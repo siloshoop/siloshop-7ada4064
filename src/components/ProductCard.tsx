@@ -23,64 +23,64 @@ const ProductCard = ({
   discount
 }: ProductCardProps) => {
   return (
-    <Card className="group cursor-pointer overflow-hidden border-0 shadow-sm hover:shadow-xl transition-all duration-300">
-      <div className="relative aspect-[3/4] overflow-hidden bg-muted">
+    <Card className="group cursor-pointer overflow-hidden border border-border/50 hover:border-primary/30 shadow-sm hover:shadow-2xl transition-all duration-500 bg-card">
+      <div className="relative aspect-[3/4] overflow-hidden bg-gradient-to-br from-muted to-muted/50">
         {discount && (
-          <Badge className="absolute top-2 left-2 z-10 bg-sale text-sale-foreground">
+          <Badge className="absolute top-3 left-3 z-10 bg-sale text-sale-foreground shadow-lg font-bold text-sm px-3 py-1 animate-pulse">
             -{discount}%
           </Badge>
         )}
         <Button
           size="icon"
           variant="ghost"
-          className="absolute top-2 right-2 z-10 bg-white/90 hover:bg-white"
+          className="absolute top-3 right-3 z-10 bg-white/95 hover:bg-primary hover:text-primary-foreground backdrop-blur-sm shadow-md transition-all duration-300 hover:scale-110"
         >
           <Heart className="h-4 w-4" />
         </Button>
+        <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
         <img
           src={image}
           alt={name}
-          className="object-cover w-full h-full group-hover:scale-110 transition-transform duration-500"
+          className="object-cover w-full h-full group-hover:scale-110 group-hover:rotate-1 transition-all duration-700"
         />
       </div>
       
-      <CardContent className="p-4">
-        <div className="space-y-2">
-          <h3 className="font-semibold text-sm line-clamp-2 group-hover:text-primary transition-colors">
-            {name}
-          </h3>
-          
-          <div className="flex items-center gap-1">
-            <div className="flex">
-              {[...Array(5)].map((_, i) => (
-                <Star
-                  key={i}
-                  className={`h-3 w-3 ${
-                    i < Math.floor(rating)
-                      ? "fill-yellow-400 text-yellow-400"
-                      : "text-gray-300"
-                  }`}
-                />
-              ))}
-            </div>
-            <span className="text-xs text-muted-foreground">({reviews})</span>
+      <CardContent className="p-5 space-y-3">
+        <h3 className="font-bold text-base line-clamp-2 min-h-[3rem] group-hover:text-primary transition-colors leading-tight">
+          {name}
+        </h3>
+        
+        <div className="flex items-center gap-2">
+          <div className="flex">
+            {[...Array(5)].map((_, i) => (
+              <Star
+                key={i}
+                className={`h-4 w-4 transition-all duration-300 ${
+                  i < Math.floor(rating)
+                    ? "fill-yellow-400 text-yellow-400"
+                    : "text-gray-300"
+                }`}
+              />
+            ))}
           </div>
-          
-          <div className="flex items-center gap-2">
-            <span className="font-bold text-lg text-foreground">
-              {price} ريال
-            </span>
-            {originalPrice && (
-              <span className="text-sm text-muted-foreground line-through">
-                {originalPrice} ريال
-              </span>
-            )}
-          </div>
-          
-          <Button className="w-full" size="sm">
-            أضف للسلة
-          </Button>
+          <span className="text-xs text-muted-foreground font-medium">({reviews})</span>
         </div>
+        
+        <div className="flex items-baseline gap-2 pt-1">
+          <span className="font-bold text-2xl text-primary">
+            {price}
+          </span>
+          <span className="text-sm text-foreground/70">ريال</span>
+          {originalPrice && (
+            <span className="text-sm text-muted-foreground line-through font-medium mr-auto">
+              {originalPrice}
+            </span>
+          )}
+        </div>
+        
+        <Button className="w-full shadow-md hover:shadow-lg transition-all duration-300 font-bold" size="lg">
+          أضف للسلة
+        </Button>
       </CardContent>
     </Card>
   );

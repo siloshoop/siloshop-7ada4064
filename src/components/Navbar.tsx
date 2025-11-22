@@ -1,26 +1,71 @@
-import { ShoppingCart, Search, Menu, Heart, User } from "lucide-react";
+import { ShoppingCart, Search, Menu, Heart, User, LogOut, LayoutDashboard } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/hooks/useAuth";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 const Navbar = () => {
+  const navigate = useNavigate();
+  const { user, signOut, loading } = useAuth();
+
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-16 items-center justify-between gap-4 px-4">
         {/* Right side - Icons */}
         <div className="flex items-center gap-2">
-          <Button variant="ghost" size="icon" className="relative">
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            className="relative"
+            onClick={() => navigate("/cart")}
+          >
             <ShoppingCart className="h-5 w-5" />
-            <Badge className="absolute -top-1 -right-1 h-5 w-5 rounded-full p-0 flex items-center justify-center bg-primary text-primary-foreground">
-              0
-            </Badge>
           </Button>
           <Button variant="ghost" size="icon">
             <Heart className="h-5 w-5" />
           </Button>
-          <Button variant="ghost" size="icon">
-            <User className="h-5 w-5" />
-          </Button>
+
+          {!loading && (
+            user ? (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="icon">
+                    <User className="h-5 w-5" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-56">
+                  <DropdownMenuLabel>حسابي</DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={() => navigate("/dashboard")}>
+                    <LayoutDashboard className="ml-2 h-4 w-4" />
+                    <span>لوحة التحكم</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => navigate("/orders")}>
+                    <ShoppingCart className="ml-2 h-4 w-4" />
+                    <span>طلباتي</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={signOut} className="text-red-600">
+                    <LogOut className="ml-2 h-4 w-4" />
+                    <span>تسجيل الخروج</span>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : (
+              <Button onClick={() => navigate("/auth")} size="sm">
+                تسجيل الدخول
+              </Button>
+            )
+          )}
         </div>
 
         {/* Center - Search */}
@@ -40,7 +85,10 @@ const Navbar = () => {
           <Button variant="ghost" size="icon" className="md:hidden">
             <Menu className="h-5 w-5" />
           </Button>
-          <h1 className="text-2xl font-bold bg-gradient-to-l from-primary to-accent bg-clip-text text-transparent">
+          <h1 
+            className="text-2xl font-bold bg-gradient-to-l from-primary to-accent bg-clip-text text-transparent cursor-pointer"
+            onClick={() => navigate("/")}
+          >
             متجر
           </h1>
         </div>
@@ -49,27 +97,14 @@ const Navbar = () => {
       {/* Navigation Links */}
       <nav className="border-t">
         <div className="container flex items-center gap-6 px-4 h-12 overflow-x-auto">
-          <Button variant="ghost" className="text-sm font-medium">
+          <Button variant="ghost" className="text-sm font-medium" onClick={() => navigate("/")}>
             الرئيسية
           </Button>
-          <Button variant="ghost" className="text-sm font-medium">
-            نساء
-          </Button>
-          <Button variant="ghost" className="text-sm font-medium">
-            رجال
-          </Button>
-          <Button variant="ghost" className="text-sm font-medium">
-            أطفال
-          </Button>
-          <Button variant="ghost" className="text-sm font-medium">
-            إلكترونيات
-          </Button>
-          <Button variant="ghost" className="text-sm font-medium">
-            منزل ومعيشة
-          </Button>
-          <Button variant="ghost" className="text-sm font-medium text-sale">
-            تخفيضات
-          </Button>
+          {user && (
+            <Button variant="ghost" className="text-sm font-medium" onClick={() => navigate("/orders")}>
+              طلباتي
+            </Button>
+          )}
         </div>
       </nav>
     </header>

@@ -1,4 +1,5 @@
 import { Heart, Star } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -22,8 +23,13 @@ const ProductCard = ({
   reviews,
   discount
 }: ProductCardProps) => {
+  const navigate = useNavigate();
+
   return (
-    <Card className="group cursor-pointer overflow-hidden border border-border/50 hover:border-primary/30 shadow-sm hover:shadow-2xl transition-all duration-500 bg-card">
+    <Card 
+      className="group cursor-pointer overflow-hidden border border-border/50 hover:border-primary/30 shadow-sm hover:shadow-2xl transition-all duration-500 bg-card"
+      onClick={() => navigate(`/product/${Math.random().toString(36).substr(2, 9)}`)} // temporary ID
+    >
       <div className="relative aspect-[3/4] overflow-hidden bg-gradient-to-br from-muted to-muted/50">
         {discount && (
           <Badge className="absolute top-3 left-3 z-10 bg-sale text-sale-foreground shadow-lg font-bold text-sm px-3 py-1 animate-pulse">
@@ -34,6 +40,7 @@ const ProductCard = ({
           size="icon"
           variant="ghost"
           className="absolute top-3 right-3 z-10 bg-white/95 hover:bg-primary hover:text-primary-foreground backdrop-blur-sm shadow-md transition-all duration-300 hover:scale-110"
+          onClick={(e) => e.stopPropagation()}
         >
           <Heart className="h-4 w-4" />
         </Button>
@@ -78,7 +85,14 @@ const ProductCard = ({
           )}
         </div>
         
-        <Button className="w-full shadow-md hover:shadow-lg transition-all duration-300 font-bold" size="lg">
+        <Button 
+          className="w-full shadow-md hover:shadow-lg transition-all duration-300 font-bold" 
+          size="lg"
+          onClick={(e) => {
+            e.stopPropagation();
+            // Add to cart logic here
+          }}
+        >
           أضف للسلة
         </Button>
       </CardContent>

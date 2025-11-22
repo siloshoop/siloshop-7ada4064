@@ -30,6 +30,9 @@ const AddProduct = () => {
     image_url: "",
   });
 
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string>("");
+
   useEffect(() => {
     if (!authLoading && !user) {
       navigate("/auth");
@@ -44,12 +47,80 @@ const AddProduct = () => {
     fetchCategories();
   }, []);
 
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      // Validate file type
+      const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif'];
+      if (!validTypes.includes(file.type)) {
+        toast({
+          title: "خطأ",
+          description: "نوع الملف غير مدعوم. يرجى اختيار صورة (JPG, PNG, WEBP, GIF)",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Validate file size (5MB)
+      if (file.size > 5242880) {
+        toast({
+          title: "خطأ",
+          description: "حجم الملف كبير جداً. الحد الأقصى 5 ميجابايت",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      setSelectedFile(file);
+      setImagePreview(URL.createObjectURL(file));
+    }
+  };
+
+  const uploadImage = async (): Promise<string | null> => {
+    if (!selectedFile || !user) return null;
+
+    const fileExt = selectedFile.name.split('.').pop();
+    const fileName = `${user.id}/${Date.now()}.${fileExt}`;
+
+    const { error, data } = await supabase.storage
+      .from('product-images')
+      .upload(fileName, selectedFile);
+
+    if (error) throw error;
+
+    const { data: { publicUrl } } = supabase.storage
+      .from('product-images')
+      .getPublicUrl(fileName);
+
+    return publicUrl;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) return;
 
     setLoading(true);
     try {
+      // Upload image if a file is selected
+      let imageUrl = formData.image_url;
+      if (selectedFile) {
+        const uploadedUrl = await uploadImage();
+        if (uploadedUrl) {
+          imageUrl = uploadedUrl;
+        }
+      }
+
+      // Validate that we have an image
+      if (!imageUrl) {
+        toast({
+          title: "خطأ",
+          description: "يرجى اختيار صورة للمنتج",
+          variant: "destructive",
+        });
+        setLoading(false);
+        return;
+      }
+
       const { error } = await supabase.from("products").insert({
         vendor_id: user.id,
         name: formData.name,
@@ -58,7 +129,7 @@ const AddProduct = () => {
         original_price: formData.original_price ? parseFloat(formData.original_price) : null,
         stock_quantity: parseInt(formData.stock_quantity),
         category_id: formData.category_id || null,
-        image_url: formData.image_url,
+        image_url: imageUrl,
         is_active: true,
       });
 
@@ -185,25 +256,53 @@ const AddProduct = () => {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="image_url">رابط الصورة *</Label>
-                <Input
-                  id="image_url"
-                  type="url"
-                  value={formData.image_url}
-                  onChange={(e) => setFormData({ ...formData, image_url: e.target.value })}
-                  required
-                  placeholder="https://example.com/image.jpg"
-                />
-                {formData.image_url && (
-                  <img
-                    src={formData.image_url}
-                    alt="معاينة"
-                    className="mt-2 w-full h-48 object-cover rounded-lg"
-                    onError={(e) => {
-                      e.currentTarget.style.display = 'none';
-                    }}
+                <Label htmlFor="image">صورة المنتج *</Label>
+                <div className="space-y-4">
+                  <Input
+                    id="image"
+                    type="file"
+                    accept="image/jpeg,image/jpg,image/png,image/webp,image/gif"
+                    onChange={handleFileChange}
+                    className="cursor-pointer"
                   />
-                )}
+                  <p className="text-sm text-muted-foreground">
+                    الحد الأقصى: 5 ميجابايت. الصيغ المدعومة: JPG, PNG, WEBP, GIF
+                  </p>
+                  
+                  {imagePreview && (
+                    <div className="relative">
+                      <img
+                        src={imagePreview}
+                        alt="معاينة"
+                        className="w-full h-48 object-cover rounded-lg"
+                      />
+                      <Button
+                        type="button"
+                        variant="destructive"
+                        size="sm"
+                        className="absolute top-2 left-2"
+                        onClick={() => {
+                          setSelectedFile(null);
+                          setImagePreview("");
+                        }}
+                      >
+                        إزالة
+                      </Button>
+                    </div>
+                  )}
+
+                  <div className="pt-2 border-t">
+                    <Label htmlFor="image_url" className="text-sm">أو أدخل رابط صورة</Label>
+                    <Input
+                      id="image_url"
+                      type="url"
+                      value={formData.image_url}
+                      onChange={(e) => setFormData({ ...formData, image_url: e.target.value })}
+                      placeholder="https://example.com/image.jpg"
+                      className="mt-2"
+                    />
+                  </div>
+                </div>
               </div>
 
               <div className="flex gap-4">

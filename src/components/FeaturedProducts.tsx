@@ -71,30 +71,34 @@ const products = [
 
 const FeaturedProducts = () => {
   return (
-    <section className="py-16">
+    <section className="py-20 bg-gradient-to-b from-background to-muted/20">
       <div className="container px-4">
-        <div className="text-center mb-12">
-          <h2 className="text-3xl md:text-4xl font-bold mb-4">المنتجات المميزة</h2>
-          <p className="text-muted-foreground text-lg">
-            اختيارات خاصة لك من أحدث المنتجات
+        <div className="text-center mb-16 space-y-3">
+          <h2 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent animate-fade-in">
+            المنتجات المميزة
+          </h2>
+          <p className="text-muted-foreground text-lg md:text-xl max-w-2xl mx-auto">
+            اختيارات خاصة لك من أحدث المنتجات وأفضل العروض
           </p>
+          <div className="h-1 w-24 bg-gradient-to-r from-primary to-accent mx-auto rounded-full" />
         </div>
         
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 md:gap-8">
           {products.map((product, index) => (
             <div
               key={index}
-              className="animate-fade-in"
-              style={{ animationDelay: `${index * 50}ms` }}
+              className="animate-fade-in hover-scale"
+              style={{ animationDelay: `${index * 75}ms` }}
             >
               <ProductCard {...product} />
             </div>
           ))}
         </div>
         
-        <div className="text-center mt-12">
-          <button className="text-primary hover:underline font-semibold text-lg">
-            عرض المزيد من المنتجات
+        <div className="text-center mt-16">
+          <button className="group relative px-8 py-4 text-primary hover:text-primary-foreground font-bold text-lg border-2 border-primary rounded-full hover:bg-primary transition-all duration-300 shadow-lg hover:shadow-xl">
+            <span className="relative z-10">عرض المزيد من المنتجات</span>
+            <div className="absolute inset-0 rounded-full bg-gradient-to-r from-primary to-accent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
           </button>
         </div>
       </div>

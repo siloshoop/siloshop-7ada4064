@@ -6,15 +6,21 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Plus, Package, TrendingUp, DollarSign, ShoppingBag, Loader2, Edit, Trash2 } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Plus, Package, TrendingUp, DollarSign, ShoppingBag, Loader2, Edit, Trash2, Search } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 const Dashboard = () => {
   const { user, loading: authLoading } = useAuth();
   const [profile, setProfile] = useState<any>(null);
   const [products, setProducts] = useState<any[]>([]);
+  const [filteredProducts, setFilteredProducts] = useState<any[]>([]);
   const [stats, setStats] = useState({ totalProducts: 0, totalOrders: 0, totalRevenue: 0 });
   const [loading, setLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [filterStatus, setFilterStatus] = useState("all");
+  const [sortBy, setSortBy] = useState("date-desc");
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -74,6 +80,48 @@ const Dashboard = () => {
 
     fetchDashboardData();
   }, [user, toast]);
+
+  // Filter and sort products
+  useEffect(() => {
+    let filtered = [...products];
+
+    // Search filter
+    if (searchQuery) {
+      filtered = filtered.filter(p => 
+        p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        p.description?.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+    }
+
+    // Status filter
+    if (filterStatus !== "all") {
+      filtered = filtered.filter(p => 
+        filterStatus === "active" ? p.is_active : !p.is_active
+      );
+    }
+
+    // Sort
+    filtered.sort((a, b) => {
+      switch (sortBy) {
+        case "date-desc":
+          return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+        case "date-asc":
+          return new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
+        case "price-desc":
+          return b.price - a.price;
+        case "price-asc":
+          return a.price - b.price;
+        case "name-asc":
+          return a.name.localeCompare(b.name, 'ar');
+        case "name-desc":
+          return b.name.localeCompare(a.name, 'ar');
+        default:
+          return 0;
+      }
+    });
+
+    setFilteredProducts(filtered);
+  }, [products, searchQuery, filterStatus, sortBy]);
 
   const handleDeleteProduct = async (productId: string) => {
     if (!confirm("هل أنت متأكد من حذف هذا المنتج؟")) return;
@@ -164,7 +212,7 @@ const Dashboard = () => {
 
             <Card>
               <CardHeader>
-                <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between mb-4">
                   <div>
                     <CardTitle>منتجاتي</CardTitle>
                     <CardDescription>إدارة منتجاتك المعروضة</CardDescription>
@@ -174,11 +222,52 @@ const Dashboard = () => {
                     إضافة منتج
                   </Button>
                 </div>
+
+                {products.length > 0 && (
+                  <div className="space-y-4 pt-4 border-t">
+                    <div className="flex flex-col md:flex-row gap-4">
+                      <div className="relative flex-1">
+                        <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                        <Input
+                          placeholder="بحث في المنتجات..."
+                          value={searchQuery}
+                          onChange={(e) => setSearchQuery(e.target.value)}
+                          className="pr-10"
+                        />
+                      </div>
+
+                      <Select value={filterStatus} onValueChange={setFilterStatus}>
+                        <SelectTrigger className="w-full md:w-40">
+                          <SelectValue placeholder="الحالة" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="all">الكل</SelectItem>
+                          <SelectItem value="active">نشط</SelectItem>
+                          <SelectItem value="inactive">غير نشط</SelectItem>
+                        </SelectContent>
+                      </Select>
+
+                      <Select value={sortBy} onValueChange={setSortBy}>
+                        <SelectTrigger className="w-full md:w-48">
+                          <SelectValue placeholder="الترتيب" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="date-desc">الأحدث أولاً</SelectItem>
+                          <SelectItem value="date-asc">الأقدم أولاً</SelectItem>
+                          <SelectItem value="price-desc">السعر: الأعلى</SelectItem>
+                          <SelectItem value="price-asc">السعر: الأقل</SelectItem>
+                          <SelectItem value="name-asc">الاسم: أ-ي</SelectItem>
+                          <SelectItem value="name-desc">الاسم: ي-أ</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                )}
               </CardHeader>
               <CardContent>
-                {products.length > 0 ? (
+                {filteredProducts.length > 0 ? (
                   <div className="space-y-4">
-                    {products.map((product) => (
+                    {filteredProducts.map((product) => (
                       <div key={product.id} className="flex items-center gap-4 p-4 border rounded-lg">
                         <img
                           src={product.image_url || "/placeholder.svg"}
@@ -186,7 +275,12 @@ const Dashboard = () => {
                           className="w-20 h-20 object-cover rounded-md"
                         />
                         <div className="flex-1">
-                          <h3 className="font-semibold">{product.name}</h3>
+                          <div className="flex items-center gap-2">
+                            <h3 className="font-semibold">{product.name}</h3>
+                            <span className={`text-xs px-2 py-1 rounded ${product.is_active ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}`}>
+                              {product.is_active ? 'نشط' : 'غير نشط'}
+                            </span>
+                          </div>
                           <p className="text-sm text-muted-foreground">
                             {product.price} ريال
                           </p>
@@ -213,6 +307,10 @@ const Dashboard = () => {
                       </div>
                     ))}
                   </div>
+                ) : products.length > 0 ? (
+                  <p className="text-center text-muted-foreground py-8">
+                    لم يتم العثور على منتجات تطابق البحث
+                  </p>
                 ) : (
                   <p className="text-center text-muted-foreground py-8">
                     لا توجد منتجات حالياً

@@ -588,6 +588,41 @@ export type Database = {
         }
         Relationships: []
       }
+      quantity_discounts: {
+        Row: {
+          created_at: string | null
+          discount_percentage: number
+          id: string
+          min_quantity: number
+          product_id: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          discount_percentage: number
+          id?: string
+          min_quantity: number
+          product_id?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          discount_percentage?: number
+          id?: string
+          min_quantity?: number
+          product_id?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quantity_discounts_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       reviews: {
         Row: {
           comment: string | null

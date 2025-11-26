@@ -45,10 +45,15 @@ const ProductCard = ({
           size="icon"
           variant="ghost"
           className="absolute top-3 right-3 z-10 bg-white/95 hover:bg-primary hover:text-primary-foreground backdrop-blur-sm shadow-md transition-all duration-300 hover:scale-110"
-          onClick={(e) => e.stopPropagation()}
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+          }}
         >
           {id ? (
-            <FavoriteButton productId={id} variant="ghost" size="icon" />
+            <div onClick={(e) => e.stopPropagation()}>
+              <FavoriteButton productId={id} variant="ghost" size="icon" />
+            </div>
           ) : (
             <Heart className="h-4 w-4" />
           )}

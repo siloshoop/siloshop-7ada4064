@@ -9,8 +9,9 @@ import { ProductReviews } from "@/components/ProductReviews";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Star, ShoppingCart, Heart, Loader2, Minus, Plus } from "lucide-react";
+import { Heart, ShoppingCart, Loader2, Minus, Plus, Star } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { FavoriteButton } from "@/components/FavoriteButton";
 
 interface Product {
   id: string;
@@ -245,9 +246,7 @@ const Product = () => {
                     </>
                   )}
                 </Button>
-                <Button size="lg" variant="outline">
-                  <Heart className="h-5 w-5" />
-                </Button>
+                <FavoriteButton productId={id!} variant="outline" size="lg" />
               </div>
             </div>
           </div>

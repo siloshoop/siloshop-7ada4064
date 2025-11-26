@@ -3,8 +3,10 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { FavoriteButton } from "@/components/FavoriteButton";
 
 interface ProductCardProps {
+  id?: string;
   name: string;
   price: number;
   originalPrice?: number;
@@ -15,6 +17,7 @@ interface ProductCardProps {
 }
 
 const ProductCard = ({
+  id,
   name,
   price,
   originalPrice,
@@ -25,10 +28,12 @@ const ProductCard = ({
 }: ProductCardProps) => {
   const navigate = useNavigate();
 
+  const productId = id || Math.random().toString(36).substr(2, 9);
+
   return (
     <Card 
       className="group cursor-pointer overflow-hidden border border-border/50 hover:border-primary/30 shadow-sm hover:shadow-2xl transition-all duration-500 bg-card"
-      onClick={() => navigate(`/product/${Math.random().toString(36).substr(2, 9)}`)} // temporary ID
+      onClick={() => navigate(`/product/${productId}`)}
     >
       <div className="relative aspect-[3/4] overflow-hidden bg-gradient-to-br from-muted to-muted/50">
         {discount && (
@@ -42,7 +47,11 @@ const ProductCard = ({
           className="absolute top-3 right-3 z-10 bg-white/95 hover:bg-primary hover:text-primary-foreground backdrop-blur-sm shadow-md transition-all duration-300 hover:scale-110"
           onClick={(e) => e.stopPropagation()}
         >
-          <Heart className="h-4 w-4" />
+          {id ? (
+            <FavoriteButton productId={id} variant="ghost" size="icon" />
+          ) : (
+            <Heart className="h-4 w-4" />
+          )}
         </Button>
         <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
         <img

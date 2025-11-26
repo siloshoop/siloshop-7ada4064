@@ -1,7 +1,38 @@
 import { Facebook, Instagram, Twitter, Youtube } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useState } from "react";
+import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 const Footer = () => {
+  const [email, setEmail] = useState("");
+  const { toast } = useToast();
+
+  const handleSubscribe = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    try {
+      const { error } = await supabase
+        .from('newsletter_subscriptions')
+        .insert([{ email }]);
+
+      if (error) throw error;
+
+      toast({
+        title: "تم الاشتراك بنجاح",
+        description: "شكراً لاشتراكك في نشرتنا البريدية",
+      });
+      setEmail("");
+    } catch (error: any) {
+      toast({
+        title: "خطأ",
+        description: error.message.includes('duplicate') 
+          ? "هذا البريد مشترك بالفعل" 
+          : "حدث خطأ، يرجى المحاولة مرة أخرى",
+        variant: "destructive",
+      });
+    }
+  };
   return (
     <footer className="bg-muted/50 border-t">
       <div className="container px-4 py-12">
@@ -32,20 +63,20 @@ const Footer = () => {
           <div>
             <h4 className="font-semibold mb-4">خدمة العملاء</h4>
             <ul className="space-y-2 text-muted-foreground">
-              <li><a href="#" className="hover:text-foreground transition-colors">اتصل بنا</a></li>
-              <li><a href="#" className="hover:text-foreground transition-colors">الأسئلة الشائعة</a></li>
-              <li><a href="#" className="hover:text-foreground transition-colors">سياسة الإرجاع</a></li>
-              <li><a href="#" className="hover:text-foreground transition-colors">الشحن والتوصيل</a></li>
+              <li><a href="/contact" className="hover:text-foreground transition-colors">اتصل بنا</a></li>
+              <li><a href="/faq" className="hover:text-foreground transition-colors">الأسئلة الشائعة</a></li>
+              <li><a href="/returns" className="hover:text-foreground transition-colors">سياسة الإرجاع</a></li>
+              <li><a href="/shipping" className="hover:text-foreground transition-colors">الشحن والتوصيل</a></li>
             </ul>
           </div>
           
           <div>
             <h4 className="font-semibold mb-4">روابط سريعة</h4>
             <ul className="space-y-2 text-muted-foreground">
-              <li><a href="#" className="hover:text-foreground transition-colors">من نحن</a></li>
-              <li><a href="#" className="hover:text-foreground transition-colors">المدونة</a></li>
-              <li><a href="#" className="hover:text-foreground transition-colors">الوظائف</a></li>
-              <li><a href="#" className="hover:text-foreground transition-colors">الشركاء</a></li>
+              <li><a href="/about" className="hover:text-foreground transition-colors">من نحن</a></li>
+              <li><a href="/blog" className="hover:text-foreground transition-colors">المدونة</a></li>
+              <li><a href="/careers" className="hover:text-foreground transition-colors">الوظائف</a></li>
+              <li><a href="/partners" className="hover:text-foreground transition-colors">الشركاء</a></li>
             </ul>
           </div>
           
@@ -54,14 +85,17 @@ const Footer = () => {
             <p className="text-muted-foreground mb-4">
               احصل على آخر العروض والتخفيضات
             </p>
-            <div className="flex gap-2">
+            <form onSubmit={handleSubscribe} className="flex gap-2">
               <input
                 type="email"
                 placeholder="بريدك الإلكتروني"
                 className="flex-1 px-4 py-2 rounded-lg border bg-background"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
               />
-              <Button>اشترك</Button>
-            </div>
+              <Button type="submit">اشترك</Button>
+            </form>
           </div>
         </div>
         

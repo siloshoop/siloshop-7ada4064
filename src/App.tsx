@@ -22,6 +22,14 @@ import Payment from "./pages/Payment";
 import Statistics from "./pages/Statistics";
 import InstallPWA from "./pages/InstallPWA";
 import Compare from "./pages/Compare";
+import Contact from "./pages/Contact";
+import FAQ from "./pages/FAQ";
+import Returns from "./pages/Returns";
+import Shipping from "./pages/Shipping";
+import About from "./pages/About";
+import Blog from "./pages/Blog";
+import Careers from "./pages/Careers";
+import Partners from "./pages/Partners";
 
 const queryClient = new QueryClient();
 
@@ -48,6 +56,14 @@ const App = () => (
           <Route path="/orders/track/:id" element={<TrackOrder />} />
           <Route path="/product/:id" element={<Product />} />
           <Route path="/compare" element={<Compare />} />
+          <Route path="/contact" element={<Contact />} />
+          <Route path="/faq" element={<FAQ />} />
+          <Route path="/returns" element={<Returns />} />
+          <Route path="/shipping" element={<Shipping />} />
+          <Route path="/about" element={<About />} />
+          <Route path="/blog" element={<Blog />} />
+          <Route path="/careers" element={<Careers />} />
+          <Route path="/partners" element={<Partners />} />
           <Route path="/chat/:vendorId" element={<Chat />} />
           <Route path="/install" element={<InstallPWA />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

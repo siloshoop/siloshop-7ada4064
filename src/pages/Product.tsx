@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { ImageGallery } from "@/components/ImageGallery";
+import { ProductReviews } from "@/components/ProductReviews";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -23,6 +24,9 @@ interface Product {
   vendor: {
     full_name: string;
   };
+  reviews: {
+    rating: number;
+  }[];
 }
 
 const Product = () => {
@@ -42,7 +46,8 @@ const Product = () => {
           .from("products")
           .select(`
             *,
-            vendor:profiles(full_name)
+            vendor:profiles(full_name),
+            reviews(rating)
           `)
           .eq("id", id)
           .maybeSingle();
@@ -136,6 +141,11 @@ const Product = () => {
     ? [product.image_url] 
     : [];
 
+  // Calculate average rating
+  const averageRating = product.reviews && product.reviews.length > 0
+    ? product.reviews.reduce((sum, r) => sum + r.rating, 0) / product.reviews.length
+    : 0;
+
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
@@ -164,10 +174,16 @@ const Product = () => {
               {[...Array(5)].map((_, i) => (
                 <Star
                   key={i}
-                  className={`h-5 w-5 ${i < 4 ? "fill-yellow-400 text-yellow-400" : "text-gray-300"}`}
+                  className={`h-5 w-5 ${
+                    i < Math.round(averageRating)
+                      ? "fill-yellow-400 text-yellow-400"
+                      : "text-gray-300"
+                  }`}
                 />
               ))}
-              <span className="text-sm text-muted-foreground">(4.5)</span>
+              <span className="text-sm text-muted-foreground">
+                ({averageRating.toFixed(1)}) - {product.reviews?.length || 0} تقييم
+              </span>
             </div>
 
             <div className="flex items-baseline gap-3">
@@ -235,6 +251,11 @@ const Product = () => {
               </div>
             </div>
           </div>
+        </div>
+
+        {/* Reviews Section */}
+        <div className="mt-12">
+          <ProductReviews productId={id!} />
         </div>
       </main>
       <Footer />

@@ -12,6 +12,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, Upload } from "lucide-react";
+import imageCompression from 'browser-image-compression';
 
 const AddProduct = () => {
   const { user, loading: authLoading } = useAuth();
@@ -47,7 +48,7 @@ const AddProduct = () => {
     fetchCategories();
   }, []);
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
       // Validate file type
@@ -71,8 +72,39 @@ const AddProduct = () => {
         return;
       }
 
-      setSelectedFile(file);
-      setImagePreview(URL.createObjectURL(file));
+      try {
+        // Compress image
+        const options = {
+          maxSizeMB: 1,
+          maxWidthOrHeight: 1920,
+          useWebWorker: true,
+          fileType: file.type as any,
+        };
+
+        toast({
+          title: "جاري ضغط الصورة...",
+          description: "يرجى الانتظار",
+        });
+
+        const compressedFile = await imageCompression(file, options);
+        
+        toast({
+          title: "تم ضغط الصورة بنجاح",
+          description: `تم تقليل الحجم من ${(file.size / 1024 / 1024).toFixed(2)} MB إلى ${(compressedFile.size / 1024 / 1024).toFixed(2)} MB`,
+        });
+
+        setSelectedFile(compressedFile);
+        setImagePreview(URL.createObjectURL(compressedFile));
+      } catch (error) {
+        console.error('Error compressing image:', error);
+        toast({
+          title: "تحذير",
+          description: "فشل ضغط الصورة. سيتم استخدام الصورة الأصلية",
+          variant: "destructive",
+        });
+        setSelectedFile(file);
+        setImagePreview(URL.createObjectURL(file));
+      }
     }
   };
 

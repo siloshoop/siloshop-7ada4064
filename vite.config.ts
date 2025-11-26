@@ -47,7 +47,8 @@ export default defineConfig(({ mode }) => ({
       },
       workbox: {
         cleanupOutdatedCaches: true,
-        skipWaiting: true
+        skipWaiting: true,
+        maximumFileSizeToCacheInBytes: 5 * 1024 * 1024 // 5 MB
       }
     })
   ].filter(Boolean),

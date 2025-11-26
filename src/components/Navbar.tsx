@@ -2,6 +2,7 @@ import { ShoppingCart, Search, Menu, Heart, User, LogOut, LayoutDashboard } from
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { NotificationsDropdown } from "@/components/NotificationsDropdown";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import {
@@ -33,6 +34,8 @@ const Navbar = () => {
           <Button variant="ghost" size="icon">
             <Heart className="h-5 w-5" />
           </Button>
+
+          {user && <NotificationsDropdown />}
 
           {!loading && (
             user ? (

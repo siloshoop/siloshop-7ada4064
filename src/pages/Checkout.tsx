@@ -232,11 +232,17 @@ const Checkout = () => {
         .eq("user_id", user.id);
 
       toast({
-        title: "تم بنجاح",
-        description: "تم إنشاء الطلب بنجاح",
+        title: "تم إنشاء الطلب",
+        description: "يرجى إتمام عملية الدفع",
       });
 
-      navigate("/orders");
+      // Navigate to payment page
+      navigate("/payment", { 
+        state: { 
+          orderId: order.id, 
+          amount: total 
+        } 
+      });
     } catch (error: any) {
       toast({
         title: "خطأ",

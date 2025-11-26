@@ -17,6 +17,10 @@ import Cart from "./pages/Cart";
 import Orders from "./pages/Orders";
 import Product from "./pages/Product";
 import NotFound from "./pages/NotFound";
+import Chat from "./pages/Chat";
+import Payment from "./pages/Payment";
+import Statistics from "./pages/Statistics";
+import InstallPWA from "./pages/InstallPWA";
 
 const queryClient = new QueryClient();
 
@@ -33,13 +37,17 @@ const App = () => (
           <Route path="/dashboard/add-product" element={<AddProduct />} />
           <Route path="/dashboard/edit-product/:id" element={<EditProduct />} />
           <Route path="/dashboard/coupons" element={<ManageCoupons />} />
+          <Route path="/dashboard/statistics" element={<Statistics />} />
           <Route path="/favorites" element={<Favorites />} />
           <Route path="/category/:categoryId" element={<Category />} />
           <Route path="/cart" element={<Cart />} />
           <Route path="/checkout" element={<Checkout />} />
+          <Route path="/payment" element={<Payment />} />
           <Route path="/orders" element={<Orders />} />
           <Route path="/orders/track/:id" element={<TrackOrder />} />
           <Route path="/product/:id" element={<Product />} />
+          <Route path="/chat/:vendorId" element={<Chat />} />
+          <Route path="/install" element={<InstallPWA />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

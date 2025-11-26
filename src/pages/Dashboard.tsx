@@ -220,6 +220,13 @@ const Dashboard = () => {
                   <div className="flex gap-2">
                     <Button 
                       variant="outline"
+                      onClick={() => navigate("/dashboard/statistics")}
+                    >
+                      <TrendingUp className="ml-2 h-4 w-4" />
+                      الإحصائيات
+                    </Button>
+                    <Button 
+                      variant="outline"
                       onClick={() => navigate("/dashboard/coupons")}
                     >
                       <Tag className="ml-2 h-4 w-4" />

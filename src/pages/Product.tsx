@@ -12,6 +12,7 @@ import { Badge } from "@/components/ui/badge";
 import { Heart, ShoppingCart, Loader2, Minus, Plus, Star } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { FavoriteButton } from "@/components/FavoriteButton";
+import ChatButton from "@/components/ChatButton";
 
 interface Product {
   id: string;
@@ -22,6 +23,7 @@ interface Product {
   stock_quantity: number;
   image_url: string;
   images: string[] | null;
+  vendor_id: string;
   vendor: {
     full_name: string;
   };
@@ -247,6 +249,9 @@ const Product = () => {
                   )}
                 </Button>
                 <FavoriteButton productId={id!} variant="outline" size="lg" />
+              </div>
+              <div className="mt-4">
+                <ChatButton vendorId={product.vendor_id} productId={id} />
               </div>
             </div>
           </div>

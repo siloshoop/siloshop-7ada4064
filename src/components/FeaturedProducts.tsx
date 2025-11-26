@@ -1,75 +1,58 @@
+import { useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
 import ProductCard from "./ProductCard";
+import { Loader2 } from "lucide-react";
 
-const products = [
-  {
-    name: "فستان صيفي أنيق بأكمام قصيرة",
-    price: 199,
-    originalPrice: 299,
-    image: "https://images.unsplash.com/photo-1515372039744-b8f02a3ae446?w=400&h=600&fit=crop",
-    rating: 4.5,
-    reviews: 128,
-    discount: 33
-  },
-  {
-    name: "قميص رجالي كلاسيكي قطن",
-    price: 149,
-    originalPrice: 249,
-    image: "https://images.unsplash.com/photo-1602810318383-e386cc2a3ccf?w=400&h=600&fit=crop",
-    rating: 4.8,
-    reviews: 95,
-    discount: 40
-  },
-  {
-    name: "حذاء رياضي عصري مريح",
-    price: 399,
-    image: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&h=600&fit=crop",
-    rating: 4.7,
-    reviews: 210
-  },
-  {
-    name: "حقيبة يد جلدية فاخرة",
-    price: 599,
-    originalPrice: 899,
-    image: "https://images.unsplash.com/photo-1584917865442-de89df76afd3?w=400&h=600&fit=crop",
-    rating: 4.9,
-    reviews: 87,
-    discount: 33
-  },
-  {
-    name: "ساعة يد ذكية رياضية",
-    price: 799,
-    image: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400&h=600&fit=crop",
-    rating: 4.6,
-    reviews: 156
-  },
-  {
-    name: "نظارة شمسية عصرية",
-    price: 199,
-    originalPrice: 349,
-    image: "https://images.unsplash.com/photo-1572635196237-14b3f281503f?w=400&h=600&fit=crop",
-    rating: 4.4,
-    reviews: 73,
-    discount: 43
-  },
-  {
-    name: "جاكيت شتوي أنيق",
-    price: 499,
-    image: "https://images.unsplash.com/photo-1551028719-00167b16eac5?w=400&h=600&fit=crop",
-    rating: 4.8,
-    reviews: 142
-  },
-  {
-    name: "بنطال جينز كلاسيكي",
-    price: 249,
-    originalPrice: 349,
-    image: "https://images.unsplash.com/photo-1541099649105-f69ad21f3246?w=400&h=600&fit=crop",
-    rating: 4.5,
-    reviews: 198,
-    discount: 29
-  }
-];
+interface Product {
+  id: string;
+  name: string;
+  price: number;
+  original_price: number | null;
+  image_url: string;
+  reviews: { rating: number }[];
+}
 
 const FeaturedProducts = () => {
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      const { data } = await supabase
+        .from("products")
+        .select(`
+          id,
+          name,
+          price,
+          original_price,
+          image_url,
+          reviews(rating)
+        `)
+        .eq("is_active", true)
+        .order("created_at", { ascending: false })
+        .limit(8);
+
+      if (data) {
+        setProducts(data as any);
+      }
+      setLoading(false);
+    };
+
+    fetchProducts();
+  }, []);
+
+  if (loading) {
+    return (
+      <section className="py-20 bg-gradient-to-b from-background to-muted/20">
+        <div className="container px-4">
+          <div className="flex items-center justify-center h-64">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          </div>
+        </div>
+      </section>
+    );
+  }
+
   return (
     <section className="py-20 bg-gradient-to-b from-background to-muted/20">
       <div className="container px-4">
@@ -83,24 +66,42 @@ const FeaturedProducts = () => {
           <div className="h-1 w-24 bg-gradient-to-r from-primary to-accent mx-auto rounded-full" />
         </div>
         
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 md:gap-8">
-          {products.map((product, index) => (
-            <div
-              key={index}
-              className="animate-fade-in hover-scale"
-              style={{ animationDelay: `${index * 75}ms` }}
-            >
-              <ProductCard {...product} />
-            </div>
-          ))}
-        </div>
-        
-        <div className="text-center mt-16">
-          <button className="group relative px-8 py-4 text-primary hover:text-primary-foreground font-bold text-lg border-2 border-primary rounded-full hover:bg-primary transition-all duration-300 shadow-lg hover:shadow-xl">
-            <span className="relative z-10">عرض المزيد من المنتجات</span>
-            <div className="absolute inset-0 rounded-full bg-gradient-to-r from-primary to-accent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-          </button>
-        </div>
+        {products.length === 0 ? (
+          <div className="text-center py-12">
+            <p className="text-muted-foreground text-lg">لا توجد منتجات متاحة حالياً</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 md:gap-8">
+            {products.map((product, index) => {
+              const avgRating = product.reviews?.length > 0
+                ? product.reviews.reduce((sum, r) => sum + r.rating, 0) / product.reviews.length
+                : 4;
+              
+              const discount = product.original_price
+                ? Math.round(((product.original_price - product.price) / product.original_price) * 100)
+                : undefined;
+
+              return (
+                <div
+                  key={product.id}
+                  className="animate-fade-in hover-scale"
+                  style={{ animationDelay: `${index * 75}ms` }}
+                >
+                  <ProductCard
+                    id={product.id}
+                    name={product.name}
+                    price={product.price}
+                    originalPrice={product.original_price || undefined}
+                    image={product.image_url}
+                    rating={avgRating}
+                    reviews={product.reviews?.length || 0}
+                    discount={discount}
+                  />
+                </div>
+              );
+            })}
+          </div>
+        )}
       </div>
     </section>
   );

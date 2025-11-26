@@ -184,7 +184,7 @@ const Cart = () => {
                       <div className="flex-1">
                         <h3 className="font-semibold mb-2">{item.product.name}</h3>
                         <p className="text-primary font-bold">
-                          {Number(item.product.price)} ريال
+                          {Number(item.product.price)} ل.س
                         </p>
                         <div className="flex items-center gap-2 mt-4">
                           <Button
@@ -228,7 +228,7 @@ const Cart = () => {
                   <div className="space-y-2">
                     <div className="flex justify-between">
                       <span>المجموع الفرعي</span>
-                      <span>{total} ريال</span>
+                      <span>{total} ل.س</span>
                     </div>
                     <div className="flex justify-between">
                       <span>الشحن</span>
@@ -236,10 +236,10 @@ const Cart = () => {
                     </div>
                     <div className="border-t pt-2 flex justify-between font-bold text-lg">
                       <span>الإجمالي</span>
-                      <span className="text-primary">{total} ريال</span>
+                      <span className="text-primary">{total} ل.س</span>
                     </div>
                   </div>
-                  <Button className="w-full" size="lg">
+                  <Button className="w-full" size="lg" onClick={() => navigate("/checkout")}>
                     إتمام الطلب
                   </Button>
                 </CardContent>

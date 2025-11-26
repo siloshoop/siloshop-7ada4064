@@ -82,17 +82,17 @@ const ProductCard = ({
           <span className="text-xs text-muted-foreground font-medium">({reviews})</span>
         </div>
         
-        <div className="flex items-baseline gap-2 pt-1">
-          <span className="font-bold text-2xl text-primary">
-            {price}
-          </span>
-          <span className="text-sm text-foreground/70">ريال</span>
-          {originalPrice && (
-            <span className="text-sm text-muted-foreground line-through font-medium mr-auto">
-              {originalPrice}
-            </span>
-          )}
-        </div>
+            <div className="flex items-baseline gap-2 pt-1">
+              <span className="font-bold text-2xl text-primary">
+                {price}
+              </span>
+              <span className="text-sm text-foreground/70">ل.س</span>
+              {originalPrice && (
+                <span className="text-sm text-muted-foreground line-through font-medium mr-auto">
+                  {originalPrice}
+                </span>
+              )}
+            </div>
         
         <Button 
           className="w-full shadow-md hover:shadow-lg transition-all duration-300 font-bold" 

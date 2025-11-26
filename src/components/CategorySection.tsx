@@ -1,58 +1,120 @@
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
-import { Shirt, UserCircle, Baby, Watch, Footprints, ShoppingBag, Sparkles } from "lucide-react";
+import { Shirt, UserCircle, Baby, Watch, Footprints, ShoppingBag, Sparkles, Loader2 } from "lucide-react";
 
-const categories = [
-  {
-    name: "ملابس نساء",
-    icon: Shirt,
-    count: "500+ منتج",
-    gradient: "from-pink-500 via-rose-500 to-purple-500",
-    bgColor: "bg-gradient-to-br from-pink-50 to-purple-50",
-    iconColor: "text-pink-600"
-  },
-  {
-    name: "ملابس رجال",
-    icon: UserCircle,
-    count: "400+ منتج",
-    gradient: "from-blue-500 via-indigo-500 to-purple-600",
-    bgColor: "bg-gradient-to-br from-blue-50 to-indigo-50",
-    iconColor: "text-blue-600"
-  },
-  {
-    name: "أطفال",
-    icon: Baby,
-    count: "300+ منتج",
-    gradient: "from-yellow-400 via-orange-400 to-red-400",
-    bgColor: "bg-gradient-to-br from-yellow-50 to-orange-50",
-    iconColor: "text-orange-600"
-  },
-  {
-    name: "إكسسوارات",
-    icon: Watch,
-    count: "250+ منتج",
-    gradient: "from-emerald-500 via-teal-500 to-cyan-500",
-    bgColor: "bg-gradient-to-br from-emerald-50 to-teal-50",
-    iconColor: "text-emerald-600"
-  },
-  {
-    name: "أحذية",
-    icon: Footprints,
-    count: "350+ منتج",
-    gradient: "from-violet-500 via-purple-500 to-fuchsia-500",
-    bgColor: "bg-gradient-to-br from-violet-50 to-fuchsia-50",
-    iconColor: "text-violet-600"
-  },
-  {
-    name: "حقائب",
-    icon: ShoppingBag,
-    count: "200+ منتج",
-    gradient: "from-amber-500 via-orange-500 to-red-500",
-    bgColor: "bg-gradient-to-br from-amber-50 to-red-50",
-    iconColor: "text-amber-600"
-  }
-];
+const iconMap: Record<string, any> = {
+  Shirt,
+  UserCircle,
+  Baby,
+  Watch,
+  Footprints,
+  ShoppingBag,
+};
+
+interface Category {
+  id: string;
+  name_ar: string;
+  icon: string | null;
+  description: string | null;
+}
 
 const CategorySection = () => {
+  const navigate = useNavigate();
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      const { data } = await supabase
+        .from("categories")
+        .select("*")
+        .order("name_ar");
+
+      if (data) {
+        setCategories(data);
+      }
+      setLoading(false);
+    };
+
+    fetchCategories();
+  }, []);
+
+  const defaultCategories = [
+    {
+      id: "default-women",
+      name: "ملابس نساء",
+      icon: "Shirt",
+      gradient: "from-pink-500 via-rose-500 to-purple-500",
+      bgColor: "bg-gradient-to-br from-pink-50 to-purple-50",
+      iconColor: "text-pink-600"
+    },
+    {
+      id: "default-men",
+      name: "ملابس رجال",
+      icon: "UserCircle",
+      gradient: "from-blue-500 via-indigo-500 to-purple-600",
+      bgColor: "bg-gradient-to-br from-blue-50 to-indigo-50",
+      iconColor: "text-blue-600"
+    },
+    {
+      id: "default-kids",
+      name: "أطفال",
+      icon: "Baby",
+      gradient: "from-yellow-400 via-orange-400 to-red-400",
+      bgColor: "bg-gradient-to-br from-yellow-50 to-orange-50",
+      iconColor: "text-orange-600"
+    },
+    {
+      id: "default-accessories",
+      name: "إكسسوارات",
+      icon: "Watch",
+      gradient: "from-emerald-500 via-teal-500 to-cyan-500",
+      bgColor: "bg-gradient-to-br from-emerald-50 to-teal-50",
+      iconColor: "text-emerald-600"
+    },
+    {
+      id: "default-shoes",
+      name: "أحذية",
+      icon: "Footprints",
+      gradient: "from-violet-500 via-purple-500 to-fuchsia-500",
+      bgColor: "bg-gradient-to-br from-violet-50 to-fuchsia-50",
+      iconColor: "text-violet-600"
+    },
+    {
+      id: "default-bags",
+      name: "حقائب",
+      icon: "ShoppingBag",
+      gradient: "from-amber-500 via-orange-500 to-red-500",
+      bgColor: "bg-gradient-to-br from-amber-50 to-red-50",
+      iconColor: "text-amber-600"
+    }
+  ];
+
+  const displayCategories = categories.length > 0 
+    ? categories.map((cat, idx) => ({
+        id: cat.id,
+        name: cat.name_ar,
+        icon: cat.icon || defaultCategories[idx % defaultCategories.length]?.icon || "ShoppingBag",
+        gradient: defaultCategories[idx % defaultCategories.length]?.gradient || "from-primary to-accent",
+        bgColor: defaultCategories[idx % defaultCategories.length]?.bgColor || "bg-muted",
+        iconColor: defaultCategories[idx % defaultCategories.length]?.iconColor || "text-primary"
+      }))
+    : defaultCategories;
+
+  if (loading) {
+    return (
+      <section className="py-20 relative overflow-hidden">
+        <div className="container px-4">
+          <div className="flex items-center justify-center h-64">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          </div>
+        </div>
+      </section>
+    );
+  }
+
   return (
     <section className="py-20 relative overflow-hidden">
       <div className="absolute inset-0 bg-gradient-to-b from-background via-muted/20 to-background" />
@@ -75,13 +137,14 @@ const CategorySection = () => {
         </div>
         
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 md:gap-6">
-          {categories.map((category, index) => {
-            const IconComponent = category.icon;
+          {displayCategories.map((category, index) => {
+            const IconComponent = iconMap[category.icon] || ShoppingBag;
             return (
               <Card
-                key={index}
+                key={category.id}
                 className={`group cursor-pointer overflow-hidden border-2 border-transparent hover:border-primary/30 shadow-lg hover:shadow-2xl transition-all duration-500 animate-fade-in hover-scale ${category.bgColor}`}
                 style={{ animationDelay: `${index * 100}ms` }}
+                onClick={() => navigate(`/category/${category.id}`)}
               >
                 <div className="relative aspect-square p-6 flex flex-col items-center justify-center text-center">
                   <div className={`absolute inset-0 bg-gradient-to-br ${category.gradient} opacity-0 group-hover:opacity-10 transition-opacity duration-500`} />

@@ -315,7 +315,7 @@ const TrackOrder = () => {
                   <div className="pt-4 border-t">
                     <div className="flex justify-between text-lg font-bold">
                       <span>المجموع:</span>
-                      <span className="text-primary">{order.total_amount} ريال</span>
+                      <span className="text-primary">{order.total_amount} ل.س</span>
                     </div>
                   </div>
                 </CardContent>
@@ -394,7 +394,7 @@ const TrackOrder = () => {
                         <div className="flex-1">
                           <h4 className="font-medium">{item.products.name}</h4>
                           <p className="text-sm text-muted-foreground">
-                            الكمية: {item.quantity} × {item.price} ريال
+                            الكمية: {item.quantity} × {item.price} ل.س
                           </p>
                         </div>
                       </div>

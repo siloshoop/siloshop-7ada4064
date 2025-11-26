@@ -204,9 +204,9 @@ const Dashboard = () => {
                   <CardTitle className="text-sm font-medium">الإيرادات</CardTitle>
                   <DollarSign className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">{stats.totalRevenue} ريال</div>
-                </CardContent>
+              <CardContent>
+                <div className="text-2xl font-bold">{stats.totalRevenue} ل.س</div>
+              </CardContent>
               </Card>
             </div>
 
@@ -291,7 +291,7 @@ const Dashboard = () => {
                             </span>
                           </div>
                           <p className="text-sm text-muted-foreground">
-                            {product.price} ريال
+                            {product.price} ل.س
                           </p>
                           <p className="text-xs text-muted-foreground">
                             الكمية: {product.stock_quantity}

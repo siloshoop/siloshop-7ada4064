@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import Navbar from "@/components/Navbar";
@@ -11,13 +11,15 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Upload } from "lucide-react";
+import { Loader2, Save, Trash2 } from "lucide-react";
 import imageCompression from 'browser-image-compression';
 
-const AddProduct = () => {
+const EditProduct = () => {
+  const { id } = useParams();
   const { user, loading: authLoading } = useAuth();
   const [categories, setCategories] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
+  const [fetching, setFetching] = useState(true);
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -28,11 +30,12 @@ const AddProduct = () => {
     original_price: "",
     stock_quantity: "",
     category_id: "",
-    image_url: "",
+    is_active: true,
   });
 
-  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
-  const [imagePreviews, setImagePreviews] = useState<string[]>([]);
+  const [existingImages, setExistingImages] = useState<string[]>([]);
+  const [newFiles, setNewFiles] = useState<File[]>([]);
+  const [newPreviews, setNewPreviews] = useState<string[]>([]);
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -41,19 +44,63 @@ const AddProduct = () => {
   }, [user, authLoading, navigate]);
 
   useEffect(() => {
-    const fetchCategories = async () => {
-      const { data } = await supabase.from("categories").select("*");
-      setCategories(data || []);
+    const fetchData = async () => {
+      try {
+        // Fetch categories
+        const { data: categoriesData } = await supabase.from("categories").select("*");
+        setCategories(categoriesData || []);
+
+        // Fetch product
+        if (id && user) {
+          const { data: product, error } = await supabase
+            .from("products")
+            .select("*")
+            .eq("id", id)
+            .eq("vendor_id", user.id)
+            .single();
+
+          if (error) throw error;
+
+          if (product) {
+            setFormData({
+              name: product.name,
+              description: product.description || "",
+              price: product.price.toString(),
+              original_price: product.original_price?.toString() || "",
+              stock_quantity: product.stock_quantity?.toString() || "0",
+              category_id: product.category_id || "",
+              is_active: product.is_active ?? true,
+            });
+
+            // Set existing images
+            const images = product.images || [];
+            if (product.image_url && !images.includes(product.image_url)) {
+              images.unshift(product.image_url);
+            }
+            setExistingImages(images);
+          }
+        }
+      } catch (error: any) {
+        toast({
+          title: "خطأ",
+          description: error.message,
+          variant: "destructive",
+        });
+        navigate("/dashboard");
+      } finally {
+        setFetching(false);
+      }
     };
-    fetchCategories();
-  }, []);
+
+    fetchData();
+  }, [id, user, navigate, toast]);
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
     if (files.length === 0) return;
 
-    // Validate total number of images (max 5)
-    if (selectedFiles.length + files.length > 5) {
+    const totalImages = existingImages.length + newFiles.length + files.length;
+    if (totalImages > 5) {
       toast({
         title: "خطأ",
         description: "يمكنك رفع 5 صور كحد أقصى",
@@ -63,10 +110,9 @@ const AddProduct = () => {
     }
 
     const validatedFiles: File[] = [];
-    const newPreviews: string[] = [];
+    const previews: string[] = [];
 
     for (const file of files) {
-      // Validate file type
       const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif'];
       if (!validTypes.includes(file.type)) {
         toast({
@@ -77,7 +123,6 @@ const AddProduct = () => {
         continue;
       }
 
-      // Validate file size (5MB)
       if (file.size > 5242880) {
         toast({
           title: "خطأ",
@@ -88,7 +133,6 @@ const AddProduct = () => {
       }
 
       try {
-        // Compress image
         const options = {
           maxSizeMB: 1,
           maxWidthOrHeight: 1920,
@@ -98,17 +142,16 @@ const AddProduct = () => {
 
         const compressedFile = await imageCompression(file, options);
         validatedFiles.push(compressedFile);
-        newPreviews.push(URL.createObjectURL(compressedFile));
+        previews.push(URL.createObjectURL(compressedFile));
       } catch (error) {
-        console.error('Error compressing image:', error);
         validatedFiles.push(file);
-        newPreviews.push(URL.createObjectURL(file));
+        previews.push(URL.createObjectURL(file));
       }
     }
 
     if (validatedFiles.length > 0) {
-      setSelectedFiles([...selectedFiles, ...validatedFiles]);
-      setImagePreviews([...imagePreviews, ...newPreviews]);
+      setNewFiles([...newFiles, ...validatedFiles]);
+      setNewPreviews([...newPreviews, ...previews]);
       
       toast({
         title: "تم بنجاح",
@@ -117,17 +160,21 @@ const AddProduct = () => {
     }
   };
 
-  const removeImage = (index: number) => {
-    setSelectedFiles(selectedFiles.filter((_, i) => i !== index));
-    setImagePreviews(imagePreviews.filter((_, i) => i !== index));
+  const removeExistingImage = (index: number) => {
+    setExistingImages(existingImages.filter((_, i) => i !== index));
   };
 
-  const uploadImages = async (): Promise<string[]> => {
-    if (selectedFiles.length === 0 || !user) return [];
+  const removeNewImage = (index: number) => {
+    setNewFiles(newFiles.filter((_, i) => i !== index));
+    setNewPreviews(newPreviews.filter((_, i) => i !== index));
+  };
+
+  const uploadNewImages = async (): Promise<string[]> => {
+    if (newFiles.length === 0 || !user) return [];
 
     const uploadedUrls: string[] = [];
 
-    for (const file of selectedFiles) {
+    for (const file of newFiles) {
       const fileExt = file.name.split('.').pop();
       const fileName = `${user.id}/${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
 
@@ -149,21 +196,17 @@ const AddProduct = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!user) return;
+    if (!user || !id) return;
 
     setLoading(true);
     try {
-      // Upload images if files are selected
-      let imageUrls: string[] = [];
-      let mainImageUrl = formData.image_url;
+      // Upload new images
+      const newImageUrls = await uploadNewImages();
+      
+      // Combine existing and new images
+      const allImages = [...existingImages, ...newImageUrls];
 
-      if (selectedFiles.length > 0) {
-        imageUrls = await uploadImages();
-        mainImageUrl = imageUrls[0]; // First image as main image
-      }
-
-      // Validate that we have at least one image
-      if (!mainImageUrl && imageUrls.length === 0) {
+      if (allImages.length === 0) {
         toast({
           title: "خطأ",
           description: "يرجى اختيار صورة واحدة على الأقل للمنتج",
@@ -173,24 +216,28 @@ const AddProduct = () => {
         return;
       }
 
-      const { error } = await supabase.from("products").insert({
-        vendor_id: user.id,
-        name: formData.name,
-        description: formData.description,
-        price: parseFloat(formData.price),
-        original_price: formData.original_price ? parseFloat(formData.original_price) : null,
-        stock_quantity: parseInt(formData.stock_quantity),
-        category_id: formData.category_id || null,
-        image_url: mainImageUrl,
-        images: imageUrls.length > 0 ? imageUrls : null,
-        is_active: true,
-      });
+      const { error } = await supabase
+        .from("products")
+        .update({
+          name: formData.name,
+          description: formData.description,
+          price: parseFloat(formData.price),
+          original_price: formData.original_price ? parseFloat(formData.original_price) : null,
+          stock_quantity: parseInt(formData.stock_quantity),
+          category_id: formData.category_id || null,
+          image_url: allImages[0],
+          images: allImages,
+          is_active: formData.is_active,
+          updated_at: new Date().toISOString(),
+        })
+        .eq("id", id)
+        .eq("vendor_id", user.id);
 
       if (error) throw error;
 
       toast({
         title: "تم بنجاح",
-        description: "تم إضافة المنتج بنجاح",
+        description: "تم تحديث المنتج بنجاح",
       });
 
       navigate("/dashboard");
@@ -205,7 +252,39 @@ const AddProduct = () => {
     }
   };
 
-  if (authLoading) {
+  const handleDelete = async () => {
+    if (!user || !id) return;
+    
+    if (!confirm("هل أنت متأكد من حذف هذا المنتج؟")) return;
+
+    setLoading(true);
+    try {
+      const { error } = await supabase
+        .from("products")
+        .delete()
+        .eq("id", id)
+        .eq("vendor_id", user.id);
+
+      if (error) throw error;
+
+      toast({
+        title: "تم بنجاح",
+        description: "تم حذف المنتج بنجاح",
+      });
+
+      navigate("/dashboard");
+    } catch (error: any) {
+      toast({
+        title: "خطأ",
+        description: error.message,
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (authLoading || fetching) {
     return (
       <div className="min-h-screen flex flex-col">
         <Navbar />
@@ -223,8 +302,8 @@ const AddProduct = () => {
       <main className="flex-1 container px-4 py-8">
         <Card className="max-w-2xl mx-auto">
           <CardHeader>
-            <CardTitle className="text-3xl">إضافة منتج جديد</CardTitle>
-            <CardDescription>أضف منتجاً جديداً إلى متجرك</CardDescription>
+            <CardTitle className="text-3xl">تعديل المنتج</CardTitle>
+            <CardDescription>تحديث معلومات وصور المنتج</CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-6">
@@ -309,60 +388,75 @@ const AddProduct = () => {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="image">صور المنتج * (حتى 5 صور)</Label>
-                <div className="space-y-4">
-                  <Input
-                    id="image"
-                    type="file"
-                    accept="image/jpeg,image/jpg,image/png,image/webp,image/gif"
-                    onChange={handleFileChange}
-                    className="cursor-pointer"
-                    multiple
-                  />
-                  <p className="text-sm text-muted-foreground">
-                    الحد الأقصى: 5 صور، 5 ميجابايت لكل صورة. الصيغ المدعومة: JPG, PNG, WEBP, GIF
-                  </p>
-                  
-                  {imagePreviews.length > 0 && (
-                    <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                      {imagePreviews.map((preview, index) => (
-                        <div key={index} className="relative">
-                          <img
-                            src={preview}
-                            alt={`معاينة ${index + 1}`}
-                            className="w-full h-32 object-cover rounded-lg"
-                          />
-                          <Button
-                            type="button"
-                            variant="destructive"
-                            size="sm"
-                            className="absolute top-2 left-2"
-                            onClick={() => removeImage(index)}
-                          >
-                            حذف
-                          </Button>
-                          {index === 0 && (
-                            <div className="absolute bottom-2 right-2 bg-primary text-primary-foreground text-xs px-2 py-1 rounded">
-                              صورة رئيسية
-                            </div>
-                          )}
-                        </div>
-                      ))}
-                    </div>
-                  )}
-
-                  <div className="pt-2 border-t">
-                    <Label htmlFor="image_url" className="text-sm">أو أدخل رابط صورة رئيسية</Label>
-                    <Input
-                      id="image_url"
-                      type="url"
-                      value={formData.image_url}
-                      onChange={(e) => setFormData({ ...formData, image_url: e.target.value })}
-                      placeholder="https://example.com/image.jpg"
-                      className="mt-2"
-                    />
+                <Label>الصور الحالية</Label>
+                {existingImages.length > 0 ? (
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                    {existingImages.map((img, index) => (
+                      <div key={index} className="relative">
+                        <img
+                          src={img}
+                          alt={`صورة ${index + 1}`}
+                          className="w-full h-32 object-cover rounded-lg"
+                        />
+                        <Button
+                          type="button"
+                          variant="destructive"
+                          size="sm"
+                          className="absolute top-2 left-2"
+                          onClick={() => removeExistingImage(index)}
+                        >
+                          حذف
+                        </Button>
+                        {index === 0 && (
+                          <div className="absolute bottom-2 right-2 bg-primary text-primary-foreground text-xs px-2 py-1 rounded">
+                            صورة رئيسية
+                          </div>
+                        )}
+                      </div>
+                    ))}
                   </div>
-                </div>
+                ) : (
+                  <p className="text-sm text-muted-foreground">لا توجد صور حالية</p>
+                )}
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="new-images">إضافة صور جديدة</Label>
+                <Input
+                  id="new-images"
+                  type="file"
+                  accept="image/jpeg,image/jpg,image/png,image/webp,image/gif"
+                  onChange={handleFileChange}
+                  className="cursor-pointer"
+                  multiple
+                  disabled={existingImages.length + newFiles.length >= 5}
+                />
+                <p className="text-sm text-muted-foreground">
+                  يمكنك رفع حتى {5 - existingImages.length - newFiles.length} صور إضافية
+                </p>
+
+                {newPreviews.length > 0 && (
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mt-4">
+                    {newPreviews.map((preview, index) => (
+                      <div key={index} className="relative">
+                        <img
+                          src={preview}
+                          alt={`صورة جديدة ${index + 1}`}
+                          className="w-full h-32 object-cover rounded-lg"
+                        />
+                        <Button
+                          type="button"
+                          variant="destructive"
+                          size="sm"
+                          className="absolute top-2 left-2"
+                          onClick={() => removeNewImage(index)}
+                        >
+                          حذف
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
 
               <div className="flex gap-4">
@@ -370,12 +464,12 @@ const AddProduct = () => {
                   {loading ? (
                     <>
                       <Loader2 className="ml-2 h-5 w-5 animate-spin" />
-                      جاري الإضافة...
+                      جاري الحفظ...
                     </>
                   ) : (
                     <>
-                      <Upload className="ml-2 h-5 w-5" />
-                      إضافة المنتج
+                      <Save className="ml-2 h-5 w-5" />
+                      حفظ التغييرات
                     </>
                   )}
                 </Button>
@@ -387,6 +481,14 @@ const AddProduct = () => {
                 >
                   إلغاء
                 </Button>
+                <Button
+                  type="button"
+                  variant="destructive"
+                  onClick={handleDelete}
+                  disabled={loading}
+                >
+                  <Trash2 className="h-5 w-5" />
+                </Button>
               </div>
             </form>
           </CardContent>
@@ -397,4 +499,4 @@ const AddProduct = () => {
   );
 };
 
-export default AddProduct;
+export default EditProduct;

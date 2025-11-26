@@ -99,7 +99,7 @@ const ProductCard = ({
           size="lg"
           onClick={(e) => {
             e.stopPropagation();
-            // Add to cart logic here
+            navigate(`/product/${productId}`);
           }}
         >
           أضف للسلة

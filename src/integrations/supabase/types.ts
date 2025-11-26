@@ -80,6 +80,80 @@ export type Database = {
         }
         Relationships: []
       }
+      coupons: {
+        Row: {
+          code: string
+          created_at: string
+          discount_type: string
+          discount_value: number
+          expires_at: string | null
+          id: string
+          is_active: boolean
+          max_uses: number | null
+          min_purchase: number | null
+          updated_at: string
+          used_count: number
+          vendor_id: string
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          discount_type: string
+          discount_value: number
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean
+          max_uses?: number | null
+          min_purchase?: number | null
+          updated_at?: string
+          used_count?: number
+          vendor_id: string
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          discount_type?: string
+          discount_value?: number
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean
+          max_uses?: number | null
+          min_purchase?: number | null
+          updated_at?: string
+          used_count?: number
+          vendor_id?: string
+        }
+        Relationships: []
+      }
+      favorites: {
+        Row: {
+          created_at: string
+          id: string
+          product_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          product_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          product_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "favorites_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       notifications: {
         Row: {
           created_at: string
@@ -165,38 +239,106 @@ export type Database = {
           },
         ]
       }
+      order_status_history: {
+        Row: {
+          created_at: string
+          id: string
+          location_lat: number | null
+          location_lng: number | null
+          notes: string | null
+          order_id: string
+          status: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          location_lat?: number | null
+          location_lng?: number | null
+          notes?: string | null
+          order_id: string
+          status: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          location_lat?: number | null
+          location_lng?: number | null
+          notes?: string | null
+          order_id?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "order_status_history_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       orders: {
         Row: {
+          coupon_code: string | null
+          courier_name: string | null
           created_at: string | null
+          current_location_lat: number | null
+          current_location_lng: number | null
           customer_id: string
+          delivery_lat: number | null
+          delivery_lng: number | null
+          discount_amount: number | null
+          estimated_delivery: string | null
           id: string
           notes: string | null
           phone: string | null
           shipping_address: string | null
           status: string | null
           total_amount: number
+          tracking_number: string | null
+          tracking_status: string | null
           updated_at: string | null
         }
         Insert: {
+          coupon_code?: string | null
+          courier_name?: string | null
           created_at?: string | null
+          current_location_lat?: number | null
+          current_location_lng?: number | null
           customer_id: string
+          delivery_lat?: number | null
+          delivery_lng?: number | null
+          discount_amount?: number | null
+          estimated_delivery?: string | null
           id?: string
           notes?: string | null
           phone?: string | null
           shipping_address?: string | null
           status?: string | null
           total_amount: number
+          tracking_number?: string | null
+          tracking_status?: string | null
           updated_at?: string | null
         }
         Update: {
+          coupon_code?: string | null
+          courier_name?: string | null
           created_at?: string | null
+          current_location_lat?: number | null
+          current_location_lng?: number | null
           customer_id?: string
+          delivery_lat?: number | null
+          delivery_lng?: number | null
+          discount_amount?: number | null
+          estimated_delivery?: string | null
           id?: string
           notes?: string | null
           phone?: string | null
           shipping_address?: string | null
           status?: string | null
           total_amount?: number
+          tracking_number?: string | null
+          tracking_status?: string | null
           updated_at?: string | null
         }
         Relationships: [

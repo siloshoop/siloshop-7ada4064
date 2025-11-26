@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { NotificationsDropdown } from "@/components/NotificationsDropdown";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
+import { useState } from "react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -13,10 +14,18 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 
 const Navbar = () => {
   const navigate = useNavigate();
   const { user, signOut, loading } = useAuth();
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -89,9 +98,84 @@ const Navbar = () => {
 
         {/* Left side - Logo & Menu */}
         <div className="flex items-center gap-4">
-          <Button variant="ghost" size="icon" className="md:hidden">
-            <Menu className="h-5 w-5" />
-          </Button>
+          <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
+            <SheetTrigger asChild>
+              <Button variant="ghost" size="icon" className="md:hidden">
+                <Menu className="h-5 w-5" />
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="right" className="w-[300px]">
+              <SheetHeader>
+                <SheetTitle>القائمة</SheetTitle>
+              </SheetHeader>
+              <div className="flex flex-col gap-4 mt-6">
+                <Button 
+                  variant="ghost" 
+                  className="justify-start" 
+                  onClick={() => {
+                    navigate("/");
+                    setMobileMenuOpen(false);
+                  }}
+                >
+                  الرئيسية
+                </Button>
+                {user && (
+                  <>
+                    <Button 
+                      variant="ghost" 
+                      className="justify-start"
+                      onClick={() => {
+                        navigate("/orders");
+                        setMobileMenuOpen(false);
+                      }}
+                    >
+                      طلباتي
+                    </Button>
+                    <Button 
+                      variant="ghost" 
+                      className="justify-start"
+                      onClick={() => {
+                        navigate("/dashboard");
+                        setMobileMenuOpen(false);
+                      }}
+                    >
+                      لوحة التحكم
+                    </Button>
+                    <Button 
+                      variant="ghost" 
+                      className="justify-start"
+                      onClick={() => {
+                        navigate("/favorites");
+                        setMobileMenuOpen(false);
+                      }}
+                    >
+                      المفضلة
+                    </Button>
+                    <Button 
+                      variant="ghost" 
+                      className="justify-start text-red-600"
+                      onClick={() => {
+                        signOut();
+                        setMobileMenuOpen(false);
+                      }}
+                    >
+                      تسجيل الخروج
+                    </Button>
+                  </>
+                )}
+                {!user && (
+                  <Button 
+                    onClick={() => {
+                      navigate("/auth");
+                      setMobileMenuOpen(false);
+                    }}
+                  >
+                    تسجيل الدخول
+                  </Button>
+                )}
+              </div>
+            </SheetContent>
+          </Sheet>
           <h1 
             className="text-2xl font-bold bg-gradient-to-l from-primary to-accent bg-clip-text text-transparent cursor-pointer"
             onClick={() => navigate("/")}

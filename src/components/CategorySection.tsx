@@ -99,9 +99,10 @@ const CategorySection = () => {
         icon: cat.icon || defaultCategories[idx % defaultCategories.length]?.icon || "ShoppingBag",
         gradient: defaultCategories[idx % defaultCategories.length]?.gradient || "from-primary to-accent",
         bgColor: defaultCategories[idx % defaultCategories.length]?.bgColor || "bg-muted",
-        iconColor: defaultCategories[idx % defaultCategories.length]?.iconColor || "text-primary"
+        iconColor: defaultCategories[idx % defaultCategories.length]?.iconColor || "text-primary",
+        count: "منتجات متنوعة"
       }))
-    : defaultCategories;
+    : defaultCategories.map(cat => ({ ...cat, count: "500+ منتج" }));
 
   if (loading) {
     return (

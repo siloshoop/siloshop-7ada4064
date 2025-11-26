@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Plus, Package, TrendingUp, DollarSign, ShoppingBag, Loader2, Edit, Trash2, Search } from "lucide-react";
+import { Plus, Package, TrendingUp, DollarSign, ShoppingBag, Loader2, Edit, Trash2, Search, Tag } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 const Dashboard = () => {
@@ -217,10 +217,19 @@ const Dashboard = () => {
                     <CardTitle>منتجاتي</CardTitle>
                     <CardDescription>إدارة منتجاتك المعروضة</CardDescription>
                   </div>
-                  <Button onClick={() => navigate("/dashboard/add-product")}>
-                    <Plus className="ml-2 h-4 w-4" />
-                    إضافة منتج
-                  </Button>
+                  <div className="flex gap-2">
+                    <Button 
+                      variant="outline"
+                      onClick={() => navigate("/dashboard/coupons")}
+                    >
+                      <Tag className="ml-2 h-4 w-4" />
+                      الكوبونات
+                    </Button>
+                    <Button onClick={() => navigate("/dashboard/add-product")}>
+                      <Plus className="ml-2 h-4 w-4" />
+                      إضافة منتج
+                    </Button>
+                  </div>
                 </div>
 
                 {products.length > 0 && (

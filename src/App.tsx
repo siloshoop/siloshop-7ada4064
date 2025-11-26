@@ -8,6 +8,9 @@ import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
 import AddProduct from "./pages/AddProduct";
 import EditProduct from "./pages/EditProduct";
+import Favorites from "./pages/Favorites";
+import ManageCoupons from "./pages/ManageCoupons";
+import TrackOrder from "./pages/TrackOrder";
 import Cart from "./pages/Cart";
 import Orders from "./pages/Orders";
 import Product from "./pages/Product";
@@ -27,8 +30,11 @@ const App = () => (
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/dashboard/add-product" element={<AddProduct />} />
           <Route path="/dashboard/edit-product/:id" element={<EditProduct />} />
+          <Route path="/dashboard/coupons" element={<ManageCoupons />} />
+          <Route path="/favorites" element={<Favorites />} />
           <Route path="/cart" element={<Cart />} />
           <Route path="/orders" element={<Orders />} />
+          <Route path="/orders/track/:id" element={<TrackOrder />} />
           <Route path="/product/:id" element={<Product />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />

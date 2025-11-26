@@ -85,13 +85,19 @@ const Navbar = () => {
         </div>
 
         {/* Center - Search */}
-        <div className="flex-1 max-w-2xl">
-          <div className="relative">
+        <div className="flex-1 max-w-2xl flex items-center gap-2">
+          <div className="relative flex-1">
             <Search className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
               type="search"
               placeholder="ابحث عن المنتجات..."
               className="pr-10 w-full"
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  const value = (e.target as HTMLInputElement).value;
+                  if (value) navigate(`/?search=${encodeURIComponent(value)}`);
+                }
+              }}
             />
           </div>
         </div>

@@ -21,6 +21,7 @@ import Chat from "./pages/Chat";
 import Payment from "./pages/Payment";
 import Statistics from "./pages/Statistics";
 import InstallPWA from "./pages/InstallPWA";
+import Compare from "./pages/Compare";
 
 const queryClient = new QueryClient();
 
@@ -46,6 +47,7 @@ const App = () => (
           <Route path="/orders" element={<Orders />} />
           <Route path="/orders/track/:id" element={<TrackOrder />} />
           <Route path="/product/:id" element={<Product />} />
+          <Route path="/compare" element={<Compare />} />
           <Route path="/chat/:vendorId" element={<Chat />} />
           <Route path="/install" element={<InstallPWA />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

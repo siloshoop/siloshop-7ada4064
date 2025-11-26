@@ -4,6 +4,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import { ImageGallery } from "@/components/ImageGallery";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -18,6 +19,7 @@ interface Product {
   original_price: number | null;
   stock_quantity: number;
   image_url: string;
+  images: string[] | null;
   vendor: {
     full_name: string;
   };
@@ -43,7 +45,7 @@ const Product = () => {
             vendor:profiles(full_name)
           `)
           .eq("id", id)
-          .single();
+          .maybeSingle();
 
         if (error) throw error;
         setProduct(data as any);
@@ -127,23 +129,26 @@ const Product = () => {
     ? Math.round(((product.original_price - product.price) / product.original_price) * 100)
     : 0;
 
+  // Prepare images array for gallery
+  const productImages = product.images && product.images.length > 0 
+    ? product.images 
+    : product.image_url 
+    ? [product.image_url] 
+    : [];
+
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
       <main className="flex-1 container px-4 py-8">
         <div className="grid lg:grid-cols-2 gap-8">
-          {/* Image Section */}
+          {/* Image Gallery Section */}
           <div className="relative">
             {discount > 0 && (
               <Badge className="absolute top-4 left-4 z-10 bg-sale text-sale-foreground text-lg px-4 py-2">
                 خصم {discount}%
               </Badge>
             )}
-            <img
-              src={product.image_url}
-              alt={product.name}
-              className="w-full aspect-square object-cover rounded-2xl shadow-2xl"
-            />
+            <ImageGallery images={productImages} productName={product.name} />
           </div>
 
           {/* Details Section */}

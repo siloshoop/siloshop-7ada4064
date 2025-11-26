@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import Navbar from "@/components/Navbar";
@@ -9,7 +9,7 @@ import { ProductReviews } from "@/components/ProductReviews";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Heart, ShoppingCart, Loader2, Minus, Plus, Star } from "lucide-react";
+import { Heart, ShoppingCart, Loader2, Minus, Plus, Star, ArrowLeftRight } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { FavoriteButton } from "@/components/FavoriteButton";
 import ChatButton from "@/components/ChatButton";
@@ -35,12 +35,44 @@ interface Product {
 const Product = () => {
   const { id } = useParams();
   const { user } = useAuth();
+  const [searchParams] = useSearchParams();
   const [product, setProduct] = useState<Product | null>(null);
   const [quantity, setQuantity] = useState(1);
   const [loading, setLoading] = useState(true);
   const [addingToCart, setAddingToCart] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
+
+  const addToCompare = () => {
+    const currentCompare = searchParams.get("compare")?.split(",") || [];
+    
+    if (!id) return;
+    
+    if (currentCompare.includes(id)) {
+      toast({
+        title: "تنبيه",
+        description: "المنتج موجود بالفعل في قائمة المقارنة",
+      });
+      return;
+    }
+
+    if (currentCompare.length >= 4) {
+      toast({
+        title: "تنبيه",
+        description: "يمكنك مقارنة حتى 4 منتجات فقط",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const newCompare = [...currentCompare, id];
+    navigate(`/compare?products=${newCompare.join(",")}`);
+    
+    toast({
+      title: "تمت الإضافة",
+      description: "تم إضافة المنتج إلى قائمة المقارنة",
+    });
+  };
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -250,6 +282,16 @@ const Product = () => {
                 </Button>
                 <FavoriteButton productId={id!} variant="outline" size="lg" />
               </div>
+              
+              <Button
+                size="lg"
+                variant="outline"
+                className="w-full"
+                onClick={addToCompare}
+              >
+                <ArrowLeftRight className="ml-2 h-5 w-5" />
+                إضافة للمقارنة
+              </Button>
               <div className="mt-4">
                 <ChatButton vendorId={product.vendor_id} productId={id} />
               </div>

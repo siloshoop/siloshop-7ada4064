@@ -1,7 +1,10 @@
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 const HeroSection = () => {
+  const navigate = useNavigate();
+
   return (
     <section className="relative overflow-hidden bg-gradient-to-br from-secondary via-background to-accent/5">
       <div className="container px-4 py-16 md:py-24">
@@ -22,11 +25,11 @@ const HeroSection = () => {
               تسوق من تشكيلة واسعة من الملابس والإكسسوارات العصرية بأفضل الأسعار
             </p>
             <div className="flex gap-4 flex-wrap justify-center lg:justify-start">
-              <Button size="lg" className="text-base gap-2">
+              <Button size="lg" className="text-base gap-2" onClick={() => navigate("/")}>
                 تسوق الآن
                 <ArrowLeft className="h-4 w-4" />
               </Button>
-              <Button size="lg" variant="outline" className="text-base">
+              <Button size="lg" variant="outline" className="text-base" onClick={() => navigate("/")}>
                 عرض المجموعات
               </Button>
             </div>

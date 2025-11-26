@@ -138,8 +138,15 @@ const Orders = () => {
                     <div className="flex items-center gap-4 mt-4 md:mt-0">
                       {getStatusBadge(order.status)}
                       <p className="font-bold text-lg text-primary">
-                        {order.total_amount} ريال
+                        {order.total_amount} ل.س
                       </p>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => navigate(`/orders/track/${order.id}`)}
+                      >
+                        تتبع الطلب
+                      </Button>
                     </div>
                   </div>
 
@@ -154,7 +161,7 @@ const Orders = () => {
                         <div className="flex-1">
                           <h4 className="font-semibold">{item.product.name}</h4>
                           <p className="text-sm text-muted-foreground">
-                            الكمية: {item.quantity} × {item.price} ريال
+                            الكمية: {item.quantity} × {item.price} ل.س
                           </p>
                         </div>
                       </div>

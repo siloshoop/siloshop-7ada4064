@@ -36,7 +36,10 @@ export const FavoriteButton = ({ productId, variant = "outline", size = "lg" }: 
     checkFavorite();
   }, [user, productId]);
 
-  const toggleFavorite = async () => {
+  const toggleFavorite = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
     if (!user) {
       navigate("/auth");
       return;

@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { Link } from "react-router-dom";
 
 const Footer = () => {
   const [email, setEmail] = useState("");
@@ -10,10 +11,10 @@ const Footer = () => {
 
   const handleSubscribe = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     try {
       const { error } = await supabase
-        .from('newsletter_subscriptions')
+        .from("newsletter_subscriptions")
         .insert([{ email }]);
 
       if (error) throw error;
@@ -26,13 +27,14 @@ const Footer = () => {
     } catch (error: any) {
       toast({
         title: "خطأ",
-        description: error.message.includes('duplicate') 
-          ? "هذا البريد مشترك بالفعل" 
+        description: error.message.includes("duplicate")
+          ? "هذا البريد مشترك بالفعل"
           : "حدث خطأ، يرجى المحاولة مرة أخرى",
         variant: "destructive",
       });
     }
   };
+
   return (
     <footer className="bg-muted/50 border-t">
       <div className="container px-4 py-12">
@@ -45,41 +47,125 @@ const Footer = () => {
               وجهتك المفضلة للتسوق أونلاين بأفضل الأسعار وأعلى جودة
             </p>
             <div className="flex gap-2">
-              <Button size="icon" variant="ghost">
-                <Facebook className="h-5 w-5" />
+              <Button size="icon" variant="ghost" asChild>
+                <a
+                  href="https://facebook.com"
+                  target="_blank"
+                  rel="noreferrer"
+                  aria-label="فيسبوك"
+                >
+                  <Facebook className="h-5 w-5" />
+                </a>
               </Button>
-              <Button size="icon" variant="ghost">
-                <Instagram className="h-5 w-5" />
+              <Button size="icon" variant="ghost" asChild>
+                <a
+                  href="https://instagram.com"
+                  target="_blank"
+                  rel="noreferrer"
+                  aria-label="انستغرام"
+                >
+                  <Instagram className="h-5 w-5" />
+                </a>
               </Button>
-              <Button size="icon" variant="ghost">
-                <Twitter className="h-5 w-5" />
+              <Button size="icon" variant="ghost" asChild>
+                <a
+                  href="https://twitter.com"
+                  target="_blank"
+                  rel="noreferrer"
+                  aria-label="تويتر"
+                >
+                  <Twitter className="h-5 w-5" />
+                </a>
               </Button>
-              <Button size="icon" variant="ghost">
-                <Youtube className="h-5 w-5" />
+              <Button size="icon" variant="ghost" asChild>
+                <a
+                  href="https://youtube.com"
+                  target="_blank"
+                  rel="noreferrer"
+                  aria-label="يوتيوب"
+                >
+                  <Youtube className="h-5 w-5" />
+                </a>
               </Button>
             </div>
           </div>
-          
+
           <div>
             <h4 className="font-semibold mb-4">خدمة العملاء</h4>
             <ul className="space-y-2 text-muted-foreground">
-              <li><a href="/contact" className="hover:text-foreground transition-colors">اتصل بنا</a></li>
-              <li><a href="/faq" className="hover:text-foreground transition-colors">الأسئلة الشائعة</a></li>
-              <li><a href="/returns" className="hover:text-foreground transition-colors">سياسة الإرجاع</a></li>
-              <li><a href="/shipping" className="hover:text-foreground transition-colors">الشحن والتوصيل</a></li>
+              <li>
+                <Link
+                  to="/contact"
+                  className="hover:text-foreground transition-colors"
+                >
+                  اتصل بنا
+                </Link>
+              </li>
+              <li>
+                <Link
+                  to="/faq"
+                  className="hover:text-foreground transition-colors"
+                >
+                  الأسئلة الشائعة
+                </Link>
+              </li>
+              <li>
+                <Link
+                  to="/returns"
+                  className="hover:text-foreground transition-colors"
+                >
+                  سياسة الإرجاع
+                </Link>
+              </li>
+              <li>
+                <Link
+                  to="/shipping"
+                  className="hover:text-foreground transition-colors"
+                >
+                  الشحن والتوصيل
+                </Link>
+              </li>
             </ul>
           </div>
-          
+
           <div>
             <h4 className="font-semibold mb-4">روابط سريعة</h4>
             <ul className="space-y-2 text-muted-foreground">
-              <li><a href="/about" className="hover:text-foreground transition-colors">من نحن</a></li>
-              <li><a href="/blog" className="hover:text-foreground transition-colors">المدونة</a></li>
-              <li><a href="/careers" className="hover:text-foreground transition-colors">الوظائف</a></li>
-              <li><a href="/partners" className="hover:text-foreground transition-colors">الشركاء</a></li>
+              <li>
+                <Link
+                  to="/about"
+                  className="hover:text-foreground transition-colors"
+                >
+                  من نحن
+                </Link>
+              </li>
+              <li>
+                <Link
+                  to="/blog"
+                  className="hover:text-foreground transition-colors"
+                >
+                  المدونة
+                </Link>
+              </li>
+              <li>
+                <Link
+                  to="/careers"
+                  className="hover:text-foreground transition-colors"
+                >
+                  الوظائف
+                </Link>
+              </li>
+              <li>
+                <Link
+                  to="/partners"
+                  className="hover:text-foreground transition-colors"
+                >
+                  الشركاء
+                </Link>
+              </li>
             </ul>
           </div>
-          
+
           <div>
             <h4 className="font-semibold mb-4">اشترك في النشرة</h4>
             <p className="text-muted-foreground mb-4">
@@ -98,7 +184,7 @@ const Footer = () => {
             </form>
           </div>
         </div>
-        
+
         <div className="border-t mt-8 pt-8 text-center text-muted-foreground">
           <p>© 2024 متجر. جميع الحقوق محفوظة.</p>
         </div>

@@ -1,9 +1,9 @@
 import { ShoppingCart, Search, Menu, Heart, User, LogOut, LayoutDashboard } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
 import { NotificationsDropdown } from "@/components/NotificationsDropdown";
 import { useNavigate } from "react-router-dom";
+import { NavLink } from "@/components/NavLink";
 import { useAuth } from "@/hooks/useAuth";
 import { useState } from "react";
 import {
@@ -125,6 +125,36 @@ const Navbar = () => {
                 >
                   الرئيسية
                 </Button>
+                <Button 
+                  variant="ghost" 
+                  className="justify-start" 
+                  onClick={() => {
+                    navigate("/about");
+                    setMobileMenuOpen(false);
+                  }}
+                >
+                  من نحن
+                </Button>
+                <Button 
+                  variant="ghost" 
+                  className="justify-start" 
+                  onClick={() => {
+                    navigate("/faq");
+                    setMobileMenuOpen(false);
+                  }}
+                >
+                  الأسئلة الشائعة
+                </Button>
+                <Button 
+                  variant="ghost" 
+                  className="justify-start" 
+                  onClick={() => {
+                    navigate("/contact");
+                    setMobileMenuOpen(false);
+                  }}
+                >
+                  اتصل بنا
+                </Button>
                 {user && (
                   <>
                     <Button 
@@ -194,13 +224,42 @@ const Navbar = () => {
       {/* Navigation Links */}
       <nav className="border-t">
         <div className="container flex items-center gap-6 px-4 h-12 overflow-x-auto">
-          <Button variant="ghost" className="text-sm font-medium" onClick={() => navigate("/")}>
+          <NavLink 
+            to="/" 
+            className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors whitespace-nowrap"
+            activeClassName="text-foreground font-semibold"
+          >
             الرئيسية
-          </Button>
+          </NavLink>
+          <NavLink 
+            to="/about" 
+            className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors whitespace-nowrap"
+            activeClassName="text-foreground font-semibold"
+          >
+            من نحن
+          </NavLink>
+          <NavLink 
+            to="/faq" 
+            className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors whitespace-nowrap"
+            activeClassName="text-foreground font-semibold"
+          >
+            الأسئلة الشائعة
+          </NavLink>
+          <NavLink 
+            to="/contact" 
+            className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors whitespace-nowrap"
+            activeClassName="text-foreground font-semibold"
+          >
+            اتصل بنا
+          </NavLink>
           {user && (
-            <Button variant="ghost" className="text-sm font-medium" onClick={() => navigate("/orders")}>
+            <NavLink 
+              to="/orders" 
+              className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors whitespace-nowrap"
+              activeClassName="text-foreground font-semibold"
+            >
               طلباتي
-            </Button>
+            </NavLink>
           )}
         </div>
       </nav>

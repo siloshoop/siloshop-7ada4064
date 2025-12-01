@@ -30,6 +30,7 @@ import About from "./pages/About";
 import Blog from "./pages/Blog";
 import Careers from "./pages/Careers";
 import Partners from "./pages/Partners";
+import VendorOrders from "./pages/VendorOrders";
 
 const queryClient = new QueryClient();
 
@@ -47,6 +48,7 @@ const App = () => (
           <Route path="/dashboard/edit-product/:id" element={<EditProduct />} />
           <Route path="/dashboard/coupons" element={<ManageCoupons />} />
           <Route path="/dashboard/statistics" element={<Statistics />} />
+          <Route path="/dashboard/orders" element={<VendorOrders />} />
           <Route path="/favorites" element={<Favorites />} />
           <Route path="/category/:categoryId" element={<Category />} />
           <Route path="/cart" element={<Cart />} />

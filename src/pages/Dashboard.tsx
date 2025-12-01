@@ -8,14 +8,16 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Plus, Package, TrendingUp, DollarSign, ShoppingBag, Loader2, Edit, Trash2, Search, Tag } from "lucide-react";
+import { Plus, Package, TrendingUp, DollarSign, ShoppingBag, Loader2, Edit, Trash2, Search, Tag, Star } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
 const Dashboard = () => {
   const { user, loading: authLoading } = useAuth();
   const [profile, setProfile] = useState<any>(null);
   const [products, setProducts] = useState<any[]>([]);
   const [filteredProducts, setFilteredProducts] = useState<any[]>([]);
+  const [recentReviews, setRecentReviews] = useState<any[]>([]);
   const [stats, setStats] = useState({ totalProducts: 0, totalOrders: 0, totalRevenue: 0 });
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
@@ -66,6 +68,20 @@ const Dashboard = () => {
             totalOrders: orderItems?.length || 0,
             totalRevenue,
           });
+
+          // Get recent reviews
+          const { data: reviewsData } = await supabase
+            .from("reviews")
+            .select(`
+              *,
+              products!inner(name, vendor_id),
+              profiles(full_name)
+            `)
+            .eq("products.vendor_id", user.id)
+            .order("created_at", { ascending: false })
+            .limit(5);
+
+          setRecentReviews(reviewsData || []);
         }
       } catch (error: any) {
         toast({
@@ -209,6 +225,61 @@ const Dashboard = () => {
               </CardContent>
               </Card>
             </div>
+
+            {/* Recent Reviews Section */}
+            {recentReviews.length > 0 && (
+              <Card className="mb-8">
+                <CardHeader>
+                  <CardTitle>آخر التقييمات</CardTitle>
+                  <CardDescription>آخر التقييمات على منتجاتك</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    {recentReviews.map((review) => (
+                      <div key={review.id} className="flex gap-4 pb-4 border-b last:border-0">
+                        <Avatar>
+                          <AvatarFallback>
+                            {review.profiles?.full_name?.[0]?.toUpperCase() || "?"}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div className="flex-1">
+                          <div className="flex items-center justify-between mb-2">
+                            <div>
+                              <span className="font-semibold text-sm">
+                                {review.profiles?.full_name || "مستخدم"}
+                              </span>
+                              <p className="text-xs text-muted-foreground">
+                                {review.products?.name}
+                              </p>
+                            </div>
+                            <span className="text-xs text-muted-foreground">
+                              {new Date(review.created_at).toLocaleDateString('ar-SY')}
+                            </span>
+                          </div>
+                          <div className="flex gap-1 mb-2">
+                            {[1, 2, 3, 4, 5].map((star) => (
+                              <Star
+                                key={star}
+                                className={`h-4 w-4 ${
+                                  star <= review.rating
+                                    ? "fill-yellow-400 text-yellow-400"
+                                    : "text-gray-300"
+                                }`}
+                              />
+                            ))}
+                          </div>
+                          {review.comment && (
+                            <p className="text-sm text-foreground/80">
+                              {review.comment}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
 
             <Card>
               <CardHeader>

@@ -4,9 +4,10 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
-import { Loader2, TrendingUp, Package, DollarSign, ShoppingCart } from "lucide-react";
+import { Loader2, TrendingUp, Package, DollarSign, ShoppingCart, Star } from "lucide-react";
 import { format, subDays, startOfWeek, endOfWeek, eachWeekOfInterval, subMonths } from "date-fns";
 import { ar } from "date-fns/locale";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
 interface WeeklyStat {
   week: string;
@@ -21,11 +22,26 @@ interface ProductStat {
   revenue: number;
 }
 
+interface Review {
+  id: string;
+  rating: number;
+  comment: string;
+  created_at: string;
+  products: {
+    name: string;
+  };
+  profiles: {
+    full_name: string;
+  };
+}
+
 const Statistics = () => {
   const { user } = useAuth();
   const [loading, setLoading] = useState(true);
   const [weeklyData, setWeeklyData] = useState<WeeklyStat[]>([]);
   const [topProducts, setTopProducts] = useState<ProductStat[]>([]);
+  const [recentReviews, setRecentReviews] = useState<Review[]>([]);
+  const [averageRating, setAverageRating] = useState(0);
   const [totalStats, setTotalStats] = useState({
     totalRevenue: 0,
     totalOrders: 0,
@@ -109,6 +125,26 @@ const Statistics = () => {
         averageOrder: totalOrders > 0 ? totalRevenue / totalOrders : 0,
       });
 
+      // Fetch recent reviews
+      const { data: reviews } = await supabase
+        .from("reviews")
+        .select(`
+          *,
+          products!inner(name, vendor_id),
+          profiles(full_name)
+        `)
+        .eq("products.vendor_id", user.id)
+        .order("created_at", { ascending: false })
+        .limit(10);
+
+      if (reviews) {
+        setRecentReviews(reviews as any);
+        const avgRating = reviews.length > 0
+          ? reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length
+          : 0;
+        setAverageRating(Math.round(avgRating * 10) / 10);
+      }
+
       setLoading(false);
     };
 
@@ -180,12 +216,27 @@ const Statistics = () => {
         </Card>
       </div>
 
+      {/* Rating Summary */}
+      <Card className="p-6 mb-8">
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-xl font-bold mb-2">متوسط التقييمات</h2>
+            <p className="text-muted-foreground">بناءً على {recentReviews.length} تقييم</p>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="text-4xl font-bold">{averageRating}</span>
+            <Star className="h-8 w-8 fill-yellow-400 text-yellow-400" />
+          </div>
+        </div>
+      </Card>
+
       {/* Charts */}
       <Tabs defaultValue="revenue" className="space-y-4">
         <TabsList>
           <TabsTrigger value="revenue">الإيرادات</TabsTrigger>
           <TabsTrigger value="orders">الطلبات</TabsTrigger>
           <TabsTrigger value="products">أفضل المنتجات</TabsTrigger>
+          <TabsTrigger value="reviews">التقييمات</TabsTrigger>
         </TabsList>
 
         <TabsContent value="revenue">
@@ -242,6 +293,61 @@ const Statistics = () => {
                 <Legend />
               </PieChart>
             </ResponsiveContainer>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="reviews">
+          <Card className="p-6">
+            <h2 className="text-xl font-bold mb-4">آخر التقييمات</h2>
+            {recentReviews.length > 0 ? (
+              <div className="space-y-4">
+                {recentReviews.map((review) => (
+                  <div key={review.id} className="flex gap-4 pb-4 border-b last:border-0">
+                    <Avatar>
+                      <AvatarFallback>
+                        {review.profiles?.full_name?.[0]?.toUpperCase() || "?"}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="flex-1">
+                      <div className="flex items-center justify-between mb-2">
+                        <div>
+                          <span className="font-semibold">
+                            {review.profiles?.full_name || "مستخدم"}
+                          </span>
+                          <p className="text-sm text-muted-foreground">
+                            {review.products?.name}
+                          </p>
+                        </div>
+                        <span className="text-xs text-muted-foreground">
+                          {new Date(review.created_at).toLocaleDateString('ar-SY')}
+                        </span>
+                      </div>
+                      <div className="flex gap-1 mb-2">
+                        {[1, 2, 3, 4, 5].map((star) => (
+                          <Star
+                            key={star}
+                            className={`h-4 w-4 ${
+                              star <= review.rating
+                                ? "fill-yellow-400 text-yellow-400"
+                                : "text-gray-300"
+                            }`}
+                          />
+                        ))}
+                      </div>
+                      {review.comment && (
+                        <p className="text-sm text-foreground/80">
+                          {review.comment}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-center text-muted-foreground py-8">
+                لا توجد تقييمات بعد
+              </p>
+            )}
           </Card>
         </TabsContent>
       </Tabs>

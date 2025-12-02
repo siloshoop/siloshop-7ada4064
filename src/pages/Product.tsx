@@ -6,6 +6,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { ImageGallery } from "@/components/ImageGallery";
 import { ProductReviews } from "@/components/ProductReviews";
+import { VendorRating } from "@/components/VendorRating";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -299,9 +300,17 @@ const Product = () => {
           </div>
         </div>
 
+        {/* Vendor Rating Section */}
+        <div className="mt-8">
+          <VendorRating 
+            vendorId={product.vendor_id} 
+            vendorName={product.vendor.full_name} 
+          />
+        </div>
+
         {/* Reviews Section */}
-        <div className="mt-12">
-          <ProductReviews productId={id!} />
+        <div className="mt-8">
+          <ProductReviews productId={id!} vendorId={product.vendor_id} />
         </div>
       </main>
       <Footer />

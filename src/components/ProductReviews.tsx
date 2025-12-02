@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Star } from "lucide-react";
+import { Star, MessageCircle, Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -10,6 +10,13 @@ import { useToast } from "@/hooks/use-toast";
 import { formatDistanceToNow } from "date-fns";
 import { ar } from "date-fns/locale";
 
+interface ReviewReply {
+  id: string;
+  reply: string;
+  created_at: string;
+  vendor_id: string;
+}
+
 interface Review {
   id: string;
   rating: number;
@@ -19,13 +26,15 @@ interface Review {
   profiles: {
     full_name: string;
   };
+  review_replies?: ReviewReply[];
 }
 
 interface ProductReviewsProps {
   productId: string;
+  vendorId?: string;
 }
 
-export const ProductReviews = ({ productId }: ProductReviewsProps) => {
+export const ProductReviews = ({ productId, vendorId }: ProductReviewsProps) => {
   const { user } = useAuth();
   const { toast } = useToast();
   const [reviews, setReviews] = useState<Review[]>([]);
@@ -35,6 +44,12 @@ export const ProductReviews = ({ productId }: ProductReviewsProps) => {
   const [loading, setLoading] = useState(false);
   const [hasUserReview, setHasUserReview] = useState(false);
   const [averageRating, setAverageRating] = useState(0);
+  const [replyingTo, setReplyingTo] = useState<string | null>(null);
+  const [replyText, setReplyText] = useState("");
+  const [submittingReply, setSubmittingReply] = useState(false);
+
+  // Check if current user is the vendor of this product
+  const isVendor = user?.id === vendorId;
 
   useEffect(() => {
     fetchReviews();
@@ -45,7 +60,8 @@ export const ProductReviews = ({ productId }: ProductReviewsProps) => {
       .from("reviews")
       .select(`
         *,
-        profiles:user_id (full_name)
+        profiles:user_id (full_name),
+        review_replies (*)
       `)
       .eq("product_id", productId)
       .order("created_at", { ascending: false });
@@ -53,13 +69,11 @@ export const ProductReviews = ({ productId }: ProductReviewsProps) => {
     if (data) {
       setReviews(data as any);
       
-      // Calculate average rating
       if (data.length > 0) {
         const avg = data.reduce((sum, r) => sum + r.rating, 0) / data.length;
         setAverageRating(Math.round(avg * 10) / 10);
       }
 
-      // Check if user has already reviewed
       if (user) {
         setHasUserReview(data.some(r => r.user_id === user.id));
       }
@@ -116,6 +130,38 @@ export const ProductReviews = ({ productId }: ProductReviewsProps) => {
     }
   };
 
+  const handleReply = async (reviewId: string) => {
+    if (!user || !replyText.trim()) return;
+
+    setSubmittingReply(true);
+    try {
+      const { error } = await supabase.from("review_replies").insert({
+        review_id: reviewId,
+        vendor_id: user.id,
+        reply: replyText.trim(),
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: "تم بنجاح",
+        description: "تم إضافة ردك على التقييم",
+      });
+
+      setReplyText("");
+      setReplyingTo(null);
+      fetchReviews();
+    } catch (error: any) {
+      toast({
+        title: "خطأ",
+        description: error.message,
+        variant: "destructive",
+      });
+    } finally {
+      setSubmittingReply(false);
+    }
+  };
+
   const StarRating = ({ value, onHover, onClick, interactive = false }: any) => (
     <div className="flex gap-1">
       {[1, 2, 3, 4, 5].map((star) => (
@@ -150,7 +196,7 @@ export const ProductReviews = ({ productId }: ProductReviewsProps) => {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          {user && !hasUserReview && (
+          {user && !hasUserReview && !isVendor && (
             <form onSubmit={handleSubmit} className="space-y-4 mb-6 pb-6 border-b">
               <div>
                 <label className="text-sm font-medium mb-2 block">تقييمك</label>
@@ -193,30 +239,96 @@ export const ProductReviews = ({ productId }: ProductReviewsProps) => {
               </p>
             ) : (
               reviews.map((review) => (
-                <div key={review.id} className="flex gap-4 pb-4 border-b last:border-0">
-                  <Avatar>
-                    <AvatarFallback>
-                      {review.profiles.full_name?.[0]?.toUpperCase() || "?"}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div className="flex-1">
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="font-semibold">
-                        {review.profiles.full_name || "مستخدم"}
-                      </span>
-                      <span className="text-xs text-muted-foreground">
-                        {formatDistanceToNow(new Date(review.created_at), {
-                          addSuffix: true,
-                          locale: ar,
-                        })}
-                      </span>
+                <div key={review.id} className="pb-4 border-b last:border-0">
+                  <div className="flex gap-4">
+                    <Avatar>
+                      <AvatarFallback>
+                        {review.profiles.full_name?.[0]?.toUpperCase() || "?"}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="flex-1">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="font-semibold">
+                          {review.profiles.full_name || "مستخدم"}
+                        </span>
+                        <span className="text-xs text-muted-foreground">
+                          {formatDistanceToNow(new Date(review.created_at), {
+                            addSuffix: true,
+                            locale: ar,
+                          })}
+                        </span>
+                      </div>
+                      <StarRating value={review.rating} />
+                      {review.comment && (
+                        <p className="mt-2 text-sm text-foreground/80">
+                          {review.comment}
+                        </p>
+                      )}
+
+                      {/* Vendor Reply Section */}
+                      {review.review_replies && review.review_replies.length > 0 && (
+                        <div className="mt-3 mr-4 p-3 bg-muted/50 rounded-lg border-r-2 border-primary">
+                          <div className="flex items-center gap-2 mb-1">
+                            <MessageCircle className="h-4 w-4 text-primary" />
+                            <span className="text-sm font-medium text-primary">رد البائع</span>
+                          </div>
+                          <p className="text-sm text-foreground/80">
+                            {review.review_replies[0].reply}
+                          </p>
+                          <span className="text-xs text-muted-foreground">
+                            {formatDistanceToNow(new Date(review.review_replies[0].created_at), {
+                              addSuffix: true,
+                              locale: ar,
+                            })}
+                          </span>
+                        </div>
+                      )}
+
+                      {/* Reply Form for Vendor */}
+                      {isVendor && (!review.review_replies || review.review_replies.length === 0) && (
+                        <div className="mt-3">
+                          {replyingTo === review.id ? (
+                            <div className="flex gap-2">
+                              <Textarea
+                                value={replyText}
+                                onChange={(e) => setReplyText(e.target.value)}
+                                placeholder="اكتب ردك على هذا التقييم..."
+                                rows={2}
+                                className="flex-1"
+                              />
+                              <div className="flex flex-col gap-1">
+                                <Button
+                                  size="sm"
+                                  onClick={() => handleReply(review.id)}
+                                  disabled={submittingReply || !replyText.trim()}
+                                >
+                                  <Send className="h-4 w-4" />
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => {
+                                    setReplyingTo(null);
+                                    setReplyText("");
+                                  }}
+                                >
+                                  إلغاء
+                                </Button>
+                              </div>
+                            </div>
+                          ) : (
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => setReplyingTo(review.id)}
+                            >
+                              <MessageCircle className="h-4 w-4 ml-1" />
+                              الرد على التقييم
+                            </Button>
+                          )}
+                        </div>
+                      )}
                     </div>
-                    <StarRating value={review.rating} />
-                    {review.comment && (
-                      <p className="mt-2 text-sm text-foreground/80">
-                        {review.comment}
-                      </p>
-                    )}
                   </div>
                 </div>
               ))

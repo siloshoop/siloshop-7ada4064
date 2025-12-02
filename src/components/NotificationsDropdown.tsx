@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Bell } from "lucide-react";
+import { Bell, Search, Trash2, Filter, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -8,6 +8,14 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
@@ -28,7 +36,11 @@ export const NotificationsDropdown = () => {
   const { user } = useAuth();
   const { toast } = useToast();
   const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [filteredNotifications, setFilteredNotifications] = useState<Notification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [typeFilter, setTypeFilter] = useState("all");
+  const [showFilters, setShowFilters] = useState(false);
 
   useEffect(() => {
     if (!user) return;
@@ -39,7 +51,7 @@ export const NotificationsDropdown = () => {
         .select("*")
         .eq("user_id", user.id)
         .order("created_at", { ascending: false })
-        .limit(10);
+        .limit(50);
 
       if (data) {
         setNotifications(data);
@@ -49,7 +61,6 @@ export const NotificationsDropdown = () => {
 
     fetchNotifications();
 
-    // Subscribe to new notifications
     const channel = supabase
       .channel('notifications-channel')
       .on(
@@ -62,7 +73,7 @@ export const NotificationsDropdown = () => {
         },
         (payload) => {
           const newNotification = payload.new as Notification;
-          setNotifications(prev => [newNotification, ...prev.slice(0, 9)]);
+          setNotifications(prev => [newNotification, ...prev.slice(0, 49)]);
           setUnreadCount(prev => prev + 1);
           
           toast({
@@ -77,6 +88,24 @@ export const NotificationsDropdown = () => {
       supabase.removeChannel(channel);
     };
   }, [user, toast]);
+
+  // Filter notifications based on search and type
+  useEffect(() => {
+    let filtered = notifications;
+
+    if (searchQuery) {
+      filtered = filtered.filter(n =>
+        n.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        n.message.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+    }
+
+    if (typeFilter !== "all") {
+      filtered = filtered.filter(n => n.type === typeFilter);
+    }
+
+    setFilteredNotifications(filtered);
+  }, [notifications, searchQuery, typeFilter]);
 
   const markAsRead = async (id: string) => {
     await supabase
@@ -103,6 +132,62 @@ export const NotificationsDropdown = () => {
     setUnreadCount(0);
   };
 
+  const deleteNotification = async (id: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    
+    const { error } = await supabase
+      .from("notifications")
+      .delete()
+      .eq("id", id);
+
+    if (!error) {
+      const notification = notifications.find(n => n.id === id);
+      setNotifications(prev => prev.filter(n => n.id !== id));
+      if (notification && !notification.is_read) {
+        setUnreadCount(prev => Math.max(0, prev - 1));
+      }
+      toast({
+        title: "تم الحذف",
+        description: "تم حذف الإشعار بنجاح",
+      });
+    }
+  };
+
+  const deleteOldNotifications = async () => {
+    if (!user) return;
+    
+    const weekAgo = new Date();
+    weekAgo.setDate(weekAgo.getDate() - 7);
+
+    const { error } = await supabase
+      .from("notifications")
+      .delete()
+      .eq("user_id", user.id)
+      .lt("created_at", weekAgo.toISOString());
+
+    if (!error) {
+      setNotifications(prev => 
+        prev.filter(n => new Date(n.created_at) > weekAgo)
+      );
+      toast({
+        title: "تم الحذف",
+        description: "تم حذف الإشعارات القديمة بنجاح",
+      });
+    }
+  };
+
+  const getTypeLabel = (type: string) => {
+    const types: Record<string, string> = {
+      order: "طلب",
+      order_status: "حالة طلب",
+      warning: "تحذير",
+      info: "معلومات",
+    };
+    return types[type] || type;
+  };
+
+  const uniqueTypes = [...new Set(notifications.map(n => n.type))];
+
   if (!user) return null;
 
   return (
@@ -120,30 +205,93 @@ export const NotificationsDropdown = () => {
           )}
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-80">
-        <div className="flex items-center justify-between p-2 border-b">
-          <span className="font-semibold">الإشعارات</span>
-          {unreadCount > 0 && (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={markAllAsRead}
-              className="text-xs"
-            >
-              تحديد الكل كمقروء
-            </Button>
+      <DropdownMenuContent align="end" className="w-96">
+        <div className="p-2 border-b space-y-2">
+          <div className="flex items-center justify-between">
+            <span className="font-semibold">الإشعارات</span>
+            <div className="flex items-center gap-1">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8"
+                onClick={() => setShowFilters(!showFilters)}
+              >
+                <Filter className="h-4 w-4" />
+              </Button>
+              {unreadCount > 0 && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={markAllAsRead}
+                  className="text-xs"
+                >
+                  تحديد الكل كمقروء
+                </Button>
+              )}
+            </div>
+          </div>
+
+          {showFilters && (
+            <div className="space-y-2">
+              <div className="relative">
+                <Search className="absolute right-2 top-2.5 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="بحث في الإشعارات..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pr-8 h-9"
+                />
+                {searchQuery && (
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="absolute left-1 top-1 h-7 w-7"
+                    onClick={() => setSearchQuery("")}
+                  >
+                    <X className="h-3 w-3" />
+                  </Button>
+                )}
+              </div>
+              <div className="flex gap-2">
+                <Select value={typeFilter} onValueChange={setTypeFilter}>
+                  <SelectTrigger className="h-9 flex-1">
+                    <SelectValue placeholder="نوع الإشعار" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">جميع الأنواع</SelectItem>
+                    {uniqueTypes.map(type => (
+                      <SelectItem key={type} value={type}>
+                        {getTypeLabel(type)}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={deleteOldNotifications}
+                  className="h-9 text-xs whitespace-nowrap"
+                >
+                  <Trash2 className="h-3 w-3 ml-1" />
+                  حذف القديمة
+                </Button>
+              </div>
+            </div>
           )}
         </div>
+
         <div className="max-h-96 overflow-y-auto">
-          {notifications.length === 0 ? (
+          {filteredNotifications.length === 0 ? (
             <div className="p-4 text-center text-muted-foreground">
-              لا توجد إشعارات
+              {searchQuery || typeFilter !== "all" 
+                ? "لا توجد نتائج مطابقة" 
+                : "لا توجد إشعارات"}
             </div>
           ) : (
-            notifications.map((notification) => (
+            filteredNotifications.map((notification) => (
               <DropdownMenuItem
                 key={notification.id}
-                className="flex flex-col items-start p-3 cursor-pointer"
+                className="flex flex-col items-start p-3 cursor-pointer group"
                 onClick={() => !notification.is_read && markAsRead(notification.id)}
               >
                 <div className="flex items-start justify-between w-full gap-2">
@@ -155,6 +303,9 @@ export const NotificationsDropdown = () => {
                       {!notification.is_read && (
                         <div className="h-2 w-2 bg-primary rounded-full" />
                       )}
+                      <Badge variant="secondary" className="text-[10px] px-1.5 py-0">
+                        {getTypeLabel(notification.type)}
+                      </Badge>
                     </div>
                     <p className="text-xs text-muted-foreground mt-1">
                       {notification.message}
@@ -166,6 +317,14 @@ export const NotificationsDropdown = () => {
                       })}
                     </span>
                   </div>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity"
+                    onClick={(e) => deleteNotification(notification.id, e)}
+                  >
+                    <Trash2 className="h-3 w-3 text-destructive" />
+                  </Button>
                 </div>
               </DropdownMenuItem>
             ))

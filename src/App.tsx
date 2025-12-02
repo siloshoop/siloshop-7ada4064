@@ -31,6 +31,7 @@ import Blog from "./pages/Blog";
 import Careers from "./pages/Careers";
 import Partners from "./pages/Partners";
 import VendorOrders from "./pages/VendorOrders";
+import VendorRatings from "./pages/VendorRatings";
 
 const queryClient = new QueryClient();
 
@@ -67,6 +68,7 @@ const App = () => (
           <Route path="/careers" element={<Careers />} />
           <Route path="/partners" element={<Partners />} />
           <Route path="/chat/:vendorId" element={<Chat />} />
+          <Route path="/vendor/:vendorId/ratings" element={<VendorRatings />} />
           <Route path="/install" element={<InstallPWA />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />

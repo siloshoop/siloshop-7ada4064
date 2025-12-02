@@ -18,7 +18,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
-import { SlidersHorizontal } from "lucide-react";
+import { SlidersHorizontal, Star } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
 interface Category {
@@ -32,6 +32,7 @@ interface SearchFiltersProps {
     maxPrice: number;
     categoryId: string;
     sortBy: string;
+    minVendorRating: number;
   }) => void;
 }
 
@@ -42,6 +43,7 @@ export const SearchFilters = ({ onFilterChange }: SearchFiltersProps) => {
   const [priceRange, setPriceRange] = useState([0, 1000000]);
   const [categoryId, setCategoryId] = useState("");
   const [sortBy, setSortBy] = useState("newest");
+  const [minVendorRating, setMinVendorRating] = useState(0);
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
@@ -65,6 +67,7 @@ export const SearchFilters = ({ onFilterChange }: SearchFiltersProps) => {
       maxPrice: priceRange[1],
       categoryId,
       sortBy,
+      minVendorRating,
     });
     setOpen(false);
   };
@@ -73,11 +76,13 @@ export const SearchFilters = ({ onFilterChange }: SearchFiltersProps) => {
     setPriceRange([0, 1000000]);
     setCategoryId("");
     setSortBy("newest");
+    setMinVendorRating(0);
     onFilterChange({
       minPrice: 0,
       maxPrice: 1000000,
       categoryId: "",
       sortBy: "newest",
+      minVendorRating: 0,
     });
     setOpen(false);
   };
@@ -163,6 +168,28 @@ export const SearchFilters = ({ onFilterChange }: SearchFiltersProps) => {
                 <SelectItem value="price_desc">السعر: من الأعلى للأقل</SelectItem>
                 <SelectItem value="name_asc">الاسم: أ - ي</SelectItem>
                 <SelectItem value="name_desc">الاسم: ي - أ</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* تقييم البائع */}
+          <div className="space-y-2">
+            <Label>الحد الأدنى لتقييم البائع</Label>
+            <Select value={String(minVendorRating)} onValueChange={(v) => setMinVendorRating(Number(v))}>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="0">الكل</SelectItem>
+                <SelectItem value="3">
+                  <span className="flex items-center gap-1">3+ <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" /></span>
+                </SelectItem>
+                <SelectItem value="4">
+                  <span className="flex items-center gap-1">4+ <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" /></span>
+                </SelectItem>
+                <SelectItem value="5">
+                  <span className="flex items-center gap-1">5 <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" /></span>
+                </SelectItem>
               </SelectContent>
             </Select>
           </div>

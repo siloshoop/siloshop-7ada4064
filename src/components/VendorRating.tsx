@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
-import { Star, Store } from "lucide-react";
+import { Link } from "react-router-dom";
+import { Star, Store, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import {
   Dialog,
   DialogContent,
@@ -173,9 +174,13 @@ export const VendorRating = ({ vendorId, vendorName }: VendorRatingProps) => {
                 <span className="text-xl font-bold">{averageRating || "—"}</span>
                 <Star className="h-5 w-5 fill-yellow-400 text-yellow-400" />
               </div>
-              <p className="text-xs text-muted-foreground">
+              <Link 
+                to={`/vendor/${vendorId}/ratings`}
+                className="text-xs text-primary hover:underline flex items-center gap-1"
+              >
                 {totalRatings} تقييم
-              </p>
+                <ExternalLink className="h-3 w-3" />
+              </Link>
             </div>
 
             {user && user.id !== vendorId && (

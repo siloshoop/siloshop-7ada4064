@@ -32,6 +32,7 @@ import Careers from "./pages/Careers";
 import Partners from "./pages/Partners";
 import VendorOrders from "./pages/VendorOrders";
 import VendorRatings from "./pages/VendorRatings";
+import Subcategory from "./pages/Subcategory";
 
 const queryClient = new QueryClient();
 
@@ -52,6 +53,7 @@ const App = () => (
           <Route path="/dashboard/orders" element={<VendorOrders />} />
           <Route path="/favorites" element={<Favorites />} />
           <Route path="/category/:categoryId" element={<Category />} />
+          <Route path="/subcategory/:categoryId/:subcategoryId" element={<Subcategory />} />
           <Route path="/cart" element={<Cart />} />
           <Route path="/checkout" element={<Checkout />} />
           <Route path="/payment" element={<Payment />} />

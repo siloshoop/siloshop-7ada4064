@@ -4,22 +4,111 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
 import { 
   Shirt, UserCircle, Baby, Watch, Footprints, ShoppingBag, Sparkles, Loader2,
-  Sofa, Gamepad2, Sparkle, BookOpen, Dumbbell, ChevronDown, ChevronUp
+  Sofa, Gamepad2, Sparkle, BookOpen, Dumbbell, ChevronDown, ChevronUp,
+  PersonStanding, Briefcase, Mountain, Home, Gem, Flower2, Wind, Crown, 
+  Scissors, Moon, Heart, Snowflake, Palette, CircleDot, Award, Layers, 
+  Bed, HeartPulse, Cloud, User, Smile, Star, School, Trophy, Clock, 
+  Diamond, Glasses, Wallet, Backpack, Plane, Laptop, GraduationCap, Tv, 
+  BedDouble, UtensilsCrossed, Monitor, TreePine, Gamepad, Dice1, Puzzle, 
+  Lightbulb, TreeDeciduous, Cat, Brush, Droplet, CircleUser, Hand, Bath, 
+  Book, BookMarked, PenTool, Users, ChefHat, Activity, Bike, Waves
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const iconMap: Record<string, any> = {
-  Shirt,
-  UserCircle,
-  Baby,
-  Watch,
-  Footprints,
-  ShoppingBag,
-  Sofa,
-  Gamepad2,
-  Sparkle,
-  BookOpen,
-  Dumbbell,
+  Shirt, UserCircle, Baby, Watch, Footprints, ShoppingBag,
+  Sofa, Gamepad2, Sparkle, BookOpen, Dumbbell,
+};
+
+// Subcategory icons mapping
+const subIconMap: Record<string, any> = {
+  // Shoes
+  "sneakers": PersonStanding,
+  "formal-shoes": Briefcase,
+  "sandals": Footprints,
+  "boots": Mountain,
+  "slippers": Home,
+  "heels": Gem,
+  // Women clothing
+  "dresses": Flower2,
+  "abayas": Wind,
+  "blouses": Crown,
+  "pants-women": Scissors,
+  "skirts": Moon,
+  "pajamas-women": Moon,
+  "underwear-women": Heart,
+  "sportswear-women": HeartPulse,
+  "coats-women": Snowflake,
+  "hijab": Palette,
+  // Men clothing
+  "shirts": Shirt,
+  "t-shirts": CircleDot,
+  "pants-men": Layers,
+  "suits": Award,
+  "jeans": Layers,
+  "pajamas-men": Bed,
+  "underwear-men": Heart,
+  "sportswear-men": HeartPulse,
+  "coats-men": Cloud,
+  "thobe": User,
+  // Kids
+  "baby-clothes": Baby,
+  "boys-clothes": Smile,
+  "girls-clothes": Star,
+  "kids-shoes": Footprints,
+  "kids-pajamas": Moon,
+  "school-uniforms": School,
+  "kids-sportswear": Trophy,
+  // Accessories
+  "watches": Clock,
+  "jewelry": Diamond,
+  "sunglasses": Glasses,
+  "belts": Layers,
+  "scarves": Wind,
+  "hats": GraduationCap,
+  "wallets": Wallet,
+  // Bags
+  "handbags": ShoppingBag,
+  "backpacks": Backpack,
+  "travel-bags": Plane,
+  "laptop-bags": Laptop,
+  "clutches": Star,
+  "school-bags": GraduationCap,
+  // Furniture
+  "living-room": Tv,
+  "bedroom": BedDouble,
+  "dining-room": UtensilsCrossed,
+  "office-furniture": Monitor,
+  "kids-furniture": Baby,
+  "outdoor-furniture": TreePine,
+  // Games
+  "video-games": Gamepad,
+  "board-games": Dice1,
+  "toys-kids": Puzzle,
+  "educational-toys": Lightbulb,
+  "outdoor-toys": TreeDeciduous,
+  "dolls": Cat,
+  // Beauty
+  "makeup": Brush,
+  "skincare": Droplet,
+  "haircare": Scissors,
+  "perfumes": Sparkle,
+  "nail-care": Hand,
+  "body-care": Bath,
+  // Books
+  "novels": Book,
+  "religious": BookMarked,
+  "educational": PenTool,
+  "children-books": Baby,
+  "self-development": Users,
+  "cooking-books": ChefHat,
+  // Sports
+  "gym-equipment": Dumbbell,
+  "sports-clothes": Shirt,
+  "sports-shoes": Footprints,
+  "football": Activity,
+  "swimming": Waves,
+  "cycling": Bike,
 };
 
 interface Category {
@@ -29,133 +118,141 @@ interface Category {
   description: string | null;
 }
 
-interface SubCategory {
+interface Subcategory {
   id: string;
-  name: string;
+  category_id: string;
+  name_ar: string;
+  icon: string | null;
 }
 
-// Subcategories mapping for each main category
-const subcategoriesMap: Record<string, SubCategory[]> = {
+interface SubCategoryLocal {
+  id: string;
+  name: string;
+  icon: string;
+}
+
+// Default subcategories mapping
+const defaultSubcategoriesMap: Record<string, SubCategoryLocal[]> = {
   "أحذية": [
-    { id: "sneakers", name: "أحذية رياضية" },
-    { id: "formal-shoes", name: "أحذية رسمية" },
-    { id: "sandals", name: "صنادل" },
-    { id: "boots", name: "بوط" },
-    { id: "slippers", name: "شباشب" },
-    { id: "heels", name: "كعب عالي" },
+    { id: "sneakers", name: "أحذية رياضية", icon: "sneakers" },
+    { id: "formal-shoes", name: "أحذية رسمية", icon: "formal-shoes" },
+    { id: "sandals", name: "صنادل", icon: "sandals" },
+    { id: "boots", name: "بوط", icon: "boots" },
+    { id: "slippers", name: "شباشب", icon: "slippers" },
+    { id: "heels", name: "كعب عالي", icon: "heels" },
   ],
   "ملابس نساء": [
-    { id: "dresses", name: "فساتين" },
-    { id: "abayas", name: "عباءات" },
-    { id: "blouses", name: "بلوزات" },
-    { id: "pants-women", name: "بناطيل" },
-    { id: "skirts", name: "تنانير" },
-    { id: "pajamas-women", name: "بيجامات" },
-    { id: "underwear-women", name: "ملابس داخلية" },
-    { id: "sportswear-women", name: "ملابس رياضية" },
-    { id: "coats-women", name: "معاطف وجاكيتات" },
-    { id: "hijab", name: "حجابات وطرح" },
+    { id: "dresses", name: "فساتين", icon: "dresses" },
+    { id: "abayas", name: "عباءات", icon: "abayas" },
+    { id: "blouses", name: "بلوزات", icon: "blouses" },
+    { id: "pants-women", name: "بناطيل", icon: "pants-women" },
+    { id: "skirts", name: "تنانير", icon: "skirts" },
+    { id: "pajamas-women", name: "بيجامات", icon: "pajamas-women" },
+    { id: "underwear-women", name: "ملابس داخلية", icon: "underwear-women" },
+    { id: "sportswear-women", name: "ملابس رياضية", icon: "sportswear-women" },
+    { id: "coats-women", name: "معاطف وجاكيتات", icon: "coats-women" },
+    { id: "hijab", name: "حجابات وطرح", icon: "hijab" },
   ],
   "ملابس رجال": [
-    { id: "shirts", name: "قمصان" },
-    { id: "t-shirts", name: "تيشيرتات" },
-    { id: "pants-men", name: "بناطيل" },
-    { id: "suits", name: "بدلات رسمية" },
-    { id: "jeans", name: "جينز" },
-    { id: "pajamas-men", name: "بيجامات" },
-    { id: "underwear-men", name: "ملابس داخلية" },
-    { id: "sportswear-men", name: "ملابس رياضية" },
-    { id: "coats-men", name: "معاطف وجاكيتات" },
-    { id: "thobe", name: "جلابيات وثياب" },
+    { id: "shirts", name: "قمصان", icon: "shirts" },
+    { id: "t-shirts", name: "تيشيرتات", icon: "t-shirts" },
+    { id: "pants-men", name: "بناطيل", icon: "pants-men" },
+    { id: "suits", name: "بدلات رسمية", icon: "suits" },
+    { id: "jeans", name: "جينز", icon: "jeans" },
+    { id: "pajamas-men", name: "بيجامات", icon: "pajamas-men" },
+    { id: "underwear-men", name: "ملابس داخلية", icon: "underwear-men" },
+    { id: "sportswear-men", name: "ملابس رياضية", icon: "sportswear-men" },
+    { id: "coats-men", name: "معاطف وجاكيتات", icon: "coats-men" },
+    { id: "thobe", name: "جلابيات وثياب", icon: "thobe" },
   ],
   "أطفال": [
-    { id: "baby-clothes", name: "ملابس رضع" },
-    { id: "boys-clothes", name: "ملابس أولاد" },
-    { id: "girls-clothes", name: "ملابس بنات" },
-    { id: "kids-shoes", name: "أحذية أطفال" },
-    { id: "kids-pajamas", name: "بيجامات أطفال" },
-    { id: "school-uniforms", name: "زي مدرسي" },
-    { id: "kids-sportswear", name: "ملابس رياضية" },
+    { id: "baby-clothes", name: "ملابس رضع", icon: "baby-clothes" },
+    { id: "boys-clothes", name: "ملابس أولاد", icon: "boys-clothes" },
+    { id: "girls-clothes", name: "ملابس بنات", icon: "girls-clothes" },
+    { id: "kids-shoes", name: "أحذية أطفال", icon: "kids-shoes" },
+    { id: "kids-pajamas", name: "بيجامات أطفال", icon: "kids-pajamas" },
+    { id: "school-uniforms", name: "زي مدرسي", icon: "school-uniforms" },
+    { id: "kids-sportswear", name: "ملابس رياضية", icon: "kids-sportswear" },
   ],
   "إكسسوارات": [
-    { id: "watches", name: "ساعات" },
-    { id: "jewelry", name: "مجوهرات" },
-    { id: "sunglasses", name: "نظارات شمسية" },
-    { id: "belts", name: "أحزمة" },
-    { id: "scarves", name: "أوشحة" },
-    { id: "hats", name: "قبعات" },
-    { id: "wallets", name: "محافظ" },
+    { id: "watches", name: "ساعات", icon: "watches" },
+    { id: "jewelry", name: "مجوهرات", icon: "jewelry" },
+    { id: "sunglasses", name: "نظارات شمسية", icon: "sunglasses" },
+    { id: "belts", name: "أحزمة", icon: "belts" },
+    { id: "scarves", name: "أوشحة", icon: "scarves" },
+    { id: "hats", name: "قبعات", icon: "hats" },
+    { id: "wallets", name: "محافظ", icon: "wallets" },
   ],
   "حقائب": [
-    { id: "handbags", name: "حقائب يد" },
-    { id: "backpacks", name: "حقائب ظهر" },
-    { id: "travel-bags", name: "حقائب سفر" },
-    { id: "laptop-bags", name: "حقائب لابتوب" },
-    { id: "clutches", name: "كلاتش" },
-    { id: "school-bags", name: "حقائب مدرسية" },
+    { id: "handbags", name: "حقائب يد", icon: "handbags" },
+    { id: "backpacks", name: "حقائب ظهر", icon: "backpacks" },
+    { id: "travel-bags", name: "حقائب سفر", icon: "travel-bags" },
+    { id: "laptop-bags", name: "حقائب لابتوب", icon: "laptop-bags" },
+    { id: "clutches", name: "كلاتش", icon: "clutches" },
+    { id: "school-bags", name: "حقائب مدرسية", icon: "school-bags" },
   ],
   "أثاث": [
-    { id: "living-room", name: "غرفة معيشة" },
-    { id: "bedroom", name: "غرفة نوم" },
-    { id: "dining-room", name: "غرفة طعام" },
-    { id: "office-furniture", name: "أثاث مكتبي" },
-    { id: "kids-furniture", name: "أثاث أطفال" },
-    { id: "outdoor-furniture", name: "أثاث خارجي" },
+    { id: "living-room", name: "غرفة معيشة", icon: "living-room" },
+    { id: "bedroom", name: "غرفة نوم", icon: "bedroom" },
+    { id: "dining-room", name: "غرفة طعام", icon: "dining-room" },
+    { id: "office-furniture", name: "أثاث مكتبي", icon: "office-furniture" },
+    { id: "kids-furniture", name: "أثاث أطفال", icon: "kids-furniture" },
+    { id: "outdoor-furniture", name: "أثاث خارجي", icon: "outdoor-furniture" },
   ],
   "ألعاب": [
-    { id: "video-games", name: "ألعاب فيديو" },
-    { id: "board-games", name: "ألعاب طاولة" },
-    { id: "toys-kids", name: "ألعاب أطفال" },
-    { id: "educational-toys", name: "ألعاب تعليمية" },
-    { id: "outdoor-toys", name: "ألعاب خارجية" },
-    { id: "dolls", name: "دمى وعرائس" },
+    { id: "video-games", name: "ألعاب فيديو", icon: "video-games" },
+    { id: "board-games", name: "ألعاب طاولة", icon: "board-games" },
+    { id: "toys-kids", name: "ألعاب أطفال", icon: "toys-kids" },
+    { id: "educational-toys", name: "ألعاب تعليمية", icon: "educational-toys" },
+    { id: "outdoor-toys", name: "ألعاب خارجية", icon: "outdoor-toys" },
+    { id: "dolls", name: "دمى وعرائس", icon: "dolls" },
   ],
   "تجميل": [
-    { id: "makeup", name: "مكياج" },
-    { id: "skincare", name: "عناية بالبشرة" },
-    { id: "haircare", name: "عناية بالشعر" },
-    { id: "perfumes", name: "عطور" },
-    { id: "nail-care", name: "عناية بالأظافر" },
-    { id: "body-care", name: "عناية بالجسم" },
+    { id: "makeup", name: "مكياج", icon: "makeup" },
+    { id: "skincare", name: "عناية بالبشرة", icon: "skincare" },
+    { id: "haircare", name: "عناية بالشعر", icon: "haircare" },
+    { id: "perfumes", name: "عطور", icon: "perfumes" },
+    { id: "nail-care", name: "عناية بالأظافر", icon: "nail-care" },
+    { id: "body-care", name: "عناية بالجسم", icon: "body-care" },
   ],
   "كتب": [
-    { id: "novels", name: "روايات" },
-    { id: "religious", name: "كتب دينية" },
-    { id: "educational", name: "كتب تعليمية" },
-    { id: "children-books", name: "كتب أطفال" },
-    { id: "self-development", name: "تطوير ذات" },
-    { id: "cooking-books", name: "كتب طبخ" },
+    { id: "novels", name: "روايات", icon: "novels" },
+    { id: "religious", name: "كتب دينية", icon: "religious" },
+    { id: "educational", name: "كتب تعليمية", icon: "educational" },
+    { id: "children-books", name: "كتب أطفال", icon: "children-books" },
+    { id: "self-development", name: "تطوير ذات", icon: "self-development" },
+    { id: "cooking-books", name: "كتب طبخ", icon: "cooking-books" },
   ],
   "رياضة": [
-    { id: "gym-equipment", name: "معدات رياضية" },
-    { id: "sports-clothes", name: "ملابس رياضية" },
-    { id: "sports-shoes", name: "أحذية رياضية" },
-    { id: "football", name: "كرة قدم" },
-    { id: "swimming", name: "سباحة" },
-    { id: "cycling", name: "دراجات" },
+    { id: "gym-equipment", name: "معدات رياضية", icon: "gym-equipment" },
+    { id: "sports-clothes", name: "ملابس رياضية", icon: "sports-clothes" },
+    { id: "sports-shoes", name: "أحذية رياضية", icon: "sports-shoes" },
+    { id: "football", name: "كرة قدم", icon: "football" },
+    { id: "swimming", name: "سباحة", icon: "swimming" },
+    { id: "cycling", name: "دراجات", icon: "cycling" },
   ],
 };
 
 const CategorySection = () => {
   const navigate = useNavigate();
   const [categories, setCategories] = useState<Category[]>([]);
+  const [dbSubcategories, setDbSubcategories] = useState<Subcategory[]>([]);
   const [loading, setLoading] = useState(true);
   const [expandedCategory, setExpandedCategory] = useState<string | null>(null);
 
   useEffect(() => {
-    const fetchCategories = async () => {
-      const { data } = await supabase
-        .from("categories")
-        .select("*")
-        .order("name_ar");
+    const fetchData = async () => {
+      const [categoriesRes, subcategoriesRes] = await Promise.all([
+        supabase.from("categories").select("*").order("name_ar"),
+        supabase.from("subcategories").select("*").eq("is_active", true).order("sort_order")
+      ]);
 
-      if (data) {
-        setCategories(data);
-      }
+      if (categoriesRes.data) setCategories(categoriesRes.data);
+      if (subcategoriesRes.data) setDbSubcategories(subcategoriesRes.data);
       setLoading(false);
     };
 
-    fetchCategories();
+    fetchData();
   }, []);
 
   const defaultCategories = [
@@ -260,6 +357,20 @@ const CategorySection = () => {
       }))
     : defaultCategories.map(cat => ({ ...cat }));
 
+  const getSubcategories = (categoryId: string, categoryName: string) => {
+    // First check DB subcategories
+    const dbSubs = dbSubcategories.filter(s => s.category_id === categoryId);
+    if (dbSubs.length > 0) {
+      return dbSubs.map(s => ({
+        id: s.id,
+        name: s.name_ar,
+        icon: s.icon || "default"
+      }));
+    }
+    // Fallback to default subcategories
+    return defaultSubcategoriesMap[categoryName] || [];
+  };
+
   const toggleExpand = (categoryName: string, e: React.MouseEvent) => {
     e.stopPropagation();
     setExpandedCategory(expandedCategory === categoryName ? null : categoryName);
@@ -267,7 +378,7 @@ const CategorySection = () => {
 
   const handleSubcategoryClick = (categoryId: string, subcategoryId: string, e: React.MouseEvent) => {
     e.stopPropagation();
-    navigate(`/category/${categoryId}?sub=${subcategoryId}`);
+    navigate(`/subcategory/${categoryId}/${subcategoryId}`);
   };
 
   if (loading) {
@@ -306,7 +417,7 @@ const CategorySection = () => {
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
           {displayCategories.map((category, index) => {
             const IconComponent = iconMap[category.icon] || ShoppingBag;
-            const subcategories = subcategoriesMap[category.name] || [];
+            const subcategories = getSubcategories(category.id, category.name);
             const isExpanded = expandedCategory === category.name;
             
             return (
@@ -322,7 +433,7 @@ const CategorySection = () => {
               >
                 <div className={cn(
                   "relative p-4 md:p-6 flex flex-col items-center justify-start text-center",
-                  isExpanded ? "min-h-[300px]" : "aspect-square"
+                  isExpanded ? "min-h-[350px]" : "aspect-square"
                 )}>
                   <div className={`absolute inset-0 bg-gradient-to-br ${category.gradient} opacity-0 group-hover:opacity-10 transition-opacity duration-500`} />
                   
@@ -346,27 +457,31 @@ const CategorySection = () => {
                         onClick={(e) => toggleExpand(category.name, e)}
                         className="flex items-center justify-center gap-1 text-xs text-muted-foreground hover:text-primary transition-colors mx-auto"
                       >
-                        <span>{isExpanded ? "إخفاء" : "عرض"} التصنيفات</span>
+                        <span>{isExpanded ? "إخفاء" : "عرض"} التصنيفات ({subcategories.length})</span>
                         {isExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
                       </button>
                     )}
 
                     {isExpanded && subcategories.length > 0 && (
                       <div className="mt-4 grid grid-cols-2 gap-2 animate-fade-in">
-                        {subcategories.map((sub) => (
-                          <button
-                            key={sub.id}
-                            onClick={(e) => handleSubcategoryClick(category.id, sub.id, e)}
-                            className={cn(
-                              "text-xs md:text-sm px-3 py-2 rounded-lg transition-all duration-200",
-                              "bg-background/80 hover:bg-primary hover:text-primary-foreground",
-                              "border border-border/50 hover:border-primary",
-                              "text-foreground/80 hover:shadow-md"
-                            )}
-                          >
-                            {sub.name}
-                          </button>
-                        ))}
+                        {subcategories.map((sub) => {
+                          const SubIcon = subIconMap[sub.icon] || ShoppingBag;
+                          return (
+                            <button
+                              key={sub.id}
+                              onClick={(e) => handleSubcategoryClick(category.id, sub.id, e)}
+                              className={cn(
+                                "flex items-center gap-2 text-xs md:text-sm px-3 py-2 rounded-lg transition-all duration-200",
+                                "bg-background/80 hover:bg-primary hover:text-primary-foreground",
+                                "border border-border/50 hover:border-primary",
+                                "text-foreground/80 hover:shadow-md"
+                              )}
+                            >
+                              <SubIcon className="w-4 h-4 shrink-0" />
+                              <span className="truncate">{sub.name}</span>
+                            </button>
+                          );
+                        })}
                       </div>
                     )}
                   </div>

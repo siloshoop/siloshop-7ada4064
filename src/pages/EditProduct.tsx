@@ -11,13 +11,15 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Save, Trash2 } from "lucide-react";
+import { Loader2, Save, Trash2, ChevronLeft } from "lucide-react";
 import imageCompression from 'browser-image-compression';
 
 const EditProduct = () => {
   const { id } = useParams();
   const { user, loading: authLoading } = useAuth();
   const [categories, setCategories] = useState<any[]>([]);
+  const [subcategories, setSubcategories] = useState<any[]>([]);
+  const [filteredSubcategories, setFilteredSubcategories] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [fetching, setFetching] = useState(true);
   const navigate = useNavigate();
@@ -30,6 +32,7 @@ const EditProduct = () => {
     original_price: "",
     stock_quantity: "",
     category_id: "",
+    subcategory_id: "",
     is_active: true,
   });
 
@@ -46,9 +49,13 @@ const EditProduct = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // Fetch categories
-        const { data: categoriesData } = await supabase.from("categories").select("*");
+        // Fetch categories and subcategories
+        const [{ data: categoriesData }, { data: subcategoriesData }] = await Promise.all([
+          supabase.from("categories").select("*").order("name_ar"),
+          supabase.from("subcategories").select("*").eq("is_active", true).order("sort_order")
+        ]);
         setCategories(categoriesData || []);
+        setSubcategories(subcategoriesData || []);
 
         // Fetch product
         if (id && user) {
@@ -69,6 +76,7 @@ const EditProduct = () => {
               original_price: product.original_price?.toString() || "",
               stock_quantity: product.stock_quantity?.toString() || "0",
               category_id: product.category_id || "",
+              subcategory_id: product.subcategory_id || "",
               is_active: product.is_active ?? true,
             });
 
@@ -94,6 +102,24 @@ const EditProduct = () => {
 
     fetchData();
   }, [id, user, navigate, toast]);
+
+  // Filter subcategories when category changes
+  useEffect(() => {
+    if (formData.category_id) {
+      const filtered = subcategories.filter(s => s.category_id === formData.category_id);
+      setFilteredSubcategories(filtered);
+    } else {
+      setFilteredSubcategories([]);
+    }
+  }, [formData.category_id, subcategories]);
+
+  const handleCategoryChange = (value: string) => {
+    setFormData(prev => ({ 
+      ...prev, 
+      category_id: value,
+      subcategory_id: "" // Reset subcategory when category changes
+    }));
+  };
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
@@ -225,6 +251,7 @@ const EditProduct = () => {
           original_price: formData.original_price ? parseFloat(formData.original_price) : null,
           stock_quantity: parseInt(formData.stock_quantity),
           category_id: formData.category_id || null,
+          subcategory_id: formData.subcategory_id || null,
           image_url: allImages[0],
           images: allImages,
           is_active: formData.is_active,
@@ -368,23 +395,72 @@ const EditProduct = () => {
                 />
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="category">الفئة</Label>
-                <Select
-                  value={formData.category_id}
-                  onValueChange={(value) => setFormData({ ...formData, category_id: value })}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="اختر الفئة" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {categories.map((category) => (
-                      <SelectItem key={category.id} value={category.id}>
-                        {category.name_ar}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+              {/* Category Selection - Amazon Style */}
+              <div className="space-y-4 p-4 bg-muted/30 rounded-lg border">
+                <h3 className="font-semibold text-lg flex items-center gap-2">
+                  <ChevronLeft className="h-5 w-5" />
+                  تصنيف المنتج
+                </h3>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="category">الفئة الرئيسية</Label>
+                    <Select
+                      value={formData.category_id}
+                      onValueChange={handleCategoryChange}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="اختر الفئة الرئيسية" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {categories.map((category) => (
+                          <SelectItem key={category.id} value={category.id}>
+                            {category.name_ar}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="subcategory">التصنيف الفرعي</Label>
+                    <Select
+                      value={formData.subcategory_id}
+                      onValueChange={(value) => setFormData({ ...formData, subcategory_id: value })}
+                      disabled={!formData.category_id || filteredSubcategories.length === 0}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder={
+                          !formData.category_id 
+                            ? "اختر الفئة أولاً" 
+                            : filteredSubcategories.length === 0 
+                              ? "لا توجد تصنيفات فرعية" 
+                              : "اختر التصنيف الفرعي"
+                        } />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {filteredSubcategories.map((sub) => (
+                          <SelectItem key={sub.id} value={sub.id}>
+                            {sub.name_ar}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+
+                {formData.category_id && formData.subcategory_id && (
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground bg-background p-2 rounded">
+                    <span>المسار:</span>
+                    <span className="font-medium text-foreground">
+                      {categories.find(c => c.id === formData.category_id)?.name_ar}
+                    </span>
+                    <ChevronLeft className="h-4 w-4" />
+                    <span className="font-medium text-primary">
+                      {filteredSubcategories.find(s => s.id === formData.subcategory_id)?.name_ar}
+                    </span>
+                  </div>
+                )}
               </div>
 
               <div className="space-y-2">

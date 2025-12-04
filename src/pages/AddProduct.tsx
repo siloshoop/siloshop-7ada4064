@@ -11,12 +11,14 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Upload } from "lucide-react";
+import { Loader2, Upload, ChevronLeft } from "lucide-react";
 import imageCompression from 'browser-image-compression';
 
 const AddProduct = () => {
   const { user, loading: authLoading } = useAuth();
   const [categories, setCategories] = useState<any[]>([]);
+  const [subcategories, setSubcategories] = useState<any[]>([]);
+  const [filteredSubcategories, setFilteredSubcategories] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -28,6 +30,7 @@ const AddProduct = () => {
     original_price: "",
     stock_quantity: "",
     category_id: "",
+    subcategory_id: "",
     image_url: "",
   });
 
@@ -41,18 +44,36 @@ const AddProduct = () => {
   }, [user, authLoading, navigate]);
 
   useEffect(() => {
-    const fetchCategories = async () => {
-      const { data } = await supabase.from("categories").select("*");
-      setCategories(data || []);
+    const fetchData = async () => {
+      const [{ data: categoriesData }, { data: subcategoriesData }] = await Promise.all([
+        supabase.from("categories").select("*").order("name_ar"),
+        supabase.from("subcategories").select("*").eq("is_active", true).order("sort_order")
+      ]);
+      setCategories(categoriesData || []);
+      setSubcategories(subcategoriesData || []);
     };
-    fetchCategories();
+    fetchData();
   }, []);
+
+  // Filter subcategories when category changes
+  useEffect(() => {
+    if (formData.category_id) {
+      const filtered = subcategories.filter(s => s.category_id === formData.category_id);
+      setFilteredSubcategories(filtered);
+      // Reset subcategory if it doesn't belong to the new category
+      if (formData.subcategory_id && !filtered.find(s => s.id === formData.subcategory_id)) {
+        setFormData(prev => ({ ...prev, subcategory_id: "" }));
+      }
+    } else {
+      setFilteredSubcategories([]);
+      setFormData(prev => ({ ...prev, subcategory_id: "" }));
+    }
+  }, [formData.category_id, subcategories]);
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
     if (files.length === 0) return;
 
-    // Validate total number of images (max 5)
     if (selectedFiles.length + files.length > 5) {
       toast({
         title: "خطأ",
@@ -66,7 +87,6 @@ const AddProduct = () => {
     const newPreviews: string[] = [];
 
     for (const file of files) {
-      // Validate file type
       const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif'];
       if (!validTypes.includes(file.type)) {
         toast({
@@ -77,7 +97,6 @@ const AddProduct = () => {
         continue;
       }
 
-      // Validate file size (5MB)
       if (file.size > 5242880) {
         toast({
           title: "خطأ",
@@ -88,7 +107,6 @@ const AddProduct = () => {
       }
 
       try {
-        // Compress image
         const options = {
           maxSizeMB: 1,
           maxWidthOrHeight: 1920,
@@ -153,16 +171,14 @@ const AddProduct = () => {
 
     setLoading(true);
     try {
-      // Upload images if files are selected
       let imageUrls: string[] = [];
       let mainImageUrl = formData.image_url;
 
       if (selectedFiles.length > 0) {
         imageUrls = await uploadImages();
-        mainImageUrl = imageUrls[0]; // First image as main image
+        mainImageUrl = imageUrls[0];
       }
 
-      // Validate that we have at least one image
       if (!mainImageUrl && imageUrls.length === 0) {
         toast({
           title: "خطأ",
@@ -181,6 +197,7 @@ const AddProduct = () => {
         original_price: formData.original_price ? parseFloat(formData.original_price) : null,
         stock_quantity: parseInt(formData.stock_quantity),
         category_id: formData.category_id || null,
+        subcategory_id: formData.subcategory_id || null,
         image_url: mainImageUrl,
         images: imageUrls.length > 0 ? imageUrls : null,
         is_active: true,
@@ -289,23 +306,72 @@ const AddProduct = () => {
                 />
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="category">الفئة</Label>
-                <Select
-                  value={formData.category_id}
-                  onValueChange={(value) => setFormData({ ...formData, category_id: value })}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="اختر الفئة" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {categories.map((category) => (
-                      <SelectItem key={category.id} value={category.id}>
-                        {category.name_ar}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+              {/* Category Selection - Amazon Style */}
+              <div className="space-y-4 p-4 bg-muted/30 rounded-lg border">
+                <h3 className="font-semibold text-lg flex items-center gap-2">
+                  <ChevronLeft className="h-5 w-5" />
+                  تصنيف المنتج
+                </h3>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="category">الفئة الرئيسية</Label>
+                    <Select
+                      value={formData.category_id}
+                      onValueChange={(value) => setFormData({ ...formData, category_id: value })}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="اختر الفئة الرئيسية" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {categories.map((category) => (
+                          <SelectItem key={category.id} value={category.id}>
+                            {category.name_ar}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="subcategory">التصنيف الفرعي</Label>
+                    <Select
+                      value={formData.subcategory_id}
+                      onValueChange={(value) => setFormData({ ...formData, subcategory_id: value })}
+                      disabled={!formData.category_id || filteredSubcategories.length === 0}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder={
+                          !formData.category_id 
+                            ? "اختر الفئة أولاً" 
+                            : filteredSubcategories.length === 0 
+                              ? "لا توجد تصنيفات فرعية" 
+                              : "اختر التصنيف الفرعي"
+                        } />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {filteredSubcategories.map((sub) => (
+                          <SelectItem key={sub.id} value={sub.id}>
+                            {sub.name_ar}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+
+                {formData.category_id && formData.subcategory_id && (
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground bg-background p-2 rounded">
+                    <span>المسار:</span>
+                    <span className="font-medium text-foreground">
+                      {categories.find(c => c.id === formData.category_id)?.name_ar}
+                    </span>
+                    <ChevronLeft className="h-4 w-4" />
+                    <span className="font-medium text-primary">
+                      {filteredSubcategories.find(s => s.id === formData.subcategory_id)?.name_ar}
+                    </span>
+                  </div>
+                )}
               </div>
 
               <div className="space-y-2">

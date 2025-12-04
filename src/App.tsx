@@ -10,6 +10,7 @@ import AddProduct from "./pages/AddProduct";
 import EditProduct from "./pages/EditProduct";
 import Favorites from "./pages/Favorites";
 import ManageCoupons from "./pages/ManageCoupons";
+import ManageSubcategories from "./pages/ManageSubcategories";
 import TrackOrder from "./pages/TrackOrder";
 import Checkout from "./pages/Checkout";
 import Category from "./pages/Category";
@@ -49,6 +50,7 @@ const App = () => (
           <Route path="/dashboard/add-product" element={<AddProduct />} />
           <Route path="/dashboard/edit-product/:id" element={<EditProduct />} />
           <Route path="/dashboard/coupons" element={<ManageCoupons />} />
+          <Route path="/dashboard/subcategories" element={<ManageSubcategories />} />
           <Route path="/dashboard/statistics" element={<Statistics />} />
           <Route path="/dashboard/orders" element={<VendorOrders />} />
           <Route path="/favorites" element={<Favorites />} />

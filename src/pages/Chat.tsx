@@ -47,14 +47,13 @@ const Chat = () => {
     if (!user || !vendorId) return;
 
     const initChat = async () => {
-      // Fetch vendor profile
-      const { data: profile } = await supabase
-        .from("profiles")
-        .select("*")
-        .eq("id", vendorId)
-        .single();
+      // Fetch vendor profile using secure function (excludes phone number)
+      const { data: profiles } = await supabase
+        .rpc("get_vendor_public_info", { vendor_id: vendorId });
 
-      setVendorProfile(profile);
+      if (profiles && profiles.length > 0) {
+        setVendorProfile(profiles[0]);
+      }
 
       // Check if conversation exists
       let { data: conversation } = await supabase

@@ -78,18 +78,28 @@ const Product = () => {
   useEffect(() => {
     const fetchProduct = async () => {
       try {
+        // Fetch product data
         const { data, error } = await supabase
           .from("products")
           .select(`
             *,
-            vendor:profiles(full_name),
             reviews(rating)
           `)
           .eq("id", id)
           .maybeSingle();
 
         if (error) throw error;
-        setProduct(data as any);
+        
+        if (data) {
+          // Fetch vendor info using secure function (excludes phone number)
+          const { data: vendorInfo } = await supabase
+            .rpc("get_vendor_public_info", { vendor_id: data.vendor_id });
+          
+          const vendorName = vendorInfo?.[0]?.full_name || null;
+          setProduct({ ...data, vendor: { full_name: vendorName } } as any);
+        } else {
+          setProduct(null);
+        }
       } catch (error: any) {
         toast({
           title: "خطأ",

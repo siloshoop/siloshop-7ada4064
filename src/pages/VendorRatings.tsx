@@ -35,15 +35,12 @@ const VendorRatings = () => {
   }, [vendorId]);
 
   const fetchVendorData = async () => {
-    // Fetch vendor profile
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("full_name")
-      .eq("id", vendorId)
-      .maybeSingle();
+    // Fetch vendor profile using secure function (excludes phone number)
+    const { data: profiles } = await supabase
+      .rpc("get_vendor_public_info", { vendor_id: vendorId });
 
-    if (profile) {
-      setVendorName(profile.full_name || "بائع");
+    if (profiles && profiles.length > 0) {
+      setVendorName(profiles[0].full_name || "بائع");
     }
 
     // Fetch all ratings

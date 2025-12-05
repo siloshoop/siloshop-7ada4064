@@ -7,8 +7,9 @@ import Footer from "@/components/Footer";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Loader2, Package } from "lucide-react";
+import { Loader2, Package, Eye, EyeOff } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { Button } from "@/components/ui/button";
 
 interface Order {
   id: string;
@@ -19,7 +20,6 @@ interface Order {
   customer_id: string;
   profiles: {
     full_name: string;
-    phone: string;
   };
 }
 
@@ -33,12 +33,38 @@ interface OrderItem {
   };
 }
 
+// Utility function to mask sensitive data
+const maskPhone = (phone: string | null): string => {
+  if (!phone) return "غير متوفر";
+  // Show only last 4 digits
+  if (phone.length > 4) {
+    return "****" + phone.slice(-4);
+  }
+  return "****";
+};
+
+// Utility function to get city/region from address
+const getPartialAddress = (address: string | null): string => {
+  if (!address) return "غير محدد";
+  // Extract city/region (first part before comma or first 30 chars)
+  const parts = address.split(',');
+  if (parts.length > 1) {
+    return parts[0].trim() + "، ...";
+  }
+  if (address.length > 30) {
+    return address.slice(0, 30) + "...";
+  }
+  return address;
+};
+
 const VendorOrders = () => {
   const { user, loading: authLoading } = useAuth();
   const [orders, setOrders] = useState<Order[]>([]);
   const [orderItems, setOrderItems] = useState<Record<string, OrderItem[]>>({});
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("all");
+  const [revealedOrders, setRevealedOrders] = useState<Set<string>>(new Set());
+  const [fullAddresses, setFullAddresses] = useState<Record<string, string>>({});
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -74,7 +100,8 @@ const VendorOrders = () => {
         const orderIds = [...new Set(vendorOrderItems?.map(item => item.order_id))];
 
         if (orderIds.length > 0) {
-          // Get order details
+          // Get order details - only fetch necessary fields for display
+          // Note: We deliberately exclude phone from profiles to minimize PII exposure
           const { data: ordersData, error: ordersError } = await supabase
             .from("orders")
             .select(`
@@ -85,8 +112,7 @@ const VendorOrders = () => {
               shipping_address,
               customer_id,
               profiles (
-                full_name,
-                phone
+                full_name
               )
             `)
             .in("id", orderIds)
@@ -95,6 +121,15 @@ const VendorOrders = () => {
           if (ordersError) throw ordersError;
 
           setOrders(ordersData || []);
+
+          // Store full addresses for optional reveal
+          const addresses: Record<string, string> = {};
+          ordersData?.forEach(order => {
+            if (order.shipping_address) {
+              addresses[order.id] = order.shipping_address;
+            }
+          });
+          setFullAddresses(addresses);
 
           // Group items by order
           const groupedItems: Record<string, OrderItem[]> = {};
@@ -119,6 +154,18 @@ const VendorOrders = () => {
 
     fetchOrders();
   }, [user, toast]);
+
+  const toggleRevealAddress = (orderId: string) => {
+    setRevealedOrders(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(orderId)) {
+        newSet.delete(orderId);
+      } else {
+        newSet.add(orderId);
+      }
+      return newSet;
+    });
+  };
 
   const getStatusBadge = (status: string) => {
     const statusMap: Record<string, { label: string; variant: "default" | "secondary" | "destructive" | "outline" }> = {
@@ -206,14 +253,28 @@ const VendorOrders = () => {
                                 <p className="text-sm text-muted-foreground">
                                   {order.profiles?.full_name || "غير متوفر"}
                                 </p>
-                                <p className="text-sm text-muted-foreground">
-                                  {order.profiles?.phone || "لا يوجد رقم"}
-                                </p>
                               </div>
                               <div>
-                                <p className="text-sm font-medium">عنوان التوصيل</p>
+                                <div className="flex items-center gap-2 mb-1">
+                                  <p className="text-sm font-medium">عنوان التوصيل</p>
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    className="h-6 w-6 p-0"
+                                    onClick={() => toggleRevealAddress(order.id)}
+                                    title={revealedOrders.has(order.id) ? "إخفاء العنوان الكامل" : "عرض العنوان الكامل"}
+                                  >
+                                    {revealedOrders.has(order.id) ? (
+                                      <EyeOff className="h-4 w-4" />
+                                    ) : (
+                                      <Eye className="h-4 w-4" />
+                                    )}
+                                  </Button>
+                                </div>
                                 <p className="text-sm text-muted-foreground">
-                                  {order.shipping_address || "غير محدد"}
+                                  {revealedOrders.has(order.id)
+                                    ? fullAddresses[order.id] || "غير محدد"
+                                    : getPartialAddress(order.shipping_address)}
                                 </p>
                               </div>
                             </div>

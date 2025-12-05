@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { z } from "zod";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import Navbar from "@/components/Navbar";
@@ -11,6 +12,16 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, ShoppingCart, Tag } from "lucide-react";
+
+const checkoutSchema = z.object({
+  phone: z.string()
+    .min(1, "رقم الهاتف مطلوب")
+    .regex(/^09\d{8}$/, "رقم الهاتف يجب أن يكون بصيغة 09xxxxxxxx"),
+  shipping_address: z.string()
+    .min(10, "العنوان قصير جداً (10 أحرف على الأقل)")
+    .max(500, "العنوان طويل جداً"),
+  notes: z.string().max(1000, "الملاحظات طويلة جداً").optional(),
+});
 
 interface CartItem {
   id: string;
@@ -173,10 +184,13 @@ const Checkout = () => {
     e.preventDefault();
     if (!user || cartItems.length === 0) return;
 
-    if (!formData.phone || !formData.shipping_address) {
+    // Validate form data with zod schema
+    const validationResult = checkoutSchema.safeParse(formData);
+    if (!validationResult.success) {
+      const firstError = validationResult.error.errors[0];
       toast({
-        title: "خطأ",
-        description: "يرجى إدخال رقم الهاتف والعنوان",
+        title: "خطأ في البيانات",
+        description: firstError.message,
         variant: "destructive",
       });
       return;

@@ -8,6 +8,11 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2, CreditCard, Smartphone } from "lucide-react";
+import { z } from "zod";
+
+// Validation schemas for payment inputs
+const phoneSchema = z.string().regex(/^09\d{8}$/, "رقم الهاتف غير صالح - يجب أن يبدأ بـ 09 ويتكون من 10 أرقام");
+const cardSchema = z.string().regex(/^\d{16}$/, "رقم البطاقة غير صالح - يجب أن يتكون من 16 رقم");
 
 const Payment = () => {
   const navigate = useNavigate();
@@ -31,21 +36,27 @@ const Payment = () => {
     }
 
     if (paymentMethod !== "cash") {
-      if (paymentMethod === "bemo" && !cardNumber) {
-        toast({
-          title: "خطأ",
-          description: "الرجاء إدخال رقم البطاقة",
-          variant: "destructive",
-        });
-        return;
+      if (paymentMethod === "bemo") {
+        const cardValidation = cardSchema.safeParse(cardNumber);
+        if (!cardValidation.success) {
+          toast({
+            title: "خطأ",
+            description: cardValidation.error.errors[0]?.message || "رقم البطاقة غير صالح",
+            variant: "destructive",
+          });
+          return;
+        }
       }
-      if ((paymentMethod === "syriatel" || paymentMethod === "mtn") && !phoneNumber) {
-        toast({
-          title: "خطأ",
-          description: "الرجاء إدخال رقم الهاتف",
-          variant: "destructive",
-        });
-        return;
+      if (paymentMethod === "syriatel" || paymentMethod === "mtn") {
+        const phoneValidation = phoneSchema.safeParse(phoneNumber);
+        if (!phoneValidation.success) {
+          toast({
+            title: "خطأ",
+            description: phoneValidation.error.errors[0]?.message || "رقم الهاتف غير صالح",
+            variant: "destructive",
+          });
+          return;
+        }
       }
     }
 

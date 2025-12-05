@@ -9,6 +9,36 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useToast } from "@/hooks/use-toast";
 import { signIn, signUp } from "@/lib/auth";
 import { Eye, EyeOff, Loader2, ShoppingBag } from "lucide-react";
+import { z } from "zod";
+
+// Validation schemas
+const signInSchema = z.object({
+  email: z.string()
+    .min(1, "البريد الإلكتروني مطلوب")
+    .email("البريد الإلكتروني غير صالح"),
+  password: z.string()
+    .min(1, "كلمة المرور مطلوبة")
+    .min(6, "كلمة المرور يجب أن تكون 6 أحرف على الأقل"),
+});
+
+const signUpSchema = z.object({
+  fullName: z.string()
+    .min(1, "الاسم الكامل مطلوب")
+    .min(2, "الاسم يجب أن يكون حرفين على الأقل")
+    .max(100, "الاسم طويل جداً"),
+  email: z.string()
+    .min(1, "البريد الإلكتروني مطلوب")
+    .email("البريد الإلكتروني غير صالح"),
+  password: z.string()
+    .min(1, "كلمة المرور مطلوبة")
+    .min(8, "كلمة المرور يجب أن تكون 8 أحرف على الأقل")
+    .regex(/[A-Z]/, "يجب أن تحتوي على حرف كبير واحد على الأقل")
+    .regex(/[a-z]/, "يجب أن تحتوي على حرف صغير واحد على الأقل")
+    .regex(/[0-9]/, "يجب أن تحتوي على رقم واحد على الأقل"),
+  role: z.enum(["customer", "vendor"], {
+    errorMap: () => ({ message: "يرجى اختيار نوع الحساب" }),
+  }),
+});
 
 const Auth = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -19,15 +49,35 @@ const Auth = () => {
   // Sign In State
   const [signInEmail, setSignInEmail] = useState("");
   const [signInPassword, setSignInPassword] = useState("");
+  const [signInErrors, setSignInErrors] = useState<{ email?: string; password?: string }>({});
 
   // Sign Up State
   const [signUpEmail, setSignUpEmail] = useState("");
   const [signUpPassword, setSignUpPassword] = useState("");
   const [signUpFullName, setSignUpFullName] = useState("");
   const [signUpRole, setSignUpRole] = useState<'customer' | 'vendor'>('customer');
+  const [signUpErrors, setSignUpErrors] = useState<{ fullName?: string; email?: string; password?: string; role?: string }>({});
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
+    setSignInErrors({});
+
+    // Validate input
+    const result = signInSchema.safeParse({
+      email: signInEmail,
+      password: signInPassword,
+    });
+
+    if (!result.success) {
+      const errors: { email?: string; password?: string } = {};
+      result.error.errors.forEach((err) => {
+        if (err.path[0] === "email") errors.email = err.message;
+        if (err.path[0] === "password") errors.password = err.message;
+      });
+      setSignInErrors(errors);
+      return;
+    }
+
     setIsLoading(true);
 
     try {
@@ -54,6 +104,28 @@ const Auth = () => {
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
+    setSignUpErrors({});
+
+    // Validate input
+    const result = signUpSchema.safeParse({
+      fullName: signUpFullName,
+      email: signUpEmail,
+      password: signUpPassword,
+      role: signUpRole,
+    });
+
+    if (!result.success) {
+      const errors: { fullName?: string; email?: string; password?: string; role?: string } = {};
+      result.error.errors.forEach((err) => {
+        if (err.path[0] === "fullName") errors.fullName = err.message;
+        if (err.path[0] === "email") errors.email = err.message;
+        if (err.path[0] === "password") errors.password = err.message;
+        if (err.path[0] === "role") errors.role = err.message;
+      });
+      setSignUpErrors(errors);
+      return;
+    }
+
     setIsLoading(true);
 
     try {
@@ -111,9 +183,12 @@ const Auth = () => {
                     placeholder="example@email.com"
                     value={signInEmail}
                     onChange={(e) => setSignInEmail(e.target.value)}
-                    required
                     disabled={isLoading}
+                    className={signInErrors.email ? "border-destructive" : ""}
                   />
+                  {signInErrors.email && (
+                    <p className="text-sm text-destructive">{signInErrors.email}</p>
+                  )}
                 </div>
 
                 <div className="space-y-2">
@@ -125,8 +200,8 @@ const Auth = () => {
                       placeholder="••••••••"
                       value={signInPassword}
                       onChange={(e) => setSignInPassword(e.target.value)}
-                      required
                       disabled={isLoading}
+                      className={signInErrors.password ? "border-destructive" : ""}
                     />
                     <Button
                       type="button"
@@ -138,6 +213,9 @@ const Auth = () => {
                       {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                     </Button>
                   </div>
+                  {signInErrors.password && (
+                    <p className="text-sm text-destructive">{signInErrors.password}</p>
+                  )}
                 </div>
 
                 <Button type="submit" className="w-full" size="lg" disabled={isLoading}>
@@ -163,9 +241,12 @@ const Auth = () => {
                     placeholder="أدخل اسمك الكامل"
                     value={signUpFullName}
                     onChange={(e) => setSignUpFullName(e.target.value)}
-                    required
                     disabled={isLoading}
+                    className={signUpErrors.fullName ? "border-destructive" : ""}
                   />
+                  {signUpErrors.fullName && (
+                    <p className="text-sm text-destructive">{signUpErrors.fullName}</p>
+                  )}
                 </div>
 
                 <div className="space-y-2">
@@ -176,9 +257,12 @@ const Auth = () => {
                     placeholder="example@email.com"
                     value={signUpEmail}
                     onChange={(e) => setSignUpEmail(e.target.value)}
-                    required
                     disabled={isLoading}
+                    className={signUpErrors.email ? "border-destructive" : ""}
                   />
+                  {signUpErrors.email && (
+                    <p className="text-sm text-destructive">{signUpErrors.email}</p>
+                  )}
                 </div>
 
                 <div className="space-y-2">
@@ -190,9 +274,8 @@ const Auth = () => {
                       placeholder="••••••••"
                       value={signUpPassword}
                       onChange={(e) => setSignUpPassword(e.target.value)}
-                      required
                       disabled={isLoading}
-                      minLength={6}
+                      className={signUpErrors.password ? "border-destructive" : ""}
                     />
                     <Button
                       type="button"
@@ -204,6 +287,12 @@ const Auth = () => {
                       {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                     </Button>
                   </div>
+                  {signUpErrors.password && (
+                    <p className="text-sm text-destructive">{signUpErrors.password}</p>
+                  )}
+                  <p className="text-xs text-muted-foreground">
+                    يجب أن تحتوي على 8 أحرف، حرف كبير، حرف صغير، ورقم
+                  </p>
                 </div>
 
                 <div className="space-y-3">
@@ -222,6 +311,9 @@ const Auth = () => {
                       </Label>
                     </div>
                   </RadioGroup>
+                  {signUpErrors.role && (
+                    <p className="text-sm text-destructive">{signUpErrors.role}</p>
+                  )}
                 </div>
 
                 <Button type="submit" className="w-full" size="lg" disabled={isLoading}>

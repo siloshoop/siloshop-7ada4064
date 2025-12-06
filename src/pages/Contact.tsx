@@ -4,11 +4,12 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Mail, Phone, MapPin, Send } from "lucide-react";
+import { Mail, Phone, MapPin, Send, ShieldAlert } from "lucide-react";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
+import { useRateLimit } from "@/hooks/useRateLimit";
 
 const contactSchema = z.object({
   name: z.string().trim().min(1, "الاسم مطلوب").max(100, "الاسم يجب أن يكون أقل من 100 حرف"),
@@ -21,6 +22,7 @@ const contactSchema = z.object({
 const Contact = () => {
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
+  const { checkRateLimit, recordSubmission, isChecking } = useRateLimit();
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -36,6 +38,18 @@ const Contact = () => {
     try {
       const validated = contactSchema.parse(formData);
       
+      // Check rate limit before submission
+      const canSubmit = await checkRateLimit(validated.email);
+      if (!canSubmit) {
+        toast({
+          title: "تم تجاوز الحد المسموح",
+          description: "لقد أرسلت عدة رسائل مؤخراً. يرجى الانتظار ساعة قبل المحاولة مرة أخرى.",
+          variant: "destructive",
+        });
+        setLoading(false);
+        return;
+      }
+      
       const { error } = await supabase
         .from("contact_messages")
         .insert([{
@@ -47,6 +61,9 @@ const Contact = () => {
         }]);
 
       if (error) throw error;
+
+      // Record submission for rate limiting
+      await recordSubmission(validated.email);
 
       toast({
         title: "تم إرسال رسالتك بنجاح",
@@ -137,7 +154,13 @@ const Contact = () => {
 
           <Card>
             <CardHeader>
-              <CardTitle>أرسل لنا رسالة</CardTitle>
+              <CardTitle className="flex items-center gap-2">
+                أرسل لنا رسالة
+                <ShieldAlert className="h-5 w-5 text-muted-foreground" />
+              </CardTitle>
+              <p className="text-sm text-muted-foreground">
+                يمكنك إرسال 3 رسائل كحد أقصى في الساعة
+              </p>
             </CardHeader>
             <CardContent>
               <form onSubmit={handleSubmit} className="space-y-4">
@@ -225,8 +248,8 @@ const Contact = () => {
                   </p>
                 </div>
 
-                <Button type="submit" disabled={loading} className="w-full">
-                  {loading ? (
+                <Button type="submit" disabled={loading || isChecking} className="w-full">
+                  {loading || isChecking ? (
                     "جاري الإرسال..."
                   ) : (
                     <>

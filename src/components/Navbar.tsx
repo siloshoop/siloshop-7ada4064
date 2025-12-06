@@ -2,6 +2,7 @@ import { ShoppingCart, Search, Menu, Heart, User, LogOut, LayoutDashboard } from
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { NotificationsDropdown } from "@/components/NotificationsDropdown";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import { useNavigate } from "react-router-dom";
 import { NavLink } from "@/components/NavLink";
 import { useAuth } from "@/hooks/useAuth";
@@ -32,6 +33,7 @@ const Navbar = () => {
       <div className="container flex h-16 items-center justify-between gap-4 px-4">
         {/* Right side - Icons */}
         <div className="flex items-center gap-2">
+          <ThemeToggle />
           <Button 
             variant="ghost" 
             size="icon" 

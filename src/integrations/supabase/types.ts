@@ -228,6 +228,44 @@ export type Database = {
         }
         Relationships: []
       }
+      daily_deals: {
+        Row: {
+          created_at: string
+          discount_percentage: number
+          end_date: string
+          id: string
+          is_active: boolean
+          product_id: string
+          start_date: string
+        }
+        Insert: {
+          created_at?: string
+          discount_percentage: number
+          end_date: string
+          id?: string
+          is_active?: boolean
+          product_id: string
+          start_date?: string
+        }
+        Update: {
+          created_at?: string
+          discount_percentage?: number
+          end_date?: string
+          id?: string
+          is_active?: boolean
+          product_id?: string
+          start_date?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "daily_deals_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       favorites: {
         Row: {
           created_at: string
@@ -701,6 +739,35 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "quantity_discounts_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      recently_viewed: {
+        Row: {
+          id: string
+          product_id: string
+          user_id: string
+          viewed_at: string
+        }
+        Insert: {
+          id?: string
+          product_id: string
+          user_id: string
+          viewed_at?: string
+        }
+        Update: {
+          id?: string
+          product_id?: string
+          user_id?: string
+          viewed_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "recently_viewed_product_id_fkey"
             columns: ["product_id"]
             isOneToOne: false
             referencedRelation: "products"

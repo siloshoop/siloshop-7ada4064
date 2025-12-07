@@ -14,6 +14,7 @@ import { Heart, ShoppingCart, Loader2, Minus, Plus, Star, ArrowLeftRight } from 
 import { useToast } from "@/hooks/use-toast";
 import { FavoriteButton } from "@/components/FavoriteButton";
 import ChatButton from "@/components/ChatButton";
+import { useRecentlyViewed } from "@/hooks/useRecentlyViewed";
 
 interface Product {
   id: string;
@@ -43,6 +44,7 @@ const Product = () => {
   const [addingToCart, setAddingToCart] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { trackProductView } = useRecentlyViewed();
 
   const addToCompare = () => {
     const currentCompare = searchParams.get("compare")?.split(",") || [];
@@ -113,8 +115,10 @@ const Product = () => {
 
     if (id) {
       fetchProduct();
+      // Track product view for recently viewed feature
+      trackProductView(id);
     }
-  }, [id, toast]);
+  }, [id, toast, trackProductView]);
 
   const addToCart = async () => {
     if (!user) {

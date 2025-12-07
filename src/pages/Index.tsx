@@ -4,6 +4,10 @@ import Navbar from "@/components/Navbar";
 import HeroSection from "@/components/HeroSection";
 import CategorySection from "@/components/CategorySection";
 import FeaturedProducts from "@/components/FeaturedProducts";
+import DailyDeals from "@/components/DailyDeals";
+import BestSellers from "@/components/BestSellers";
+import RecentlyViewed from "@/components/RecentlyViewed";
+import ProductRecommendations from "@/components/ProductRecommendations";
 import Footer from "@/components/Footer";
 import ProductCard from "@/components/ProductCard";
 import { SearchFilters } from "@/components/SearchFilters";
@@ -136,7 +140,11 @@ const Index = () => {
       <Navbar />
       <main className="flex-1">
         <HeroSection />
+        <DailyDeals />
         <CategorySection />
+        <BestSellers />
+        <RecentlyViewed />
+        <ProductRecommendations />
         <FeaturedProducts />
       </main>
       <Footer />

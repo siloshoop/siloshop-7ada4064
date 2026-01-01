@@ -4,6 +4,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import CartRecommendations from "@/components/CartRecommendations";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -24,6 +25,7 @@ interface CartItem {
     price: number;
     image_url: string;
     stock_quantity: number;
+    category_id: string;
   };
 }
 
@@ -54,7 +56,7 @@ const Cart = () => {
           .select(`
             id,
             quantity,
-            product:products(id, name, price, image_url, stock_quantity)
+            product:products(id, name, price, image_url, stock_quantity, category_id)
           `)
           .eq("user_id", user.id);
 
@@ -393,6 +395,14 @@ const Cart = () => {
               </Card>
             </div>
           </div>
+        )}
+
+        {/* Smart Recommendations */}
+        {cartItems.length > 0 && (
+          <CartRecommendations
+            cartProductIds={cartItems.map((item) => item.product.id)}
+            cartCategoryIds={[...new Set(cartItems.map((item) => item.product.category_id).filter(Boolean))]}
+          />
         )}
       </main>
       <Footer />

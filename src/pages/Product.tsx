@@ -15,6 +15,7 @@ import { useToast } from "@/hooks/use-toast";
 import { FavoriteButton } from "@/components/FavoriteButton";
 import ChatButton from "@/components/ChatButton";
 import { useRecentlyViewed } from "@/hooks/useRecentlyViewed";
+import SimilarProducts from "@/components/SimilarProducts";
 
 interface Product {
   id: string;
@@ -26,6 +27,7 @@ interface Product {
   image_url: string;
   images: string[] | null;
   vendor_id: string;
+  category_id: string | null;
   vendor: {
     full_name: string;
   };
@@ -326,6 +328,13 @@ const Product = () => {
         <div className="mt-8">
           <ProductReviews productId={id!} vendorId={product.vendor_id} />
         </div>
+
+        {/* Similar Products Section */}
+        <SimilarProducts 
+          productId={id!} 
+          categoryId={product.category_id} 
+          vendorId={product.vendor_id} 
+        />
       </main>
       <Footer />
     </div>

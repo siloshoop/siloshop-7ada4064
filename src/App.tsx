@@ -35,6 +35,7 @@ import Partners from "./pages/Partners";
 import VendorOrders from "./pages/VendorOrders";
 import VendorRatings from "./pages/VendorRatings";
 import Subcategory from "./pages/Subcategory";
+import ManageDeals from "./pages/ManageDeals";
 
 const queryClient = new QueryClient();
 
@@ -55,6 +56,7 @@ const App = () => (
             <Route path="/dashboard/subcategories" element={<ManageSubcategories />} />
             <Route path="/dashboard/statistics" element={<Statistics />} />
             <Route path="/dashboard/orders" element={<VendorOrders />} />
+            <Route path="/dashboard/deals" element={<ManageDeals />} />
             <Route path="/favorites" element={<Favorites />} />
             <Route path="/category/:categoryId" element={<Category />} />
             <Route path="/subcategory/:categoryId/:subcategoryId" element={<Subcategory />} />

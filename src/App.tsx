@@ -36,6 +36,7 @@ import VendorOrders from "./pages/VendorOrders";
 import VendorRatings from "./pages/VendorRatings";
 import Subcategory from "./pages/Subcategory";
 import ManageDeals from "./pages/ManageDeals";
+import SearchPage from "./pages/Search";
 
 const queryClient = new QueryClient();
 
@@ -48,6 +49,7 @@ const App = () => (
         <BrowserRouter>
           <Routes>
             <Route path="/" element={<Index />} />
+            <Route path="/search" element={<SearchPage />} />
             <Route path="/auth" element={<Auth />} />
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/dashboard/add-product" element={<AddProduct />} />

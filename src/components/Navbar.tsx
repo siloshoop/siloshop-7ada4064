@@ -1,4 +1,4 @@
-import { ShoppingCart, Search, Menu, Heart, User, LogOut, LayoutDashboard } from "lucide-react";
+import { ShoppingCart, Search, Menu, Heart, User, LogOut, LayoutDashboard, SlidersHorizontal } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { NotificationsDropdown } from "@/components/NotificationsDropdown";
@@ -97,11 +97,19 @@ const Navbar = () => {
               onKeyDown={(e) => {
                 if (e.key === 'Enter') {
                   const value = (e.target as HTMLInputElement).value;
-                  if (value) navigate(`/?search=${encodeURIComponent(value)}`);
+                  if (value) navigate(`/search?q=${encodeURIComponent(value)}`);
                 }
               }}
             />
           </div>
+          <Button 
+            variant="outline" 
+            size="icon"
+            onClick={() => navigate("/search")}
+            title="البحث المتقدم"
+          >
+            <SlidersHorizontal className="h-4 w-4" />
+          </Button>
         </div>
 
         {/* Left side - Logo & Menu */}

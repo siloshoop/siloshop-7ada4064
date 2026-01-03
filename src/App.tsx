@@ -37,6 +37,8 @@ import VendorRatings from "./pages/VendorRatings";
 import Subcategory from "./pages/Subcategory";
 import ManageDeals from "./pages/ManageDeals";
 import SearchPage from "./pages/Search";
+import Wishlist from "./pages/Wishlist";
+import SharedWishlist from "./pages/SharedWishlist";
 
 const queryClient = new QueryClient();
 
@@ -60,6 +62,8 @@ const App = () => (
             <Route path="/dashboard/orders" element={<VendorOrders />} />
             <Route path="/dashboard/deals" element={<ManageDeals />} />
             <Route path="/favorites" element={<Favorites />} />
+            <Route path="/wishlist" element={<Wishlist />} />
+            <Route path="/wishlist/shared/:token" element={<SharedWishlist />} />
             <Route path="/category/:categoryId" element={<Category />} />
             <Route path="/subcategory/:categoryId/:subcategoryId" element={<Subcategory />} />
             <Route path="/cart" element={<Cart />} />

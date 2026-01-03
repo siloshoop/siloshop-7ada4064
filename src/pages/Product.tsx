@@ -13,6 +13,7 @@ import { Badge } from "@/components/ui/badge";
 import { Heart, ShoppingCart, Loader2, Minus, Plus, Star, ArrowLeftRight } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { FavoriteButton } from "@/components/FavoriteButton";
+import AddToWishlistButton from "@/components/AddToWishlistButton";
 import ChatButton from "@/components/ChatButton";
 import { useRecentlyViewed } from "@/hooks/useRecentlyViewed";
 import SimilarProducts from "@/components/SimilarProducts";
@@ -309,6 +310,7 @@ const Product = () => {
                 <ArrowLeftRight className="ml-2 h-5 w-5" />
                 إضافة للمقارنة
               </Button>
+              <AddToWishlistButton productId={id!} variant="outline" />
               <div className="mt-4">
                 <ChatButton vendorId={product.vendor_id} productId={id} />
               </div>

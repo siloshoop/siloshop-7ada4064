@@ -1,9 +1,9 @@
-import { ShoppingCart, Search, Menu, Heart, User, LogOut, LayoutDashboard, SlidersHorizontal, Gift } from "lucide-react";
+import { ShoppingCart, Search, Menu, Heart, User, LogOut, LayoutDashboard, SlidersHorizontal, Gift, Scale } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { NotificationsDropdown } from "@/components/NotificationsDropdown";
 import { ThemeToggle } from "@/components/ThemeToggle";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { NavLink } from "@/components/NavLink";
 import { useAuth } from "@/hooks/useAuth";
 import { useState } from "react";
@@ -22,11 +22,16 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
+import { Badge } from "@/components/ui/badge";
 
 const Navbar = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { user, signOut, loading } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  const compareProducts = searchParams.get("products")?.split(",").filter(Boolean) || [];
+  const compareCount = compareProducts.length;
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -48,6 +53,26 @@ const Navbar = () => {
             onClick={() => navigate("/favorites")}
           >
             <Heart className="h-5 w-5" />
+          </Button>
+          <Button 
+            variant="ghost" 
+            size="icon"
+            className="relative"
+            onClick={() => {
+              if (compareCount > 0) {
+                navigate(`/compare?products=${compareProducts.join(",")}`);
+              } else {
+                navigate("/compare");
+              }
+            }}
+            title="مقارنة المنتجات"
+          >
+            <Scale className="h-5 w-5" />
+            {compareCount > 0 && (
+              <Badge className="absolute -top-1 -right-1 h-5 w-5 p-0 flex items-center justify-center text-xs bg-primary">
+                {compareCount}
+              </Badge>
+            )}
           </Button>
 
           {user && <NotificationsDropdown />}

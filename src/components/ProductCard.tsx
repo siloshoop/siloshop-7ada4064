@@ -1,9 +1,10 @@
-import { Heart, Star } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { Heart, Star, Scale } from "lucide-react";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { FavoriteButton } from "@/components/FavoriteButton";
+import { useToast } from "@/hooks/use-toast";
 
 interface ProductCardProps {
   id?: string;
@@ -27,8 +28,44 @@ const ProductCard = ({
   discount
 }: ProductCardProps) => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const { toast } = useToast();
 
   const productId = id || Math.random().toString(36).substr(2, 9);
+
+  const handleCompare = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    if (!id) return;
+    
+    const currentProducts = searchParams.get("products")?.split(",").filter(Boolean) || [];
+    
+    if (currentProducts.includes(id)) {
+      toast({
+        title: "موجود بالفعل",
+        description: "هذا المنتج موجود في قائمة المقارنة",
+      });
+      return;
+    }
+    
+    if (currentProducts.length >= 4) {
+      toast({
+        title: "الحد الأقصى",
+        description: "يمكنك مقارنة 4 منتجات كحد أقصى",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    const newProducts = [...currentProducts, id].join(",");
+    navigate(`/compare?products=${newProducts}`);
+    
+    toast({
+      title: "تمت الإضافة",
+      description: "تم إضافة المنتج لقائمة المقارنة",
+    });
+  };
 
   return (
     <Card 
@@ -41,23 +78,36 @@ const ProductCard = ({
             -{discount}%
           </Badge>
         )}
-        <Button
-          size="icon"
-          variant="ghost"
-          className="absolute top-3 right-3 z-10 bg-white/95 hover:bg-primary hover:text-primary-foreground backdrop-blur-sm shadow-md transition-all duration-300 hover:scale-110"
-          onClick={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
-          }}
-        >
-          {id ? (
-            <div onClick={(e) => e.stopPropagation()}>
-              <FavoriteButton productId={id} variant="ghost" size="icon" />
-            </div>
-          ) : (
-            <Heart className="h-4 w-4" />
+        <div className="absolute top-3 right-3 z-10 flex flex-col gap-2">
+          <Button
+            size="icon"
+            variant="ghost"
+            className="bg-white/95 hover:bg-primary hover:text-primary-foreground backdrop-blur-sm shadow-md transition-all duration-300 hover:scale-110"
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+            }}
+          >
+            {id ? (
+              <div onClick={(e) => e.stopPropagation()}>
+                <FavoriteButton productId={id} variant="ghost" size="icon" />
+              </div>
+            ) : (
+              <Heart className="h-4 w-4" />
+            )}
+          </Button>
+          {id && (
+            <Button
+              size="icon"
+              variant="ghost"
+              className="bg-white/95 hover:bg-primary hover:text-primary-foreground backdrop-blur-sm shadow-md transition-all duration-300 hover:scale-110"
+              onClick={handleCompare}
+              title="أضف للمقارنة"
+            >
+              <Scale className="h-4 w-4" />
+            </Button>
           )}
-        </Button>
+        </div>
         <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
         <img
           src={image}

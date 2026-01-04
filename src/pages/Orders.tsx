@@ -7,24 +7,35 @@ import Footer from "@/components/Footer";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { ShoppingBag, Loader2, Package } from "lucide-react";
+import { Loader2, Package } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
 import { ar } from "date-fns/locale";
+import DeliveryRating from "@/components/DeliveryRating";
+import ReorderButton from "@/components/ReorderButton";
+
+interface OrderItem {
+  product_id: string;
+  product: {
+    name: string;
+    image_url: string;
+  };
+  quantity: number;
+  price: number;
+}
+
+interface DeliveryRatingData {
+  order_id: string;
+  rating: number;
+}
 
 interface Order {
   id: string;
   created_at: string;
   total_amount: number;
   status: string;
-  order_items: {
-    product: {
-      name: string;
-      image_url: string;
-    };
-    quantity: number;
-    price: number;
-  }[];
+  order_items: OrderItem[];
+  delivery_rating?: DeliveryRatingData | null;
 }
 
 const Orders = () => {
@@ -53,6 +64,7 @@ const Orders = () => {
             total_amount,
             status,
             order_items(
+              product_id,
               quantity,
               price,
               product:products(name, image_url)
@@ -62,7 +74,22 @@ const Orders = () => {
           .order("created_at", { ascending: false });
 
         if (error) throw error;
-        setOrders(data as any || []);
+
+        // Fetch delivery ratings for these orders
+        const orderIds = data?.map(o => o.id) || [];
+        const { data: ratingsData } = await supabase
+          .from("delivery_ratings")
+          .select("order_id, rating")
+          .in("order_id", orderIds);
+
+        const ratingsMap = new Map(ratingsData?.map(r => [r.order_id, r]) || []);
+
+        const ordersWithRatings = data?.map(order => ({
+          ...order,
+          delivery_rating: ratingsMap.get(order.id) || null
+        })) || [];
+
+        setOrders(ordersWithRatings as any);
       } catch (error: any) {
         toast({
           title: "خطأ",
@@ -135,7 +162,7 @@ const Orders = () => {
                         التاريخ: {format(new Date(order.created_at), "dd MMMM yyyy", { locale: ar })}
                       </p>
                     </div>
-                    <div className="flex items-center gap-4 mt-4 md:mt-0">
+                    <div className="flex flex-wrap items-center gap-2 mt-4 md:mt-0">
                       {getStatusBadge(order.status)}
                       <p className="font-bold text-lg text-primary">
                         {order.total_amount} ل.س
@@ -147,6 +174,25 @@ const Orders = () => {
                       >
                         تتبع الطلب
                       </Button>
+                      {user && (
+                        <ReorderButton
+                          orderId={order.id}
+                          userId={user.id}
+                          orderItems={order.order_items.map(item => ({
+                            product_id: item.product_id,
+                            quantity: item.quantity
+                          }))}
+                        />
+                      )}
+                      {user && (
+                        <DeliveryRating
+                          orderId={order.id}
+                          userId={user.id}
+                          isDelivered={order.status === "delivered"}
+                          existingRating={order.delivery_rating?.rating}
+                          onRatingSubmitted={() => window.location.reload()}
+                        />
+                      )}
                     </div>
                   </div>
 

@@ -10,10 +10,11 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { 
   Loader2, X, Star, Package, DollarSign, Tag, ShoppingCart, 
-  User, Check, Minus, TrendingDown, Scale, Heart 
+  User, Check, Minus, TrendingDown, Scale, Heart, Trash2 
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { FavoriteButton } from "@/components/FavoriteButton";
+import { useCompareProducts } from "@/hooks/useCompareProducts";
 
 interface Product {
   id: string;
@@ -53,6 +54,7 @@ const Compare = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { user } = useAuth();
+  const { clearProducts } = useCompareProducts();
 
   useEffect(() => {
     fetchProducts();
@@ -113,6 +115,15 @@ const Compare = () => {
     } else {
       setSearchParams({ products: newIds.join(",") });
     }
+  };
+
+  const handleClearAll = () => {
+    clearProducts();
+    navigate("/");
+    toast({
+      title: "تم المسح",
+      description: "تم مسح قائمة المقارنة بالكامل",
+    });
   };
 
   const addToCart = async (productId: string) => {
@@ -339,14 +350,20 @@ const Compare = () => {
     <div className="min-h-screen flex flex-col">
       <Navbar />
       <main className="flex-1 container px-4 py-8">
-        <div className="mb-8 flex items-center gap-3">
-          <Scale className="h-8 w-8 text-primary" />
-          <div>
-            <h1 className="text-3xl font-bold">مقارنة المنتجات</h1>
-            <p className="text-muted-foreground">
-              قارن بين {products.length} منتجات جنباً إلى جنب
-            </p>
+        <div className="mb-8 flex items-center justify-between flex-wrap gap-4">
+          <div className="flex items-center gap-3">
+            <Scale className="h-8 w-8 text-primary" />
+            <div>
+              <h1 className="text-3xl font-bold">مقارنة المنتجات</h1>
+              <p className="text-muted-foreground">
+                قارن بين {products.length} منتجات جنباً إلى جنب
+              </p>
+            </div>
           </div>
+          <Button variant="destructive" onClick={handleClearAll}>
+            <Trash2 className="h-4 w-4 ml-2" />
+            مسح الكل
+          </Button>
         </div>
 
         <div className="overflow-x-auto">

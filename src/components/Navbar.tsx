@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { NotificationsDropdown } from "@/components/NotificationsDropdown";
 import { ThemeToggle } from "@/components/ThemeToggle";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { NavLink } from "@/components/NavLink";
 import { useAuth } from "@/hooks/useAuth";
 import { useState } from "react";
@@ -23,15 +23,13 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { Badge } from "@/components/ui/badge";
+import { useCompareProducts } from "@/hooks/useCompareProducts";
 
 const Navbar = () => {
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
   const { user, signOut, loading } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-
-  const compareProducts = searchParams.get("products")?.split(",").filter(Boolean) || [];
-  const compareCount = compareProducts.length;
+  const { compareProducts, compareCount } = useCompareProducts();
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">

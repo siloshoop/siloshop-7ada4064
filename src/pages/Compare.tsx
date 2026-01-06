@@ -21,7 +21,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { 
   Loader2, X, Star, Package, DollarSign, Tag, ShoppingCart, 
-  User, Check, Minus, TrendingDown, Scale, Heart, Trash2 
+  User, Check, Minus, TrendingDown, Scale, Heart, Trash2, Share2, Copy 
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { FavoriteButton } from "@/components/FavoriteButton";
@@ -135,6 +135,23 @@ const Compare = () => {
       title: "تم المسح",
       description: "تم مسح قائمة المقارنة بالكامل",
     });
+  };
+
+  const handleShareComparison = async () => {
+    const url = window.location.href;
+    try {
+      await navigator.clipboard.writeText(url);
+      toast({
+        title: "تم النسخ",
+        description: "تم نسخ رابط المقارنة إلى الحافظة",
+      });
+    } catch {
+      toast({
+        title: "خطأ",
+        description: "فشل نسخ الرابط",
+        variant: "destructive",
+      });
+    }
   };
 
   const addToCart = async (productId: string) => {
@@ -371,28 +388,34 @@ const Compare = () => {
               </p>
             </div>
           </div>
-          <AlertDialog>
-            <AlertDialogTrigger asChild>
-              <Button variant="destructive">
-                <Trash2 className="h-4 w-4 ml-2" />
-                مسح الكل
-              </Button>
-            </AlertDialogTrigger>
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>هل أنت متأكد؟</AlertDialogTitle>
-                <AlertDialogDescription>
-                  سيتم مسح جميع المنتجات من قائمة المقارنة. لا يمكن التراجع عن هذا الإجراء.
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter className="gap-2">
-                <AlertDialogCancel>إلغاء</AlertDialogCancel>
-                <AlertDialogAction onClick={handleClearAll} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
-                  نعم، مسح الكل
-                </AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
+          <div className="flex gap-2">
+            <Button variant="outline" onClick={handleShareComparison}>
+              <Share2 className="h-4 w-4 ml-2" />
+              مشاركة المقارنة
+            </Button>
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button variant="destructive">
+                  <Trash2 className="h-4 w-4 ml-2" />
+                  مسح الكل
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>هل أنت متأكد؟</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    سيتم مسح جميع المنتجات من قائمة المقارنة. لا يمكن التراجع عن هذا الإجراء.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter className="gap-2">
+                  <AlertDialogCancel>إلغاء</AlertDialogCancel>
+                  <AlertDialogAction onClick={handleClearAll} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                    نعم، مسح الكل
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          </div>
         </div>
 
         <div className="overflow-x-auto">

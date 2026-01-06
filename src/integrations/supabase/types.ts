@@ -746,6 +746,66 @@ export type Database = {
         }
         Relationships: []
       }
+      push_notifications: {
+        Row: {
+          body: string
+          icon: string | null
+          id: string
+          recipient_count: number | null
+          sent_at: string
+          sent_by: string | null
+          title: string
+          url: string | null
+        }
+        Insert: {
+          body: string
+          icon?: string | null
+          id?: string
+          recipient_count?: number | null
+          sent_at?: string
+          sent_by?: string | null
+          title: string
+          url?: string | null
+        }
+        Update: {
+          body?: string
+          icon?: string | null
+          id?: string
+          recipient_count?: number | null
+          sent_at?: string
+          sent_by?: string | null
+          title?: string
+          url?: string | null
+        }
+        Relationships: []
+      }
+      push_subscriptions: {
+        Row: {
+          auth: string
+          created_at: string
+          endpoint: string
+          id: string
+          p256dh: string
+          user_id: string | null
+        }
+        Insert: {
+          auth: string
+          created_at?: string
+          endpoint: string
+          id?: string
+          p256dh: string
+          user_id?: string | null
+        }
+        Update: {
+          auth?: string
+          created_at?: string
+          endpoint?: string
+          id?: string
+          p256dh?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       quantity_discounts: {
         Row: {
           created_at: string | null

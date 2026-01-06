@@ -1,10 +1,11 @@
 import { Heart, Star, Scale } from "lucide-react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { FavoriteButton } from "@/components/FavoriteButton";
 import { useToast } from "@/hooks/use-toast";
+import { useCompareProducts } from "@/hooks/useCompareProducts";
 
 interface ProductCardProps {
   id?: string;
@@ -28,8 +29,8 @@ const ProductCard = ({
   discount
 }: ProductCardProps) => {
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
   const { toast } = useToast();
+  const { addProduct } = useCompareProducts();
 
   const productId = id || Math.random().toString(36).substr(2, 9);
 
@@ -39,9 +40,9 @@ const ProductCard = ({
     
     if (!id) return;
     
-    const currentProducts = searchParams.get("products")?.split(",").filter(Boolean) || [];
+    const result = addProduct(id);
     
-    if (currentProducts.includes(id)) {
+    if (result.message === "exists") {
       toast({
         title: "موجود بالفعل",
         description: "هذا المنتج موجود في قائمة المقارنة",
@@ -49,7 +50,7 @@ const ProductCard = ({
       return;
     }
     
-    if (currentProducts.length >= 4) {
+    if (result.message === "max") {
       toast({
         title: "الحد الأقصى",
         description: "يمكنك مقارنة 4 منتجات كحد أقصى",
@@ -57,9 +58,6 @@ const ProductCard = ({
       });
       return;
     }
-    
-    const newProducts = [...currentProducts, id].join(",");
-    navigate(`/compare?products=${newProducts}`);
     
     toast({
       title: "تمت الإضافة",

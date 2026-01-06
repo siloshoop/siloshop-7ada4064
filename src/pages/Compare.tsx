@@ -8,6 +8,17 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { 
   Loader2, X, Star, Package, DollarSign, Tag, ShoppingCart, 
   User, Check, Minus, TrendingDown, Scale, Heart, Trash2 
@@ -360,10 +371,28 @@ const Compare = () => {
               </p>
             </div>
           </div>
-          <Button variant="destructive" onClick={handleClearAll}>
-            <Trash2 className="h-4 w-4 ml-2" />
-            مسح الكل
-          </Button>
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button variant="destructive">
+                <Trash2 className="h-4 w-4 ml-2" />
+                مسح الكل
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>هل أنت متأكد؟</AlertDialogTitle>
+                <AlertDialogDescription>
+                  سيتم مسح جميع المنتجات من قائمة المقارنة. لا يمكن التراجع عن هذا الإجراء.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter className="gap-2">
+                <AlertDialogCancel>إلغاء</AlertDialogCancel>
+                <AlertDialogAction onClick={handleClearAll} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                  نعم، مسح الكل
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
         </div>
 
         <div className="overflow-x-auto">

@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Bell, Search, Trash2, Filter, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -33,6 +34,7 @@ interface Notification {
 }
 
 export const NotificationsDropdown = () => {
+  const navigate = useNavigate();
   const { user } = useAuth();
   const { toast } = useToast();
   const [notifications, setNotifications] = useState<Notification[]>([]);
@@ -180,6 +182,7 @@ export const NotificationsDropdown = () => {
     const types: Record<string, string> = {
       order: "طلب",
       order_status: "حالة طلب",
+      price_change: "تغيير سعر",
       warning: "تحذير",
       info: "معلومات",
     };
@@ -330,6 +333,18 @@ export const NotificationsDropdown = () => {
             ))
           )}
         </div>
+        
+        {notifications.length > 0 && (
+          <div className="p-2 border-t">
+            <Button 
+              variant="ghost" 
+              className="w-full text-sm"
+              onClick={() => navigate("/notifications")}
+            >
+              عرض جميع الإشعارات
+            </Button>
+          </div>
+        )}
       </DropdownMenuContent>
     </DropdownMenu>
   );

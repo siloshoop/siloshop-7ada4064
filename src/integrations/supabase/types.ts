@@ -943,6 +943,30 @@ export type Database = {
           },
         ]
       }
+      saved_comparisons: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          product_ids: string[]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name?: string
+          product_ids: string[]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          product_ids?: string[]
+          user_id?: string
+        }
+        Relationships: []
+      }
       subcategories: {
         Row: {
           category_id: string

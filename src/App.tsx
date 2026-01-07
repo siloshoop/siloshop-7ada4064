@@ -39,6 +39,7 @@ import ManageDeals from "./pages/ManageDeals";
 import SearchPage from "./pages/Search";
 import Wishlist from "./pages/Wishlist";
 import SharedWishlist from "./pages/SharedWishlist";
+import Notifications from "./pages/Notifications";
 
 const queryClient = new QueryClient();
 
@@ -84,6 +85,7 @@ const App = () => (
             <Route path="/chat/:vendorId" element={<Chat />} />
             <Route path="/vendor/:vendorId/ratings" element={<VendorRatings />} />
             <Route path="/install" element={<InstallPWA />} />
+            <Route path="/notifications" element={<Notifications />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

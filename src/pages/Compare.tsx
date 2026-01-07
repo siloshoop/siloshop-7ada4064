@@ -8,6 +8,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import { Input } from "@/components/ui/input";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -25,9 +26,18 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { 
   Loader2, X, Star, Package, DollarSign, Tag, ShoppingCart, 
-  User, Check, Minus, TrendingDown, Scale, Heart, Trash2, Share2, Copy 
+  User, Check, Minus, TrendingDown, Scale, Trash2, Share2, Copy, Bookmark, FolderOpen 
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { FavoriteButton } from "@/components/FavoriteButton";
@@ -63,11 +73,23 @@ interface ComparisonRow {
   highlight?: "lowest" | "highest";
 }
 
+interface SavedComparison {
+  id: string;
+  name: string;
+  product_ids: string[];
+  created_at: string;
+}
+
 const Compare = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [addingToCart, setAddingToCart] = useState<string | null>(null);
+  const [savedComparisons, setSavedComparisons] = useState<SavedComparison[]>([]);
+  const [saveName, setSaveName] = useState("");
+  const [saveDialogOpen, setSaveDialogOpen] = useState(false);
+  const [savedDialogOpen, setSavedDialogOpen] = useState(false);
+  const [saving, setSaving] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
   const { user } = useAuth();
@@ -76,6 +98,12 @@ const Compare = () => {
   useEffect(() => {
     fetchProducts();
   }, [searchParams]);
+
+  useEffect(() => {
+    if (user) {
+      fetchSavedComparisons();
+    }
+  }, [user]);
 
   const fetchProducts = async () => {
     const productIds = searchParams.get("products")?.split(",") || [];
@@ -120,6 +148,78 @@ const Compare = () => {
       });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchSavedComparisons = async () => {
+    if (!user) return;
+    
+    const { data, error } = await supabase
+      .from("saved_comparisons")
+      .select("*")
+      .eq("user_id", user.id)
+      .order("created_at", { ascending: false });
+
+    if (!error && data) {
+      setSavedComparisons(data);
+    }
+  };
+
+  const handleSaveComparison = async () => {
+    if (!user) {
+      navigate("/auth");
+      return;
+    }
+
+    if (products.length === 0) return;
+
+    setSaving(true);
+    try {
+      const { error } = await supabase.from("saved_comparisons").insert({
+        user_id: user.id,
+        name: saveName || `مقارنة ${new Date().toLocaleDateString("ar")}`,
+        product_ids: products.map((p) => p.id),
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: "تم الحفظ",
+        description: "تم حفظ المقارنة بنجاح",
+      });
+
+      setSaveDialogOpen(false);
+      setSaveName("");
+      fetchSavedComparisons();
+    } catch (error: any) {
+      toast({
+        title: "خطأ",
+        description: error.message,
+        variant: "destructive",
+      });
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleLoadComparison = (comparison: SavedComparison) => {
+    setSearchParams({ products: comparison.product_ids.join(",") });
+    setSavedDialogOpen(false);
+    toast({
+      title: "تم التحميل",
+      description: `تم تحميل "${comparison.name}"`,
+    });
+  };
+
+  const handleDeleteSavedComparison = async (id: string) => {
+    const { error } = await supabase.from("saved_comparisons").delete().eq("id", id);
+
+    if (!error) {
+      toast({
+        title: "تم الحذف",
+        description: "تم حذف المقارنة المحفوظة",
+      });
+      fetchSavedComparisons();
     }
   };
 
@@ -414,7 +514,94 @@ const Compare = () => {
               </p>
             </div>
           </div>
-          <div className="flex gap-2">
+          <div className="flex gap-2 flex-wrap">
+            {/* Save Comparison Button */}
+            <Dialog open={saveDialogOpen} onOpenChange={setSaveDialogOpen}>
+              <DialogTrigger asChild>
+                <Button variant="outline">
+                  <Bookmark className="h-4 w-4 ml-2" />
+                  حفظ المقارنة
+                </Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>حفظ المقارنة</DialogTitle>
+                  <DialogDescription>
+                    أدخل اسماً للمقارنة لحفظها والرجوع إليها لاحقاً
+                  </DialogDescription>
+                </DialogHeader>
+                <Input
+                  placeholder="اسم المقارنة (اختياري)"
+                  value={saveName}
+                  onChange={(e) => setSaveName(e.target.value)}
+                />
+                <DialogFooter>
+                  <Button variant="outline" onClick={() => setSaveDialogOpen(false)}>
+                    إلغاء
+                  </Button>
+                  <Button onClick={handleSaveComparison} disabled={saving}>
+                    {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : "حفظ"}
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
+
+            {/* Load Saved Comparisons Button */}
+            <Dialog open={savedDialogOpen} onOpenChange={setSavedDialogOpen}>
+              <DialogTrigger asChild>
+                <Button variant="outline">
+                  <FolderOpen className="h-4 w-4 ml-2" />
+                  المقارنات المحفوظة
+                  {savedComparisons.length > 0 && (
+                    <Badge className="mr-2" variant="secondary">
+                      {savedComparisons.length}
+                    </Badge>
+                  )}
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-md">
+                <DialogHeader>
+                  <DialogTitle>المقارنات المحفوظة</DialogTitle>
+                  <DialogDescription>
+                    اختر مقارنة لتحميلها
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="max-h-[300px] overflow-y-auto space-y-2">
+                  {savedComparisons.length === 0 ? (
+                    <p className="text-center text-muted-foreground py-4">
+                      لا توجد مقارنات محفوظة
+                    </p>
+                  ) : (
+                    savedComparisons.map((comparison) => (
+                      <div
+                        key={comparison.id}
+                        className="flex items-center justify-between p-3 rounded-lg border hover:bg-muted/50 transition-colors"
+                      >
+                        <div
+                          className="flex-1 cursor-pointer"
+                          onClick={() => handleLoadComparison(comparison)}
+                        >
+                          <p className="font-medium">{comparison.name}</p>
+                          <p className="text-xs text-muted-foreground">
+                            {comparison.product_ids.length} منتجات •{" "}
+                            {new Date(comparison.created_at).toLocaleDateString("ar")}
+                          </p>
+                        </div>
+                        <Button
+                          size="icon"
+                          variant="ghost"
+                          className="text-destructive hover:text-destructive"
+                          onClick={() => handleDeleteSavedComparison(comparison.id)}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </DialogContent>
+            </Dialog>
+
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="outline">

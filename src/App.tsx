@@ -41,7 +41,7 @@ import Wishlist from "./pages/Wishlist";
 import SharedWishlist from "./pages/SharedWishlist";
 import Notifications from "./pages/Notifications";
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient(); // App query client
 
 const App = () => (
   <ThemeProvider attribute="class" defaultTheme="system" enableSystem>

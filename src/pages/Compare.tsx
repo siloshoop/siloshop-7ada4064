@@ -43,7 +43,7 @@ import { useToast } from "@/hooks/use-toast";
 import { FavoriteButton } from "@/components/FavoriteButton";
 import { useCompareProducts } from "@/hooks/useCompareProducts";
 import html2canvas from "html2canvas";
-import jsPDF from "jspdf";
+import { jsPDF } from "jspdf";
 
 interface Product {
   id: string;
@@ -112,7 +112,7 @@ const Compare = () => {
       });
       
       const link = document.createElement("a");
-      link.download = `مقارنة-المنتجات-${new Date().toLocaleDateString("ar")}.png`;
+      link.download = `comparison-${Date.now()}.png`;
       link.href = canvas.toDataURL("image/png");
       link.click();
       
@@ -151,7 +151,7 @@ const Compare = () => {
       });
       
       pdf.addImage(imgData, "PNG", 0, 0, canvas.width, canvas.height);
-      pdf.save(`مقارنة-المنتجات-${new Date().toLocaleDateString("ar")}.pdf`);
+      pdf.save(`comparison-${Date.now()}.pdf`);
       
       toast({
         title: "تم التصدير",
@@ -200,7 +200,6 @@ const Compare = () => {
 
       if (error) throw error;
 
-      // Fetch vendor info for each product
       const productsWithVendors = await Promise.all(
         (data || []).map(async (product) => {
           const { data: vendorInfo } = await supabase

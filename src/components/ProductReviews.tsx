@@ -1,14 +1,15 @@
 import { useEffect, useState } from "react";
-import { Star, MessageCircle, Send } from "lucide-react";
+import { Star, MessageCircle, Send, Camera, Image as ImageIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { formatDistanceToNow } from "date-fns";
 import { ar } from "date-fns/locale";
+import ReviewsChart from "@/components/ReviewsChart";
 
 interface ReviewReply {
   id: string;
@@ -186,16 +187,20 @@ export const ProductReviews = ({ productId, vendorId }: ProductReviewsProps) => 
         <CardHeader>
           <CardTitle className="flex items-center justify-between">
             <span>التقييمات والمراجعات</span>
-            <div className="flex items-center gap-2">
-              <span className="text-2xl font-bold">{averageRating}</span>
-              <Star className="h-6 w-6 fill-yellow-400 text-yellow-400" />
-              <span className="text-sm text-muted-foreground">
-                ({reviews.length} تقييم)
-              </span>
-            </div>
+            <span className="text-sm text-muted-foreground">
+              ({reviews.length} تقييم)
+            </span>
           </CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="space-y-6">
+          {/* Reviews Chart */}
+          {reviews.length > 0 && (
+            <ReviewsChart 
+              reviews={reviews.map(r => ({ rating: r.rating }))}
+              averageRating={averageRating}
+              totalReviews={reviews.length}
+            />
+          )}
           {user && !hasUserReview && !isVendor && (
             <form onSubmit={handleSubmit} className="space-y-4 mb-6 pb-6 border-b">
               <div>

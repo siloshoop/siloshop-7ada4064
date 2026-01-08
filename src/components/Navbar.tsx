@@ -24,6 +24,7 @@ import {
 } from "@/components/ui/sheet";
 import { Badge } from "@/components/ui/badge";
 import { useCompareProducts } from "@/hooks/useCompareProducts";
+import MegaMenu from "@/components/MegaMenu";
 
 const Navbar = () => {
   const navigate = useNavigate();
@@ -258,46 +259,45 @@ const Navbar = () => {
         </div>
       </div>
 
-      {/* Navigation Links */}
-      <nav className="border-t">
-        <div className="container flex items-center gap-6 px-4 h-12 overflow-x-auto">
-          <NavLink 
-            to="/" 
-            className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors whitespace-nowrap"
-            activeClassName="text-foreground font-semibold"
-          >
-            الرئيسية
-          </NavLink>
-          <NavLink 
-            to="/about" 
-            className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors whitespace-nowrap"
-            activeClassName="text-foreground font-semibold"
-          >
-            من نحن
-          </NavLink>
-          <NavLink 
-            to="/faq" 
-            className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors whitespace-nowrap"
-            activeClassName="text-foreground font-semibold"
-          >
-            الأسئلة الشائعة
-          </NavLink>
-          <NavLink 
-            to="/contact" 
-            className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors whitespace-nowrap"
-            activeClassName="text-foreground font-semibold"
-          >
-            اتصل بنا
-          </NavLink>
-          {user && (
+      {/* Mega Menu Navigation */}
+      <nav className="border-t bg-background/95">
+        <div className="container px-4 flex items-center justify-between h-12">
+          <div className="hidden md:block overflow-x-auto">
+            <MegaMenu />
+          </div>
+          
+          <div className="flex items-center gap-4 md:gap-6">
             <NavLink 
-              to="/orders" 
+              to="/" 
               className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors whitespace-nowrap"
               activeClassName="text-foreground font-semibold"
             >
-              طلباتي
+              الرئيسية
             </NavLink>
-          )}
+            <NavLink 
+              to="/about" 
+              className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors whitespace-nowrap hidden sm:block"
+              activeClassName="text-foreground font-semibold"
+            >
+              من نحن
+            </NavLink>
+            <NavLink 
+              to="/contact" 
+              className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors whitespace-nowrap hidden sm:block"
+              activeClassName="text-foreground font-semibold"
+            >
+              اتصل بنا
+            </NavLink>
+            {user && (
+              <NavLink 
+                to="/orders" 
+                className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors whitespace-nowrap"
+                activeClassName="text-foreground font-semibold"
+              >
+                طلباتي
+              </NavLink>
+            )}
+          </div>
         </div>
       </nav>
     </header>

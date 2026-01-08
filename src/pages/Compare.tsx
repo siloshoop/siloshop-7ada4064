@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -37,11 +37,13 @@ import {
 } from "@/components/ui/dialog";
 import { 
   Loader2, X, Star, Package, DollarSign, Tag, ShoppingCart, 
-  User, Check, Minus, TrendingDown, Scale, Trash2, Share2, Copy, Bookmark, FolderOpen 
+  User, Check, Minus, TrendingDown, Scale, Trash2, Share2, Copy, Bookmark, FolderOpen, Download, Image, FileText 
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { FavoriteButton } from "@/components/FavoriteButton";
 import { useCompareProducts } from "@/hooks/useCompareProducts";
+import html2canvas from "html2canvas";
+import jsPDF from "jspdf";
 
 interface Product {
   id: string;
@@ -90,10 +92,81 @@ const Compare = () => {
   const [saveDialogOpen, setSaveDialogOpen] = useState(false);
   const [savedDialogOpen, setSavedDialogOpen] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [exporting, setExporting] = useState(false);
+  const comparisonRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
   const { toast } = useToast();
   const { user } = useAuth();
   const { clearProducts } = useCompareProducts();
+
+  const handleExportAsImage = async () => {
+    if (!comparisonRef.current) return;
+    
+    setExporting(true);
+    try {
+      const canvas = await html2canvas(comparisonRef.current, {
+        backgroundColor: "#ffffff",
+        scale: 2,
+        useCORS: true,
+        allowTaint: true,
+      });
+      
+      const link = document.createElement("a");
+      link.download = `مقارنة-المنتجات-${new Date().toLocaleDateString("ar")}.png`;
+      link.href = canvas.toDataURL("image/png");
+      link.click();
+      
+      toast({
+        title: "تم التصدير",
+        description: "تم تصدير المقارنة كصورة بنجاح",
+      });
+    } catch (error) {
+      toast({
+        title: "خطأ",
+        description: "فشل تصدير المقارنة كصورة",
+        variant: "destructive",
+      });
+    } finally {
+      setExporting(false);
+    }
+  };
+
+  const handleExportAsPDF = async () => {
+    if (!comparisonRef.current) return;
+    
+    setExporting(true);
+    try {
+      const canvas = await html2canvas(comparisonRef.current, {
+        backgroundColor: "#ffffff",
+        scale: 2,
+        useCORS: true,
+        allowTaint: true,
+      });
+      
+      const imgData = canvas.toDataURL("image/png");
+      const pdf = new jsPDF({
+        orientation: canvas.width > canvas.height ? "landscape" : "portrait",
+        unit: "px",
+        format: [canvas.width, canvas.height],
+      });
+      
+      pdf.addImage(imgData, "PNG", 0, 0, canvas.width, canvas.height);
+      pdf.save(`مقارنة-المنتجات-${new Date().toLocaleDateString("ar")}.pdf`);
+      
+      toast({
+        title: "تم التصدير",
+        description: "تم تصدير المقارنة كـ PDF بنجاح",
+      });
+    } catch (error) {
+      toast({
+        title: "خطأ",
+        description: "فشل تصدير المقارنة كـ PDF",
+        variant: "destructive",
+      });
+    } finally {
+      setExporting(false);
+    }
+  };
 
   useEffect(() => {
     fetchProducts();
@@ -602,6 +675,30 @@ const Compare = () => {
               </DialogContent>
             </Dialog>
 
+            {/* Export Dropdown */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" disabled={exporting}>
+                  {exporting ? (
+                    <Loader2 className="h-4 w-4 ml-2 animate-spin" />
+                  ) : (
+                    <Download className="h-4 w-4 ml-2" />
+                  )}
+                  تصدير
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-48">
+                <DropdownMenuItem onClick={handleExportAsImage} className="cursor-pointer">
+                  <Image className="h-4 w-4 ml-2" />
+                  تصدير كصورة (PNG)
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={handleExportAsPDF} className="cursor-pointer">
+                  <FileText className="h-4 w-4 ml-2" />
+                  تصدير كـ PDF
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="outline">
@@ -660,7 +757,7 @@ const Compare = () => {
         </div>
 
         <div className="overflow-x-auto">
-          <div className="min-w-max">
+          <div className="min-w-max" ref={comparisonRef}>
             {/* Product Images and Names Header */}
             <div 
               className="grid gap-4 mb-6" 

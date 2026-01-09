@@ -3,10 +3,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { NotificationsDropdown } from "@/components/NotificationsDropdown";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import PushNotificationManager from "@/components/PushNotificationManager";
 import { useNavigate } from "react-router-dom";
 import { NavLink } from "@/components/NavLink";
 import { useAuth } from "@/hooks/useAuth";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -74,7 +75,12 @@ const Navbar = () => {
             )}
           </Button>
 
-          {user && <NotificationsDropdown />}
+          {user && (
+            <>
+              <PushNotificationManager variant="icon" />
+              <NotificationsDropdown />
+            </>
+          )}
 
           {!loading && (
             user ? (

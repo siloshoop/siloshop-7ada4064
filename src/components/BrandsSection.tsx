@@ -4,8 +4,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ChevronLeft, ChevronRight, Sparkles } from "lucide-react";
+import { ChevronLeft, ChevronRight, Sparkles, Bell, BellOff, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useToast } from "@/hooks/use-toast";
 
 interface Brand {
   id: string;
@@ -13,6 +14,7 @@ interface Brand {
   name_ar: string;
   logo_url: string | null;
   product_count?: number;
+  is_following?: boolean;
 }
 
 const BrandsSection = () => {
@@ -20,15 +22,29 @@ const BrandsSection = () => {
   const [loading, setLoading] = useState(true);
   const [selectedBrand, setSelectedBrand] = useState<string | null>(null);
   const [scrollPosition, setScrollPosition] = useState(0);
+  const [user, setUser] = useState<any>(null);
+  const [followingLoading, setFollowingLoading] = useState<string | null>(null);
   const navigate = useNavigate();
+  const { toast } = useToast();
 
   useEffect(() => {
+    checkUser();
     fetchBrands();
   }, []);
 
+  useEffect(() => {
+    if (user) {
+      fetchFollowedBrands();
+    }
+  }, [user]);
+
+  const checkUser = async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    setUser(user);
+  };
+
   const fetchBrands = async () => {
     try {
-      // Fetch brands with product count
       const { data: brandsData } = await supabase
         .from("brands")
         .select("id, name, name_ar, logo_url")
@@ -36,7 +52,6 @@ const BrandsSection = () => {
         .order("name_ar");
 
       if (brandsData) {
-        // Get product counts for each brand
         const brandsWithCounts = await Promise.all(
           brandsData.map(async (brand) => {
             const { count } = await supabase
@@ -48,6 +63,7 @@ const BrandsSection = () => {
             return {
               ...brand,
               product_count: count || 0,
+              is_following: false,
             };
           })
         );
@@ -58,6 +74,95 @@ const BrandsSection = () => {
       console.error("Error fetching brands:", error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchFollowedBrands = async () => {
+    if (!user) return;
+
+    try {
+      const { data: followedData } = await supabase
+        .from("brand_followers")
+        .select("brand_id")
+        .eq("user_id", user.id);
+
+      if (followedData) {
+        const followedIds = followedData.map((f) => f.brand_id);
+        setBrands((prev) =>
+          prev.map((brand) => ({
+            ...brand,
+            is_following: followedIds.includes(brand.id),
+          }))
+        );
+      }
+    } catch (error) {
+      console.error("Error fetching followed brands:", error);
+    }
+  };
+
+  const toggleFollow = async (e: React.MouseEvent, brandId: string) => {
+    e.stopPropagation();
+
+    if (!user) {
+      toast({
+        title: "تسجيل الدخول مطلوب",
+        description: "يرجى تسجيل الدخول لمتابعة العلامات التجارية",
+        variant: "destructive",
+      });
+      navigate("/auth");
+      return;
+    }
+
+    setFollowingLoading(brandId);
+    const brand = brands.find((b) => b.id === brandId);
+    const isCurrentlyFollowing = brand?.is_following;
+
+    try {
+      if (isCurrentlyFollowing) {
+        // Unfollow
+        await supabase
+          .from("brand_followers")
+          .delete()
+          .eq("user_id", user.id)
+          .eq("brand_id", brandId);
+
+        setBrands((prev) =>
+          prev.map((b) =>
+            b.id === brandId ? { ...b, is_following: false } : b
+          )
+        );
+
+        toast({
+          title: "تم إلغاء المتابعة",
+          description: `لن تتلقى إشعارات من ${brand?.name_ar}`,
+        });
+      } else {
+        // Follow
+        await supabase.from("brand_followers").insert({
+          user_id: user.id,
+          brand_id: brandId,
+        });
+
+        setBrands((prev) =>
+          prev.map((b) =>
+            b.id === brandId ? { ...b, is_following: true } : b
+          )
+        );
+
+        toast({
+          title: "تمت المتابعة بنجاح",
+          description: `ستتلقى إشعارات عند إضافة منتجات جديدة من ${brand?.name_ar}`,
+        });
+      }
+    } catch (error) {
+      console.error("Error toggling follow:", error);
+      toast({
+        title: "حدث خطأ",
+        description: "يرجى المحاولة مرة أخرى",
+        variant: "destructive",
+      });
+    } finally {
+      setFollowingLoading(null);
     }
   };
 
@@ -85,6 +190,8 @@ const BrandsSection = () => {
     }
   };
 
+  const followedCount = brands.filter((b) => b.is_following).length;
+
   if (loading) {
     return (
       <section className="py-8 bg-gradient-to-b from-muted/30 to-background">
@@ -94,7 +201,7 @@ const BrandsSection = () => {
           </div>
           <div className="flex gap-4 overflow-hidden">
             {Array.from({ length: 6 }).map((_, i) => (
-              <Skeleton key={i} className="h-32 w-40 flex-shrink-0 rounded-xl" />
+              <Skeleton key={i} className="h-36 w-40 flex-shrink-0 rounded-xl" />
             ))}
           </div>
         </div>
@@ -121,6 +228,11 @@ const BrandsSection = () => {
               </h2>
               <p className="text-sm text-muted-foreground">
                 تصفح حسب الماركة المفضلة
+                {followedCount > 0 && (
+                  <span className="text-primary mr-2">
+                    • تتابع {followedCount} علامة
+                  </span>
+                )}
               </p>
             </div>
           </div>
@@ -158,7 +270,7 @@ const BrandsSection = () => {
               setSelectedBrand(null);
               navigate("/search");
             }}
-            className={`flex-shrink-0 w-36 h-32 flex flex-col items-center justify-center gap-2 cursor-pointer transition-all duration-300 hover:shadow-lg hover:-translate-y-1 ${
+            className={`flex-shrink-0 w-40 h-36 flex flex-col items-center justify-center gap-2 cursor-pointer transition-all duration-300 hover:shadow-lg hover:-translate-y-1 ${
               !selectedBrand
                 ? "ring-2 ring-primary bg-primary/5"
                 : "hover:border-primary/50"
@@ -177,19 +289,40 @@ const BrandsSection = () => {
             <Card
               key={brand.id}
               onClick={() => handleBrandClick(brand.id)}
-              className={`flex-shrink-0 w-36 h-32 flex flex-col items-center justify-center gap-2 cursor-pointer transition-all duration-300 hover:shadow-lg hover:-translate-y-1 group relative ${
+              className={`flex-shrink-0 w-40 h-36 flex flex-col items-center justify-center gap-2 cursor-pointer transition-all duration-300 hover:shadow-lg hover:-translate-y-1 group relative ${
                 selectedBrand === brand.id
                   ? "ring-2 ring-primary bg-primary/5"
                   : "hover:border-primary/50"
-              }`}
+              } ${brand.is_following ? "border-primary/30" : ""}`}
             >
+              {/* Follow Button */}
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={(e) => toggleFollow(e, brand.id)}
+                disabled={followingLoading === brand.id}
+                className={`absolute top-2 right-2 h-7 w-7 rounded-full transition-all ${
+                  brand.is_following
+                    ? "bg-primary text-primary-foreground hover:bg-primary/90"
+                    : "bg-muted/80 text-muted-foreground hover:bg-primary hover:text-primary-foreground"
+                }`}
+              >
+                {followingLoading === brand.id ? (
+                  <div className="h-3 w-3 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                ) : brand.is_following ? (
+                  <Check className="h-3.5 w-3.5" />
+                ) : (
+                  <Bell className="h-3.5 w-3.5" />
+                )}
+              </Button>
+
               {/* Product Count Badge */}
               {brand.product_count && brand.product_count > 0 && (
                 <Badge
                   variant="secondary"
                   className="absolute top-2 left-2 text-xs bg-muted text-muted-foreground"
                 >
-                  {brand.product_count} منتج
+                  {brand.product_count}
                 </Badge>
               )}
 
@@ -219,6 +352,14 @@ const BrandsSection = () => {
               <span className="text-sm font-medium text-foreground text-center line-clamp-1 px-2">
                 {brand.name_ar}
               </span>
+
+              {/* Following indicator */}
+              {brand.is_following && (
+                <span className="text-xs text-primary flex items-center gap-1">
+                  <Bell className="h-3 w-3" />
+                  متابَعة
+                </span>
+              )}
             </Card>
           ))}
         </div>

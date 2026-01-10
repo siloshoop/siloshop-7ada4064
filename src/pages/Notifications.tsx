@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Bell, Search, Trash2, Filter, X, CheckCheck, Package, Tag, Info, AlertTriangle } from "lucide-react";
+import { Bell, Search, Trash2, Filter, X, CheckCheck, Package, Tag, Info, AlertTriangle, Settings, Percent } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -36,6 +36,9 @@ const NotificationTypeConfig: Record<string, { label: string; icon: React.ReactN
   order: { label: "طلب", icon: <Package className="h-4 w-4" />, color: "bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300" },
   order_status: { label: "حالة طلب", icon: <Package className="h-4 w-4" />, color: "bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300" },
   price_change: { label: "تغيير سعر", icon: <Tag className="h-4 w-4" />, color: "bg-orange-100 text-orange-700 dark:bg-orange-900 dark:text-orange-300" },
+  price_drop: { label: "تخفيض سعر", icon: <Percent className="h-4 w-4" />, color: "bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300" },
+  daily_deal: { label: "عرض يومي", icon: <Tag className="h-4 w-4" />, color: "bg-orange-100 text-orange-700 dark:bg-orange-900 dark:text-orange-300" },
+  new_product: { label: "منتج جديد", icon: <Package className="h-4 w-4" />, color: "bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-300" },
   warning: { label: "تحذير", icon: <AlertTriangle className="h-4 w-4" />, color: "bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300" },
   info: { label: "معلومات", icon: <Info className="h-4 w-4" />, color: "bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300" },
 };
@@ -188,7 +191,7 @@ const Notifications = () => {
     }
     
     if (notification.related_id) {
-      if (notification.type === "price_change") {
+      if (notification.type === "price_change" || notification.type === "price_drop" || notification.type === "daily_deal" || notification.type === "new_product") {
         navigate(`/product/${notification.related_id}`);
       } else if (notification.type === "order" || notification.type === "order_status") {
         navigate(`/orders/track/${notification.related_id}`);
@@ -224,6 +227,10 @@ const Notifications = () => {
             </div>
           </div>
           <div className="flex gap-2">
+            <Button variant="outline" onClick={() => navigate("/notifications/settings")}>
+              <Settings className="h-4 w-4 ml-2" />
+              إعدادات الإشعارات
+            </Button>
             {unreadCount > 0 && (
               <Button variant="outline" onClick={markAllAsRead}>
                 <CheckCheck className="h-4 w-4 ml-2" />

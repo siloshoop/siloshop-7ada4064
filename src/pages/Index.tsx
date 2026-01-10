@@ -3,7 +3,6 @@ import { useSearchParams } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import HeroSection from "@/components/HeroSection";
 import CategorySection from "@/components/CategorySection";
-import BrandsSection from "@/components/BrandsSection";
 import FeaturedProducts from "@/components/FeaturedProducts";
 import EnhancedDailyDeals from "@/components/EnhancedDailyDeals";
 import BestSellers from "@/components/BestSellers";
@@ -142,7 +141,6 @@ const Index = () => {
       <Navbar />
       <main className="flex-1">
         <HeroSection />
-        <BrandsSection />
         <EnhancedDailyDeals />
         <CategorySection />
         <PurchasedRecently />

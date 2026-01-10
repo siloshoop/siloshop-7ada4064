@@ -41,6 +41,7 @@ import Wishlist from "./pages/Wishlist";
 import SharedWishlist from "./pages/SharedWishlist";
 import Notifications from "./pages/Notifications";
 import NotificationSettings from "./pages/NotificationSettings";
+import FollowedBrands from "./pages/FollowedBrands";
 
 const queryClient = new QueryClient(); // App query client
 
@@ -88,6 +89,7 @@ const App = () => (
             <Route path="/install" element={<InstallPWA />} />
             <Route path="/notifications" element={<Notifications />} />
             <Route path="/notifications/settings" element={<NotificationSettings />} />
+            <Route path="/followed-brands" element={<FollowedBrands />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

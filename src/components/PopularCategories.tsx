@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent } from "@/components/ui/card";
@@ -48,7 +48,27 @@ const categoryColors: { [key: string]: string } = {
 const PopularCategories = () => {
   const [categories, setCategories] = useState<PopularCategory[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isVisible, setIsVisible] = useState(false);
+  const sectionRef = useRef<HTMLElement>(null);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true);
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.1 }
+    );
+
+    if (sectionRef.current) {
+      observer.observe(sectionRef.current);
+    }
+
+    return () => observer.disconnect();
+  }, []);
 
   useEffect(() => {
     fetchPopularCategories();
@@ -129,7 +149,12 @@ const PopularCategories = () => {
   if (categories.length === 0) return null;
 
   return (
-    <section className="py-8 bg-muted/30">
+    <section 
+      ref={sectionRef}
+      className={`py-8 bg-muted/30 transition-all duration-700 ${
+        isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
+      }`}
+    >
       <div className="container px-4">
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-3">
@@ -166,12 +191,15 @@ const PopularCategories = () => {
           className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide scroll-smooth"
           style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
         >
-          {categories.map((category) => {
+          {categories.map((category, index) => {
             const IconComponent = getIconComponent(category.icon);
             return (
               <Card
                 key={category.id}
-                className={`min-w-[160px] md:min-w-[200px] cursor-pointer transition-all duration-300 hover:scale-105 hover:shadow-lg border-0 bg-gradient-to-br ${getCategoryColor(category.name_ar)}`}
+                className={`min-w-[160px] md:min-w-[200px] cursor-pointer transition-all duration-500 hover:scale-105 hover:shadow-lg border-0 bg-gradient-to-br ${getCategoryColor(category.name_ar)} ${
+                  isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
+                }`}
+                style={{ transitionDelay: isVisible ? `${index * 100}ms` : "0ms" }}
                 onClick={() => navigate(`/category/${category.id}`)}
               >
                 <CardContent className="p-6 flex flex-col items-center text-center gap-3">

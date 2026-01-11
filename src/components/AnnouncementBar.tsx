@@ -1,28 +1,64 @@
 import { useState, useEffect } from "react";
-import { X, Percent, Gift, Truck, Tag } from "lucide-react";
+import { X, Percent, Gift, Truck, Tag, Sparkles, Zap, Star, Heart } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 
-const announcements = [
-  { text: "🔥 خصم 50% على جميع المنتجات الإلكترونية - لفترة محدودة!", icon: Percent },
-  { text: "🎁 اشترِ 2 واحصل على الثالث مجاناً!", icon: Gift },
-  { text: "🚚 شحن مجاني للطلبات أكثر من 200 ريال", icon: Truck },
-  { text: "💫 عروض حصرية للمستخدمين الجدد - خصم 30%", icon: Tag },
-];
+interface Announcement {
+  id: string;
+  text: string;
+  icon: string;
+}
+
+const iconMap: { [key: string]: React.ComponentType<{ className?: string }> } = {
+  percent: Percent,
+  gift: Gift,
+  truck: Truck,
+  tag: Tag,
+  sparkles: Sparkles,
+  zap: Zap,
+  star: Star,
+  heart: Heart,
+};
 
 const AnnouncementBar = () => {
   const [isVisible, setIsVisible] = useState(true);
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [announcements, setAnnouncements] = useState<Announcement[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    fetchAnnouncements();
+  }, []);
+
+  const fetchAnnouncements = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("announcements")
+        .select("id, text, icon")
+        .eq("is_active", true)
+        .order("sort_order", { ascending: true });
+
+      if (error) throw error;
+      setAnnouncements(data || []);
+    } catch (error) {
+      console.error("Error fetching announcements:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (announcements.length === 0) return;
+    
     const interval = setInterval(() => {
       setCurrentIndex((prev) => (prev + 1) % announcements.length);
     }, 4000);
 
     return () => clearInterval(interval);
-  }, []);
+  }, [announcements.length]);
 
-  if (!isVisible) return null;
+  if (!isVisible || loading || announcements.length === 0) return null;
 
-  const CurrentIcon = announcements[currentIndex].icon;
+  const CurrentIcon = iconMap[announcements[currentIndex]?.icon] || Tag;
 
   return (
     <div className="relative bg-gradient-to-r from-primary via-primary/90 to-primary overflow-hidden">
@@ -39,7 +75,7 @@ const AnnouncementBar = () => {
             <div className="relative h-6 overflow-hidden">
               {announcements.map((announcement, index) => (
                 <p
-                  key={index}
+                  key={announcement.id}
                   className={`text-sm font-medium text-primary-foreground whitespace-nowrap absolute transition-all duration-500 ease-out ${
                     index === currentIndex
                       ? "translate-y-0 opacity-100"

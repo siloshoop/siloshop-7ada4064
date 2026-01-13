@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Plus, Package, TrendingUp, DollarSign, ShoppingBag, Loader2, Edit, Trash2, Search, Tag, Star, Layers, Percent, Megaphone } from "lucide-react";
+import { Plus, Package, TrendingUp, DollarSign, ShoppingBag, Loader2, Edit, Trash2, Search, Tag, Star, Layers, Percent, Megaphone, Users } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
@@ -336,13 +336,22 @@ const Dashboard = () => {
                       العروض
                     </Button>
                     {isAdmin && (
-                      <Button 
-                        variant="outline"
-                        onClick={() => navigate("/dashboard/announcements")}
-                      >
-                        <Megaphone className="ml-2 h-4 w-4" />
-                        الإعلانات
-                      </Button>
+                      <>
+                        <Button 
+                          variant="outline"
+                          onClick={() => navigate("/dashboard/announcements")}
+                        >
+                          <Megaphone className="ml-2 h-4 w-4" />
+                          الإعلانات
+                        </Button>
+                        <Button 
+                          variant="outline"
+                          onClick={() => navigate("/dashboard/users")}
+                        >
+                          <Users className="ml-2 h-4 w-4" />
+                          المستخدمين
+                        </Button>
+                      </>
                     )}
                     <Button onClick={() => navigate("/dashboard/add-product")}>
                       <Plus className="ml-2 h-4 w-4" />

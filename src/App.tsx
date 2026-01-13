@@ -43,6 +43,7 @@ import Notifications from "./pages/Notifications";
 import NotificationSettings from "./pages/NotificationSettings";
 import FollowedBrands from "./pages/FollowedBrands";
 import ManageAnnouncements from "./pages/ManageAnnouncements";
+import ManageUsers from "./pages/ManageUsers";
 
 const queryClient = new QueryClient(); // App query client
 
@@ -66,6 +67,7 @@ const App = () => (
             <Route path="/dashboard/orders" element={<VendorOrders />} />
             <Route path="/dashboard/deals" element={<ManageDeals />} />
             <Route path="/dashboard/announcements" element={<ManageAnnouncements />} />
+            <Route path="/dashboard/users" element={<ManageUsers />} />
             <Route path="/favorites" element={<Favorites />} />
             <Route path="/wishlist" element={<Wishlist />} />
             <Route path="/wishlist/shared/:token" element={<SharedWishlist />} />

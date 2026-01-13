@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import ProductCard from "./ProductCard";
 import { Loader2, Zap, Clock, Flame, ArrowLeft } from "lucide-react";
@@ -26,6 +26,26 @@ const EnhancedDailyDeals = () => {
     minutes: 0,
     seconds: 0,
   });
+  const [isVisible, setIsVisible] = useState(false);
+  const sectionRef = useRef<HTMLElement>(null);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true);
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.1 }
+    );
+
+    if (sectionRef.current) {
+      observer.observe(sectionRef.current);
+    }
+
+    return () => observer.disconnect();
+  }, []);
 
   useEffect(() => {
     const fetchDeals = async () => {
@@ -119,7 +139,7 @@ const EnhancedDailyDeals = () => {
   }
 
   return (
-    <section className="py-16 relative overflow-hidden">
+    <section ref={sectionRef} className="py-16 relative overflow-hidden">
       {/* Background Effects */}
       <div className="absolute inset-0 bg-gradient-to-br from-destructive/10 via-background to-primary/10" />
       <div className="absolute top-0 right-0 w-96 h-96 bg-destructive/20 rounded-full blur-3xl animate-pulse" />
@@ -127,7 +147,7 @@ const EnhancedDailyDeals = () => {
       
       <div className="container px-4 relative z-10">
         {/* Header */}
-        <div className="flex flex-col md:flex-row items-center justify-between gap-6 mb-10">
+        <div className={`flex flex-col md:flex-row items-center justify-between gap-6 mb-10 transition-all duration-700 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
           <div className="flex items-center gap-4">
             <div className="relative">
               <div className="p-4 rounded-2xl bg-gradient-to-br from-destructive to-destructive/80 shadow-lg shadow-destructive/30">
@@ -172,7 +192,7 @@ const EnhancedDailyDeals = () => {
         </div>
 
         {/* Deals Banner */}
-        <div className="mb-8 p-6 rounded-2xl bg-gradient-to-r from-destructive/20 via-primary/10 to-accent/20 border border-destructive/30 flex flex-col md:flex-row items-center justify-between gap-4">
+        <div className={`mb-8 p-6 rounded-2xl bg-gradient-to-r from-destructive/20 via-primary/10 to-accent/20 border border-destructive/30 flex flex-col md:flex-row items-center justify-between gap-4 transition-all duration-700 delay-200 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
           <div className="flex items-center gap-3">
             <Zap className="h-8 w-8 text-yellow-500 animate-bounce" />
             <div>
@@ -193,7 +213,7 @@ const EnhancedDailyDeals = () => {
 
         {/* Products Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {products.map((product) => {
+          {products.map((product, index) => {
             const avgRating = product.reviews?.length
               ? product.reviews.reduce((sum, r) => sum + r.rating, 0) / product.reviews.length
               : 0;
@@ -201,7 +221,11 @@ const EnhancedDailyDeals = () => {
             const dealPrice = product.price * (1 - product.deal_discount / 100);
 
             return (
-              <div key={product.id} className="relative">
+              <div 
+                key={product.id} 
+                className={`relative transition-all duration-500 ${isVisible ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-8 scale-95'}`}
+                style={{ transitionDelay: `${300 + index * 100}ms` }}
+              >
                 <Badge 
                   variant="destructive" 
                   className="absolute -top-2 -right-2 z-10 text-lg px-3 py-1 shadow-lg animate-pulse"

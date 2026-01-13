@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
@@ -24,8 +24,28 @@ const BrandsSection = () => {
   const [scrollPosition, setScrollPosition] = useState(0);
   const [user, setUser] = useState<any>(null);
   const [followingLoading, setFollowingLoading] = useState<string | null>(null);
+  const [isVisible, setIsVisible] = useState(false);
+  const sectionRef = useRef<HTMLElement>(null);
   const navigate = useNavigate();
   const { toast } = useToast();
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true);
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.1 }
+    );
+
+    if (sectionRef.current) {
+      observer.observe(sectionRef.current);
+    }
+
+    return () => observer.disconnect();
+  }, []);
 
   useEffect(() => {
     checkUser();
@@ -214,10 +234,10 @@ const BrandsSection = () => {
   }
 
   return (
-    <section className="py-8 bg-gradient-to-b from-muted/30 to-background overflow-hidden">
+    <section ref={sectionRef} className="py-8 bg-gradient-to-b from-muted/30 to-background overflow-hidden">
       <div className="container px-4">
         {/* Header */}
-        <div className="flex items-center justify-between mb-6">
+        <div className={`flex items-center justify-between mb-6 transition-all duration-700 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
           <div className="flex items-center gap-3">
             <div className="p-2 rounded-lg bg-primary/10">
               <Sparkles className="h-5 w-5 text-primary" />
@@ -261,7 +281,7 @@ const BrandsSection = () => {
         {/* Brands Container */}
         <div
           id="brands-container"
-          className="flex gap-4 overflow-x-auto scrollbar-hide pb-4 -mx-4 px-4"
+          className={`flex gap-4 overflow-x-auto scrollbar-hide pb-4 -mx-4 px-4 transition-all duration-700 delay-200 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}
           style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
         >
           {/* All Brands Card */}

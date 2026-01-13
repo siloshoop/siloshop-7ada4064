@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Plus, Package, TrendingUp, DollarSign, ShoppingBag, Loader2, Edit, Trash2, Search, Tag, Star, Layers, Percent } from "lucide-react";
+import { Plus, Package, TrendingUp, DollarSign, ShoppingBag, Loader2, Edit, Trash2, Search, Tag, Star, Layers, Percent, Megaphone } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
@@ -23,6 +23,7 @@ const Dashboard = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [filterStatus, setFilterStatus] = useState("all");
   const [sortBy, setSortBy] = useState("date-desc");
+  const [isAdmin, setIsAdmin] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -45,6 +46,16 @@ const Dashboard = () => {
           .single();
 
         setProfile(profileData);
+
+        // Check if user is admin
+        const { data: adminRole } = await supabase
+          .from("user_roles")
+          .select("role")
+          .eq("user_id", user.id)
+          .eq("role", "admin")
+          .maybeSingle();
+
+        setIsAdmin(!!adminRole);
 
         if (profileData?.role === "vendor") {
           // Get vendor stats and products
@@ -324,6 +335,15 @@ const Dashboard = () => {
                       <Percent className="ml-2 h-4 w-4" />
                       العروض
                     </Button>
+                    {isAdmin && (
+                      <Button 
+                        variant="outline"
+                        onClick={() => navigate("/dashboard/announcements")}
+                      >
+                        <Megaphone className="ml-2 h-4 w-4" />
+                        الإعلانات
+                      </Button>
+                    )}
                     <Button onClick={() => navigate("/dashboard/add-product")}>
                       <Plus className="ml-2 h-4 w-4" />
                       إضافة منتج

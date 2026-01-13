@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import ProductCard from "./ProductCard";
 import { Loader2, TrendingUp } from "lucide-react";
@@ -19,6 +19,26 @@ interface BestSellerProduct extends Product {
 const BestSellers = () => {
   const [products, setProducts] = useState<BestSellerProduct[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isVisible, setIsVisible] = useState(false);
+  const sectionRef = useRef<HTMLElement>(null);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true);
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.1 }
+    );
+
+    if (sectionRef.current) {
+      observer.observe(sectionRef.current);
+    }
+
+    return () => observer.disconnect();
+  }, []);
 
   useEffect(() => {
     const fetchBestSellers = async () => {
@@ -92,9 +112,9 @@ const BestSellers = () => {
   }
 
   return (
-    <section className="py-12 bg-muted/30">
+    <section ref={sectionRef} className="py-12 bg-muted/30">
       <div className="container px-4">
-        <div className="flex items-center gap-3 mb-8">
+        <div className={`flex items-center gap-3 mb-8 transition-all duration-700 ${isVisible ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-8'}`}>
           <div className="p-2 rounded-lg bg-primary/10">
             <TrendingUp className="h-6 w-6 text-primary" />
           </div>
@@ -104,7 +124,7 @@ const BestSellers = () => {
           </div>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {products.map((product) => {
+          {products.map((product, index) => {
             const avgRating = product.reviews?.length
               ? product.reviews.reduce((sum, r) => sum + r.rating, 0) / product.reviews.length
               : 0;
@@ -113,17 +133,22 @@ const BestSellers = () => {
               : undefined;
 
             return (
-              <ProductCard
+              <div
                 key={product.id}
-                id={product.id}
-                name={product.name}
-                price={product.price}
-                originalPrice={product.original_price || undefined}
-                image={product.image_url}
-                rating={avgRating}
-                reviews={product.reviews?.length || 0}
-                discount={discount}
-              />
+                className={`transition-all duration-500 hover:scale-105 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'}`}
+                style={{ transitionDelay: `${100 + index * 75}ms` }}
+              >
+                <ProductCard
+                  id={product.id}
+                  name={product.name}
+                  price={product.price}
+                  originalPrice={product.original_price || undefined}
+                  image={product.image_url}
+                  rating={avgRating}
+                  reviews={product.reviews?.length || 0}
+                  discount={discount}
+                />
+              </div>
             );
           })}
         </div>

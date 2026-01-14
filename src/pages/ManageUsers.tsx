@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
+import { logActivity } from "@/hooks/useActivityLog";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
@@ -247,9 +248,27 @@ const ManageUsers = () => {
 
       if (error) throw error;
 
+      // Send notification to banned user
+      await supabase.from("notifications").insert({
+        user_id: userId,
+        title: "تم حظر حسابك",
+        message: reason 
+          ? `تم حظر حسابك بسبب: ${reason}. يرجى التواصل مع الدعم إذا كنت تعتقد أن هذا خطأ.`
+          : "تم حظر حسابك. يرجى التواصل مع الدعم إذا كنت تعتقد أن هذا خطأ.",
+        type: "warning",
+      });
+
+      // Log activity
+      if (user) {
+        await logActivity(user.id, "user_banned", { 
+          banned_user_id: userId, 
+          reason: reason || null 
+        });
+      }
+
       toast({
         title: "تم الحظر",
-        description: "تم حظر المستخدم بنجاح",
+        description: "تم حظر المستخدم وإرسال إشعار له",
       });
 
       setBanReason("");
@@ -276,9 +295,22 @@ const ManageUsers = () => {
 
       if (error) throw error;
 
+      // Send notification to unbanned user
+      await supabase.from("notifications").insert({
+        user_id: userId,
+        title: "تم إلغاء حظر حسابك",
+        message: "تم إلغاء حظر حسابك ويمكنك الآن استخدام المنصة بشكل طبيعي.",
+        type: "info",
+      });
+
+      // Log activity
+      if (user) {
+        await logActivity(user.id, "user_unbanned", { unbanned_user_id: userId });
+      }
+
       toast({
         title: "تم إلغاء الحظر",
-        description: "تم إلغاء حظر المستخدم بنجاح",
+        description: "تم إلغاء حظر المستخدم وإرسال إشعار له",
       });
 
       fetchUsers();

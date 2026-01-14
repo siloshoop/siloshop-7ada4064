@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Users, Search, Shield, ShieldCheck, ShieldX, UserCog, Store, User } from "lucide-react";
+import { Loader2, Users, Search, Shield, ShieldCheck, ShieldX, UserCog, Store, User, Ban, UserCheck } from "lucide-react";
 import { format } from "date-fns";
 import { ar } from "date-fns/locale";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -39,6 +39,9 @@ interface UserProfile {
   role: "customer" | "vendor";
   avatar_url: string | null;
   created_at: string | null;
+  is_banned: boolean;
+  banned_at: string | null;
+  ban_reason: string | null;
 }
 
 interface UserRole {
@@ -54,6 +57,7 @@ const ManageUsers = () => {
   const [isAdmin, setIsAdmin] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [filterRole, setFilterRole] = useState("all");
+  const [banReason, setBanReason] = useState("");
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -221,6 +225,72 @@ const ManageUsers = () => {
     }
   };
 
+  const banUser = async (userId: string, reason: string) => {
+    if (userId === user?.id) {
+      toast({
+        title: "غير مسموح",
+        description: "لا يمكنك حظر نفسك",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      const { error } = await supabase
+        .from("profiles")
+        .update({
+          is_banned: true,
+          banned_at: new Date().toISOString(),
+          ban_reason: reason || null,
+        })
+        .eq("id", userId);
+
+      if (error) throw error;
+
+      toast({
+        title: "تم الحظر",
+        description: "تم حظر المستخدم بنجاح",
+      });
+
+      setBanReason("");
+      fetchUsers();
+    } catch (error: any) {
+      toast({
+        title: "خطأ",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  };
+
+  const unbanUser = async (userId: string) => {
+    try {
+      const { error } = await supabase
+        .from("profiles")
+        .update({
+          is_banned: false,
+          banned_at: null,
+          ban_reason: null,
+        })
+        .eq("id", userId);
+
+      if (error) throw error;
+
+      toast({
+        title: "تم إلغاء الحظر",
+        description: "تم إلغاء حظر المستخدم بنجاح",
+      });
+
+      fetchUsers();
+    } catch (error: any) {
+      toast({
+        title: "خطأ",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  };
+
   const getRoleLabel = (role: string) => {
     switch (role) {
       case "admin":
@@ -257,7 +327,8 @@ const ManageUsers = () => {
       filterRole === "all" ||
       (filterRole === "admin" && userRoles[u.id]?.includes("admin")) ||
       (filterRole === "vendor" && u.role === "vendor") ||
-      (filterRole === "customer" && u.role === "customer" && !userRoles[u.id]?.includes("admin"));
+      (filterRole === "customer" && u.role === "customer" && !userRoles[u.id]?.includes("admin")) ||
+      (filterRole === "banned" && u.is_banned);
 
     return matchesSearch && matchesRole;
   });
@@ -313,12 +384,13 @@ const ManageUsers = () => {
                   <SelectTrigger className="w-full md:w-48">
                     <SelectValue placeholder="فلترة حسب الدور" />
                   </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">جميع المستخدمين</SelectItem>
-                    <SelectItem value="admin">المدراء</SelectItem>
-                    <SelectItem value="vendor">البائعون</SelectItem>
-                    <SelectItem value="customer">العملاء</SelectItem>
-                  </SelectContent>
+                    <SelectContent>
+                      <SelectItem value="all">جميع المستخدمين</SelectItem>
+                      <SelectItem value="admin">المدراء</SelectItem>
+                      <SelectItem value="vendor">البائعون</SelectItem>
+                      <SelectItem value="customer">العملاء</SelectItem>
+                      <SelectItem value="banned">المحظورون</SelectItem>
+                    </SelectContent>
                 </Select>
               </div>
             </CardContent>
@@ -352,6 +424,12 @@ const ManageUsers = () => {
                           {userProfile.id === user?.id && (
                             <Badge variant="outline" className="text-xs">
                               أنت
+                            </Badge>
+                          )}
+                          {userProfile.is_banned && (
+                            <Badge variant="destructive" className="text-xs flex items-center gap-1">
+                              <Ban className="h-3 w-3" />
+                              محظور
                             </Badge>
                           )}
                         </div>
@@ -396,6 +474,16 @@ const ManageUsers = () => {
                           {userProfile.created_at && (
                             <span>
                               انضم: {format(new Date(userProfile.created_at), "dd MMM yyyy", { locale: ar })}
+                            </span>
+                          )}
+                          {userProfile.is_banned && userProfile.banned_at && (
+                            <span className="text-destructive">
+                              حُظر: {format(new Date(userProfile.banned_at), "dd MMM yyyy", { locale: ar })}
+                            </span>
+                          )}
+                          {userProfile.is_banned && userProfile.ban_reason && (
+                            <span className="text-destructive">
+                              السبب: {userProfile.ban_reason}
                             </span>
                           )}
                         </div>
@@ -479,6 +567,78 @@ const ManageUsers = () => {
                               </AlertDialogContent>
                             </AlertDialog>
                           )}
+
+                        {/* Ban/Unban User */}
+                        {userProfile.id !== user?.id && (
+                          <>
+                            {!userProfile.is_banned ? (
+                              <AlertDialog>
+                                <AlertDialogTrigger asChild>
+                                  <Button variant="outline" size="sm" className="text-destructive border-destructive hover:bg-destructive hover:text-destructive-foreground">
+                                    <Ban className="h-4 w-4 ml-2" />
+                                    حظر
+                                  </Button>
+                                </AlertDialogTrigger>
+                                <AlertDialogContent>
+                                  <AlertDialogHeader>
+                                    <AlertDialogTitle>تأكيد حظر المستخدم</AlertDialogTitle>
+                                    <AlertDialogDescription className="space-y-4">
+                                      <p>
+                                        هل أنت متأكد من حظر{" "}
+                                        <strong>{userProfile.full_name || "هذا المستخدم"}</strong>؟
+                                        <br />
+                                        لن يتمكن من الوصول إلى حسابه.
+                                      </p>
+                                      <Input
+                                        placeholder="سبب الحظر (اختياري)"
+                                        value={banReason}
+                                        onChange={(e) => setBanReason(e.target.value)}
+                                      />
+                                    </AlertDialogDescription>
+                                  </AlertDialogHeader>
+                                  <AlertDialogFooter>
+                                    <AlertDialogCancel onClick={() => setBanReason("")}>إلغاء</AlertDialogCancel>
+                                    <AlertDialogAction
+                                      onClick={() => banUser(userProfile.id, banReason)}
+                                      className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                    >
+                                      حظر
+                                    </AlertDialogAction>
+                                  </AlertDialogFooter>
+                                </AlertDialogContent>
+                              </AlertDialog>
+                            ) : (
+                              <AlertDialog>
+                                <AlertDialogTrigger asChild>
+                                  <Button variant="outline" size="sm" className="text-green-600 border-green-600 hover:bg-green-600 hover:text-white">
+                                    <UserCheck className="h-4 w-4 ml-2" />
+                                    إلغاء الحظر
+                                  </Button>
+                                </AlertDialogTrigger>
+                                <AlertDialogContent>
+                                  <AlertDialogHeader>
+                                    <AlertDialogTitle>تأكيد إلغاء الحظر</AlertDialogTitle>
+                                    <AlertDialogDescription>
+                                      هل أنت متأكد من إلغاء حظر{" "}
+                                      <strong>{userProfile.full_name || "هذا المستخدم"}</strong>؟
+                                      <br />
+                                      سيتمكن من الوصول إلى حسابه مجدداً.
+                                    </AlertDialogDescription>
+                                  </AlertDialogHeader>
+                                  <AlertDialogFooter>
+                                    <AlertDialogCancel>إلغاء</AlertDialogCancel>
+                                    <AlertDialogAction
+                                      onClick={() => unbanUser(userProfile.id)}
+                                      className="bg-green-600 text-white hover:bg-green-700"
+                                    >
+                                      إلغاء الحظر
+                                    </AlertDialogAction>
+                                  </AlertDialogFooter>
+                                </AlertDialogContent>
+                              </AlertDialog>
+                            )}
+                          </>
+                        )}
                       </div>
                     </div>
                   </CardContent>

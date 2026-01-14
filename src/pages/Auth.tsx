@@ -8,6 +8,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useToast } from "@/hooks/use-toast";
 import { signIn, signUp } from "@/lib/auth";
+import { supabase } from "@/integrations/supabase/client";
+import { logActivity } from "@/hooks/useActivityLog";
 import { Eye, EyeOff, Loader2, ShoppingBag } from "lucide-react";
 import { z } from "zod";
 
@@ -81,9 +83,36 @@ const Auth = () => {
     setIsLoading(true);
 
     try {
-      const { error } = await signIn(signInEmail, signInPassword);
+      const { user: signedInUser, error } = await signIn(signInEmail, signInPassword);
 
       if (error) throw error;
+
+      // Check if user is banned
+      if (signedInUser) {
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("is_banned, ban_reason")
+          .eq("id", signedInUser.id)
+          .single();
+
+        if (profile?.is_banned) {
+          // Sign out the banned user
+          await supabase.auth.signOut();
+          
+          toast({
+            title: "الحساب محظور",
+            description: profile.ban_reason 
+              ? `تم حظر حسابك بسبب: ${profile.ban_reason}`
+              : "تم حظر حسابك. يرجى التواصل مع الدعم.",
+            variant: "destructive",
+          });
+          setIsLoading(false);
+          return;
+        }
+
+        // Log successful login
+        await logActivity(signedInUser.id, "login");
+      }
 
       toast({
         title: "تم تسجيل الدخول بنجاح",
@@ -129,9 +158,14 @@ const Auth = () => {
     setIsLoading(true);
 
     try {
-      const { error } = await signUp(signUpEmail, signUpPassword, signUpFullName, signUpRole);
+      const { user: newUser, error } = await signUp(signUpEmail, signUpPassword, signUpFullName, signUpRole);
 
       if (error) throw error;
+
+      // Log signup activity
+      if (newUser) {
+        await logActivity(newUser.id, "signup", { role: signUpRole });
+      }
 
       toast({
         title: "تم إنشاء الحساب بنجاح",

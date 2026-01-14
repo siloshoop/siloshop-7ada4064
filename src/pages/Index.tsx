@@ -1,21 +1,30 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense, lazy } from "react";
 import { useSearchParams } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import AnnouncementBar from "@/components/AnnouncementBar";
 import HeroSection from "@/components/HeroSection";
-import CategorySection from "@/components/CategorySection";
-import PopularCategories from "@/components/PopularCategories";
-import FeaturedProducts from "@/components/FeaturedProducts";
-import EnhancedDailyDeals from "@/components/EnhancedDailyDeals";
-import BestSellers from "@/components/BestSellers";
-import RecentlyViewed from "@/components/RecentlyViewed";
-import ProductRecommendations from "@/components/ProductRecommendations";
-import PurchasedRecently from "@/components/PurchasedRecently";
-import Footer from "@/components/Footer";
-import ProductCard from "@/components/ProductCard";
 import { SearchFilters } from "@/components/SearchFilters";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2 } from "lucide-react";
+import ProductCard from "@/components/ProductCard";
+import Footer from "@/components/Footer";
+import {
+  HeroSkeleton,
+  CategorySkeleton,
+  ProductGridSkeleton,
+  DailyDealsSkeleton,
+  RecentlyViewedSkeleton,
+} from "@/components/HomeSkeleton";
+
+// Lazy load components for better performance
+const PopularCategories = lazy(() => import("@/components/PopularCategories"));
+const EnhancedDailyDeals = lazy(() => import("@/components/EnhancedDailyDeals"));
+const CategorySection = lazy(() => import("@/components/CategorySection"));
+const PurchasedRecently = lazy(() => import("@/components/PurchasedRecently"));
+const BestSellers = lazy(() => import("@/components/BestSellers"));
+const RecentlyViewed = lazy(() => import("@/components/RecentlyViewed"));
+const ProductRecommendations = lazy(() => import("@/components/ProductRecommendations"));
+const FeaturedProducts = lazy(() => import("@/components/FeaturedProducts"));
 
 interface Product {
   id: string;
@@ -144,14 +153,30 @@ const Index = () => {
       <Navbar />
       <main className="flex-1">
         <HeroSection />
-        <PopularCategories />
-        <EnhancedDailyDeals />
-        <CategorySection />
-        <PurchasedRecently />
-        <BestSellers />
-        <RecentlyViewed />
-        <ProductRecommendations />
-        <FeaturedProducts />
+        <Suspense fallback={<CategorySkeleton />}>
+          <PopularCategories />
+        </Suspense>
+        <Suspense fallback={<DailyDealsSkeleton />}>
+          <EnhancedDailyDeals />
+        </Suspense>
+        <Suspense fallback={<CategorySkeleton />}>
+          <CategorySection />
+        </Suspense>
+        <Suspense fallback={<ProductGridSkeleton />}>
+          <PurchasedRecently />
+        </Suspense>
+        <Suspense fallback={<ProductGridSkeleton />}>
+          <BestSellers />
+        </Suspense>
+        <Suspense fallback={<RecentlyViewedSkeleton />}>
+          <RecentlyViewed />
+        </Suspense>
+        <Suspense fallback={<ProductGridSkeleton />}>
+          <ProductRecommendations />
+        </Suspense>
+        <Suspense fallback={<ProductGridSkeleton />}>
+          <FeaturedProducts />
+        </Suspense>
       </main>
       <Footer />
     </div>

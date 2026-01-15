@@ -1,0 +1,196 @@
+import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+
+const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
+
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers":
+    "authorization, x-client-info, apikey, content-type",
+};
+
+interface OrderItem {
+  product_name: string;
+  quantity: number;
+  price: number;
+}
+
+interface NewOrderPayload {
+  order_id: string;
+  vendor_id: string;
+  customer_name: string;
+  items: OrderItem[];
+  total_amount: number;
+  shipping_address: string;
+}
+
+const handler = async (req: Request): Promise<Response> => {
+  if (req.method === "OPTIONS") {
+    return new Response(null, { headers: corsHeaders });
+  }
+
+  try {
+    const { order_id, vendor_id, customer_name, items, total_amount, shipping_address }: NewOrderPayload = await req.json();
+
+    // Create Supabase client
+    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+    const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    const supabase = createClient(supabaseUrl, supabaseServiceKey);
+
+    // Get vendor email
+    const { data: vendorData, error: vendorError } = await supabase.auth.admin.getUserById(vendor_id);
+    
+    if (vendorError || !vendorData?.user?.email) {
+      console.log("Could not find vendor email");
+      return new Response(
+        JSON.stringify({ message: "Vendor email not found" }),
+        { status: 200, headers: { "Content-Type": "application/json", ...corsHeaders } }
+      );
+    }
+
+    const vendorEmail = vendorData.user.email;
+
+    // Get vendor profile for name
+    const { data: vendorProfile } = await supabase
+      .from("profiles")
+      .select("full_name")
+      .eq("id", vendor_id)
+      .single();
+
+    const vendorName = vendorProfile?.full_name || "البائع";
+
+    const orderDate = new Date().toLocaleDateString('ar-SY', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+
+    // Create items HTML
+    const itemsHtml = items.map(item => `
+      <tr>
+        <td style="padding: 12px; border-bottom: 1px solid #e5e7eb;">${item.product_name}</td>
+        <td style="padding: 12px; border-bottom: 1px solid #e5e7eb; text-align: center;">${item.quantity}</td>
+        <td style="padding: 12px; border-bottom: 1px solid #e5e7eb; text-align: left;">${item.price} ل.س</td>
+      </tr>
+    `).join('');
+
+    // Send email to vendor
+    const emailResponse = await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${RESEND_API_KEY}`,
+      },
+      body: JSON.stringify({
+        from: "Trendingsy <onboarding@resend.dev>",
+        to: [vendorEmail],
+        subject: `🛒 طلب جديد #${order_id.slice(0, 8)}`,
+        html: `
+          <!DOCTYPE html>
+          <html dir="rtl" lang="ar">
+          <head>
+            <meta charset="UTF-8">
+            <style>
+              body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f4f4; margin: 0; padding: 20px; }
+              .container { max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+              .header { background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; padding: 30px; text-align: center; }
+              .header h1 { margin: 0; font-size: 24px; }
+              .content { padding: 30px; }
+              .order-info { background-color: #f0fdf4; border-radius: 8px; padding: 20px; margin: 20px 0; border-right: 4px solid #10b981; }
+              .info-row { display: flex; justify-content: space-between; margin: 10px 0; }
+              .label { color: #6c757d; }
+              .value { font-weight: 600; color: #212529; }
+              table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+              th { background-color: #f8f9fa; padding: 12px; text-align: right; border-bottom: 2px solid #e5e7eb; }
+              .total-row { background-color: #f0fdf4; font-weight: bold; }
+              .total-row td { padding: 15px 12px; }
+              .footer { background-color: #f8f9fa; padding: 20px; text-align: center; color: #6c757d; font-size: 12px; }
+              .btn { display: inline-block; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; padding: 12px 30px; text-decoration: none; border-radius: 6px; margin-top: 20px; }
+            </style>
+          </head>
+          <body>
+            <div class="container">
+              <div class="header">
+                <h1>🎉 طلب جديد!</h1>
+              </div>
+              <div class="content">
+                <p>مرحباً ${vendorName}،</p>
+                <p>تهانينا! لديك طلب جديد على منصة Trendingsy:</p>
+                
+                <div class="order-info">
+                  <div class="info-row">
+                    <span class="label">رقم الطلب:</span>
+                    <span class="value">#${order_id.slice(0, 8)}</span>
+                  </div>
+                  <div class="info-row">
+                    <span class="label">اسم العميل:</span>
+                    <span class="value">${customer_name}</span>
+                  </div>
+                  <div class="info-row">
+                    <span class="label">تاريخ الطلب:</span>
+                    <span class="value">${orderDate}</span>
+                  </div>
+                  <div class="info-row">
+                    <span class="label">عنوان التوصيل:</span>
+                    <span class="value">${shipping_address || 'غير محدد'}</span>
+                  </div>
+                </div>
+
+                <h3>تفاصيل المنتجات:</h3>
+                <table>
+                  <thead>
+                    <tr>
+                      <th>المنتج</th>
+                      <th style="text-align: center;">الكمية</th>
+                      <th style="text-align: left;">السعر</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    ${itemsHtml}
+                    <tr class="total-row">
+                      <td colspan="2">الإجمالي</td>
+                      <td style="text-align: left;">${total_amount} ل.س</td>
+                    </tr>
+                  </tbody>
+                </table>
+
+                <p>يرجى تجهيز الطلب في أقرب وقت ممكن.</p>
+              </div>
+              <div class="footer">
+                <p>هذه رسالة آلية من نظام Trendingsy</p>
+              </div>
+            </div>
+          </body>
+          </html>
+        `,
+      }),
+    });
+
+    const emailResult = await emailResponse.json();
+    console.log("Vendor notification email sent successfully:", emailResult);
+
+    // Also create in-app notification for vendor
+    await supabase.from("notifications").insert({
+      user_id: vendor_id,
+      title: "طلب جديد",
+      message: `لديك طلب جديد من ${customer_name} بقيمة ${total_amount} ل.س`,
+      type: "new_order",
+      related_id: order_id,
+    });
+
+    return new Response(
+      JSON.stringify({ success: true }),
+      { status: 200, headers: { "Content-Type": "application/json", ...corsHeaders } }
+    );
+  } catch (error: any) {
+    console.error("Error in notify-vendor-new-order function:", error);
+    return new Response(
+      JSON.stringify({ error: error.message }),
+      { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders } }
+    );
+  }
+};
+
+serve(handler);

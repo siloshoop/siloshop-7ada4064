@@ -231,6 +231,48 @@ const Checkout = () => {
 
       if (itemsError) throw itemsError;
 
+      // Get customer profile for name
+      const { data: customerProfile } = await supabase
+        .from("profiles")
+        .select("full_name")
+        .eq("id", user.id)
+        .single();
+
+      const customerName = customerProfile?.full_name || "عميل";
+
+      // Group items by vendor and notify each vendor
+      const itemsByVendor = cartItems.reduce((acc, item) => {
+        const vendorId = item.product.vendor_id;
+        if (!acc[vendorId]) {
+          acc[vendorId] = [];
+        }
+        acc[vendorId].push({
+          product_name: item.product.name,
+          quantity: item.quantity,
+          price: Number(item.product.price) * item.quantity,
+        });
+        return acc;
+      }, {} as Record<string, Array<{ product_name: string; quantity: number; price: number }>>);
+
+      // Notify each vendor about their items
+      for (const [vendorId, vendorItems] of Object.entries(itemsByVendor)) {
+        const vendorTotal = vendorItems.reduce((sum, item) => sum + item.price, 0);
+        try {
+          await supabase.functions.invoke("notify-vendor-new-order", {
+            body: {
+              order_id: order.id,
+              vendor_id: vendorId,
+              customer_name: customerName,
+              items: vendorItems,
+              total_amount: vendorTotal,
+              shipping_address: formData.shipping_address,
+            },
+          });
+        } catch (notifyError) {
+          console.error("Failed to notify vendor:", notifyError);
+        }
+      }
+
       // Update coupon usage if applied
       if (appliedCoupon) {
         await supabase

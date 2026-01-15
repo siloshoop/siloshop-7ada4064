@@ -162,9 +162,22 @@ const Auth = () => {
 
       if (error) throw error;
 
-      // Log signup activity
+      // Log signup activity and notify admins
       if (newUser) {
         await logActivity(newUser.id, "signup", { role: signUpRole });
+        
+        // Notify admins about new user registration
+        try {
+          await supabase.functions.invoke("notify-admin-new-user", {
+            body: {
+              user_id: newUser.id,
+              user_email: signUpEmail,
+              user_name: signUpFullName,
+            },
+          });
+        } catch (notifyError) {
+          console.error("Failed to notify admins:", notifyError);
+        }
       }
 
       toast({

@@ -10,7 +10,13 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Loader2, Package, Eye, EyeOff } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
-
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 interface Order {
   id: string;
   created_at: string;
@@ -62,6 +68,7 @@ const VendorOrders = () => {
   const [orders, setOrders] = useState<Order[]>([]);
   const [orderItems, setOrderItems] = useState<Record<string, OrderItem[]>>({});
   const [loading, setLoading] = useState(true);
+  const [updatingStatus, setUpdatingStatus] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState("all");
   const [revealedOrders, setRevealedOrders] = useState<Set<string>>(new Set());
   const [fullAddresses, setFullAddresses] = useState<Record<string, string>>({});
@@ -185,6 +192,61 @@ const VendorOrders = () => {
     return orders.filter(order => order.status === status);
   };
 
+  const updateOrderStatus = async (orderId: string, newStatus: string) => {
+    setUpdatingStatus(orderId);
+    try {
+      // Update order status
+      const { error: orderError } = await supabase
+        .from("orders")
+        .update({ status: newStatus })
+        .eq("id", orderId);
+
+      if (orderError) throw orderError;
+
+      // Add to status history
+      const { error: historyError } = await supabase
+        .from("order_status_history")
+        .insert({
+          order_id: orderId,
+          status: newStatus,
+        });
+
+      if (historyError) throw historyError;
+
+      // Send email notification to customer
+      try {
+        await supabase.functions.invoke("notify-customer-order-status", {
+          body: {
+            order_id: orderId,
+            new_status: newStatus,
+          },
+        });
+      } catch (emailError) {
+        console.error("Failed to send email notification:", emailError);
+      }
+
+      // Update local state
+      setOrders(prev =>
+        prev.map(order =>
+          order.id === orderId ? { ...order, status: newStatus } : order
+        )
+      );
+
+      toast({
+        title: "تم التحديث",
+        description: "تم تحديث حالة الطلب بنجاح",
+      });
+    } catch (error: any) {
+      toast({
+        title: "خطأ",
+        description: "فشل في تحديث حالة الطلب",
+        variant: "destructive",
+      });
+    } finally {
+      setUpdatingStatus(null);
+    }
+  };
+
   if (authLoading || loading) {
     return (
       <div className="min-h-screen flex flex-col">
@@ -304,6 +366,32 @@ const VendorOrders = () => {
                                 </div>
                               </div>
                             )}
+
+                            {/* Status Update Section */}
+                            <div className="border-t pt-4 mt-4">
+                              <div className="flex items-center gap-4">
+                                <p className="text-sm font-medium">تحديث الحالة:</p>
+                                <Select
+                                  value={order.status}
+                                  onValueChange={(value) => updateOrderStatus(order.id, value)}
+                                  disabled={updatingStatus === order.id}
+                                >
+                                  <SelectTrigger className="w-[180px]">
+                                    <SelectValue placeholder="اختر الحالة" />
+                                  </SelectTrigger>
+                                  <SelectContent className="bg-background">
+                                    <SelectItem value="pending">قيد الانتظار</SelectItem>
+                                    <SelectItem value="processing">قيد المعالجة</SelectItem>
+                                    <SelectItem value="shipped">تم الشحن</SelectItem>
+                                    <SelectItem value="delivered">تم التوصيل</SelectItem>
+                                    <SelectItem value="cancelled">ملغى</SelectItem>
+                                  </SelectContent>
+                                </Select>
+                                {updatingStatus === order.id && (
+                                  <Loader2 className="h-4 w-4 animate-spin" />
+                                )}
+                              </div>
+                            </div>
                           </div>
                         </CardContent>
                       </Card>

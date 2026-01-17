@@ -530,6 +530,45 @@ export type Database = {
         }
         Relationships: []
       }
+      notification_preferences: {
+        Row: {
+          created_at: string
+          daily_deals: boolean
+          id: string
+          new_products: boolean
+          newsletter: boolean
+          order_updates: boolean
+          price_drops: boolean
+          promotions: boolean
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          daily_deals?: boolean
+          id?: string
+          new_products?: boolean
+          newsletter?: boolean
+          order_updates?: boolean
+          price_drops?: boolean
+          promotions?: boolean
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          daily_deals?: boolean
+          id?: string
+          new_products?: boolean
+          newsletter?: boolean
+          order_updates?: boolean
+          price_drops?: boolean
+          promotions?: boolean
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       notifications: {
         Row: {
           created_at: string

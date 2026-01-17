@@ -8,23 +8,16 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { Bell, Package, Tag, Percent, Loader2, Save } from "lucide-react";
+import { Bell, Package, Tag, Percent, Loader2, Save, ShoppingBag, Mail, Megaphone } from "lucide-react";
 import PushNotificationManager from "@/components/PushNotificationManager";
 
 interface NotificationPreferences {
   new_products: boolean;
   daily_deals: boolean;
   price_drops: boolean;
-}
-
-interface DBNotificationPreferences {
-  id: string;
-  user_id: string;
-  new_products: boolean;
-  daily_deals: boolean;
-  price_drops: boolean;
-  created_at: string;
-  updated_at: string;
+  order_updates: boolean;
+  promotions: boolean;
+  newsletter: boolean;
 }
 
 const NotificationSettings = () => {
@@ -37,6 +30,9 @@ const NotificationSettings = () => {
     new_products: true,
     daily_deals: true,
     price_drops: true,
+    order_updates: true,
+    promotions: true,
+    newsletter: false,
   });
 
   useEffect(() => {
@@ -55,7 +51,7 @@ const NotificationSettings = () => {
   const fetchPreferences = async (uid: string) => {
     try {
       const { data, error } = await supabase
-        .from("notification_preferences" as any)
+        .from("notification_preferences")
         .select("*")
         .eq("user_id", uid)
         .maybeSingle();
@@ -63,11 +59,13 @@ const NotificationSettings = () => {
       if (error) throw error;
 
       if (data) {
-        const prefs = data as unknown as DBNotificationPreferences;
         setPreferences({
-          new_products: prefs.new_products,
-          daily_deals: prefs.daily_deals,
-          price_drops: prefs.price_drops,
+          new_products: data.new_products,
+          daily_deals: data.daily_deals,
+          price_drops: data.price_drops,
+          order_updates: data.order_updates,
+          promotions: data.promotions,
+          newsletter: data.newsletter,
         });
       }
     } catch (error) {
@@ -90,12 +88,12 @@ const NotificationSettings = () => {
     setSaving(true);
     try {
       const { error } = await supabase
-        .from("notification_preferences" as any)
+        .from("notification_preferences")
         .upsert({
           user_id: userId,
           ...preferences,
           updated_at: new Date().toISOString(),
-        } as any, {
+        }, {
           onConflict: "user_id",
         });
 
@@ -128,6 +126,57 @@ const NotificationSettings = () => {
       </div>
     );
   }
+
+  const notificationOptions = [
+    {
+      key: "order_updates" as keyof NotificationPreferences,
+      icon: ShoppingBag,
+      iconColor: "text-blue-500",
+      bgColor: "bg-blue-500/10",
+      title: "تحديثات الطلبات",
+      description: "إشعارات عند تغيير حالة طلباتك (شحن، توصيل، إلخ)",
+    },
+    {
+      key: "new_products" as keyof NotificationPreferences,
+      icon: Package,
+      iconColor: "text-primary",
+      bgColor: "bg-primary/10",
+      title: "منتجات جديدة",
+      description: "إشعارات عند إضافة منتجات جديدة من الماركات المتابَعة",
+    },
+    {
+      key: "daily_deals" as keyof NotificationPreferences,
+      icon: Tag,
+      iconColor: "text-orange-500",
+      bgColor: "bg-orange-500/10",
+      title: "العروض اليومية",
+      description: "إشعارات عند إضافة منتجاتك المفضلة للعروض اليومية",
+    },
+    {
+      key: "price_drops" as keyof NotificationPreferences,
+      icon: Percent,
+      iconColor: "text-green-500",
+      bgColor: "bg-green-500/10",
+      title: "تخفيضات الأسعار",
+      description: "إشعارات عند انخفاض أسعار المنتجات المفضلة لديك",
+    },
+    {
+      key: "promotions" as keyof NotificationPreferences,
+      icon: Megaphone,
+      iconColor: "text-purple-500",
+      bgColor: "bg-purple-500/10",
+      title: "العروض الترويجية",
+      description: "إشعارات بالعروض والخصومات الخاصة",
+    },
+    {
+      key: "newsletter" as keyof NotificationPreferences,
+      icon: Mail,
+      iconColor: "text-rose-500",
+      bgColor: "bg-rose-500/10",
+      title: "النشرة البريدية",
+      description: "استلم ملخص أسبوعي بأفضل العروض والمنتجات",
+    },
+  ];
 
   return (
     <div className="min-h-screen bg-background" dir="rtl">
@@ -163,72 +212,35 @@ const NotificationSettings = () => {
                 اختر أنواع الإشعارات التي تريد تلقيها
               </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-6">
-              {/* New Products */}
-              <div className="flex items-center justify-between p-4 rounded-lg border bg-card hover:bg-accent/50 transition-colors">
-                <div className="flex items-center gap-4">
-                  <div className="p-2 rounded-full bg-primary/10">
-                    <Package className="h-5 w-5 text-primary" />
+            <CardContent className="space-y-4">
+              {notificationOptions.map((option) => {
+                const IconComponent = option.icon;
+                return (
+                  <div 
+                    key={option.key}
+                    className="flex items-center justify-between p-4 rounded-lg border bg-card hover:bg-accent/50 transition-colors"
+                  >
+                    <div className="flex items-center gap-4">
+                      <div className={`p-2 rounded-full ${option.bgColor}`}>
+                        <IconComponent className={`h-5 w-5 ${option.iconColor}`} />
+                      </div>
+                      <div>
+                        <Label htmlFor={option.key} className="text-base font-medium cursor-pointer">
+                          {option.title}
+                        </Label>
+                        <p className="text-sm text-muted-foreground">
+                          {option.description}
+                        </p>
+                      </div>
+                    </div>
+                    <Switch
+                      id={option.key}
+                      checked={preferences[option.key]}
+                      onCheckedChange={() => handleToggle(option.key)}
+                    />
                   </div>
-                  <div>
-                    <Label htmlFor="new_products" className="text-base font-medium cursor-pointer">
-                      منتجات جديدة
-                    </Label>
-                    <p className="text-sm text-muted-foreground">
-                      إشعارات عند إضافة منتجات جديدة من الماركات المتابَعة
-                    </p>
-                  </div>
-                </div>
-                <Switch
-                  id="new_products"
-                  checked={preferences.new_products}
-                  onCheckedChange={() => handleToggle("new_products")}
-                />
-              </div>
-
-              {/* Daily Deals */}
-              <div className="flex items-center justify-between p-4 rounded-lg border bg-card hover:bg-accent/50 transition-colors">
-                <div className="flex items-center gap-4">
-                  <div className="p-2 rounded-full bg-orange-500/10">
-                    <Tag className="h-5 w-5 text-orange-500" />
-                  </div>
-                  <div>
-                    <Label htmlFor="daily_deals" className="text-base font-medium cursor-pointer">
-                      العروض اليومية
-                    </Label>
-                    <p className="text-sm text-muted-foreground">
-                      إشعارات عند إضافة منتجاتك المفضلة للعروض اليومية
-                    </p>
-                  </div>
-                </div>
-                <Switch
-                  id="daily_deals"
-                  checked={preferences.daily_deals}
-                  onCheckedChange={() => handleToggle("daily_deals")}
-                />
-              </div>
-
-              {/* Price Drops */}
-              <div className="flex items-center justify-between p-4 rounded-lg border bg-card hover:bg-accent/50 transition-colors">
-                <div className="flex items-center gap-4">
-                  <div className="p-2 rounded-full bg-green-500/10">
-                    <Percent className="h-5 w-5 text-green-500" />
-                  </div>
-                  <div>
-                    <Label htmlFor="price_drops" className="text-base font-medium cursor-pointer">
-                      تخفيضات الأسعار
-                    </Label>
-                    <p className="text-sm text-muted-foreground">
-                      إشعارات عند انخفاض أسعار المنتجات المفضلة لديك
-                    </p>
-                  </div>
-                </div>
-                <Switch
-                  id="price_drops"
-                  checked={preferences.price_drops}
-                  onCheckedChange={() => handleToggle("price_drops")}
-                />
-              </div>
+                );
+              })}
 
               <Button 
                 onClick={savePreferences} 

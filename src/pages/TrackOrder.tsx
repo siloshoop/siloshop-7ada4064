@@ -6,11 +6,41 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, Package, MapPin, Clock, Truck } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Loader2, Package, MapPin, Clock, Truck, ExternalLink } from "lucide-react";
 import { format } from "date-fns";
 import { ar } from "date-fns/locale";
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
+
+// روابط تتبع شركات الشحن
+const courierTrackingUrls: Record<string, (trackingNumber: string) => string> = {
+  'aramex': (tn) => `https://www.aramex.com/track/results?ShipmentNumber=${tn}`,
+  'أرامكس': (tn) => `https://www.aramex.com/track/results?ShipmentNumber=${tn}`,
+  'dhl': (tn) => `https://www.dhl.com/global-en/home/tracking/tracking-express.html?submit=1&tracking-id=${tn}`,
+  'دي اتش ال': (tn) => `https://www.dhl.com/global-en/home/tracking/tracking-express.html?submit=1&tracking-id=${tn}`,
+  'fedex': (tn) => `https://www.fedex.com/fedextrack/?trknbr=${tn}`,
+  'فيديكس': (tn) => `https://www.fedex.com/fedextrack/?trknbr=${tn}`,
+  'ups': (tn) => `https://www.ups.com/track?tracknum=${tn}`,
+  'يو بي اس': (tn) => `https://www.ups.com/track?tracknum=${tn}`,
+  'smsa': (tn) => `https://www.smsaexpress.com/trackshipment?tracknumbers=${tn}`,
+  'سمسا': (tn) => `https://www.smsaexpress.com/trackshipment?tracknumbers=${tn}`,
+  'zajil': (tn) => `https://www.zajil.com/track?id=${tn}`,
+  'زاجل': (tn) => `https://www.zajil.com/track?id=${tn}`,
+  'saudi post': (tn) => `https://www.splonline.com.sa/track/${tn}`,
+  'البريد السعودي': (tn) => `https://www.splonline.com.sa/track/${tn}`,
+  'j&t': (tn) => `https://www.jtexpress.sa/track?id=${tn}`,
+  'جي اند تي': (tn) => `https://www.jtexpress.sa/track?id=${tn}`,
+  'naqel': (tn) => `https://naqelexpress.com/en/track/${tn}`,
+  'ناقل': (tn) => `https://naqelexpress.com/en/track/${tn}`,
+};
+
+const getTrackingUrl = (courierName: string | null, trackingNumber: string): string | null => {
+  if (!courierName || !trackingNumber) return null;
+  const normalizedName = courierName.toLowerCase().trim();
+  const urlGenerator = courierTrackingUrls[normalizedName];
+  return urlGenerator ? urlGenerator(trackingNumber) : null;
+};
 
 interface Order {
   id: string;
@@ -289,6 +319,33 @@ const TrackOrder = () => {
                       <Truck className="h-4 w-4 text-muted-foreground" />
                       <span className="text-muted-foreground">شركة الشحن:</span>
                       <span className="font-medium">{order.courier_name}</span>
+                    </div>
+                  )}
+
+                  {/* زر تتبع الشحنة المباشر */}
+                  {order.tracking_number && order.courier_name && (
+                    <div className="pt-2">
+                      {getTrackingUrl(order.courier_name, order.tracking_number) ? (
+                        <Button
+                          className="w-full"
+                          onClick={() => {
+                            const url = getTrackingUrl(order.courier_name, order.tracking_number!);
+                            if (url) window.open(url, '_blank');
+                          }}
+                        >
+                          <ExternalLink className="h-4 w-4 ml-2" />
+                          تتبع الشحنة عبر {order.courier_name}
+                        </Button>
+                      ) : (
+                        <div className="p-3 bg-muted rounded-lg">
+                          <p className="text-sm text-muted-foreground text-center">
+                            يمكنك تتبع شحنتك باستخدام رقم التتبع: <span className="font-mono font-bold">{order.tracking_number}</span>
+                          </p>
+                          <p className="text-xs text-muted-foreground text-center mt-1">
+                            عبر موقع شركة الشحن: {order.courier_name}
+                          </p>
+                        </div>
+                      )}
                     </div>
                   )}
 

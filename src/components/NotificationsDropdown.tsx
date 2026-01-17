@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Bell, Search, Trash2, Filter, X } from "lucide-react";
+import { Bell, Search, Trash2, Filter, X, Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -335,13 +335,35 @@ export const NotificationsDropdown = () => {
         </div>
         
         {notifications.length > 0 && (
+          <div className="p-2 border-t flex gap-2">
+            <Button 
+              variant="ghost" 
+              className="flex-1 text-sm"
+              onClick={() => navigate("/notifications")}
+            >
+              عرض جميع الإشعارات
+            </Button>
+            <Button 
+              variant="ghost" 
+              size="icon"
+              className="h-9 w-9"
+              onClick={() => navigate("/notifications/settings")}
+              title="إعدادات الإشعارات"
+            >
+              <Settings className="h-4 w-4" />
+            </Button>
+          </div>
+        )}
+        
+        {notifications.length === 0 && (
           <div className="p-2 border-t">
             <Button 
               variant="ghost" 
               className="w-full text-sm"
-              onClick={() => navigate("/notifications")}
+              onClick={() => navigate("/notifications/settings")}
             >
-              عرض جميع الإشعارات
+              <Settings className="h-4 w-4 ml-2" />
+              إعدادات الإشعارات
             </Button>
           </div>
         )}

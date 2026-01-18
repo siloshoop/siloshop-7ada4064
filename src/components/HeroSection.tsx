@@ -12,7 +12,7 @@ const HeroSection = () => {
                 عروض الموسم الجديد
               </span>
             </div>
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight">
+            <h1 className="text-4xl md:text-5xl font-bold leading-tight lg:text-4xl">
               اكتشف أحدث صيحات
               <span className="block bg-gradient-to-l from-primary to-accent bg-clip-text text-transparent mx-px my-[11px] px-0 py-[11px]">
                 الموضة والأناقة

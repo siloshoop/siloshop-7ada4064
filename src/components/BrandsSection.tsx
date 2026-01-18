@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ChevronLeft, ChevronRight, Sparkles, Bell, BellOff, Check } from "lucide-react";
+import { Sparkles, Bell, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 
@@ -21,7 +21,6 @@ const BrandsSection = () => {
   const [brands, setBrands] = useState<Brand[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedBrand, setSelectedBrand] = useState<string | null>(null);
-  const [scrollPosition, setScrollPosition] = useState(0);
   const [user, setUser] = useState<any>(null);
   const [followingLoading, setFollowingLoading] = useState<string | null>(null);
   const [isVisible, setIsVisible] = useState(false);
@@ -196,32 +195,19 @@ const BrandsSection = () => {
     }
   };
 
-  const scroll = (direction: "left" | "right") => {
-    const container = document.getElementById("brands-container");
-    if (container) {
-      const scrollAmount = 300;
-      const newPosition =
-        direction === "left"
-          ? scrollPosition - scrollAmount
-          : scrollPosition + scrollAmount;
-
-      container.scrollTo({ left: newPosition, behavior: "smooth" });
-      setScrollPosition(newPosition);
-    }
-  };
 
   const followedCount = brands.filter((b) => b.is_following).length;
 
   if (loading) {
     return (
-      <section className="py-8 bg-gradient-to-b from-muted/30 to-background">
+      <section className="py-6 bg-gradient-to-b from-muted/30 to-background">
         <div className="container px-4">
-          <div className="flex items-center gap-2 mb-6">
-            <Skeleton className="h-8 w-48" />
+          <div className="flex items-center gap-2 mb-4">
+            <Skeleton className="h-6 w-40" />
           </div>
-          <div className="flex gap-4 overflow-hidden">
-            {Array.from({ length: 6 }).map((_, i) => (
-              <Skeleton key={i} className="h-36 w-40 flex-shrink-0 rounded-xl" />
+          <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-3">
+            {Array.from({ length: 8 }).map((_, i) => (
+              <Skeleton key={i} className="h-28 rounded-lg" />
             ))}
           </div>
         </div>
@@ -234,82 +220,53 @@ const BrandsSection = () => {
   }
 
   return (
-    <section ref={sectionRef} className="py-8 bg-gradient-to-b from-muted/30 to-background overflow-hidden">
+    <section ref={sectionRef} className="py-6 bg-gradient-to-b from-muted/30 to-background">
       <div className="container px-4">
         {/* Header */}
-        <div className={`flex items-center justify-between mb-6 transition-all duration-700 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
-          <div className="flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-primary/10">
-              <Sparkles className="h-5 w-5 text-primary" />
-            </div>
-            <div>
-              <h2 className="text-2xl font-bold text-foreground">
-                العلامات التجارية
-              </h2>
-              <p className="text-sm text-muted-foreground">
-                تصفح حسب الماركة المفضلة
-                {followedCount > 0 && (
-                  <span className="text-primary mr-2">
-                    • تتابع {followedCount} علامة
-                  </span>
-                )}
-              </p>
-            </div>
+        <div className={`flex items-center gap-2 mb-4 transition-all duration-700 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
+          <div className="p-1.5 rounded-md bg-primary/10">
+            <Sparkles className="h-5 w-5 text-primary" />
           </div>
-
-          {/* Navigation Buttons */}
-          <div className="flex gap-2">
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={() => scroll("right")}
-              className="h-9 w-9 rounded-full border-border hover:bg-primary hover:text-primary-foreground transition-colors"
-            >
-              <ChevronRight className="h-4 w-4" />
-            </Button>
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={() => scroll("left")}
-              className="h-9 w-9 rounded-full border-border hover:bg-primary hover:text-primary-foreground transition-colors"
-            >
-              <ChevronLeft className="h-4 w-4" />
-            </Button>
+          <div>
+            <h2 className="text-lg md:text-xl font-bold text-foreground">
+              العلامات التجارية
+            </h2>
+            {followedCount > 0 && (
+              <span className="text-xs text-primary">
+                تتابع {followedCount} علامة
+              </span>
+            )}
           </div>
         </div>
 
-        {/* Brands Container */}
-        <div
-          id="brands-container"
-          className={`flex gap-4 overflow-x-auto scrollbar-hide pb-4 -mx-4 px-4 transition-all duration-700 delay-200 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}
-          style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
-        >
+        {/* Brands Grid */}
+        <div className={`grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-3 transition-all duration-700 delay-200 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
           {/* All Brands Card */}
           <Card
             onClick={() => {
               setSelectedBrand(null);
               navigate("/search");
             }}
-            className={`flex-shrink-0 w-40 h-36 flex flex-col items-center justify-center gap-2 cursor-pointer transition-all duration-300 hover:shadow-lg hover:-translate-y-1 ${
+            className={`h-24 flex flex-col items-center justify-center gap-1.5 cursor-pointer transition-all duration-300 hover:shadow-md ${
               !selectedBrand
                 ? "ring-2 ring-primary bg-primary/5"
                 : "hover:border-primary/50"
             }`}
           >
-            <div className="w-14 h-14 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center">
-              <Sparkles className="h-7 w-7 text-primary-foreground" />
+            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center">
+              <Sparkles className="h-5 w-5 text-primary-foreground" />
             </div>
-            <span className="text-sm font-medium text-foreground">
-              جميع الماركات
+            <span className="text-xs font-medium text-foreground">
+              الكل
             </span>
           </Card>
 
           {/* Brand Cards */}
-          {brands.map((brand) => (
+          {brands.slice(0, 7).map((brand) => (
             <Card
               key={brand.id}
               onClick={() => handleBrandClick(brand.id)}
-              className={`flex-shrink-0 w-40 h-36 flex flex-col items-center justify-center gap-2 cursor-pointer transition-all duration-300 hover:shadow-lg hover:-translate-y-1 group relative ${
+              className={`h-24 flex flex-col items-center justify-center gap-1.5 cursor-pointer transition-all duration-300 hover:shadow-md group relative ${
                 selectedBrand === brand.id
                   ? "ring-2 ring-primary bg-primary/5"
                   : "hover:border-primary/50"
@@ -321,38 +278,28 @@ const BrandsSection = () => {
                 size="icon"
                 onClick={(e) => toggleFollow(e, brand.id)}
                 disabled={followingLoading === brand.id}
-                className={`absolute top-2 right-2 h-7 w-7 rounded-full transition-all ${
+                className={`absolute top-1 right-1 h-5 w-5 rounded-full transition-all ${
                   brand.is_following
                     ? "bg-primary text-primary-foreground hover:bg-primary/90"
-                    : "bg-muted/80 text-muted-foreground hover:bg-primary hover:text-primary-foreground"
+                    : "bg-muted/80 text-muted-foreground hover:bg-primary hover:text-primary-foreground opacity-0 group-hover:opacity-100"
                 }`}
               >
                 {followingLoading === brand.id ? (
-                  <div className="h-3 w-3 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                  <div className="h-2 w-2 border border-current border-t-transparent rounded-full animate-spin" />
                 ) : brand.is_following ? (
-                  <Check className="h-3.5 w-3.5" />
+                  <Check className="h-2.5 w-2.5" />
                 ) : (
-                  <Bell className="h-3.5 w-3.5" />
+                  <Bell className="h-2.5 w-2.5" />
                 )}
               </Button>
 
-              {/* Product Count Badge */}
-              {brand.product_count && brand.product_count > 0 && (
-                <Badge
-                  variant="secondary"
-                  className="absolute top-2 left-2 text-xs bg-muted text-muted-foreground"
-                >
-                  {brand.product_count}
-                </Badge>
-              )}
-
               {/* Logo */}
-              <div className="w-14 h-14 rounded-full bg-background border border-border flex items-center justify-center overflow-hidden group-hover:border-primary/50 transition-colors">
+              <div className="w-10 h-10 rounded-full bg-background border border-border flex items-center justify-center overflow-hidden group-hover:border-primary/50 transition-colors">
                 {brand.logo_url ? (
                   <img
                     src={brand.logo_url}
                     alt={brand.name_ar}
-                    className="w-10 h-10 object-contain"
+                    className="w-8 h-8 object-contain"
                     onError={(e) => {
                       (e.target as HTMLImageElement).style.display = "none";
                       (e.target as HTMLImageElement).nextElementSibling?.classList.remove("hidden");
@@ -360,7 +307,7 @@ const BrandsSection = () => {
                   />
                 ) : null}
                 <span
-                  className={`text-lg font-bold text-primary ${
+                  className={`text-sm font-bold text-primary ${
                     brand.logo_url ? "hidden" : ""
                   }`}
                 >
@@ -369,29 +316,21 @@ const BrandsSection = () => {
               </div>
 
               {/* Brand Name */}
-              <span className="text-sm font-medium text-foreground text-center line-clamp-1 px-2">
+              <span className="text-xs font-medium text-foreground text-center line-clamp-1 px-1">
                 {brand.name_ar}
               </span>
-
-              {/* Following indicator */}
-              {brand.is_following && (
-                <span className="text-xs text-primary flex items-center gap-1">
-                  <Bell className="h-3 w-3" />
-                  متابَعة
-                </span>
-              )}
             </Card>
           ))}
         </div>
 
         {/* Selected Brand Indicator */}
         {selectedBrand && (
-          <div className="mt-4 flex items-center justify-center">
+          <div className="mt-3 flex items-center justify-center">
             <Badge
               variant="outline"
-              className="gap-2 px-4 py-2 bg-primary/5 border-primary/20"
+              className="gap-1.5 px-3 py-1.5 bg-primary/5 border-primary/20 text-xs"
             >
-              <span className="text-muted-foreground">تصفية حسب:</span>
+              <span className="text-muted-foreground">تصفية:</span>
               <span className="font-medium text-foreground">
                 {brands.find((b) => b.id === selectedBrand)?.name_ar}
               </span>

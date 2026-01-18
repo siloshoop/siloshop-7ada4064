@@ -130,10 +130,21 @@ All colors MUST be HSL.
     font-feature-settings: "cv11", "ss01";
     font-optical-sizing: auto;
     direction: rtl;
+    overflow-x: hidden;
   }
   
   html {
     direction: rtl;
+    overflow-x: hidden;
+  }
+
+  /* Hide scrollbars globally for horizontal scroll containers */
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
   }
 }
 

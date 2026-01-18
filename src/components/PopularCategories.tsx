@@ -5,9 +5,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { 
   Smartphone, Laptop, Shirt, Home, Dumbbell, Gamepad2, Watch, 
-  Baby, Sparkles, BookOpen, Car, Utensils, TrendingUp, ChevronLeft, ChevronRight
+  Baby, Sparkles, BookOpen, Car, Utensils, TrendingUp
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
 
 interface PopularCategory {
   id: string;
@@ -120,25 +119,17 @@ const PopularCategories = () => {
     return categoryColors[name] || "from-primary/20 to-primary/10";
   };
 
-  const scroll = (direction: "left" | "right") => {
-    const container = document.getElementById("popular-categories-container");
-    if (container) {
-      const scrollAmount = direction === "left" ? -300 : 300;
-      container.scrollBy({ left: scrollAmount, behavior: "smooth" });
-    }
-  };
-
   if (loading) {
     return (
-      <section className="py-8 bg-muted/30">
+      <section className="py-6 bg-muted/30">
         <div className="container px-4">
-          <div className="flex items-center gap-2 mb-6">
-            <Skeleton className="h-8 w-8" />
-            <Skeleton className="h-8 w-48" />
+          <div className="flex items-center gap-2 mb-4">
+            <Skeleton className="h-6 w-6" />
+            <Skeleton className="h-6 w-40" />
           </div>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-3">
             {[...Array(8)].map((_, i) => (
-              <Skeleton key={i} className="h-32 rounded-xl" />
+              <Skeleton key={i} className="h-24 rounded-lg" />
             ))}
           </div>
         </div>
@@ -151,64 +142,39 @@ const PopularCategories = () => {
   return (
     <section 
       ref={sectionRef}
-      className={`py-8 bg-muted/30 transition-all duration-700 ${
+      className={`py-6 bg-muted/30 transition-all duration-700 ${
         isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
       }`}
     >
       <div className="container px-4">
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-primary/10">
-              <TrendingUp className="h-6 w-6 text-primary" />
-            </div>
-            <div>
-              <h2 className="text-xl md:text-2xl font-bold">الفئات الأكثر شعبية</h2>
-              <p className="text-sm text-muted-foreground">اكتشف الفئات الأكثر طلباً</p>
-            </div>
+        <div className="flex items-center gap-2 mb-4">
+          <div className="p-1.5 rounded-md bg-primary/10">
+            <TrendingUp className="h-5 w-5 text-primary" />
           </div>
-          <div className="hidden md:flex gap-2">
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={() => scroll("right")}
-              className="rounded-full"
-            >
-              <ChevronRight className="h-4 w-4" />
-            </Button>
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={() => scroll("left")}
-              className="rounded-full"
-            >
-              <ChevronLeft className="h-4 w-4" />
-            </Button>
+          <div>
+            <h2 className="text-lg md:text-xl font-bold">الفئات الأكثر شعبية</h2>
           </div>
         </div>
 
-        <div
-          id="popular-categories-container"
-          className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide scroll-smooth"
-          style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
-        >
+        <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-3">
           {categories.map((category, index) => {
             const IconComponent = getIconComponent(category.icon);
             return (
               <Card
                 key={category.id}
-                className={`min-w-[160px] md:min-w-[200px] cursor-pointer transition-all duration-500 hover:scale-105 hover:shadow-lg border-0 bg-gradient-to-br ${getCategoryColor(category.name_ar)} ${
+                className={`cursor-pointer transition-all duration-300 hover:scale-105 hover:shadow-md border-0 bg-gradient-to-br ${getCategoryColor(category.name_ar)} ${
                   isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
                 }`}
-                style={{ transitionDelay: isVisible ? `${index * 100}ms` : "0ms" }}
+                style={{ transitionDelay: isVisible ? `${index * 50}ms` : "0ms" }}
                 onClick={() => navigate(`/category/${category.id}`)}
               >
-                <CardContent className="p-6 flex flex-col items-center text-center gap-3">
-                  <div className="p-4 rounded-full bg-background/80 backdrop-blur-sm shadow-sm">
-                    <IconComponent className="h-8 w-8 text-primary" />
+                <CardContent className="p-3 flex flex-col items-center text-center gap-1.5">
+                  <div className="p-2 rounded-full bg-background/80 backdrop-blur-sm">
+                    <IconComponent className="h-5 w-5 text-primary" />
                   </div>
                   <div>
-                    <h3 className="font-semibold text-foreground">{category.name_ar}</h3>
-                    <p className="text-sm text-muted-foreground mt-1">
+                    <h3 className="text-xs font-medium text-foreground line-clamp-1">{category.name_ar}</h3>
+                    <p className="text-[10px] text-muted-foreground">
                       {category.product_count} منتج
                     </p>
                   </div>

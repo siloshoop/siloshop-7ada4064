@@ -84,7 +84,7 @@ const MegaMenu = () => {
 
   return (
     <NavigationMenu className="max-w-none" dir="rtl">
-      <NavigationMenuList className="gap-1">
+      <NavigationMenuList className="gap-0">
         {categories.slice(0, 8).map((category) => {
           const IconComponent = iconMap[category.icon || "ShoppingBag"] || ShoppingBag;
           const subs = getCategorySubcategories(category.id);
@@ -92,44 +92,44 @@ const MegaMenu = () => {
           return (
             <NavigationMenuItem key={category.id}>
               <NavigationMenuTrigger
-                className="gap-2 bg-transparent hover:bg-accent/10 data-[state=open]:bg-accent/10"
+                className="gap-1.5 px-2.5 py-1.5 h-9 bg-transparent hover:bg-accent/10 data-[state=open]:bg-accent/10 text-sm"
                 onMouseEnter={() => setActiveCategory(category.id)}
               >
-                <IconComponent className="h-4 w-4" />
-                <span className="text-sm font-medium">{category.name_ar}</span>
+                <IconComponent className="h-3.5 w-3.5" />
+                <span className="text-xs font-medium">{category.name_ar}</span>
               </NavigationMenuTrigger>
               <NavigationMenuContent>
-                <div className="grid gap-4 p-6 w-[600px] lg:w-[800px] grid-cols-[1fr_250px]">
+                <div className="grid gap-3 p-4 w-[500px] lg:w-[650px] grid-cols-[1fr_200px]">
                   {/* Subcategories List */}
-                  <div className="space-y-4">
+                  <div className="space-y-3">
                     <div className="flex items-center justify-between border-b pb-2">
-                      <h3 className="text-lg font-bold text-foreground">{category.name_ar}</h3>
+                      <h3 className="text-base font-bold text-foreground">{category.name_ar}</h3>
                       <button
                         onClick={() => navigate(`/category/${category.id}`)}
-                        className="text-sm text-primary hover:underline flex items-center gap-1"
+                        className="text-xs text-primary hover:underline flex items-center gap-1"
                       >
                         عرض الكل
-                        <ChevronLeft className="h-4 w-4" />
+                        <ChevronLeft className="h-3 w-3" />
                       </button>
                     </div>
                     
-                    <div className="grid grid-cols-2 lg:grid-cols-3 gap-2">
+                    <div className="grid grid-cols-2 lg:grid-cols-3 gap-1.5">
                       {subs.length > 0 ? (
                         subs.map((sub) => (
                           <button
                             key={sub.id}
                             onClick={() => navigate(`/subcategory/${category.id}/${sub.id}`)}
                             className={cn(
-                              "flex items-center gap-2 p-3 rounded-lg text-right transition-all duration-200",
+                              "flex items-center gap-1.5 p-2 rounded-md text-right transition-all duration-200",
                               "hover:bg-primary/10 hover:text-primary",
                               "border border-transparent hover:border-primary/20"
                             )}
                           >
-                            <span className="text-sm font-medium">{sub.name_ar}</span>
+                            <span className="text-xs font-medium">{sub.name_ar}</span>
                           </button>
                         ))
                       ) : (
-                        <p className="text-sm text-muted-foreground col-span-full py-4 text-center">
+                        <p className="text-xs text-muted-foreground col-span-full py-3 text-center">
                           لا توجد فئات فرعية
                         </p>
                       )}
@@ -138,7 +138,7 @@ const MegaMenu = () => {
                   
                   {/* Category Image */}
                   <div 
-                    className="relative rounded-xl overflow-hidden cursor-pointer group"
+                    className="relative rounded-lg overflow-hidden cursor-pointer group h-32"
                     onClick={() => navigate(`/category/${category.id}`)}
                   >
                     <img
@@ -147,9 +147,9 @@ const MegaMenu = () => {
                       className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
-                    <div className="absolute bottom-4 right-4 left-4">
-                      <p className="text-white font-bold text-lg">{category.name_ar}</p>
-                      <p className="text-white/80 text-sm">اكتشف المزيد</p>
+                    <div className="absolute bottom-2 right-2 left-2">
+                      <p className="text-white font-bold text-sm">{category.name_ar}</p>
+                      <p className="text-white/80 text-xs">اكتشف المزيد</p>
                     </div>
                   </div>
                 </div>

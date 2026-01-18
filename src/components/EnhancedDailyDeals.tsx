@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import ProductCard from "./ProductCard";
-import { Loader2, Zap, Clock, Flame, ArrowLeft } from "lucide-react";
+import { Loader2, Flame, Clock, ArrowLeft } from "lucide-react";
 import { Badge } from "./ui/badge";
 import { Button } from "./ui/button";
 import { useNavigate } from "react-router-dom";
@@ -123,11 +123,11 @@ const EnhancedDailyDeals = () => {
 
   if (loading) {
     return (
-      <section className="py-16 relative overflow-hidden">
+      <section className="py-8 relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-destructive/5 via-background to-primary/5" />
         <div className="container px-4 relative z-10">
-          <div className="flex items-center justify-center py-12">
-            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          <div className="flex items-center justify-center py-8">
+            <Loader2 className="h-6 w-6 animate-spin text-primary" />
           </div>
         </div>
       </section>
@@ -139,80 +139,55 @@ const EnhancedDailyDeals = () => {
   }
 
   return (
-    <section ref={sectionRef} className="py-16 relative overflow-hidden">
+    <section ref={sectionRef} className="py-8 relative overflow-hidden">
       {/* Background Effects */}
-      <div className="absolute inset-0 bg-gradient-to-br from-destructive/10 via-background to-primary/10" />
-      <div className="absolute top-0 right-0 w-96 h-96 bg-destructive/20 rounded-full blur-3xl animate-pulse" />
-      <div className="absolute bottom-0 left-0 w-96 h-96 bg-primary/20 rounded-full blur-3xl animate-pulse delay-1000" />
+      <div className="absolute inset-0 bg-gradient-to-br from-destructive/5 via-background to-primary/5" />
       
       <div className="container px-4 relative z-10">
-        {/* Header */}
-        <div className={`flex flex-col md:flex-row items-center justify-between gap-6 mb-10 transition-all duration-700 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
-          <div className="flex items-center gap-4">
-            <div className="relative">
-              <div className="p-4 rounded-2xl bg-gradient-to-br from-destructive to-destructive/80 shadow-lg shadow-destructive/30">
-                <Flame className="h-8 w-8 text-white animate-pulse" />
-              </div>
-              <div className="absolute -top-1 -right-1 w-4 h-4 bg-yellow-400 rounded-full animate-ping" />
+        {/* Compact Header */}
+        <div className={`flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6 transition-all duration-700 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
+          <div className="flex items-center gap-3">
+            <div className="p-2.5 rounded-xl bg-gradient-to-br from-destructive to-destructive/80 shadow-md">
+              <Flame className="h-5 w-5 text-white" />
             </div>
             <div>
-              <h2 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-destructive to-primary bg-clip-text text-transparent">
-                عروض اليوم الحصرية
+              <h2 className="text-xl md:text-2xl font-bold text-foreground">
+                عروض اليوم
               </h2>
-              <p className="text-muted-foreground text-lg">خصومات مذهلة لفترة محدودة جداً!</p>
+              <p className="text-muted-foreground text-sm">خصومات لفترة محدودة</p>
             </div>
           </div>
           
-          {/* Countdown Timer */}
-          <div className="flex items-center gap-2">
-            <Clock className="h-5 w-5 text-destructive animate-pulse" />
-            <div className="flex gap-2">
-              <div className="flex flex-col items-center">
-                <div className="bg-gradient-to-b from-destructive to-destructive/80 text-white text-3xl font-bold w-16 h-16 rounded-xl flex items-center justify-center shadow-lg">
-                  {String(timeLeft.hours).padStart(2, "0")}
-                </div>
-                <span className="text-xs text-muted-foreground mt-1">ساعة</span>
-              </div>
-              <span className="text-3xl font-bold text-destructive self-start mt-3">:</span>
-              <div className="flex flex-col items-center">
-                <div className="bg-gradient-to-b from-destructive to-destructive/80 text-white text-3xl font-bold w-16 h-16 rounded-xl flex items-center justify-center shadow-lg">
-                  {String(timeLeft.minutes).padStart(2, "0")}
-                </div>
-                <span className="text-xs text-muted-foreground mt-1">دقيقة</span>
-              </div>
-              <span className="text-3xl font-bold text-destructive self-start mt-3">:</span>
-              <div className="flex flex-col items-center">
-                <div className="bg-gradient-to-b from-destructive to-destructive/80 text-white text-3xl font-bold w-16 h-16 rounded-xl flex items-center justify-center shadow-lg animate-pulse">
-                  {String(timeLeft.seconds).padStart(2, "0")}
-                </div>
-                <span className="text-xs text-muted-foreground mt-1">ثانية</span>
-              </div>
+          {/* Compact Countdown Timer */}
+          <div className="flex items-center gap-3 bg-destructive/10 rounded-xl px-4 py-2">
+            <Clock className="h-4 w-4 text-destructive" />
+            <div className="flex items-center gap-1 text-lg font-bold text-destructive">
+              <span className="bg-destructive text-white px-2 py-0.5 rounded">
+                {String(timeLeft.hours).padStart(2, "0")}
+              </span>
+              <span>:</span>
+              <span className="bg-destructive text-white px-2 py-0.5 rounded">
+                {String(timeLeft.minutes).padStart(2, "0")}
+              </span>
+              <span>:</span>
+              <span className="bg-destructive text-white px-2 py-0.5 rounded animate-pulse">
+                {String(timeLeft.seconds).padStart(2, "0")}
+              </span>
             </div>
+            <Button 
+              size="sm" 
+              variant="destructive"
+              className="hidden sm:flex gap-1 text-xs"
+              onClick={() => navigate("/search?discount=true")}
+            >
+              عرض الكل
+              <ArrowLeft className="h-3 w-3" />
+            </Button>
           </div>
-        </div>
-
-        {/* Deals Banner */}
-        <div className={`mb-8 p-6 rounded-2xl bg-gradient-to-r from-destructive/20 via-primary/10 to-accent/20 border border-destructive/30 flex flex-col md:flex-row items-center justify-between gap-4 transition-all duration-700 delay-200 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
-          <div className="flex items-center gap-3">
-            <Zap className="h-8 w-8 text-yellow-500 animate-bounce" />
-            <div>
-              <p className="text-lg font-bold">خصومات تصل إلى</p>
-              <p className="text-4xl font-black text-destructive">70%</p>
-            </div>
-          </div>
-          <Button 
-            size="lg" 
-            variant="destructive"
-            className="gap-2 shadow-lg shadow-destructive/30"
-            onClick={() => navigate("/search?discount=true")}
-          >
-            تصفح جميع العروض
-            <ArrowLeft className="h-5 w-5" />
-          </Button>
         </div>
 
         {/* Products Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-3">
           {products.map((product, index) => {
             const avgRating = product.reviews?.length
               ? product.reviews.reduce((sum, r) => sum + r.rating, 0) / product.reviews.length
@@ -224,11 +199,11 @@ const EnhancedDailyDeals = () => {
               <div 
                 key={product.id} 
                 className={`relative transition-all duration-500 ${isVisible ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-8 scale-95'}`}
-                style={{ transitionDelay: `${300 + index * 100}ms` }}
+                style={{ transitionDelay: `${200 + index * 50}ms` }}
               >
                 <Badge 
                   variant="destructive" 
-                  className="absolute -top-2 -right-2 z-10 text-lg px-3 py-1 shadow-lg animate-pulse"
+                  className="absolute -top-1.5 -right-1.5 z-10 text-xs px-2 py-0.5 shadow-md"
                 >
                   -{product.deal_discount}%
                 </Badge>

@@ -8,6 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Loader2 } from "lucide-react";
 import ProductCard from "@/components/ProductCard";
 import Footer from "@/components/Footer";
+import MobileBottomNav from "@/components/MobileBottomNav";
 import {
   HeroSkeleton,
   CategorySkeleton,
@@ -151,7 +152,7 @@ const Index = () => {
     <div className="min-h-screen flex flex-col">
       <AnnouncementBar />
       <Navbar />
-      <main className="flex-1">
+      <main className="flex-1 pb-16 md:pb-0">
         <HeroSection />
         <Suspense fallback={<CategorySkeleton />}>
           <PopularCategories />
@@ -179,6 +180,7 @@ const Index = () => {
         </Suspense>
       </main>
       <Footer />
+      <MobileBottomNav />
     </div>
   );
 };

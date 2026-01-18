@@ -267,12 +267,12 @@ const Navbar = () => {
 
       {/* Mega Menu Navigation */}
       <nav className="border-t bg-background/95">
-        <div className="container px-4 flex items-center justify-between h-12">
-          <div className="hidden md:block overflow-x-auto">
+        <div className="container px-4 flex items-center justify-between h-10">
+          <div className="hidden md:block">
             <MegaMenu />
           </div>
           
-          <div className="flex items-center gap-4 md:gap-6">
+          <div className="flex items-center gap-3 md:gap-4">
             <NavLink 
               to="/" 
               className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors whitespace-nowrap"

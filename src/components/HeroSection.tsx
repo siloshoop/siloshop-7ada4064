@@ -1,12 +1,9 @@
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-
 const HeroSection = () => {
   const navigate = useNavigate();
-
-  return (
-    <section className="relative overflow-hidden bg-gradient-to-br from-secondary via-background to-accent/5">
+  return <section className="relative overflow-hidden bg-gradient-to-br from-secondary via-background to-accent/5">
       <div className="container px-4 py-16 md:py-24">
         <div className="grid gap-8 lg:grid-cols-2 items-center">
           <div className="space-y-6 text-center lg:text-right animate-fade-in">
@@ -17,7 +14,7 @@ const HeroSection = () => {
             </div>
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight">
               اكتشف أحدث صيحات
-              <span className="block bg-gradient-to-l from-primary to-accent bg-clip-text text-transparent">
+              <span className="block bg-gradient-to-l from-primary to-accent bg-clip-text text-transparent mx-px my-[11px] px-0 py-[11px]">
                 الموضة والأناقة
               </span>
             </h1>
@@ -50,16 +47,10 @@ const HeroSection = () => {
           </div>
           <div className="relative animate-slide-up">
             <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-accent/20 rounded-3xl blur-3xl"></div>
-            <img
-              src="https://images.unsplash.com/photo-1483985988355-763728e1935b?w=800&h=800&fit=crop"
-              alt="منتجات الموضة"
-              className="relative rounded-3xl shadow-2xl w-full object-cover aspect-square"
-            />
+            <img src="https://images.unsplash.com/photo-1483985988355-763728e1935b?w=800&h=800&fit=crop" alt="منتجات الموضة" className="relative rounded-3xl shadow-2xl w-full object-cover aspect-square" />
           </div>
         </div>
       </div>
-    </section>
-  );
+    </section>;
 };
-
 export default HeroSection;

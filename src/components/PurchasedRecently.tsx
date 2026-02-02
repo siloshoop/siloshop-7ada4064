@@ -24,6 +24,7 @@ const PurchasedRecently = () => {
   const [products, setProducts] = useState<PurchasedProduct[]>([]);
   const [loading, setLoading] = useState(true);
   const [reordering, setReordering] = useState<string | null>(null);
+  const { ref, isVisible } = useScrollAnimation();
 
   useEffect(() => {
     if (user) {
@@ -150,8 +151,6 @@ const PurchasedRecently = () => {
   if (products.length === 0) {
     return null;
   }
-
-  const { ref, isVisible } = useScrollAnimation();
 
   return (
     <section 

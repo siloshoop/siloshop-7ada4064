@@ -1,12 +1,20 @@
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useScrollAnimation } from "@/hooks/useScrollAnimation";
+
 const HeroSection = () => {
   const navigate = useNavigate();
-  return <section className="relative overflow-hidden bg-gradient-to-br from-secondary via-background to-accent/5">
+  const { ref, isVisible } = useScrollAnimation({ threshold: 0.2 });
+
+  return (
+    <section 
+      ref={ref as React.RefObject<HTMLElement>}
+      className="relative overflow-hidden bg-gradient-to-br from-secondary via-background to-accent/5"
+    >
       <div className="container px-4 py-16 md:py-24">
         <div className="grid gap-8 lg:grid-cols-2 items-center">
-          <div className="space-y-6 text-center lg:text-right animate-fade-in">
+          <div className={`space-y-6 text-center lg:text-right transition-all duration-700 ${isVisible ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-12'}`}>
             <div className="inline-block">
               <span className="bg-primary/10 text-primary px-4 py-2 rounded-full text-sm font-semibold">
                 عروض الموسم الجديد
@@ -30,7 +38,7 @@ const HeroSection = () => {
                 عرض المجموعات
               </Button>
             </div>
-            <div className="flex gap-8 justify-center lg:justify-start pt-4">
+            <div className={`flex gap-8 justify-center lg:justify-start pt-4 transition-all duration-700 delay-300 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
               <div>
                 <div className="text-3xl font-bold text-foreground">+1000</div>
                 <div className="text-sm text-muted-foreground">منتج</div>
@@ -45,12 +53,13 @@ const HeroSection = () => {
               </div>
             </div>
           </div>
-          <div className="relative animate-slide-up">
+          <div className={`relative transition-all duration-700 delay-200 ${isVisible ? 'opacity-100 translate-x-0 scale-100' : 'opacity-0 -translate-x-12 scale-95'}`}>
             <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-accent/20 rounded-3xl blur-3xl"></div>
             <img src="https://images.unsplash.com/photo-1483985988355-763728e1935b?w=800&h=800&fit=crop" alt="منتجات الموضة" className="relative rounded-3xl shadow-2xl w-full object-cover aspect-square" />
           </div>
         </div>
       </div>
-    </section>;
+    </section>
+  );
 };
 export default HeroSection;

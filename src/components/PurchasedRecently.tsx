@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
@@ -6,6 +6,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { RefreshCw, Package, ShoppingCart, Loader2, ChevronLeft, ChevronRight } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useScrollAnimation } from "@/hooks/useScrollAnimation";
 
 interface PurchasedProduct {
   id: string;
@@ -150,10 +151,15 @@ const PurchasedRecently = () => {
     return null;
   }
 
+  const { ref, isVisible } = useScrollAnimation();
+
   return (
-    <section className="py-12 bg-gradient-to-b from-muted/30 to-background">
+    <section 
+      ref={ref as React.RefObject<HTMLElement>}
+      className="py-12 bg-gradient-to-b from-muted/30 to-background"
+    >
       <div className="container px-4">
-        <div className="flex items-center justify-between mb-8">
+        <div className={`flex items-center justify-between mb-8 transition-all duration-700 ${isVisible ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-8'}`}>
           <div className="flex items-center gap-3">
             <div className="p-2 rounded-lg bg-primary/10">
               <Package className="h-6 w-6 text-primary" />
@@ -170,10 +176,11 @@ const PurchasedRecently = () => {
 
         <div className="relative">
           <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide snap-x snap-mandatory">
-            {products.map((product) => (
+            {products.map((product, index) => (
               <Card
                 key={product.id}
-                className="flex-shrink-0 w-[200px] snap-start overflow-hidden group hover:shadow-lg transition-all duration-300"
+                className={`flex-shrink-0 w-[200px] snap-start overflow-hidden group hover:shadow-lg transition-all duration-500 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}
+                style={{ transitionDelay: `${100 + index * 75}ms` }}
               >
                 <div 
                   className="relative aspect-square cursor-pointer overflow-hidden"

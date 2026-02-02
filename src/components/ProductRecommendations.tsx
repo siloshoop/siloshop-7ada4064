@@ -19,6 +19,7 @@ const ProductRecommendations = () => {
   const { user } = useAuth();
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
+  const { ref, isVisible } = useScrollAnimation();
 
   useEffect(() => {
     const fetchRecommendations = async () => {
@@ -128,8 +129,6 @@ const ProductRecommendations = () => {
   if (products.length === 0) {
     return null;
   }
-
-  const { ref, isVisible } = useScrollAnimation();
 
   return (
     <section 

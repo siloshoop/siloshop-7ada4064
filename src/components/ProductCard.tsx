@@ -77,23 +77,21 @@ const ProductCard = ({
           </Badge>
         )}
         <div className="absolute top-3 right-3 z-10 flex flex-col gap-2">
-          <Button
-            size="icon"
-            variant="ghost"
-            className="bg-white/95 hover:bg-primary hover:text-primary-foreground backdrop-blur-sm shadow-md transition-all duration-300 hover:scale-110"
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-            }}
-          >
-            {id ? (
-              <div onClick={(e) => e.stopPropagation()}>
-                <FavoriteButton productId={id} variant="ghost" size="icon" />
-              </div>
-            ) : (
+          {id ? (
+            <FavoriteButton productId={id} variant="ghost" size="icon" />
+          ) : (
+            <Button
+              size="icon"
+              variant="ghost"
+              className="bg-white/95 hover:bg-primary hover:text-primary-foreground backdrop-blur-sm shadow-md transition-all duration-300 hover:scale-110"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+              }}
+            >
               <Heart className="h-4 w-4" />
-            )}
-          </Button>
+            </Button>
+          )}
           {id && (
             <Button
               size="icon"

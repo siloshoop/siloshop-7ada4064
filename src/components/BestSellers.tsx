@@ -43,48 +43,16 @@ const BestSellers = () => {
   useEffect(() => {
     const fetchBestSellers = async () => {
       try {
-        // Get products with most order items (best sellers)
-        const { data: orderItems } = await supabase
-          .from("order_items")
-          .select("product_id, quantity");
+        // Since order_items requires authentication, we'll just show newest products
+        // as "best sellers" for non-authenticated users
+        const { data: newProducts } = await supabase
+          .from("products")
+          .select("id, name, price, original_price, image_url, reviews(rating)")
+          .eq("is_active", true)
+          .order("created_at", { ascending: false })
+          .limit(8);
 
-        // Count sales per product
-        const salesCount: Record<string, number> = {};
-        orderItems?.forEach((item) => {
-          salesCount[item.product_id] = (salesCount[item.product_id] || 0) + item.quantity;
-        });
-
-        // Get top 8 product IDs by sales
-        const topProductIds = Object.entries(salesCount)
-          .sort(([, a], [, b]) => b - a)
-          .slice(0, 8)
-          .map(([id]) => id);
-
-        if (topProductIds.length === 0) {
-          // If no sales yet, show newest products
-          const { data: newProducts } = await supabase
-            .from("products")
-            .select("id, name, price, original_price, image_url, reviews(rating)")
-            .eq("is_active", true)
-            .order("created_at", { ascending: false })
-            .limit(8);
-
-          setProducts((newProducts || []).map(p => ({ ...p, sales_count: 0 })));
-        } else {
-          // Fetch product details for best sellers
-          const { data: productData } = await supabase
-            .from("products")
-            .select("id, name, price, original_price, image_url, reviews(rating)")
-            .eq("is_active", true)
-            .in("id", topProductIds);
-
-          const productsWithSales = (productData || []).map(p => ({
-            ...p,
-            sales_count: salesCount[p.id] || 0
-          })).sort((a, b) => b.sales_count - a.sales_count);
-
-          setProducts(productsWithSales);
-        }
+        setProducts((newProducts || []).map(p => ({ ...p, sales_count: 0 })));
       } catch (error) {
         console.error("Error fetching best sellers:", error);
       } finally {

@@ -90,9 +90,9 @@ export const FavoriteButton = ({ productId, variant = "outline", size = "lg" }: 
       size={size}
       onClick={toggleFavorite}
       disabled={loading}
-      className="relative"
+      className="relative bg-white/95 hover:bg-primary hover:text-primary-foreground backdrop-blur-sm shadow-md transition-all duration-300 hover:scale-110"
     >
-      <Heart className={`h-5 w-5 ${isFavorite ? "fill-red-500 text-red-500" : ""}`} />
+      <Heart className={`h-4 w-4 ${isFavorite ? "fill-red-500 text-red-500" : ""}`} />
     </Button>
   );
 };

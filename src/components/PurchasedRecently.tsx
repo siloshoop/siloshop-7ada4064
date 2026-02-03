@@ -136,10 +136,10 @@ const PurchasedRecently = () => {
   if (!user || loading) {
     if (loading) {
       return (
-        <section className="py-12 bg-muted/30">
+        <section className="py-6 bg-muted/30">
           <div className="container px-4">
-            <div className="flex items-center justify-center py-12">
-              <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            <div className="flex items-center justify-center py-8">
+              <Loader2 className="h-6 w-6 animate-spin text-primary" />
             </div>
           </div>
         </section>
@@ -155,21 +155,21 @@ const PurchasedRecently = () => {
   return (
     <section 
       ref={ref as React.RefObject<HTMLElement>}
-      className="py-12 bg-gradient-to-b from-muted/30 to-background"
+      className="py-6 bg-gradient-to-b from-muted/30 to-background"
     >
       <div className="container px-4">
-        <div className={`flex items-center justify-between mb-8 transition-all duration-700 ${isVisible ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-8'}`}>
-          <div className="flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-primary/10">
-              <Package className="h-6 w-6 text-primary" />
+        <div className={`flex items-center justify-between mb-4 transition-all duration-700 ${isVisible ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-8'}`}>
+          <div className="flex items-center gap-2">
+            <div className="p-1.5 rounded-lg bg-primary/10">
+              <Package className="h-5 w-5 text-primary" />
             </div>
             <div>
-              <h2 className="text-2xl font-bold">اشتريته مؤخراً</h2>
-              <p className="text-muted-foreground text-sm">اطلب مرة أخرى بنقرة واحدة</p>
+              <h2 className="text-lg md:text-xl font-bold">اشتريته مؤخراً</h2>
+              <p className="text-muted-foreground text-xs">اطلب مرة أخرى بنقرة واحدة</p>
             </div>
           </div>
-          <Button variant="outline" onClick={() => navigate("/orders")}>
-            عرض جميع الطلبات
+          <Button variant="outline" size="sm" onClick={() => navigate("/orders")}>
+            عرض الطلبات
           </Button>
         </div>
 

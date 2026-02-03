@@ -12,7 +12,7 @@ const HeroSection = () => {
       ref={ref as React.RefObject<HTMLElement>}
       className="relative overflow-hidden bg-gradient-to-br from-secondary via-background to-accent/5"
     >
-      <div className="container px-4 py-16 md:py-24">
+      <div className="container px-4 py-8 md:py-12">
         <div className="grid gap-8 lg:grid-cols-2 items-center">
           <div className={`space-y-6 text-center lg:text-right transition-all duration-700 ${isVisible ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-12'}`}>
             <div className="inline-block">

@@ -121,15 +121,15 @@ const PopularCategories = () => {
 
   if (loading) {
     return (
-      <section className="py-6 bg-muted/30">
+      <section className="py-4 bg-muted/30">
         <div className="container px-4">
-          <div className="flex items-center gap-2 mb-4">
-            <Skeleton className="h-6 w-6" />
-            <Skeleton className="h-6 w-40" />
+          <div className="flex items-center gap-2 mb-3">
+            <Skeleton className="h-5 w-5" />
+            <Skeleton className="h-5 w-32" />
           </div>
-          <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-3">
+          <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-2">
             {[...Array(8)].map((_, i) => (
-              <Skeleton key={i} className="h-24 rounded-lg" />
+              <Skeleton key={i} className="h-20 rounded-lg" />
             ))}
           </div>
         </div>
@@ -142,21 +142,19 @@ const PopularCategories = () => {
   return (
     <section 
       ref={sectionRef}
-      className={`py-6 bg-muted/30 transition-all duration-700 ${
+      className={`py-4 bg-muted/30 transition-all duration-700 ${
         isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
       }`}
     >
       <div className="container px-4">
-        <div className="flex items-center gap-2 mb-4">
-          <div className="p-1.5 rounded-md bg-primary/10">
-            <TrendingUp className="h-5 w-5 text-primary" />
+        <div className="flex items-center gap-2 mb-3">
+          <div className="p-1 rounded-md bg-primary/10">
+            <TrendingUp className="h-4 w-4 text-primary" />
           </div>
-          <div>
-            <h2 className="text-lg md:text-xl font-bold">الفئات الأكثر شعبية</h2>
-          </div>
+          <h2 className="text-base md:text-lg font-bold">الفئات الأكثر شعبية</h2>
         </div>
 
-        <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-3">
+        <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-2">
           {categories.map((category, index) => {
             const IconComponent = getIconComponent(category.icon);
             return (

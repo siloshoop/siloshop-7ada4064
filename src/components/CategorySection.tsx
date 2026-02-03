@@ -385,10 +385,10 @@ const CategorySection = () => {
 
   if (loading) {
     return (
-      <section className="py-20 relative overflow-hidden">
+      <section className="py-8 relative overflow-hidden">
         <div className="container px-4">
-          <div className="flex items-center justify-center h-64">
-            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          <div className="flex items-center justify-center h-32">
+            <Loader2 className="h-6 w-6 animate-spin text-primary" />
           </div>
         </div>
       </section>
@@ -398,28 +398,28 @@ const CategorySection = () => {
   return (
     <section 
       ref={ref as React.RefObject<HTMLElement>}
-      className="py-20 relative overflow-hidden"
+      className="py-8 relative overflow-hidden"
     >
       <div className="absolute inset-0 bg-gradient-to-b from-background via-muted/20 to-background" />
-      <div className="absolute top-0 right-0 w-96 h-96 bg-primary/5 rounded-full blur-3xl" />
-      <div className="absolute bottom-0 left-0 w-96 h-96 bg-accent/5 rounded-full blur-3xl" />
+      <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full blur-3xl" />
+      <div className="absolute bottom-0 left-0 w-64 h-64 bg-accent/5 rounded-full blur-3xl" />
       
       <div className="container px-4 relative z-10">
-        <div className={`text-center mb-16 space-y-3 transition-all duration-700 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
-          <div className="flex items-center justify-center gap-2 mb-2">
-            <Sparkles className="w-6 h-6 text-primary animate-pulse" />
-            <h2 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent">
+        <div className={`text-center mb-6 space-y-2 transition-all duration-700 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
+          <div className="flex items-center justify-center gap-2 mb-1">
+            <Sparkles className="w-5 h-5 text-primary animate-pulse" />
+            <h2 className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent">
               تسوق حسب الفئة
             </h2>
-            <Sparkles className="w-6 h-6 text-accent animate-pulse" />
+            <Sparkles className="w-5 h-5 text-accent animate-pulse" />
           </div>
-          <p className="text-muted-foreground text-lg md:text-xl">
+          <p className="text-muted-foreground text-sm md:text-base">
             اكتشف مجموعاتنا المتنوعة من أفضل المنتجات
           </p>
-          <div className={`h-1 w-24 bg-gradient-to-r from-primary to-accent mx-auto rounded-full transition-all duration-700 delay-300 ${isVisible ? 'opacity-100 scale-x-100' : 'opacity-0 scale-x-0'}`} />
+          <div className={`h-0.5 w-16 bg-gradient-to-r from-primary to-accent mx-auto rounded-full transition-all duration-700 delay-300 ${isVisible ? 'opacity-100 scale-x-100' : 'opacity-0 scale-x-0'}`} />
         </div>
         
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4">
           {displayCategories.map((category, index) => {
             const IconComponent = iconMap[category.icon] || ShoppingBag;
             const subcategories = getSubcategories(category.id, category.name);

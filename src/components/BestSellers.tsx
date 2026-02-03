@@ -65,10 +65,10 @@ const BestSellers = () => {
 
   if (loading) {
     return (
-      <section className="py-12 bg-muted/30">
+      <section className="py-6 bg-muted/30">
         <div className="container px-4">
-          <div className="flex items-center justify-center py-12">
-            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          <div className="flex items-center justify-center py-8">
+            <Loader2 className="h-6 w-6 animate-spin text-primary" />
           </div>
         </div>
       </section>
@@ -80,18 +80,18 @@ const BestSellers = () => {
   }
 
   return (
-    <section ref={sectionRef} className="py-12 bg-muted/30">
+    <section ref={sectionRef} className="py-6 bg-muted/30">
       <div className="container px-4">
-        <div className={`flex items-center gap-3 mb-8 transition-all duration-700 ${isVisible ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-8'}`}>
-          <div className="p-2 rounded-lg bg-primary/10">
-            <TrendingUp className="h-6 w-6 text-primary" />
+        <div className={`flex items-center gap-2 mb-4 transition-all duration-700 ${isVisible ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-8'}`}>
+          <div className="p-1.5 rounded-lg bg-primary/10">
+            <TrendingUp className="h-5 w-5 text-primary" />
           </div>
           <div>
-            <h2 className="text-2xl font-bold">الأكثر مبيعاً</h2>
-            <p className="text-muted-foreground text-sm">المنتجات الأكثر طلباً من عملائنا</p>
+            <h2 className="text-lg md:text-xl font-bold">الأكثر مبيعاً</h2>
+            <p className="text-muted-foreground text-xs">المنتجات الأكثر طلباً</p>
           </div>
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
           {products.map((product, index) => {
             const avgRating = product.reviews?.length
               ? product.reviews.reduce((sum, r) => sum + r.rating, 0) / product.reviews.length

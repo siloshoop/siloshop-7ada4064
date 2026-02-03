@@ -80,19 +80,19 @@ const RecentlyViewed = () => {
   return (
     <section 
       ref={ref as React.RefObject<HTMLElement>}
-      className="py-12"
+      className="py-6"
     >
       <div className="container px-4">
-        <div className={`flex items-center gap-3 mb-8 transition-all duration-700 ${isVisible ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-8'}`}>
-          <div className="p-2 rounded-lg bg-secondary/50">
-            <History className="h-6 w-6 text-foreground" />
+        <div className={`flex items-center gap-2 mb-4 transition-all duration-700 ${isVisible ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-8'}`}>
+          <div className="p-1.5 rounded-lg bg-secondary/50">
+            <History className="h-5 w-5 text-foreground" />
           </div>
           <div>
-            <h2 className="text-2xl font-bold">شاهدتها مؤخراً</h2>
-            <p className="text-muted-foreground text-sm">المنتجات التي زرتها مؤخراً</p>
+            <h2 className="text-lg md:text-xl font-bold">شاهدتها مؤخراً</h2>
+            <p className="text-muted-foreground text-xs">المنتجات التي زرتها مؤخراً</p>
           </div>
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
           {products.map((product, index) => {
             const avgRating = product.reviews?.length
               ? product.reviews.reduce((sum, r) => sum + r.rating, 0) / product.reviews.length

@@ -63,10 +63,10 @@ const FeaturedProducts = () => {
 
   if (loading) {
     return (
-      <section className="py-20 bg-gradient-to-b from-background to-muted/20">
+      <section className="py-6 bg-gradient-to-b from-background to-muted/20">
         <div className="container px-4">
-          <div className="flex items-center justify-center h-64">
-            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          <div className="flex items-center justify-center h-32">
+            <Loader2 className="h-6 w-6 animate-spin text-primary" />
           </div>
         </div>
       </section>
@@ -74,24 +74,24 @@ const FeaturedProducts = () => {
   }
 
   return (
-    <section ref={sectionRef} className="py-20 bg-gradient-to-b from-background to-muted/20">
+    <section ref={sectionRef} className="py-6 bg-gradient-to-b from-background to-muted/20">
       <div className="container px-4">
-        <div className={`text-center mb-16 space-y-3 transition-all duration-700 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
-          <h2 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent">
+        <div className={`text-center mb-6 space-y-2 transition-all duration-700 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
+          <h2 className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent">
             المنتجات المميزة
           </h2>
-          <p className="text-muted-foreground text-lg md:text-xl max-w-2xl mx-auto">
+          <p className="text-muted-foreground text-sm md:text-base max-w-2xl mx-auto">
             اختيارات خاصة لك من أحدث المنتجات وأفضل العروض
           </p>
-          <div className={`h-1 w-24 bg-gradient-to-r from-primary to-accent mx-auto rounded-full transition-all duration-700 delay-300 ${isVisible ? 'opacity-100 scale-x-100' : 'opacity-0 scale-x-0'}`} />
+          <div className={`h-0.5 w-16 bg-gradient-to-r from-primary to-accent mx-auto rounded-full transition-all duration-700 delay-300 ${isVisible ? 'opacity-100 scale-x-100' : 'opacity-0 scale-x-0'}`} />
         </div>
         
         {products.length === 0 ? (
-          <div className="text-center py-12">
-            <p className="text-muted-foreground text-lg">لا توجد منتجات متاحة حالياً</p>
+          <div className="text-center py-8">
+            <p className="text-muted-foreground">لا توجد منتجات متاحة حالياً</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 md:gap-8">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
             {products.map((product, index) => {
               const avgRating = product.reviews?.length > 0
                 ? product.reviews.reduce((sum, r) => sum + r.rating, 0) / product.reviews.length

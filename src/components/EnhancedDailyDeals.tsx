@@ -142,12 +142,14 @@ const EnhancedDailyDeals = () => {
     <section ref={sectionRef} className="py-8 relative overflow-hidden">
       {/* Background Effects */}
       <div className="absolute inset-0 bg-gradient-to-br from-destructive/5 via-background to-primary/5" />
+      <div className="absolute top-0 left-0 w-64 h-64 bg-destructive/10 rounded-full blur-3xl animate-float" />
+      <div className="absolute bottom-0 right-0 w-96 h-96 bg-primary/10 rounded-full blur-3xl animate-float" style={{ animationDelay: '1.5s' }} />
       
       <div className="container px-4 relative z-10">
         {/* Compact Header */}
         <div className={`flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6 transition-all duration-700 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
           <div className="flex items-center gap-3">
-            <div className="p-2.5 rounded-xl bg-gradient-to-br from-destructive to-destructive/80 shadow-md">
+            <div className="p-2.5 rounded-xl bg-gradient-to-br from-destructive to-destructive/80 shadow-md animate-pulse-glow">
               <Flame className="h-5 w-5 text-white" />
             </div>
             <div>
@@ -159,25 +161,25 @@ const EnhancedDailyDeals = () => {
           </div>
           
           {/* Compact Countdown Timer */}
-          <div className="flex items-center gap-3 bg-destructive/10 rounded-xl px-4 py-2">
-            <Clock className="h-4 w-4 text-destructive" />
+          <div className="flex items-center gap-3 bg-destructive/10 rounded-xl px-4 py-2 glass">
+            <Clock className="h-4 w-4 text-destructive animate-pulse" />
             <div className="flex items-center gap-1 text-lg font-bold text-destructive">
-              <span className="bg-destructive text-white px-2 py-0.5 rounded">
+              <span className="bg-destructive text-white px-2 py-0.5 rounded shadow-md">
                 {String(timeLeft.hours).padStart(2, "0")}
               </span>
-              <span>:</span>
-              <span className="bg-destructive text-white px-2 py-0.5 rounded">
+              <span className="animate-pulse">:</span>
+              <span className="bg-destructive text-white px-2 py-0.5 rounded shadow-md">
                 {String(timeLeft.minutes).padStart(2, "0")}
               </span>
-              <span>:</span>
-              <span className="bg-destructive text-white px-2 py-0.5 rounded animate-pulse">
+              <span className="animate-pulse">:</span>
+              <span className="bg-destructive text-white px-2 py-0.5 rounded shadow-md">
                 {String(timeLeft.seconds).padStart(2, "0")}
               </span>
             </div>
             <Button 
               size="sm" 
               variant="destructive"
-              className="hidden sm:flex gap-1 text-xs"
+              className="hidden sm:flex gap-1 text-xs glow-on-hover"
               onClick={() => navigate("/search?discount=true")}
             >
               عرض الكل
@@ -198,12 +200,12 @@ const EnhancedDailyDeals = () => {
             return (
               <div 
                 key={product.id} 
-                className={`relative transition-all duration-500 ${isVisible ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-8 scale-95'}`}
+                className={`relative transition-all duration-500 hover-lift ${isVisible ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-8 scale-95'}`}
                 style={{ transitionDelay: `${200 + index * 50}ms` }}
               >
                 <Badge 
                   variant="destructive" 
-                  className="absolute -top-1.5 -right-1.5 z-10 text-xs px-2 py-0.5 shadow-md"
+                  className="absolute -top-1.5 -right-1.5 z-10 text-xs px-2 py-0.5 shadow-md animate-bounce-in"
                 >
                   -{product.deal_discount}%
                 </Badge>

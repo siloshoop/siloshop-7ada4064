@@ -149,36 +149,76 @@ All colors MUST be HSL.
 }
 
 @layer utilities {
-  .animate-fade-in {
-    animation: fadeIn 0.5s ease-in;
-  }
-  
-  .animate-slide-up {
-    animation: slideUp 0.5s ease-out;
-  }
-
   /* Safe area for iOS devices */
   .safe-area-bottom {
     padding-bottom: env(safe-area-inset-bottom, 0);
   }
-  
-  @keyframes fadeIn {
-    from {
-      opacity: 0;
-    }
-    to {
-      opacity: 1;
-    }
+
+  /* Hover scale animation */
+  .hover-scale {
+    @apply transition-transform duration-300 hover:scale-105;
   }
-  
-  @keyframes slideUp {
-    from {
-      opacity: 0;
-      transform: translateY(20px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
+
+  /* Hover lift animation with shadow */
+  .hover-lift {
+    @apply transition-all duration-300 hover:-translate-y-1 hover:shadow-lg;
+  }
+
+  /* Story link underline animation */
+  .story-link {
+    @apply relative inline-block;
+  }
+  .story-link::after {
+    content: '';
+    @apply absolute bottom-0 left-0 w-full h-0.5 bg-primary origin-bottom-right transition-transform duration-300 scale-x-0;
+  }
+  .story-link:hover::after {
+    @apply origin-bottom-left scale-x-100;
+  }
+
+  /* Stagger animation delay utilities */
+  .stagger-1 { animation-delay: 50ms; }
+  .stagger-2 { animation-delay: 100ms; }
+  .stagger-3 { animation-delay: 150ms; }
+  .stagger-4 { animation-delay: 200ms; }
+  .stagger-5 { animation-delay: 250ms; }
+  .stagger-6 { animation-delay: 300ms; }
+  .stagger-7 { animation-delay: 350ms; }
+  .stagger-8 { animation-delay: 400ms; }
+
+  /* Glass morphism effect */
+  .glass {
+    @apply bg-background/80 backdrop-blur-md border border-border/50;
+  }
+
+  /* Gradient text */
+  .gradient-text {
+    @apply bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent;
+  }
+
+  /* Shimmer loading effect */
+  .shimmer {
+    @apply bg-gradient-to-r from-transparent via-white/20 to-transparent bg-[length:200%_100%] animate-shimmer;
+  }
+
+  /* Glow effect on hover */
+  .glow-on-hover {
+    @apply transition-shadow duration-300 hover:shadow-[0_0_20px_hsl(var(--primary)/0.3)];
+  }
+
+  /* Smooth scroll reveal */
+  .reveal {
+    @apply opacity-0 translate-y-8 transition-all duration-700;
+  }
+  .reveal.visible {
+    @apply opacity-100 translate-y-0;
+  }
+
+  /* Card hover with glow */
+  .card-glow {
+    @apply transition-all duration-300;
+  }
+  .card-glow:hover {
+    box-shadow: 0 0 30px -10px hsl(var(--primary) / 0.3);
   }
 }

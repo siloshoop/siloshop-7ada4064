@@ -36,18 +36,24 @@ const Footer = () => {
   };
 
   return (
-    <footer className="bg-muted/50 border-t">
-      <div className="container px-4 py-12">
+    <footer className="bg-muted/50 border-t relative overflow-hidden">
+      {/* Background decoration */}
+      <div className="absolute inset-0 pointer-events-none">
+        <div className="absolute bottom-0 left-0 w-64 h-64 bg-primary/5 rounded-full blur-3xl" />
+        <div className="absolute top-0 right-0 w-96 h-96 bg-accent/5 rounded-full blur-3xl" />
+      </div>
+      
+      <div className="container px-4 py-12 relative z-10">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-          <div>
-            <h3 className="font-bold text-2xl mb-4 bg-gradient-to-l from-primary to-accent bg-clip-text text-transparent">
+          <div className="animate-fade-in">
+            <h3 className="font-bold text-2xl mb-4 gradient-text">
               متجر
             </h3>
             <p className="text-muted-foreground mb-4">
               وجهتك المفضلة للتسوق أونلاين بأفضل الأسعار وأعلى جودة
             </p>
             <div className="flex gap-2">
-              <Button size="icon" variant="ghost" asChild>
+              <Button size="icon" variant="ghost" className="hover-scale glow-on-hover" asChild>
                 <a
                   href="https://facebook.com"
                   target="_blank"
@@ -57,7 +63,7 @@ const Footer = () => {
                   <Facebook className="h-5 w-5" />
                 </a>
               </Button>
-              <Button size="icon" variant="ghost" asChild>
+              <Button size="icon" variant="ghost" className="hover-scale glow-on-hover" asChild>
                 <a
                   href="https://instagram.com"
                   target="_blank"
@@ -67,7 +73,7 @@ const Footer = () => {
                   <Instagram className="h-5 w-5" />
                 </a>
               </Button>
-              <Button size="icon" variant="ghost" asChild>
+              <Button size="icon" variant="ghost" className="hover-scale glow-on-hover" asChild>
                 <a
                   href="https://twitter.com"
                   target="_blank"
@@ -77,7 +83,7 @@ const Footer = () => {
                   <Twitter className="h-5 w-5" />
                 </a>
               </Button>
-              <Button size="icon" variant="ghost" asChild>
+              <Button size="icon" variant="ghost" className="hover-scale glow-on-hover" asChild>
                 <a
                   href="https://youtube.com"
                   target="_blank"
@@ -96,7 +102,7 @@ const Footer = () => {
               <li>
                 <Link
                   to="/contact"
-                  className="hover:text-foreground transition-colors"
+                  className="hover:text-foreground transition-colors story-link"
                 >
                   اتصل بنا
                 </Link>
@@ -104,7 +110,7 @@ const Footer = () => {
               <li>
                 <Link
                   to="/faq"
-                  className="hover:text-foreground transition-colors"
+                  className="hover:text-foreground transition-colors story-link"
                 >
                   الأسئلة الشائعة
                 </Link>
@@ -112,7 +118,7 @@ const Footer = () => {
               <li>
                 <Link
                   to="/returns"
-                  className="hover:text-foreground transition-colors"
+                  className="hover:text-foreground transition-colors story-link"
                 >
                   سياسة الإرجاع
                 </Link>
@@ -120,7 +126,7 @@ const Footer = () => {
               <li>
                 <Link
                   to="/shipping"
-                  className="hover:text-foreground transition-colors"
+                  className="hover:text-foreground transition-colors story-link"
                 >
                   الشحن والتوصيل
                 </Link>
@@ -128,13 +134,13 @@ const Footer = () => {
             </ul>
           </div>
 
-          <div>
+          <div className="animate-fade-in stagger-2">
             <h4 className="font-semibold mb-4">روابط سريعة</h4>
             <ul className="space-y-2 text-muted-foreground">
               <li>
                 <Link
                   to="/about"
-                  className="hover:text-foreground transition-colors"
+                  className="hover:text-foreground transition-colors story-link"
                 >
                   من نحن
                 </Link>
@@ -142,7 +148,7 @@ const Footer = () => {
               <li>
                 <Link
                   to="/blog"
-                  className="hover:text-foreground transition-colors"
+                  className="hover:text-foreground transition-colors story-link"
                 >
                   المدونة
                 </Link>
@@ -150,7 +156,7 @@ const Footer = () => {
               <li>
                 <Link
                   to="/careers"
-                  className="hover:text-foreground transition-colors"
+                  className="hover:text-foreground transition-colors story-link"
                 >
                   الوظائف
                 </Link>
@@ -158,7 +164,7 @@ const Footer = () => {
               <li>
                 <Link
                   to="/partners"
-                  className="hover:text-foreground transition-colors"
+                  className="hover:text-foreground transition-colors story-link"
                 >
                   الشركاء
                 </Link>
@@ -166,7 +172,7 @@ const Footer = () => {
             </ul>
           </div>
 
-          <div>
+          <div className="animate-fade-in stagger-3">
             <h4 className="font-semibold mb-4">اشترك في النشرة</h4>
             <p className="text-muted-foreground mb-4">
               احصل على آخر العروض والتخفيضات
@@ -175,12 +181,12 @@ const Footer = () => {
               <input
                 type="email"
                 placeholder="بريدك الإلكتروني"
-                className="flex-1 px-4 py-2 rounded-lg border bg-background"
+                className="flex-1 px-4 py-2 rounded-lg border bg-background focus:ring-2 focus:ring-primary/50 transition-all"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
               />
-              <Button type="submit">اشترك</Button>
+              <Button type="submit" className="glow-on-hover">اشترك</Button>
             </form>
           </div>
         </div>

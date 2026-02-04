@@ -67,12 +67,12 @@ const ProductCard = ({
 
   return (
     <Card 
-      className="group cursor-pointer overflow-hidden border border-border/50 hover:border-primary/30 shadow-sm hover:shadow-2xl transition-all duration-500 bg-card"
+      className="group cursor-pointer overflow-hidden border border-border/50 hover:border-primary/30 shadow-sm hover:shadow-2xl transition-all duration-500 bg-card card-glow"
       onClick={() => navigate(`/product/${productId}`)}
     >
       <div className="relative aspect-[3/4] overflow-hidden bg-gradient-to-br from-muted to-muted/50">
         {discount && (
-          <Badge className="absolute top-3 left-3 z-10 bg-sale text-sale-foreground shadow-lg font-bold text-sm px-3 py-1 animate-pulse">
+          <Badge className="absolute top-3 left-3 z-10 bg-sale text-sale-foreground shadow-lg font-bold text-sm px-3 py-1 animate-bounce-in">
             -{discount}%
           </Badge>
         )}
@@ -83,7 +83,7 @@ const ProductCard = ({
             <Button
               size="icon"
               variant="ghost"
-              className="bg-white/95 hover:bg-primary hover:text-primary-foreground backdrop-blur-sm shadow-md transition-all duration-300 hover:scale-110"
+              className="bg-white/95 hover:bg-primary hover:text-primary-foreground backdrop-blur-sm shadow-md transition-all duration-300 hover:scale-110 hover:rotate-12"
               onClick={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
@@ -104,12 +104,18 @@ const ProductCard = ({
             </Button>
           )}
         </div>
-        <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
         <img
           src={image}
           alt={name}
-          className="object-cover w-full h-full group-hover:scale-110 group-hover:rotate-1 transition-all duration-700"
+          className="object-cover w-full h-full group-hover:scale-110 transition-transform duration-700 ease-out"
         />
+        {/* Quick view overlay */}
+        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300">
+          <span className="bg-background/90 backdrop-blur-sm text-foreground px-4 py-2 rounded-full text-sm font-medium shadow-lg translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
+            عرض سريع
+          </span>
+        </div>
       </div>
       
       <CardContent className="p-5 space-y-3">
@@ -146,14 +152,15 @@ const ProductCard = ({
             </div>
         
         <Button 
-          className="w-full shadow-md hover:shadow-lg transition-all duration-300 font-bold" 
+          className="w-full shadow-md hover:shadow-lg transition-all duration-300 font-bold group/btn overflow-hidden relative" 
           size="lg"
           onClick={(e) => {
             e.stopPropagation();
             navigate(`/product/${productId}`);
           }}
         >
-          أضف للسلة
+          <span className="relative z-10">أضف للسلة</span>
+          <div className="absolute inset-0 bg-gradient-to-r from-primary via-accent to-primary bg-[length:200%_100%] opacity-0 group-hover/btn:opacity-100 transition-opacity duration-300 animate-gradient-shift" />
         </Button>
       </CardContent>
     </Card>

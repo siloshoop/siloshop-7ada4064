@@ -84,7 +84,7 @@ const RecentlyViewed = () => {
     >
       <div className="container px-4">
         <div className={`flex items-center gap-2 mb-4 transition-all duration-700 ${isVisible ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-8'}`}>
-          <div className="p-1.5 rounded-lg bg-secondary/50">
+          <div className="p-1.5 rounded-lg bg-secondary/50 hover-scale">
             <History className="h-5 w-5 text-foreground" />
           </div>
           <div>
@@ -104,7 +104,7 @@ const RecentlyViewed = () => {
             return (
               <div
                 key={product.id}
-                className={`transition-all duration-500 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'}`}
+                className={`transition-all duration-500 hover-lift ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'}`}
                 style={{ transitionDelay: `${100 + index * 75}ms` }}
               >
                 <ProductCard

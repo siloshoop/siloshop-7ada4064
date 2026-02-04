@@ -157,7 +157,7 @@ const ProductRecommendations = () => {
             return (
               <div
                 key={product.id}
-                className={`transition-all duration-500 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'}`}
+                className={`transition-all duration-500 hover-lift card-glow ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'}`}
                 style={{ transitionDelay: `${100 + index * 75}ms` }}
               >
                 <ProductCard

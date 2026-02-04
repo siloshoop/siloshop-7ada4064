@@ -1,4 +1,4 @@
-import { useState, useEffect, Suspense, lazy } from "react";
+import { useState, useEffect, Suspense, lazy, useCallback } from "react";
 import { useSearchParams } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import AnnouncementBar from "@/components/AnnouncementBar";
@@ -9,6 +9,8 @@ import { Loader2 } from "lucide-react";
 import ProductCard from "@/components/ProductCard";
 import Footer from "@/components/Footer";
 import MobileBottomNav from "@/components/MobileBottomNav";
+import PullToRefreshIndicator from "@/components/PullToRefresh";
+import { usePullToRefresh } from "@/hooks/usePullToRefresh";
 import {
   HeroSkeleton,
   CategorySkeleton,
@@ -39,6 +41,7 @@ const Index = () => {
   const [searchParams] = useSearchParams();
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(false);
+  const [refreshKey, setRefreshKey] = useState(0);
   const [filters, setFilters] = useState({
     minPrice: 0,
     maxPrice: 1000000,
@@ -47,6 +50,17 @@ const Index = () => {
   });
 
   const searchQuery = searchParams.get("search");
+
+  const handleRefresh = useCallback(async () => {
+    // Increment key to force re-render of lazy components
+    setRefreshKey((prev) => prev + 1);
+    // Small delay to show the refresh animation
+    await new Promise((resolve) => setTimeout(resolve, 800));
+  }, []);
+
+  const { containerRef, pullDistance, isRefreshing, progress } = usePullToRefresh({
+    onRefresh: handleRefresh,
+  });
 
   useEffect(() => {
     if (searchQuery) {
@@ -149,34 +163,39 @@ const Index = () => {
   }
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div ref={containerRef} className="min-h-screen flex flex-col">
+      <PullToRefreshIndicator
+        pullDistance={pullDistance}
+        isRefreshing={isRefreshing}
+        progress={progress}
+      />
       <AnnouncementBar />
       <Navbar />
       <main className="flex-1 pb-16 md:pb-0">
         <HeroSection />
         <Suspense fallback={<CategorySkeleton />}>
-          <PopularCategories />
+          <PopularCategories key={`popular-${refreshKey}`} />
         </Suspense>
         <Suspense fallback={<DailyDealsSkeleton />}>
-          <EnhancedDailyDeals />
+          <EnhancedDailyDeals key={`deals-${refreshKey}`} />
         </Suspense>
         <Suspense fallback={<CategorySkeleton />}>
-          <CategorySection />
+          <CategorySection key={`category-${refreshKey}`} />
         </Suspense>
         <Suspense fallback={<ProductGridSkeleton />}>
-          <PurchasedRecently />
+          <PurchasedRecently key={`purchased-${refreshKey}`} />
         </Suspense>
         <Suspense fallback={<ProductGridSkeleton />}>
-          <BestSellers />
+          <BestSellers key={`bestsellers-${refreshKey}`} />
         </Suspense>
         <Suspense fallback={<RecentlyViewedSkeleton />}>
-          <RecentlyViewed />
+          <RecentlyViewed key={`recent-${refreshKey}`} />
         </Suspense>
         <Suspense fallback={<ProductGridSkeleton />}>
-          <ProductRecommendations />
+          <ProductRecommendations key={`recommendations-${refreshKey}`} />
         </Suspense>
         <Suspense fallback={<ProductGridSkeleton />}>
-          <FeaturedProducts />
+          <FeaturedProducts key={`featured-${refreshKey}`} />
         </Suspense>
       </main>
       <Footer />

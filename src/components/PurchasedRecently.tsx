@@ -133,18 +133,12 @@ const PurchasedRecently = () => {
     }
   };
 
-  if (!user || loading) {
-    if (loading) {
-      return (
-        <section className="py-6 bg-muted/30">
-          <div className="container px-4">
-            <div className="flex items-center justify-center py-8">
-              <Loader2 className="h-6 w-6 animate-spin text-primary" />
-            </div>
-          </div>
-        </section>
-      );
-    }
+  // Don't show for non-logged users
+  if (!user) {
+    return null;
+  }
+
+  if (loading) {
     return null;
   }
 

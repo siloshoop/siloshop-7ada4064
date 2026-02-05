@@ -63,16 +63,9 @@ const BestSellers = () => {
     fetchBestSellers();
   }, []);
 
+  // Return null while loading to prevent gap, unless we know there's content
   if (loading) {
-    return (
-      <section className="py-6 bg-muted/30">
-        <div className="container px-4">
-          <div className="flex items-center justify-center py-8">
-            <Loader2 className="h-6 w-6 animate-spin text-primary" />
-          </div>
-        </div>
-      </section>
-    );
+    return null;
   }
 
   if (products.length === 0) {

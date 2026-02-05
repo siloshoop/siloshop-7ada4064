@@ -121,20 +121,8 @@ const EnhancedDailyDeals = () => {
     return () => clearInterval(interval);
   }, [products]);
 
-  if (loading) {
-    return (
-      <section className="py-8 relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-destructive/5 via-background to-primary/5" />
-        <div className="container px-4 relative z-10">
-          <div className="flex items-center justify-center py-8">
-            <Loader2 className="h-6 w-6 animate-spin text-primary" />
-          </div>
-        </div>
-      </section>
-    );
-  }
-
-  if (products.length === 0) {
+  // Return null immediately if loading or no products - don't show any loader for empty sections
+  if (loading || products.length === 0) {
     return null;
   }
 

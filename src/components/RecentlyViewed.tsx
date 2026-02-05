@@ -69,7 +69,12 @@ const RecentlyViewed = () => {
     fetchRecentlyViewed();
   }, [user]);
 
-  if (!user || loading) {
+  // Don't show anything for non-logged users or when loading
+  if (!user) {
+    return null;
+  }
+
+  if (loading) {
     return null;
   }
 

@@ -176,19 +176,22 @@ const Index = () => {
         <Suspense fallback={<CategorySkeleton />}>
           <PopularCategories key={`popular-${refreshKey}`} />
         </Suspense>
-        <Suspense fallback={<DailyDealsSkeleton />}>
+        {/* Daily deals - no fallback since it may return null */}
+        <Suspense fallback={null}>
           <EnhancedDailyDeals key={`deals-${refreshKey}`} />
         </Suspense>
         <Suspense fallback={<CategorySkeleton />}>
           <CategorySection key={`category-${refreshKey}`} />
         </Suspense>
-        <Suspense fallback={<ProductGridSkeleton />}>
+        {/* Auth-dependent sections - no skeleton fallback to avoid flash */}
+        <Suspense fallback={null}>
           <PurchasedRecently key={`purchased-${refreshKey}`} />
         </Suspense>
         <Suspense fallback={<ProductGridSkeleton />}>
           <BestSellers key={`bestsellers-${refreshKey}`} />
         </Suspense>
-        <Suspense fallback={<RecentlyViewedSkeleton />}>
+        {/* Auth-dependent sections - no skeleton fallback */}
+        <Suspense fallback={null}>
           <RecentlyViewed key={`recent-${refreshKey}`} />
         </Suspense>
         <Suspense fallback={<ProductGridSkeleton />}>

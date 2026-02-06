@@ -82,19 +82,27 @@ const PopularCategories = () => {
 
       if (categoriesError) throw categoriesError;
 
-      // جلب عدد المنتجات لكل فئة
+      // جلب عدد المنتجات لكل فئة - handle individual failures gracefully
       const categoriesWithCount = await Promise.all(
         (categoriesData || []).map(async (category) => {
-          const { count } = await supabase
-            .from("products")
-            .select("*", { count: "exact", head: true })
-            .eq("category_id", category.id)
-            .eq("is_active", true);
+          try {
+            const { count } = await supabase
+              .from("products")
+              .select("*", { count: "exact", head: true })
+              .eq("category_id", category.id)
+              .eq("is_active", true);
 
-          return {
-            ...category,
-            product_count: count || 0,
-          };
+            return {
+              ...category,
+              product_count: count || 0,
+            };
+          } catch {
+            // If individual count fails, still show category with 0 count
+            return {
+              ...category,
+              product_count: 0,
+            };
+          }
         })
       );
 
@@ -106,6 +114,15 @@ const PopularCategories = () => {
       setCategories(sortedCategories);
     } catch (error) {
       console.error("Error fetching popular categories:", error);
+      // Even on error, show categories without counts
+      const { data: fallbackCategories } = await supabase
+        .from("categories")
+        .select("id, name_ar, icon")
+        .limit(8);
+      
+      if (fallbackCategories) {
+        setCategories(fallbackCategories.map(c => ({ ...c, product_count: 0 })));
+      }
     } finally {
       setLoading(false);
     }

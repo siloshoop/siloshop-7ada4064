@@ -11,6 +11,7 @@ import Footer from "@/components/Footer";
 import MobileBottomNav from "@/components/MobileBottomNav";
 import PullToRefreshIndicator from "@/components/PullToRefresh";
 import { usePullToRefresh } from "@/hooks/usePullToRefresh";
+import SectionErrorBoundary from "@/components/SectionErrorBoundary";
 import {
   HeroSkeleton,
   CategorySkeleton,
@@ -173,33 +174,49 @@ const Index = () => {
       <Navbar />
       <main className="flex-1 pb-16 md:pb-0">
         <HeroSection />
-        <Suspense fallback={<CategorySkeleton />}>
-          <PopularCategories key={`popular-${refreshKey}`} />
-        </Suspense>
+        <SectionErrorBoundary>
+          <Suspense fallback={<CategorySkeleton />}>
+            <PopularCategories key={`popular-${refreshKey}`} />
+          </Suspense>
+        </SectionErrorBoundary>
         {/* Daily deals - no fallback since it may return null */}
-        <Suspense fallback={null}>
-          <EnhancedDailyDeals key={`deals-${refreshKey}`} />
-        </Suspense>
-        <Suspense fallback={<CategorySkeleton />}>
-          <CategorySection key={`category-${refreshKey}`} />
-        </Suspense>
+        <SectionErrorBoundary>
+          <Suspense fallback={null}>
+            <EnhancedDailyDeals key={`deals-${refreshKey}`} />
+          </Suspense>
+        </SectionErrorBoundary>
+        <SectionErrorBoundary>
+          <Suspense fallback={<CategorySkeleton />}>
+            <CategorySection key={`category-${refreshKey}`} />
+          </Suspense>
+        </SectionErrorBoundary>
         {/* Auth-dependent sections - no skeleton fallback to avoid flash */}
-        <Suspense fallback={null}>
-          <PurchasedRecently key={`purchased-${refreshKey}`} />
-        </Suspense>
-        <Suspense fallback={<ProductGridSkeleton />}>
-          <BestSellers key={`bestsellers-${refreshKey}`} />
-        </Suspense>
+        <SectionErrorBoundary>
+          <Suspense fallback={null}>
+            <PurchasedRecently key={`purchased-${refreshKey}`} />
+          </Suspense>
+        </SectionErrorBoundary>
+        <SectionErrorBoundary>
+          <Suspense fallback={<ProductGridSkeleton />}>
+            <BestSellers key={`bestsellers-${refreshKey}`} />
+          </Suspense>
+        </SectionErrorBoundary>
         {/* Auth-dependent sections - no skeleton fallback */}
-        <Suspense fallback={null}>
-          <RecentlyViewed key={`recent-${refreshKey}`} />
-        </Suspense>
-        <Suspense fallback={<ProductGridSkeleton />}>
-          <ProductRecommendations key={`recommendations-${refreshKey}`} />
-        </Suspense>
-        <Suspense fallback={<ProductGridSkeleton />}>
-          <FeaturedProducts key={`featured-${refreshKey}`} />
-        </Suspense>
+        <SectionErrorBoundary>
+          <Suspense fallback={null}>
+            <RecentlyViewed key={`recent-${refreshKey}`} />
+          </Suspense>
+        </SectionErrorBoundary>
+        <SectionErrorBoundary>
+          <Suspense fallback={<ProductGridSkeleton />}>
+            <ProductRecommendations key={`recommendations-${refreshKey}`} />
+          </Suspense>
+        </SectionErrorBoundary>
+        <SectionErrorBoundary>
+          <Suspense fallback={<ProductGridSkeleton />}>
+            <FeaturedProducts key={`featured-${refreshKey}`} />
+          </Suspense>
+        </SectionErrorBoundary>
       </main>
       <Footer />
       <MobileBottomNav />

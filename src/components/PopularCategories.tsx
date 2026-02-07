@@ -12,7 +12,6 @@ interface PopularCategory {
   id: string;
   name_ar: string;
   icon: string;
-  product_count: number;
 }
 
 const iconMap: { [key: string]: React.ComponentType<{ className?: string }> } = {
@@ -75,54 +74,17 @@ const PopularCategories = () => {
 
   const fetchPopularCategories = async () => {
     try {
-      // جلب الفئات مع عدد المنتجات
-      const { data: categoriesData, error: categoriesError } = await supabase
-        .from("categories")
-        .select("id, name_ar, icon");
-
-      if (categoriesError) throw categoriesError;
-
-      // جلب عدد المنتجات لكل فئة - handle individual failures gracefully
-      const categoriesWithCount = await Promise.all(
-        (categoriesData || []).map(async (category) => {
-          try {
-            const { count } = await supabase
-              .from("products")
-              .select("*", { count: "exact", head: true })
-              .eq("category_id", category.id)
-              .eq("is_active", true);
-
-            return {
-              ...category,
-              product_count: count || 0,
-            };
-          } catch {
-            // If individual count fails, still show category with 0 count
-            return {
-              ...category,
-              product_count: 0,
-            };
-          }
-        })
-      );
-
-      // ترتيب حسب عدد المنتجات وأخذ أول 8
-      const sortedCategories = categoriesWithCount
-        .sort((a, b) => b.product_count - a.product_count)
-        .slice(0, 8);
-
-      setCategories(sortedCategories);
-    } catch (error) {
-      console.error("Error fetching popular categories:", error);
-      // Even on error, show categories without counts
-      const { data: fallbackCategories } = await supabase
+      // Simple single query - no individual HEAD requests that can be aborted
+      const { data: categoriesData, error } = await supabase
         .from("categories")
         .select("id, name_ar, icon")
         .limit(8);
-      
-      if (fallbackCategories) {
-        setCategories(fallbackCategories.map(c => ({ ...c, product_count: 0 })));
-      }
+
+      if (error) throw error;
+
+      setCategories(categoriesData || []);
+    } catch (error) {
+      console.error("Error fetching popular categories:", error);
     } finally {
       setLoading(false);
     }
@@ -189,9 +151,6 @@ const PopularCategories = () => {
                   </div>
                   <div>
                     <h3 className="text-xs font-medium text-foreground line-clamp-1">{category.name_ar}</h3>
-                    <p className="text-[10px] text-muted-foreground">
-                      {category.product_count} منتج
-                    </p>
                   </div>
                 </CardContent>
               </Card>

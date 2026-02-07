@@ -1,4 +1,4 @@
-import { useState, useEffect, Suspense, lazy, useCallback } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useSearchParams } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import AnnouncementBar from "@/components/AnnouncementBar";
@@ -12,23 +12,16 @@ import MobileBottomNav from "@/components/MobileBottomNav";
 import PullToRefreshIndicator from "@/components/PullToRefresh";
 import { usePullToRefresh } from "@/hooks/usePullToRefresh";
 import SectionErrorBoundary from "@/components/SectionErrorBoundary";
-import {
-  HeroSkeleton,
-  CategorySkeleton,
-  ProductGridSkeleton,
-  DailyDealsSkeleton,
-  RecentlyViewedSkeleton,
-} from "@/components/HomeSkeleton";
 
-// Lazy load components for better performance
-const PopularCategories = lazy(() => import("@/components/PopularCategories"));
-const EnhancedDailyDeals = lazy(() => import("@/components/EnhancedDailyDeals"));
-const CategorySection = lazy(() => import("@/components/CategorySection"));
-const PurchasedRecently = lazy(() => import("@/components/PurchasedRecently"));
-const BestSellers = lazy(() => import("@/components/BestSellers"));
-const RecentlyViewed = lazy(() => import("@/components/RecentlyViewed"));
-const ProductRecommendations = lazy(() => import("@/components/ProductRecommendations"));
-const FeaturedProducts = lazy(() => import("@/components/FeaturedProducts"));
+// Import critical sections directly (not lazy) to prevent chunk loading failures
+import PopularCategories from "@/components/PopularCategories";
+import CategorySection from "@/components/CategorySection";
+import BestSellers from "@/components/BestSellers";
+import FeaturedProducts from "@/components/FeaturedProducts";
+import ProductRecommendations from "@/components/ProductRecommendations";
+import EnhancedDailyDeals from "@/components/EnhancedDailyDeals";
+import PurchasedRecently from "@/components/PurchasedRecently";
+import RecentlyViewed from "@/components/RecentlyViewed";
 
 interface Product {
   id: string;
@@ -53,9 +46,7 @@ const Index = () => {
   const searchQuery = searchParams.get("search");
 
   const handleRefresh = useCallback(async () => {
-    // Increment key to force re-render of lazy components
     setRefreshKey((prev) => prev + 1);
-    // Small delay to show the refresh animation
     await new Promise((resolve) => setTimeout(resolve, 800));
   }, []);
 
@@ -84,7 +75,6 @@ const Index = () => {
         queryBuilder = queryBuilder.eq("category_id", filters.categoryId);
       }
 
-      // Apply sorting
       switch (filters.sortBy) {
         case "price_asc":
           queryBuilder = queryBuilder.order("price", { ascending: true });
@@ -175,47 +165,28 @@ const Index = () => {
       <main className="flex-1 pb-16 md:pb-0">
         <HeroSection />
         <SectionErrorBoundary>
-          <Suspense fallback={<CategorySkeleton />}>
-            <PopularCategories key={`popular-${refreshKey}`} />
-          </Suspense>
-        </SectionErrorBoundary>
-        {/* Daily deals - no fallback since it may return null */}
-        <SectionErrorBoundary>
-          <Suspense fallback={null}>
-            <EnhancedDailyDeals key={`deals-${refreshKey}`} />
-          </Suspense>
+          <PopularCategories key={`popular-${refreshKey}`} />
         </SectionErrorBoundary>
         <SectionErrorBoundary>
-          <Suspense fallback={<CategorySkeleton />}>
-            <CategorySection key={`category-${refreshKey}`} />
-          </Suspense>
-        </SectionErrorBoundary>
-        {/* Auth-dependent sections - no skeleton fallback to avoid flash */}
-        <SectionErrorBoundary>
-          <Suspense fallback={null}>
-            <PurchasedRecently key={`purchased-${refreshKey}`} />
-          </Suspense>
+          <EnhancedDailyDeals key={`deals-${refreshKey}`} />
         </SectionErrorBoundary>
         <SectionErrorBoundary>
-          <Suspense fallback={<ProductGridSkeleton />}>
-            <BestSellers key={`bestsellers-${refreshKey}`} />
-          </Suspense>
-        </SectionErrorBoundary>
-        {/* Auth-dependent sections - no skeleton fallback */}
-        <SectionErrorBoundary>
-          <Suspense fallback={null}>
-            <RecentlyViewed key={`recent-${refreshKey}`} />
-          </Suspense>
+          <CategorySection key={`category-${refreshKey}`} />
         </SectionErrorBoundary>
         <SectionErrorBoundary>
-          <Suspense fallback={<ProductGridSkeleton />}>
-            <ProductRecommendations key={`recommendations-${refreshKey}`} />
-          </Suspense>
+          <PurchasedRecently key={`purchased-${refreshKey}`} />
         </SectionErrorBoundary>
         <SectionErrorBoundary>
-          <Suspense fallback={<ProductGridSkeleton />}>
-            <FeaturedProducts key={`featured-${refreshKey}`} />
-          </Suspense>
+          <BestSellers key={`bestsellers-${refreshKey}`} />
+        </SectionErrorBoundary>
+        <SectionErrorBoundary>
+          <RecentlyViewed key={`recent-${refreshKey}`} />
+        </SectionErrorBoundary>
+        <SectionErrorBoundary>
+          <ProductRecommendations key={`recommendations-${refreshKey}`} />
+        </SectionErrorBoundary>
+        <SectionErrorBoundary>
+          <FeaturedProducts key={`featured-${refreshKey}`} />
         </SectionErrorBoundary>
       </main>
       <Footer />

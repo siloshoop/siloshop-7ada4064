@@ -110,9 +110,7 @@ const Contact = () => {
               <CardContent>
                 <p className="text-muted-foreground">+963 11 123 4567</p>
                 <p className="text-muted-foreground">+963 11 765 4321</p>
-                <p className="text-sm text-muted-foreground mt-2">
-                  السبت - الخميس: 9 صباحاً - 8 مساءً
-                </p>
+                
               </CardContent>
             </Card>
 

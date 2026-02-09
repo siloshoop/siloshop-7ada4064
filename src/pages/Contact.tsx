@@ -123,7 +123,7 @@ const Contact = () => {
               </CardHeader>
               <CardContent>
                 <p className="text-muted-foreground">support@marketplace.sy</p>
-                <p className="text-muted-foreground">info@marketplace.sy</p>
+                
                 
               </CardContent>
             </Card>

@@ -107,11 +107,7 @@ const Contact = () => {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-12">
             <Card>
               
-              <CardContent>
-                <p className="text-muted-foreground">+963 11 123 4567</p>
-                <p className="text-muted-foreground">+963 11 765 4321</p>
-                
-              </CardContent>
+              
             </Card>
 
             <Card>

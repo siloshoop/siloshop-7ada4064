@@ -124,9 +124,7 @@ const Contact = () => {
               <CardContent>
                 <p className="text-muted-foreground">support@marketplace.sy</p>
                 <p className="text-muted-foreground">info@marketplace.sy</p>
-                <p className="text-sm text-muted-foreground mt-2">
-                  نرد على الرسائل خلال 24 ساعة
-                </p>
+                
               </CardContent>
             </Card>
 

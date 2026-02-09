@@ -10,94 +10,90 @@ import { useToast } from "@/hooks/use-toast";
 import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
 import { useRateLimit } from "@/hooks/useRateLimit";
-
 const contactSchema = z.object({
   name: z.string().trim().min(1, "الاسم مطلوب").max(100, "الاسم يجب أن يكون أقل من 100 حرف"),
   email: z.string().trim().email("البريد الإلكتروني غير صالح").max(255, "البريد يجب أن يكون أقل من 255 حرف"),
   phone: z.string().trim().min(1, "رقم الهاتف مطلوب").max(20, "رقم الهاتف يجب أن يكون أقل من 20 رقم"),
   subject: z.string().trim().min(1, "الموضوع مطلوب").max(200, "الموضوع يجب أن يكون أقل من 200 حرف"),
-  message: z.string().trim().min(10, "الرسالة يجب أن تكون 10 أحرف على الأقل").max(2000, "الرسالة يجب أن تكون أقل من 2000 حرف"),
+  message: z.string().trim().min(10, "الرسالة يجب أن تكون 10 أحرف على الأقل").max(2000, "الرسالة يجب أن تكون أقل من 2000 حرف")
 });
-
 const Contact = () => {
-  const { toast } = useToast();
+  const {
+    toast
+  } = useToast();
   const [loading, setLoading] = useState(false);
-  const { checkRateLimit, recordSubmission, isChecking } = useRateLimit();
+  const {
+    checkRateLimit,
+    recordSubmission,
+    isChecking
+  } = useRateLimit();
   const [formData, setFormData] = useState({
     name: "",
     email: "",
     phone: "",
     subject: "",
-    message: "",
+    message: ""
   });
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-
     try {
       const validated = contactSchema.parse(formData);
-      
+
       // Check rate limit before submission
       const canSubmit = await checkRateLimit(validated.email);
       if (!canSubmit) {
         toast({
           title: "تم تجاوز الحد المسموح",
           description: "لقد أرسلت عدة رسائل مؤخراً. يرجى الانتظار ساعة قبل المحاولة مرة أخرى.",
-          variant: "destructive",
+          variant: "destructive"
         });
         setLoading(false);
         return;
       }
-      
-      const { error } = await supabase
-        .from("contact_messages")
-        .insert([{
-          name: validated.name,
-          email: validated.email,
-          phone: validated.phone,
-          subject: validated.subject,
-          message: validated.message,
-        }]);
-
+      const {
+        error
+      } = await supabase.from("contact_messages").insert([{
+        name: validated.name,
+        email: validated.email,
+        phone: validated.phone,
+        subject: validated.subject,
+        message: validated.message
+      }]);
       if (error) throw error;
 
       // Record submission for rate limiting
       await recordSubmission(validated.email);
-
       toast({
         title: "تم إرسال رسالتك بنجاح",
-        description: "سنتواصل معك في أقرب وقت ممكن",
+        description: "سنتواصل معك في أقرب وقت ممكن"
       });
-
       setFormData({
         name: "",
         email: "",
         phone: "",
         subject: "",
-        message: "",
+        message: ""
       });
     } catch (error) {
       if (error instanceof z.ZodError) {
         toast({
           title: "خطأ في البيانات",
           description: error.errors[0].message,
-          variant: "destructive",
+          variant: "destructive"
         });
       } else {
         toast({
           title: "خطأ",
           description: "حدث خطأ أثناء إرسال الرسالة، يرجى المحاولة مرة أخرى",
-          variant: "destructive",
+          variant: "destructive"
         });
       }
     } finally {
       setLoading(false);
     }
   };
-
-  return (
-    <div className="min-h-screen flex flex-col">
+  return <div className="min-h-screen flex flex-col">
       <Navbar />
       <main className="flex-1 container px-4 py-12">
         <div className="max-w-6xl mx-auto">
@@ -110,10 +106,7 @@ const Contact = () => {
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-12">
             <Card>
-              <CardHeader>
-                <Phone className="h-8 w-8 text-primary mb-2" />
-                <CardTitle>الهاتف</CardTitle>
-              </CardHeader>
+              
               <CardContent>
                 <p className="text-muted-foreground">+963 11 123 4567</p>
                 <p className="text-muted-foreground">+963 11 765 4321</p>
@@ -169,30 +162,19 @@ const Contact = () => {
                     <label className="block text-sm font-medium mb-2">
                       الاسم الكامل *
                     </label>
-                    <Input
-                      required
-                      maxLength={100}
-                      value={formData.name}
-                      onChange={(e) =>
-                        setFormData({ ...formData, name: e.target.value })
-                      }
-                      placeholder="أدخل اسمك الكامل"
-                    />
+                    <Input required maxLength={100} value={formData.name} onChange={e => setFormData({
+                    ...formData,
+                    name: e.target.value
+                  })} placeholder="أدخل اسمك الكامل" />
                   </div>
                   <div>
                     <label className="block text-sm font-medium mb-2">
                       البريد الإلكتروني *
                     </label>
-                    <Input
-                      type="email"
-                      required
-                      maxLength={255}
-                      value={formData.email}
-                      onChange={(e) =>
-                        setFormData({ ...formData, email: e.target.value })
-                      }
-                      placeholder="example@email.com"
-                    />
+                    <Input type="email" required maxLength={255} value={formData.email} onChange={e => setFormData({
+                    ...formData,
+                    email: e.target.value
+                  })} placeholder="example@email.com" />
                   </div>
                 </div>
 
@@ -201,30 +183,19 @@ const Contact = () => {
                     <label className="block text-sm font-medium mb-2">
                       رقم الهاتف *
                     </label>
-                    <Input
-                      type="tel"
-                      required
-                      maxLength={20}
-                      value={formData.phone}
-                      onChange={(e) =>
-                        setFormData({ ...formData, phone: e.target.value })
-                      }
-                      placeholder="+963 XXX XXX XXX"
-                    />
+                    <Input type="tel" required maxLength={20} value={formData.phone} onChange={e => setFormData({
+                    ...formData,
+                    phone: e.target.value
+                  })} placeholder="+963 XXX XXX XXX" />
                   </div>
                   <div>
                     <label className="block text-sm font-medium mb-2">
                       الموضوع *
                     </label>
-                    <Input
-                      required
-                      maxLength={200}
-                      value={formData.subject}
-                      onChange={(e) =>
-                        setFormData({ ...formData, subject: e.target.value })
-                      }
-                      placeholder="موضوع الرسالة"
-                    />
+                    <Input required maxLength={200} value={formData.subject} onChange={e => setFormData({
+                    ...formData,
+                    subject: e.target.value
+                  })} placeholder="موضوع الرسالة" />
                   </div>
                 </div>
 
@@ -232,31 +203,20 @@ const Contact = () => {
                   <label className="block text-sm font-medium mb-2">
                     الرسالة *
                   </label>
-                  <Textarea
-                    required
-                    minLength={10}
-                    maxLength={2000}
-                    value={formData.message}
-                    onChange={(e) =>
-                      setFormData({ ...formData, message: e.target.value })
-                    }
-                    placeholder="اكتب رسالتك هنا..."
-                    className="min-h-[150px]"
-                  />
+                  <Textarea required minLength={10} maxLength={2000} value={formData.message} onChange={e => setFormData({
+                  ...formData,
+                  message: e.target.value
+                })} placeholder="اكتب رسالتك هنا..." className="min-h-[150px]" />
                   <p className="text-sm text-muted-foreground mt-1">
                     {formData.message.length} / 2000 حرف
                   </p>
                 </div>
 
                 <Button type="submit" disabled={loading || isChecking} className="w-full">
-                  {loading || isChecking ? (
-                    "جاري الإرسال..."
-                  ) : (
-                    <>
+                  {loading || isChecking ? "جاري الإرسال..." : <>
                       <Send className="ml-2 h-4 w-4" />
                       إرسال الرسالة
-                    </>
-                  )}
+                    </>}
                 </Button>
               </form>
             </CardContent>
@@ -293,8 +253,6 @@ const Contact = () => {
         </div>
       </main>
       <Footer />
-    </div>
-  );
+    </div>;
 };
-
 export default Contact;

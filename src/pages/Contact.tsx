@@ -121,11 +121,7 @@ const Contact = () => {
                 <Mail className="h-8 w-8 text-primary mb-2" />
                 <CardTitle>البريد الإلكتروني</CardTitle>
               </CardHeader>
-              <CardContent>
-                <p className="text-muted-foreground">support@marketplace.sy</p>
-                
-                
-              </CardContent>
+              
             </Card>
 
             <Card>

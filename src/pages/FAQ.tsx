@@ -93,13 +93,7 @@ const FAQ = () => {
       <Navbar />
       <main className="flex-1 container px-4 py-12">
         <div className="max-w-4xl mx-auto">
-          <div className="text-center mb-12">
-            <HelpCircle className="h-16 w-16 text-primary mx-auto mb-4" />
-            <h1 className="text-4xl font-bold mb-4">الأسئلة الشائعة</h1>
-            <p className="text-muted-foreground text-lg">
-              إجابات على الأسئلة الأكثر شيوعاً
-            </p>
-          </div>
+          
 
           <div className="mb-8">
             <div className="relative">

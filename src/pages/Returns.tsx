@@ -86,9 +86,7 @@ const Returns = () => {
             </Card>
 
             <Card>
-              <CardHeader>
-                <CardTitle>للتواصل</CardTitle>
-              </CardHeader>
+              
               <CardContent>
                 <p className="mb-2">للاستفسارات حول الإرجاع والاستبدال:</p>
                 <p>البريد الإلكتروني: returns@marketplace.sy</p>

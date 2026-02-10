@@ -120,13 +120,7 @@ const Contact = () => {
 
             <Card>
               
-              <CardContent>
-                <p className="text-muted-foreground">دمشق - المزة</p>
-                <p className="text-muted-foreground">شارع الجلاء - مبنى 15</p>
-                <p className="text-sm text-muted-foreground mt-2">
-                  الطابق الثاني - مكتب 204
-                </p>
-              </CardContent>
+              
             </Card>
           </div>
 

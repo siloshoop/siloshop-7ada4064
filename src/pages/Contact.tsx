@@ -202,10 +202,7 @@ const Contact = () => {
             <CardContent className="space-y-4">
               <div>
                 <h3 className="font-semibold mb-2">الدعم الفني</h3>
-                <p className="text-muted-foreground">
-                  للمساعدة الفورية، يمكنك التواصل مع فريق الدعم الفني عبر الواتساب
-                  على الرقم +963 999 123 456
-                </p>
+                
               </div>
               <div>
                 <h3 className="font-semibold mb-2">حسابات التواصل الاجتماعي</h3>

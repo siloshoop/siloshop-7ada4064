@@ -2,10 +2,8 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Truck, Package, Clock, MapPin } from "lucide-react";
-
 const Shipping = () => {
-  return (
-    <div className="min-h-screen flex flex-col">
+  return <div className="min-h-screen flex flex-col">
       <Navbar />
       <main className="flex-1 container px-4 py-12">
         <div className="max-w-4xl mx-auto">
@@ -81,20 +79,7 @@ const Shipping = () => {
               <CardHeader>
                 <CardTitle>تكلفة الشحن</CardTitle>
               </CardHeader>
-              <CardContent className="space-y-3">
-                <div className="flex justify-between items-center pb-3 border-b">
-                  <span>الطلبات أقل من 50,000 ل.س</span>
-                  <span className="font-semibold">5,000 ل.س</span>
-                </div>
-                <div className="flex justify-between items-center pb-3 border-b">
-                  <span>الطلبات من 50,000 - 100,000 ل.س</span>
-                  <span className="font-semibold">3,000 ل.س</span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span>الطلبات أكثر من 100,000 ل.س</span>
-                  <span className="font-semibold text-green-600">شحن مجاني</span>
-                </div>
-              </CardContent>
+              
             </Card>
 
             <Card>
@@ -128,8 +113,6 @@ const Shipping = () => {
         </div>
       </main>
       <Footer />
-    </div>
-  );
+    </div>;
 };
-
 export default Shipping;

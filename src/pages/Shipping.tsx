@@ -106,7 +106,7 @@ const Shipping = () => {
                 </p>
                 <p className="font-semibold">للاستفسارات حول الشحن:</p>
                 <p>البريد الإلكتروني: shipping@marketplace.sy</p>
-                <p>الهاتف: +963 11 123 4567</p>
+                
               </CardContent>
             </Card>
           </div>

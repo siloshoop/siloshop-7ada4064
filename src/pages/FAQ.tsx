@@ -111,9 +111,7 @@ const FAQ = () => {
               </CardContent>
             </Card> : <div className="space-y-8">
               {filteredCategories.map((category, categoryIndex) => <Card key={categoryIndex}>
-                  <CardHeader>
-                    <CardTitle>{category.title}</CardTitle>
-                  </CardHeader>
+                  
                   
                 </Card>)}
             </div>}

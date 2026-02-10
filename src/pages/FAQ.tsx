@@ -91,9 +91,7 @@ const FAQ = () => {
   })).filter(category => category.questions.length > 0);
   return <div className="min-h-screen flex flex-col">
       <Navbar />
-      <main className="flex-1 container px-4 py-12">
-        
-      </main>
+      
       <Footer />
     </div>;
 };

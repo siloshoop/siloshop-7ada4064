@@ -92,51 +92,7 @@ const FAQ = () => {
   return <div className="min-h-screen flex flex-col">
       <Navbar />
       <main className="flex-1 container px-4 py-12">
-        <div className="max-w-4xl mx-auto">
-          
-
-          <div className="mb-8">
-            <div className="relative">
-              <Search className="absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-              <Input type="search" placeholder="ابحث عن سؤال..." className="pr-10" value={searchQuery} onChange={e => setSearchQuery(e.target.value)} />
-            </div>
-          </div>
-
-          {filteredCategories.length === 0 ? <Card>
-              <CardContent className="py-12 text-center">
-                <p className="text-muted-foreground mb-4">
-                  لم نجد أي نتائج لبحثك
-                </p>
-                <Button onClick={() => setSearchQuery("")}>مسح البحث</Button>
-              </CardContent>
-            </Card> : <div className="space-y-8">
-              {filteredCategories.map((category, categoryIndex) => <Card key={categoryIndex}>
-                  
-                  
-                </Card>)}
-            </div>}
-
-          <Card className="mt-12">
-            <CardHeader>
-              <CardTitle>لم تجد إجابة لسؤالك؟</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <p className="text-muted-foreground">
-                إذا لم تجد الإجابة التي تبحث عنها، فريق الدعم لدينا جاهز لمساعدتك
-              </p>
-              <div className="flex flex-col sm:flex-row gap-4">
-                <Button asChild className="flex-1">
-                  <Link to="/contact">اتصل بنا</Link>
-                </Button>
-                <Button variant="outline" asChild className="flex-1">
-                  <a href="https://wa.me/963999123456" target="_blank" rel="noreferrer">
-                    تواصل عبر الواتساب
-                  </a>
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+        
       </main>
       <Footer />
     </div>;

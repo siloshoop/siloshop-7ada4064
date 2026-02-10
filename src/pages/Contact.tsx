@@ -119,10 +119,7 @@ const Contact = () => {
             </Card>
 
             <Card>
-              <CardHeader>
-                <MapPin className="h-8 w-8 text-primary mb-2" />
-                <CardTitle>العنوان</CardTitle>
-              </CardHeader>
+              
               <CardContent>
                 <p className="text-muted-foreground">دمشق - المزة</p>
                 <p className="text-muted-foreground">شارع الجلاء - مبنى 15</p>

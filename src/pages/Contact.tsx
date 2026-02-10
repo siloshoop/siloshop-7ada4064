@@ -118,10 +118,7 @@ const Contact = () => {
               
             </Card>
 
-            <Card>
-              
-              
-            </Card>
+            
           </div>
 
           <Card>

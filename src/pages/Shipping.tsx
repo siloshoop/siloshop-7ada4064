@@ -76,9 +76,7 @@ const Shipping = () => {
             </Card>
 
             <Card>
-              <CardHeader>
-                <CardTitle>تكلفة الشحن</CardTitle>
-              </CardHeader>
+              
               
             </Card>
 

@@ -103,7 +103,7 @@ const Shipping = () => {
                   في حالة وجود أي تأخير، سيتم إبلاغك فوراً عبر الرسائل النصية والبريد الإلكتروني.
                 </p>
                 <p className="font-semibold">للاستفسارات حول الشحن:</p>
-                <p>البريد الإلكتروني: shipping@marketplace.sy</p>
+                
                 
               </CardContent>
             </Card>

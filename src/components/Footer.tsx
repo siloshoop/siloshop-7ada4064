@@ -4,39 +4,34 @@ import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Link } from "react-router-dom";
-
 const Footer = () => {
   const [email, setEmail] = useState("");
-  const { toast } = useToast();
-
+  const {
+    toast
+  } = useToast();
   const handleSubscribe = async (e: React.FormEvent) => {
     e.preventDefault();
-
     try {
-      const { error } = await supabase
-        .from("newsletter_subscriptions")
-        .insert([{ email }]);
-
+      const {
+        error
+      } = await supabase.from("newsletter_subscriptions").insert([{
+        email
+      }]);
       if (error) throw error;
-
       toast({
         title: "تم الاشتراك بنجاح",
-        description: "شكراً لاشتراكك في نشرتنا البريدية",
+        description: "شكراً لاشتراكك في نشرتنا البريدية"
       });
       setEmail("");
     } catch (error: any) {
       toast({
         title: "خطأ",
-        description: error.message.includes("duplicate")
-          ? "هذا البريد مشترك بالفعل"
-          : "حدث خطأ، يرجى المحاولة مرة أخرى",
-        variant: "destructive",
+        description: error.message.includes("duplicate") ? "هذا البريد مشترك بالفعل" : "حدث خطأ، يرجى المحاولة مرة أخرى",
+        variant: "destructive"
       });
     }
   };
-
-  return (
-    <footer className="bg-muted/50 border-t relative overflow-hidden">
+  return <footer className="bg-muted/50 border-t relative overflow-hidden">
       {/* Background decoration */}
       <div className="absolute inset-0 pointer-events-none">
         <div className="absolute bottom-0 left-0 w-64 h-64 bg-primary/5 rounded-full blur-3xl" />
@@ -54,42 +49,22 @@ const Footer = () => {
             </p>
             <div className="flex gap-2">
               <Button size="icon" variant="ghost" className="hover-scale glow-on-hover" asChild>
-                <a
-                  href="https://facebook.com"
-                  target="_blank"
-                  rel="noreferrer"
-                  aria-label="فيسبوك"
-                >
+                <a href="https://facebook.com" target="_blank" rel="noreferrer" aria-label="فيسبوك">
                   <Facebook className="h-5 w-5" />
                 </a>
               </Button>
               <Button size="icon" variant="ghost" className="hover-scale glow-on-hover" asChild>
-                <a
-                  href="https://instagram.com"
-                  target="_blank"
-                  rel="noreferrer"
-                  aria-label="انستغرام"
-                >
+                <a href="https://instagram.com" target="_blank" rel="noreferrer" aria-label="انستغرام">
                   <Instagram className="h-5 w-5" />
                 </a>
               </Button>
               <Button size="icon" variant="ghost" className="hover-scale glow-on-hover" asChild>
-                <a
-                  href="https://twitter.com"
-                  target="_blank"
-                  rel="noreferrer"
-                  aria-label="تويتر"
-                >
+                <a href="https://twitter.com" target="_blank" rel="noreferrer" aria-label="تويتر">
                   <Twitter className="h-5 w-5" />
                 </a>
               </Button>
               <Button size="icon" variant="ghost" className="hover-scale glow-on-hover" asChild>
-                <a
-                  href="https://youtube.com"
-                  target="_blank"
-                  rel="noreferrer"
-                  aria-label="يوتيوب"
-                >
+                <a href="https://youtube.com" target="_blank" rel="noreferrer" aria-label="يوتيوب">
                   <Youtube className="h-5 w-5" />
                 </a>
               </Button>
@@ -100,34 +75,20 @@ const Footer = () => {
             <h4 className="font-semibold mb-4">خدمة العملاء</h4>
             <ul className="space-y-2 text-muted-foreground">
               <li>
-                <Link
-                  to="/contact"
-                  className="hover:text-foreground transition-colors story-link"
-                >
+                <Link to="/contact" className="hover:text-foreground transition-colors story-link">
                   اتصل بنا
                 </Link>
               </li>
               <li>
-                <Link
-                  to="/faq"
-                  className="hover:text-foreground transition-colors story-link"
-                >
-                  الأسئلة الشائعة
-                </Link>
+                
               </li>
               <li>
-                <Link
-                  to="/returns"
-                  className="hover:text-foreground transition-colors story-link"
-                >
+                <Link to="/returns" className="hover:text-foreground transition-colors story-link">
                   سياسة الإرجاع
                 </Link>
               </li>
               <li>
-                <Link
-                  to="/shipping"
-                  className="hover:text-foreground transition-colors story-link"
-                >
+                <Link to="/shipping" className="hover:text-foreground transition-colors story-link">
                   الشحن والتوصيل
                 </Link>
               </li>
@@ -138,34 +99,22 @@ const Footer = () => {
             <h4 className="font-semibold mb-4">روابط سريعة</h4>
             <ul className="space-y-2 text-muted-foreground">
               <li>
-                <Link
-                  to="/about"
-                  className="hover:text-foreground transition-colors story-link"
-                >
+                <Link to="/about" className="hover:text-foreground transition-colors story-link">
                   من نحن
                 </Link>
               </li>
               <li>
-                <Link
-                  to="/blog"
-                  className="hover:text-foreground transition-colors story-link"
-                >
+                <Link to="/blog" className="hover:text-foreground transition-colors story-link">
                   المدونة
                 </Link>
               </li>
               <li>
-                <Link
-                  to="/careers"
-                  className="hover:text-foreground transition-colors story-link"
-                >
+                <Link to="/careers" className="hover:text-foreground transition-colors story-link">
                   الوظائف
                 </Link>
               </li>
               <li>
-                <Link
-                  to="/partners"
-                  className="hover:text-foreground transition-colors story-link"
-                >
+                <Link to="/partners" className="hover:text-foreground transition-colors story-link">
                   الشركاء
                 </Link>
               </li>
@@ -178,14 +127,7 @@ const Footer = () => {
               احصل على آخر العروض والتخفيضات
             </p>
             <form onSubmit={handleSubscribe} className="flex gap-2">
-              <input
-                type="email"
-                placeholder="بريدك الإلكتروني"
-                className="flex-1 px-4 py-2 rounded-lg border bg-background focus:ring-2 focus:ring-primary/50 transition-all"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-              />
+              <input type="email" placeholder="بريدك الإلكتروني" className="flex-1 px-4 py-2 rounded-lg border bg-background focus:ring-2 focus:ring-primary/50 transition-all" value={email} onChange={e => setEmail(e.target.value)} required />
               <Button type="submit" className="glow-on-hover">اشترك</Button>
             </form>
           </div>
@@ -195,8 +137,6 @@ const Footer = () => {
           <p>© 2024 متجر. جميع الحقوق محفوظة.</p>
         </div>
       </div>
-    </footer>
-  );
+    </footer>;
 };
-
 export default Footer;

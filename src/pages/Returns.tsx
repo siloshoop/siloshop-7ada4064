@@ -67,7 +67,7 @@ const Returns = () => {
                   <p className="text-muted-foreground">قم بتغليف المنتج بشكل آمن وإرساله إلى عنواننا</p>
                 </div>
                 <div>
-                  <h3 className="font-semibold mb-2">4. استرداد المبلغ</h3>
+                  
                   
                 </div>
               </CardContent>

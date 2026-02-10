@@ -3,37 +3,29 @@ import Footer from "@/components/Footer";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Briefcase, MapPin, Clock } from "lucide-react";
-
 const Careers = () => {
-  const jobs = [
-    {
-      title: "مطور واجهات أمامية",
-      location: "دمشق",
-      type: "دوام كامل",
-      description: "نبحث عن مطور واجهات أمامية محترف يجيد React و TypeScript للانضمام إلى فريقنا المتنامي."
-    },
-    {
-      title: "مدير تسويق رقمي",
-      location: "دمشق",
-      type: "دوام كامل",
-      description: "فرصة رائعة لمدير تسويق رقمي خبير في إدارة حملات التسويق الإلكتروني ووسائل التواصل الاجتماعي."
-    },
-    {
-      title: "مسؤول خدمة عملاء",
-      location: "دمشق / عن بعد",
-      type: "دوام كامل",
-      description: "انضم إلى فريق خدمة العملاء لدينا وساعد في تقديم أفضل تجربة لعملائنا."
-    },
-    {
-      title: "مصمم UI/UX",
-      location: "دمشق / عن بعد",
-      type: "دوام جزئي",
-      description: "نبحث عن مصمم مبدع لتصميم واجهات مستخدم جذابة وسهلة الاستخدام."
-    }
-  ];
-
-  return (
-    <div className="min-h-screen flex flex-col">
+  const jobs = [{
+    title: "مطور واجهات أمامية",
+    location: "دمشق",
+    type: "دوام كامل",
+    description: "نبحث عن مطور واجهات أمامية محترف يجيد React و TypeScript للانضمام إلى فريقنا المتنامي."
+  }, {
+    title: "مدير تسويق رقمي",
+    location: "دمشق",
+    type: "دوام كامل",
+    description: "فرصة رائعة لمدير تسويق رقمي خبير في إدارة حملات التسويق الإلكتروني ووسائل التواصل الاجتماعي."
+  }, {
+    title: "مسؤول خدمة عملاء",
+    location: "دمشق / عن بعد",
+    type: "دوام كامل",
+    description: "انضم إلى فريق خدمة العملاء لدينا وساعد في تقديم أفضل تجربة لعملائنا."
+  }, {
+    title: "مصمم UI/UX",
+    location: "دمشق / عن بعد",
+    type: "دوام جزئي",
+    description: "نبحث عن مصمم مبدع لتصميم واجهات مستخدم جذابة وسهلة الاستخدام."
+  }];
+  return <div className="min-h-screen flex flex-col">
       <Navbar />
       <main className="flex-1">
         <div className="bg-gradient-to-l from-primary/10 via-accent/10 to-primary/5 py-20">
@@ -82,8 +74,7 @@ const Careers = () => {
             <div>
               <h2 className="text-3xl font-bold mb-6">الوظائف المتاحة</h2>
               <div className="space-y-4">
-                {jobs.map((job, index) => (
-                  <Card key={index}>
+                {jobs.map((job, index) => <Card key={index}>
                     <CardHeader>
                       <div className="flex items-start justify-between">
                         <div className="space-y-2">
@@ -97,7 +88,7 @@ const Careers = () => {
                       <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">
                         <div className="flex items-center gap-1">
                           <MapPin className="h-4 w-4" />
-                          <span>{job.location}</span>
+                          
                         </div>
                         <div className="flex items-center gap-1">
                           <Clock className="h-4 w-4" />
@@ -109,8 +100,7 @@ const Careers = () => {
                         </div>
                       </div>
                     </CardContent>
-                  </Card>
-                ))}
+                  </Card>)}
               </div>
             </div>
 
@@ -127,8 +117,6 @@ const Careers = () => {
         </div>
       </main>
       <Footer />
-    </div>
-  );
+    </div>;
 };
-
 export default Careers;

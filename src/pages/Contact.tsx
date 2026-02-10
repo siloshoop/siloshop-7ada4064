@@ -111,10 +111,7 @@ const Contact = () => {
             </Card>
 
             <Card>
-              <CardHeader>
-                <Mail className="h-8 w-8 text-primary mb-2" />
-                <CardTitle>البريد الإلكتروني</CardTitle>
-              </CardHeader>
+              
               
             </Card>
 

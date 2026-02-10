@@ -2,10 +2,8 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { CheckCircle2 } from "lucide-react";
-
 const Returns = () => {
-  return (
-    <div className="min-h-screen flex flex-col">
+  return <div className="min-h-screen flex flex-col">
       <Navbar />
       <main className="flex-1 container px-4 py-12">
         <div className="max-w-4xl mx-auto">
@@ -94,15 +92,13 @@ const Returns = () => {
               <CardContent>
                 <p className="mb-2">للاستفسارات حول الإرجاع والاستبدال:</p>
                 <p>البريد الإلكتروني: returns@marketplace.sy</p>
-                <p>الهاتف: +963 11 123 4567</p>
+                
               </CardContent>
             </Card>
           </div>
         </div>
       </main>
       <Footer />
-    </div>
-  );
+    </div>;
 };
-
 export default Returns;

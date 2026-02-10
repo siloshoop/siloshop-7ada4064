@@ -68,7 +68,7 @@ const Returns = () => {
                 </div>
                 <div>
                   <h3 className="font-semibold mb-2">4. استرداد المبلغ</h3>
-                  <p className="text-muted-foreground">سيتم استرداد المبلغ خلال 7-14 يوم عمل</p>
+                  
                 </div>
               </CardContent>
             </Card>

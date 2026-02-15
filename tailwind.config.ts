@@ -184,7 +184,7 @@ export default {
   					opacity: '1'
   				}
   			},
-  			'float': {
+  			float: {
   				'0%, 100%': {
   					transform: 'translateY(0)'
   				},
@@ -192,7 +192,7 @@ export default {
   					transform: 'translateY(-10px)'
   				}
   			},
-  			'shimmer': {
+  			shimmer: {
   				'0%': {
   					backgroundPosition: '-200% 0'
   				},
@@ -227,7 +227,7 @@ export default {
   					transform: 'rotate(360deg)'
   				}
   			},
-  			'wiggle': {
+  			wiggle: {
   				'0%, 100%': {
   					transform: 'rotate(-3deg)'
   				},
@@ -248,12 +248,12 @@ export default {
   			'scale-in': 'scale-in 0.3s ease-out',
   			'scale-out': 'scale-out 0.3s ease-out',
   			'bounce-in': 'bounce-in 0.6s ease-out',
-  			'float': 'float 3s ease-in-out infinite',
-  			'shimmer': 'shimmer 2s linear infinite',
+  			float: 'float 3s ease-in-out infinite',
+  			shimmer: 'shimmer 2s linear infinite',
   			'pulse-glow': 'pulse-glow 2s ease-in-out infinite',
   			'gradient-shift': 'gradient-shift 3s ease infinite',
   			'spin-slow': 'spin-slow 8s linear infinite',
-  			'wiggle': 'wiggle 0.3s ease-in-out'
+  			wiggle: 'wiggle 0.3s ease-in-out'
   		},
   		boxShadow: {
   			'2xs': 'var(--shadow-2xs)',
@@ -266,20 +266,19 @@ export default {
   		},
   		fontFamily: {
   			sans: [
-  				'Poppins',
+  				'Roboto',
   				'ui-sans-serif',
   				'system-ui',
   				'-apple-system',
   				'BlinkMacSystemFont',
   				'Segoe UI',
-  				'Roboto',
   				'Helvetica Neue',
   				'Arial',
   				'Noto Sans',
   				'sans-serif'
   			],
   			serif: [
-  				'Merriweather',
+  				'Libre Caslon Text',
   				'ui-serif',
   				'Georgia',
   				'Cambria',
@@ -288,7 +287,7 @@ export default {
   				'serif'
   			],
   			mono: [
-  				'JetBrains Mono',
+  				'Roboto Mono',
   				'ui-monospace',
   				'SFMono-Regular',
   				'Menlo',

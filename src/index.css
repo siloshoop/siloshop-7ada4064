@@ -131,6 +131,7 @@ All colors MUST be HSL.
     font-optical-sizing: auto;
     direction: rtl;
     overflow-x: hidden;
+    opacity: 1;
   }
   
   html {

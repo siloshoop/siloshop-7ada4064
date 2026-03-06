@@ -19,7 +19,7 @@ interface BestSellerProduct extends Product {
 const BestSellers = () => {
   const [products, setProducts] = useState<BestSellerProduct[]>([]);
   const [loading, setLoading] = useState(true);
-  const [isVisible, setIsVisible] = useState(false);
+  const [isVisible, setIsVisible] = useState(true);
   const sectionRef = useRef<HTMLElement>(null);
 
   useEffect(() => {

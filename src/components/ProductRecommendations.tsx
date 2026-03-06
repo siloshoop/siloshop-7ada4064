@@ -19,7 +19,7 @@ const ProductRecommendations = () => {
   const { user } = useAuth();
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
-  const { ref, isVisible } = useScrollAnimation();
+  const isVisible = true;
 
   useEffect(() => {
     const fetchRecommendations = async () => {
@@ -125,7 +125,6 @@ const ProductRecommendations = () => {
 
   return (
     <section 
-      ref={ref as React.RefObject<HTMLElement>}
       className="py-6"
     >
       <div className="container px-4">

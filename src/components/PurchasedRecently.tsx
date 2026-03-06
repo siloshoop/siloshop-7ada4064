@@ -24,7 +24,7 @@ const PurchasedRecently = () => {
   const [products, setProducts] = useState<PurchasedProduct[]>([]);
   const [loading, setLoading] = useState(true);
   const [reordering, setReordering] = useState<string | null>(null);
-  const { ref, isVisible } = useScrollAnimation();
+  const isVisible = true;
 
   useEffect(() => {
     if (user) {
@@ -148,7 +148,6 @@ const PurchasedRecently = () => {
 
   return (
     <section 
-      ref={ref as React.RefObject<HTMLElement>}
       className="py-6 bg-gradient-to-b from-muted/30 to-background"
     >
       <div className="container px-4">

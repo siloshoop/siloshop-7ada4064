@@ -1,41 +1,38 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 
-// Mock Supabase client
+// Create a chainable mock that returns { data: [], error: null } for any chain
+const createChainableMock = () => {
+  const result = Promise.resolve({ data: [], error: null, count: 0 });
+  const chain: any = () => chain;
+  chain.select = chain;
+  chain.insert = chain;
+  chain.update = chain;
+  chain.delete = chain;
+  chain.eq = chain;
+  chain.neq = chain;
+  chain.gt = chain;
+  chain.gte = chain;
+  chain.lt = chain;
+  chain.lte = chain;
+  chain.like = chain;
+  chain.ilike = chain;
+  chain.is = chain;
+  chain.in = chain;
+  chain.order = chain;
+  chain.limit = chain;
+  chain.range = chain;
+  chain.single = () => Promise.resolve({ data: null, error: null });
+  chain.maybeSingle = () => Promise.resolve({ data: null, error: null });
+  chain.then = result.then.bind(result);
+  chain.catch = result.catch.bind(result);
+  return chain;
+};
+
 vi.mock("@/integrations/supabase/client", () => ({
   supabase: {
-    from: () => ({
-      select: () => ({
-        order: () => ({
-          eq: () => ({
-            order: () => Promise.resolve({ data: [], error: null }),
-          }),
-          limit: () => Promise.resolve({ data: [], error: null }),
-          gte: () => ({
-            lte: () => ({
-              eq: () => ({
-                order: () => Promise.resolve({ data: [], error: null }),
-              }),
-              order: () => Promise.resolve({ data: [], error: null }),
-            }),
-          }),
-          ilike: () => ({
-            gte: () => ({
-              lte: () => ({
-                order: () => Promise.resolve({ data: [], error: null }),
-              }),
-            }),
-          }),
-        }),
-        eq: () => ({
-          order: () => Promise.resolve({ data: [], error: null }),
-          single: () => Promise.resolve({ data: null, error: null }),
-          limit: () => Promise.resolve({ data: [], error: null }),
-        }),
-        limit: () => Promise.resolve({ data: [], error: null }),
-      }),
-    }),
+    from: () => createChainableMock(),
     auth: {
       getSession: () => Promise.resolve({ data: { session: null }, error: null }),
       onAuthStateChange: () => ({ data: { subscription: { unsubscribe: () => {} } } }),
@@ -46,12 +43,10 @@ vi.mock("@/integrations/supabase/client", () => ({
   },
 }));
 
-// Mock useAuth
 vi.mock("@/hooks/useAuth", () => ({
   useAuth: () => ({ user: null, profile: null, loading: false }),
 }));
 
-// Import after mocks
 import Index from "@/pages/Index";
 
 const renderHomepage = () =>
@@ -71,38 +66,35 @@ describe("Homepage Smoke Test", () => {
     expect(container.querySelector("main")).toBeInTheDocument();
   });
 
-  it("renders the hero section", () => {
-    const { container } = renderHomepage();
-    // Hero should be one of the first sections
-    const sections = container.querySelectorAll("section");
-    expect(sections.length).toBeGreaterThan(0);
-  });
-
-  it("renders the footer", () => {
-    renderHomepage();
-    const footer = document.querySelector("footer");
-    expect(footer).toBeInTheDocument();
-  });
-
-  it("does not show a blank page - multiple sections exist", () => {
+  it("renders multiple sections (no blank page)", () => {
     const { container } = renderHomepage();
     const sections = container.querySelectorAll("section");
-    // At minimum: Hero + Categories + BestSellers = 3 sections
     expect(sections.length).toBeGreaterThanOrEqual(2);
   });
 
-  it("all sections have opacity 1 (no hidden sections)", () => {
+  it("renders the footer", () => {
+    const { container } = renderHomepage();
+    expect(container.querySelector("footer")).toBeInTheDocument();
+  });
+
+  it("no sections have opacity 0", () => {
     const { container } = renderHomepage();
     const sections = container.querySelectorAll("section");
     sections.forEach((section) => {
       const style = window.getComputedStyle(section);
-      // Should not have opacity 0
       expect(style.opacity).not.toBe("0");
     });
   });
 
-  it("category section title is rendered", () => {
+  it("category section renders after data loads", async () => {
     const { container } = renderHomepage();
-    expect(container.textContent).toContain("تسوق حسب الفئة");
+    await waitFor(() => {
+      expect(container.textContent).toContain("تسوق حسب الفئة");
+    }, { timeout: 2000 });
+  });
+
+  it("hero section content is present", () => {
+    const { container } = renderHomepage();
+    expect(container.textContent).toContain("اكتشف");
   });
 });

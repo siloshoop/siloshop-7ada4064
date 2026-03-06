@@ -240,7 +240,7 @@ const CategorySection = () => {
   const [dbSubcategories, setDbSubcategories] = useState<Subcategory[]>([]);
   const [loading, setLoading] = useState(true);
   const [expandedCategory, setExpandedCategory] = useState<string | null>(null);
-  const { ref, isVisible } = useScrollAnimation();
+  const isVisible = true;
 
   useEffect(() => {
     const fetchData = async () => {
@@ -397,7 +397,6 @@ const CategorySection = () => {
 
   return (
     <section 
-      ref={ref as React.RefObject<HTMLElement>}
       className="py-8 relative overflow-hidden"
     >
       <div className="absolute inset-0 bg-gradient-to-b from-background via-muted/20 to-background" />

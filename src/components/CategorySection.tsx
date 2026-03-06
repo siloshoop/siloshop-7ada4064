@@ -240,7 +240,7 @@ const CategorySection = () => {
   const [dbSubcategories, setDbSubcategories] = useState<Subcategory[]>([]);
   const [loading, setLoading] = useState(true);
   const [expandedCategory, setExpandedCategory] = useState<string | null>(null);
-  const { ref, isVisible } = useScrollAnimation();
+  const isVisible = true;
 
   useEffect(() => {
     const fetchData = async () => {

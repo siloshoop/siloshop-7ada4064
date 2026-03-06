@@ -18,7 +18,7 @@ const RecentlyViewed = () => {
   const { user } = useAuth();
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
-  const { ref, isVisible } = useScrollAnimation();
+  const isVisible = true;
 
   useEffect(() => {
     const fetchRecentlyViewed = async () => {

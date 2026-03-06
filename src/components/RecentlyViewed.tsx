@@ -84,7 +84,6 @@ const RecentlyViewed = () => {
 
   return (
     <section 
-      ref={ref as React.RefObject<HTMLElement>}
       className="py-6"
     >
       <div className="container px-4">

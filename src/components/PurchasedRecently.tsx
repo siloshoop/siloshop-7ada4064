@@ -148,7 +148,6 @@ const PurchasedRecently = () => {
 
   return (
     <section 
-      ref={ref as React.RefObject<HTMLElement>}
       className="py-6 bg-gradient-to-b from-muted/30 to-background"
     >
       <div className="container px-4">

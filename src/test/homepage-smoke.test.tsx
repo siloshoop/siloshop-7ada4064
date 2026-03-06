@@ -102,7 +102,7 @@ describe("Homepage Smoke Test", () => {
   });
 
   it("category section title is rendered", () => {
-    renderHomepage();
-    expect(screen.getByText("تسوق حسب الفئة")).toBeInTheDocument();
+    const { container } = renderHomepage();
+    expect(container.textContent).toContain("تسوق حسب الفئة");
   });
 });

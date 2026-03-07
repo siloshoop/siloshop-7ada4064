@@ -1,11 +1,11 @@
-import { Heart, Star, Scale } from "lucide-react";
+import { Heart, Star, Scale, ShoppingCart, Eye } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { FavoriteButton } from "@/components/FavoriteButton";
 import { useToast } from "@/hooks/use-toast";
 import { useCompareProducts } from "@/hooks/useCompareProducts";
+import { useState } from "react";
 
 interface ProductCardProps {
   id?: string;
@@ -31,6 +31,8 @@ const ProductCard = ({
   const navigate = useNavigate();
   const { toast } = useToast();
   const { addProduct } = useCompareProducts();
+  const [imageLoaded, setImageLoaded] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
 
   const productId = id || Math.random().toString(36).substr(2, 9);
 
@@ -65,105 +67,133 @@ const ProductCard = ({
     });
   };
 
+  const filledStars = Math.floor(rating);
+
   return (
-    <Card 
-      className="group cursor-pointer overflow-hidden border border-border/50 hover:border-primary/30 shadow-sm hover:shadow-2xl transition-all duration-500 bg-card card-glow"
+    <div
+      className="group relative cursor-pointer rounded-2xl overflow-hidden bg-card border border-border/40 hover:border-primary/40 transition-all duration-500 hover:shadow-[0_8px_40px_-12px_hsl(var(--primary)/0.25)]"
       onClick={() => navigate(`/product/${productId}`)}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
     >
-      <div className="relative aspect-[3/4] overflow-hidden bg-gradient-to-br from-muted to-muted/50">
+      {/* Image Container */}
+      <div className="relative aspect-[3/4] overflow-hidden bg-muted/30">
+        {/* Discount Badge */}
         {discount && (
-          <Badge className="absolute top-3 left-3 z-10 bg-sale text-sale-foreground shadow-lg font-bold text-sm px-3 py-1 animate-bounce-in">
-            -{discount}%
-          </Badge>
+          <div className="absolute top-3 left-3 z-10">
+            <Badge className="bg-sale text-sale-foreground font-bold text-xs px-2.5 py-1 rounded-lg shadow-lg backdrop-blur-sm border-0">
+              {discount}%-
+            </Badge>
+          </div>
         )}
-        <div className="absolute top-3 right-3 z-10 flex flex-col gap-2">
+
+        {/* Action Buttons */}
+        <div className="absolute top-3 right-3 z-10 flex flex-col gap-1.5">
           {id ? (
             <FavoriteButton productId={id} variant="ghost" size="icon" />
           ) : (
-            <Button
-              size="icon"
-              variant="ghost"
-              className="bg-white/95 hover:bg-primary hover:text-primary-foreground backdrop-blur-sm shadow-md transition-all duration-300 hover:scale-110 hover:rotate-12"
+            <button
+              className="h-9 w-9 flex items-center justify-center rounded-xl bg-background/80 backdrop-blur-md shadow-sm hover:bg-primary hover:text-primary-foreground transition-all duration-300 hover:scale-110 hover:shadow-md"
               onClick={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
               }}
             >
               <Heart className="h-4 w-4" />
-            </Button>
+            </button>
           )}
           {id && (
-            <Button
-              size="icon"
-              variant="ghost"
-              className="bg-white/95 hover:bg-primary hover:text-primary-foreground backdrop-blur-sm shadow-md transition-all duration-300 hover:scale-110"
+            <button
+              className="h-9 w-9 flex items-center justify-center rounded-xl bg-background/80 backdrop-blur-md shadow-sm hover:bg-primary hover:text-primary-foreground transition-all duration-300 hover:scale-110 hover:shadow-md opacity-0 group-hover:opacity-100 translate-x-2 group-hover:translate-x-0"
               onClick={handleCompare}
               title="أضف للمقارنة"
             >
               <Scale className="h-4 w-4" />
-            </Button>
+            </button>
           )}
         </div>
-        <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+
+        {/* Image */}
         <img
           src={image}
           alt={name}
-          className="object-cover w-full h-full group-hover:scale-110 transition-transform duration-700 ease-out"
+          loading="lazy"
+          onLoad={() => setImageLoaded(true)}
+          className={`object-cover w-full h-full transition-all duration-700 ease-out ${
+            imageLoaded ? "opacity-100" : "opacity-0"
+          } ${isHovered ? "scale-110" : "scale-100"}`}
         />
-        {/* Quick view overlay */}
-        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300">
-          <span className="bg-background/90 backdrop-blur-sm text-foreground px-4 py-2 rounded-full text-sm font-medium shadow-lg translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
+
+        {/* Hover Overlay */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-black/10 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-500" />
+
+        {/* Quick View Button */}
+        <div className="absolute bottom-0 left-0 right-0 p-3 translate-y-full group-hover:translate-y-0 transition-transform duration-400 ease-out">
+          <button
+            className="w-full flex items-center justify-center gap-2 bg-background/90 backdrop-blur-md text-foreground py-2.5 rounded-xl text-sm font-semibold shadow-lg hover:bg-primary hover:text-primary-foreground transition-colors duration-200"
+            onClick={(e) => {
+              e.stopPropagation();
+              navigate(`/product/${productId}`);
+            }}
+          >
+            <Eye className="h-4 w-4" />
             عرض سريع
-          </span>
+          </button>
         </div>
       </div>
-      
-      <CardContent className="p-5 space-y-3">
-        <h3 className="font-bold text-base line-clamp-2 min-h-[3rem] group-hover:text-primary transition-colors leading-tight">
+
+      {/* Content */}
+      <div className="p-4 space-y-2.5">
+        {/* Product Name */}
+        <h3 className="font-semibold text-sm leading-snug line-clamp-2 min-h-[2.5rem] text-foreground group-hover:text-primary transition-colors duration-300">
           {name}
         </h3>
-        
-        <div className="flex items-center gap-2">
-          <div className="flex">
+
+        {/* Rating */}
+        <div className="flex items-center gap-1.5">
+          <div className="flex gap-0.5">
             {[...Array(5)].map((_, i) => (
               <Star
                 key={i}
-                className={`h-4 w-4 transition-all duration-300 ${
-                  i < Math.floor(rating)
-                    ? "fill-yellow-400 text-yellow-400"
-                    : "text-gray-300"
+                className={`h-3.5 w-3.5 ${
+                  i < filledStars
+                    ? "fill-amber-400 text-amber-400"
+                    : "fill-muted text-muted"
                 }`}
               />
             ))}
           </div>
-          <span className="text-xs text-muted-foreground font-medium">({reviews})</span>
+          <span className="text-[11px] text-muted-foreground">({reviews})</span>
         </div>
-        
-            <div className="flex items-baseline gap-2 pt-1">
-              <span className="font-bold text-2xl text-primary">
-                {price}
-              </span>
-              <span className="text-sm text-foreground/70">ل.س</span>
-              {originalPrice && (
-                <span className="text-sm text-muted-foreground line-through font-medium mr-auto">
-                  {originalPrice}
-                </span>
-              )}
-            </div>
-        
-        <Button 
-          className="w-full shadow-md hover:shadow-lg transition-all duration-300 font-bold group/btn overflow-hidden relative" 
-          size="lg"
+
+        {/* Price */}
+        <div className="flex items-end gap-2 pt-0.5">
+          <div className="flex items-baseline gap-1">
+            <span className="font-bold text-xl text-primary leading-none">
+              {price.toLocaleString()}
+            </span>
+            <span className="text-[11px] text-muted-foreground font-medium">ل.س</span>
+          </div>
+          {originalPrice && (
+            <span className="text-xs text-muted-foreground/70 line-through mr-auto">
+              {originalPrice.toLocaleString()}
+            </span>
+          )}
+        </div>
+
+        {/* Add to Cart Button */}
+        <Button
+          className="w-full rounded-xl font-semibold text-sm h-10 shadow-sm hover:shadow-md transition-all duration-300 group/btn"
           onClick={(e) => {
             e.stopPropagation();
             navigate(`/product/${productId}`);
           }}
         >
-          <span className="relative z-10">أضف للسلة</span>
-          <div className="absolute inset-0 bg-gradient-to-r from-primary via-accent to-primary bg-[length:200%_100%] opacity-0 group-hover/btn:opacity-100 transition-opacity duration-300 animate-gradient-shift" />
+          <ShoppingCart className="h-4 w-4 ml-2 transition-transform duration-300 group-hover/btn:scale-110" />
+          أضف للسلة
         </Button>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 };
 

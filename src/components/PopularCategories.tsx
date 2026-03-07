@@ -121,9 +121,8 @@ const PopularCategories = () => {
   return (
     <section 
       ref={sectionRef}
-      className={`py-4 bg-muted/30 transition-all duration-700 ${
-        isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
-      }`}
+    className="py-4 bg-muted/30"
+    style={{ opacity: 1 }}
     >
       <div className="container px-4">
         <div className="flex items-center gap-2 mb-3">

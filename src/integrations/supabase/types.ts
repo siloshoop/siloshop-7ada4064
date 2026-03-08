@@ -1335,6 +1335,28 @@ export type Database = {
         }
         Returns: boolean
       }
+      log_activity: {
+        Args: {
+          _action_details?: Json
+          _action_type: string
+          _user_agent?: string
+        }
+        Returns: undefined
+      }
+      record_contact_rate_limit: {
+        Args: { _email_hash: string; _ip_hash: string }
+        Returns: undefined
+      }
+      send_notification: {
+        Args: {
+          _message: string
+          _related_id?: string
+          _target_user_id: string
+          _title: string
+          _type?: string
+        }
+        Returns: undefined
+      }
     }
     Enums: {
       app_role: "customer" | "vendor" | "admin"

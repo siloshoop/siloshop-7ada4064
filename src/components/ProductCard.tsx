@@ -221,7 +221,7 @@ const ProductCard = ({
             {[...Array(5)].map((_, i) => (
               <Star
                 key={i}
-                className={`h-3.5 w-3.5 ${
+                className={`h-3 w-3 ${
                   i < filledStars
                     ? "fill-amber-400 text-amber-400"
                     : "fill-muted text-muted"

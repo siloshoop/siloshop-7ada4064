@@ -164,6 +164,29 @@ export const SearchFilters = ({ onFilterChange }: SearchFiltersProps) => {
             </Select>
           </div>
 
+          {/* العلامة التجارية */}
+          {brands.length > 0 && (
+            <div className="space-y-2">
+              <Label className="flex items-center gap-1">
+                <Gem className="h-4 w-4" />
+                العلامة التجارية
+              </Label>
+              <Select value={brandId} onValueChange={setBrandId}>
+                <SelectTrigger>
+                  <SelectValue placeholder="اختر العلامة التجارية" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="">جميع العلامات</SelectItem>
+                  {brands.map((brand) => (
+                    <SelectItem key={brand.id} value={brand.id}>
+                      {brand.name_ar}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
+
           {/* الترتيب */}
           <div className="space-y-2">
             <Label>ترتيب حسب</Label>

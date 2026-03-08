@@ -34,6 +34,7 @@ const Navbar = () => {
   const { user, signOut, loading } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [cartCount, setCartCount] = useState(0);
+  const [cartBounce, setCartBounce] = useState(false);
   const { compareProducts, compareCount } = useCompareProducts();
   const { cartRef } = useFlyToCart();
 
@@ -54,7 +55,13 @@ const Navbar = () => {
     }
 
     const totalItems = (data || []).reduce((sum, item) => sum + (item.quantity || 0), 0);
-    setCartCount(totalItems);
+    setCartCount((prev) => {
+      if (totalItems !== prev && totalItems > 0) {
+        setCartBounce(true);
+        setTimeout(() => setCartBounce(false), 500);
+      }
+      return totalItems;
+    });
   }, [user]);
 
   useEffect(() => {

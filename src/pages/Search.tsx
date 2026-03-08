@@ -76,6 +76,7 @@ interface Filters {
   categoryIds: string[];
   subcategoryIds: string[];
   vendorIds: string[];
+  brandIds: string[];
   minRating: number;
   sortBy: string;
   hasDiscount: boolean;

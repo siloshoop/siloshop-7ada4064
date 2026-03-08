@@ -205,7 +205,7 @@ const PopularCategories = () => {
           <span className="text-xs text-muted-foreground mr-auto">({displayCategories.length} فئة)</span>
         </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 stagger-children">
           {displayCategories.map((category, index) => {
             const IconComponent = getIconComponent(category.icon);
             const colors = categoryColors[index % categoryColors.length];

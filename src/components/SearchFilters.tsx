@@ -18,10 +18,15 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
-import { SlidersHorizontal, Star } from "lucide-react";
+import { SlidersHorizontal, Star, Gem } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
 interface Category {
+  id: string;
+  name_ar: string;
+}
+
+interface Brand {
   id: string;
   name_ar: string;
 }

@@ -157,6 +157,7 @@ const Cart = () => {
           item.id === itemId ? { ...item, quantity: newQuantity } : item
         )
       );
+      window.dispatchEvent(new Event("cart-updated"));
     } catch (error: any) {
       toast({
         title: "خطأ",

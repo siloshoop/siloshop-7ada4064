@@ -194,15 +194,15 @@ const ProductCard = ({
         <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-black/10 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-500" />
 
         {/* Quick View Button */}
-        <div className="absolute bottom-0 left-0 right-0 p-3 translate-y-full group-hover:translate-y-0 transition-transform duration-400 ease-out">
+        <div className="absolute bottom-0 left-0 right-0 p-2 translate-y-full group-hover:translate-y-0 transition-transform duration-400 ease-out">
           <button
-            className="w-full flex items-center justify-center gap-2 bg-background/90 backdrop-blur-md text-foreground py-2.5 rounded-xl text-sm font-semibold shadow-lg hover:bg-primary hover:text-primary-foreground transition-colors duration-200"
+            className="w-full flex items-center justify-center gap-1.5 bg-background/90 backdrop-blur-md text-foreground py-2 rounded-lg text-xs font-semibold shadow-lg hover:bg-primary hover:text-primary-foreground transition-colors duration-200"
             onClick={(e) => {
               e.stopPropagation();
               navigate(`/product/${productId}`);
             }}
           >
-            <Eye className="h-4 w-4" />
+            <Eye className="h-3.5 w-3.5" />
             عرض سريع
           </button>
         </div>

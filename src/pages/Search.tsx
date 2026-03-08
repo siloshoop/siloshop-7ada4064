@@ -171,6 +171,11 @@ const SearchPage = () => {
         query = query.in("vendor_id", filters.vendorIds);
       }
 
+      // Brands
+      if (filters.brandIds.length > 0) {
+        query = query.in("brand_id", filters.brandIds);
+      }
+
       // Has discount
       if (filters.hasDiscount) {
         query = query.not("original_price", "is", null);

@@ -26,14 +26,18 @@ const iconMap: { [key: string]: React.ComponentType<{ className?: string }> } = 
 };
 
 const categoryColors = [
-  { bg: "from-blue-500/15 to-cyan-500/15", icon: "text-blue-600 dark:text-blue-400" },
-  { bg: "from-pink-500/15 to-rose-500/15", icon: "text-pink-600 dark:text-pink-400" },
-  { bg: "from-green-500/15 to-emerald-500/15", icon: "text-green-600 dark:text-green-400" },
-  { bg: "from-orange-500/15 to-amber-500/15", icon: "text-orange-600 dark:text-orange-400" },
-  { bg: "from-purple-500/15 to-violet-500/15", icon: "text-purple-600 dark:text-purple-400" },
-  { bg: "from-fuchsia-500/15 to-pink-500/15", icon: "text-fuchsia-600 dark:text-fuchsia-400" },
-  { bg: "from-indigo-500/15 to-blue-500/15", icon: "text-indigo-600 dark:text-indigo-400" },
-  { bg: "from-teal-500/15 to-green-500/15", icon: "text-teal-600 dark:text-teal-400" },
+  { bg: "from-blue-500/15 to-cyan-500/15", icon: "text-blue-600 dark:text-blue-400", ring: "group-hover:ring-blue-500/30" },
+  { bg: "from-pink-500/15 to-rose-500/15", icon: "text-pink-600 dark:text-pink-400", ring: "group-hover:ring-pink-500/30" },
+  { bg: "from-green-500/15 to-emerald-500/15", icon: "text-green-600 dark:text-green-400", ring: "group-hover:ring-green-500/30" },
+  { bg: "from-orange-500/15 to-amber-500/15", icon: "text-orange-600 dark:text-orange-400", ring: "group-hover:ring-orange-500/30" },
+  { bg: "from-purple-500/15 to-violet-500/15", icon: "text-purple-600 dark:text-purple-400", ring: "group-hover:ring-purple-500/30" },
+  { bg: "from-fuchsia-500/15 to-pink-500/15", icon: "text-fuchsia-600 dark:text-fuchsia-400", ring: "group-hover:ring-fuchsia-500/30" },
+  { bg: "from-indigo-500/15 to-blue-500/15", icon: "text-indigo-600 dark:text-indigo-400", ring: "group-hover:ring-indigo-500/30" },
+  { bg: "from-teal-500/15 to-green-500/15", icon: "text-teal-600 dark:text-teal-400", ring: "group-hover:ring-teal-500/30" },
+  { bg: "from-red-500/15 to-orange-500/15", icon: "text-red-600 dark:text-red-400", ring: "group-hover:ring-red-500/30" },
+  { bg: "from-cyan-500/15 to-sky-500/15", icon: "text-cyan-600 dark:text-cyan-400", ring: "group-hover:ring-cyan-500/30" },
+  { bg: "from-amber-500/15 to-yellow-500/15", icon: "text-amber-600 dark:text-amber-400", ring: "group-hover:ring-amber-500/30" },
+  { bg: "from-emerald-500/15 to-teal-500/15", icon: "text-emerald-600 dark:text-emerald-400", ring: "group-hover:ring-emerald-500/30" },
 ];
 
 const demoCategories: PopularCategory[] = [
@@ -72,7 +76,7 @@ const PopularCategories = () => {
 
       if (categoriesData && categoriesData.length > 0) {
         const withCounts = await Promise.all(
-          categoriesData.slice(0, 8).map(async (cat) => {
+          categoriesData.map(async (cat) => {
             const { count } = await supabase
               .from("products")
               .select("id", { count: "exact", head: true })
@@ -99,20 +103,19 @@ const PopularCategories = () => {
     return iconMap[iconName] || iconMap[iconName?.toLowerCase()] || Package;
   };
 
-  // Always show content — use demo data as initial state so section is NEVER empty
   const displayCategories = categories.length > 0 ? categories : demoCategories;
 
   if (loading) {
     return (
-      <section className="py-6 bg-muted/30">
+      <section className="py-8 bg-muted/30">
         <div className="container px-4">
-          <div className="flex items-center gap-2 mb-4">
+          <div className="flex items-center gap-2 mb-5">
             <Skeleton className="h-5 w-5 rounded-md" />
             <Skeleton className="h-5 w-36" />
           </div>
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
-            {[...Array(8)].map((_, i) => (
-              <Skeleton key={i} className="h-[72px] rounded-xl" />
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
+            {[...Array(12)].map((_, i) => (
+              <Skeleton key={i} className="h-[88px] rounded-xl" />
             ))}
           </div>
         </div>
@@ -121,16 +124,17 @@ const PopularCategories = () => {
   }
 
   return (
-    <section className="py-6 bg-muted/30" style={{ opacity: 1 }}>
+    <section className="py-8 bg-muted/30">
       <div className="container px-4">
-        <div className="flex items-center gap-2 mb-4">
+        <div className="flex items-center gap-2 mb-5">
           <div className="p-1.5 rounded-lg bg-primary/10">
             <TrendingUp className="h-4 w-4 text-primary" />
           </div>
           <h2 className="text-base md:text-lg font-bold text-foreground">الفئات الأكثر شعبية</h2>
+          <span className="text-xs text-muted-foreground mr-auto">({displayCategories.length} فئة)</span>
         </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
           {displayCategories.map((category, index) => {
             const IconComponent = getIconComponent(category.icon);
             const colors = categoryColors[index % categoryColors.length];
@@ -138,14 +142,15 @@ const PopularCategories = () => {
             return (
               <Card
                 key={category.id}
-                className={`group cursor-pointer transition-all duration-300 hover:scale-[1.03] hover:shadow-lg border border-border/50 bg-gradient-to-br ${colors.bg} backdrop-blur-sm overflow-hidden`}
+                className={`group cursor-pointer transition-all duration-300 hover:scale-[1.05] hover:-translate-y-1 hover:shadow-xl border border-border/50 bg-gradient-to-br ${colors.bg} backdrop-blur-sm overflow-hidden ring-2 ring-transparent ${colors.ring}`}
+                style={{ animationDelay: `${index * 50}ms` }}
                 onClick={() => !isDemo && navigate(`/category/${category.id}`)}
               >
-                <CardContent className="p-4 flex items-center gap-3 rtl:flex-row-reverse">
-                  <div className="p-2.5 rounded-xl bg-background/80 backdrop-blur-sm shadow-sm group-hover:shadow-md transition-shadow duration-300 shrink-0">
-                    <IconComponent className={`h-6 w-6 ${colors.icon} transition-transform duration-300 group-hover:scale-110`} />
+                <CardContent className="p-3 sm:p-4 flex flex-col items-center gap-2 text-center">
+                  <div className="p-2.5 rounded-xl bg-background/80 backdrop-blur-sm shadow-sm group-hover:shadow-md transition-all duration-300 group-hover:scale-110">
+                    <IconComponent className={`h-6 w-6 ${colors.icon} transition-transform duration-300`} />
                   </div>
-                  <div className="min-w-0 text-right flex-1">
+                  <div className="min-w-0 w-full">
                     <h3 className="text-sm font-semibold text-foreground line-clamp-1">{category.name_ar}</h3>
                     <p className="text-xs text-muted-foreground mt-0.5">
                       {category.product_count ?? 0} منتج

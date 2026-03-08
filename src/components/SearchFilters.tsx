@@ -74,6 +74,7 @@ export const SearchFilters = ({ onFilterChange }: SearchFiltersProps) => {
       categoryId,
       sortBy,
       minVendorRating,
+      brandId,
     });
     setOpen(false);
   };
@@ -81,6 +82,7 @@ export const SearchFilters = ({ onFilterChange }: SearchFiltersProps) => {
   const resetFilters = () => {
     setPriceRange([0, 1000000]);
     setCategoryId("");
+    setBrandId("");
     setSortBy("newest");
     setMinVendorRating(0);
     onFilterChange({
@@ -89,6 +91,7 @@ export const SearchFilters = ({ onFilterChange }: SearchFiltersProps) => {
       categoryId: "",
       sortBy: "newest",
       minVendorRating: 0,
+      brandId: "",
     });
     setOpen(false);
   };

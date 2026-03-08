@@ -44,10 +44,12 @@ interface SearchFiltersProps {
 
 export const SearchFilters = ({ onFilterChange }: SearchFiltersProps) => {
   const [categories, setCategories] = useState<Category[]>([]);
+  const [brands, setBrands] = useState<Brand[]>([]);
   const [minPrice, setMinPrice] = useState(0);
   const [maxPrice, setMaxPrice] = useState(1000000);
   const [priceRange, setPriceRange] = useState([0, 1000000]);
   const [categoryId, setCategoryId] = useState("");
+  const [brandId, setBrandId] = useState("");
   const [sortBy, setSortBy] = useState("newest");
   const [minVendorRating, setMinVendorRating] = useState(0);
   const [open, setOpen] = useState(false);

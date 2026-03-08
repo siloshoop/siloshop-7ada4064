@@ -176,7 +176,7 @@ const ActivityLogs = () => {
     return matchesSearch && matchesAction;
   });
 
-  if (authLoading || loading) {
+  if (adminLoading || loading) {
     return (
       <div className="min-h-screen flex flex-col">
         <Navbar />

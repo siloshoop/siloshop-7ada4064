@@ -137,7 +137,7 @@ const ProductCard = ({
 
   return (
     <div
-      className="group relative cursor-pointer rounded-2xl overflow-hidden bg-card border border-border/40 hover:border-primary/40 transition-all duration-500 hover:shadow-[0_8px_40px_-12px_hsl(var(--primary)/0.25)]"
+      className="group relative cursor-pointer rounded-xl overflow-hidden bg-card border border-border/40 hover:border-primary/40 transition-all duration-500 hover:shadow-[0_8px_40px_-12px_hsl(var(--primary)/0.25)]"
       onClick={() => navigate(`/product/${productId}`)}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}

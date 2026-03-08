@@ -8,8 +8,8 @@ import PushNotificationManager from "@/components/PushNotificationManager";
 import { useNavigate } from "react-router-dom";
 import { NavLink } from "@/components/NavLink";
 import { useAuth } from "@/hooks/useAuth";
-import { useState, useEffect } from "react";
-import {
+import { supabase } from "@/integrations/supabase/client";
+import { useState, useEffect, useCallback } from "react";
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,

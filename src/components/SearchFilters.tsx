@@ -55,18 +55,16 @@ export const SearchFilters = ({ onFilterChange }: SearchFiltersProps) => {
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
-    fetchCategories();
+    fetchFilterData();
   }, []);
 
-  const fetchCategories = async () => {
-    const { data } = await supabase
-      .from("categories")
-      .select("id, name_ar")
-      .order("name_ar");
-
-    if (data) {
-      setCategories(data);
-    }
+  const fetchFilterData = async () => {
+    const [categoriesRes, brandsRes] = await Promise.all([
+      supabase.from("categories").select("id, name_ar").order("name_ar"),
+      supabase.from("brands").select("id, name_ar").eq("is_active", true).order("name_ar"),
+    ]);
+    if (categoriesRes.data) setCategories(categoriesRes.data);
+    if (brandsRes.data) setBrands(brandsRes.data);
   };
 
   const applyFilters = () => {

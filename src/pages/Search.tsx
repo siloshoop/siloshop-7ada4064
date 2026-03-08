@@ -33,7 +33,7 @@ import {
 } from "@/components/ui/sheet";
 import { 
   Loader2, Search as SearchIcon, SlidersHorizontal, Star, X, Tag, 
-  DollarSign, User, Layers, ArrowUpDown, RotateCcw 
+  DollarSign, User, Layers, ArrowUpDown, RotateCcw, Gem 
 } from "lucide-react";
 
 interface Product {

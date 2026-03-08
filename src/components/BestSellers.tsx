@@ -19,7 +19,7 @@ interface BestSellerProduct extends Product {
 const BestSellers = () => {
   const [products, setProducts] = useState<BestSellerProduct[]>([]);
   const [loading, setLoading] = useState(true);
-  const [isVisible, setIsVisible] = useState(true);
+  const [isVisible, setIsVisible] = useState(false);
   const sectionRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
@@ -30,7 +30,7 @@ const BestSellers = () => {
           observer.disconnect();
         }
       },
-      { threshold: 0.1 }
+      { threshold: 0.05 }
     );
 
     if (sectionRef.current) {
@@ -43,8 +43,6 @@ const BestSellers = () => {
   useEffect(() => {
     const fetchBestSellers = async () => {
       try {
-        // Since order_items requires authentication, we'll just show newest products
-        // as "best sellers" for non-authenticated users
         const { data: newProducts } = await supabase
           .from("products")
           .select("id, name, price, original_price, image_url, reviews(rating)")
@@ -63,19 +61,13 @@ const BestSellers = () => {
     fetchBestSellers();
   }, []);
 
-  // Return null while loading to prevent gap, unless we know there's content
-  if (loading) {
-    return null;
-  }
-
-  if (products.length === 0) {
-    return null;
-  }
+  if (loading) return null;
+  if (products.length === 0) return null;
 
   return (
     <section ref={sectionRef} className="py-6 bg-muted/30">
       <div className="container px-4">
-        <div className={`flex items-center gap-2 mb-4 transition-all duration-700 ${isVisible ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-8'}`}>
+        <div className={`flex items-center gap-2 mb-4 transition-all duration-600 ease-[cubic-bezier(0.22,1,0.36,1)] ${isVisible ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-8'}`}>
           <div className="p-1.5 rounded-lg bg-primary/10">
             <TrendingUp className="h-5 w-5 text-primary" />
           </div>
@@ -84,7 +76,7 @@ const BestSellers = () => {
             <p className="text-muted-foreground text-xs">المنتجات الأكثر طلباً</p>
           </div>
         </div>
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+        <div className={`grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 ${isVisible ? 'stagger-children' : ''}`}>
           {products.map((product, index) => {
             const avgRating = product.reviews?.length
               ? product.reviews.reduce((sum, r) => sum + r.rating, 0) / product.reviews.length
@@ -96,8 +88,8 @@ const BestSellers = () => {
             return (
               <div
                 key={product.id}
-                className={`transition-all duration-500 hover-lift card-glow ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'}`}
-                style={{ transitionDelay: `${100 + index * 75}ms` }}
+                className="hover-lift card-glow"
+                style={{ animationDelay: `${index * 80}ms` }}
               >
                 <ProductCard
                   id={product.id}

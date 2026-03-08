@@ -18,10 +18,15 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
-import { SlidersHorizontal, Star } from "lucide-react";
+import { SlidersHorizontal, Star, Gem } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
 interface Category {
+  id: string;
+  name_ar: string;
+}
+
+interface Brand {
   id: string;
   name_ar: string;
 }
@@ -33,32 +38,33 @@ interface SearchFiltersProps {
     categoryId: string;
     sortBy: string;
     minVendorRating: number;
+    brandId: string;
   }) => void;
 }
 
 export const SearchFilters = ({ onFilterChange }: SearchFiltersProps) => {
   const [categories, setCategories] = useState<Category[]>([]);
+  const [brands, setBrands] = useState<Brand[]>([]);
   const [minPrice, setMinPrice] = useState(0);
   const [maxPrice, setMaxPrice] = useState(1000000);
   const [priceRange, setPriceRange] = useState([0, 1000000]);
   const [categoryId, setCategoryId] = useState("");
+  const [brandId, setBrandId] = useState("");
   const [sortBy, setSortBy] = useState("newest");
   const [minVendorRating, setMinVendorRating] = useState(0);
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
-    fetchCategories();
+    fetchFilterData();
   }, []);
 
-  const fetchCategories = async () => {
-    const { data } = await supabase
-      .from("categories")
-      .select("id, name_ar")
-      .order("name_ar");
-
-    if (data) {
-      setCategories(data);
-    }
+  const fetchFilterData = async () => {
+    const [categoriesRes, brandsRes] = await Promise.all([
+      supabase.from("categories").select("id, name_ar").order("name_ar"),
+      supabase.from("brands").select("id, name_ar").eq("is_active", true).order("name_ar"),
+    ]);
+    if (categoriesRes.data) setCategories(categoriesRes.data);
+    if (brandsRes.data) setBrands(brandsRes.data);
   };
 
   const applyFilters = () => {
@@ -68,6 +74,7 @@ export const SearchFilters = ({ onFilterChange }: SearchFiltersProps) => {
       categoryId,
       sortBy,
       minVendorRating,
+      brandId,
     });
     setOpen(false);
   };
@@ -75,6 +82,7 @@ export const SearchFilters = ({ onFilterChange }: SearchFiltersProps) => {
   const resetFilters = () => {
     setPriceRange([0, 1000000]);
     setCategoryId("");
+    setBrandId("");
     setSortBy("newest");
     setMinVendorRating(0);
     onFilterChange({
@@ -83,6 +91,7 @@ export const SearchFilters = ({ onFilterChange }: SearchFiltersProps) => {
       categoryId: "",
       sortBy: "newest",
       minVendorRating: 0,
+      brandId: "",
     });
     setOpen(false);
   };
@@ -154,6 +163,29 @@ export const SearchFilters = ({ onFilterChange }: SearchFiltersProps) => {
               </SelectContent>
             </Select>
           </div>
+
+          {/* العلامة التجارية */}
+          {brands.length > 0 && (
+            <div className="space-y-2">
+              <Label className="flex items-center gap-1">
+                <Gem className="h-4 w-4" />
+                العلامة التجارية
+              </Label>
+              <Select value={brandId} onValueChange={setBrandId}>
+                <SelectTrigger>
+                  <SelectValue placeholder="اختر العلامة التجارية" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="">جميع العلامات</SelectItem>
+                  {brands.map((brand) => (
+                    <SelectItem key={brand.id} value={brand.id}>
+                      {brand.name_ar}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
 
           {/* الترتيب */}
           <div className="space-y-2">

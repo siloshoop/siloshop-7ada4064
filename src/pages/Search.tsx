@@ -33,7 +33,7 @@ import {
 } from "@/components/ui/sheet";
 import { 
   Loader2, Search as SearchIcon, SlidersHorizontal, Star, X, Tag, 
-  DollarSign, User, Layers, ArrowUpDown, RotateCcw 
+  DollarSign, User, Layers, ArrowUpDown, RotateCcw, Gem 
 } from "lucide-react";
 
 interface Product {
@@ -64,6 +64,11 @@ interface Vendor {
   full_name: string;
 }
 
+interface Brand {
+  id: string;
+  name_ar: string;
+}
+
 interface Filters {
   search: string;
   minPrice: number;
@@ -71,6 +76,7 @@ interface Filters {
   categoryIds: string[];
   subcategoryIds: string[];
   vendorIds: string[];
+  brandIds: string[];
   minRating: number;
   sortBy: string;
   hasDiscount: boolean;
@@ -84,6 +90,7 @@ const defaultFilters: Filters = {
   categoryIds: [],
   subcategoryIds: [],
   vendorIds: [],
+  brandIds: [],
   minRating: 0,
   sortBy: "newest",
   hasDiscount: false,
@@ -97,6 +104,7 @@ const SearchPage = () => {
   const [categories, setCategories] = useState<Category[]>([]);
   const [subcategories, setSubcategories] = useState<Subcategory[]>([]);
   const [vendors, setVendors] = useState<Vendor[]>([]);
+  const [brands, setBrands] = useState<Brand[]>([]);
   const [loading, setLoading] = useState(true);
   const [totalProducts, setTotalProducts] = useState(0);
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
@@ -111,15 +119,17 @@ const SearchPage = () => {
   // Fetch categories, subcategories, and vendors on mount
   useEffect(() => {
     const fetchFilterData = async () => {
-      const [categoriesRes, subcategoriesRes, vendorsRes] = await Promise.all([
+      const [categoriesRes, subcategoriesRes, vendorsRes, brandsRes] = await Promise.all([
         supabase.from("categories").select("id, name_ar").order("name_ar"),
         supabase.from("subcategories").select("id, name_ar, category_id").eq("is_active", true).order("name_ar"),
         supabase.from("profiles").select("id, full_name").eq("role", "vendor"),
+        supabase.from("brands").select("id, name_ar").eq("is_active", true).order("name_ar"),
       ]);
 
       if (categoriesRes.data) setCategories(categoriesRes.data);
       if (subcategoriesRes.data) setSubcategories(subcategoriesRes.data);
       if (vendorsRes.data) setVendors(vendorsRes.data as Vendor[]);
+      if (brandsRes.data) setBrands(brandsRes.data);
     };
 
     fetchFilterData();
@@ -159,6 +169,11 @@ const SearchPage = () => {
       // Vendors
       if (filters.vendorIds.length > 0) {
         query = query.in("vendor_id", filters.vendorIds);
+      }
+
+      // Brands
+      if (filters.brandIds.length > 0) {
+        query = query.in("brand_id", filters.brandIds);
       }
 
       // Has discount
@@ -217,7 +232,7 @@ const SearchPage = () => {
     setFilters((prev) => ({ ...prev, [key]: value }));
   };
 
-  const toggleArrayFilter = (key: "categoryIds" | "subcategoryIds" | "vendorIds", id: string) => {
+  const toggleArrayFilter = (key: "categoryIds" | "subcategoryIds" | "vendorIds" | "brandIds", id: string) => {
     setFilters((prev) => {
       const array = prev[key];
       const newArray = array.includes(id)
@@ -244,6 +259,7 @@ const SearchPage = () => {
     filters.categoryIds.length +
     filters.subcategoryIds.length +
     filters.vendorIds.length +
+    filters.brandIds.length +
     (filters.minRating > 0 ? 1 : 0) +
     (filters.hasDiscount ? 1 : 0) +
     (filters.inStock ? 1 : 0) +
@@ -286,6 +302,15 @@ const SearchPage = () => {
                 <Badge key={id} variant="secondary" className="gap-1">
                   {vendor.full_name}
                   <X className="h-3 w-3 cursor-pointer" onClick={() => toggleArrayFilter("vendorIds", id)} />
+                </Badge>
+              ) : null;
+            })}
+            {filters.brandIds.map((id) => {
+              const brand = brands.find((b) => b.id === id);
+              return brand ? (
+                <Badge key={id} variant="secondary" className="gap-1">
+                  {brand.name_ar}
+                  <X className="h-3 w-3 cursor-pointer" onClick={() => toggleArrayFilter("brandIds", id)} />
                 </Badge>
               ) : null;
             })}
@@ -394,6 +419,32 @@ const SearchPage = () => {
                   />
                   <label htmlFor={`sub-${sub.id}`} className="text-sm cursor-pointer flex-1">
                     {sub.name_ar}
+                  </label>
+                </div>
+              ))}
+            </AccordionContent>
+          </AccordionItem>
+        )}
+
+        {/* Brands */}
+        {brands.length > 0 && (
+          <AccordionItem value="brand">
+            <AccordionTrigger className="hover:no-underline">
+              <div className="flex items-center gap-2">
+                <Gem className="h-4 w-4" />
+                العلامات التجارية
+              </div>
+            </AccordionTrigger>
+            <AccordionContent className="space-y-2 pt-2 max-h-48 overflow-y-auto">
+              {brands.map((brand) => (
+                <div key={brand.id} className="flex items-center gap-2">
+                  <Checkbox
+                    id={`brand-${brand.id}`}
+                    checked={filters.brandIds.includes(brand.id)}
+                    onCheckedChange={() => toggleArrayFilter("brandIds", brand.id)}
+                  />
+                  <label htmlFor={`brand-${brand.id}`} className="text-sm cursor-pointer flex-1">
+                    {brand.name_ar}
                   </label>
                 </div>
               ))}

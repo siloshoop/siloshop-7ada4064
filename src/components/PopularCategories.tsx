@@ -23,6 +23,13 @@ interface PopularCategory {
   product_count?: number;
 }
 
+interface Subcategory {
+  id: string;
+  category_id: string;
+  name_ar: string;
+  icon: string | null;
+}
+
 const iconMap: { [key: string]: React.ComponentType<{ className?: string }> } = {
   Smartphone, Laptop, Shirt, Home, Dumbbell, Gamepad2, Watch,
   Baby, Sparkles, BookOpen, Car, Utensils, Footprints,
@@ -30,6 +37,34 @@ const iconMap: { [key: string]: React.ComponentType<{ className?: string }> } = 
   smartphone: Smartphone, laptop: Laptop, shirt: Shirt, home: Home,
   dumbbell: Dumbbell, gamepad: Gamepad2, watch: Watch, baby: Baby,
   sparkles: Sparkles, book: BookOpen, car: Car, utensils: Utensils,
+};
+
+const subIconMap: Record<string, React.ComponentType<{ className?: string }>> = {
+  "sneakers": PersonStanding, "formal-shoes": Briefcase, "sandals": Footprints,
+  "boots": Mountain, "slippers": Home, "heels": Gem,
+  "dresses": Flower2, "abayas": Wind, "blouses": Crown,
+  "pants-women": Scissors, "skirts": Moon, "pajamas-women": Moon,
+  "underwear-women": Heart, "sportswear-women": HeartPulse, "coats-women": Snowflake,
+  "hijab": Palette, "shirts": Shirt, "t-shirts": CircleDot,
+  "pants-men": Layers, "suits": Award, "jeans": Layers,
+  "pajamas-men": Bed, "underwear-men": Heart, "sportswear-men": HeartPulse,
+  "coats-men": Cloud, "thobe": User, "baby-clothes": Baby,
+  "boys-clothes": Smile, "girls-clothes": Star, "kids-shoes": Footprints,
+  "kids-pajamas": Moon, "school-uniforms": School, "kids-sportswear": Trophy,
+  "watches": Clock, "jewelry": Diamond, "sunglasses": Glasses,
+  "belts": Layers, "scarves": Wind, "hats": GraduationCap, "wallets": Wallet,
+  "handbags": ShoppingBag, "backpacks": Backpack, "travel-bags": Plane,
+  "laptop-bags": Laptop, "clutches": Star, "school-bags": GraduationCap,
+  "living-room": Tv, "bedroom": BedDouble, "dining-room": UtensilsCrossed,
+  "office-furniture": Monitor, "kids-furniture": Baby, "outdoor-furniture": TreePine,
+  "video-games": Gamepad, "board-games": Dice1, "toys-kids": Puzzle,
+  "educational-toys": Lightbulb, "outdoor-toys": TreeDeciduous, "dolls": Cat,
+  "makeup": Brush, "skincare": Droplet, "haircare": Scissors,
+  "perfumes": Sparkle, "nail-care": Hand, "body-care": Bath,
+  "novels": Book, "religious": BookMarked, "educational": PenTool,
+  "children-books": Baby, "self-development": Users, "cooking-books": ChefHat,
+  "gym-equipment": Dumbbell, "sports-clothes": Shirt, "sports-shoes": Footprints,
+  "football": Activity, "swimming": Waves, "cycling": Bike,
 };
 
 const categoryColors = [

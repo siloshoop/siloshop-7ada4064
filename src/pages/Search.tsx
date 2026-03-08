@@ -90,6 +90,7 @@ const defaultFilters: Filters = {
   categoryIds: [],
   subcategoryIds: [],
   vendorIds: [],
+  brandIds: [],
   minRating: 0,
   sortBy: "newest",
   hasDiscount: false,

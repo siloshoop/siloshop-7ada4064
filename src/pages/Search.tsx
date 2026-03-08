@@ -232,7 +232,7 @@ const SearchPage = () => {
     setFilters((prev) => ({ ...prev, [key]: value }));
   };
 
-  const toggleArrayFilter = (key: "categoryIds" | "subcategoryIds" | "vendorIds", id: string) => {
+  const toggleArrayFilter = (key: "categoryIds" | "subcategoryIds" | "vendorIds" | "brandIds", id: string) => {
     setFilters((prev) => {
       const array = prev[key];
       const newArray = array.includes(id)

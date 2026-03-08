@@ -305,6 +305,15 @@ const SearchPage = () => {
                 </Badge>
               ) : null;
             })}
+            {filters.brandIds.map((id) => {
+              const brand = brands.find((b) => b.id === id);
+              return brand ? (
+                <Badge key={id} variant="secondary" className="gap-1">
+                  {brand.name_ar}
+                  <X className="h-3 w-3 cursor-pointer" onClick={() => toggleArrayFilter("brandIds", id)} />
+                </Badge>
+              ) : null;
+            })}
             {filters.minRating > 0 && (
               <Badge variant="secondary" className="gap-1">
                 {filters.minRating}+ نجوم

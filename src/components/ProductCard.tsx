@@ -32,6 +32,7 @@ const ProductCard = ({
   const navigate = useNavigate();
   const { toast } = useToast();
   const { addProduct } = useCompareProducts();
+  const { triggerFly } = useFlyToCart();
   const [imageLoaded, setImageLoaded] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
 

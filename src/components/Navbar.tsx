@@ -83,6 +83,11 @@ const Navbar = () => {
             ref={(el: HTMLButtonElement | null) => { (cartRef as React.MutableRefObject<HTMLElement | null>).current = el; }}
           >
             <ShoppingCart className="h-5 w-5" />
+            {cartCount > 0 && (
+              <Badge className="absolute -top-1 -right-1 h-5 min-w-5 px-1 flex items-center justify-center text-xs bg-primary">
+                {cartCount > 99 ? "99+" : cartCount}
+              </Badge>
+            )}
           </Button>
           <Button 
             variant="ghost" 

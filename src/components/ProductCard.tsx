@@ -170,7 +170,7 @@ const ProductCard = ({
           )}
           {id && (
             <button
-              className="h-9 w-9 flex items-center justify-center rounded-xl bg-background/80 backdrop-blur-md shadow-sm hover:bg-primary hover:text-primary-foreground transition-all duration-300 hover:scale-110 hover:shadow-md opacity-0 group-hover:opacity-100 translate-x-2 group-hover:translate-x-0"
+              className="h-7 w-7 flex items-center justify-center rounded-lg bg-background/80 backdrop-blur-md shadow-sm hover:bg-primary hover:text-primary-foreground transition-all duration-300 hover:scale-110 opacity-0 group-hover:opacity-100 translate-x-2 group-hover:translate-x-0"
               onClick={handleCompare}
               title="أضف للمقارنة"
             >

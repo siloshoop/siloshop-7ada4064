@@ -216,7 +216,7 @@ const PopularCategories = () => {
             return (
               <Card
                 key={category.id}
-                className={`group cursor-pointer transition-all duration-300 hover:scale-[1.05] hover:-translate-y-1 hover:shadow-xl border border-border/50 bg-gradient-to-br ${colors.bg} backdrop-blur-sm overflow-hidden ring-2 ${isExpanded ? 'ring-primary/50 scale-[1.03] shadow-xl' : `ring-transparent ${colors.ring}`}`}
+                className={`group cursor-pointer transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] hover:scale-[1.05] hover:-translate-y-1 hover:shadow-xl active:scale-[0.97] border border-border/50 bg-gradient-to-br ${colors.bg} backdrop-blur-sm overflow-hidden ring-2 ${isExpanded ? 'ring-primary/50 scale-[1.03] shadow-xl' : `ring-transparent ${colors.ring}`}`}
                 style={{ animationDelay: `${index * 50}ms` }}
                 onClick={() => handleCategoryClick(category.id, isDemo)}
               >

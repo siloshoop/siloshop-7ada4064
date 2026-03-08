@@ -35,6 +35,7 @@ import {
   Loader2, Search as SearchIcon, SlidersHorizontal, Star, X, Tag, 
   DollarSign, User, Layers, ArrowUpDown, RotateCcw, Gem 
 } from "lucide-react";
+import AdPlaceholder from "@/components/AdPlaceholder";
 
 interface Product {
   id: string;

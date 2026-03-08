@@ -264,11 +264,11 @@ const ManageUsers = () => {
       if (error) throw error;
 
       // Send notification to unbanned user
-      await supabase.from("notifications").insert({
-        user_id: userId,
-        title: "تم إلغاء حظر حسابك",
-        message: "تم إلغاء حظر حسابك ويمكنك الآن استخدام المنصة بشكل طبيعي.",
-        type: "info",
+      await supabase.rpc('send_notification', {
+        _target_user_id: userId,
+        _title: "تم إلغاء حظر حسابك",
+        _message: "تم إلغاء حظر حسابك ويمكنك الآن استخدام المنصة بشكل طبيعي.",
+        _type: "info",
       });
 
       // Log activity

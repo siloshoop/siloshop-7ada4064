@@ -6,6 +6,8 @@ import { FavoriteButton } from "@/components/FavoriteButton";
 import { useToast } from "@/hooks/use-toast";
 import { useCompareProducts } from "@/hooks/useCompareProducts";
 import { useFlyToCart } from "@/components/FlyToCart";
+import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
 import { useState } from "react";
 
 interface ProductCardProps {
@@ -30,6 +32,7 @@ const ProductCard = ({
   discount
 }: ProductCardProps) => {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const { toast } = useToast();
   const { addProduct } = useCompareProducts();
   const { triggerFly } = useFlyToCart();
@@ -67,6 +70,67 @@ const ProductCard = ({
       title: "تمت الإضافة",
       description: "تم إضافة المنتج لقائمة المقارنة",
     });
+  };
+
+  const handleAddToCart = async (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.stopPropagation();
+
+    if (!user) {
+      navigate("/auth");
+      return;
+    }
+
+    if (!id) {
+      toast({
+        title: "خطأ",
+        description: "لا يمكن إضافة هذا المنتج حالياً",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      const { data: existingItem, error: existingError } = await supabase
+        .from("cart_items")
+        .select("id, quantity")
+        .eq("user_id", user.id)
+        .eq("product_id", id)
+        .maybeSingle();
+
+      if (existingError) throw existingError;
+
+      if (existingItem) {
+        const { error: updateError } = await supabase
+          .from("cart_items")
+          .update({ quantity: existingItem.quantity + 1 })
+          .eq("id", existingItem.id);
+
+        if (updateError) throw updateError;
+      } else {
+        const { error: insertError } = await supabase.from("cart_items").insert({
+          user_id: user.id,
+          product_id: id,
+          quantity: 1,
+        });
+
+        if (insertError) throw insertError;
+      }
+
+      const rect = e.currentTarget.getBoundingClientRect();
+      triggerFly(rect.left + rect.width / 2, rect.top, image);
+      window.dispatchEvent(new Event("cart-updated"));
+
+      toast({
+        title: "تمت الإضافة",
+        description: "تم إضافة المنتج إلى السلة",
+      });
+    } catch (error: any) {
+      toast({
+        title: "خطأ",
+        description: error.message || "فشل إضافة المنتج إلى السلة",
+        variant: "destructive",
+      });
+    }
   };
 
   const filledStars = Math.floor(rating);
@@ -186,15 +250,7 @@ const ProductCard = ({
         {/* Add to Cart Button */}
         <Button
           className="w-full rounded-xl font-semibold text-sm h-10 shadow-sm hover:shadow-md transition-all duration-300 group/btn"
-          onClick={(e) => {
-            e.stopPropagation();
-            const rect = e.currentTarget.getBoundingClientRect();
-            triggerFly(rect.left + rect.width / 2, rect.top, image);
-            toast({
-              title: "تمت الإضافة",
-              description: "تم إضافة المنتج إلى السلة",
-            });
-          }}
+          onClick={handleAddToCart}
         >
           <ShoppingCart className="h-4 w-4 ml-2 transition-transform duration-300 group-hover/btn:scale-110" />
           أضف للسلة

@@ -8,7 +8,8 @@ import PushNotificationManager from "@/components/PushNotificationManager";
 import { useNavigate } from "react-router-dom";
 import { NavLink } from "@/components/NavLink";
 import { useAuth } from "@/hooks/useAuth";
-import { useState, useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { useState, useEffect, useCallback } from "react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -32,9 +33,42 @@ const Navbar = () => {
   const navigate = useNavigate();
   const { user, signOut, loading } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [cartCount, setCartCount] = useState(0);
   const { compareProducts, compareCount } = useCompareProducts();
   const { cartRef } = useFlyToCart();
 
+  const fetchCartCount = useCallback(async () => {
+    if (!user) {
+      setCartCount(0);
+      return;
+    }
+
+    const { data, error } = await supabase
+      .from("cart_items")
+      .select("quantity")
+      .eq("user_id", user.id);
+
+    if (error) {
+      console.error("Error fetching cart count:", error);
+      return;
+    }
+
+    const totalItems = (data || []).reduce((sum, item) => sum + (item.quantity || 0), 0);
+    setCartCount(totalItems);
+  }, [user]);
+
+  useEffect(() => {
+    fetchCartCount();
+  }, [fetchCartCount]);
+
+  useEffect(() => {
+    const handleCartUpdated = () => {
+      fetchCartCount();
+    };
+
+    window.addEventListener("cart-updated", handleCartUpdated);
+    return () => window.removeEventListener("cart-updated", handleCartUpdated);
+  }, [fetchCartCount]);
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-16 items-center justify-between gap-4 px-4">
@@ -49,6 +83,11 @@ const Navbar = () => {
             ref={(el: HTMLButtonElement | null) => { (cartRef as React.MutableRefObject<HTMLElement | null>).current = el; }}
           >
             <ShoppingCart className="h-5 w-5" />
+            {cartCount > 0 && (
+              <Badge className="absolute -top-1 -right-1 h-5 min-w-5 px-1 flex items-center justify-center text-xs bg-primary">
+                {cartCount > 99 ? "99+" : cartCount}
+              </Badge>
+            )}
           </Button>
           <Button 
             variant="ghost" 

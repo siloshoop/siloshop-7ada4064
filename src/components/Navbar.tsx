@@ -33,6 +33,7 @@ const Navbar = () => {
   const { user, signOut, loading } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { compareProducts, compareCount } = useCompareProducts();
+  const { cartRef } = useFlyToCart();
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">

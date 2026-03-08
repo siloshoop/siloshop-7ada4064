@@ -248,7 +248,7 @@ const Auth = () => {
                       value={signInPassword}
                       onChange={(e) => setSignInPassword(e.target.value)}
                       disabled={isLoading}
-                      className={`pl-14 ${signInErrors.password ? "border-destructive" : ""}`}
+                      className={`pl-20 ${signInErrors.password ? "border-destructive" : ""}`}
                     />
                     <Button
                       type="button"
@@ -322,7 +322,7 @@ const Auth = () => {
                       value={signUpPassword}
                       onChange={(e) => setSignUpPassword(e.target.value)}
                       disabled={isLoading}
-                      className={signUpErrors.password ? "border-destructive" : ""}
+                      className={`pl-20 ${signUpErrors.password ? "border-destructive" : ""}`}
                     />
                     <Button
                       type="button"

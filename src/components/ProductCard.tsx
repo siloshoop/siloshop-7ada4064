@@ -250,15 +250,7 @@ const ProductCard = ({
         {/* Add to Cart Button */}
         <Button
           className="w-full rounded-xl font-semibold text-sm h-10 shadow-sm hover:shadow-md transition-all duration-300 group/btn"
-          onClick={(e) => {
-            e.stopPropagation();
-            const rect = e.currentTarget.getBoundingClientRect();
-            triggerFly(rect.left + rect.width / 2, rect.top, image);
-            toast({
-              title: "تمت الإضافة",
-              description: "تم إضافة المنتج إلى السلة",
-            });
-          }}
+          onClick={handleAddToCart}
         >
           <ShoppingCart className="h-4 w-4 ml-2 transition-transform duration-300 group-hover/btn:scale-110" />
           أضف للسلة

@@ -38,13 +38,11 @@ const iconOptions = [
 ];
 
 const ManageAnnouncements = () => {
-  const { user, loading: authLoading } = useAuth();
+  const { user, isAdmin, loading: adminLoading } = useAdminCheck();
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
   const [loading, setLoading] = useState(true);
-  const [isAdmin, setIsAdmin] = useState(false);
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
-  const navigate = useNavigate();
   const { toast } = useToast();
 
   const [formData, setFormData] = useState({
@@ -55,39 +53,10 @@ const ManageAnnouncements = () => {
   });
 
   useEffect(() => {
-    if (!authLoading && !user) {
-      navigate("/auth");
-    }
-  }, [user, authLoading, navigate]);
-
-  useEffect(() => {
-    if (user) {
-      checkAdminRole();
+    if (isAdmin) {
       fetchAnnouncements();
     }
-  }, [user]);
-
-  const checkAdminRole = async () => {
-    if (!user) return;
-
-    const { data } = await supabase
-      .from("user_roles")
-      .select("role")
-      .eq("user_id", user.id)
-      .eq("role", "admin")
-      .single();
-
-    if (data) {
-      setIsAdmin(true);
-    } else {
-      toast({
-        title: "غير مصرح",
-        description: "هذه الصفحة مخصصة للمدراء فقط",
-        variant: "destructive",
-      });
-      navigate("/");
-    }
-  };
+  }, [isAdmin]);
 
   const fetchAnnouncements = async () => {
     const { data, error } = await supabase

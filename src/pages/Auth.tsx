@@ -265,7 +265,17 @@ const Auth = () => {
                   )}
                 </div>
 
-                <Button type="submit" className="w-full" size="lg" disabled={isLoading}>
+                <div className="text-left">
+                  <Button
+                    type="button"
+                    variant="link"
+                    className="p-0 h-auto text-sm text-primary"
+                    onClick={() => navigate("/forgot-password")}
+                  >
+                    نسيت كلمة المرور؟
+                  </Button>
+                </div>
+
                   {isLoading ? (
                     <>
                       <Loader2 className="ml-2 h-4 w-4 animate-spin" />

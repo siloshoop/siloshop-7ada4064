@@ -426,6 +426,32 @@ const SearchPage = () => {
           </AccordionItem>
         )}
 
+        {/* Brands */}
+        {brands.length > 0 && (
+          <AccordionItem value="brand">
+            <AccordionTrigger className="hover:no-underline">
+              <div className="flex items-center gap-2">
+                <Gem className="h-4 w-4" />
+                العلامات التجارية
+              </div>
+            </AccordionTrigger>
+            <AccordionContent className="space-y-2 pt-2 max-h-48 overflow-y-auto">
+              {brands.map((brand) => (
+                <div key={brand.id} className="flex items-center gap-2">
+                  <Checkbox
+                    id={`brand-${brand.id}`}
+                    checked={filters.brandIds.includes(brand.id)}
+                    onCheckedChange={() => toggleArrayFilter("brandIds", brand.id)}
+                  />
+                  <label htmlFor={`brand-${brand.id}`} className="text-sm cursor-pointer flex-1">
+                    {brand.name_ar}
+                  </label>
+                </div>
+              ))}
+            </AccordionContent>
+          </AccordionItem>
+        )}
+
         {/* Vendors */}
         <AccordionItem value="vendor">
           <AccordionTrigger className="hover:no-underline">

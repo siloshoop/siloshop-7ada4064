@@ -38,6 +38,7 @@ interface SearchFiltersProps {
     categoryId: string;
     sortBy: string;
     minVendorRating: number;
+    brandId: string;
   }) => void;
 }
 

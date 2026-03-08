@@ -1,4 +1,5 @@
 import { ShoppingCart, Search, Menu, Heart, User, LogOut, LayoutDashboard, SlidersHorizontal, Gift, Scale } from "lucide-react";
+import { useFlyToCart } from "@/components/FlyToCart";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { NotificationsDropdown } from "@/components/NotificationsDropdown";
@@ -32,6 +33,7 @@ const Navbar = () => {
   const { user, signOut, loading } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { compareProducts, compareCount } = useCompareProducts();
+  const { cartRef } = useFlyToCart();
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -44,6 +46,7 @@ const Navbar = () => {
             size="icon" 
             className="relative"
             onClick={() => navigate("/cart")}
+            ref={(el: HTMLButtonElement | null) => { (cartRef as React.MutableRefObject<HTMLElement | null>).current = el; }}
           >
             <ShoppingCart className="h-5 w-5" />
           </Button>

@@ -50,51 +50,20 @@ interface UserRole {
 }
 
 const ManageUsers = () => {
-  const { user, loading: authLoading } = useAuth();
+  const { user, isAdmin, loading: adminLoading } = useAdminCheck();
   const [users, setUsers] = useState<UserProfile[]>([]);
   const [userRoles, setUserRoles] = useState<Record<string, string[]>>({});
   const [loading, setLoading] = useState(true);
-  const [isAdmin, setIsAdmin] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [filterRole, setFilterRole] = useState("all");
   const [banReason, setBanReason] = useState("");
-  const navigate = useNavigate();
   const { toast } = useToast();
 
   useEffect(() => {
-    if (!authLoading && !user) {
-      navigate("/auth");
-    }
-  }, [user, authLoading, navigate]);
-
-  useEffect(() => {
-    if (user) {
-      checkAdminRole();
-    }
-  }, [user]);
-
-  const checkAdminRole = async () => {
-    if (!user) return;
-
-    const { data } = await supabase
-      .from("user_roles")
-      .select("role")
-      .eq("user_id", user.id)
-      .eq("role", "admin")
-      .maybeSingle();
-
-    if (data) {
-      setIsAdmin(true);
+    if (isAdmin) {
       fetchUsers();
-    } else {
-      toast({
-        title: "غير مصرح",
-        description: "هذه الصفحة مخصصة للمدراء فقط",
-        variant: "destructive",
-      });
-      navigate("/");
     }
-  };
+  }, [isAdmin]);
 
   const fetchUsers = async () => {
     try {

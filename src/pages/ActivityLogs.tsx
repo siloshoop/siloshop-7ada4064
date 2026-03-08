@@ -51,49 +51,18 @@ interface ActivityLog {
 }
 
 const ActivityLogs = () => {
-  const { user, loading: authLoading } = useAuth();
+  const { user, isAdmin, loading: adminLoading } = useAdminCheck();
   const [logs, setLogs] = useState<ActivityLog[]>([]);
   const [loading, setLoading] = useState(true);
-  const [isAdmin, setIsAdmin] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [filterAction, setFilterAction] = useState("all");
-  const navigate = useNavigate();
   const { toast } = useToast();
 
   useEffect(() => {
-    if (!authLoading && !user) {
-      navigate("/auth");
-    }
-  }, [user, authLoading, navigate]);
-
-  useEffect(() => {
-    if (user) {
-      checkAdminRole();
-    }
-  }, [user]);
-
-  const checkAdminRole = async () => {
-    if (!user) return;
-
-    const { data } = await supabase
-      .from("user_roles")
-      .select("role")
-      .eq("user_id", user.id)
-      .eq("role", "admin")
-      .maybeSingle();
-
-    if (data) {
-      setIsAdmin(true);
+    if (isAdmin) {
       fetchLogs();
-    } else {
-      toast({
-        title: "غير مصرح",
-        description: "هذه الصفحة مخصصة للمدراء فقط",
-        variant: "destructive",
-      });
-      navigate("/");
     }
-  };
+  }, [isAdmin]);
 
   const fetchLogs = async () => {
     try {

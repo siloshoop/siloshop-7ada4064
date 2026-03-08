@@ -118,6 +118,12 @@ export default {
           "70%": { transform: "scale(0.9)" },
           "100%": { transform: "scale(1)", opacity: "1" },
         },
+        "cartPulse": {
+          "0%": { transform: "scale(1)" },
+          "30%": { transform: "scale(1.5)" },
+          "60%": { transform: "scale(0.85)" },
+          "100%": { transform: "scale(1)" },
+        },
         "float": {
           "0%, 100%": { transform: "translateY(0)" },
           "50%": { transform: "translateY(-10px)" },

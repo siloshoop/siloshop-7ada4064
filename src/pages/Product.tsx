@@ -320,6 +320,11 @@ const Product = () => {
           </div>
         </div>
 
+        {/* Ad: Leaderboard after product info — high-intent placement */}
+        <div className="mt-8">
+          <AdPlaceholder size="leaderboard" slot="product-top-leaderboard" />
+        </div>
+
         {/* Vendor Rating Section */}
         <div className="mt-8">
           <VendorRating 
@@ -333,12 +338,22 @@ const Product = () => {
           <ProductReviews productId={id!} vendorId={product.vendor_id} />
         </div>
 
+        {/* Ad: Rectangle between reviews and similar products */}
+        <div className="mt-8 flex justify-center">
+          <AdPlaceholder size="rectangle" slot="product-mid-rectangle" />
+        </div>
+
         {/* Similar Products Section */}
         <SimilarProducts 
           productId={id!} 
           categoryId={product.category_id} 
           vendorId={product.vendor_id} 
         />
+
+        {/* Ad: Banner after similar products */}
+        <div className="mt-6">
+          <AdPlaceholder size="banner" slot="product-bottom-banner" />
+        </div>
       </main>
       <Footer />
     </div>

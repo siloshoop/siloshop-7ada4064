@@ -155,6 +155,11 @@ const Category = () => {
     <div className="min-h-screen flex flex-col">
       <Navbar />
       <main className="flex-1 container px-4 py-8">
+        {/* Ad: Top banner */}
+        <div className="mb-6">
+          <AdPlaceholder size="leaderboard" slot="category-top-banner" />
+        </div>
+
         <div className="flex items-center justify-between mb-8">
           <div>
             <h1 className="text-3xl font-bold mb-2">{categoryName || "الفئة"}</h1>
@@ -168,31 +173,69 @@ const Category = () => {
             <p className="text-muted-foreground text-lg">لا توجد منتجات مطابقة للفلاتر</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {filteredProducts.map((product) => {
-              const avgRating = product.reviews?.length > 0
-                ? product.reviews.reduce((sum, r) => sum + r.rating, 0) / product.reviews.length
-                : 4;
-              
-              const discount = product.original_price
-                ? Math.round(((product.original_price - product.price) / product.original_price) * 100)
-                : undefined;
+          <>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              {filteredProducts.slice(0, 8).map((product) => {
+                const avgRating = product.reviews?.length > 0
+                  ? product.reviews.reduce((sum, r) => sum + r.rating, 0) / product.reviews.length
+                  : 4;
+                const discount = product.original_price
+                  ? Math.round(((product.original_price - product.price) / product.original_price) * 100)
+                  : undefined;
+                return (
+                  <ProductCard
+                    key={product.id}
+                    id={product.id}
+                    name={product.name}
+                    price={product.price}
+                    originalPrice={product.original_price || undefined}
+                    image={product.image_url}
+                    rating={avgRating}
+                    reviews={product.reviews?.length || 0}
+                    discount={discount}
+                  />
+                );
+              })}
+            </div>
 
-              return (
-                <ProductCard
-                  key={product.id}
-                  id={product.id}
-                  name={product.name}
-                  price={product.price}
-                  originalPrice={product.original_price || undefined}
-                  image={product.image_url}
-                  rating={avgRating}
-                  reviews={product.reviews?.length || 0}
-                  discount={discount}
-                />
-              );
-            })}
-          </div>
+            {/* Ad: In-feed after first 8 products */}
+            {filteredProducts.length > 8 && (
+              <div className="my-6">
+                <AdPlaceholder size="interstitial" slot="category-mid-interstitial" />
+              </div>
+            )}
+
+            {filteredProducts.length > 8 && (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                {filteredProducts.slice(8).map((product) => {
+                  const avgRating = product.reviews?.length > 0
+                    ? product.reviews.reduce((sum, r) => sum + r.rating, 0) / product.reviews.length
+                    : 4;
+                  const discount = product.original_price
+                    ? Math.round(((product.original_price - product.price) / product.original_price) * 100)
+                    : undefined;
+                  return (
+                    <ProductCard
+                      key={product.id}
+                      id={product.id}
+                      name={product.name}
+                      price={product.price}
+                      originalPrice={product.original_price || undefined}
+                      image={product.image_url}
+                      rating={avgRating}
+                      reviews={product.reviews?.length || 0}
+                      discount={discount}
+                    />
+                  );
+                })}
+              </div>
+            )}
+
+            {/* Ad: Bottom banner */}
+            <div className="mt-8">
+              <AdPlaceholder size="banner" slot="category-bottom-banner" />
+            </div>
+          </>
         )}
       </main>
       <Footer />
@@ -201,3 +244,4 @@ const Category = () => {
 };
 
 export default Category;
+

@@ -209,9 +209,9 @@ const ProductCard = ({
       </div>
 
       {/* Content */}
-      <div className="p-4 space-y-2.5">
+      <div className="p-3 space-y-1.5">
         {/* Product Name */}
-        <h3 className="font-semibold text-sm leading-snug line-clamp-2 min-h-[2.5rem] text-foreground group-hover:text-primary transition-colors duration-300">
+        <h3 className="font-semibold text-xs leading-snug line-clamp-2 min-h-[2rem] text-foreground group-hover:text-primary transition-colors duration-300">
           {name}
         </h3>
 

@@ -41,6 +41,7 @@ const Index = () => {
     maxPrice: 1000000,
     categoryId: "",
     sortBy: "newest",
+    brandId: "",
   });
 
   const searchQuery = searchParams.get("search");

@@ -33,9 +33,42 @@ const Navbar = () => {
   const navigate = useNavigate();
   const { user, signOut, loading } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [cartCount, setCartCount] = useState(0);
   const { compareProducts, compareCount } = useCompareProducts();
   const { cartRef } = useFlyToCart();
 
+  const fetchCartCount = useCallback(async () => {
+    if (!user) {
+      setCartCount(0);
+      return;
+    }
+
+    const { data, error } = await supabase
+      .from("cart_items")
+      .select("quantity")
+      .eq("user_id", user.id);
+
+    if (error) {
+      console.error("Error fetching cart count:", error);
+      return;
+    }
+
+    const totalItems = (data || []).reduce((sum, item) => sum + (item.quantity || 0), 0);
+    setCartCount(totalItems);
+  }, [user]);
+
+  useEffect(() => {
+    fetchCartCount();
+  }, [fetchCartCount]);
+
+  useEffect(() => {
+    const handleCartUpdated = () => {
+      fetchCartCount();
+    };
+
+    window.addEventListener("cart-updated", handleCartUpdated);
+    return () => window.removeEventListener("cart-updated", handleCartUpdated);
+  }, [fetchCartCount]);
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-16 items-center justify-between gap-4 px-4">

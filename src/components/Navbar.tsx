@@ -10,6 +10,7 @@ import { NavLink } from "@/components/NavLink";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { useState, useEffect, useCallback } from "react";
+import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,

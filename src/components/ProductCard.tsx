@@ -249,10 +249,10 @@ const ProductCard = ({
 
         {/* Add to Cart Button */}
         <Button
-          className="w-full rounded-xl font-semibold text-sm h-10 shadow-sm hover:shadow-md transition-all duration-300 group/btn"
+          className="w-full rounded-lg font-semibold text-xs h-8 shadow-sm hover:shadow-md transition-all duration-300 group/btn"
           onClick={handleAddToCart}
         >
-          <ShoppingCart className="h-4 w-4 ml-2 transition-transform duration-300 group-hover/btn:scale-110" />
+          <ShoppingCart className="h-3.5 w-3.5 ml-1.5 transition-transform duration-300 group-hover/btn:scale-110" />
           أضف للسلة
         </Button>
       </div>

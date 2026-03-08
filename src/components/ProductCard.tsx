@@ -146,8 +146,8 @@ const ProductCard = ({
       <div className="relative aspect-square overflow-hidden bg-muted/30">
         {/* Discount Badge */}
         {discount && (
-          <div className="absolute top-3 left-3 z-10">
-            <Badge className="bg-sale text-sale-foreground font-bold text-xs px-2.5 py-1 rounded-lg shadow-lg backdrop-blur-sm border-0">
+          <div className="absolute top-2 left-2 z-10">
+            <Badge className="bg-sale text-sale-foreground font-bold text-[10px] px-1.5 py-0.5 rounded-md shadow-lg backdrop-blur-sm border-0">
               {discount}%-
             </Badge>
           </div>

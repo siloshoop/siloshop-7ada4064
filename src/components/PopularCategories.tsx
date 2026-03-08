@@ -205,7 +205,7 @@ const PopularCategories = () => {
           <span className="text-xs text-muted-foreground mr-auto">({displayCategories.length} فئة)</span>
         </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 stagger-children">
           {displayCategories.map((category, index) => {
             const IconComponent = getIconComponent(category.icon);
             const colors = categoryColors[index % categoryColors.length];
@@ -216,7 +216,7 @@ const PopularCategories = () => {
             return (
               <Card
                 key={category.id}
-                className={`group cursor-pointer transition-all duration-300 hover:scale-[1.05] hover:-translate-y-1 hover:shadow-xl border border-border/50 bg-gradient-to-br ${colors.bg} backdrop-blur-sm overflow-hidden ring-2 ${isExpanded ? 'ring-primary/50 scale-[1.03] shadow-xl' : `ring-transparent ${colors.ring}`}`}
+                className={`group cursor-pointer transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] hover:scale-[1.05] hover:-translate-y-1 hover:shadow-xl active:scale-[0.97] border border-border/50 bg-gradient-to-br ${colors.bg} backdrop-blur-sm overflow-hidden ring-2 ${isExpanded ? 'ring-primary/50 scale-[1.03] shadow-xl' : `ring-transparent ${colors.ring}`}`}
                 style={{ animationDelay: `${index * 50}ms` }}
                 onClick={() => handleCategoryClick(category.id, isDemo)}
               >

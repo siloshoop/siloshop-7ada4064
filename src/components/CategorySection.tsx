@@ -444,9 +444,9 @@ const CategorySection = () => {
                   
                   <div className="relative z-10 space-y-3 w-full">
                     <div className="flex items-center justify-center gap-2">
-                      <div className={`w-14 h-14 md:w-16 md:h-16 rounded-2xl bg-gradient-to-br ${category.gradient} p-0.5 group-hover:scale-110 transition-all duration-500 shadow-lg`}>
-                        <div className="w-full h-full bg-background rounded-2xl flex items-center justify-center">
-                          <IconComponent className={`w-7 h-7 md:w-8 md:h-8 ${category.iconColor} group-hover:scale-110 transition-transform duration-300`} />
+                      <div className={`w-10 h-10 md:w-12 md:h-12 rounded-xl bg-gradient-to-br ${category.gradient} p-0.5 group-hover:scale-110 transition-all duration-500 shadow-lg`}>
+                        <div className="w-full h-full bg-background rounded-xl flex items-center justify-center">
+                          <IconComponent className={`w-5 h-5 md:w-6 md:h-6 ${category.iconColor} group-hover:scale-110 transition-transform duration-300`} />
                         </div>
                       </div>
                     </div>

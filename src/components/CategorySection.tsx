@@ -418,7 +418,7 @@ const CategorySection = () => {
           <div className={`h-0.5 w-16 bg-gradient-to-r from-primary to-accent mx-auto rounded-full transition-all duration-700 delay-300 ${isVisible ? 'opacity-100 scale-x-100' : 'opacity-0 scale-x-0'}`} />
         </div>
         
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4">
+        <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2 md:gap-3">
           {displayCategories.map((category, index) => {
             const IconComponent = iconMap[category.icon] || ShoppingBag;
             const subcategories = getSubcategories(category.id, category.name);
@@ -437,22 +437,22 @@ const CategorySection = () => {
                 onClick={() => navigate(`/category/${category.id}`)}
               >
                 <div className={cn(
-                  "relative p-4 md:p-6 flex flex-col items-center justify-start text-center",
-                  isExpanded ? "min-h-[350px]" : "aspect-square"
+                  "relative p-3 md:p-4 flex flex-col items-center justify-start text-center",
+                  isExpanded ? "min-h-[280px]" : "aspect-square"
                 )}>
                   <div className={`absolute inset-0 bg-gradient-to-br ${category.gradient} opacity-0 group-hover:opacity-10 transition-opacity duration-500`} />
                   
                   <div className="relative z-10 space-y-3 w-full">
                     <div className="flex items-center justify-center gap-2">
-                      <div className={`w-14 h-14 md:w-16 md:h-16 rounded-2xl bg-gradient-to-br ${category.gradient} p-0.5 group-hover:scale-110 transition-all duration-500 shadow-lg`}>
-                        <div className="w-full h-full bg-background rounded-2xl flex items-center justify-center">
-                          <IconComponent className={`w-7 h-7 md:w-8 md:h-8 ${category.iconColor} group-hover:scale-110 transition-transform duration-300`} />
+                      <div className={`w-10 h-10 md:w-12 md:h-12 rounded-xl bg-gradient-to-br ${category.gradient} p-0.5 group-hover:scale-110 transition-all duration-500 shadow-lg`}>
+                        <div className="w-full h-full bg-background rounded-xl flex items-center justify-center">
+                          <IconComponent className={`w-5 h-5 md:w-6 md:h-6 ${category.iconColor} group-hover:scale-110 transition-transform duration-300`} />
                         </div>
                       </div>
                     </div>
                     
                     <div>
-                      <h3 className="font-bold text-base md:text-lg mb-1 group-hover:text-primary transition-colors">
+                      <h3 className="font-bold text-sm md:text-base mb-1 group-hover:text-primary transition-colors">
                         {category.name}
                       </h3>
                     </div>

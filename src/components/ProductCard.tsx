@@ -137,44 +137,44 @@ const ProductCard = ({
 
   return (
     <div
-      className="group relative cursor-pointer rounded-2xl overflow-hidden bg-card border border-border/40 hover:border-primary/40 transition-all duration-500 hover:shadow-[0_8px_40px_-12px_hsl(var(--primary)/0.25)]"
+      className="group relative cursor-pointer rounded-xl overflow-hidden bg-card border border-border/40 hover:border-primary/40 transition-all duration-500 hover:shadow-[0_8px_40px_-12px_hsl(var(--primary)/0.25)]"
       onClick={() => navigate(`/product/${productId}`)}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
       {/* Image Container */}
-      <div className="relative aspect-[3/4] overflow-hidden bg-muted/30">
+      <div className="relative aspect-square overflow-hidden bg-muted/30">
         {/* Discount Badge */}
         {discount && (
-          <div className="absolute top-3 left-3 z-10">
-            <Badge className="bg-sale text-sale-foreground font-bold text-xs px-2.5 py-1 rounded-lg shadow-lg backdrop-blur-sm border-0">
+          <div className="absolute top-2 left-2 z-10">
+            <Badge className="bg-sale text-sale-foreground font-bold text-[10px] px-1.5 py-0.5 rounded-md shadow-lg backdrop-blur-sm border-0">
               {discount}%-
             </Badge>
           </div>
         )}
 
         {/* Action Buttons */}
-        <div className="absolute top-3 right-3 z-10 flex flex-col gap-1.5">
+        <div className="absolute top-2 right-2 z-10 flex flex-col gap-1">
           {id ? (
             <FavoriteButton productId={id} variant="ghost" size="icon" />
           ) : (
             <button
-              className="h-9 w-9 flex items-center justify-center rounded-xl bg-background/80 backdrop-blur-md shadow-sm hover:bg-primary hover:text-primary-foreground transition-all duration-300 hover:scale-110 hover:shadow-md"
+              className="h-7 w-7 flex items-center justify-center rounded-lg bg-background/80 backdrop-blur-md shadow-sm hover:bg-primary hover:text-primary-foreground transition-all duration-300 hover:scale-110"
               onClick={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
               }}
             >
-              <Heart className="h-4 w-4" />
+              <Heart className="h-3.5 w-3.5" />
             </button>
           )}
           {id && (
             <button
-              className="h-9 w-9 flex items-center justify-center rounded-xl bg-background/80 backdrop-blur-md shadow-sm hover:bg-primary hover:text-primary-foreground transition-all duration-300 hover:scale-110 hover:shadow-md opacity-0 group-hover:opacity-100 translate-x-2 group-hover:translate-x-0"
+              className="h-7 w-7 flex items-center justify-center rounded-lg bg-background/80 backdrop-blur-md shadow-sm hover:bg-primary hover:text-primary-foreground transition-all duration-300 hover:scale-110 opacity-0 group-hover:opacity-100 translate-x-2 group-hover:translate-x-0"
               onClick={handleCompare}
               title="أضف للمقارنة"
             >
-              <Scale className="h-4 w-4" />
+              <Scale className="h-3.5 w-3.5" />
             </button>
           )}
         </div>
@@ -194,24 +194,24 @@ const ProductCard = ({
         <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-black/10 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-500" />
 
         {/* Quick View Button */}
-        <div className="absolute bottom-0 left-0 right-0 p-3 translate-y-full group-hover:translate-y-0 transition-transform duration-400 ease-out">
+        <div className="absolute bottom-0 left-0 right-0 p-2 translate-y-full group-hover:translate-y-0 transition-transform duration-400 ease-out">
           <button
-            className="w-full flex items-center justify-center gap-2 bg-background/90 backdrop-blur-md text-foreground py-2.5 rounded-xl text-sm font-semibold shadow-lg hover:bg-primary hover:text-primary-foreground transition-colors duration-200"
+            className="w-full flex items-center justify-center gap-1.5 bg-background/90 backdrop-blur-md text-foreground py-2 rounded-lg text-xs font-semibold shadow-lg hover:bg-primary hover:text-primary-foreground transition-colors duration-200"
             onClick={(e) => {
               e.stopPropagation();
               navigate(`/product/${productId}`);
             }}
           >
-            <Eye className="h-4 w-4" />
+            <Eye className="h-3.5 w-3.5" />
             عرض سريع
           </button>
         </div>
       </div>
 
       {/* Content */}
-      <div className="p-4 space-y-2.5">
+      <div className="p-3 space-y-1.5">
         {/* Product Name */}
-        <h3 className="font-semibold text-sm leading-snug line-clamp-2 min-h-[2.5rem] text-foreground group-hover:text-primary transition-colors duration-300">
+        <h3 className="font-semibold text-xs leading-snug line-clamp-2 min-h-[2rem] text-foreground group-hover:text-primary transition-colors duration-300">
           {name}
         </h3>
 
@@ -221,7 +221,7 @@ const ProductCard = ({
             {[...Array(5)].map((_, i) => (
               <Star
                 key={i}
-                className={`h-3.5 w-3.5 ${
+                className={`h-3 w-3 ${
                   i < filledStars
                     ? "fill-amber-400 text-amber-400"
                     : "fill-muted text-muted"
@@ -233,15 +233,15 @@ const ProductCard = ({
         </div>
 
         {/* Price */}
-        <div className="flex items-end gap-2 pt-0.5">
-          <div className="flex items-baseline gap-1">
-            <span className="font-bold text-xl text-primary leading-none">
+        <div className="flex items-end gap-1.5">
+          <div className="flex items-baseline gap-0.5">
+            <span className="font-bold text-base text-primary leading-none">
               {price.toLocaleString()}
             </span>
-            <span className="text-[11px] text-muted-foreground font-medium">ل.س</span>
+            <span className="text-[10px] text-muted-foreground font-medium">ل.س</span>
           </div>
           {originalPrice && (
-            <span className="text-xs text-muted-foreground/70 line-through mr-auto">
+            <span className="text-[10px] text-muted-foreground/70 line-through mr-auto">
               {originalPrice.toLocaleString()}
             </span>
           )}
@@ -249,10 +249,10 @@ const ProductCard = ({
 
         {/* Add to Cart Button */}
         <Button
-          className="w-full rounded-xl font-semibold text-sm h-10 shadow-sm hover:shadow-md transition-all duration-300 group/btn"
+          className="w-full rounded-lg font-semibold text-xs h-8 shadow-sm hover:shadow-md transition-all duration-300 group/btn"
           onClick={handleAddToCart}
         >
-          <ShoppingCart className="h-4 w-4 ml-2 transition-transform duration-300 group-hover/btn:scale-110" />
+          <ShoppingCart className="h-3.5 w-3.5 ml-1.5 transition-transform duration-300 group-hover/btn:scale-110" />
           أضف للسلة
         </Button>
       </div>

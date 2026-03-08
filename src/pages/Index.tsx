@@ -166,24 +166,44 @@ const Index = () => {
       <Navbar />
       <main className="flex-1 pb-16 md:pb-0 page-enter">
         <HeroSection />
+
+        <div className="container px-4 py-4">
+          <AdPlaceholder size="leaderboard" slot="home-top-leaderboard" />
+        </div>
+
         <SectionErrorBoundary>
           <PopularCategories key={`popular-${refreshKey}`} />
         </SectionErrorBoundary>
         <SectionErrorBoundary>
           <EnhancedDailyDeals key={`deals-${refreshKey}`} />
         </SectionErrorBoundary>
+
+        <div className="container px-4 py-2">
+          <AdPlaceholder size="banner" slot="home-mid-banner" />
+        </div>
+
         <SectionErrorBoundary>
           <CategorySection key={`category-${refreshKey}`} />
         </SectionErrorBoundary>
         <SectionErrorBoundary>
           <PurchasedRecently key={`purchased-${refreshKey}`} />
         </SectionErrorBoundary>
+
+        <div className="container px-4 py-2 flex justify-center">
+          <AdPlaceholder size="rectangle" slot="home-mid-rectangle" />
+        </div>
+
         <SectionErrorBoundary>
           <BestSellers key={`bestsellers-${refreshKey}`} />
         </SectionErrorBoundary>
         <SectionErrorBoundary>
           <RecentlyViewed key={`recent-${refreshKey}`} />
         </SectionErrorBoundary>
+
+        <div className="container px-4 py-2">
+          <AdPlaceholder size="interstitial" slot="home-interstitial" />
+        </div>
+
         <SectionErrorBoundary>
           <ProductRecommendations key={`recommendations-${refreshKey}`} />
         </SectionErrorBoundary>

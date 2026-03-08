@@ -12,6 +12,7 @@ import MobileBottomNav from "@/components/MobileBottomNav";
 import PullToRefreshIndicator from "@/components/PullToRefresh";
 import { usePullToRefresh } from "@/hooks/usePullToRefresh";
 import SectionErrorBoundary from "@/components/SectionErrorBoundary";
+import AdPlaceholder from "@/components/AdPlaceholder";
 
 // Import critical sections directly (not lazy) to prevent chunk loading failures
 import PopularCategories from "@/components/PopularCategories";

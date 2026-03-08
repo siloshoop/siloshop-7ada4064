@@ -64,6 +64,11 @@ interface Vendor {
   full_name: string;
 }
 
+interface Brand {
+  id: string;
+  name_ar: string;
+}
+
 interface Filters {
   search: string;
   minPrice: number;

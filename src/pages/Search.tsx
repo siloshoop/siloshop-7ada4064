@@ -119,15 +119,17 @@ const SearchPage = () => {
   // Fetch categories, subcategories, and vendors on mount
   useEffect(() => {
     const fetchFilterData = async () => {
-      const [categoriesRes, subcategoriesRes, vendorsRes] = await Promise.all([
+      const [categoriesRes, subcategoriesRes, vendorsRes, brandsRes] = await Promise.all([
         supabase.from("categories").select("id, name_ar").order("name_ar"),
         supabase.from("subcategories").select("id, name_ar, category_id").eq("is_active", true).order("name_ar"),
         supabase.from("profiles").select("id, full_name").eq("role", "vendor"),
+        supabase.from("brands").select("id, name_ar").eq("is_active", true).order("name_ar"),
       ]);
 
       if (categoriesRes.data) setCategories(categoriesRes.data);
       if (subcategoriesRes.data) setSubcategories(subcategoriesRes.data);
       if (vendorsRes.data) setVendors(vendorsRes.data as Vendor[]);
+      if (brandsRes.data) setBrands(brandsRes.data);
     };
 
     fetchFilterData();

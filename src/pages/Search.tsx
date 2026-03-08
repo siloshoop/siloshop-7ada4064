@@ -259,6 +259,7 @@ const SearchPage = () => {
     filters.categoryIds.length +
     filters.subcategoryIds.length +
     filters.vendorIds.length +
+    filters.brandIds.length +
     (filters.minRating > 0 ? 1 : 0) +
     (filters.hasDiscount ? 1 : 0) +
     (filters.inStock ? 1 : 0) +

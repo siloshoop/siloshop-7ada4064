@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent } from "@/components/ui/card";
@@ -25,15 +25,15 @@ const iconMap: { [key: string]: React.ComponentType<{ className?: string }> } = 
   sparkles: Sparkles, book: BookOpen, car: Car, utensils: Utensils,
 };
 
-const categoryColorsByIndex = [
-  { bg: "from-blue-500/15 to-cyan-500/15", icon: "text-blue-600 dark:text-blue-400", ring: "ring-blue-500/20" },
-  { bg: "from-pink-500/15 to-rose-500/15", icon: "text-pink-600 dark:text-pink-400", ring: "ring-pink-500/20" },
-  { bg: "from-green-500/15 to-emerald-500/15", icon: "text-green-600 dark:text-green-400", ring: "ring-green-500/20" },
-  { bg: "from-orange-500/15 to-amber-500/15", icon: "text-orange-600 dark:text-orange-400", ring: "ring-orange-500/20" },
-  { bg: "from-purple-500/15 to-violet-500/15", icon: "text-purple-600 dark:text-purple-400", ring: "ring-purple-500/20" },
-  { bg: "from-fuchsia-500/15 to-pink-500/15", icon: "text-fuchsia-600 dark:text-fuchsia-400", ring: "ring-fuchsia-500/20" },
-  { bg: "from-indigo-500/15 to-blue-500/15", icon: "text-indigo-600 dark:text-indigo-400", ring: "ring-indigo-500/20" },
-  { bg: "from-teal-500/15 to-green-500/15", icon: "text-teal-600 dark:text-teal-400", ring: "ring-teal-500/20" },
+const categoryColors = [
+  { bg: "from-blue-500/15 to-cyan-500/15", icon: "text-blue-600 dark:text-blue-400" },
+  { bg: "from-pink-500/15 to-rose-500/15", icon: "text-pink-600 dark:text-pink-400" },
+  { bg: "from-green-500/15 to-emerald-500/15", icon: "text-green-600 dark:text-green-400" },
+  { bg: "from-orange-500/15 to-amber-500/15", icon: "text-orange-600 dark:text-orange-400" },
+  { bg: "from-purple-500/15 to-violet-500/15", icon: "text-purple-600 dark:text-purple-400" },
+  { bg: "from-fuchsia-500/15 to-pink-500/15", icon: "text-fuchsia-600 dark:text-fuchsia-400" },
+  { bg: "from-indigo-500/15 to-blue-500/15", icon: "text-indigo-600 dark:text-indigo-400" },
+  { bg: "from-teal-500/15 to-green-500/15", icon: "text-teal-600 dark:text-teal-400" },
 ];
 
 const demoCategories: PopularCategory[] = [
@@ -48,25 +48,9 @@ const demoCategories: PopularCategory[] = [
 ];
 
 const PopularCategories = () => {
-  const [categories, setCategories] = useState<PopularCategory[]>([]);
+  const [categories, setCategories] = useState<PopularCategory[]>(demoCategories);
   const [loading, setLoading] = useState(true);
-  const [isVisible, setIsVisible] = useState(false);
-  const sectionRef = useRef<HTMLElement>(null);
   const navigate = useNavigate();
-
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setIsVisible(true);
-          observer.disconnect();
-        }
-      },
-      { threshold: 0.1 }
-    );
-    if (sectionRef.current) observer.observe(sectionRef.current);
-    return () => observer.disconnect();
-  }, []);
 
   useEffect(() => {
     fetchPopularCategories();
@@ -74,14 +58,19 @@ const PopularCategories = () => {
 
   const fetchPopularCategories = async () => {
     try {
+      console.log("[PopularCategories] Fetching categories...");
       const { data: categoriesData, error } = await supabase
         .from("categories")
         .select("id, name_ar, icon");
 
-      if (error) throw error;
+      if (error) {
+        console.error("[PopularCategories] Supabase error:", error);
+        throw error;
+      }
+
+      console.log("[PopularCategories] Fetched:", categoriesData?.length, "categories");
 
       if (categoriesData && categoriesData.length > 0) {
-        // Fetch product counts per category
         const withCounts = await Promise.all(
           categoriesData.slice(0, 8).map(async (cat) => {
             const { count } = await supabase
@@ -92,14 +81,14 @@ const PopularCategories = () => {
             return { ...cat, product_count: count || 0 };
           })
         );
-        // Sort by product count descending
         withCounts.sort((a, b) => (b.product_count || 0) - (a.product_count || 0));
         setCategories(withCounts);
       } else {
+        console.log("[PopularCategories] No categories found, using demo data");
         setCategories(demoCategories);
       }
     } catch (error) {
-      console.error("Error fetching popular categories:", error);
+      console.error("[PopularCategories] Error:", error);
       setCategories(demoCategories);
     } finally {
       setLoading(false);
@@ -109,6 +98,9 @@ const PopularCategories = () => {
   const getIconComponent = (iconName: string) => {
     return iconMap[iconName] || iconMap[iconName?.toLowerCase()] || Package;
   };
+
+  // Always show content — use demo data as initial state so section is NEVER empty
+  const displayCategories = categories.length > 0 ? categories : demoCategories;
 
   if (loading) {
     return (
@@ -120,7 +112,7 @@ const PopularCategories = () => {
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
             {[...Array(8)].map((_, i) => (
-              <Skeleton key={i} className="h-24 rounded-xl" />
+              <Skeleton key={i} className="h-[72px] rounded-xl" />
             ))}
           </div>
         </div>
@@ -128,14 +120,8 @@ const PopularCategories = () => {
     );
   }
 
-  const displayCategories = categories.length > 0 ? categories : demoCategories;
-
   return (
-    <section 
-      ref={sectionRef}
-      className="py-6 bg-muted/30"
-      style={{ opacity: 1 }}
-    >
+    <section className="py-6 bg-muted/30" style={{ opacity: 1 }}>
       <div className="container px-4">
         <div className="flex items-center gap-2 mb-4">
           <div className="p-1.5 rounded-lg bg-primary/10">
@@ -147,15 +133,12 @@ const PopularCategories = () => {
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
           {displayCategories.map((category, index) => {
             const IconComponent = getIconComponent(category.icon);
-            const colors = categoryColorsByIndex[index % categoryColorsByIndex.length];
+            const colors = categoryColors[index % categoryColors.length];
             const isDemo = category.id.startsWith("demo-");
             return (
               <Card
                 key={category.id}
-                className={`group cursor-pointer transition-all duration-300 hover:scale-[1.03] hover:shadow-lg border border-border/50 hover:${colors.ring} bg-gradient-to-br ${colors.bg} backdrop-blur-sm overflow-hidden ${
-                  isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
-                }`}
-                style={{ transitionDelay: isVisible ? `${index * 60}ms` : "0ms" }}
+                className={`group cursor-pointer transition-all duration-300 hover:scale-[1.03] hover:shadow-lg border border-border/50 bg-gradient-to-br ${colors.bg} backdrop-blur-sm overflow-hidden`}
                 onClick={() => !isDemo && navigate(`/category/${category.id}`)}
               >
                 <CardContent className="p-4 flex items-center gap-3 rtl:flex-row-reverse">

@@ -157,6 +157,7 @@ const Cart = () => {
           item.id === itemId ? { ...item, quantity: newQuantity } : item
         )
       );
+      window.dispatchEvent(new Event("cart-updated"));
     } catch (error: any) {
       toast({
         title: "خطأ",
@@ -176,6 +177,7 @@ const Cart = () => {
       if (error) throw error;
 
       setCartItems(items => items.filter(item => item.id !== itemId));
+      window.dispatchEvent(new Event("cart-updated"));
 
       toast({
         title: "تم الحذف",

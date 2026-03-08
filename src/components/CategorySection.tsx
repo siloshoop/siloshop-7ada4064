@@ -418,7 +418,7 @@ const CategorySection = () => {
           <div className={`h-0.5 w-16 bg-gradient-to-r from-primary to-accent mx-auto rounded-full transition-all duration-700 delay-300 ${isVisible ? 'opacity-100 scale-x-100' : 'opacity-0 scale-x-0'}`} />
         </div>
         
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4">
+        <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2 md:gap-3">
           {displayCategories.map((category, index) => {
             const IconComponent = iconMap[category.icon] || ShoppingBag;
             const subcategories = getSubcategories(category.id, category.name);

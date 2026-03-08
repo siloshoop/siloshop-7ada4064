@@ -265,6 +265,17 @@ const Auth = () => {
                   )}
                 </div>
 
+                <div className="text-left">
+                  <Button
+                    type="button"
+                    variant="link"
+                    className="p-0 h-auto text-sm text-primary"
+                    onClick={() => navigate("/forgot-password")}
+                  >
+                    نسيت كلمة المرور؟
+                  </Button>
+                </div>
+
                 <Button type="submit" className="w-full" size="lg" disabled={isLoading}>
                   {isLoading ? (
                     <>

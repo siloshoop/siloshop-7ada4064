@@ -46,6 +46,8 @@ import FollowedBrands from "./pages/FollowedBrands";
 import ManageAnnouncements from "./pages/ManageAnnouncements";
 import ManageUsers from "./pages/ManageUsers";
 import ActivityLogs from "./pages/ActivityLogs";
+import ForgotPassword from "./pages/ForgotPassword";
+import ResetPassword from "./pages/ResetPassword";
 
 const queryClient = new QueryClient(); // App query client
 
@@ -98,6 +100,8 @@ const App = () => (
             <Route path="/notifications" element={<Notifications />} />
             <Route path="/notifications/settings" element={<NotificationSettings />} />
             <Route path="/followed-brands" element={<FollowedBrands />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route path="/reset-password" element={<ResetPassword />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

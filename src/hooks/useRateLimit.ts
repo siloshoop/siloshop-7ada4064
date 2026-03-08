@@ -49,9 +49,10 @@ export function useRateLimit(): UseRateLimitReturn {
       const emailHash = simpleHash(email.toLowerCase().trim());
       const ipHash = simpleHash(navigator.userAgent + window.screen.width);
       
-      await supabase
-        .from('contact_rate_limits')
-        .insert([{ email_hash: emailHash, ip_hash: ipHash }]);
+      await supabase.rpc('record_contact_rate_limit', {
+        _email_hash: emailHash,
+        _ip_hash: ipHash,
+      });
     } catch (error) {
       console.error('Rate limit record error:', error);
     }

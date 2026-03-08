@@ -6,6 +6,8 @@ import { FavoriteButton } from "@/components/FavoriteButton";
 import { useToast } from "@/hooks/use-toast";
 import { useCompareProducts } from "@/hooks/useCompareProducts";
 import { useFlyToCart } from "@/components/FlyToCart";
+import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
 import { useState } from "react";
 
 interface ProductCardProps {

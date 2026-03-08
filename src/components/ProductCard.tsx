@@ -143,7 +143,7 @@ const ProductCard = ({
       onMouseLeave={() => setIsHovered(false)}
     >
       {/* Image Container */}
-      <div className="relative aspect-[3/4] overflow-hidden bg-muted/30">
+      <div className="relative aspect-square overflow-hidden bg-muted/30">
         {/* Discount Badge */}
         {discount && (
           <div className="absolute top-3 left-3 z-10">

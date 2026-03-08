@@ -122,8 +122,8 @@ const ResetPassword = () => {
         <CardContent>
           {isSuccess ? (
             <div className="space-y-4 text-center">
-              <div className="mx-auto w-20 h-20 rounded-full bg-green-500/10 flex items-center justify-center">
-                <CheckCircle2 className="h-10 w-10 text-green-500" />
+              <div className="mx-auto w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center">
+                <CheckCircle2 className="h-10 w-10 text-primary" />
               </div>
               <Button className="w-full" onClick={() => navigate("/auth")}>
                 تسجيل الدخول

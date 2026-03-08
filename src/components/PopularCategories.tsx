@@ -6,7 +6,14 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { 
   Smartphone, Laptop, Shirt, Home, Dumbbell, Gamepad2, Watch, 
   Baby, Sparkles, BookOpen, Car, Utensils, TrendingUp, Footprints,
-  ShoppingBag, Trophy, Sofa, Gem, Monitor, Package
+  ShoppingBag, Trophy, Sofa, Gem, Monitor, Package, ChevronDown,
+  Brush, Droplet, Scissors, Sparkle, Hand, Bath, Book, BookMarked,
+  PenTool, Users, ChefHat, Activity, Bike, Waves, PersonStanding,
+  Briefcase, Mountain, Flower2, Wind, Crown, Moon, Heart, Snowflake,
+  Palette, CircleDot, Layers, Award, Bed, HeartPulse, Cloud, User,
+  Smile, Star, School, Clock, Diamond, Glasses, Wallet, Backpack,
+  Plane, GraduationCap, Tv, BedDouble, UtensilsCrossed, TreePine,
+  Gamepad, Dice1, Puzzle, Lightbulb, TreeDeciduous, Cat, X
 } from "lucide-react";
 
 interface PopularCategory {

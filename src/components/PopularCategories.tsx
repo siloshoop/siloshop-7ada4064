@@ -5,7 +5,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { 
   Smartphone, Laptop, Shirt, Home, Dumbbell, Gamepad2, Watch, 
-  Baby, Sparkles, BookOpen, Car, Utensils, TrendingUp
+  Baby, Sparkles, BookOpen, Car, Utensils, TrendingUp, Footprints,
+  ShoppingBag, Trophy, Sofa, Gem, Monitor, Package
 } from "lucide-react";
 
 interface PopularCategory {
@@ -15,33 +16,25 @@ interface PopularCategory {
 }
 
 const iconMap: { [key: string]: React.ComponentType<{ className?: string }> } = {
-  "smartphone": Smartphone,
-  "laptop": Laptop,
-  "shirt": Shirt,
-  "home": Home,
-  "dumbbell": Dumbbell,
-  "gamepad": Gamepad2,
-  "watch": Watch,
-  "baby": Baby,
-  "sparkles": Sparkles,
-  "book": BookOpen,
-  "car": Car,
-  "utensils": Utensils,
+  Smartphone, Laptop, Shirt, Home, Dumbbell, Gamepad2, Watch,
+  Baby, Sparkles, BookOpen, Car, Utensils, Footprints,
+  ShoppingBag, Trophy, Sofa, Gem, Monitor, Package,
+  // lowercase fallbacks
+  smartphone: Smartphone, laptop: Laptop, shirt: Shirt, home: Home,
+  dumbbell: Dumbbell, gamepad: Gamepad2, watch: Watch, baby: Baby,
+  sparkles: Sparkles, book: BookOpen, car: Car, utensils: Utensils,
 };
 
-const categoryColors: { [key: string]: string } = {
-  "الإلكترونيات": "from-blue-500/20 to-cyan-500/20",
-  "الملابس والأزياء": "from-pink-500/20 to-rose-500/20",
-  "المنزل والحديقة": "from-green-500/20 to-emerald-500/20",
-  "الرياضة": "from-orange-500/20 to-amber-500/20",
-  "الألعاب": "from-purple-500/20 to-violet-500/20",
-  "الساعات": "from-slate-500/20 to-gray-500/20",
-  "الأطفال": "from-yellow-500/20 to-lime-500/20",
-  "الجمال": "from-fuchsia-500/20 to-pink-500/20",
-  "الكتب": "from-indigo-500/20 to-blue-500/20",
-  "السيارات": "from-red-500/20 to-orange-500/20",
-  "الطعام": "from-teal-500/20 to-green-500/20",
-};
+const categoryColorsByIndex = [
+  "from-blue-500/20 to-cyan-500/20",
+  "from-pink-500/20 to-rose-500/20",
+  "from-green-500/20 to-emerald-500/20",
+  "from-orange-500/20 to-amber-500/20",
+  "from-purple-500/20 to-violet-500/20",
+  "from-fuchsia-500/20 to-pink-500/20",
+  "from-indigo-500/20 to-blue-500/20",
+  "from-teal-500/20 to-green-500/20",
+];
 
 const PopularCategories = () => {
   const [categories, setCategories] = useState<PopularCategory[]>([]);
@@ -74,7 +67,6 @@ const PopularCategories = () => {
 
   const fetchPopularCategories = async () => {
     try {
-      // Simple single query - no individual HEAD requests that can be aborted
       const { data: categoriesData, error } = await supabase
         .from("categories")
         .select("id, name_ar, icon")
@@ -91,11 +83,7 @@ const PopularCategories = () => {
   };
 
   const getIconComponent = (iconName: string) => {
-    return iconMap[iconName] || Smartphone;
-  };
-
-  const getCategoryColor = (name: string) => {
-    return categoryColors[name] || "from-primary/20 to-primary/10";
+    return iconMap[iconName] || iconMap[iconName?.toLowerCase()] || Package;
   };
 
   if (loading) {
@@ -121,8 +109,8 @@ const PopularCategories = () => {
   return (
     <section 
       ref={sectionRef}
-    className="py-4 bg-muted/30"
-    style={{ opacity: 1 }}
+      className="py-4 bg-muted/30"
+      style={{ opacity: 1 }}
     >
       <div className="container px-4">
         <div className="flex items-center gap-2 mb-3">
@@ -135,10 +123,11 @@ const PopularCategories = () => {
         <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-2">
           {categories.map((category, index) => {
             const IconComponent = getIconComponent(category.icon);
+            const colorClass = categoryColorsByIndex[index % categoryColorsByIndex.length];
             return (
               <Card
                 key={category.id}
-                className={`cursor-pointer transition-all duration-300 hover:scale-105 hover:shadow-md border-0 bg-gradient-to-br ${getCategoryColor(category.name_ar)} ${
+                className={`cursor-pointer transition-all duration-300 hover:scale-105 hover:shadow-md border-0 bg-gradient-to-br ${colorClass} ${
                   isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
                 }`}
                 style={{ transitionDelay: isVisible ? `${index * 50}ms` : "0ms" }}

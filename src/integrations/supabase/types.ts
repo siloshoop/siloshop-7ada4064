@@ -1357,6 +1357,10 @@ export type Database = {
         }
         Returns: undefined
       }
+      update_own_profile: {
+        Args: { _avatar_url?: string; _full_name?: string; _phone?: string }
+        Returns: undefined
+      }
     }
     Enums: {
       app_role: "customer" | "vendor" | "admin"

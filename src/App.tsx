@@ -100,6 +100,8 @@ const App = () => (
             <Route path="/notifications" element={<Notifications />} />
             <Route path="/notifications/settings" element={<NotificationSettings />} />
             <Route path="/followed-brands" element={<FollowedBrands />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route path="/reset-password" element={<ResetPassword />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

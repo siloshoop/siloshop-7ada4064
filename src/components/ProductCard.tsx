@@ -154,7 +154,7 @@ const ProductCard = ({
         )}
 
         {/* Action Buttons */}
-        <div className="absolute top-3 right-3 z-10 flex flex-col gap-1.5">
+        <div className="absolute top-2 right-2 z-10 flex flex-col gap-1">
           {id ? (
             <FavoriteButton productId={id} variant="ghost" size="icon" />
           ) : (

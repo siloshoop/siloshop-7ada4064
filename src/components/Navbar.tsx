@@ -34,6 +34,7 @@ const Navbar = () => {
   const { user, signOut, loading } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [cartCount, setCartCount] = useState(0);
+  const [cartBounce, setCartBounce] = useState(false);
   const { compareProducts, compareCount } = useCompareProducts();
   const { cartRef } = useFlyToCart();
 
@@ -54,7 +55,13 @@ const Navbar = () => {
     }
 
     const totalItems = (data || []).reduce((sum, item) => sum + (item.quantity || 0), 0);
-    setCartCount(totalItems);
+    setCartCount((prev) => {
+      if (totalItems !== prev && totalItems > 0) {
+        setCartBounce(true);
+        setTimeout(() => setCartBounce(false), 500);
+      }
+      return totalItems;
+    });
   }, [user]);
 
   useEffect(() => {
@@ -84,7 +91,7 @@ const Navbar = () => {
           >
             <ShoppingCart className="h-5 w-5" />
             {cartCount > 0 && (
-              <Badge className="absolute -top-1 -right-1 h-5 min-w-5 px-1 flex items-center justify-center text-xs bg-primary">
+              <Badge className={`absolute -top-1 -right-1 h-5 min-w-5 px-1 flex items-center justify-center text-xs bg-primary transition-transform ${cartBounce ? "animate-[cartPulse_0.5s_ease-out]" : ""}`}>
                 {cartCount > 99 ? "99+" : cartCount}
               </Badge>
             )}

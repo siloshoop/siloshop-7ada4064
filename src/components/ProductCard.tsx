@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { FavoriteButton } from "@/components/FavoriteButton";
 import { useToast } from "@/hooks/use-toast";
 import { useCompareProducts } from "@/hooks/useCompareProducts";
+import { useFlyToCart } from "@/components/FlyToCart";
 import { useState } from "react";
 
 interface ProductCardProps {

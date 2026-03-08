@@ -46,7 +46,7 @@ const Navbar = () => {
             size="icon" 
             className="relative"
             onClick={() => navigate("/cart")}
-            ref={(el) => { if (cartRef) cartRef.current = el; }}
+            ref={(el: HTMLButtonElement | null) => { (cartRef as React.MutableRefObject<HTMLElement | null>).current = el; }}
           >
             <ShoppingCart className="h-5 w-5" />
           </Button>

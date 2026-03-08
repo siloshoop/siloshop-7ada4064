@@ -25,14 +25,11 @@ export const logActivity = async (
   actionDetails: ActionDetails = {}
 ) => {
   try {
-    const { error } = await supabase
-      .from("activity_logs")
-      .insert({
-        user_id: userId,
-        action_type: actionType,
-        action_details: actionDetails,
-        user_agent: navigator.userAgent,
-      });
+    const { error } = await supabase.rpc('log_activity', {
+      _action_type: actionType,
+      _action_details: actionDetails,
+      _user_agent: navigator.userAgent,
+    });
 
     if (error) {
       console.error("Failed to log activity:", error);

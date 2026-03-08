@@ -437,8 +437,8 @@ const CategorySection = () => {
                 onClick={() => navigate(`/category/${category.id}`)}
               >
                 <div className={cn(
-                  "relative p-4 md:p-6 flex flex-col items-center justify-start text-center",
-                  isExpanded ? "min-h-[350px]" : "aspect-square"
+                  "relative p-3 md:p-4 flex flex-col items-center justify-start text-center",
+                  isExpanded ? "min-h-[280px]" : "aspect-square"
                 )}>
                   <div className={`absolute inset-0 bg-gradient-to-br ${category.gradient} opacity-0 group-hover:opacity-10 transition-opacity duration-500`} />
                   

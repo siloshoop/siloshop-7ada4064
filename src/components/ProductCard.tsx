@@ -159,7 +159,7 @@ const ProductCard = ({
             <FavoriteButton productId={id} variant="ghost" size="icon" />
           ) : (
             <button
-              className="h-9 w-9 flex items-center justify-center rounded-xl bg-background/80 backdrop-blur-md shadow-sm hover:bg-primary hover:text-primary-foreground transition-all duration-300 hover:scale-110 hover:shadow-md"
+              className="h-7 w-7 flex items-center justify-center rounded-lg bg-background/80 backdrop-blur-md shadow-sm hover:bg-primary hover:text-primary-foreground transition-all duration-300 hover:scale-110"
               onClick={(e) => {
                 e.preventDefault();
                 e.stopPropagation();

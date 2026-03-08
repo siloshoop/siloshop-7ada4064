@@ -233,15 +233,15 @@ const ProductCard = ({
         </div>
 
         {/* Price */}
-        <div className="flex items-end gap-2 pt-0.5">
-          <div className="flex items-baseline gap-1">
-            <span className="font-bold text-xl text-primary leading-none">
+        <div className="flex items-end gap-1.5">
+          <div className="flex items-baseline gap-0.5">
+            <span className="font-bold text-base text-primary leading-none">
               {price.toLocaleString()}
             </span>
-            <span className="text-[11px] text-muted-foreground font-medium">ل.س</span>
+            <span className="text-[10px] text-muted-foreground font-medium">ل.س</span>
           </div>
           {originalPrice && (
-            <span className="text-xs text-muted-foreground/70 line-through mr-auto">
+            <span className="text-[10px] text-muted-foreground/70 line-through mr-auto">
               {originalPrice.toLocaleString()}
             </span>
           )}

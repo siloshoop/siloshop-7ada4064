@@ -6,6 +6,8 @@ import Footer from "@/components/Footer";
 import ProductCard from "@/components/ProductCard";
 import { SearchFilters } from "@/components/SearchFilters";
 import { Loader2 } from "lucide-react";
+import AdPlaceholder from "@/components/AdPlaceholder";
+
 
 interface Product {
   id: string;

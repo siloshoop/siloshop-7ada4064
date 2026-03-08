@@ -1,4 +1,5 @@
 import { ShoppingCart, Search, Menu, Heart, User, LogOut, LayoutDashboard, SlidersHorizontal, Gift, Scale } from "lucide-react";
+import { useFlyToCart } from "@/components/FlyToCart";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { NotificationsDropdown } from "@/components/NotificationsDropdown";

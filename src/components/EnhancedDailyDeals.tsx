@@ -26,7 +26,7 @@ const EnhancedDailyDeals = () => {
     minutes: 0,
     seconds: 0,
   });
-  const [isVisible, setIsVisible] = useState(false);
+  const [isVisible, setIsVisible] = useState(true);
   const sectionRef = useRef<HTMLElement>(null);
 
   useEffect(() => {

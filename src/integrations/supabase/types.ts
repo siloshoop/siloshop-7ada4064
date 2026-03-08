@@ -1347,6 +1347,16 @@ export type Database = {
         Args: { _email_hash: string; _ip_hash: string }
         Returns: undefined
       }
+      send_notification: {
+        Args: {
+          _message: string
+          _related_id?: string
+          _target_user_id: string
+          _title: string
+          _type?: string
+        }
+        Returns: undefined
+      }
     }
     Enums: {
       app_role: "customer" | "vendor" | "admin"

@@ -95,7 +95,9 @@ const demoCategories: PopularCategory[] = [
 
 const PopularCategories = () => {
   const [categories, setCategories] = useState<PopularCategory[]>(demoCategories);
+  const [subcategories, setSubcategories] = useState<Subcategory[]>([]);
   const [loading, setLoading] = useState(true);
+  const [expandedCategoryId, setExpandedCategoryId] = useState<string | null>(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -104,21 +106,16 @@ const PopularCategories = () => {
 
   const fetchPopularCategories = async () => {
     try {
-      console.log("[PopularCategories] Fetching categories...");
-      const { data: categoriesData, error } = await supabase
-        .from("categories")
-        .select("id, name_ar, icon");
+      const [categoriesRes, subcategoriesRes] = await Promise.all([
+        supabase.from("categories").select("id, name_ar, icon"),
+        supabase.from("subcategories").select("*").eq("is_active", true).order("sort_order"),
+      ]);
 
-      if (error) {
-        console.error("[PopularCategories] Supabase error:", error);
-        throw error;
-      }
+      if (categoriesRes.error) throw categoriesRes.error;
 
-      console.log("[PopularCategories] Fetched:", categoriesData?.length, "categories");
-
-      if (categoriesData && categoriesData.length > 0) {
+      if (categoriesRes.data && categoriesRes.data.length > 0) {
         const withCounts = await Promise.all(
-          categoriesData.map(async (cat) => {
+          categoriesRes.data.map(async (cat) => {
             const { count } = await supabase
               .from("products")
               .select("id", { count: "exact", head: true })
@@ -130,8 +127,11 @@ const PopularCategories = () => {
         withCounts.sort((a, b) => (b.product_count || 0) - (a.product_count || 0));
         setCategories(withCounts);
       } else {
-        console.log("[PopularCategories] No categories found, using demo data");
         setCategories(demoCategories);
+      }
+
+      if (subcategoriesRes.data) {
+        setSubcategories(subcategoriesRes.data);
       }
     } catch (error) {
       console.error("[PopularCategories] Error:", error);
@@ -143,6 +143,25 @@ const PopularCategories = () => {
 
   const getIconComponent = (iconName: string) => {
     return iconMap[iconName] || iconMap[iconName?.toLowerCase()] || Package;
+  };
+
+  const getSubIconComponent = (iconName: string | null) => {
+    if (!iconName) return Package;
+    return subIconMap[iconName] || iconMap[iconName] || Package;
+  };
+
+  const getCategorySubcategories = (categoryId: string) => {
+    return subcategories.filter((s) => s.category_id === categoryId);
+  };
+
+  const handleCategoryClick = (categoryId: string, isDemo: boolean) => {
+    if (isDemo) return;
+    const subs = getCategorySubcategories(categoryId);
+    if (subs.length > 0) {
+      setExpandedCategoryId(expandedCategoryId === categoryId ? null : categoryId);
+    } else {
+      navigate(`/category/${categoryId}`);
+    }
   };
 
   const displayCategories = categories.length > 0 ? categories : demoCategories;
@@ -165,6 +184,16 @@ const PopularCategories = () => {
     );
   }
 
+  const expandedCategory = expandedCategoryId
+    ? displayCategories.find((c) => c.id === expandedCategoryId)
+    : null;
+  const expandedSubs = expandedCategoryId
+    ? getCategorySubcategories(expandedCategoryId)
+    : [];
+  const expandedColorIndex = expandedCategory
+    ? displayCategories.indexOf(expandedCategory)
+    : 0;
+
   return (
     <section className="py-8 bg-muted/30">
       <div className="container px-4">
@@ -181,14 +210,17 @@ const PopularCategories = () => {
             const IconComponent = getIconComponent(category.icon);
             const colors = categoryColors[index % categoryColors.length];
             const isDemo = category.id.startsWith("demo-");
+            const isExpanded = expandedCategoryId === category.id;
+            const hasSubs = getCategorySubcategories(category.id).length > 0;
+
             return (
               <Card
                 key={category.id}
-                className={`group cursor-pointer transition-all duration-300 hover:scale-[1.05] hover:-translate-y-1 hover:shadow-xl border border-border/50 bg-gradient-to-br ${colors.bg} backdrop-blur-sm overflow-hidden ring-2 ring-transparent ${colors.ring}`}
+                className={`group cursor-pointer transition-all duration-300 hover:scale-[1.05] hover:-translate-y-1 hover:shadow-xl border border-border/50 bg-gradient-to-br ${colors.bg} backdrop-blur-sm overflow-hidden ring-2 ${isExpanded ? 'ring-primary/50 scale-[1.03] shadow-xl' : `ring-transparent ${colors.ring}`}`}
                 style={{ animationDelay: `${index * 50}ms` }}
-                onClick={() => !isDemo && navigate(`/category/${category.id}`)}
+                onClick={() => handleCategoryClick(category.id, isDemo)}
               >
-                <CardContent className="p-3 sm:p-4 flex flex-col items-center gap-2 text-center">
+                <CardContent className="p-3 sm:p-4 flex flex-col items-center gap-2 text-center relative">
                   <div className="p-2.5 rounded-xl bg-background/80 backdrop-blur-sm shadow-sm group-hover:shadow-md transition-all duration-300 group-hover:scale-110">
                     <IconComponent className={`h-6 w-6 ${colors.icon} transition-transform duration-300`} />
                   </div>
@@ -198,11 +230,66 @@ const PopularCategories = () => {
                       {category.product_count ?? 0} منتج
                     </p>
                   </div>
+                  {hasSubs && (
+                    <ChevronDown className={`absolute top-2 left-2 h-3.5 w-3.5 text-muted-foreground transition-transform duration-300 ${isExpanded ? 'rotate-180 text-primary' : ''}`} />
+                  )}
                 </CardContent>
               </Card>
             );
           })}
         </div>
+
+        {/* Subcategories Panel */}
+        {expandedCategoryId && expandedSubs.length > 0 && expandedCategory && (
+          <div className="mt-4 animate-in slide-in-from-top-2 fade-in duration-300">
+            <Card className="border border-primary/20 bg-gradient-to-br from-muted/50 to-background shadow-lg overflow-hidden">
+              <CardContent className="p-4 md:p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center gap-2">
+                    <div className={`p-1.5 rounded-lg bg-gradient-to-br ${categoryColors[expandedColorIndex % categoryColors.length].bg}`}>
+                      {(() => {
+                        const Icon = getIconComponent(expandedCategory.icon);
+                        return <Icon className={`h-4 w-4 ${categoryColors[expandedColorIndex % categoryColors.length].icon}`} />;
+                      })()}
+                    </div>
+                    <h3 className="font-bold text-foreground">{expandedCategory.name_ar}</h3>
+                    <span className="text-xs text-muted-foreground">({expandedSubs.length} تصنيف فرعي)</span>
+                  </div>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => navigate(`/category/${expandedCategoryId}`)}
+                      className="text-xs text-primary hover:underline font-medium"
+                    >
+                      عرض الكل
+                    </button>
+                    <button
+                      onClick={() => setExpandedCategoryId(null)}
+                      className="p-1 rounded-full hover:bg-muted transition-colors"
+                    >
+                      <X className="h-4 w-4 text-muted-foreground" />
+                    </button>
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2">
+                  {expandedSubs.map((sub, i) => {
+                    const SubIcon = getSubIconComponent(sub.icon);
+                    return (
+                      <button
+                        key={sub.id}
+                        onClick={() => navigate(`/subcategory/${expandedCategoryId}/${sub.id}`)}
+                        className="flex items-center gap-2 px-3 py-2.5 rounded-xl bg-background hover:bg-primary hover:text-primary-foreground border border-border/50 hover:border-primary transition-all duration-200 hover:shadow-md hover:scale-[1.02] text-sm"
+                        style={{ animationDelay: `${i * 30}ms` }}
+                      >
+                        <SubIcon className="h-4 w-4 shrink-0" />
+                        <span className="truncate">{sub.name_ar}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
       </div>
     </section>
   );

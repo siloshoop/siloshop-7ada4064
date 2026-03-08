@@ -452,7 +452,7 @@ const CategorySection = () => {
                     </div>
                     
                     <div>
-                      <h3 className="font-bold text-base md:text-lg mb-1 group-hover:text-primary transition-colors">
+                      <h3 className="font-bold text-sm md:text-base mb-1 group-hover:text-primary transition-colors">
                         {category.name}
                       </h3>
                     </div>

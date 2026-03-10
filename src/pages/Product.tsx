@@ -18,6 +18,7 @@ import ChatButton from "@/components/ChatButton";
 import { useRecentlyViewed } from "@/hooks/useRecentlyViewed";
 import SimilarProducts from "@/components/SimilarProducts";
 import AdPlaceholder from "@/components/AdPlaceholder";
+import StickyMobileAd from "@/components/StickyMobileAd";
 
 
 interface Product {

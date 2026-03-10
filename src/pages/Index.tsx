@@ -165,7 +165,7 @@ const Index = () => {
       />
       <AnnouncementBar />
       <Navbar />
-      <main className="flex-1 pb-16 md:pb-0 page-enter">
+      <main className="flex-1 pb-[120px] md:pb-0 page-enter">
         <HeroSection />
 
         <div className="container px-4 py-4">

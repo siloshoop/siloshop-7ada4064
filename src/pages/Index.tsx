@@ -213,6 +213,7 @@ const Index = () => {
         </SectionErrorBoundary>
       </main>
       <Footer />
+      <StickyMobileAd />
       <MobileBottomNav />
     </div>
   );

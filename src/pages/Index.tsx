@@ -9,6 +9,7 @@ import { Loader2 } from "lucide-react";
 import ProductCard from "@/components/ProductCard";
 import Footer from "@/components/Footer";
 import MobileBottomNav from "@/components/MobileBottomNav";
+import StickyMobileAd from "@/components/StickyMobileAd";
 import PullToRefreshIndicator from "@/components/PullToRefresh";
 import { usePullToRefresh } from "@/hooks/usePullToRefresh";
 import SectionErrorBoundary from "@/components/SectionErrorBoundary";

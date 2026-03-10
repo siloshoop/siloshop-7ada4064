@@ -9,6 +9,7 @@ import { Loader2 } from "lucide-react";
 import ProductCard from "@/components/ProductCard";
 import Footer from "@/components/Footer";
 import MobileBottomNav from "@/components/MobileBottomNav";
+import StickyMobileAd from "@/components/StickyMobileAd";
 import PullToRefreshIndicator from "@/components/PullToRefresh";
 import { usePullToRefresh } from "@/hooks/usePullToRefresh";
 import SectionErrorBoundary from "@/components/SectionErrorBoundary";
@@ -164,7 +165,7 @@ const Index = () => {
       />
       <AnnouncementBar />
       <Navbar />
-      <main className="flex-1 pb-16 md:pb-0 page-enter">
+      <main className="flex-1 pb-[120px] md:pb-0 page-enter">
         <HeroSection />
 
         <div className="container px-4 py-4">
@@ -212,6 +213,7 @@ const Index = () => {
         </SectionErrorBoundary>
       </main>
       <Footer />
+      <StickyMobileAd />
       <MobileBottomNav />
     </div>
   );

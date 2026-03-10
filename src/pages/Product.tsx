@@ -356,6 +356,7 @@ const Product = () => {
           <AdPlaceholder size="banner" slot="product-bottom-banner" />
         </div>
       </main>
+      <StickyMobileAd />
       <Footer />
     </div>
   );

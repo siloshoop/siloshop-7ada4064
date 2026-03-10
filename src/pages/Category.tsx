@@ -239,6 +239,7 @@ const Category = () => {
           </>
         )}
       </main>
+      <StickyMobileAd />
       <Footer />
     </div>
   );

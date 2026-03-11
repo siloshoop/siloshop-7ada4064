@@ -2,6 +2,7 @@ import { memo } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ExternalLink, Megaphone } from "lucide-react";
+import { useAdTracking } from "@/hooks/useAdTracking";
 
 interface NativeAdCardProps {
   title?: string;
@@ -10,6 +11,7 @@ interface NativeAdCardProps {
   ctaText?: string;
   ctaUrl?: string;
   sponsorName?: string;
+  slot?: string;
 }
 
 const NativeAdCard = memo(({
@@ -19,13 +21,20 @@ const NativeAdCard = memo(({
   ctaText = "تسوق الآن",
   ctaUrl = "#",
   sponsorName = "إعلان ممول",
+  slot = "native-search",
 }: NativeAdCardProps) => {
+  const { ref, trackClick } = useAdTracking(slot);
+
+  const handleClick = () => {
+    trackClick();
+    if (ctaUrl && ctaUrl !== "#") window.open(ctaUrl, "_blank");
+  };
+
   return (
     <div
+      ref={ref}
       className="group relative cursor-pointer rounded-xl overflow-hidden bg-card border border-dashed border-primary/30 hover:border-primary/50 transition-all duration-400 ease-[cubic-bezier(0.22,1,0.36,1)] hover:shadow-[0_8px_40px_-12px_hsl(var(--primary)/0.2)]"
-      onClick={() => {
-        if (ctaUrl && ctaUrl !== "#") window.open(ctaUrl, "_blank");
-      }}
+      onClick={handleClick}
     >
       {/* Image Container */}
       <div className="relative aspect-square overflow-hidden bg-gradient-to-br from-primary/5 via-accent/5 to-primary/10">
@@ -70,7 +79,7 @@ const NativeAdCard = memo(({
           className="w-full rounded-lg font-semibold text-xs h-8 border-primary/30 text-primary hover:bg-primary hover:text-primary-foreground transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] group/btn active:scale-95"
           onClick={(e) => {
             e.stopPropagation();
-            if (ctaUrl && ctaUrl !== "#") window.open(ctaUrl, "_blank");
+            handleClick();
           }}
         >
           <ExternalLink className="h-3.5 w-3.5 ml-1.5 transition-transform duration-300 group-hover/btn:scale-110" />

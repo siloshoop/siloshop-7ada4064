@@ -36,6 +36,7 @@ import {
   DollarSign, User, Layers, ArrowUpDown, RotateCcw, Gem 
 } from "lucide-react";
 import AdPlaceholder from "@/components/AdPlaceholder";
+import NativeAdCard from "@/components/NativeAdCard";
 
 interface Product {
   id: string;

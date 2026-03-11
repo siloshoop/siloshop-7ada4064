@@ -646,42 +646,17 @@ const SearchPage = () => {
                   <AdPlaceholder size="leaderboard" slot="search-top-leaderboard" />
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
-                  {products.slice(0, 6).map((product) => {
+                  {products.map((product, index) => {
                     const avgRating = getAverageRating(product.reviews);
                     const discount = product.original_price
                       ? Math.round(((product.original_price - product.price) / product.original_price) * 100)
                       : undefined;
                     return (
-                      <ProductCard
-                        key={product.id}
-                        id={product.id}
-                        name={product.name}
-                        price={product.price}
-                        originalPrice={product.original_price || undefined}
-                        image={product.image_url}
-                        rating={avgRating}
-                        reviews={product.reviews?.length || 0}
-                        discount={discount}
-                      />
-                    );
-                  })}
-                </div>
-
-                {/* Ad: in-feed after 6 products */}
-                {products.length > 6 && (
-                  <div className="my-6">
-                    <AdPlaceholder size="interstitial" slot="search-mid-interstitial" />
-                  </div>
-                )}
-
-                {products.length > 6 && (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
-                    {products.slice(6).map((product) => {
-                      const avgRating = getAverageRating(product.reviews);
-                      const discount = product.original_price
-                        ? Math.round(((product.original_price - product.price) / product.original_price) * 100)
-                        : undefined;
-                      return (
+                      <>
+                        {/* Native ad after every 4th product */}
+                        {index > 0 && index % 4 === 0 && (
+                          <NativeAdCard key={`native-ad-${index}`} />
+                        )}
                         <ProductCard
                           key={product.id}
                           id={product.id}
@@ -693,11 +668,10 @@ const SearchPage = () => {
                           reviews={product.reviews?.length || 0}
                           discount={discount}
                         />
-                      );
-                    })}
-                  </div>
-                )}
-
+                      </>
+                    );
+                  })}
+                </div>
                 {/* Ad: bottom banner */}
                 <div className="mt-6">
                   <AdPlaceholder size="banner" slot="search-bottom-banner" />

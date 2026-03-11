@@ -652,13 +652,12 @@ const SearchPage = () => {
                       ? Math.round(((product.original_price - product.price) / product.original_price) * 100)
                       : undefined;
                     return (
-                      <>
+                      <Fragment key={product.id}>
                         {/* Native ad after every 4th product */}
                         {index > 0 && index % 4 === 0 && (
-                          <NativeAdCard key={`native-ad-${index}`} />
+                          <NativeAdCard />
                         )}
                         <ProductCard
-                          key={product.id}
                           id={product.id}
                           name={product.name}
                           price={product.price}
@@ -668,7 +667,7 @@ const SearchPage = () => {
                           reviews={product.reviews?.length || 0}
                           discount={discount}
                         />
-                      </>
+                      </Fragment>
                     );
                   })}
                 </div>

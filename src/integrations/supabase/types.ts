@@ -539,6 +539,60 @@ export type Database = {
           },
         ]
       }
+      native_ads: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          cta_text: string
+          cta_url: string | null
+          description: string | null
+          end_date: string | null
+          id: string
+          image_url: string | null
+          is_active: boolean
+          placement: string
+          priority: number
+          sponsor_name: string
+          start_date: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          cta_text?: string
+          cta_url?: string | null
+          description?: string | null
+          end_date?: string | null
+          id?: string
+          image_url?: string | null
+          is_active?: boolean
+          placement?: string
+          priority?: number
+          sponsor_name?: string
+          start_date?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          cta_text?: string
+          cta_url?: string | null
+          description?: string | null
+          end_date?: string | null
+          id?: string
+          image_url?: string | null
+          is_active?: boolean
+          placement?: string
+          priority?: number
+          sponsor_name?: string
+          start_date?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       newsletter_subscriptions: {
         Row: {
           email: string

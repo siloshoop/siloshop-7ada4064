@@ -656,9 +656,13 @@ const SearchPage = () => {
                     return (
                       <Fragment key={product.id}>
                         {/* Native ad after every 4th product */}
-                        {index > 0 && index % 4 === 0 && (
-                          <NativeAdCard slot={`native-search-${Math.floor(index / 4)}`} />
-                        )}
+                        {index > 0 && index % 4 === 0 && (() => {
+                          const adIndex = Math.floor(index / 4) - 1;
+                          const ad = nativeAds[adIndex % nativeAds.length];
+                          return ad 
+                            ? <NativeAdCard ad={ad} slot={`native-search-${adIndex}`} />
+                            : <NativeAdCard slot={`native-search-${adIndex}`} />;
+                        })()}
                         <ProductCard
                           id={product.id}
                           name={product.name}

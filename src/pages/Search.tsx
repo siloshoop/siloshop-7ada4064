@@ -37,6 +37,7 @@ import {
 } from "lucide-react";
 import AdPlaceholder from "@/components/AdPlaceholder";
 import NativeAdCard from "@/components/NativeAdCard";
+import { useNativeAds } from "@/hooks/useNativeAds";
 
 interface Product {
   id: string;

@@ -3,8 +3,11 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ExternalLink, Megaphone } from "lucide-react";
 import { useAdTracking } from "@/hooks/useAdTracking";
+import type { NativeAd } from "@/hooks/useNativeAds";
 
 interface NativeAdCardProps {
+  ad?: NativeAd;
+  // Fallback props when no dynamic ad is provided
   title?: string;
   description?: string;
   image?: string;
@@ -15,19 +18,28 @@ interface NativeAdCardProps {
 }
 
 const NativeAdCard = memo(({
-  title = "منتج مميز - إعلان",
-  description = "اكتشف أفضل العروض والمنتجات المميزة من شركائنا",
-  image = "/placeholder.svg",
-  ctaText = "تسوق الآن",
-  ctaUrl = "#",
-  sponsorName = "إعلان ممول",
-  slot = "native-search",
+  ad,
+  title,
+  description,
+  image,
+  ctaText,
+  ctaUrl,
+  sponsorName,
+  slot,
 }: NativeAdCardProps) => {
-  const { ref, trackClick } = useAdTracking(slot);
+  const adTitle = ad?.title || title || "منتج مميز - إعلان";
+  const adDescription = ad?.description || description || "اكتشف أفضل العروض والمنتجات المميزة من شركائنا";
+  const adImage = ad?.image_url || image || "/placeholder.svg";
+  const adCtaText = ad?.cta_text || ctaText || "تسوق الآن";
+  const adCtaUrl = ad?.cta_url || ctaUrl || "#";
+  const adSponsor = ad?.sponsor_name || sponsorName || "إعلان ممول";
+  const adSlot = slot || (ad ? `native-${ad.id}` : "native-fallback");
+
+  const { ref, trackClick } = useAdTracking(adSlot);
 
   const handleClick = () => {
     trackClick();
-    if (ctaUrl && ctaUrl !== "#") window.open(ctaUrl, "_blank");
+    if (adCtaUrl && adCtaUrl !== "#") window.open(adCtaUrl, "_blank");
   };
 
   return (
@@ -45,14 +57,14 @@ const NativeAdCard = memo(({
             className="bg-background/90 backdrop-blur-sm text-muted-foreground text-[10px] px-1.5 py-0.5 gap-1 border-primary/20"
           >
             <Megaphone className="h-2.5 w-2.5" />
-            {sponsorName}
+            {adSponsor}
           </Badge>
         </div>
 
         {/* Ad Image */}
         <img
-          src={image}
-          alt={title}
+          src={adImage}
+          alt={adTitle}
           loading="lazy"
           className="object-cover w-full h-full transition-all duration-700 ease-out group-hover:scale-110"
         />
@@ -63,17 +75,14 @@ const NativeAdCard = memo(({
 
       {/* Content */}
       <div className="p-3 space-y-1.5">
-        {/* Title */}
         <h3 className="font-semibold text-xs leading-snug line-clamp-2 min-h-[2rem] text-foreground group-hover:text-primary transition-colors duration-300">
-          {title}
+          {adTitle}
         </h3>
 
-        {/* Description */}
         <p className="text-[11px] text-muted-foreground line-clamp-2">
-          {description}
+          {adDescription}
         </p>
 
-        {/* CTA Button */}
         <Button
           variant="outline"
           className="w-full rounded-lg font-semibold text-xs h-8 border-primary/30 text-primary hover:bg-primary hover:text-primary-foreground transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] group/btn active:scale-95"
@@ -83,7 +92,7 @@ const NativeAdCard = memo(({
           }}
         >
           <ExternalLink className="h-3.5 w-3.5 ml-1.5 transition-transform duration-300 group-hover/btn:scale-110" />
-          {ctaText}
+          {adCtaText}
         </Button>
       </div>
     </div>

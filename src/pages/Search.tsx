@@ -37,6 +37,7 @@ import {
 } from "lucide-react";
 import AdPlaceholder from "@/components/AdPlaceholder";
 import NativeAdCard from "@/components/NativeAdCard";
+import { useNativeAds } from "@/hooks/useNativeAds";
 
 interface Product {
   id: string;
@@ -110,6 +111,7 @@ const SearchPage = () => {
   const [loading, setLoading] = useState(true);
   const [totalProducts, setTotalProducts] = useState(0);
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
+  const { data: nativeAds = [] } = useNativeAds("search");
 
   const [filters, setFilters] = useState<Filters>(() => ({
     ...defaultFilters,
@@ -654,9 +656,13 @@ const SearchPage = () => {
                     return (
                       <Fragment key={product.id}>
                         {/* Native ad after every 4th product */}
-                        {index > 0 && index % 4 === 0 && (
-                          <NativeAdCard slot={`native-search-${Math.floor(index / 4)}`} />
-                        )}
+                        {index > 0 && index % 4 === 0 && (() => {
+                          const adIndex = Math.floor(index / 4) - 1;
+                          const ad = nativeAds[adIndex % nativeAds.length];
+                          return ad 
+                            ? <NativeAdCard ad={ad} slot={`native-search-${adIndex}`} />
+                            : <NativeAdCard slot={`native-search-${adIndex}`} />;
+                        })()}
                         <ProductCard
                           id={product.id}
                           name={product.name}

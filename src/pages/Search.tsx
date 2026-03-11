@@ -111,6 +111,7 @@ const SearchPage = () => {
   const [loading, setLoading] = useState(true);
   const [totalProducts, setTotalProducts] = useState(0);
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
+  const { data: nativeAds = [] } = useNativeAds("search");
 
   const [filters, setFilters] = useState<Filters>(() => ({
     ...defaultFilters,

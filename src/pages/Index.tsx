@@ -186,6 +186,11 @@ const Index = () => {
           <AdPlaceholder size="banner" slot="home-mid-banner" />
         </div>
 
+        {/* Native Ads Section for Mobile */}
+        <SectionErrorBoundary>
+          <HomeNativeAds />
+        </SectionErrorBoundary>
+
         <SectionErrorBoundary>
           <CategorySection key={`category-${refreshKey}`} />
         </SectionErrorBoundary>

@@ -1,9 +1,11 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, Fragment } from "react";
 import { useParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import ProductCard from "@/components/ProductCard";
+import NativeAdCard from "@/components/NativeAdCard";
+import { useNativeAds } from "@/hooks/useNativeAds";
 import { SearchFilters } from "@/components/SearchFilters";
 import { Loader2 } from "lucide-react";
 import AdPlaceholder from "@/components/AdPlaceholder";

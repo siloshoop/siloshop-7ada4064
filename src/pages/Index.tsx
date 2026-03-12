@@ -128,27 +128,28 @@ const Index = () => {
               <p className="text-xl text-muted-foreground">لا توجد نتائج</p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {products.map((product) => (
-                <ProductCard
-                  key={product.id}
-                  id={product.id}
-                  name={product.name}
-                  price={product.price}
-                  originalPrice={product.original_price || undefined}
-                  image={product.image_url}
-                  rating={4}
-                  reviews={0}
-                  discount={
-                    product.original_price
-                      ? Math.round(
-                          ((product.original_price - product.price) /
-                            product.original_price) *
-                            100
-                        )
-                      : undefined
-                  }
-                />
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+              {products.map((product, index) => (
+                <Fragment key={product.id}>
+                  <ProductCard
+                    id={product.id}
+                    name={product.name}
+                    price={product.price}
+                    originalPrice={product.original_price || undefined}
+                    image={product.image_url}
+                    rating={4}
+                    reviews={0}
+                    discount={
+                      product.original_price
+                        ? Math.round(
+                            ((product.original_price - product.price) /
+                              product.original_price) *
+                              100
+                          )
+                        : undefined
+                    }
+                  />
+                </Fragment>
               ))}
             </div>
           )}

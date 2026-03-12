@@ -217,8 +217,8 @@ const Category = () => {
             )}
 
             {filteredProducts.length > 8 && (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                {filteredProducts.slice(8).map((product) => {
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+                {filteredProducts.slice(8).map((product, index) => {
                   const avgRating = product.reviews?.length > 0
                     ? product.reviews.reduce((sum, r) => sum + r.rating, 0) / product.reviews.length
                     : 4;
@@ -226,17 +226,24 @@ const Category = () => {
                     ? Math.round(((product.original_price - product.price) / product.original_price) * 100)
                     : undefined;
                   return (
-                    <ProductCard
-                      key={product.id}
-                      id={product.id}
-                      name={product.name}
-                      price={product.price}
-                      originalPrice={product.original_price || undefined}
-                      image={product.image_url}
-                      rating={avgRating}
-                      reviews={product.reviews?.length || 0}
-                      discount={discount}
-                    />
+                    <Fragment key={product.id}>
+                      {index > 0 && index % 4 === 0 && nativeAds && nativeAds[Math.floor(index / 4)] && (
+                        <NativeAdCard
+                          ad={nativeAds[Math.floor(index / 4)]}
+                          slot={`native-category-b-${index}`}
+                        />
+                      )}
+                      <ProductCard
+                        id={product.id}
+                        name={product.name}
+                        price={product.price}
+                        originalPrice={product.original_price || undefined}
+                        image={product.image_url}
+                        rating={avgRating}
+                        reviews={product.reviews?.length || 0}
+                        discount={discount}
+                      />
+                    </Fragment>
                   );
                 })}
               </div>

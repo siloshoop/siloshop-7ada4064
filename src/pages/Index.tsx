@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, Fragment } from "react";
 import { useSearchParams } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import AnnouncementBar from "@/components/AnnouncementBar";
@@ -14,6 +14,8 @@ import PullToRefreshIndicator from "@/components/PullToRefresh";
 import { usePullToRefresh } from "@/hooks/usePullToRefresh";
 import SectionErrorBoundary from "@/components/SectionErrorBoundary";
 import AdPlaceholder from "@/components/AdPlaceholder";
+import NativeAdCard from "@/components/NativeAdCard";
+import { useNativeAds } from "@/hooks/useNativeAds";
 
 // Import critical sections directly (not lazy) to prevent chunk loading failures
 import PopularCategories from "@/components/PopularCategories";

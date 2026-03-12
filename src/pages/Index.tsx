@@ -227,4 +227,27 @@ const Index = () => {
   );
 };
 
+// Home Native Ads component
+const HomeNativeAds = () => {
+  const { data: ads } = useNativeAds("home");
+
+  if (!ads || ads.length === 0) return null;
+
+  return (
+    <section className="py-4">
+      <div className="container px-4">
+        <div className="flex items-center gap-2 mb-3">
+          <h3 className="text-sm font-semibold text-muted-foreground">إعلانات مميزة</h3>
+          <div className="flex-1 h-px bg-border" />
+        </div>
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+          {ads.slice(0, 4).map((ad) => (
+            <NativeAdCard key={ad.id} ad={ad} slot={`native-home-${ad.id}`} />
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+};
+
 export default Index;

@@ -46,6 +46,7 @@ import FollowedBrands from "./pages/FollowedBrands";
 import ManageAnnouncements from "./pages/ManageAnnouncements";
 import ManageUsers from "./pages/ManageUsers";
 import ActivityLogs from "./pages/ActivityLogs";
+import ManageNativeAds from "./pages/ManageNativeAds";
 import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
 

@@ -29,6 +29,7 @@ interface VendorRating {
 
 const Category = () => {
   const { categoryId } = useParams();
+  const { data: nativeAds } = useNativeAds("category");
   const [products, setProducts] = useState<Product[]>([]);
   const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
   const [vendorRatings, setVendorRatings] = useState<Map<string, number>>(new Map());

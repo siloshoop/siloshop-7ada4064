@@ -75,6 +75,7 @@ const App = () => (
             <Route path="/dashboard/announcements" element={<ManageAnnouncements />} />
             <Route path="/dashboard/users" element={<ManageUsers />} />
             <Route path="/dashboard/activity-logs" element={<ActivityLogs />} />
+            <Route path="/dashboard/native-ads" element={<ManageNativeAds />} />
             <Route path="/favorites" element={<Favorites />} />
             <Route path="/wishlist" element={<Wishlist />} />
             <Route path="/wishlist/shared/:token" element={<SharedWishlist />} />

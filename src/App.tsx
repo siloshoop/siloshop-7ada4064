@@ -46,6 +46,7 @@ import FollowedBrands from "./pages/FollowedBrands";
 import ManageAnnouncements from "./pages/ManageAnnouncements";
 import ManageUsers from "./pages/ManageUsers";
 import ActivityLogs from "./pages/ActivityLogs";
+import ManageNativeAds from "./pages/ManageNativeAds";
 import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
 
@@ -74,6 +75,7 @@ const App = () => (
             <Route path="/dashboard/announcements" element={<ManageAnnouncements />} />
             <Route path="/dashboard/users" element={<ManageUsers />} />
             <Route path="/dashboard/activity-logs" element={<ActivityLogs />} />
+            <Route path="/dashboard/native-ads" element={<ManageNativeAds />} />
             <Route path="/favorites" element={<Favorites />} />
             <Route path="/wishlist" element={<Wishlist />} />
             <Route path="/wishlist/shared/:token" element={<SharedWishlist />} />

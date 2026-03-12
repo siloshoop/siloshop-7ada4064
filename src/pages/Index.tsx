@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, Fragment } from "react";
 import { useSearchParams } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import AnnouncementBar from "@/components/AnnouncementBar";
@@ -14,6 +14,8 @@ import PullToRefreshIndicator from "@/components/PullToRefresh";
 import { usePullToRefresh } from "@/hooks/usePullToRefresh";
 import SectionErrorBoundary from "@/components/SectionErrorBoundary";
 import AdPlaceholder from "@/components/AdPlaceholder";
+import NativeAdCard from "@/components/NativeAdCard";
+import { useNativeAds } from "@/hooks/useNativeAds";
 
 // Import critical sections directly (not lazy) to prevent chunk loading failures
 import PopularCategories from "@/components/PopularCategories";
@@ -126,27 +128,28 @@ const Index = () => {
               <p className="text-xl text-muted-foreground">لا توجد نتائج</p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {products.map((product) => (
-                <ProductCard
-                  key={product.id}
-                  id={product.id}
-                  name={product.name}
-                  price={product.price}
-                  originalPrice={product.original_price || undefined}
-                  image={product.image_url}
-                  rating={4}
-                  reviews={0}
-                  discount={
-                    product.original_price
-                      ? Math.round(
-                          ((product.original_price - product.price) /
-                            product.original_price) *
-                            100
-                        )
-                      : undefined
-                  }
-                />
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+              {products.map((product, index) => (
+                <Fragment key={product.id}>
+                  <ProductCard
+                    id={product.id}
+                    name={product.name}
+                    price={product.price}
+                    originalPrice={product.original_price || undefined}
+                    image={product.image_url}
+                    rating={4}
+                    reviews={0}
+                    discount={
+                      product.original_price
+                        ? Math.round(
+                            ((product.original_price - product.price) /
+                              product.original_price) *
+                              100
+                          )
+                        : undefined
+                    }
+                  />
+                </Fragment>
               ))}
             </div>
           )}
@@ -183,6 +186,11 @@ const Index = () => {
           <AdPlaceholder size="banner" slot="home-mid-banner" />
         </div>
 
+        {/* Native Ads Section for Mobile */}
+        <SectionErrorBoundary>
+          <HomeNativeAds />
+        </SectionErrorBoundary>
+
         <SectionErrorBoundary>
           <CategorySection key={`category-${refreshKey}`} />
         </SectionErrorBoundary>
@@ -216,6 +224,29 @@ const Index = () => {
       <StickyMobileAd />
       <MobileBottomNav />
     </div>
+  );
+};
+
+// Home Native Ads component
+const HomeNativeAds = () => {
+  const { data: ads } = useNativeAds("home");
+
+  if (!ads || ads.length === 0) return null;
+
+  return (
+    <section className="py-4">
+      <div className="container px-4">
+        <div className="flex items-center gap-2 mb-3">
+          <h3 className="text-sm font-semibold text-muted-foreground">إعلانات مميزة</h3>
+          <div className="flex-1 h-px bg-border" />
+        </div>
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+          {ads.slice(0, 4).map((ad) => (
+            <NativeAdCard key={ad.id} ad={ad} slot={`native-home-${ad.id}`} />
+          ))}
+        </div>
+      </div>
+    </section>
   );
 };
 

@@ -11,9 +11,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Plus, Trash2, Pencil, Eye, EyeOff, Megaphone, ExternalLink, Image } from "lucide-react";
-import { format } from "date-fns";
+import { Loader2, Plus, Trash2, Pencil, Eye, EyeOff, Megaphone, ExternalLink, Image, CalendarClock, CalendarCheck, CalendarX, Clock } from "lucide-react";
+import { format, isPast, isFuture, isWithinInterval } from "date-fns";
 import { ar } from "date-fns/locale";
+import { Badge } from "@/components/ui/badge";
 
 interface NativeAd {
   id: string;
@@ -275,57 +276,108 @@ const ManageNativeAds = () => {
                 </CardContent>
               </Card>
             ) : (
-              ads.map((ad) => (
-                <Card key={ad.id} className={`transition-all ${!ad.is_active ? "opacity-60" : ""}`}>
-                  <CardContent className="p-6">
-                    <div className="flex items-start gap-4">
-                      {ad.image_url ? (
-                        <img src={ad.image_url} alt={ad.title} className="w-20 h-20 rounded-lg object-cover border" />
-                      ) : (
-                        <div className="w-20 h-20 rounded-lg bg-muted flex items-center justify-center">
-                          <Image className="h-8 w-8 text-muted-foreground/40" />
-                        </div>
-                      )}
+              ads.map((ad) => {
+                const now = new Date();
+                const startDate = ad.start_date ? new Date(ad.start_date) : null;
+                const endDate = ad.end_date ? new Date(ad.end_date) : null;
+                
+                let scheduleStatus: "active" | "scheduled" | "expired" | "no-schedule" = "no-schedule";
+                if (startDate && endDate) {
+                  if (isFuture(startDate)) scheduleStatus = "scheduled";
+                  else if (isPast(endDate)) scheduleStatus = "expired";
+                  else scheduleStatus = "active";
+                } else if (startDate && isFuture(startDate)) {
+                  scheduleStatus = "scheduled";
+                } else if (endDate && isPast(endDate)) {
+                  scheduleStatus = "expired";
+                } else if (startDate || endDate) {
+                  scheduleStatus = "active";
+                }
 
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-3 mb-1">
-                          <h3 className="text-lg font-semibold truncate">{ad.title}</h3>
-                          <span className={`text-xs px-2 py-0.5 rounded-full shrink-0 ${ad.is_active ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400" : "bg-muted text-muted-foreground"}`}>
-                            {ad.is_active ? "نشط" : "متوقف"}
-                          </span>
-                        </div>
-                        {ad.description && <p className="text-sm text-muted-foreground line-clamp-1 mb-2">{ad.description}</p>}
-                        <div className="flex flex-wrap gap-3 text-xs text-muted-foreground">
-                          <span className="bg-muted px-2 py-0.5 rounded">{placementOptions.find((p) => p.value === ad.placement)?.label || ad.placement}</span>
-                          <span>الراعي: {ad.sponsor_name}</span>
-                          <span>أولوية: {ad.priority}</span>
-                          {ad.cta_url && (
-                            <a href={ad.cta_url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 text-primary hover:underline">
-                              <ExternalLink className="h-3 w-3" /> {ad.cta_text}
-                            </a>
+                const scheduleConfig = {
+                  "active": { icon: CalendarCheck, label: "جارٍ الآن", className: "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400" },
+                  "scheduled": { icon: CalendarClock, label: "مجدول", className: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400" },
+                  "expired": { icon: CalendarX, label: "منتهي", className: "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400" },
+                  "no-schedule": { icon: Clock, label: "بدون جدولة", className: "bg-muted text-muted-foreground" },
+                };
+                const schedule = scheduleConfig[scheduleStatus];
+                const ScheduleIcon = schedule.icon;
+
+                return (
+                  <Card key={ad.id} className={`transition-all ${!ad.is_active ? "opacity-60" : ""} ${scheduleStatus === "expired" ? "border-destructive/30" : ""}`}>
+                    <CardContent className="p-6">
+                      <div className="flex items-start gap-4">
+                        {ad.image_url ? (
+                          <img src={ad.image_url} alt={ad.title} className="w-20 h-20 rounded-lg object-cover border" />
+                        ) : (
+                          <div className="w-20 h-20 rounded-lg bg-muted flex items-center justify-center">
+                            <Image className="h-8 w-8 text-muted-foreground/40" />
+                          </div>
+                        )}
+
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 mb-1 flex-wrap">
+                            <h3 className="text-lg font-semibold truncate">{ad.title}</h3>
+                            <span className={`text-xs px-2 py-0.5 rounded-full shrink-0 ${ad.is_active ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400" : "bg-muted text-muted-foreground"}`}>
+                              {ad.is_active ? "نشط" : "متوقف"}
+                            </span>
+                            {(startDate || endDate) && (
+                              <Badge variant="outline" className={`text-[10px] gap-1 ${schedule.className} border-0`}>
+                                <ScheduleIcon className="h-3 w-3" />
+                                {schedule.label}
+                              </Badge>
+                            )}
+                          </div>
+                          {ad.description && <p className="text-sm text-muted-foreground line-clamp-1 mb-2">{ad.description}</p>}
+                          
+                          <div className="flex flex-wrap gap-3 text-xs text-muted-foreground">
+                            <span className="bg-muted px-2 py-0.5 rounded">{placementOptions.find((p) => p.value === ad.placement)?.label || ad.placement}</span>
+                            <span>الراعي: {ad.sponsor_name}</span>
+                            <span>أولوية: {ad.priority}</span>
+                            {ad.cta_url && (
+                              <a href={ad.cta_url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 text-primary hover:underline">
+                                <ExternalLink className="h-3 w-3" /> {ad.cta_text}
+                              </a>
+                            )}
+                          </div>
+
+                          {(startDate || endDate) && (
+                            <div className="flex flex-wrap gap-3 mt-2 text-xs text-muted-foreground border-t pt-2">
+                              {startDate && (
+                                <span className="flex items-center gap-1">
+                                  <CalendarCheck className="h-3 w-3" />
+                                  يبدأ: {format(startDate, "dd MMM yyyy - HH:mm", { locale: ar })}
+                                </span>
+                              )}
+                              {endDate && (
+                                <span className={`flex items-center gap-1 ${scheduleStatus === "expired" ? "text-destructive" : ""}`}>
+                                  <CalendarX className="h-3 w-3" />
+                                  ينتهي: {format(endDate, "dd MMM yyyy - HH:mm", { locale: ar })}
+                                </span>
+                              )}
+                            </div>
                           )}
-                          {ad.end_date && <span>ينتهي: {format(new Date(ad.end_date), "dd MMM yyyy", { locale: ar })}</span>}
                         </div>
-                      </div>
 
-                      <div className="flex items-center gap-2 shrink-0">
-                        <div className="flex items-center gap-2 pl-4 border-l">
-                          <Label htmlFor={`toggle-${ad.id}`} className="text-sm">
-                            {ad.is_active ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
-                          </Label>
-                          <Switch id={`toggle-${ad.id}`} checked={ad.is_active} onCheckedChange={() => toggleStatus(ad.id, ad.is_active)} />
+                        <div className="flex items-center gap-2 shrink-0">
+                          <div className="flex items-center gap-2 pl-4 border-l">
+                            <Label htmlFor={`toggle-${ad.id}`} className="text-sm">
+                              {ad.is_active ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
+                            </Label>
+                            <Switch id={`toggle-${ad.id}`} checked={ad.is_active} onCheckedChange={() => toggleStatus(ad.id, ad.is_active)} />
+                          </div>
+                          <Button variant="outline" size="icon" onClick={() => handleEdit(ad)}>
+                            <Pencil className="h-4 w-4" />
+                          </Button>
+                          <Button variant="destructive" size="icon" onClick={() => deleteAd(ad.id)}>
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
                         </div>
-                        <Button variant="outline" size="icon" onClick={() => handleEdit(ad)}>
-                          <Pencil className="h-4 w-4" />
-                        </Button>
-                        <Button variant="destructive" size="icon" onClick={() => deleteAd(ad.id)}>
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
                       </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))
+                    </CardContent>
+                  </Card>
+                );
+              })
             )}
           </div>
         </div>

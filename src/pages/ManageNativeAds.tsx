@@ -11,9 +11,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Plus, Trash2, Pencil, Eye, EyeOff, Megaphone, ExternalLink, Image } from "lucide-react";
-import { format } from "date-fns";
+import { Loader2, Plus, Trash2, Pencil, Eye, EyeOff, Megaphone, ExternalLink, Image, CalendarClock, CalendarCheck, CalendarX, Clock } from "lucide-react";
+import { format, isPast, isFuture, isWithinInterval } from "date-fns";
 import { ar } from "date-fns/locale";
+import { Badge } from "@/components/ui/badge";
 
 interface NativeAd {
   id: string;

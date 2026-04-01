@@ -12,7 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, Plus, Trash2, Pencil, Eye, EyeOff, Megaphone, ExternalLink, Image, CalendarClock, CalendarCheck, CalendarX, Clock } from "lucide-react";
-import { format, isPast, isFuture, isWithinInterval } from "date-fns";
+import { format, isPast, isFuture } from "date-fns";
 import { ar } from "date-fns/locale";
 import { Badge } from "@/components/ui/badge";
 
@@ -61,16 +61,23 @@ const ManageNativeAds = () => {
 
   useEffect(() => {
     if (isAdmin) fetchAds();
-  }, [isAdmin]);
+    else if (!adminLoading) setLoading(false);
+  }, [isAdmin, adminLoading]);
 
   const fetchAds = async () => {
-    const { data, error } = await supabase
-      .from("native_ads")
-      .select("*")
-      .order("priority", { ascending: false });
+    try {
+      const { data, error } = await supabase
+        .from("native_ads")
+        .select("*")
+        .order("priority", { ascending: false });
 
-    if (!error) setAds(data || []);
-    setLoading(false);
+      if (error) throw error;
+      setAds(data || []);
+    } catch (error: any) {
+      toast({ title: "خطأ", description: error.message, variant: "destructive" });
+    } finally {
+      setLoading(false);
+    }
   };
 
   const resetForm = () => {
@@ -165,7 +172,17 @@ const ManageNativeAds = () => {
     );
   }
 
-  if (!isAdmin) return null;
+  if (!isAdmin) {
+    return (
+      <div className="min-h-screen flex flex-col">
+        <Navbar />
+        <div className="flex-1 flex items-center justify-center px-4 text-center text-muted-foreground">
+          جاري التحقق من صلاحية الوصول...
+        </div>
+        <Footer />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -277,7 +294,6 @@ const ManageNativeAds = () => {
               </Card>
             ) : (
               ads.map((ad) => {
-                const now = new Date();
                 const startDate = ad.start_date ? new Date(ad.start_date) : null;
                 const endDate = ad.end_date ? new Date(ad.end_date) : null;
                 

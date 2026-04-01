@@ -13,6 +13,7 @@ export const useAdminCheck = () => {
 
   useEffect(() => {
     if (!authLoading && !user) {
+      setAdminLoading(false);
       navigate("/auth");
       return;
     }
@@ -20,7 +21,7 @@ export const useAdminCheck = () => {
     if (user) {
       checkAdmin();
     }
-  }, [user, authLoading]);
+  }, [user, authLoading, navigate]);
 
   const checkAdmin = async () => {
     if (!user) return;

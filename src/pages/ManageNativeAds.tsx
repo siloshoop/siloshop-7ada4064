@@ -172,7 +172,17 @@ const ManageNativeAds = () => {
     );
   }
 
-  if (!isAdmin) return null;
+  if (!isAdmin) {
+    return (
+      <div className="min-h-screen flex flex-col">
+        <Navbar />
+        <div className="flex-1 flex items-center justify-center px-4 text-center text-muted-foreground">
+          جاري التحقق من صلاحية الوصول...
+        </div>
+        <Footer />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex flex-col">

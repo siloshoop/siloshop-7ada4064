@@ -228,7 +228,6 @@ const SearchPage = () => {
       }
 
       // Filter by rating client-side (since it's calculated from reviews)
-      let filteredProducts = data || [];
       if (filters.minRating > 0) {
         filteredProducts = filteredProducts.filter((product: any) => {
           const avgRating = product.reviews?.length > 0

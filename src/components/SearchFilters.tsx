@@ -21,6 +21,9 @@ import { Slider } from "@/components/ui/slider";
 import { SlidersHorizontal, Star, Gem } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
+const ALL_CATEGORIES_VALUE = "__all_categories__";
+const ALL_BRANDS_VALUE = "__all_brands__";
+
 interface Category {
   id: string;
   name_ar: string;
@@ -45,8 +48,6 @@ interface SearchFiltersProps {
 export const SearchFilters = ({ onFilterChange }: SearchFiltersProps) => {
   const [categories, setCategories] = useState<Category[]>([]);
   const [brands, setBrands] = useState<Brand[]>([]);
-  const [minPrice, setMinPrice] = useState(0);
-  const [maxPrice, setMaxPrice] = useState(1000000);
   const [priceRange, setPriceRange] = useState([0, 1000000]);
   const [categoryId, setCategoryId] = useState("");
   const [brandId, setBrandId] = useState("");
@@ -149,12 +150,15 @@ export const SearchFilters = ({ onFilterChange }: SearchFiltersProps) => {
           {/* الفئة */}
           <div className="space-y-2">
             <Label>الفئة</Label>
-            <Select value={categoryId} onValueChange={setCategoryId}>
+            <Select
+              value={categoryId || ALL_CATEGORIES_VALUE}
+              onValueChange={(value) => setCategoryId(value === ALL_CATEGORIES_VALUE ? "" : value)}
+            >
               <SelectTrigger>
                 <SelectValue placeholder="اختر الفئة" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">جميع الفئات</SelectItem>
+                <SelectItem value={ALL_CATEGORIES_VALUE}>جميع الفئات</SelectItem>
                 {categories.map((category) => (
                   <SelectItem key={category.id} value={category.id}>
                     {category.name_ar}
@@ -171,12 +175,15 @@ export const SearchFilters = ({ onFilterChange }: SearchFiltersProps) => {
                 <Gem className="h-4 w-4" />
                 العلامة التجارية
               </Label>
-              <Select value={brandId} onValueChange={setBrandId}>
+              <Select
+                value={brandId || ALL_BRANDS_VALUE}
+                onValueChange={(value) => setBrandId(value === ALL_BRANDS_VALUE ? "" : value)}
+              >
                 <SelectTrigger>
                   <SelectValue placeholder="اختر العلامة التجارية" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">جميع العلامات</SelectItem>
+                  <SelectItem value={ALL_BRANDS_VALUE}>جميع العلامات</SelectItem>
                   {brands.map((brand) => (
                     <SelectItem key={brand.id} value={brand.id}>
                       {brand.name_ar}

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
@@ -19,9 +19,27 @@ interface OrderItem {
   product: {
     name: string;
     image_url: string;
-  };
+  } | null;
   quantity: number;
   price: number;
+}
+
+interface OrderRecord {
+  id: string;
+  created_at: string;
+  total_amount: number;
+  status: string | null;
+}
+
+interface OrderItemRecord {
+  order_id: string;
+  product_id: string;
+  quantity: number;
+  price: number;
+  product: {
+    name: string | null;
+    image_url: string | null;
+  } | null;
 }
 
 interface DeliveryRatingData {
@@ -51,58 +69,100 @@ const Orders = () => {
     }
   }, [user, authLoading, navigate]);
 
-  useEffect(() => {
-    const fetchOrders = async () => {
-      if (!user) return;
+  const fetchOrders = useCallback(async () => {
+    if (!user) {
+      setOrders([]);
+      setLoading(false);
+      return;
+    }
 
-      try {
-        const { data, error } = await supabase
-          .from("orders")
+    setLoading(true);
+
+    try {
+      const { data: ordersData, error: ordersError } = await supabase
+        .from("orders")
+        .select("id, created_at, total_amount, status")
+        .eq("customer_id", user.id)
+        .order("created_at", { ascending: false });
+
+      if (ordersError) throw ordersError;
+
+      if (!ordersData || ordersData.length === 0) {
+        setOrders([]);
+        return;
+      }
+
+      const orderIds = ordersData.map((order) => order.id);
+
+      const [{ data: orderItemsData, error: orderItemsError }, { data: ratingsData, error: ratingsError }] = await Promise.all([
+        supabase
+          .from("order_items")
           .select(`
-            id,
-            created_at,
-            total_amount,
-            status,
-            order_items(
-              product_id,
-              quantity,
-              price,
-              product:products(name, image_url)
-            )
+            order_id,
+            product_id,
+            quantity,
+            price,
+            product:products(name, image_url)
           `)
-          .eq("customer_id", user.id)
-          .order("created_at", { ascending: false });
-
-        if (error) throw error;
-
-        // Fetch delivery ratings for these orders
-        const orderIds = data?.map(o => o.id) || [];
-        const { data: ratingsData } = await supabase
+          .in("order_id", orderIds),
+        supabase
           .from("delivery_ratings")
           .select("order_id, rating")
-          .in("order_id", orderIds);
+          .in("order_id", orderIds),
+      ]);
 
-        const ratingsMap = new Map(ratingsData?.map(r => [r.order_id, r]) || []);
-
-        const ordersWithRatings = data?.map(order => ({
-          ...order,
-          delivery_rating: ratingsMap.get(order.id) || null
-        })) || [];
-
-        setOrders(ordersWithRatings as any);
-      } catch (error: any) {
-        toast({
-          title: "خطأ",
-          description: "فشل في جلب الطلبات",
-          variant: "destructive",
-        });
-      } finally {
-        setLoading(false);
+      if (orderItemsError) {
+        console.error("Order items fetch error:", orderItemsError);
       }
-    };
 
-    fetchOrders();
+      if (ratingsError) {
+        console.error("Delivery ratings fetch error:", ratingsError);
+      }
+
+      const orderItemsMap = new Map<string, OrderItem[]>();
+      (orderItemsData as OrderItemRecord[] | null)?.forEach((item) => {
+        const currentItems = orderItemsMap.get(item.order_id) || [];
+
+        currentItems.push({
+          product_id: item.product_id,
+          quantity: item.quantity,
+          price: item.price,
+          product: {
+            name: item.product?.name || "منتج غير متوفر",
+            image_url: item.product?.image_url || "/placeholder.svg",
+          },
+        });
+
+        orderItemsMap.set(item.order_id, currentItems);
+      });
+
+      const ratingsMap = new Map(ratingsData?.map((rating) => [rating.order_id, rating]) || []);
+
+      const ordersWithDetails: Order[] = (ordersData as OrderRecord[]).map((order) => ({
+        id: order.id,
+        created_at: order.created_at,
+        total_amount: order.total_amount,
+        status: order.status || "pending",
+        order_items: orderItemsMap.get(order.id) || [],
+        delivery_rating: ratingsMap.get(order.id) || null,
+      }));
+
+      setOrders(ordersWithDetails);
+    } catch (error: any) {
+      console.error("Orders fetch error:", error);
+      toast({
+        title: "خطأ",
+        description: "فشل في جلب الطلبات",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
   }, [user, toast]);
+
+  useEffect(() => {
+    void fetchOrders();
+  }, [fetchOrders]);
 
   const getStatusBadge = (status: string) => {
     const statusConfig: Record<string, { label: string; variant: "default" | "secondary" | "destructive" | "outline" }> = {
@@ -132,8 +192,8 @@ const Orders = () => {
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
-      <main className="flex-1 container px-4 py-8">
-        <h1 className="text-3xl font-bold mb-8">طلباتي</h1>
+      <main className="flex-1 container px-4 py-6 sm:py-8">
+        <h1 className="mb-8 text-2xl font-bold sm:text-3xl">طلباتي</h1>
 
         {orders.length === 0 ? (
           <Card>
@@ -153,7 +213,7 @@ const Orders = () => {
             {orders.map((order) => (
               <Card key={order.id}>
                 <CardContent className="p-6">
-                  <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-4">
+                  <div className="mb-4 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
                     <div>
                       <p className="text-sm text-muted-foreground mb-1">
                         رقم الطلب: <span className="font-mono">{order.id.slice(0, 8)}</span>
@@ -162,50 +222,55 @@ const Orders = () => {
                         التاريخ: {format(new Date(order.created_at), "dd MMMM yyyy", { locale: ar })}
                       </p>
                     </div>
-                    <div className="flex flex-wrap items-center gap-2 mt-4 md:mt-0">
-                      {getStatusBadge(order.status)}
-                      <p className="font-bold text-lg text-primary">
-                        {order.total_amount} ل.س
-                      </p>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => navigate(`/orders/track/${order.id}`)}
-                      >
-                        تتبع الطلب
-                      </Button>
-                      {user && (
-                        <ReorderButton
-                          orderId={order.id}
-                          userId={user.id}
-                          orderItems={order.order_items.map(item => ({
-                            product_id: item.product_id,
-                            quantity: item.quantity
-                          }))}
-                        />
-                      )}
-                      {user && (
-                        <DeliveryRating
-                          orderId={order.id}
-                          userId={user.id}
-                          isDelivered={order.status === "delivered"}
-                          existingRating={order.delivery_rating?.rating}
-                          onRatingSubmitted={() => window.location.reload()}
-                        />
-                      )}
+                    <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center lg:justify-end">
+                      <div className="flex flex-wrap items-center gap-2">
+                        {getStatusBadge(order.status)}
+                        <p className="text-lg font-bold text-primary">
+                          {order.total_amount.toLocaleString()} ل.س
+                        </p>
+                      </div>
+                      <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="w-full sm:w-auto"
+                          onClick={() => navigate(`/orders/track/${order.id}`)}
+                        >
+                          تتبع الطلب
+                        </Button>
+                        {user && (
+                          <ReorderButton
+                            orderId={order.id}
+                            userId={user.id}
+                            orderItems={order.order_items.map(item => ({
+                              product_id: item.product_id,
+                              quantity: item.quantity
+                            }))}
+                          />
+                        )}
+                        {user && (
+                          <DeliveryRating
+                            orderId={order.id}
+                            userId={user.id}
+                            isDelivered={order.status === "delivered"}
+                            existingRating={order.delivery_rating?.rating}
+                            onRatingSubmitted={() => void fetchOrders()}
+                          />
+                        )}
+                      </div>
                     </div>
                   </div>
 
                   <div className="space-y-3">
                     {order.order_items.map((item, index) => (
-                      <div key={index} className="flex gap-4 p-3 bg-muted/30 rounded-lg">
+                      <div key={index} className="flex items-center gap-4 rounded-lg bg-muted/30 p-3">
                         <img
-                          src={item.product.image_url}
-                          alt={item.product.name}
+                          src={item.product?.image_url || "/placeholder.svg"}
+                          alt={item.product?.name || "منتج"}
                           className="w-16 h-16 object-cover rounded-lg"
                         />
                         <div className="flex-1">
-                          <h4 className="font-semibold">{item.product.name}</h4>
+                          <h4 className="font-semibold">{item.product?.name || "منتج غير متوفر"}</h4>
                           <p className="text-sm text-muted-foreground">
                             الكمية: {item.quantity} × {item.price} ل.س
                           </p>

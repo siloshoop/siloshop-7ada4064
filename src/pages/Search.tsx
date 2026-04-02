@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, Fragment } from "react";
-import { useSearchParams, useNavigate } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import ProductCard from "@/components/ProductCard";
@@ -38,6 +38,7 @@ import {
 import AdPlaceholder from "@/components/AdPlaceholder";
 import NativeAdCard from "@/components/NativeAdCard";
 import { useNativeAds } from "@/hooks/useNativeAds";
+import { matchesSearchTerm } from "@/lib/search";
 
 interface Product {
   id: string;
@@ -48,6 +49,7 @@ interface Product {
   vendor_id: string;
   category_id: string | null;
   subcategory_id: string | null;
+  stock_quantity: number | null;
   reviews: { rating: number }[];
 }
 
@@ -102,20 +104,19 @@ const defaultFilters: Filters = {
 
 const SearchPage = () => {
   const [searchParams, setSearchParams] = useSearchParams();
-  const navigate = useNavigate();
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [subcategories, setSubcategories] = useState<Subcategory[]>([]);
   const [vendors, setVendors] = useState<Vendor[]>([]);
   const [brands, setBrands] = useState<Brand[]>([]);
   const [loading, setLoading] = useState(true);
-  const [totalProducts, setTotalProducts] = useState(0);
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
   const { data: nativeAds = [] } = useNativeAds("search");
+  const urlSearchQuery = searchParams.get("q")?.trim() || "";
 
   const [filters, setFilters] = useState<Filters>(() => ({
     ...defaultFilters,
-    search: searchParams.get("q") || "",
+    search: urlSearchQuery,
   }));
 
   const [priceRange, setPriceRange] = useState([0, 10000000]);
@@ -139,6 +140,17 @@ const SearchPage = () => {
     fetchFilterData();
   }, []);
 
+  useEffect(() => {
+    setFilters((prev) => (
+      prev.search === urlSearchQuery
+        ? prev
+        : {
+            ...prev,
+            search: urlSearchQuery,
+          }
+    ));
+  }, [urlSearchQuery]);
+
   // Search products when filters change
   useEffect(() => {
     searchProducts();
@@ -151,11 +163,6 @@ const SearchPage = () => {
         .from("products")
         .select("id, name, price, original_price, image_url, vendor_id, category_id, subcategory_id, stock_quantity, reviews(rating)", { count: "exact" })
         .eq("is_active", true);
-
-      // Search query
-      if (filters.search) {
-        query = query.ilike("name", `%${filters.search}%`);
-      }
 
       // Price range
       query = query.gte("price", filters.minPrice).lte("price", filters.maxPrice);
@@ -208,12 +215,19 @@ const SearchPage = () => {
           query = query.order("created_at", { ascending: false });
       }
 
-      const { data, count, error } = await query.limit(50);
+      const { data, error } = await query;
 
       if (error) throw error;
 
+      let filteredProducts = (data || []) as Product[];
+
+      if (filters.search.trim()) {
+        filteredProducts = filteredProducts.filter((product) =>
+          matchesSearchTerm(product.name, filters.search)
+        );
+      }
+
       // Filter by rating client-side (since it's calculated from reviews)
-      let filteredProducts = data || [];
       if (filters.minRating > 0) {
         filteredProducts = filteredProducts.filter((product: any) => {
           const avgRating = product.reviews?.length > 0
@@ -224,7 +238,6 @@ const SearchPage = () => {
       }
 
       setProducts(filteredProducts);
-      setTotalProducts(count || 0);
     } catch (error) {
       console.error("Search error:", error);
     } finally {
@@ -551,8 +564,8 @@ const SearchPage = () => {
       <main className="flex-1 container px-4 py-8">
         {/* Search Header */}
         <div className="mb-6 space-y-4">
-          <div className="flex items-center gap-4">
-            <div className="relative flex-1">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+            <div className="relative w-full flex-1">
               <SearchIcon className="absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
               <Input
                 type="search"
@@ -566,7 +579,7 @@ const SearchPage = () => {
             {/* Mobile Filters Button */}
             <Sheet open={mobileFiltersOpen} onOpenChange={setMobileFiltersOpen}>
               <SheetTrigger asChild>
-                <Button variant="outline" size="lg" className="lg:hidden relative">
+                <Button variant="outline" size="lg" className="relative w-full sm:w-auto lg:hidden">
                   <SlidersHorizontal className="h-5 w-5" />
                   {activeFiltersCount > 0 && (
                     <Badge className="absolute -top-2 -right-2 h-5 w-5 p-0 flex items-center justify-center">
@@ -587,14 +600,14 @@ const SearchPage = () => {
           </div>
 
           {/* Results Info & Sort */}
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <p className="text-muted-foreground">
               {loading ? "جاري البحث..." : `${products.length} منتج`}
             </p>
-            <div className="flex items-center gap-2">
-              <ArrowUpDown className="h-4 w-4 text-muted-foreground" />
+            <div className="flex w-full items-center gap-2 sm:w-auto">
+              <ArrowUpDown className="hidden h-4 w-4 text-muted-foreground sm:block" />
               <Select value={filters.sortBy} onValueChange={(value) => updateFilter("sortBy", value)}>
-                <SelectTrigger className="w-48">
+                <SelectTrigger className="w-full sm:w-48">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -647,7 +660,7 @@ const SearchPage = () => {
                 <div className="mb-4">
                   <AdPlaceholder size="leaderboard" slot="search-top-leaderboard" />
                 </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
+                <div className="grid grid-cols-2 gap-4 sm:gap-6 xl:grid-cols-3">
                   {products.map((product, index) => {
                     const avgRating = getAverageRating(product.reviews);
                     const discount = product.original_price

@@ -13,6 +13,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/co
 import { Badge } from "@/components/ui/badge";
 import { Loader2, Filter, Search, Star, ArrowRight, X, SlidersHorizontal } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { matchesSearchTerm } from "@/lib/search";
 
 interface Product {
   id: string;
@@ -21,6 +22,7 @@ interface Product {
   original_price: number | null;
   image_url: string;
   vendor_id: string;
+  stock_quantity?: number | null;
   reviews: { rating: number }[];
 }
 
@@ -38,6 +40,7 @@ const Subcategory = () => {
   const [categoryName, setCategoryName] = useState("");
   const [subcategoryName, setSubcategoryName] = useState("");
   const [loading, setLoading] = useState(true);
+  const [showCategoryFallbackNotice, setShowCategoryFallbackNotice] = useState(false);
   
   // Filters
   const [searchQuery, setSearchQuery] = useState("");
@@ -60,6 +63,7 @@ const Subcategory = () => {
 
   const fetchData = async () => {
     setLoading(true);
+    setShowCategoryFallbackNotice(false);
     
     // Fetch category info
     const { data: categoryData } = await supabase
@@ -191,11 +195,36 @@ const Subcategory = () => {
 
     const { data: productsData } = await productsQuery.order("created_at", { ascending: false });
 
-    if (productsData) {
-      setProducts(productsData as any);
+    let resolvedProducts = (productsData || []) as Product[];
+
+    if (resolvedProducts.length === 0 && isUUID && categoryId) {
+      const { data: fallbackProducts } = await supabase
+        .from("products")
+        .select(`
+          id,
+          name,
+          price,
+          original_price,
+          image_url,
+          vendor_id,
+          stock_quantity,
+          reviews(rating)
+        `)
+        .eq("category_id", categoryId)
+        .eq("is_active", true)
+        .order("created_at", { ascending: false });
+
+      if (fallbackProducts?.length) {
+        resolvedProducts = fallbackProducts as Product[];
+        setShowCategoryFallbackNotice(true);
+      }
+    }
+
+    if (resolvedProducts.length > 0) {
+      setProducts(resolvedProducts as any);
       
       // Calculate max price
-      const prices = productsData.map(p => p.price);
+      const prices = resolvedProducts.map(p => p.price);
       if (prices.length > 0) {
         const max = Math.max(...prices);
         setMaxPrice(max);
@@ -203,7 +232,7 @@ const Subcategory = () => {
       }
       
       // Fetch vendor ratings
-      const vendorIds = [...new Set(productsData.map(p => p.vendor_id))];
+      const vendorIds = [...new Set(resolvedProducts.map(p => p.vendor_id))];
       if (vendorIds.length > 0) {
         const { data: ratingsData } = await supabase
           .from("vendor_ratings")
@@ -226,6 +255,10 @@ const Subcategory = () => {
           setVendorRatings(avgRatings);
         }
       }
+    } else {
+      setProducts([]);
+      setFilteredProducts([]);
+      setVendorRatings(new Map());
     }
     setLoading(false);
   };
@@ -236,7 +269,7 @@ const Subcategory = () => {
     // Search filter
     if (searchQuery) {
       result = result.filter(p => 
-        p.name.toLowerCase().includes(searchQuery.toLowerCase())
+        matchesSearchTerm(p.name, searchQuery)
       );
     }
 
@@ -326,7 +359,7 @@ const Subcategory = () => {
       <Navbar />
       <main className="flex-1 container px-4 py-8">
         {/* Breadcrumb */}
-        <div className="flex items-center gap-2 text-sm text-muted-foreground mb-6">
+        <div className="mb-6 flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
           <button onClick={() => navigate("/")} className="hover:text-primary">
             الرئيسية
           </button>
@@ -339,15 +372,15 @@ const Subcategory = () => {
         </div>
 
         {/* Header */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+        <div className="mb-8 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div>
-            <h1 className="text-3xl font-bold mb-2">{subcategoryName}</h1>
+            <h1 className="mb-2 text-2xl font-bold sm:text-3xl">{subcategoryName}</h1>
             <p className="text-muted-foreground">{filteredProducts.length} منتج</p>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex w-full flex-col gap-3 sm:flex-row sm:items-center md:w-auto">
             {/* Search */}
-            <div className="relative flex-1 md:w-64">
+            <div className="relative w-full sm:flex-1 md:w-64">
               <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <Input
                 placeholder="ابحث في المنتجات..."
@@ -360,7 +393,7 @@ const Subcategory = () => {
             {/* Mobile Filters */}
             <Sheet>
               <SheetTrigger asChild>
-                <Button variant="outline" className="relative">
+                <Button variant="outline" className="relative w-full sm:w-auto">
                   <SlidersHorizontal className="w-4 h-4 ml-2" />
                   الفلاتر
                   {activeFiltersCount > 0 && (
@@ -370,7 +403,7 @@ const Subcategory = () => {
                   )}
                 </Button>
               </SheetTrigger>
-              <SheetContent side="right" className="w-80">
+              <SheetContent side="right" className="w-full sm:w-80">
                 <SheetHeader>
                   <SheetTitle className="flex items-center justify-between">
                     <span>فلترة المنتجات</span>
@@ -515,6 +548,12 @@ const Subcategory = () => {
           </div>
         )}
 
+        {showCategoryFallbackNotice && filteredProducts.length > 0 && (
+          <div className="mb-6 rounded-xl border border-border bg-muted/30 px-4 py-3 text-sm text-muted-foreground">
+            لا توجد منتجات مرتبطة بهذه الفئة الفرعية حالياً، لذلك نعرض لك منتجات الفئة الرئيسية مؤقتاً.
+          </div>
+        )}
+
         {/* Products Grid */}
         {filteredProducts.length === 0 ? (
           <div className="text-center py-16">
@@ -526,7 +565,7 @@ const Subcategory = () => {
             <Button onClick={clearFilters}>مسح الفلاتر</Button>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          <div className="grid grid-cols-2 gap-4 sm:gap-6 lg:grid-cols-3 xl:grid-cols-4">
             {filteredProducts.map((product) => {
               const avgRating = product.reviews?.length > 0
                 ? product.reviews.reduce((sum, r) => sum + r.rating, 0) / product.reviews.length

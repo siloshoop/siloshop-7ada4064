@@ -171,20 +171,23 @@ const Navbar = () => {
 
         {/* Center - Search */}
         <div className="flex-1 max-w-2xl flex items-center gap-2">
-          <div className="relative flex-1">
+          <form className="relative flex-1" onSubmit={(e) => {
+            e.preventDefault();
+            const input = e.currentTarget.querySelector('input');
+            const value = input?.value;
+            if (value) {
+              input?.blur();
+              navigate(`/search?q=${encodeURIComponent(value)}`);
+            }
+          }}>
             <Search className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
               type="search"
               placeholder="ابحث عن المنتجات..."
               className="pr-10 w-full"
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') {
-                  const value = (e.target as HTMLInputElement).value;
-                  if (value) navigate(`/search?q=${encodeURIComponent(value)}`);
-                }
-              }}
+              enterKeyHint="search"
             />
-          </div>
+          </form>
           <Button 
             variant="outline" 
             size="icon"

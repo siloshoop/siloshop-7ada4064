@@ -565,7 +565,10 @@ const SearchPage = () => {
         {/* Search Header */}
         <div className="mb-6 space-y-4">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-            <div className="relative w-full flex-1">
+            <form className="relative w-full flex-1" onSubmit={(e) => {
+              e.preventDefault();
+              (e.currentTarget.querySelector('input') as HTMLInputElement)?.blur();
+            }}>
               <SearchIcon className="absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
               <Input
                 type="search"
@@ -573,8 +576,9 @@ const SearchPage = () => {
                 value={filters.search}
                 onChange={(e) => updateFilter("search", e.target.value)}
                 className="pr-10 text-lg h-12"
+                enterKeyHint="search"
               />
-            </div>
+            </form>
             
             {/* Mobile Filters Button */}
             <Sheet open={mobileFiltersOpen} onOpenChange={setMobileFiltersOpen}>

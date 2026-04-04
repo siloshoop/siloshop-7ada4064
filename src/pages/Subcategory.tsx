@@ -380,15 +380,19 @@ const Subcategory = () => {
 
           <div className="flex w-full flex-col gap-3 sm:flex-row sm:items-center md:w-auto">
             {/* Search */}
-            <div className="relative w-full sm:flex-1 md:w-64">
+            <form className="relative w-full sm:flex-1 md:w-64" onSubmit={(e) => {
+              e.preventDefault();
+              (e.currentTarget.querySelector('input') as HTMLInputElement)?.blur();
+            }}>
               <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <Input
                 placeholder="ابحث في المنتجات..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="pr-10"
+                enterKeyHint="search"
               />
-            </div>
+            </form>
 
             {/* Mobile Filters */}
             <Sheet>

@@ -134,13 +134,25 @@ const Product = () => {
 
     setAddingToCart(true);
     try {
-      const { error } = await supabase
+      // Check if item already exists in cart
+      const { data: existingItem } = await supabase
         .from("cart_items")
-        .upsert({
-          user_id: user.id,
-          product_id: id,
-          quantity,
-        });
+        .select("id, quantity")
+        .eq("user_id", user.id)
+        .eq("product_id", id!)
+        .maybeSingle();
+
+      let error;
+      if (existingItem) {
+        ({ error } = await supabase
+          .from("cart_items")
+          .update({ quantity: existingItem.quantity + quantity })
+          .eq("id", existingItem.id));
+      } else {
+        ({ error } = await supabase
+          .from("cart_items")
+          .insert({ user_id: user.id, product_id: id, quantity }));
+      }
 
       if (error) throw error;
 

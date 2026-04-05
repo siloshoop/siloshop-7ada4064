@@ -75,6 +75,9 @@ const ProductCard = ({
   const handleAddToCart = async (e: React.MouseEvent<HTMLButtonElement>) => {
     e.stopPropagation();
 
+    // Capture button position before any async work (currentTarget becomes null after await)
+    const buttonRect = e.currentTarget.getBoundingClientRect();
+
     if (!user) {
       navigate("/auth");
       return;
@@ -116,8 +119,7 @@ const ProductCard = ({
         if (insertError) throw insertError;
       }
 
-      const rect = e.currentTarget.getBoundingClientRect();
-      triggerFly(rect.left + rect.width / 2, rect.top, image);
+      triggerFly(buttonRect.left + buttonRect.width / 2, buttonRect.top, image);
       window.dispatchEvent(new Event("cart-updated"));
 
       toast({

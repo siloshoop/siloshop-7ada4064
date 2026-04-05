@@ -119,8 +119,7 @@ const ProductCard = ({
         if (insertError) throw insertError;
       }
 
-      const rect = e.currentTarget.getBoundingClientRect();
-      triggerFly(rect.left + rect.width / 2, rect.top, image);
+      triggerFly(buttonRect.left + buttonRect.width / 2, buttonRect.top, image);
       window.dispatchEvent(new Event("cart-updated"));
 
       toast({

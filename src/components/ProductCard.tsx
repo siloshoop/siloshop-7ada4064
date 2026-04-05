@@ -75,6 +75,9 @@ const ProductCard = ({
   const handleAddToCart = async (e: React.MouseEvent<HTMLButtonElement>) => {
     e.stopPropagation();
 
+    // Capture button position before any async work (currentTarget becomes null after await)
+    const buttonRect = e.currentTarget.getBoundingClientRect();
+
     if (!user) {
       navigate("/auth");
       return;

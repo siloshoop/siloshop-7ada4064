@@ -31,6 +31,7 @@ const EditProduct = () => {
     price: "",
     original_price: "",
     stock_quantity: "",
+    shipping_cost: "0",
     category_id: "",
     subcategory_id: "",
     is_active: true,
@@ -75,6 +76,7 @@ const EditProduct = () => {
               price: product.price.toString(),
               original_price: product.original_price?.toString() || "",
               stock_quantity: product.stock_quantity?.toString() || "0",
+              shipping_cost: (product as any).shipping_cost?.toString() || "0",
               category_id: product.category_id || "",
               subcategory_id: product.subcategory_id || "",
               is_active: product.is_active ?? true,
@@ -250,13 +252,14 @@ const EditProduct = () => {
           price: parseFloat(formData.price),
           original_price: formData.original_price ? parseFloat(formData.original_price) : null,
           stock_quantity: parseInt(formData.stock_quantity),
+          shipping_cost: parseFloat(formData.shipping_cost) || 0,
           category_id: formData.category_id || null,
           subcategory_id: formData.subcategory_id || null,
           image_url: allImages[0],
           images: allImages,
           is_active: formData.is_active,
           updated_at: new Date().toISOString(),
-        })
+        } as any)
         .eq("id", id)
         .eq("vendor_id", user.id);
 
@@ -381,6 +384,20 @@ const EditProduct = () => {
                     placeholder="0.00"
                   />
                 </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="shipping_cost">تكلفة الشحن (ل.س)</Label>
+                <Input
+                  id="shipping_cost"
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  value={formData.shipping_cost}
+                  onChange={(e) => setFormData({ ...formData, shipping_cost: e.target.value })}
+                  placeholder="0 = شحن مجاني"
+                />
+                <p className="text-xs text-muted-foreground">اتركه 0 للشحن المجاني</p>
               </div>
 
               <div className="space-y-2">

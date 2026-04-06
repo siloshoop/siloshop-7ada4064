@@ -29,6 +29,7 @@ const AddProduct = () => {
     price: "",
     original_price: "",
     stock_quantity: "",
+    shipping_cost: "0",
     category_id: "",
     subcategory_id: "",
     image_url: "",
@@ -196,12 +197,13 @@ const AddProduct = () => {
         price: parseFloat(formData.price),
         original_price: formData.original_price ? parseFloat(formData.original_price) : null,
         stock_quantity: parseInt(formData.stock_quantity),
+        shipping_cost: parseFloat(formData.shipping_cost) || 0,
         category_id: formData.category_id || null,
         subcategory_id: formData.subcategory_id || null,
         image_url: mainImageUrl,
         images: imageUrls.length > 0 ? imageUrls : null,
         is_active: true,
-      });
+      } as any);
 
       if (error) throw error;
 
@@ -304,6 +306,20 @@ const AddProduct = () => {
                   required
                   placeholder="0"
                 />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="shipping_cost">تكلفة الشحن (ل.س)</Label>
+                <Input
+                  id="shipping_cost"
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  value={formData.shipping_cost}
+                  onChange={(e) => setFormData({ ...formData, shipping_cost: e.target.value })}
+                  placeholder="0 = شحن مجاني"
+                />
+                <p className="text-xs text-muted-foreground">اتركه 0 للشحن المجاني</p>
               </div>
 
               {/* Category Selection - Amazon Style */}

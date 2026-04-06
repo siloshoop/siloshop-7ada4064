@@ -19,6 +19,7 @@ interface ProductCardProps {
   rating: number;
   reviews: number;
   discount?: number;
+  shippingCost?: number;
 }
 
 const ProductCard = ({
@@ -29,7 +30,8 @@ const ProductCard = ({
   image,
   rating,
   reviews,
-  discount
+  discount,
+  shippingCost
 }: ProductCardProps) => {
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -246,6 +248,15 @@ const ProductCard = ({
             <span className="text-[10px] text-muted-foreground/70 line-through mr-auto">
               {originalPrice.toLocaleString()}
             </span>
+          )}
+        </div>
+
+        {/* Shipping Cost */}
+        <div className="text-[11px]">
+          {shippingCost && shippingCost > 0 ? (
+            <span className="text-muted-foreground">🚚 شحن: {shippingCost.toLocaleString()} ل.س</span>
+          ) : (
+            <span className="text-green-600 dark:text-green-400 font-medium">🚚 شحن مجاني</span>
           )}
         </div>
 

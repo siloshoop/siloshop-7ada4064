@@ -244,6 +244,7 @@ const Category = () => {
                         rating={avgRating}
                         reviews={product.reviews?.length || 0}
                         discount={discount}
+                        shippingCost={(product as any).shipping_cost || 0}
                       />
                     </Fragment>
                   );

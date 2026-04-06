@@ -50,6 +50,7 @@ interface Product {
   category_id: string | null;
   subcategory_id: string | null;
   stock_quantity: number | null;
+  shipping_cost?: number;
   reviews: { rating: number }[];
 }
 
@@ -86,6 +87,7 @@ interface Filters {
   sortBy: string;
   hasDiscount: boolean;
   inStock: boolean;
+  freeShipping: boolean;
 }
 
 const defaultFilters: Filters = {
@@ -100,6 +102,7 @@ const defaultFilters: Filters = {
   sortBy: "newest",
   hasDiscount: false,
   inStock: false,
+  freeShipping: false,
 };
 
 const SearchPage = () => {
@@ -161,7 +164,7 @@ const SearchPage = () => {
     try {
       let query = supabase
         .from("products")
-        .select("id, name, price, original_price, image_url, vendor_id, category_id, subcategory_id, stock_quantity, reviews(rating)", { count: "exact" })
+        .select("id, name, price, original_price, image_url, vendor_id, category_id, subcategory_id, stock_quantity, shipping_cost, reviews(rating)", { count: "exact" })
         .eq("is_active", true);
 
       // Price range
@@ -195,6 +198,11 @@ const SearchPage = () => {
       // In stock
       if (filters.inStock) {
         query = query.gt("stock_quantity", 0);
+      }
+
+      // Free shipping
+      if (filters.freeShipping) {
+        query = query.eq("shipping_cost", 0);
       }
 
       // Sorting
@@ -280,7 +288,8 @@ const SearchPage = () => {
     (filters.minRating > 0 ? 1 : 0) +
     (filters.hasDiscount ? 1 : 0) +
     (filters.inStock ? 1 : 0) +
-    (filters.minPrice > 0 || filters.maxPrice < 10000000 ? 1 : 0);
+    (filters.minPrice > 0 || filters.maxPrice < 10000000 ? 1 : 0) +
+    (filters.freeShipping ? 1 : 0);
 
   const getAverageRating = (reviews: { rating: number }[]) => {
     if (!reviews || reviews.length === 0) return 0;
@@ -347,6 +356,12 @@ const SearchPage = () => {
               <Badge variant="secondary" className="gap-1">
                 متوفر فقط
                 <X className="h-3 w-3 cursor-pointer" onClick={() => updateFilter("inStock", false)} />
+              </Badge>
+            )}
+            {filters.freeShipping && (
+              <Badge variant="secondary" className="gap-1">
+                شحن مجاني
+                <X className="h-3 w-3 cursor-pointer" onClick={() => updateFilter("freeShipping", false)} />
               </Badge>
             )}
           </div>
@@ -542,7 +557,7 @@ const SearchPage = () => {
                 عروض وخصومات فقط
               </label>
             </div>
-            <div className="flex items-center gap-2">
+             <div className="flex items-center gap-2">
               <Checkbox
                 id="inStock"
                 checked={filters.inStock}
@@ -550,6 +565,16 @@ const SearchPage = () => {
               />
               <label htmlFor="inStock" className="text-sm cursor-pointer">
                 المنتجات المتوفرة فقط
+              </label>
+            </div>
+            <div className="flex items-center gap-2">
+              <Checkbox
+                id="freeShipping"
+                checked={filters.freeShipping}
+                onCheckedChange={(checked) => updateFilter("freeShipping", !!checked)}
+              />
+              <label htmlFor="freeShipping" className="text-sm cursor-pointer">
+                🚚 شحن مجاني فقط
               </label>
             </div>
           </AccordionContent>
@@ -689,6 +714,7 @@ const SearchPage = () => {
                           rating={avgRating}
                           reviews={product.reviews?.length || 0}
                           discount={discount}
+                          shippingCost={(product as any).shipping_cost || 0}
                         />
                       </Fragment>
                     );

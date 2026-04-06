@@ -75,6 +75,7 @@ const Category = () => {
         original_price,
         image_url,
         vendor_id,
+        shipping_cost,
         reviews(rating)
       `)
       .eq("category_id", categoryId)
@@ -203,6 +204,7 @@ const Category = () => {
                       rating={avgRating}
                       reviews={product.reviews?.length || 0}
                       discount={discount}
+                      shippingCost={(product as any).shipping_cost || 0}
                     />
                   </Fragment>
                 );
@@ -242,6 +244,7 @@ const Category = () => {
                         rating={avgRating}
                         reviews={product.reviews?.length || 0}
                         discount={discount}
+                        shippingCost={(product as any).shipping_cost || 0}
                       />
                     </Fragment>
                   );

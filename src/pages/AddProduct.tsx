@@ -203,7 +203,7 @@ const AddProduct = () => {
         image_url: mainImageUrl,
         images: imageUrls.length > 0 ? imageUrls : null,
         is_active: true,
-      });
+      } as any);
 
       if (error) throw error;
 

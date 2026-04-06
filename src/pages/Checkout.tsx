@@ -33,6 +33,7 @@ interface CartItem {
     price: number;
     image_url: string;
     vendor_id: string;
+    shipping_cost?: number;
   };
 }
 
@@ -73,7 +74,7 @@ const Checkout = () => {
           id,
           quantity,
           product_id,
-          product:products(id, name, price, image_url, vendor_id)
+          product:products(id, name, price, image_url, vendor_id, shipping_cost)
         `)
         .eq("user_id", user.id);
 
@@ -95,7 +96,12 @@ const Checkout = () => {
     0
   );
 
-  const total = subtotal - discount;
+  const shippingTotal = cartItems.reduce(
+    (sum, item) => sum + Number((item.product as any).shipping_cost || 0),
+    0
+  );
+
+  const total = subtotal + shippingTotal - discount;
 
   const applyCoupon = async () => {
     if (!couponCode.trim()) {
@@ -454,7 +460,7 @@ const Checkout = () => {
                     )}
                     <div className="flex justify-between">
                       <span>الشحن</span>
-                      <span>مجاني</span>
+                      <span>{shippingTotal > 0 ? `${shippingTotal} ل.س` : 'مجاني'}</span>
                     </div>
                     <div className="border-t pt-2 flex justify-between font-bold text-lg">
                       <span>الإجمالي</span>

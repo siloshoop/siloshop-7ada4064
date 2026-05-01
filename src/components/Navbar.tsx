@@ -312,7 +312,7 @@ const Navbar = () => {
             className="text-2xl font-bold bg-gradient-to-l from-primary to-accent bg-clip-text text-transparent cursor-pointer"
             onClick={() => navigate("/")}
           >
-            متجر
+            SiloShop
           </h1>
         </div>
       </div>

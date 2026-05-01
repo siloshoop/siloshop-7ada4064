@@ -46,7 +46,7 @@ const InstallPWA = () => {
       <main className="flex-1 container px-4 py-12">
         <div className="max-w-3xl mx-auto">
           <div className="text-center mb-8">
-            <h1 className="text-4xl font-bold mb-4">ثبّت تطبيق متجر</h1>
+            <h1 className="text-4xl font-bold mb-4">ثبّت تطبيق SiloShop</h1>
             <p className="text-lg text-muted-foreground">
               احصل على تجربة تسوق أفضل مع تطبيقنا القابل للتثبيت
             </p>

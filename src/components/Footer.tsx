@@ -42,7 +42,7 @@ const Footer = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           <div className="animate-fade-in">
             <h3 className="font-bold text-2xl mb-4 gradient-text">
-              متجر
+              SiloShop
             </h3>
             <p className="text-muted-foreground mb-4">
               وجهتك المفضلة للتسوق أونلاين بأفضل الأسعار وأعلى جودة
@@ -134,7 +134,7 @@ const Footer = () => {
         </div>
 
         <div className="border-t mt-8 pt-8 text-center text-muted-foreground">
-          <p>© 2024 متجر. جميع الحقوق محفوظة.</p>
+          <p>© 2024 SiloShop. جميع الحقوق محفوظة.</p>
         </div>
       </div>
     </footer>;

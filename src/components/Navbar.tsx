@@ -28,6 +28,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { useCompareProducts } from "@/hooks/useCompareProducts";
 import MegaMenu from "@/components/MegaMenu";
+import siloshopLogo from "@/assets/siloshop-logo.png";
 
 const Navbar = () => {
   const navigate = useNavigate();

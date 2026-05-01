@@ -9,28 +9,28 @@ const Blog = () => {
       title: "نصائح للتسوق الآمن عبر الإنترنت",
       description: "دليل شامل لحماية نفسك أثناء التسوق الإلكتروني",
       date: "2024-01-15",
-      author: "فريق متجر",
+      author: "فريق SiloShop",
       image: "/placeholder.svg"
     },
     {
       title: "كيف تختار المنتج المناسب؟",
       description: "خطوات عملية لاتخاذ قرار شراء صحيح",
       date: "2024-01-10",
-      author: "فريق متجر",
+      author: "فريق SiloShop",
       image: "/placeholder.svg"
     },
     {
       title: "أحدث صيحات الموضة لهذا الموسم",
       description: "تعرف على أبرز اتجاهات الموضة والأناقة",
       date: "2024-01-05",
-      author: "فريق متجر",
+      author: "فريق SiloShop",
       image: "/placeholder.svg"
     },
     {
       title: "دليل البائعين الجدد",
       description: "كل ما تحتاج معرفته للبدء في البيع على منصتنا",
       date: "2024-01-01",
-      author: "فريق متجر",
+      author: "فريق SiloShop",
       image: "/placeholder.svg"
     }
   ];

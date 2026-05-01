@@ -309,12 +309,12 @@ const Navbar = () => {
               </div>
             </SheetContent>
           </Sheet>
-          <h1 
-            className="text-2xl font-bold bg-gradient-to-l from-primary to-accent bg-clip-text text-transparent cursor-pointer"
+          <img
+            src={siloshopLogo}
+            alt="SiloShop"
+            className="h-10 md:h-12 w-auto cursor-pointer object-contain"
             onClick={() => navigate("/")}
-          >
-            SiloShop
-          </h1>
+          />
         </div>
       </div>
 

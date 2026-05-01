@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Link } from "react-router-dom";
+import siloshopLogo from "@/assets/siloshop-logo.png";
 const Footer = () => {
   const [email, setEmail] = useState("");
   const {
@@ -41,9 +42,7 @@ const Footer = () => {
       <div className="container px-4 py-12 relative z-10">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           <div className="animate-fade-in">
-            <h3 className="font-bold text-2xl mb-4 gradient-text">
-              SiloShop
-            </h3>
+            <img src={siloshopLogo} alt="SiloShop" className="h-12 w-auto mb-4 object-contain" />
             <p className="text-muted-foreground mb-4">
               وجهتك المفضلة للتسوق أونلاين بأفضل الأسعار وأعلى جودة
             </p>

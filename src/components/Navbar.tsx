@@ -28,7 +28,6 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { useCompareProducts } from "@/hooks/useCompareProducts";
 import MegaMenu from "@/components/MegaMenu";
-import siloshopLogo from "@/assets/siloshop-logo.png";
 
 const Navbar = () => {
   const navigate = useNavigate();
@@ -309,12 +308,12 @@ const Navbar = () => {
               </div>
             </SheetContent>
           </Sheet>
-          <img
-            src={siloshopLogo}
-            alt="SiloShop"
-            className="h-10 md:h-12 w-auto cursor-pointer object-contain"
+          <h1
             onClick={() => navigate("/")}
-          />
+            className="text-2xl md:text-3xl font-extrabold cursor-pointer bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent tracking-tight"
+          >
+            SiloShop
+          </h1>
         </div>
       </div>
 

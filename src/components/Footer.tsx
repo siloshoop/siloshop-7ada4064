@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Link } from "react-router-dom";
+import BrandLogo from "@/components/BrandLogo";
 const Footer = () => {
   const [email, setEmail] = useState("");
   const {
@@ -41,9 +42,7 @@ const Footer = () => {
       <div className="container px-4 py-12 relative z-10">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           <div className="animate-fade-in">
-            <h2 className="text-3xl font-extrabold mb-4 bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent tracking-tight">
-              SiloShop
-            </h2>
+            <BrandLogo as="h2" className="text-3xl md:text-4xl mb-4 block" />
             <p className="text-muted-foreground mb-4">
               وجهتك المفضلة للتسوق أونلاين بأفضل الأسعار وأعلى جودة
             </p>
@@ -134,12 +133,8 @@ const Footer = () => {
         </div>
 
         <div className="border-t mt-8 pt-8 text-center text-muted-foreground">
-          <p>
-            © 2024{" "}
-            <span className="font-extrabold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent tracking-tight">
-              SiloShop
-            </span>
-            . جميع الحقوق محفوظة.
+          <p className="text-base">
+            © 2024 <BrandLogo className="text-base" />. جميع الحقوق محفوظة.
           </p>
         </div>
       </div>

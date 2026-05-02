@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Download, Smartphone, CheckCircle } from "lucide-react";
+import BrandLogo from "@/components/BrandLogo";
 
 const InstallPWA = () => {
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);

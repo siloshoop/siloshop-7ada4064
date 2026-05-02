@@ -134,7 +134,13 @@ const Footer = () => {
         </div>
 
         <div className="border-t mt-8 pt-8 text-center text-muted-foreground">
-          <p>© 2024 SiloShop. جميع الحقوق محفوظة.</p>
+          <p>
+            © 2024{" "}
+            <span className="font-extrabold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent tracking-tight">
+              SiloShop
+            </span>
+            . جميع الحقوق محفوظة.
+          </p>
         </div>
       </div>
     </footer>;

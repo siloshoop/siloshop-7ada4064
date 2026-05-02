@@ -47,10 +47,7 @@ const InstallPWA = () => {
         <div className="max-w-3xl mx-auto">
           <div className="text-center mb-8">
             <h1 className="text-4xl font-bold mb-4">
-              ثبّت تطبيق{" "}
-              <span className="font-extrabold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent tracking-tight">
-                SiloShop
-              </span>
+              ثبّت تطبيق <BrandLogo className="text-4xl" />
             </h1>
             <p className="text-lg text-muted-foreground">
               احصل على تجربة تسوق أفضل مع تطبيقنا القابل للتثبيت

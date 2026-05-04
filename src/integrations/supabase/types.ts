@@ -1407,6 +1407,17 @@ export type Database = {
         Returns: boolean
       }
       cleanup_old_rate_limits: { Args: never; Returns: undefined }
+      get_vendor_orders: {
+        Args: never
+        Returns: {
+          city: string
+          created_at: string
+          customer_name: string
+          id: string
+          status: string
+          total_amount: number
+        }[]
+      }
       get_vendor_public_info: {
         Args: { vendor_id: string }
         Returns: {
@@ -1447,6 +1458,19 @@ export type Database = {
       update_own_profile: {
         Args: { _avatar_url?: string; _full_name?: string; _phone?: string }
         Returns: undefined
+      }
+      validate_coupon: {
+        Args: { _code: string; _subtotal: number }
+        Returns: {
+          discount_type: string
+          discount_value: number
+          expires_at: string
+          id: string
+          max_uses: number
+          min_purchase: number
+          used_count: number
+          vendor_id: string
+        }[]
       }
     }
     Enums: {

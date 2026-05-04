@@ -68,12 +68,68 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
+    // --- Authentication: caller must be signed in ---
+    const authHeader = req.headers.get("Authorization");
+    if (!authHeader?.startsWith("Bearer ")) {
+      return new Response(
+        JSON.stringify({ error: "Unauthorized" }),
+        { status: 401, headers: { "Content-Type": "application/json", ...corsHeaders } }
+      );
+    }
+
+    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+    const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
+    const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+
+    const authClient = createClient(supabaseUrl, supabaseAnonKey, {
+      global: { headers: { Authorization: authHeader } },
+    });
+
+    const token = authHeader.replace("Bearer ", "");
+    const { data: claimsData, error: claimsError } = await authClient.auth.getClaims(token);
+    if (claimsError || !claimsData?.claims) {
+      return new Response(
+        JSON.stringify({ error: "Unauthorized" }),
+        { status: 401, headers: { "Content-Type": "application/json", ...corsHeaders } }
+      );
+    }
+    const callerId = claimsData.claims.sub as string;
+
     const { order_id, new_status, notes }: OrderStatusPayload = await req.json();
 
-    // Create Supabase client
-    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-    const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    if (!order_id || !new_status) {
+      return new Response(
+        JSON.stringify({ error: "Invalid payload" }),
+        { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders } }
+      );
+    }
+
+    // Service-role client for cross-table reads/writes
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
+
+    // --- Authorization: caller must be admin OR a vendor with an item in this order ---
+    const [{ data: isAdminRole }, { data: vendorItem }] = await Promise.all([
+      supabase
+        .from("user_roles")
+        .select("user_id")
+        .eq("user_id", callerId)
+        .eq("role", "admin")
+        .maybeSingle(),
+      supabase
+        .from("order_items")
+        .select("id")
+        .eq("order_id", order_id)
+        .eq("vendor_id", callerId)
+        .limit(1)
+        .maybeSingle(),
+    ]);
+
+    if (!isAdminRole && !vendorItem) {
+      return new Response(
+        JSON.stringify({ error: "Forbidden" }),
+        { status: 403, headers: { "Content-Type": "application/json", ...corsHeaders } }
+      );
+    }
 
     // Get order details with customer info
     const { data: order, error: orderError } = await supabase

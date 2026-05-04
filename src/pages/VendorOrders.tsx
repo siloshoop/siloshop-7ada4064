@@ -32,11 +32,8 @@ interface Order {
   created_at: string;
   status: string;
   total_amount: number;
-  shipping_address: string;
-  customer_id: string;
-  profiles: {
-    full_name: string;
-  };
+  customer_name: string;
+  city: string | null;
 }
 
 interface OrderItem {
@@ -59,19 +56,8 @@ const maskPhone = (phone: string | null): string => {
   return "****";
 };
 
-// Utility function to get city/region from address
-const getPartialAddress = (address: string | null): string => {
-  if (!address) return "غير محدد";
-  // Extract city/region (first part before comma or first 30 chars)
-  const parts = address.split(',');
-  if (parts.length > 1) {
-    return parts[0].trim() + "، ...";
-  }
-  if (address.length > 30) {
-    return address.slice(0, 30) + "...";
-  }
-  return address;
-};
+// City is now returned directly by the secure RPC, already minimised.
+const getPartialAddress = (city: string | null): string => city || "غير محدد";
 
 const VendorOrders = () => {
   const { user, loading: authLoading } = useAuth();
@@ -80,8 +66,11 @@ const VendorOrders = () => {
   const [loading, setLoading] = useState(true);
   const [updatingStatus, setUpdatingStatus] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState("all");
-  const [revealedOrders, setRevealedOrders] = useState<Set<string>>(new Set());
-  const [fullAddresses, setFullAddresses] = useState<Record<string, string>>({});
+  // Sensitive PII (full address, phone, coordinates, coupon) is no longer
+  // available to vendors per security hardening. Reveal toggle is therefore
+  // a no-op kept only to preserve existing UI structure.
+  const [revealedOrders] = useState<Set<string>>(new Set());
+  const [fullAddresses] = useState<Record<string, string>>({});
   
   // Shipping dialog state
   const [shippingDialogOpen, setShippingDialogOpen] = useState(false);
@@ -120,40 +109,17 @@ const VendorOrders = () => {
 
         if (itemsError) throw itemsError;
 
-        // Get unique order IDs
         const orderIds = [...new Set(vendorOrderItems?.map(item => item.order_id))];
 
         if (orderIds.length > 0) {
-          // Get order details - only fetch necessary fields for display
-          // Note: We deliberately exclude phone from profiles to minimize PII exposure
+          // Use secure RPC that returns only fulfillment-relevant fields
+          // (no phone, full address, coordinates, or coupon code).
           const { data: ordersData, error: ordersError } = await supabase
-            .from("orders")
-            .select(`
-              id,
-              created_at,
-              status,
-              total_amount,
-              shipping_address,
-              customer_id,
-              profiles (
-                full_name
-              )
-            `)
-            .in("id", orderIds)
-            .order("created_at", { ascending: false });
+            .rpc("get_vendor_orders");
 
           if (ordersError) throw ordersError;
 
-          setOrders(ordersData || []);
-
-          // Store full addresses for optional reveal
-          const addresses: Record<string, string> = {};
-          ordersData?.forEach(order => {
-            if (order.shipping_address) {
-              addresses[order.id] = order.shipping_address;
-            }
-          });
-          setFullAddresses(addresses);
+          setOrders((ordersData as Order[]) || []);
 
           // Group items by order
           const groupedItems: Record<string, OrderItem[]> = {};

@@ -145,16 +145,8 @@ const VendorOrders = () => {
     fetchOrders();
   }, [user, toast]);
 
-  const toggleRevealAddress = (orderId: string) => {
-    setRevealedOrders(prev => {
-      const newSet = new Set(prev);
-      if (newSet.has(orderId)) {
-        newSet.delete(orderId);
-      } else {
-        newSet.add(orderId);
-      }
-      return newSet;
-    });
+  const toggleRevealAddress = (_orderId: string) => {
+    // No-op: full address is no longer exposed to vendors.
   };
 
   const getStatusBadge = (status: string) => {
@@ -374,7 +366,7 @@ const VendorOrders = () => {
                               <div>
                                 <p className="text-sm font-medium">العميل</p>
                                 <p className="text-sm text-muted-foreground">
-                                  {order.profiles?.full_name || "غير متوفر"}
+                                  {order.customer_name || "غير متوفر"}
                                 </p>
                               </div>
                               <div>
@@ -395,9 +387,7 @@ const VendorOrders = () => {
                                   </Button>
                                 </div>
                                 <p className="text-sm text-muted-foreground">
-                                  {revealedOrders.has(order.id)
-                                    ? fullAddresses[order.id] || "غير محدد"
-                                    : getPartialAddress(order.shipping_address)}
+                                  {getPartialAddress(order.city)}
                                 </p>
                               </div>
                             </div>

@@ -9,6 +9,14 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type",
 };
 
+const esc = (s: unknown): string =>
+  String(s ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+
 interface OrderStatusPayload {
   order_id: string;
   new_status: string;
@@ -127,8 +135,8 @@ const handler = async (req: Request): Promise<Response> => {
       trackingHtml = `
         <div style="background-color: #f0f9ff; border-radius: 8px; padding: 15px; margin: 20px 0; border-right: 4px solid #0ea5e9;">
           <h4 style="margin: 0 0 10px 0; color: #0369a1;">معلومات الشحن</h4>
-          ${order.courier_name ? `<p style="margin: 5px 0;"><strong>شركة الشحن:</strong> ${order.courier_name}</p>` : ''}
-          ${order.tracking_number ? `<p style="margin: 5px 0;"><strong>رقم التتبع:</strong> ${order.tracking_number}</p>` : ''}
+          ${order.courier_name ? `<p style="margin: 5px 0;"><strong>شركة الشحن:</strong> ${esc(order.courier_name)}</p>` : ''}
+          ${order.tracking_number ? `<p style="margin: 5px 0;"><strong>رقم التتبع:</strong> ${esc(order.tracking_number)}</p>` : ''}
         </div>
       `;
     }
@@ -138,7 +146,7 @@ const handler = async (req: Request): Promise<Response> => {
     if (notes) {
       notesHtml = `
         <div style="background-color: #fefce8; border-radius: 8px; padding: 15px; margin: 20px 0; border-right: 4px solid #eab308;">
-          <p style="margin: 0;"><strong>ملاحظات:</strong> ${notes}</p>
+          <p style="margin: 0;"><strong>ملاحظات:</strong> ${esc(notes)}</p>
         </div>
       `;
     }
@@ -183,7 +191,7 @@ const handler = async (req: Request): Promise<Response> => {
                 <h1>تحديث حالة الطلب</h1>
               </div>
               <div class="content">
-                <p>مرحباً ${customerName}،</p>
+                <p>مرحباً ${esc(customerName)}،</p>
                 <p>نود إعلامك بأن حالة طلبك قد تم تحديثها:</p>
                 
                 <div style="text-align: center; margin: 25px 0;">
@@ -193,7 +201,7 @@ const handler = async (req: Request): Promise<Response> => {
                 <div class="order-info">
                   <div class="info-row">
                     <span class="label">رقم الطلب:</span>
-                    <span class="value">#${order_id.slice(0, 8)}</span>
+                    <span class="value">#${esc(order_id.slice(0, 8))}</span>
                   </div>
                   <div class="info-row">
                     <span class="label">تاريخ التحديث:</span>
@@ -201,11 +209,11 @@ const handler = async (req: Request): Promise<Response> => {
                   </div>
                   <div class="info-row">
                     <span class="label">قيمة الطلب:</span>
-                    <span class="value">${order.total_amount} ل.س</span>
+                    <span class="value">${esc(order.total_amount)} ل.س</span>
                   </div>
                   <div class="info-row">
                     <span class="label">عنوان التوصيل:</span>
-                    <span class="value">${order.shipping_address || 'غير محدد'}</span>
+                    <span class="value">${esc(order.shipping_address || 'غير محدد')}</span>
                   </div>
                 </div>
 

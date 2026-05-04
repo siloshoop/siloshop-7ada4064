@@ -114,49 +114,20 @@ const Checkout = () => {
     }
 
     try {
-      const { data, error } = await supabase
-        .from("coupons")
-        .select("*")
-        .eq("code", couponCode.toUpperCase())
-        .eq("is_active", true)
-        .maybeSingle();
+      const { data: rows, error } = await supabase
+        .rpc("validate_coupon", {
+          _code: couponCode.toUpperCase(),
+          _subtotal: subtotal,
+        });
 
       if (error) throw error;
+
+      const data = Array.isArray(rows) ? rows[0] : rows;
 
       if (!data) {
         toast({
           title: "خطأ",
-          description: "كود الكوبون غير صحيح أو منتهي الصلاحية",
-          variant: "destructive",
-        });
-        return;
-      }
-
-      // Check if coupon has expired
-      if (data.expires_at && new Date(data.expires_at) < new Date()) {
-        toast({
-          title: "خطأ",
-          description: "كود الكوبون منتهي الصلاحية",
-          variant: "destructive",
-        });
-        return;
-      }
-
-      // Check if coupon has reached max uses
-      if (data.max_uses && data.used_count >= data.max_uses) {
-        toast({
-          title: "خطأ",
-          description: "تم استخدام هذا الكوبون بالحد الأقصى",
-          variant: "destructive",
-        });
-        return;
-      }
-
-      // Check minimum purchase
-      if (data.min_purchase > subtotal) {
-        toast({
-          title: "خطأ",
-          description: `الحد الأدنى للشراء ${data.min_purchase} ل.س`,
+          description: "كود الكوبون غير صحيح أو منتهي الصلاحية أو الحد الأدنى للشراء غير محقق",
           variant: "destructive",
         });
         return;

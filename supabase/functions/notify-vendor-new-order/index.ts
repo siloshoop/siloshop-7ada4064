@@ -38,12 +38,82 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
+    // --- Authentication: caller must be signed in ---
+    const authHeader = req.headers.get("Authorization");
+    if (!authHeader?.startsWith("Bearer ")) {
+      return new Response(
+        JSON.stringify({ error: "Unauthorized" }),
+        { status: 401, headers: { "Content-Type": "application/json", ...corsHeaders } }
+      );
+    }
+
+    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+    const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
+    const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+
+    const authClient = createClient(supabaseUrl, supabaseAnonKey, {
+      global: { headers: { Authorization: authHeader } },
+    });
+
+    const token = authHeader.replace("Bearer ", "");
+    const { data: claimsData, error: claimsError } = await authClient.auth.getClaims(token);
+    if (claimsError || !claimsData?.claims) {
+      return new Response(
+        JSON.stringify({ error: "Unauthorized" }),
+        { status: 401, headers: { "Content-Type": "application/json", ...corsHeaders } }
+      );
+    }
+    const callerId = claimsData.claims.sub as string;
+
     const { order_id, vendor_id, customer_name, items, total_amount, shipping_address }: NewOrderPayload = await req.json();
 
-    // Create Supabase client
-    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-    const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    if (!order_id || !vendor_id) {
+      return new Response(
+        JSON.stringify({ error: "Invalid payload" }),
+        { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders } }
+      );
+    }
+
+    // Service-role client for trusted lookups
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
+
+    // --- Authorization: caller must own the order, AND vendor_id must
+    // actually have an item in this order. Admins are also allowed. ---
+    const [{ data: orderRow }, { data: vendorItem }, { data: isAdminRole }] = await Promise.all([
+      supabase
+        .from("orders")
+        .select("customer_id")
+        .eq("id", order_id)
+        .maybeSingle(),
+      supabase
+        .from("order_items")
+        .select("id")
+        .eq("order_id", order_id)
+        .eq("vendor_id", vendor_id)
+        .limit(1)
+        .maybeSingle(),
+      supabase
+        .from("user_roles")
+        .select("user_id")
+        .eq("user_id", callerId)
+        .eq("role", "admin")
+        .maybeSingle(),
+    ]);
+
+    if (!orderRow || !vendorItem) {
+      return new Response(
+        JSON.stringify({ error: "Order or vendor mismatch" }),
+        { status: 403, headers: { "Content-Type": "application/json", ...corsHeaders } }
+      );
+    }
+
+    const isOrderOwner = orderRow.customer_id === callerId;
+    if (!isOrderOwner && !isAdminRole) {
+      return new Response(
+        JSON.stringify({ error: "Forbidden" }),
+        { status: 403, headers: { "Content-Type": "application/json", ...corsHeaders } }
+      );
+    }
 
     // Get vendor email
     const { data: vendorData, error: vendorError } = await supabase.auth.admin.getUserById(vendor_id);

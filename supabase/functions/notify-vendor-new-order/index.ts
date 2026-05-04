@@ -9,6 +9,14 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type",
 };
 
+const esc = (s: unknown): string =>
+  String(s ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+
 interface OrderItem {
   product_name: string;
   quantity: number;
@@ -70,9 +78,9 @@ const handler = async (req: Request): Promise<Response> => {
     // Create items HTML
     const itemsHtml = items.map(item => `
       <tr>
-        <td style="padding: 12px; border-bottom: 1px solid #e5e7eb;">${item.product_name}</td>
-        <td style="padding: 12px; border-bottom: 1px solid #e5e7eb; text-align: center;">${item.quantity}</td>
-        <td style="padding: 12px; border-bottom: 1px solid #e5e7eb; text-align: left;">${item.price} ل.س</td>
+        <td style="padding: 12px; border-bottom: 1px solid #e5e7eb;">${esc(item.product_name)}</td>
+        <td style="padding: 12px; border-bottom: 1px solid #e5e7eb; text-align: center;">${esc(item.quantity)}</td>
+        <td style="padding: 12px; border-bottom: 1px solid #e5e7eb; text-align: left;">${esc(item.price)} ل.س</td>
       </tr>
     `).join('');
 
@@ -116,17 +124,17 @@ const handler = async (req: Request): Promise<Response> => {
                 <h1>🎉 طلب جديد!</h1>
               </div>
               <div class="content">
-                <p>مرحباً ${vendorName}،</p>
+                <p>مرحباً ${esc(vendorName)}،</p>
                 <p>تهانينا! لديك طلب جديد على منصة Trendingsy:</p>
                 
                 <div class="order-info">
                   <div class="info-row">
                     <span class="label">رقم الطلب:</span>
-                    <span class="value">#${order_id.slice(0, 8)}</span>
+                    <span class="value">#${esc(order_id.slice(0, 8))}</span>
                   </div>
                   <div class="info-row">
                     <span class="label">اسم العميل:</span>
-                    <span class="value">${customer_name}</span>
+                    <span class="value">${esc(customer_name)}</span>
                   </div>
                   <div class="info-row">
                     <span class="label">تاريخ الطلب:</span>
@@ -134,7 +142,7 @@ const handler = async (req: Request): Promise<Response> => {
                   </div>
                   <div class="info-row">
                     <span class="label">عنوان التوصيل:</span>
-                    <span class="value">${shipping_address || 'غير محدد'}</span>
+                    <span class="value">${esc(shipping_address || 'غير محدد')}</span>
                   </div>
                 </div>
 
@@ -151,7 +159,7 @@ const handler = async (req: Request): Promise<Response> => {
                     ${itemsHtml}
                     <tr class="total-row">
                       <td colspan="2">الإجمالي</td>
-                      <td style="text-align: left;">${total_amount} ل.س</td>
+                      <td style="text-align: left;">${esc(total_amount)} ل.س</td>
                     </tr>
                   </tbody>
                 </table>

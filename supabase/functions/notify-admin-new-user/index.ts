@@ -9,6 +9,14 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type",
 };
 
+const esc = (s: unknown): string =>
+  String(s ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+
 interface NewUserPayload {
   user_id: string;
   user_email: string;
@@ -112,15 +120,15 @@ const handler = async (req: Request): Promise<Response> => {
                 <div class="user-card">
                   <div class="user-info">
                     <div class="label">الاسم</div>
-                    <div class="value">${user_name || 'غير محدد'}</div>
+                    <div class="value">${esc(user_name || 'غير محدد')}</div>
                   </div>
                   <div class="user-info">
                     <div class="label">البريد الإلكتروني</div>
-                    <div class="value">${user_email}</div>
+                    <div class="value">${esc(user_email)}</div>
                   </div>
                   <div class="user-info">
                     <div class="label">معرف المستخدم</div>
-                    <div class="value" style="font-size: 12px; font-family: monospace;">${user_id}</div>
+                    <div class="value" style="font-size: 12px; font-family: monospace;">${esc(user_id)}</div>
                   </div>
                   <div class="user-info">
                     <div class="label">تاريخ التسجيل</div>

@@ -49,6 +49,8 @@ import ActivityLogs from "./pages/ActivityLogs";
 import ManageNativeAds from "./pages/ManageNativeAds";
 import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
+import Addresses from "./pages/Addresses";
+import OrderDetails from "./pages/OrderDetails";
 
 const queryClient = new QueryClient(); // App query client
 
@@ -86,6 +88,8 @@ const App = () => (
             <Route path="/payment" element={<Payment />} />
             <Route path="/orders" element={<Orders />} />
             <Route path="/orders/track/:id" element={<TrackOrder />} />
+            <Route path="/orders/:id" element={<OrderDetails />} />
+            <Route path="/account/addresses" element={<Addresses />} />
             <Route path="/product/:id" element={<Product />} />
             <Route path="/compare" element={<Compare />} />
             <Route path="/contact" element={<Contact />} />

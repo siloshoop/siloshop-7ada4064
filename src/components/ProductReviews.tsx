@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
-import { Star, MessageCircle, Send, Camera, Image as ImageIcon } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { Star, MessageCircle, Send, Camera, Image as ImageIcon, X, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -24,6 +24,7 @@ interface Review {
   comment: string;
   created_at: string;
   user_id: string;
+  image_url?: string | null;
   profiles: {
     full_name: string;
   };
@@ -48,6 +49,10 @@ export const ProductReviews = ({ productId, vendorId }: ProductReviewsProps) => 
   const [replyingTo, setReplyingTo] = useState<string | null>(null);
   const [replyText, setReplyText] = useState("");
   const [submittingReply, setSubmittingReply] = useState(false);
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Check if current user is the vendor of this product
   const isVendor = user?.id === vendorId;
@@ -103,11 +108,26 @@ export const ProductReviews = ({ productId, vendorId }: ProductReviewsProps) => 
 
     setLoading(true);
     try {
+      let uploadedUrl: string | null = null;
+      if (imageFile) {
+        setUploading(true);
+        const ext = imageFile.name.split(".").pop() || "jpg";
+        const path = `${user.id}/${productId}-${Date.now()}.${ext}`;
+        const { error: upErr } = await supabase.storage
+          .from("review-images")
+          .upload(path, imageFile, { contentType: imageFile.type, upsert: false });
+        if (upErr) throw upErr;
+        const { data: pub } = supabase.storage.from("review-images").getPublicUrl(path);
+        uploadedUrl = pub.publicUrl;
+        setUploading(false);
+      }
+
       const { error } = await supabase.from("reviews").insert({
         product_id: productId,
         user_id: user.id,
         rating,
         comment: comment.trim() || null,
+        image_url: uploadedUrl,
       });
 
       if (error) throw error;
@@ -119,6 +139,8 @@ export const ProductReviews = ({ productId, vendorId }: ProductReviewsProps) => 
 
       setRating(0);
       setComment("");
+      setImageFile(null);
+      setImagePreview(null);
       fetchReviews();
     } catch (error: any) {
       toast({
@@ -128,6 +150,7 @@ export const ProductReviews = ({ productId, vendorId }: ProductReviewsProps) => 
       });
     } finally {
       setLoading(false);
+      setUploading(false);
     }
   };
 
@@ -225,8 +248,46 @@ export const ProductReviews = ({ productId, vendorId }: ProductReviewsProps) => 
                 />
               </div>
 
-              <Button type="submit" disabled={loading || rating === 0}>
-                إضافة تقييم
+              <div>
+                <label className="text-sm font-medium mb-2 block">إرفاق صورة (اختياري)</label>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={(e) => {
+                    const f = e.target.files?.[0];
+                    if (!f) return;
+                    if (f.size > 5 * 1024 * 1024) {
+                      toast({ title: "الملف كبير", description: "حجم الصورة يجب أن يكون أقل من 5 ميجا", variant: "destructive" });
+                      return;
+                    }
+                    setImageFile(f);
+                    setImagePreview(URL.createObjectURL(f));
+                  }}
+                />
+                {imagePreview ? (
+                  <div className="relative inline-block">
+                    <img src={imagePreview} alt="معاينة" className="h-24 w-24 object-cover rounded-lg border" />
+                    <button
+                      type="button"
+                      onClick={() => { setImageFile(null); setImagePreview(null); if (fileInputRef.current) fileInputRef.current.value = ""; }}
+                      className="absolute -top-2 -right-2 bg-destructive text-destructive-foreground rounded-full p-1"
+                      aria-label="إزالة الصورة"
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
+                  </div>
+                ) : (
+                  <Button type="button" variant="outline" size="sm" onClick={() => fileInputRef.current?.click()}>
+                    <Camera className="h-4 w-4 ml-1" /> اختيار صورة
+                  </Button>
+                )}
+              </div>
+
+              <Button type="submit" disabled={loading || rating === 0 || uploading}>
+                {(loading || uploading) ? <Loader2 className="h-4 w-4 ml-1 animate-spin" /> : null}
+                {uploading ? "جاري رفع الصورة..." : "إضافة تقييم"}
               </Button>
             </form>
           )}
@@ -268,6 +329,11 @@ export const ProductReviews = ({ productId, vendorId }: ProductReviewsProps) => 
                         <p className="mt-2 text-sm text-foreground/80">
                           {review.comment}
                         </p>
+                      )}
+                      {review.image_url && (
+                        <a href={review.image_url} target="_blank" rel="noreferrer" className="block mt-2">
+                          <img src={review.image_url} alt="صورة التقييم" className="h-32 w-32 object-cover rounded-lg border hover:opacity-90 transition-opacity" loading="lazy" />
+                        </a>
                       )}
 
                       {/* Vendor Reply Section */}

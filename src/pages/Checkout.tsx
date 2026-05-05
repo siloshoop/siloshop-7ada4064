@@ -11,7 +11,8 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, ShoppingCart, Tag } from "lucide-react";
+import { Loader2, ShoppingCart, Tag, MapPin, Plus } from "lucide-react";
+import { Link } from "react-router-dom";
 
 const checkoutSchema = z.object({
   phone: z.string()
@@ -45,6 +46,8 @@ const Checkout = () => {
   const [couponCode, setCouponCode] = useState("");
   const [appliedCoupon, setAppliedCoupon] = useState<any>(null);
   const [discount, setDiscount] = useState(0);
+  const [savedAddresses, setSavedAddresses] = useState<any[]>([]);
+  const [selectedAddressId, setSelectedAddressId] = useState<string>("");
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -62,6 +65,29 @@ const Checkout = () => {
 
   useEffect(() => {
     fetchCart();
+  }, [user]);
+
+  useEffect(() => {
+    const loadAddresses = async () => {
+      if (!user) return;
+      const { data } = await supabase
+        .from("delivery_addresses")
+        .select("*")
+        .eq("user_id", user.id)
+        .order("is_default", { ascending: false });
+      const addrs = data || [];
+      setSavedAddresses(addrs);
+      const def = addrs.find((a: any) => a.is_default) || addrs[0];
+      if (def) {
+        setSelectedAddressId(def.id);
+        setFormData((f) => ({
+          ...f,
+          phone: def.phone || f.phone,
+          shipping_address: `${def.city} — ${def.street}`,
+        }));
+      }
+    };
+    void loadAddresses();
   }, [user]);
 
   const fetchCart = async () => {
@@ -318,6 +344,39 @@ const Checkout = () => {
                   <CardTitle>معلومات الشحن</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
+                  {savedAddresses.length > 0 && (
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between">
+                        <Label className="flex items-center gap-1.5"><MapPin className="h-4 w-4" /> اختر عنواناً محفوظاً</Label>
+                        <Link to="/account/addresses" className="text-xs text-primary hover:underline flex items-center gap-1">
+                          <Plus className="h-3 w-3" /> إدارة العناوين
+                        </Link>
+                      </div>
+                      <div className="grid sm:grid-cols-2 gap-2">
+                        {savedAddresses.map((a) => (
+                          <button
+                            type="button"
+                            key={a.id}
+                            onClick={() => {
+                              setSelectedAddressId(a.id);
+                              setFormData({ ...formData, phone: a.phone, shipping_address: `${a.city} — ${a.street}` });
+                            }}
+                            className={`text-right p-3 rounded-lg border text-sm transition-colors ${selectedAddressId === a.id ? "border-primary bg-primary/5" : "border-border hover:bg-muted/50"}`}
+                          >
+                            <p className="font-semibold">{a.label} {a.is_default && <span className="text-xs text-primary">(افتراضي)</span>}</p>
+                            <p className="text-xs text-muted-foreground mt-0.5">{a.city} — {a.street}</p>
+                            <p className="text-xs text-muted-foreground" dir="ltr">{a.phone}</p>
+                          </button>
+                        ))}
+                      </div>
+                      <div className="text-xs text-muted-foreground text-center">— أو أدخل عنواناً جديداً —</div>
+                    </div>
+                  )}
+                  {savedAddresses.length === 0 && (
+                    <Link to="/account/addresses" className="text-xs text-primary hover:underline flex items-center gap-1 justify-end">
+                      <Plus className="h-3 w-3" /> حفظ عناوين للاستخدام لاحقاً
+                    </Link>
+                  )}
                   <div className="space-y-2">
                     <Label htmlFor="phone">رقم الهاتف *</Label>
                     <Input

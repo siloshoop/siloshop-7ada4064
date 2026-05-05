@@ -155,6 +155,10 @@ const Navbar = () => {
                     <ShoppingCart className="ml-2 h-4 w-4" />
                     <span>طلباتي</span>
                   </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => navigate("/account/addresses")}>
+                    <Gift className="ml-2 h-4 w-4" />
+                    <span>عناوين التوصيل</span>
+                  </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={signOut} className="text-red-600">
                     <LogOut className="ml-2 h-4 w-4" />

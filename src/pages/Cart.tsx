@@ -8,7 +8,9 @@ import CartRecommendations from "@/components/CartRecommendations";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Minus, Plus, Trash2, ShoppingCart, Loader2, Percent } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Minus, Plus, Trash2, ShoppingCart, Loader2, Percent, Tag, Truck, Receipt, X, CheckCircle2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 interface QuantityDiscount {
@@ -26,6 +28,7 @@ interface CartItem {
     image_url: string;
     stock_quantity: number;
     category_id: string;
+    shipping_cost?: number;
   };
 }
 
@@ -40,6 +43,10 @@ const Cart = () => {
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [discounts, setDiscounts] = useState<Record<string, QuantityDiscount[]>>({});
   const [loading, setLoading] = useState(true);
+  const [couponCode, setCouponCode] = useState("");
+  const [appliedCoupon, setAppliedCoupon] = useState<any>(null);
+  const [couponDiscount, setCouponDiscount] = useState(0);
+  const [validatingCoupon, setValidatingCoupon] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -56,7 +63,7 @@ const Cart = () => {
           .select(`
             id,
             quantity,
-            product:products(id, name, price, image_url, stock_quantity, category_id)
+            product:products(id, name, price, image_url, stock_quantity, category_id, shipping_cost)
           `)
           .eq("user_id", user.id);
 
@@ -198,7 +205,55 @@ const Cart = () => {
     0
   );
   const totalSavings = itemsWithDiscounts.reduce((sum, item) => sum + item.savings, 0);
-  const total = subtotal - totalSavings;
+  const subtotalAfterQtyDiscount = subtotal - totalSavings;
+  const shippingTotal = cartItems.reduce(
+    (sum, item) => sum + Number(item.product.shipping_cost || 0) * item.quantity,
+    0
+  );
+  const TAX_RATE = 0; // الضريبة (VAT) — غير مطبّقة حالياً
+  const taxableBase = Math.max(0, subtotalAfterQtyDiscount - couponDiscount);
+  const taxAmount = taxableBase * TAX_RATE;
+  const total = taxableBase + shippingTotal + taxAmount;
+
+  const applyCoupon = async () => {
+    if (!couponCode.trim()) {
+      toast({ title: "خطأ", description: "يرجى إدخال كود الكوبون", variant: "destructive" });
+      return;
+    }
+    setValidatingCoupon(true);
+    try {
+      const { data: rows, error } = await supabase.rpc("validate_coupon", {
+        _code: couponCode.toUpperCase().trim(),
+        _subtotal: subtotalAfterQtyDiscount,
+      });
+      if (error) throw error;
+      const data = Array.isArray(rows) ? rows[0] : rows;
+      if (!data) {
+        toast({
+          title: "كوبون غير صالح",
+          description: "الكود غير صحيح أو منتهي الصلاحية أو لم يتحقق الحد الأدنى",
+          variant: "destructive",
+        });
+        return;
+      }
+      const discountAmount = data.discount_type === "percentage"
+        ? (subtotalAfterQtyDiscount * Number(data.discount_value)) / 100
+        : Number(data.discount_value);
+      setAppliedCoupon(data);
+      setCouponDiscount(discountAmount);
+      toast({ title: "تم التطبيق", description: `تم تطبيق خصم ${discountAmount.toFixed(0)} ل.س` });
+    } catch (error: any) {
+      toast({ title: "خطأ", description: error.message, variant: "destructive" });
+    } finally {
+      setValidatingCoupon(false);
+    }
+  };
+
+  const removeCoupon = () => {
+    setAppliedCoupon(null);
+    setCouponDiscount(0);
+    setCouponCode("");
+  };
 
   if (authLoading || loading) {
     return (
@@ -349,15 +404,65 @@ const Cart = () => {
 
             <div className="lg:col-span-1">
               <Card className="sticky top-4">
-                <CardContent className="p-6 space-y-4">
+                <CardContent className="p-6 space-y-5">
                   <h2 className="text-xl font-bold">ملخص الطلب</h2>
-                  
+
+                  {/* Coupon section */}
                   <div className="space-y-2">
+                    <Label htmlFor="cart-coupon" className="flex items-center gap-1.5">
+                      <Tag className="h-3.5 w-3.5" />
+                      كود الخصم
+                    </Label>
+                    {appliedCoupon ? (
+                      <div className="flex items-center justify-between gap-2 rounded-md border border-green-500/40 bg-green-50 dark:bg-green-950/30 px-3 py-2">
+                        <div className="flex items-center gap-2 text-sm font-medium text-green-700 dark:text-green-300">
+                          <CheckCircle2 className="h-4 w-4" />
+                          <span dir="ltr">{appliedCoupon.code}</span>
+                        </div>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          className="h-7 w-7"
+                          onClick={removeCoupon}
+                          aria-label="إزالة الكوبون"
+                        >
+                          <X className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    ) : (
+                      <div className="flex gap-2">
+                        <Input
+                          id="cart-coupon"
+                          value={couponCode}
+                          onChange={(e) => setCouponCode(e.target.value)}
+                          placeholder="أدخل الكود"
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter") {
+                              e.preventDefault();
+                              applyCoupon();
+                            }
+                          }}
+                        />
+                        <Button
+                          type="button"
+                          variant="outline"
+                          onClick={applyCoupon}
+                          disabled={validatingCoupon || !couponCode.trim()}
+                        >
+                          {validatingCoupon ? <Loader2 className="h-4 w-4 animate-spin" /> : "تطبيق"}
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Totals breakdown */}
+                  <div className="space-y-2 border-t pt-4">
                     <div className="flex justify-between text-sm">
                       <span className="text-muted-foreground">المجموع الفرعي</span>
                       <span>{subtotal.toFixed(0)} ل.س</span>
                     </div>
-                    
+
                     {totalSavings > 0 && (
                       <div className="flex justify-between text-sm">
                         <span className="text-green-600 flex items-center gap-1">
@@ -369,30 +474,71 @@ const Cart = () => {
                         </span>
                       </div>
                     )}
-                    
-                    <div className="border-t pt-2 mt-2">
+
+                    {couponDiscount > 0 && (
+                      <div className="flex justify-between text-sm">
+                        <span className="text-green-600 flex items-center gap-1">
+                          <Tag className="h-3 w-3" />
+                          خصم الكوبون
+                        </span>
+                        <span className="text-green-600 font-medium">
+                          -{couponDiscount.toFixed(0)} ل.س
+                        </span>
+                      </div>
+                    )}
+
+                    <div className="flex justify-between text-sm">
+                      <span className="text-muted-foreground flex items-center gap-1">
+                        <Truck className="h-3.5 w-3.5" />
+                        تكلفة التوصيل
+                      </span>
+                      <span className={shippingTotal === 0 ? "text-green-600 font-medium" : ""}>
+                        {shippingTotal === 0 ? "مجاني" : `${shippingTotal.toFixed(0)} ل.س`}
+                      </span>
+                    </div>
+
+                    <div className="flex justify-between text-sm">
+                      <span className="text-muted-foreground flex items-center gap-1">
+                        <Receipt className="h-3.5 w-3.5" />
+                        الضريبة {TAX_RATE > 0 ? `(${(TAX_RATE * 100).toFixed(0)}%)` : ""}
+                      </span>
+                      <span>{taxAmount.toFixed(0)} ل.س</span>
+                    </div>
+
+                    <div className="border-t pt-3 mt-2">
                       <div className="flex justify-between font-bold text-lg">
-                        <span>المجموع</span>
+                        <span>الإجمالي النهائي</span>
                         <span className="text-primary">{total.toFixed(0)} ل.س</span>
                       </div>
                     </div>
                   </div>
 
-                  {totalSavings > 0 && (
-                    <div className="bg-green-50 dark:bg-green-950 p-3 rounded-lg">
+                  {(totalSavings > 0 || couponDiscount > 0) && (
+                    <div className="bg-green-50 dark:bg-green-950/40 p-3 rounded-lg">
                       <p className="text-sm text-green-800 dark:text-green-200 font-medium">
-                        🎉 لقد وفرت {totalSavings.toFixed(0)} ل.س بفضل خصومات الكمية!
+                        🎉 لقد وفرت {(totalSavings + couponDiscount).toFixed(0)} ل.س على هذا الطلب!
                       </p>
                     </div>
                   )}
 
-                  <Button 
-                    className="w-full" 
+                  <Button
+                    className="w-full"
                     size="lg"
-                    onClick={() => navigate("/checkout")}
+                    onClick={() =>
+                      navigate("/checkout", {
+                        state: appliedCoupon
+                          ? { couponCode: appliedCoupon.code, couponDiscount }
+                          : undefined,
+                      })
+                    }
                   >
-                    إتمام الشراء
+                    <ShoppingCart className="ml-2 h-5 w-5" />
+                    إتمام الطلب
                   </Button>
+
+                  <p className="text-xs text-muted-foreground text-center">
+                    الدفع آمن ومحمي. يمكنك مراجعة الطلب قبل التأكيد.
+                  </p>
                 </CardContent>
               </Card>
             </div>

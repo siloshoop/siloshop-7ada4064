@@ -8,7 +8,9 @@ import CartRecommendations from "@/components/CartRecommendations";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Minus, Plus, Trash2, ShoppingCart, Loader2, Percent } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Minus, Plus, Trash2, ShoppingCart, Loader2, Percent, Tag, Truck, Receipt, X, CheckCircle2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 interface QuantityDiscount {
@@ -26,6 +28,7 @@ interface CartItem {
     image_url: string;
     stock_quantity: number;
     category_id: string;
+    shipping_cost?: number;
   };
 }
 
@@ -40,6 +43,10 @@ const Cart = () => {
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [discounts, setDiscounts] = useState<Record<string, QuantityDiscount[]>>({});
   const [loading, setLoading] = useState(true);
+  const [couponCode, setCouponCode] = useState("");
+  const [appliedCoupon, setAppliedCoupon] = useState<any>(null);
+  const [couponDiscount, setCouponDiscount] = useState(0);
+  const [validatingCoupon, setValidatingCoupon] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -56,7 +63,7 @@ const Cart = () => {
           .select(`
             id,
             quantity,
-            product:products(id, name, price, image_url, stock_quantity, category_id)
+            product:products(id, name, price, image_url, stock_quantity, category_id, shipping_cost)
           `)
           .eq("user_id", user.id);
 

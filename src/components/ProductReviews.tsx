@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
-import { Star, MessageCircle, Send, Camera, Image as ImageIcon } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { Star, MessageCircle, Send, Camera, Image as ImageIcon, X, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -24,6 +24,7 @@ interface Review {
   comment: string;
   created_at: string;
   user_id: string;
+  image_url?: string | null;
   profiles: {
     full_name: string;
   };
@@ -48,6 +49,10 @@ export const ProductReviews = ({ productId, vendorId }: ProductReviewsProps) => 
   const [replyingTo, setReplyingTo] = useState<string | null>(null);
   const [replyText, setReplyText] = useState("");
   const [submittingReply, setSubmittingReply] = useState(false);
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Check if current user is the vendor of this product
   const isVendor = user?.id === vendorId;
@@ -103,11 +108,26 @@ export const ProductReviews = ({ productId, vendorId }: ProductReviewsProps) => 
 
     setLoading(true);
     try {
+      let uploadedUrl: string | null = null;
+      if (imageFile) {
+        setUploading(true);
+        const ext = imageFile.name.split(".").pop() || "jpg";
+        const path = `${user.id}/${productId}-${Date.now()}.${ext}`;
+        const { error: upErr } = await supabase.storage
+          .from("review-images")
+          .upload(path, imageFile, { contentType: imageFile.type, upsert: false });
+        if (upErr) throw upErr;
+        const { data: pub } = supabase.storage.from("review-images").getPublicUrl(path);
+        uploadedUrl = pub.publicUrl;
+        setUploading(false);
+      }
+
       const { error } = await supabase.from("reviews").insert({
         product_id: productId,
         user_id: user.id,
         rating,
         comment: comment.trim() || null,
+        image_url: uploadedUrl,
       });
 
       if (error) throw error;
@@ -119,6 +139,8 @@ export const ProductReviews = ({ productId, vendorId }: ProductReviewsProps) => 
 
       setRating(0);
       setComment("");
+      setImageFile(null);
+      setImagePreview(null);
       fetchReviews();
     } catch (error: any) {
       toast({
@@ -128,6 +150,7 @@ export const ProductReviews = ({ productId, vendorId }: ProductReviewsProps) => 
       });
     } finally {
       setLoading(false);
+      setUploading(false);
     }
   };
 

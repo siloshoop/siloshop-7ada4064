@@ -424,6 +424,48 @@ export type Database = {
           },
         ]
       }
+      delivery_addresses: {
+        Row: {
+          city: string
+          created_at: string
+          id: string
+          is_default: boolean
+          label: string
+          notes: string | null
+          phone: string
+          recipient_name: string
+          street: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          city: string
+          created_at?: string
+          id?: string
+          is_default?: boolean
+          label: string
+          notes?: string | null
+          phone: string
+          recipient_name: string
+          street: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          city?: string
+          created_at?: string
+          id?: string
+          is_default?: boolean
+          label?: string
+          notes?: string | null
+          phone?: string
+          recipient_name?: string
+          street?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       delivery_ratings: {
         Row: {
           comment: string | null
@@ -1183,6 +1225,7 @@ export type Database = {
           comment: string | null
           created_at: string
           id: string
+          image_url: string | null
           product_id: string
           rating: number
           updated_at: string
@@ -1192,6 +1235,7 @@ export type Database = {
           comment?: string | null
           created_at?: string
           id?: string
+          image_url?: string | null
           product_id: string
           rating: number
           updated_at?: string
@@ -1201,6 +1245,7 @@ export type Database = {
           comment?: string | null
           created_at?: string
           id?: string
+          image_url?: string | null
           product_id?: string
           rating?: number
           updated_at?: string
@@ -1455,6 +1500,7 @@ export type Database = {
         }
         Returns: undefined
       }
+      set_default_address: { Args: { _address_id: string }; Returns: undefined }
       update_own_profile: {
         Args: { _avatar_url?: string; _full_name?: string; _phone?: string }
         Returns: undefined

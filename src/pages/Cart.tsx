@@ -422,6 +422,34 @@ const Cart = () => {
                 <CardContent className="p-6 space-y-5">
                   <h2 className="text-xl font-bold">ملخص الطلب</h2>
 
+                  {/* Delivery address */}
+                  <div className="rounded-lg border p-3 space-y-2 bg-muted/30">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-medium flex items-center gap-1.5">
+                        <MapPin className="h-4 w-4 text-primary" />
+                        عنوان التوصيل
+                      </span>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-7 px-2 text-xs"
+                        onClick={() => navigate("/account/addresses")}
+                      >
+                        <Pencil className="h-3 w-3 ml-1" />
+                        {defaultAddress ? "تغيير" : "إضافة"}
+                      </Button>
+                    </div>
+                    {defaultAddress ? (
+                      <div className="text-xs text-muted-foreground leading-relaxed">
+                        <p className="font-semibold text-foreground">{defaultAddress.recipient_name}</p>
+                        <p>{defaultAddress.city} — {defaultAddress.street}</p>
+                        <p dir="ltr">{defaultAddress.phone}</p>
+                      </div>
+                    ) : (
+                      <p className="text-xs text-muted-foreground">لم يتم تحديد عنوان افتراضي. سيتم طلبه عند إتمام الطلب.</p>
+                    )}
+                  </div>
+
                   {/* Coupon section */}
                   <div className="space-y-2">
                     <Label htmlFor="cart-coupon" className="flex items-center gap-1.5">

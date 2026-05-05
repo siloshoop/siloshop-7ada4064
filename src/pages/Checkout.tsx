@@ -11,7 +11,8 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, ShoppingCart, Tag } from "lucide-react";
+import { Loader2, ShoppingCart, Tag, MapPin, Plus } from "lucide-react";
+import { Link } from "react-router-dom";
 
 const checkoutSchema = z.object({
   phone: z.string()
@@ -45,6 +46,8 @@ const Checkout = () => {
   const [couponCode, setCouponCode] = useState("");
   const [appliedCoupon, setAppliedCoupon] = useState<any>(null);
   const [discount, setDiscount] = useState(0);
+  const [savedAddresses, setSavedAddresses] = useState<any[]>([]);
+  const [selectedAddressId, setSelectedAddressId] = useState<string>("");
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -62,6 +65,29 @@ const Checkout = () => {
 
   useEffect(() => {
     fetchCart();
+  }, [user]);
+
+  useEffect(() => {
+    const loadAddresses = async () => {
+      if (!user) return;
+      const { data } = await supabase
+        .from("delivery_addresses")
+        .select("*")
+        .eq("user_id", user.id)
+        .order("is_default", { ascending: false });
+      const addrs = data || [];
+      setSavedAddresses(addrs);
+      const def = addrs.find((a: any) => a.is_default) || addrs[0];
+      if (def) {
+        setSelectedAddressId(def.id);
+        setFormData((f) => ({
+          ...f,
+          phone: def.phone || f.phone,
+          shipping_address: `${def.city} — ${def.street}`,
+        }));
+      }
+    };
+    void loadAddresses();
   }, [user]);
 
   const fetchCart = async () => {

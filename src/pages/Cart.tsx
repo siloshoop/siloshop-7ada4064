@@ -10,7 +10,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Minus, Plus, Trash2, ShoppingCart, Loader2, Percent, Tag, Truck, Receipt, X, CheckCircle2 } from "lucide-react";
+import { Minus, Plus, Trash2, ShoppingCart, Loader2, Percent, Tag, Truck, Receipt, X, CheckCircle2, MapPin, Pencil } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 interface QuantityDiscount {
@@ -47,6 +47,7 @@ const Cart = () => {
   const [appliedCoupon, setAppliedCoupon] = useState<any>(null);
   const [couponDiscount, setCouponDiscount] = useState(0);
   const [validatingCoupon, setValidatingCoupon] = useState(false);
+  const [defaultAddress, setDefaultAddress] = useState<any>(null);
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -106,6 +107,20 @@ const Cart = () => {
 
     fetchCart();
   }, [user, toast]);
+
+  useEffect(() => {
+    const loadDefault = async () => {
+      if (!user) return;
+      const { data } = await supabase
+        .from("delivery_addresses")
+        .select("id, label, recipient_name, city, street, phone")
+        .eq("user_id", user.id)
+        .eq("is_default", true)
+        .maybeSingle();
+      setDefaultAddress(data);
+    };
+    void loadDefault();
+  }, [user]);
 
   const getApplicableDiscount = (productId: string, quantity: number): number => {
     const productDiscounts = discounts[productId] || [];

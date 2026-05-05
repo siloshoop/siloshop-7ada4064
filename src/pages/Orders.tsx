@@ -248,6 +248,14 @@ const Orders = () => {
                             }))}
                           />
                         )}
+                        <Button
+                          variant="default"
+                          size="sm"
+                          className="w-full sm:w-auto"
+                          onClick={() => navigate(`/orders/${order.id}`)}
+                        >
+                          عرض التفاصيل
+                        </Button>
                         {user && (
                           <DeliveryRating
                             orderId={order.id}

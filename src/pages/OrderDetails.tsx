@@ -1,0 +1,150 @@
+import { useEffect, useState } from "react";
+import { useParams, useNavigate, Link } from "react-router-dom";
+import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
+import Navbar from "@/components/Navbar";
+import Footer from "@/components/Footer";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Loader2, ArrowRight, Package, MapPin, Phone, Calendar, Receipt } from "lucide-react";
+import { format } from "date-fns";
+import { ar } from "date-fns/locale";
+
+const statusMap: Record<string, { label: string; variant: "default" | "secondary" | "destructive" | "outline" }> = {
+  pending: { label: "قيد المعالجة", variant: "secondary" },
+  confirmed: { label: "مؤكد", variant: "default" },
+  shipped: { label: "جاري التوصيل", variant: "outline" },
+  delivered: { label: "تم التوصيل", variant: "default" },
+  cancelled: { label: "ملغي", variant: "destructive" },
+};
+
+const OrderDetails = () => {
+  const { id } = useParams();
+  const navigate = useNavigate();
+  const { user, loading: authLoading } = useAuth();
+  const [order, setOrder] = useState<any>(null);
+  const [items, setItems] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (!authLoading && !user) navigate("/auth");
+  }, [user, authLoading, navigate]);
+
+  useEffect(() => {
+    const load = async () => {
+      if (!user || !id) return;
+      setLoading(true);
+      const { data: ord } = await supabase
+        .from("orders")
+        .select("*")
+        .eq("id", id)
+        .eq("customer_id", user.id)
+        .maybeSingle();
+      if (!ord) { setLoading(false); return; }
+      setOrder(ord);
+      const { data: oi } = await supabase
+        .from("order_items")
+        .select("quantity, price, product:products(id, name, image_url)")
+        .eq("order_id", id);
+      setItems(oi || []);
+      setLoading(false);
+    };
+    void load();
+  }, [id, user]);
+
+  if (authLoading || loading) {
+    return (
+      <div className="min-h-screen flex flex-col"><Navbar />
+        <div className="flex-1 flex items-center justify-center"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>
+        <Footer />
+      </div>
+    );
+  }
+
+  if (!order) {
+    return (
+      <div className="min-h-screen flex flex-col"><Navbar />
+        <main className="flex-1 container px-4 py-12 text-center space-y-4">
+          <Package className="h-16 w-16 mx-auto text-muted-foreground" />
+          <h1 className="text-xl font-bold">الطلب غير موجود</h1>
+          <Button onClick={() => navigate("/orders")}>العودة للطلبات</Button>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
+
+  const status = statusMap[order.status || "pending"] || statusMap.pending;
+  const itemsTotal = items.reduce((s, it) => s + Number(it.price) * it.quantity, 0);
+  const discount = Number(order.discount_amount || 0);
+  const shipping = Math.max(0, Number(order.total_amount) - itemsTotal + discount);
+
+  return (
+    <div className="min-h-screen flex flex-col">
+      <Navbar />
+      <main className="flex-1 container px-4 py-6 sm:py-8 space-y-4">
+        <Button variant="ghost" size="sm" onClick={() => navigate("/orders")}>
+          <ArrowRight className="h-4 w-4 ml-1" /> العودة للطلبات
+        </Button>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+              <span>تفاصيل الطلب #{order.id.slice(0, 8)}</span>
+              <Badge variant={status.variant}>{status.label}</Badge>
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3 text-sm">
+            <p className="flex items-center gap-2"><Calendar className="h-4 w-4 text-muted-foreground" />
+              {format(new Date(order.created_at), "dd MMMM yyyy - HH:mm", { locale: ar })}
+            </p>
+            {order.shipping_address && (
+              <p className="flex items-start gap-2"><MapPin className="h-4 w-4 text-muted-foreground mt-0.5" />{order.shipping_address}</p>
+            )}
+            {order.phone && <p className="flex items-center gap-2" dir="ltr"><Phone className="h-4 w-4 text-muted-foreground" />{order.phone}</p>}
+            {order.notes && <p className="text-muted-foreground bg-muted/50 p-2 rounded">{order.notes}</p>}
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader><CardTitle>المنتجات</CardTitle></CardHeader>
+          <CardContent className="space-y-3">
+            {items.map((it, idx) => (
+              <Link to={it.product?.id ? `/product/${it.product.id}` : "#"} key={idx}
+                className="flex items-center gap-3 p-3 rounded-lg bg-muted/30 hover:bg-muted/60 transition-colors">
+                <img src={it.product?.image_url || "/placeholder.svg"} alt={it.product?.name} className="w-16 h-16 rounded object-cover" />
+                <div className="flex-1">
+                  <p className="font-medium">{it.product?.name || "منتج"}</p>
+                  <p className="text-xs text-muted-foreground">{it.quantity} × {Number(it.price).toLocaleString()} ل.س</p>
+                </div>
+                <p className="font-bold">{(Number(it.price) * it.quantity).toLocaleString()} ل.س</p>
+              </Link>
+            ))}
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader><CardTitle className="flex items-center gap-2"><Receipt className="h-5 w-5" />ملخص الفاتورة</CardTitle></CardHeader>
+          <CardContent className="space-y-2 text-sm">
+            <div className="flex justify-between"><span className="text-muted-foreground">المجموع الفرعي</span><span>{itemsTotal.toLocaleString()} ل.س</span></div>
+            {discount > 0 && (
+              <div className="flex justify-between text-green-600"><span>الخصم {order.coupon_code ? `(${order.coupon_code})` : ""}</span><span>-{discount.toLocaleString()} ل.س</span></div>
+            )}
+            <div className="flex justify-between"><span className="text-muted-foreground">التوصيل</span><span>{shipping > 0 ? `${shipping.toLocaleString()} ل.س` : "مجاني"}</span></div>
+            <div className="border-t pt-2 mt-2 flex justify-between font-bold text-lg">
+              <span>الإجمالي</span><span className="text-primary">{Number(order.total_amount).toLocaleString()} ل.س</span>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Button variant="outline" className="w-full" onClick={() => navigate(`/orders/track/${order.id}`)}>
+          تتبع الطلب
+        </Button>
+      </main>
+      <Footer />
+    </div>
+  );
+};
+
+export default OrderDetails;

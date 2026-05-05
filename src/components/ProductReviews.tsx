@@ -248,8 +248,46 @@ export const ProductReviews = ({ productId, vendorId }: ProductReviewsProps) => 
                 />
               </div>
 
-              <Button type="submit" disabled={loading || rating === 0}>
-                إضافة تقييم
+              <div>
+                <label className="text-sm font-medium mb-2 block">إرفاق صورة (اختياري)</label>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={(e) => {
+                    const f = e.target.files?.[0];
+                    if (!f) return;
+                    if (f.size > 5 * 1024 * 1024) {
+                      toast({ title: "الملف كبير", description: "حجم الصورة يجب أن يكون أقل من 5 ميجا", variant: "destructive" });
+                      return;
+                    }
+                    setImageFile(f);
+                    setImagePreview(URL.createObjectURL(f));
+                  }}
+                />
+                {imagePreview ? (
+                  <div className="relative inline-block">
+                    <img src={imagePreview} alt="معاينة" className="h-24 w-24 object-cover rounded-lg border" />
+                    <button
+                      type="button"
+                      onClick={() => { setImageFile(null); setImagePreview(null); if (fileInputRef.current) fileInputRef.current.value = ""; }}
+                      className="absolute -top-2 -right-2 bg-destructive text-destructive-foreground rounded-full p-1"
+                      aria-label="إزالة الصورة"
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
+                  </div>
+                ) : (
+                  <Button type="button" variant="outline" size="sm" onClick={() => fileInputRef.current?.click()}>
+                    <Camera className="h-4 w-4 ml-1" /> اختيار صورة
+                  </Button>
+                )}
+              </div>
+
+              <Button type="submit" disabled={loading || rating === 0 || uploading}>
+                {(loading || uploading) ? <Loader2 className="h-4 w-4 ml-1 animate-spin" /> : null}
+                {uploading ? "جاري رفع الصورة..." : "إضافة تقييم"}
               </Button>
             </form>
           )}

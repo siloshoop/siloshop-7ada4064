@@ -330,6 +330,11 @@ export const ProductReviews = ({ productId, vendorId }: ProductReviewsProps) => 
                           {review.comment}
                         </p>
                       )}
+                      {review.image_url && (
+                        <a href={review.image_url} target="_blank" rel="noreferrer" className="block mt-2">
+                          <img src={review.image_url} alt="صورة التقييم" className="h-32 w-32 object-cover rounded-lg border hover:opacity-90 transition-opacity" loading="lazy" />
+                        </a>
+                      )}
 
                       {/* Vendor Reply Section */}
                       {review.review_replies && review.review_replies.length > 0 && (

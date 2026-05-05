@@ -205,7 +205,55 @@ const Cart = () => {
     0
   );
   const totalSavings = itemsWithDiscounts.reduce((sum, item) => sum + item.savings, 0);
-  const total = subtotal - totalSavings;
+  const subtotalAfterQtyDiscount = subtotal - totalSavings;
+  const shippingTotal = cartItems.reduce(
+    (sum, item) => sum + Number(item.product.shipping_cost || 0) * item.quantity,
+    0
+  );
+  const TAX_RATE = 0; // الضريبة (VAT) — غير مطبّقة حالياً
+  const taxableBase = Math.max(0, subtotalAfterQtyDiscount - couponDiscount);
+  const taxAmount = taxableBase * TAX_RATE;
+  const total = taxableBase + shippingTotal + taxAmount;
+
+  const applyCoupon = async () => {
+    if (!couponCode.trim()) {
+      toast({ title: "خطأ", description: "يرجى إدخال كود الكوبون", variant: "destructive" });
+      return;
+    }
+    setValidatingCoupon(true);
+    try {
+      const { data: rows, error } = await supabase.rpc("validate_coupon", {
+        _code: couponCode.toUpperCase().trim(),
+        _subtotal: subtotalAfterQtyDiscount,
+      });
+      if (error) throw error;
+      const data = Array.isArray(rows) ? rows[0] : rows;
+      if (!data) {
+        toast({
+          title: "كوبون غير صالح",
+          description: "الكود غير صحيح أو منتهي الصلاحية أو لم يتحقق الحد الأدنى",
+          variant: "destructive",
+        });
+        return;
+      }
+      const discountAmount = data.discount_type === "percentage"
+        ? (subtotalAfterQtyDiscount * Number(data.discount_value)) / 100
+        : Number(data.discount_value);
+      setAppliedCoupon(data);
+      setCouponDiscount(discountAmount);
+      toast({ title: "تم التطبيق", description: `تم تطبيق خصم ${discountAmount.toFixed(0)} ل.س` });
+    } catch (error: any) {
+      toast({ title: "خطأ", description: error.message, variant: "destructive" });
+    } finally {
+      setValidatingCoupon(false);
+    }
+  };
+
+  const removeCoupon = () => {
+    setAppliedCoupon(null);
+    setCouponDiscount(0);
+    setCouponCode("");
+  };
 
   if (authLoading || loading) {
     return (

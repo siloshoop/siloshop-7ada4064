@@ -94,33 +94,78 @@ const TrackOrder = () => {
     fetchOrder();
     fetchStatusHistory();
 
-    // Subscribe to status updates
+    let pollInterval: ReturnType<typeof setInterval> | null = null;
+    let realtimeConnected = false;
+
+    // Start polling as fallback - will be cancelled when realtime connects
+    const startPolling = () => {
+      if (pollInterval) return;
+      pollInterval = setInterval(() => {
+        fetchOrder();
+        fetchStatusHistory();
+      }, 30000);
+    };
+
+    const stopPolling = () => {
+      if (pollInterval) {
+        clearInterval(pollInterval);
+        pollInterval = null;
+      }
+    };
+
+    // Subscribe to realtime updates on both tables
     const channel = supabase
-      .channel('order-updates')
+      .channel(`order-updates-${id}`)
       .on(
         'postgres_changes',
         {
           event: 'INSERT',
           schema: 'public',
           table: 'order_status_history',
-          filter: `order_id=eq.${id}`
+          filter: `order_id=eq.${id}`,
         },
         () => {
           fetchOrder();
           fetchStatusHistory();
         }
       )
-      .subscribe();
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'orders',
+          filter: `id=eq.${id}`,
+        },
+        () => {
+          fetchOrder();
+        }
+      )
+      .subscribe((status) => {
+        if (status === 'SUBSCRIBED') {
+          // Realtime is live: stop polling
+          realtimeConnected = true;
+          stopPolling();
+        } else if (
+          status === 'CHANNEL_ERROR' ||
+          status === 'TIMED_OUT' ||
+          status === 'CLOSED'
+        ) {
+          // Realtime unavailable: fall back to polling every 30s
+          realtimeConnected = false;
+          startPolling();
+        }
+      });
 
-    // Auto-refresh polling every 30s as fallback to realtime
-    const pollInterval = setInterval(() => {
-      fetchOrder();
-      fetchStatusHistory();
-    }, 30000);
+    // Initial safety net: if realtime hasn't connected within 5s, start polling
+    const fallbackTimer = setTimeout(() => {
+      if (!realtimeConnected) startPolling();
+    }, 5000);
 
     return () => {
+      clearTimeout(fallbackTimer);
+      stopPolling();
       supabase.removeChannel(channel);
-      clearInterval(pollInterval);
     };
   }, [id, user]);
 

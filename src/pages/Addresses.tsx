@@ -13,7 +13,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Loader2, MapPin, Plus, Trash2, Star, Phone, Home } from "lucide-react";
+import { Loader2, MapPin, Plus, Trash2, Star, Phone, Home, Pencil } from "lucide-react";
 
 export interface DeliveryAddress {
   id: string;
@@ -43,6 +43,7 @@ const Addresses = () => {
   const [loading, setLoading] = useState(true);
   const [open, setOpen] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState({
     label: "",
     recipient_name: "",
@@ -81,9 +82,24 @@ const Addresses = () => {
 
   const resetForm = () => {
     setForm({ label: "", recipient_name: "", city: "", street: "", phone: "", notes: "", is_default: false });
+    setEditingId(null);
   };
 
-  const handleAdd = async (e: React.FormEvent) => {
+  const openEdit = (addr: DeliveryAddress) => {
+    setEditingId(addr.id);
+    setForm({
+      label: addr.label,
+      recipient_name: addr.recipient_name,
+      city: addr.city,
+      street: addr.street,
+      phone: addr.phone,
+      notes: addr.notes || "",
+      is_default: addr.is_default,
+    });
+    setOpen(true);
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) return;
     const parsed = schema.safeParse(form);
@@ -93,26 +109,49 @@ const Addresses = () => {
     }
     setSaving(true);
     try {
-      const willBeDefault = form.is_default || addresses.length === 0;
-      const { data: inserted, error } = await supabase
-        .from("delivery_addresses")
-        .insert({
-          user_id: user.id,
-          label: parsed.data.label,
-          recipient_name: parsed.data.recipient_name,
-          city: parsed.data.city,
-          street: parsed.data.street,
-          phone: parsed.data.phone,
-          notes: parsed.data.notes || null,
-          is_default: false,
-        })
-        .select()
-        .single();
-      if (error) throw error;
-      if (willBeDefault && inserted) {
-        await supabase.rpc("set_default_address", { _address_id: inserted.id });
+      if (editingId) {
+        // Update existing
+        const { error } = await supabase
+          .from("delivery_addresses")
+          .update({
+            label: parsed.data.label,
+            recipient_name: parsed.data.recipient_name,
+            city: parsed.data.city,
+            street: parsed.data.street,
+            phone: parsed.data.phone,
+            notes: parsed.data.notes || null,
+          })
+          .eq("id", editingId)
+          .eq("user_id", user.id);
+        if (error) throw error;
+        // Handle default toggle
+        const original = addresses.find((a) => a.id === editingId);
+        if (form.is_default && !original?.is_default) {
+          await supabase.rpc("set_default_address", { _address_id: editingId });
+        }
+        toast({ title: "تم التحديث", description: "تم حفظ التعديلات" });
+      } else {
+        const willBeDefault = form.is_default || addresses.length === 0;
+        const { data: inserted, error } = await supabase
+          .from("delivery_addresses")
+          .insert({
+            user_id: user.id,
+            label: parsed.data.label,
+            recipient_name: parsed.data.recipient_name,
+            city: parsed.data.city,
+            street: parsed.data.street,
+            phone: parsed.data.phone,
+            notes: parsed.data.notes || null,
+            is_default: false,
+          })
+          .select()
+          .single();
+        if (error) throw error;
+        if (willBeDefault && inserted) {
+          await supabase.rpc("set_default_address", { _address_id: inserted.id });
+        }
+        toast({ title: "تمت الإضافة", description: "تم حفظ العنوان" });
       }
-      toast({ title: "تمت الإضافة", description: "تم حفظ العنوان" });
       setOpen(false);
       resetForm();
       void fetchAddresses();
@@ -164,9 +203,9 @@ const Addresses = () => {
             </DialogTrigger>
             <DialogContent className="max-w-lg">
               <DialogHeader>
-                <DialogTitle>إضافة عنوان جديد</DialogTitle>
+                <DialogTitle>{editingId ? "تعديل العنوان" : "إضافة عنوان جديد"}</DialogTitle>
               </DialogHeader>
-              <form onSubmit={handleAdd} className="space-y-3">
+              <form onSubmit={handleSubmit} className="space-y-3">
                 <div className="space-y-1.5">
                   <Label>اسم العنوان (مثل: المنزل، العمل)</Label>
                   <Input value={form.label} onChange={(e) => setForm({ ...form, label: e.target.value })} placeholder="المنزل" required />
@@ -198,7 +237,7 @@ const Addresses = () => {
                   تعيين كعنوان افتراضي
                 </label>
                 <Button type="submit" className="w-full" disabled={saving}>
-                  {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : "حفظ العنوان"}
+                  {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : (editingId ? "حفظ التعديلات" : "حفظ العنوان")}
                 </Button>
               </form>
             </DialogContent>
@@ -230,9 +269,14 @@ const Addresses = () => {
                       </div>
                       <p className="text-sm text-muted-foreground">{addr.recipient_name}</p>
                     </div>
-                    <Button variant="ghost" size="icon" onClick={() => handleDelete(addr.id)}>
-                      <Trash2 className="h-4 w-4 text-destructive" />
-                    </Button>
+                    <div className="flex gap-1">
+                      <Button variant="ghost" size="icon" onClick={() => openEdit(addr)} aria-label="تعديل">
+                        <Pencil className="h-4 w-4" />
+                      </Button>
+                      <Button variant="ghost" size="icon" onClick={() => handleDelete(addr.id)} aria-label="حذف">
+                        <Trash2 className="h-4 w-4 text-destructive" />
+                      </Button>
+                    </div>
                   </div>
                   <div className="text-sm space-y-1">
                     <p className="flex items-start gap-2"><MapPin className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" /><span>{addr.city} — {addr.street}</span></p>

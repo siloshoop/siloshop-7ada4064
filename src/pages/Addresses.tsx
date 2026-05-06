@@ -54,6 +54,7 @@ const Addresses = () => {
   const [open, setOpen] = useState(false);
   const [saving, setSaving] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [deleteId, setDeleteId] = useState<string | null>(null);
   const [form, setForm] = useState({
     label: "",
     recipient_name: "",
@@ -172,15 +173,35 @@ const Addresses = () => {
     }
   };
 
-  const handleDelete = async (id: string) => {
-    if (!confirm("هل أنت متأكد من حذف هذا العنوان؟")) return;
-    const { error } = await supabase.from("delivery_addresses").delete().eq("id", id);
+  const confirmDelete = async () => {
+    if (!deleteId || !user) return;
+    const target = addresses.find((a) => a.id === deleteId);
+    const wasDefault = !!target?.is_default;
+    const { error } = await supabase.from("delivery_addresses").delete().eq("id", deleteId);
     if (error) {
       toast({ title: "خطأ", description: error.message, variant: "destructive" });
+      setDeleteId(null);
+      return;
+    }
+    // If we deleted the default, promote the most recent remaining address as default
+    if (wasDefault) {
+      const { data: remaining } = await supabase
+        .from("delivery_addresses")
+        .select("id")
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: false })
+        .limit(1);
+      if (remaining && remaining.length > 0) {
+        await supabase.rpc("set_default_address", { _address_id: remaining[0].id });
+        toast({ title: "تم الحذف", description: "تم تعيين عنوان آخر كافتراضي تلقائياً" });
+      } else {
+        toast({ title: "تم الحذف" });
+      }
     } else {
       toast({ title: "تم الحذف" });
-      void fetchAddresses();
     }
+    setDeleteId(null);
+    void fetchAddresses();
   };
 
   const handleSetDefault = async (id: string) => {
@@ -283,7 +304,7 @@ const Addresses = () => {
                       <Button variant="ghost" size="icon" onClick={() => openEdit(addr)} aria-label="تعديل">
                         <Pencil className="h-4 w-4" />
                       </Button>
-                      <Button variant="ghost" size="icon" onClick={() => handleDelete(addr.id)} aria-label="حذف">
+                      <Button variant="ghost" size="icon" onClick={() => setDeleteId(addr.id)} aria-label="حذف">
                         <Trash2 className="h-4 w-4 text-destructive" />
                       </Button>
                     </div>
@@ -305,6 +326,27 @@ const Addresses = () => {
         )}
       </main>
       <Footer />
+      <AlertDialog open={!!deleteId} onOpenChange={(v) => !v && setDeleteId(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>تأكيد حذف العنوان</AlertDialogTitle>
+            <AlertDialogDescription>
+              هل أنت متأكد من حذف هذا العنوان؟ لا يمكن التراجع عن هذا الإجراء.
+              {addresses.find((a) => a.id === deleteId)?.is_default && (
+                <span className="block mt-2 text-amber-600 font-medium">
+                  ملاحظة: هذا هو عنوانك الافتراضي. سيتم تعيين عنوان آخر كافتراضي تلقائياً.
+                </span>
+              )}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>إلغاء</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmDelete} className="bg-destructive hover:bg-destructive/90">
+              حذف
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };

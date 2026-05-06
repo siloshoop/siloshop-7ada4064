@@ -112,8 +112,15 @@ const TrackOrder = () => {
       )
       .subscribe();
 
+    // Auto-refresh polling every 30s as fallback to realtime
+    const pollInterval = setInterval(() => {
+      fetchOrder();
+      fetchStatusHistory();
+    }, 30000);
+
     return () => {
       supabase.removeChannel(channel);
+      clearInterval(pollInterval);
     };
   }, [id, user]);
 

@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Progress } from "@/components/ui/progress";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
@@ -52,6 +53,7 @@ export const ProductReviews = ({ productId, vendorId }: ProductReviewsProps) => 
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Check if current user is the vendor of this product
@@ -111,12 +113,40 @@ export const ProductReviews = ({ productId, vendorId }: ProductReviewsProps) => 
       let uploadedUrl: string | null = null;
       if (imageFile) {
         setUploading(true);
+        setUploadProgress(0);
         const ext = imageFile.name.split(".").pop() || "jpg";
         const path = `${user.id}/${productId}-${Date.now()}.${ext}`;
-        const { error: upErr } = await supabase.storage
-          .from("review-images")
-          .upload(path, imageFile, { contentType: imageFile.type, upsert: false });
-        if (upErr) throw upErr;
+
+        // Use XHR to track upload progress (Supabase JS doesn't expose progress events)
+        const { data: sessionData } = await supabase.auth.getSession();
+        const token = sessionData.session?.access_token;
+        const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+        const apikey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+
+        await new Promise<void>((resolve, reject) => {
+          const xhr = new XMLHttpRequest();
+          xhr.open("POST", `${supabaseUrl}/storage/v1/object/review-images/${path}`);
+          xhr.setRequestHeader("Authorization", `Bearer ${token}`);
+          xhr.setRequestHeader("apikey", apikey);
+          xhr.setRequestHeader("x-upsert", "false");
+          xhr.setRequestHeader("Content-Type", imageFile.type || "application/octet-stream");
+          xhr.upload.onprogress = (ev) => {
+            if (ev.lengthComputable) {
+              setUploadProgress(Math.round((ev.loaded / ev.total) * 100));
+            }
+          };
+          xhr.onload = () => {
+            if (xhr.status >= 200 && xhr.status < 300) {
+              setUploadProgress(100);
+              resolve();
+            } else {
+              reject(new Error(`فشل رفع الصورة (${xhr.status})`));
+            }
+          };
+          xhr.onerror = () => reject(new Error("فشل الاتصال أثناء رفع الصورة"));
+          xhr.send(imageFile);
+        });
+
         const { data: pub } = supabase.storage.from("review-images").getPublicUrl(path);
         uploadedUrl = pub.publicUrl;
         setUploading(false);
@@ -141,6 +171,7 @@ export const ProductReviews = ({ productId, vendorId }: ProductReviewsProps) => 
       setComment("");
       setImageFile(null);
       setImagePreview(null);
+      setUploadProgress(0);
       fetchReviews();
     } catch (error: any) {
       toast({
@@ -151,6 +182,7 @@ export const ProductReviews = ({ productId, vendorId }: ProductReviewsProps) => 
     } finally {
       setLoading(false);
       setUploading(false);
+      setUploadProgress(0);
     }
   };
 
@@ -274,6 +306,7 @@ export const ProductReviews = ({ productId, vendorId }: ProductReviewsProps) => 
                       onClick={() => { setImageFile(null); setImagePreview(null); if (fileInputRef.current) fileInputRef.current.value = ""; }}
                       className="absolute -top-2 -right-2 bg-destructive text-destructive-foreground rounded-full p-1"
                       aria-label="إزالة الصورة"
+                      disabled={uploading}
                     >
                       <X className="h-3 w-3" />
                     </button>
@@ -282,6 +315,12 @@ export const ProductReviews = ({ productId, vendorId }: ProductReviewsProps) => 
                   <Button type="button" variant="outline" size="sm" onClick={() => fileInputRef.current?.click()}>
                     <Camera className="h-4 w-4 ml-1" /> اختيار صورة
                   </Button>
+                )}
+                {uploading && (
+                  <div className="mt-3 space-y-1">
+                    <Progress value={uploadProgress} className="h-2" />
+                    <p className="text-xs text-muted-foreground">جاري رفع الصورة... {uploadProgress}%</p>
+                  </div>
                 )}
               </div>
 

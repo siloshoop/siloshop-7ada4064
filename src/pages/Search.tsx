@@ -187,7 +187,7 @@ const SearchPage = () => {
   // Search products when filters change
   useEffect(() => {
     searchProducts();
-  }, [filters]);
+  }, [filters, salesCounts]);
 
   // Fetch sales counts once for best-selling sort
   useEffect(() => {

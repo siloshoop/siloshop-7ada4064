@@ -7,8 +7,8 @@ import Footer from "@/components/Footer";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Loader2, Package, MapPin, Clock, Truck, ExternalLink } from "lucide-react";
-import { format } from "date-fns";
+import { Loader2, Package, MapPin, Clock, Truck, ExternalLink, RefreshCw, Wifi, WifiOff } from "lucide-react";
+import { format, formatDistanceToNow } from "date-fns";
 import { ar } from "date-fns/locale";
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
@@ -80,6 +80,10 @@ const TrackOrder = () => {
   const [order, setOrder] = useState<Order | null>(null);
   const [statusHistory, setStatusHistory] = useState<StatusUpdate[]>([]);
   const [loading, setLoading] = useState(true);
+  const [lastUpdated, setLastUpdated] = useState<Date>(new Date());
+  const [isLive, setIsLive] = useState(false);
+  const [highlightedIndex, setHighlightedIndex] = useState<number | null>(null);
+  const [, forceTick] = useState(0);
   const navigate = useNavigate();
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<mapboxgl.Map | null>(null);
@@ -127,6 +131,8 @@ const TrackOrder = () => {
         () => {
           fetchOrder();
           fetchStatusHistory();
+          setHighlightedIndex(0);
+          setTimeout(() => setHighlightedIndex(null), 3000);
         }
       )
       .on(
@@ -145,6 +151,7 @@ const TrackOrder = () => {
         if (status === 'SUBSCRIBED') {
           // Realtime is live: stop polling
           realtimeConnected = true;
+          setIsLive(true);
           stopPolling();
         } else if (
           status === 'CHANNEL_ERROR' ||
@@ -153,6 +160,7 @@ const TrackOrder = () => {
         ) {
           // Realtime unavailable: fall back to polling every 30s
           realtimeConnected = false;
+          setIsLive(false);
           startPolling();
         }
       });
@@ -168,6 +176,12 @@ const TrackOrder = () => {
       supabase.removeChannel(channel);
     };
   }, [id, user]);
+
+  // Tick every 30s to refresh "since" label
+  useEffect(() => {
+    const t = setInterval(() => forceTick((n) => n + 1), 30000);
+    return () => clearInterval(t);
+  }, []);
 
   // Initialize map
   useEffect(() => {
@@ -247,6 +261,7 @@ const TrackOrder = () => {
 
     setOrder(data as any);
     setLoading(false);
+    setLastUpdated(new Date());
   };
 
   const fetchStatusHistory = async () => {
@@ -260,6 +275,7 @@ const TrackOrder = () => {
 
     if (data) {
       setStatusHistory(data);
+      setLastUpdated(new Date());
     }
   };
 
@@ -335,6 +351,27 @@ const TrackOrder = () => {
           <div className="mb-8">
             <h1 className="text-3xl font-bold mb-2">تتبع الطلب</h1>
             <p className="text-muted-foreground">رقم الطلب: {order.id.slice(0, 8)}</p>
+            <div className="flex items-center gap-3 mt-2 flex-wrap">
+              <Badge variant={isLive ? "default" : "outline"} className="gap-1">
+                {isLive ? <Wifi className="h-3 w-3" /> : <WifiOff className="h-3 w-3" />}
+                {isLive ? "تحديث فوري" : "تحديث دوري"}
+              </Badge>
+              <span className="text-xs text-muted-foreground flex items-center gap-1">
+                <RefreshCw className="h-3 w-3" />
+                آخر تحديث: {formatDistanceToNow(lastUpdated, { addSuffix: true, locale: ar })}
+              </span>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-7 px-2 text-xs"
+                onClick={() => {
+                  fetchOrder();
+                  fetchStatusHistory();
+                }}
+              >
+                تحديث الآن
+              </Button>
+            </div>
           </div>
 
           <div className="grid lg:grid-cols-2 gap-6">
@@ -443,23 +480,38 @@ const TrackOrder = () => {
                   ) : (
                     <div className="space-y-4">
                       {statusHistory.map((update, index) => (
-                        <div key={index} className="flex gap-4 pb-4 border-b last:border-0">
+                        <div
+                          key={index}
+                          className={`flex gap-4 pb-4 border-b last:border-0 transition-colors rounded-md ${
+                            highlightedIndex === index ? "bg-primary/10 animate-pulse" : ""
+                          }`}
+                        >
                           <div className="flex flex-col items-center">
-                            <div className="h-3 w-3 rounded-full bg-primary" />
+                            <div className={`h-3 w-3 rounded-full ${index === 0 ? "bg-primary ring-4 ring-primary/20" : "bg-primary"}`} />
                             {index < statusHistory.length - 1 && (
                               <div className="w-px h-full bg-border mt-2" />
                             )}
                           </div>
                           <div className="flex-1 pb-4">
-                            <Badge className={getStatusColor(update.status)} variant="outline">
-                              {getStatusText(update.status)}
-                            </Badge>
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <Badge className={getStatusColor(update.status)} variant="outline">
+                                {getStatusText(update.status)}
+                              </Badge>
+                              {index === 0 && (
+                                <span className="text-xs text-primary font-medium">أحدث تحديث</span>
+                              )}
+                            </div>
                             {update.notes && (
                               <p className="text-sm mt-2">{update.notes}</p>
                             )}
-                            <span className="text-xs text-muted-foreground mt-1 block">
-                              {format(new Date(update.created_at), "dd MMM yyyy - HH:mm", { locale: ar })}
-                            </span>
+                            <div className="flex items-center gap-2 mt-1 flex-wrap">
+                              <span className="text-xs text-muted-foreground">
+                                {format(new Date(update.created_at), "dd MMM yyyy - HH:mm", { locale: ar })}
+                              </span>
+                              <span className="text-xs text-muted-foreground">
+                                ({formatDistanceToNow(new Date(update.created_at), { addSuffix: true, locale: ar })})
+                              </span>
+                            </div>
                           </div>
                         </div>
                       ))}

@@ -18,6 +18,7 @@ export const FavoriteButton = ({ productId, variant = "outline", size = "lg" }: 
   const navigate = useNavigate();
   const [isFavorite, setIsFavorite] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [bouncing, setBouncing] = useState(false);
 
   useEffect(() => {
     if (!user) return;
@@ -45,6 +46,8 @@ export const FavoriteButton = ({ productId, variant = "outline", size = "lg" }: 
       return;
     }
 
+    setBouncing(true);
+    setTimeout(() => setBouncing(false), 600);
     setLoading(true);
     try {
       if (isFavorite) {
@@ -92,7 +95,7 @@ export const FavoriteButton = ({ productId, variant = "outline", size = "lg" }: 
       disabled={loading}
       className="relative bg-white/95 dark:bg-black dark:hover:bg-black hover:bg-primary hover:text-primary-foreground backdrop-blur-sm shadow-md transition-all duration-300 hover:scale-110"
     >
-      <Heart className={`h-4 w-4 dark:text-pink-400 ${isFavorite ? "fill-red-500 text-red-500 dark:fill-pink-400 dark:text-pink-400" : ""}`} />
+      <Heart className={`h-4 w-4 dark:text-pink-400 transition-transform ${bouncing ? "animate-bounce-in" : ""} ${isFavorite ? "fill-red-500 text-red-500 dark:fill-pink-400 dark:text-pink-400" : ""}`} />
     </Button>
   );
 };

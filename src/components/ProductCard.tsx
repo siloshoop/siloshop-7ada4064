@@ -20,6 +20,7 @@ interface ProductCardProps {
   reviews: number;
   discount?: number;
   shippingCost?: number;
+  stockQuantity?: number | null;
 }
 
 const ProductCard = ({
@@ -31,7 +32,8 @@ const ProductCard = ({
   rating,
   reviews,
   discount,
-  shippingCost
+  shippingCost,
+  stockQuantity,
 }: ProductCardProps) => {
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -74,11 +76,24 @@ const ProductCard = ({
     });
   };
 
+  const isOutOfStock = typeof stockQuantity === "number" && stockQuantity <= 0;
+  const isLowStock = typeof stockQuantity === "number" && stockQuantity > 0 && stockQuantity <= 5;
+
   const handleAddToCart = async (e: React.MouseEvent<HTMLButtonElement>) => {
     e.stopPropagation();
+    e.preventDefault();
 
     // Capture button position before any async work (currentTarget becomes null after await)
     const buttonRect = e.currentTarget.getBoundingClientRect();
+
+    if (isOutOfStock) {
+      toast({
+        title: "نفذت الكمية",
+        description: "هذا المنتج غير متوفر حالياً",
+        variant: "destructive",
+      });
+      return;
+    }
 
     if (!user) {
       navigate("/auth");
@@ -153,6 +168,22 @@ const ProductCard = ({
           <div className="absolute top-2 left-2 z-10">
             <Badge className="bg-sale text-sale-foreground font-bold text-[10px] px-1.5 py-0.5 rounded-md shadow-lg backdrop-blur-sm border-0">
               {discount}%-
+            </Badge>
+          </div>
+        )}
+
+        {/* Stock Badges */}
+        {isOutOfStock && (
+          <div className="absolute inset-0 z-20 flex items-center justify-center bg-background/60 backdrop-blur-[2px]">
+            <Badge className="bg-destructive text-destructive-foreground font-bold text-sm px-3 py-1 rounded-md shadow-lg border-0 animate-pop-in">
+              نفذت الكمية
+            </Badge>
+          </div>
+        )}
+        {!isOutOfStock && isLowStock && (
+          <div className="absolute bottom-2 left-2 z-10">
+            <Badge className="bg-amber-500 text-white font-semibold text-[10px] px-1.5 py-0.5 rounded-md shadow-md border-0 animate-pulse">
+              متبقي {stockQuantity}
             </Badge>
           </div>
         )}
@@ -262,11 +293,13 @@ const ProductCard = ({
 
         {/* Add to Cart Button */}
         <Button
-          className="w-full rounded-lg font-semibold text-xs h-8 shadow-sm hover:shadow-md transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] group/btn active:scale-95"
+          className="w-full rounded-lg font-semibold text-xs h-8 shadow-sm hover:shadow-md transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] group/btn active:scale-95 disabled:opacity-60"
           onClick={handleAddToCart}
+          disabled={isOutOfStock}
+          variant={isOutOfStock ? "secondary" : "default"}
         >
           <ShoppingCart className="h-3.5 w-3.5 ml-1.5 transition-transform duration-300 group-hover/btn:scale-110" />
-          أضف للسلة
+          {isOutOfStock ? "نفذت الكمية" : "أضف للسلة"}
         </Button>
       </div>
     </div>

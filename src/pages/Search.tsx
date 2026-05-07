@@ -267,6 +267,12 @@ const SearchPage = () => {
         case "name_desc":
           query = query.order("name", { ascending: false });
           break;
+        case "rating_desc":
+        case "best_selling":
+        case "discount_desc":
+          // Sorted client-side after fetch
+          query = query.order("created_at", { ascending: false });
+          break;
         default:
           query = query.order("created_at", { ascending: false });
       }
@@ -291,6 +297,23 @@ const SearchPage = () => {
             : 0;
           return avgRating >= filters.minRating;
         });
+      }
+
+      // Client-side sort for computed fields
+      if (filters.sortBy === "rating_desc") {
+        filteredProducts.sort((a, b) => {
+          const ra = a.reviews?.length ? a.reviews.reduce((s, r) => s + r.rating, 0) / a.reviews.length : 0;
+          const rb = b.reviews?.length ? b.reviews.reduce((s, r) => s + r.rating, 0) / b.reviews.length : 0;
+          return rb - ra;
+        });
+      } else if (filters.sortBy === "discount_desc") {
+        filteredProducts.sort((a, b) => {
+          const da = a.original_price ? (a.original_price - a.price) / a.original_price : 0;
+          const db = b.original_price ? (b.original_price - b.price) / b.original_price : 0;
+          return db - da;
+        });
+      } else if (filters.sortBy === "best_selling") {
+        filteredProducts.sort((a, b) => (salesCounts.get(b.id) || 0) - (salesCounts.get(a.id) || 0));
       }
 
       setProducts(filteredProducts);

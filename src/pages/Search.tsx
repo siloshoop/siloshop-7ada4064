@@ -349,6 +349,11 @@ const SearchPage = () => {
   const resetFilters = () => {
     setFilters(defaultFilters);
     setPriceRange([0, 10000000]);
+    try {
+      localStorage.removeItem(FILTERS_STORAGE_KEY);
+    } catch {
+      /* ignore */
+    }
   };
 
   const activeFiltersCount = 

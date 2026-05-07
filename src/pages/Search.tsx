@@ -105,6 +105,18 @@ const defaultFilters: Filters = {
   freeShipping: false,
 };
 
+const FILTERS_STORAGE_KEY = "search_filters_v1";
+
+const loadStoredFilters = (): Partial<Filters> | null => {
+  try {
+    const raw = localStorage.getItem(FILTERS_STORAGE_KEY);
+    if (!raw) return null;
+    return JSON.parse(raw);
+  } catch {
+    return null;
+  }
+};
+
 const SearchPage = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [products, setProducts] = useState<Product[]>([]);
@@ -114,15 +126,33 @@ const SearchPage = () => {
   const [brands, setBrands] = useState<Brand[]>([]);
   const [loading, setLoading] = useState(true);
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
+  const [salesCounts, setSalesCounts] = useState<Map<string, number>>(new Map());
   const { data: nativeAds = [] } = useNativeAds("search");
   const urlSearchQuery = searchParams.get("q")?.trim() || "";
 
-  const [filters, setFilters] = useState<Filters>(() => ({
-    ...defaultFilters,
-    search: urlSearchQuery,
-  }));
+  const [filters, setFilters] = useState<Filters>(() => {
+    const stored = loadStoredFilters();
+    return {
+      ...defaultFilters,
+      ...(stored || {}),
+      // URL search query always wins on initial load if provided
+      search: urlSearchQuery || stored?.search || "",
+    };
+  });
 
-  const [priceRange, setPriceRange] = useState([0, 10000000]);
+  const [priceRange, setPriceRange] = useState<number[]>(() => {
+    const stored = loadStoredFilters();
+    return [stored?.minPrice ?? 0, stored?.maxPrice ?? 10000000];
+  });
+
+  // Persist filters whenever they change
+  useEffect(() => {
+    try {
+      localStorage.setItem(FILTERS_STORAGE_KEY, JSON.stringify(filters));
+    } catch {
+      /* ignore quota errors */
+    }
+  }, [filters]);
 
   // Fetch categories, subcategories, and vendors on mount
   useEffect(() => {
@@ -157,7 +187,25 @@ const SearchPage = () => {
   // Search products when filters change
   useEffect(() => {
     searchProducts();
-  }, [filters]);
+  }, [filters, salesCounts]);
+
+  // Fetch sales counts once for best-selling sort
+  useEffect(() => {
+    const fetchSales = async () => {
+      const { data } = await supabase
+        .from("order_items")
+        .select("product_id, quantity")
+        .limit(5000);
+      if (!data) return;
+      const map = new Map<string, number>();
+      data.forEach((row: any) => {
+        if (!row.product_id) return;
+        map.set(row.product_id, (map.get(row.product_id) || 0) + (row.quantity || 1));
+      });
+      setSalesCounts(map);
+    };
+    fetchSales();
+  }, []);
 
   const searchProducts = async () => {
     setLoading(true);
@@ -219,6 +267,12 @@ const SearchPage = () => {
         case "name_desc":
           query = query.order("name", { ascending: false });
           break;
+        case "rating_desc":
+        case "best_selling":
+        case "discount_desc":
+          // Sorted client-side after fetch
+          query = query.order("created_at", { ascending: false });
+          break;
         default:
           query = query.order("created_at", { ascending: false });
       }
@@ -243,6 +297,23 @@ const SearchPage = () => {
             : 0;
           return avgRating >= filters.minRating;
         });
+      }
+
+      // Client-side sort for computed fields
+      if (filters.sortBy === "rating_desc") {
+        filteredProducts.sort((a, b) => {
+          const ra = a.reviews?.length ? a.reviews.reduce((s, r) => s + r.rating, 0) / a.reviews.length : 0;
+          const rb = b.reviews?.length ? b.reviews.reduce((s, r) => s + r.rating, 0) / b.reviews.length : 0;
+          return rb - ra;
+        });
+      } else if (filters.sortBy === "discount_desc") {
+        filteredProducts.sort((a, b) => {
+          const da = a.original_price ? (a.original_price - a.price) / a.original_price : 0;
+          const db = b.original_price ? (b.original_price - b.price) / b.original_price : 0;
+          return db - da;
+        });
+      } else if (filters.sortBy === "best_selling") {
+        filteredProducts.sort((a, b) => (salesCounts.get(b.id) || 0) - (salesCounts.get(a.id) || 0));
       }
 
       setProducts(filteredProducts);
@@ -278,6 +349,11 @@ const SearchPage = () => {
   const resetFilters = () => {
     setFilters(defaultFilters);
     setPriceRange([0, 10000000]);
+    try {
+      localStorage.removeItem(FILTERS_STORAGE_KEY);
+    } catch {
+      /* ignore */
+    }
   };
 
   const activeFiltersCount = 
@@ -641,6 +717,9 @@ const SearchPage = () => {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="newest">الأحدث</SelectItem>
+                  <SelectItem value="best_selling">الأكثر مبيعاً</SelectItem>
+                  <SelectItem value="rating_desc">الأعلى تقييماً</SelectItem>
+                  <SelectItem value="discount_desc">الأعلى خصماً</SelectItem>
                   <SelectItem value="price_asc">السعر: من الأقل للأعلى</SelectItem>
                   <SelectItem value="price_desc">السعر: من الأعلى للأقل</SelectItem>
                   <SelectItem value="name_asc">الاسم: أ - ي</SelectItem>

@@ -712,6 +712,9 @@ const SearchPage = () => {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="newest">الأحدث</SelectItem>
+                  <SelectItem value="best_selling">الأكثر مبيعاً</SelectItem>
+                  <SelectItem value="rating_desc">الأعلى تقييماً</SelectItem>
+                  <SelectItem value="discount_desc">الأعلى خصماً</SelectItem>
                   <SelectItem value="price_asc">السعر: من الأقل للأعلى</SelectItem>
                   <SelectItem value="price_desc">السعر: من الأعلى للأقل</SelectItem>
                   <SelectItem value="name_asc">الاسم: أ - ي</SelectItem>

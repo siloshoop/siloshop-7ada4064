@@ -105,6 +105,18 @@ const defaultFilters: Filters = {
   freeShipping: false,
 };
 
+const FILTERS_STORAGE_KEY = "search_filters_v1";
+
+const loadStoredFilters = (): Partial<Filters> | null => {
+  try {
+    const raw = localStorage.getItem(FILTERS_STORAGE_KEY);
+    if (!raw) return null;
+    return JSON.parse(raw);
+  } catch {
+    return null;
+  }
+};
+
 const SearchPage = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [products, setProducts] = useState<Product[]>([]);
@@ -114,15 +126,33 @@ const SearchPage = () => {
   const [brands, setBrands] = useState<Brand[]>([]);
   const [loading, setLoading] = useState(true);
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
+  const [salesCounts, setSalesCounts] = useState<Map<string, number>>(new Map());
   const { data: nativeAds = [] } = useNativeAds("search");
   const urlSearchQuery = searchParams.get("q")?.trim() || "";
 
-  const [filters, setFilters] = useState<Filters>(() => ({
-    ...defaultFilters,
-    search: urlSearchQuery,
-  }));
+  const [filters, setFilters] = useState<Filters>(() => {
+    const stored = loadStoredFilters();
+    return {
+      ...defaultFilters,
+      ...(stored || {}),
+      // URL search query always wins on initial load if provided
+      search: urlSearchQuery || stored?.search || "",
+    };
+  });
 
-  const [priceRange, setPriceRange] = useState([0, 10000000]);
+  const [priceRange, setPriceRange] = useState<number[]>(() => {
+    const stored = loadStoredFilters();
+    return [stored?.minPrice ?? 0, stored?.maxPrice ?? 10000000];
+  });
+
+  // Persist filters whenever they change
+  useEffect(() => {
+    try {
+      localStorage.setItem(FILTERS_STORAGE_KEY, JSON.stringify(filters));
+    } catch {
+      /* ignore quota errors */
+    }
+  }, [filters]);
 
   // Fetch categories, subcategories, and vendors on mount
   useEffect(() => {
@@ -158,6 +188,24 @@ const SearchPage = () => {
   useEffect(() => {
     searchProducts();
   }, [filters]);
+
+  // Fetch sales counts once for best-selling sort
+  useEffect(() => {
+    const fetchSales = async () => {
+      const { data } = await supabase
+        .from("order_items")
+        .select("product_id, quantity")
+        .limit(5000);
+      if (!data) return;
+      const map = new Map<string, number>();
+      data.forEach((row: any) => {
+        if (!row.product_id) return;
+        map.set(row.product_id, (map.get(row.product_id) || 0) + (row.quantity || 1));
+      });
+      setSalesCounts(map);
+    };
+    fetchSales();
+  }, []);
 
   const searchProducts = async () => {
     setLoading(true);

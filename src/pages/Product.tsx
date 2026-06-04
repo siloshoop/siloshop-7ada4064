@@ -17,6 +17,7 @@ import AddToWishlistButton from "@/components/AddToWishlistButton";
 import ChatButton from "@/components/ChatButton";
 import { useRecentlyViewed } from "@/hooks/useRecentlyViewed";
 import SimilarProducts from "@/components/SimilarProducts";
+import MarketPriceBar from "@/components/MarketPriceBar";
 import AdPlaceholder from "@/components/AdPlaceholder";
 import StickyMobileAd from "@/components/StickyMobileAd";
 
@@ -267,6 +268,12 @@ const Product = () => {
             <Card className="p-6 bg-muted/30">
               <p className="text-foreground leading-relaxed">{product.description}</p>
             </Card>
+
+            <MarketPriceBar
+              productId={product.id}
+              price={product.price}
+              categoryId={product.category_id}
+            />
 
             <div className="space-y-4">
               <div className="flex items-center gap-4">

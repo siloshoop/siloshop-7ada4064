@@ -8,7 +8,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Plus, Package, TrendingUp, DollarSign, ShoppingBag, Loader2, Edit, Trash2, Search, Tag, Star, Layers, Percent, Megaphone, Users, Activity, BarChart3, LayoutGrid } from "lucide-react";
+import { Plus, Package, TrendingUp, DollarSign, ShoppingBag, Loader2, Edit, Trash2, Search, Tag, Star, Layers, Percent, Megaphone, Users, Activity, BarChart3, LayoutGrid, Heart, Settings, MessageSquare } from "lucide-react";
+import { Progress } from "@/components/ui/progress";
 import UserStatistics from "@/components/UserStatistics";
 import { useToast } from "@/hooks/use-toast";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -20,6 +21,7 @@ const Dashboard = () => {
   const [filteredProducts, setFilteredProducts] = useState<any[]>([]);
   const [recentReviews, setRecentReviews] = useState<any[]>([]);
   const [stats, setStats] = useState({ totalProducts: 0, totalOrders: 0, totalRevenue: 0 });
+  const [customerStats, setCustomerStats] = useState({ orders: 0, totalSpent: 0, reviewed: 0, favorites: 0 });
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [filterStatus, setFilterStatus] = useState("all");
@@ -94,6 +96,20 @@ const Dashboard = () => {
             .limit(5);
 
           setRecentReviews(reviewsData || []);
+        } else {
+          // Customer stats
+          const [ordersRes, favRes, reviewsRes] = await Promise.all([
+            supabase.from("orders").select("total_amount, status").eq("customer_id", user.id),
+            supabase.from("favorites").select("id", { count: "exact", head: true }).eq("user_id", user.id),
+            supabase.from("reviews").select("id", { count: "exact", head: true }).eq("user_id", user.id),
+          ]);
+          const orders = ordersRes.data || [];
+          setCustomerStats({
+            orders: orders.length,
+            totalSpent: orders.reduce((s, o: any) => s + Number(o.total_amount || 0), 0),
+            reviewed: reviewsRes.count || 0,
+            favorites: favRes.count || 0,
+          });
         }
       } catch (error: any) {
         toast({
@@ -487,22 +503,72 @@ const Dashboard = () => {
             </Card>
           </>
         ) : (
-          <Card>
-            <CardHeader>
-              <CardTitle>طلباتي</CardTitle>
-              <CardDescription>تتبع طلباتك ومشترياتك</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <p className="text-center text-muted-foreground py-8">
-                لا توجد طلبات حالياً
-              </p>
-              <div className="text-center mt-4">
-                <Button onClick={() => navigate("/")}>
-                  تصفح المنتجات
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
+          <>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">عدد الطلبات</CardTitle>
+                  <ShoppingBag className="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent><div className="text-2xl font-bold">{customerStats.orders}</div></CardContent>
+              </Card>
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">المبلغ الإجمالي</CardTitle>
+                  <DollarSign className="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent><div className="text-2xl font-bold">{customerStats.totalSpent.toLocaleString()} ل.س</div></CardContent>
+              </Card>
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">منتجات مقيّمة</CardTitle>
+                  <Star className="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">{customerStats.reviewed}</div>
+                  <Progress
+                    value={customerStats.orders > 0 ? Math.min(100, (customerStats.reviewed / customerStats.orders) * 100) : 0}
+                    className="mt-2 h-1.5"
+                  />
+                  <p className="text-[10px] text-muted-foreground mt-1">نسبة التقييم من طلباتك</p>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">المفضلة</CardTitle>
+                  <Heart className="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent><div className="text-2xl font-bold">{customerStats.favorites}</div></CardContent>
+              </Card>
+            </div>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>الوصول السريع</CardTitle>
+                <CardDescription>تنقّل سريعاً إلى أهم الصفحات</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                  <Button variant="outline" className="h-20 flex-col gap-1" onClick={() => navigate("/orders")}>
+                    <ShoppingBag className="h-5 w-5" />
+                    <span>طلباتي</span>
+                  </Button>
+                  <Button variant="outline" className="h-20 flex-col gap-1" onClick={() => navigate("/favorites")}>
+                    <Heart className="h-5 w-5" />
+                    <span>المفضلة</span>
+                  </Button>
+                  <Button variant="outline" className="h-20 flex-col gap-1" onClick={() => navigate("/chat")}>
+                    <MessageSquare className="h-5 w-5" />
+                    <span>الرسائل</span>
+                  </Button>
+                  <Button variant="outline" className="h-20 flex-col gap-1" onClick={() => navigate("/notification-settings")}>
+                    <Settings className="h-5 w-5" />
+                    <span>الإعدادات</span>
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </>
         )}
       </main>
       <Footer />

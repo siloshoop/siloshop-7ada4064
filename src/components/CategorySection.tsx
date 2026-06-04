@@ -428,7 +428,7 @@ const CategorySection = () => {
               <Card
                 key={category.id}
                 className={cn(
-                  `group cursor-pointer overflow-hidden border-2 border-transparent hover:border-primary/30 shadow-lg hover:shadow-2xl transition-all duration-500`,
+                  `group cursor-pointer overflow-hidden border-2 border-transparent hover:border-primary/30 shadow-lg hover:shadow-2xl active:scale-[0.94] active:translate-y-[2px] active:shadow-inner transition-all duration-500`,
                   category.bgColor,
                   isExpanded && "col-span-2 row-span-2",
                   isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
@@ -444,7 +444,7 @@ const CategorySection = () => {
                   
                   <div className="relative z-10 space-y-3 w-full">
                     <div className="flex items-center justify-center gap-2">
-                      <div className={`w-10 h-10 md:w-12 md:h-12 rounded-xl bg-gradient-to-br ${category.gradient} p-0.5 group-hover:scale-110 transition-all duration-500 shadow-lg`}>
+                      <div className={`w-10 h-10 md:w-12 md:h-12 rounded-xl bg-gradient-to-br ${category.gradient} p-0.5 group-hover:scale-110 group-active:scale-95 transition-all duration-500 shadow-lg group-active:shadow-inner`}>
                         <div className="w-full h-full bg-background rounded-xl flex items-center justify-center">
                           <IconComponent className={`w-5 h-5 md:w-6 md:h-6 ${category.iconColor} group-hover:scale-110 transition-transform duration-300`} />
                         </div>
@@ -460,7 +460,7 @@ const CategorySection = () => {
                     {subcategories.length > 0 && (
                       <button
                         onClick={(e) => toggleExpand(category.name, e)}
-                        className="flex items-center justify-center gap-1 text-xs text-muted-foreground hover:text-primary transition-colors mx-auto"
+                        className="flex items-center justify-center gap-1 text-xs text-muted-foreground hover:text-primary transition-colors mx-auto active:scale-95"
                       >
                         <span>{isExpanded ? "إخفاء" : "عرض"} التصنيفات ({subcategories.length})</span>
                         {isExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
@@ -479,7 +479,7 @@ const CategorySection = () => {
                                 "flex items-center gap-2 text-xs md:text-sm px-3 py-2 rounded-lg transition-all duration-200",
                                 "bg-background/80 hover:bg-primary hover:text-primary-foreground",
                                 "border border-border/50 hover:border-primary",
-                                "text-foreground/80 hover:shadow-md"
+                                "text-foreground/80 hover:shadow-md active:scale-95 active:shadow-inner"
                               )}
                             >
                               <SubIcon className="w-4 h-4 shrink-0" />

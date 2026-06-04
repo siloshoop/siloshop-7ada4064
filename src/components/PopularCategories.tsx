@@ -244,12 +244,12 @@ const PopularCategories = () => {
             return (
               <Card
                 key={category.id}
-                className={`group cursor-pointer transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] hover:scale-[1.05] hover:-translate-y-1 hover:shadow-xl active:scale-[0.97] border border-border/50 bg-gradient-to-br ${colors.bg} backdrop-blur-sm overflow-hidden ring-2 ${isExpanded ? 'ring-primary/50 scale-[1.03] shadow-xl' : `ring-transparent ${colors.ring}`}`}
+                className={`group cursor-pointer transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] hover:scale-[1.05] hover:-translate-y-1 hover:shadow-xl active:scale-[0.94] active:translate-y-[2px] active:shadow-inner border border-border/50 bg-gradient-to-br ${colors.bg} backdrop-blur-sm overflow-hidden ring-2 ${isExpanded ? 'ring-primary/50 scale-[1.03] shadow-xl' : `ring-transparent ${colors.ring}`}`}
                 style={{ animationDelay: `${index * 50}ms` }}
                 onClick={() => handleCategoryClick(category.id, isDemo)}
               >
                 <CardContent className="p-3 sm:p-4 flex flex-col items-center gap-2 text-center relative">
-                  <div className="p-2.5 rounded-xl bg-background/80 backdrop-blur-sm shadow-sm group-hover:shadow-md transition-all duration-300 group-hover:scale-110">
+                  <div className="p-2.5 rounded-xl bg-background/80 backdrop-blur-sm shadow-sm group-hover:shadow-md group-active:shadow-inner transition-all duration-300 group-hover:scale-110">
                     <IconComponent className={`h-6 w-6 ${colors.icon} transition-transform duration-300`} />
                   </div>
                   <div className="min-w-0 w-full">

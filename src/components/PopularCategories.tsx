@@ -11,10 +11,11 @@ import {
   PenTool, Users, ChefHat, Activity, Bike, Waves, PersonStanding,
   Briefcase, Mountain, Flower2, Wind, Crown, Moon, Heart, Snowflake,
   Palette, CircleDot, Layers, Award, Bed, HeartPulse, Cloud, User,
-  Smile, Star, School, Clock, Diamond, Glasses, Wallet, Backpack,
+  Smile, Star, School, Clock, Diamond, Glasses, Wallet, Backpack, Search,
   Plane, GraduationCap, Tv, BedDouble, UtensilsCrossed, TreePine,
   Gamepad, Dice1, Puzzle, Lightbulb, TreeDeciduous, Cat, X
 } from "lucide-react";
+import { Input } from "@/components/ui/input";
 
 interface PopularCategory {
   id: string;
@@ -98,6 +99,7 @@ const PopularCategories = () => {
   const [subcategories, setSubcategories] = useState<Subcategory[]>([]);
   const [loading, setLoading] = useState(true);
   const [expandedCategoryId, setExpandedCategoryId] = useState<string | null>(null);
+  const [searchTerm, setSearchTerm] = useState("");
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -164,7 +166,10 @@ const PopularCategories = () => {
     }
   };
 
-  const displayCategories = categories.length > 0 ? categories : demoCategories;
+  const baseCategories = categories.length > 0 ? categories : demoCategories;
+  const displayCategories = searchTerm
+    ? baseCategories.filter((c) => c.name_ar.includes(searchTerm.trim()))
+    : baseCategories;
 
   if (loading) {
     return (
@@ -197,6 +202,24 @@ const PopularCategories = () => {
   return (
     <section className="py-8 bg-muted/30">
       <div className="container px-4">
+        <div className="rounded-2xl bg-gradient-to-br from-primary/15 via-accent/10 to-transparent border border-primary/15 p-4 md:p-5 mb-5">
+          <h2 className="text-lg md:text-xl font-bold text-foreground mb-1">
+            تصفّح فئات المتجر
+          </h2>
+          <p className="text-xs md:text-sm text-muted-foreground mb-3">
+            اكتشف آلاف المنتجات من فئات متنوعة بأفضل الأسعار
+          </p>
+          <div className="relative max-w-md">
+            <Search className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              placeholder="ابحث في الفئات..."
+              className="pr-9 bg-background/80"
+            />
+          </div>
+        </div>
+
         <div className="flex items-center gap-2 mb-5">
           <div className="p-1.5 rounded-lg bg-primary/10">
             <TrendingUp className="h-4 w-4 text-primary" />
@@ -205,6 +228,11 @@ const PopularCategories = () => {
           <span className="text-xs text-muted-foreground mr-auto">({displayCategories.length} فئة)</span>
         </div>
 
+        {displayCategories.length === 0 && (
+          <p className="text-center text-sm text-muted-foreground py-6">
+            لا توجد فئات مطابقة للبحث
+          </p>
+        )}
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 stagger-children">
           {displayCategories.map((category, index) => {
             const IconComponent = getIconComponent(category.icon);

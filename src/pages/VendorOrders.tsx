@@ -184,15 +184,13 @@ const VendorOrders = () => {
     
     setUpdatingStatus(pendingShipOrderId);
     try {
-      // Update order status with tracking info
-      const { error: orderError } = await supabase
-        .from("orders")
-        .update({ 
-          status: "shipped",
-          tracking_number: trackingNumber || null,
-          courier_name: courierName || null,
-        })
-        .eq("id", pendingShipOrderId);
+      // Update order status via SECURITY DEFINER RPC (avoids exposing customer PII through UPDATE RLS).
+      const { error: orderError } = await supabase.rpc("vendor_update_order_status", {
+        _order_id: pendingShipOrderId,
+        _status: "shipped",
+        _tracking_number: trackingNumber || null,
+        _courier_name: courierName || null,
+      });
 
       if (orderError) throw orderError;
 
@@ -248,11 +246,11 @@ const VendorOrders = () => {
   const updateOrderStatus = async (orderId: string, newStatus: string) => {
     setUpdatingStatus(orderId);
     try {
-      // Update order status
-      const { error: orderError } = await supabase
-        .from("orders")
-        .update({ status: newStatus })
-        .eq("id", orderId);
+      // Update order status via SECURITY DEFINER RPC.
+      const { error: orderError } = await supabase.rpc("vendor_update_order_status", {
+        _order_id: orderId,
+        _status: newStatus,
+      });
 
       if (orderError) throw orderError;
 

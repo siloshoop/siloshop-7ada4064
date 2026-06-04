@@ -201,38 +201,22 @@ const Checkout = () => {
 
     setSubmitting(true);
     try {
-      // Create order
-      const { data: order, error: orderError } = await supabase
-        .from("orders")
-        .insert({
-          customer_id: user.id,
-          total_amount: total,
-          phone: formData.phone,
-          shipping_address: formData.shipping_address,
-          notes: formData.notes || null,
-          status: "pending",
-          coupon_code: appliedCoupon?.code || null,
-          discount_amount: discount,
-        })
-        .select()
-        .single();
+      // Create order server-side via SECURITY DEFINER RPC.
+      // Total, prices, shipping, and coupon redemption are computed from
+      // the database — the client cannot tamper with total_amount.
+      const { data: newOrderId, error: orderError } = await supabase.rpc("create_order", {
+        _items: cartItems.map((item) => ({
+          product_id: item.product.id,
+          quantity: item.quantity,
+        })),
+        _phone: formData.phone,
+        _shipping_address: formData.shipping_address,
+        _notes: formData.notes || null,
+        _coupon_code: appliedCoupon?.code || null,
+      });
 
       if (orderError) throw orderError;
-
-      // Create order items
-      const orderItems = cartItems.map(item => ({
-        order_id: order.id,
-        product_id: item.product.id,
-        vendor_id: item.product.vendor_id,
-        quantity: item.quantity,
-        price: Number(item.product.price),
-      }));
-
-      const { error: itemsError } = await supabase
-        .from("order_items")
-        .insert(orderItems);
-
-      if (itemsError) throw itemsError;
+      const order = { id: newOrderId as string };
 
       // Get customer profile for name
       const { data: customerProfile } = await supabase
@@ -276,19 +260,7 @@ const Checkout = () => {
         }
       }
 
-      // Update coupon usage if applied
-      if (appliedCoupon) {
-        await supabase
-          .from("coupons")
-          .update({ used_count: appliedCoupon.used_count + 1 })
-          .eq("id", appliedCoupon.id);
-      }
-
-      // Clear cart
-      await supabase
-        .from("cart_items")
-        .delete()
-        .eq("user_id", user.id);
+      // Coupon redemption + cart clearing handled atomically inside create_order RPC.
 
       toast({
         title: "تم إنشاء الطلب",

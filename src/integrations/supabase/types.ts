@@ -1452,6 +1452,16 @@ export type Database = {
         Returns: boolean
       }
       cleanup_old_rate_limits: { Args: never; Returns: undefined }
+      create_order: {
+        Args: {
+          _coupon_code?: string
+          _items: Json
+          _notes?: string
+          _phone: string
+          _shipping_address: string
+        }
+        Returns: string
+      }
       get_vendor_orders: {
         Args: never
         Returns: {
@@ -1490,6 +1500,16 @@ export type Database = {
         Args: { _email_hash: string; _ip_hash: string }
         Returns: undefined
       }
+      redeem_coupon: {
+        Args: { _code: string; _subtotal: number }
+        Returns: {
+          code: string
+          discount_amount: number
+          discount_type: string
+          discount_value: number
+          id: string
+        }[]
+      }
       send_notification: {
         Args: {
           _message: string
@@ -1517,6 +1537,15 @@ export type Database = {
           used_count: number
           vendor_id: string
         }[]
+      }
+      vendor_update_order_status: {
+        Args: {
+          _courier_name?: string
+          _order_id: string
+          _status: string
+          _tracking_number?: string
+        }
+        Returns: undefined
       }
     }
     Enums: {

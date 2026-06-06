@@ -5,6 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { measureFrames } from "@/lib/perfMonitor";
 import { useCategoryCardPress } from "@/hooks/useCategoryCardPress";
+import { CategoryCardItem } from "@/components/CategoryCardItem";
 import { 
   Smartphone, Laptop, Shirt, Home, Dumbbell, Gamepad2, Watch, 
   Baby, Sparkles, BookOpen, Car, Utensils, TrendingUp, Footprints,

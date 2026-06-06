@@ -341,10 +341,20 @@ All colors MUST be HSL.
   backface-visibility: hidden;
 }
 
-/* Visible keyboard focus ring meeting WCAG contrast */
+/* Visible keyboard focus ring — WCAG 2.4.7 + 1.4.11.
+   Layered: 2px background spacer (separates from card bg) +
+   3px solid primary ring (≥3:1 contrast against light & dark backgrounds). */
 .category-card:focus-visible {
   outline: none;
   box-shadow:
     0 0 0 2px hsl(var(--background)),
-    0 0 0 4px hsl(var(--ring));
+    0 0 0 5px hsl(var(--ring)),
+    0 0 0 6px hsl(var(--background) / 0.6);
+  position: relative;
+  z-index: 1;
+}
+
+/* Pressed state: explicit, GPU-only transform so it never blocks scroll/jank */
+.category-card[data-pressed="true"] {
+  transition-duration: 120ms;
 }

@@ -244,12 +244,22 @@ const PopularCategories = () => {
             return (
               <Card
                 key={category.id}
-                className={`group cursor-pointer transition-all duration-150 ease-out hover:scale-[1.05] hover:-translate-y-1 hover:shadow-xl active:scale-[0.94] active:translate-y-[2px] active:shadow-inner border border-border/50 bg-gradient-to-br ${colors.bg} backdrop-blur-sm overflow-hidden ring-2 ${isExpanded ? 'ring-primary/50 scale-[1.03] shadow-xl' : `ring-transparent ${colors.ring}`}`}
-                style={{ animationDelay: `${index * 50}ms` }}
+                role="button"
+                tabIndex={0}
+                aria-label={`فئة ${category.name_ar}، ${category.product_count ?? 0} منتج`}
+                aria-expanded={hasSubs ? isExpanded : undefined}
+                className={`category-card group cursor-pointer transition-transform transition-shadow duration-150 ease-out motion-safe:hover:scale-[1.05] motion-safe:hover:-translate-y-1 hover:shadow-xl active:scale-[0.96] active:shadow-inner border border-border/50 bg-gradient-to-br ${colors.bg} backdrop-blur-sm overflow-hidden ring-2 ${isExpanded ? 'ring-primary/50 motion-safe:scale-[1.03] shadow-xl' : `ring-transparent ${colors.ring}`}`}
+                style={{ animationDelay: `${index * 30}ms` }}
                 onClick={() => handleCategoryClick(category.id, isDemo)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    handleCategoryClick(category.id, isDemo);
+                  }
+                }}
               >
                 <CardContent className="p-3 sm:p-4 flex flex-col items-center gap-2 text-center relative">
-                  <div className="p-2.5 rounded-xl bg-background/80 backdrop-blur-sm shadow-sm group-hover:shadow-md group-active:shadow-inner transition-all duration-150 group-hover:scale-110">
+                  <div className="category-card-icon p-2.5 rounded-xl bg-background/80 backdrop-blur-sm shadow-sm group-hover:shadow-md group-active:shadow-inner transition-transform transition-shadow duration-150 motion-safe:group-hover:scale-110">
                     <IconComponent className={`h-6 w-6 ${colors.icon} transition-transform duration-150`} />
                   </div>
                   <div className="min-w-0 w-full">

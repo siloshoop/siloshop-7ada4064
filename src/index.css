@@ -298,3 +298,53 @@ All colors MUST be HSL.
 .cart-bounce {
   animation: cartBounce 0.4s ease-out;
 }
+
+/* ============================================================
+   Accessibility & motion polish for interactive cards
+   ============================================================ */
+
+/* Global: respect users who prefer reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .stagger-children > * {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}
+
+/* Touch devices: disable hover-only effects to avoid "stuck" hover after tap.
+   Hover styles only apply on devices that truly support hover. */
+@media (hover: none) {
+  .category-card:hover {
+    transform: none !important;
+    box-shadow: inherit;
+  }
+  .category-card:hover .category-card-icon {
+    transform: none !important;
+  }
+}
+
+/* Smoother GPU-accelerated transforms to prevent jank */
+.category-card {
+  -webkit-tap-highlight-color: transparent;
+  will-change: transform;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}
+
+/* Visible keyboard focus ring meeting WCAG contrast */
+.category-card:focus-visible {
+  outline: none;
+  box-shadow:
+    0 0 0 2px hsl(var(--background)),
+    0 0 0 4px hsl(var(--ring));
+}

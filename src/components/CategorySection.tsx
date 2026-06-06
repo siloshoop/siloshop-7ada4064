@@ -428,7 +428,7 @@ const CategorySection = () => {
               <Card
                 key={category.id}
                 className={cn(
-                  `group cursor-pointer overflow-hidden border-2 border-transparent hover:border-primary/30 shadow-lg hover:shadow-2xl active:scale-[0.94] active:translate-y-[2px] active:shadow-inner transition-all duration-500`,
+                  `group cursor-pointer overflow-hidden border-2 border-transparent hover:border-primary/30 shadow-lg hover:shadow-2xl active:scale-[0.94] active:translate-y-[2px] active:shadow-inner transition-all duration-150`,
                   category.bgColor,
                   isExpanded && "col-span-2 row-span-2",
                   isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
@@ -440,13 +440,13 @@ const CategorySection = () => {
                   "relative p-3 md:p-4 flex flex-col items-center justify-start text-center",
                   isExpanded ? "min-h-[280px]" : "aspect-square"
                 )}>
-                  <div className={`absolute inset-0 bg-gradient-to-br ${category.gradient} opacity-0 group-hover:opacity-10 transition-opacity duration-500`} />
+                  <div className={`absolute inset-0 bg-gradient-to-br ${category.gradient} opacity-0 group-hover:opacity-10 transition-opacity duration-150`} />
                   
                   <div className="relative z-10 space-y-3 w-full">
                     <div className="flex items-center justify-center gap-2">
-                      <div className={`w-10 h-10 md:w-12 md:h-12 rounded-xl bg-gradient-to-br ${category.gradient} p-0.5 group-hover:scale-110 group-active:scale-95 transition-all duration-500 shadow-lg group-active:shadow-inner`}>
+                      <div className={`w-10 h-10 md:w-12 md:h-12 rounded-xl bg-gradient-to-br ${category.gradient} p-0.5 group-hover:scale-110 group-active:scale-95 transition-all duration-150 shadow-lg group-active:shadow-inner`}>
                         <div className="w-full h-full bg-background rounded-xl flex items-center justify-center">
-                          <IconComponent className={`w-5 h-5 md:w-6 md:h-6 ${category.iconColor} group-hover:scale-110 transition-transform duration-300`} />
+                          <IconComponent className={`w-5 h-5 md:w-6 md:h-6 ${category.iconColor} group-hover:scale-110 transition-transform duration-150`} />
                         </div>
                       </div>
                     </div>

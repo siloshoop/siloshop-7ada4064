@@ -3,6 +3,8 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { measureFrames } from "@/lib/perfMonitor";
+import { CategoryCardItem } from "@/components/CategoryCardItem";
 import { 
   Smartphone, Laptop, Shirt, Home, Dumbbell, Gamepad2, Watch, 
   Baby, Sparkles, BookOpen, Car, Utensils, TrendingUp, Footprints,
@@ -106,6 +108,15 @@ const PopularCategories = () => {
     fetchPopularCategories();
   }, []);
 
+  // Sample frame timings once after first paint to log card animation smoothness
+  useEffect(() => {
+    if (loading) return;
+    const id = window.setTimeout(() => {
+      measureFrames("popular-categories-mount", 1000);
+    }, 50);
+    return () => window.clearTimeout(id);
+  }, [loading]);
+
   const fetchPopularCategories = async () => {
     try {
       const [categoriesRes, subcategoriesRes] = await Promise.all([
@@ -181,7 +192,15 @@ const PopularCategories = () => {
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
             {[...Array(12)].map((_, i) => (
-              <Skeleton key={i} className="h-[88px] rounded-xl" />
+              <div
+                key={i}
+                className="rounded-xl border border-border/50 bg-card/60 p-3 sm:p-4 flex flex-col items-center gap-2"
+                aria-hidden="true"
+              >
+                <Skeleton className="h-11 w-11 rounded-xl" />
+                <Skeleton className="h-3.5 w-20 rounded" />
+                <Skeleton className="h-3 w-12 rounded" />
+              </div>
             ))}
           </div>
         </div>

@@ -428,12 +428,12 @@ const CategorySection = () => {
               <Card
                 key={category.id}
                 className={cn(
-                  `group cursor-pointer overflow-hidden border-2 border-transparent hover:border-primary/30 shadow-lg hover:shadow-2xl active:scale-[0.94] active:translate-y-[2px] active:shadow-inner transition-all duration-500`,
+                  `group cursor-pointer overflow-hidden border-2 border-transparent hover:border-primary/30 shadow-lg hover:shadow-2xl active:scale-[0.94] active:translate-y-[2px] active:shadow-inner transition-all duration-150`,
                   category.bgColor,
                   isExpanded && "col-span-2 row-span-2",
                   isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
                 )}
-                style={{ transitionDelay: `${200 + index * 50}ms` }}
+                style={{ transitionDelay: `${200 + index * 50}ms`, transitionDuration: isVisible ? undefined : '500ms' }}
                 onClick={() => navigate(`/category/${category.id}`)}
               >
                 <div className={cn(

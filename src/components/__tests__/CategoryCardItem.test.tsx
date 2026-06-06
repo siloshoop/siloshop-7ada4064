@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from "vitest";
-import { render, screen, fireEvent } from "@testing-library/react";
+import { render, screen, fireEvent, act } from "@testing-library/react";
 import { ShoppingBag } from "lucide-react";
 import { CategoryCardItem } from "@/components/CategoryCardItem";
 
@@ -42,7 +42,9 @@ describe("CategoryCardItem (a11y + interaction)", () => {
     const btn = screen.getByRole("button");
     fireEvent.pointerDown(btn);
     expect(btn.getAttribute("data-pressed")).toBe("true");
-    vi.advanceTimersByTime(250);
+    act(() => {
+      vi.advanceTimersByTime(250);
+    });
     expect(btn.getAttribute("data-pressed")).toBeNull();
     vi.useRealTimers();
   });

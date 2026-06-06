@@ -3,6 +3,9 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { measureFrames } from "@/lib/perfMonitor";
+import { useCategoryCardPress } from "@/hooks/useCategoryCardPress";
+import { CategoryCardItem } from "@/components/CategoryCardItem";
 import { 
   Smartphone, Laptop, Shirt, Home, Dumbbell, Gamepad2, Watch, 
   Baby, Sparkles, BookOpen, Car, Utensils, TrendingUp, Footprints,
@@ -95,6 +98,7 @@ const demoCategories: PopularCategory[] = [
 ];
 
 const PopularCategories = () => {
+  // small subcomponent declared via const below
   const [categories, setCategories] = useState<PopularCategory[]>(demoCategories);
   const [subcategories, setSubcategories] = useState<Subcategory[]>([]);
   const [loading, setLoading] = useState(true);
@@ -105,6 +109,15 @@ const PopularCategories = () => {
   useEffect(() => {
     fetchPopularCategories();
   }, []);
+
+  // Sample frame timings once after first paint to log card animation smoothness
+  useEffect(() => {
+    if (loading) return;
+    const id = window.setTimeout(() => {
+      measureFrames("popular-categories-mount", 1000);
+    }, 50);
+    return () => window.clearTimeout(id);
+  }, [loading]);
 
   const fetchPopularCategories = async () => {
     try {
@@ -181,7 +194,15 @@ const PopularCategories = () => {
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
             {[...Array(12)].map((_, i) => (
-              <Skeleton key={i} className="h-[88px] rounded-xl" />
+              <div
+                key={i}
+                className="rounded-xl border border-border/50 bg-card/60 p-3 sm:p-4 flex flex-col items-center gap-2"
+                aria-hidden="true"
+              >
+                <Skeleton className="h-11 w-11 rounded-xl" />
+                <Skeleton className="h-3.5 w-20 rounded" />
+                <Skeleton className="h-3 w-12 rounded" />
+              </div>
             ))}
           </div>
         </div>
@@ -242,37 +263,16 @@ const PopularCategories = () => {
             const hasSubs = getCategorySubcategories(category.id).length > 0;
 
             return (
-              <Card
+              <CategoryCardItem
                 key={category.id}
-                role="button"
-                tabIndex={0}
-                aria-label={`فئة ${category.name_ar}، ${category.product_count ?? 0} منتج`}
-                aria-expanded={hasSubs ? isExpanded : undefined}
-                className={`category-card group cursor-pointer transition-transform transition-shadow duration-150 ease-out motion-safe:hover:scale-[1.05] motion-safe:hover:-translate-y-1 hover:shadow-xl active:scale-[0.96] active:shadow-inner border border-border/50 bg-gradient-to-br ${colors.bg} backdrop-blur-sm overflow-hidden ring-2 ${isExpanded ? 'ring-primary/50 motion-safe:scale-[1.03] shadow-xl' : `ring-transparent ${colors.ring}`}`}
-                style={{ animationDelay: `${index * 30}ms` }}
-                onClick={() => handleCategoryClick(category.id, isDemo)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" || e.key === " ") {
-                    e.preventDefault();
-                    handleCategoryClick(category.id, isDemo);
-                  }
-                }}
-              >
-                <CardContent className="p-3 sm:p-4 flex flex-col items-center gap-2 text-center relative">
-                  <div className="category-card-icon p-2.5 rounded-xl bg-background/80 backdrop-blur-sm shadow-sm group-hover:shadow-md group-active:shadow-inner transition-transform transition-shadow duration-150 motion-safe:group-hover:scale-110">
-                    <IconComponent className={`h-6 w-6 ${colors.icon} transition-transform duration-150`} />
-                  </div>
-                  <div className="min-w-0 w-full">
-                    <h3 className="text-sm font-semibold text-foreground line-clamp-1">{category.name_ar}</h3>
-                    <p className="text-xs text-muted-foreground mt-0.5">
-                      {category.product_count ?? 0} منتج
-                    </p>
-                  </div>
-                  {hasSubs && (
-                    <ChevronDown className={`absolute top-2 left-2 h-3.5 w-3.5 text-muted-foreground transition-transform duration-300 ${isExpanded ? 'rotate-180 text-primary' : ''}`} />
-                  )}
-                </CardContent>
-              </Card>
+                category={category}
+                colors={colors}
+                isExpanded={isExpanded}
+                hasSubs={hasSubs}
+                index={index}
+                IconComponent={IconComponent}
+                onActivate={() => handleCategoryClick(category.id, isDemo)}
+              />
             );
           })}
         </div>

@@ -1500,6 +1500,14 @@ export type Database = {
         Args: { _email_hash: string; _ip_hash: string }
         Returns: undefined
       }
+      record_payment: {
+        Args: {
+          _order_id: string
+          _payment_details?: Json
+          _payment_method: string
+        }
+        Returns: string
+      }
       redeem_coupon: {
         Args: { _code: string; _subtotal: number }
         Returns: {

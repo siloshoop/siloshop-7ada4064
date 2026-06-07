@@ -63,30 +63,19 @@ const Payment = () => {
     setProcessing(true);
 
     try {
-      // Create payment record
-      const { data: payment, error: paymentError } = await supabase
-        .from("payments")
-        .insert({
-          order_id: orderId,
-          payment_method: paymentMethod,
-          amount: amount,
-          payment_status: paymentMethod === "cash" ? "pending" : "completed",
-          transaction_id: `TXN-${Date.now()}`,
-          payment_details: {
-            phone_number: phoneNumber || null,
-            card_number: cardNumber ? `****${cardNumber.slice(-4)}` : null,
-          },
-        })
-        .select()
-        .single();
+      // Server-side payment + order confirmation: amount is derived from
+      // orders.total_amount inside record_payment() so the client cannot
+      // forge a settlement amount.
+      const { error: paymentError } = await supabase.rpc("record_payment", {
+        _order_id: orderId,
+        _payment_method: paymentMethod,
+        _payment_details: {
+          phone_number: phoneNumber || null,
+          card_number: cardNumber ? `****${cardNumber.slice(-4)}` : null,
+        },
+      });
 
       if (paymentError) throw paymentError;
-
-      // Update order status
-      await supabase
-        .from("orders")
-        .update({ status: "confirmed" })
-        .eq("id", orderId);
 
       toast({
         title: "تم الدفع بنجاح",

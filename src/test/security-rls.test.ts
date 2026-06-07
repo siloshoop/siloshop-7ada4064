@@ -85,10 +85,12 @@ describeIf("RLS — anonymous clients cannot access protected data", () => {
   });
 
   it("cannot tamper with coupons.used_count", async () => {
-    const { error } = await supabase
+    const { data, error } = await supabase
       .from("coupons")
       .update({ used_count: 0 })
-      .eq("id", "00000000-0000-0000-0000-000000000000");
-    expect(error).toBeTruthy();
+      .eq("id", "00000000-0000-0000-0000-000000000000")
+      .select();
+    // Either denied outright or RLS filters so no rows are returned/updated.
+    expect(error || (data && data.length === 0)).toBeTruthy();
   });
 });

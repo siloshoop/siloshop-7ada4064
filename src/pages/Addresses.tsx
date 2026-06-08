@@ -24,6 +24,8 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Loader2, MapPin, Plus, Trash2, Star, Phone, Home, Pencil } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { SYRIAN_GOVERNORATES } from "@/lib/syrianGovernorates";
 
 export interface DeliveryAddress {
   id: string;
@@ -38,7 +40,7 @@ export interface DeliveryAddress {
 
 const schema = z.object({
   recipient_name: z.string().trim().min(2, "اسم المستلم مطلوب").max(100),
-  city: z.string().trim().min(2, "المدينة مطلوبة").max(100),
+  city: z.string().trim().refine((v) => (SYRIAN_GOVERNORATES as readonly string[]).includes(v), "يرجى اختيار المحافظة"),
   phone: z.string().trim().regex(/^09\d{8}$/, "رقم سوري بصيغة 09xxxxxxxx"),
   notes: z.string().trim().max(500).optional().or(z.literal("")),
 });
@@ -235,8 +237,17 @@ const Addresses = () => {
                 </div>
                 <div className="grid grid-cols-2 gap-3">
                   <div className="space-y-1.5">
-                    <Label>المدينة</Label>
-                    <Input value={form.city} onChange={(e) => setForm({ ...form, city: e.target.value })} placeholder="دمشق" required />
+                    <Label>المحافظة</Label>
+                    <Select value={form.city} onValueChange={(v) => setForm({ ...form, city: v })}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="اختر المحافظة" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {SYRIAN_GOVERNORATES.map((g) => (
+                          <SelectItem key={g} value={g}>{g}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
                   <div className="space-y-1.5">
                     <Label>الهاتف</Label>

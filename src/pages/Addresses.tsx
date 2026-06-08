@@ -37,10 +37,8 @@ export interface DeliveryAddress {
 }
 
 const schema = z.object({
-  label: z.string().trim().min(1, "أدخل اسماً للعنوان (مثل: المنزل)").max(50),
   recipient_name: z.string().trim().min(2, "اسم المستلم مطلوب").max(100),
   city: z.string().trim().min(2, "المدينة مطلوبة").max(100),
-  street: z.string().trim().min(3, "الشارع/المنطقة مطلوبة").max(300),
   phone: z.string().trim().regex(/^09\d{8}$/, "رقم سوري بصيغة 09xxxxxxxx"),
   notes: z.string().trim().max(500).optional().or(z.literal("")),
 });
@@ -56,10 +54,8 @@ const Addresses = () => {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [form, setForm] = useState({
-    label: "",
     recipient_name: "",
     city: "",
-    street: "",
     phone: "",
     notes: "",
     is_default: false,
@@ -92,17 +88,15 @@ const Addresses = () => {
   }, [user]);
 
   const resetForm = () => {
-    setForm({ label: "", recipient_name: "", city: "", street: "", phone: "", notes: "", is_default: false });
+    setForm({ recipient_name: "", city: "", phone: "", notes: "", is_default: false });
     setEditingId(null);
   };
 
   const openEdit = (addr: DeliveryAddress) => {
     setEditingId(addr.id);
     setForm({
-      label: addr.label,
       recipient_name: addr.recipient_name,
       city: addr.city,
-      street: addr.street,
       phone: addr.phone,
       notes: addr.notes || "",
       is_default: addr.is_default,
@@ -125,10 +119,8 @@ const Addresses = () => {
         const { error } = await supabase
           .from("delivery_addresses")
           .update({
-            label: parsed.data.label,
             recipient_name: parsed.data.recipient_name,
             city: parsed.data.city,
-            street: parsed.data.street,
             phone: parsed.data.phone,
             notes: parsed.data.notes || null,
           })
@@ -147,10 +139,10 @@ const Addresses = () => {
           .from("delivery_addresses")
           .insert({
             user_id: user.id,
-            label: parsed.data.label,
+            label: "عنوان التوصيل",
             recipient_name: parsed.data.recipient_name,
             city: parsed.data.city,
-            street: parsed.data.street,
+            street: "-",
             phone: parsed.data.phone,
             notes: parsed.data.notes || null,
             is_default: false,
@@ -238,10 +230,6 @@ const Addresses = () => {
               </DialogHeader>
               <form onSubmit={handleSubmit} className="space-y-3">
                 <div className="space-y-1.5">
-                  <Label>اسم العنوان (مثل: المنزل، العمل)</Label>
-                  <Input value={form.label} onChange={(e) => setForm({ ...form, label: e.target.value })} placeholder="المنزل" required />
-                </div>
-                <div className="space-y-1.5">
                   <Label>اسم المستلم</Label>
                   <Input value={form.recipient_name} onChange={(e) => setForm({ ...form, recipient_name: e.target.value })} required />
                 </div>
@@ -256,12 +244,8 @@ const Addresses = () => {
                   </div>
                 </div>
                 <div className="space-y-1.5">
-                  <Label>المنطقة / الشارع / تفاصيل الوصول</Label>
-                  <Textarea rows={3} value={form.street} onChange={(e) => setForm({ ...form, street: e.target.value })} placeholder="المنطقة، الشارع، رقم البناء، الطابق..." required />
-                </div>
-                <div className="space-y-1.5">
-                  <Label>ملاحظات (اختياري)</Label>
-                  <Textarea rows={2} value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} placeholder="علامة مميزة أو تعليمات للمندوب" />
+                  <Label>تفاصيل الوصول / ملاحظات (اختياري)</Label>
+                  <Textarea rows={3} value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} placeholder="تفاصيل إضافية أو تعليمات للمندوب" />
                 </div>
                 <label className="flex items-center gap-2 text-sm">
                   <input type="checkbox" checked={form.is_default} onChange={(e) => setForm({ ...form, is_default: e.target.checked })} />
@@ -293,12 +277,11 @@ const Addresses = () => {
                   <div className="flex items-start justify-between gap-2">
                     <div>
                       <div className="flex items-center gap-2 flex-wrap">
-                        <h3 className="font-bold text-lg">{addr.label}</h3>
+                        <h3 className="font-bold text-lg">{addr.recipient_name}</h3>
                         {addr.is_default && (
                           <Badge className="bg-primary"><Star className="h-3 w-3 ml-1" />افتراضي</Badge>
                         )}
                       </div>
-                      <p className="text-sm text-muted-foreground">{addr.recipient_name}</p>
                     </div>
                     <div className="flex gap-1">
                       <Button variant="ghost" size="icon" onClick={() => openEdit(addr)} aria-label="تعديل">
@@ -310,7 +293,7 @@ const Addresses = () => {
                     </div>
                   </div>
                   <div className="text-sm space-y-1">
-                    <p className="flex items-start gap-2"><MapPin className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" /><span>{addr.city} — {addr.street}</span></p>
+                    <p className="flex items-start gap-2"><MapPin className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" /><span>{addr.city}</span></p>
                     <p className="flex items-center gap-2" dir="ltr"><Phone className="h-4 w-4 text-muted-foreground" />{addr.phone}</p>
                     {addr.notes && <p className="text-xs text-muted-foreground bg-muted/50 p-2 rounded">{addr.notes}</p>}
                   </div>

@@ -83,7 +83,7 @@ const Checkout = () => {
         setFormData((f) => ({
           ...f,
           phone: def.phone || f.phone,
-          shipping_address: `${def.city} — ${def.street}`,
+          shipping_address: def.notes ? `${def.city} — ${def.notes}` : def.city,
         }));
       }
     };
@@ -331,12 +331,12 @@ const Checkout = () => {
                             key={a.id}
                             onClick={() => {
                               setSelectedAddressId(a.id);
-                              setFormData({ ...formData, phone: a.phone, shipping_address: `${a.city} — ${a.street}` });
+                              setFormData({ ...formData, phone: a.phone, shipping_address: a.notes ? `${a.city} — ${a.notes}` : a.city });
                             }}
                             className={`text-right p-3 rounded-lg border text-sm transition-colors ${selectedAddressId === a.id ? "border-primary bg-primary/5" : "border-border hover:bg-muted/50"}`}
                           >
-                            <p className="font-semibold">{a.label} {a.is_default && <span className="text-xs text-primary">(افتراضي)</span>}</p>
-                            <p className="text-xs text-muted-foreground mt-0.5">{a.city} — {a.street}</p>
+                            <p className="font-semibold">{a.recipient_name} {a.is_default && <span className="text-xs text-primary">(افتراضي)</span>}</p>
+                            <p className="text-xs text-muted-foreground mt-0.5">{a.city}</p>
                             <p className="text-xs text-muted-foreground" dir="ltr">{a.phone}</p>
                           </button>
                         ))}

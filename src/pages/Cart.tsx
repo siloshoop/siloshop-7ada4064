@@ -442,7 +442,7 @@ const Cart = () => {
                     {defaultAddress ? (
                       <div className="text-xs text-muted-foreground leading-relaxed">
                         <p className="font-semibold text-foreground">{defaultAddress.recipient_name}</p>
-                        <p>{defaultAddress.city} — {defaultAddress.street}</p>
+                        <p>{defaultAddress.city}</p>
                         <p dir="ltr">{defaultAddress.phone}</p>
                       </div>
                     ) : (

@@ -13,14 +13,16 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, ShoppingCart, Tag, MapPin, Plus } from "lucide-react";
 import { Link } from "react-router-dom";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { SYRIAN_GOVERNORATES } from "@/lib/syrianGovernorates";
 
 const checkoutSchema = z.object({
   phone: z.string()
     .min(1, "رقم الهاتف مطلوب")
     .regex(/^09\d{8}$/, "رقم الهاتف يجب أن يكون بصيغة 09xxxxxxxx"),
   shipping_address: z.string()
-    .min(10, "العنوان قصير جداً (10 أحرف على الأقل)")
-    .max(500, "العنوان طويل جداً"),
+    .min(1, "يرجى اختيار المحافظة")
+    .refine((v) => (SYRIAN_GOVERNORATES as readonly string[]).includes(v), "يرجى اختيار محافظة صحيحة"),
   notes: z.string().max(1000, "الملاحظات طويلة جداً").optional(),
 });
 
@@ -83,7 +85,7 @@ const Checkout = () => {
         setFormData((f) => ({
           ...f,
           phone: def.phone || f.phone,
-          shipping_address: def.notes ? `${def.city} — ${def.notes}` : def.city,
+          shipping_address: def.city,
         }));
       }
     };
@@ -331,7 +333,7 @@ const Checkout = () => {
                             key={a.id}
                             onClick={() => {
                               setSelectedAddressId(a.id);
-                              setFormData({ ...formData, phone: a.phone, shipping_address: a.notes ? `${a.city} — ${a.notes}` : a.city });
+                              setFormData({ ...formData, phone: a.phone, shipping_address: a.city });
                             }}
                             className={`text-right p-3 rounded-lg border text-sm transition-colors ${selectedAddressId === a.id ? "border-primary bg-primary/5" : "border-border hover:bg-muted/50"}`}
                           >
@@ -363,15 +365,20 @@ const Checkout = () => {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="address">عنوان الشحن *</Label>
-                    <Textarea
-                      id="address"
+                    <Label htmlFor="address">المحافظة *</Label>
+                    <Select
                       value={formData.shipping_address}
-                      onChange={(e) => setFormData({ ...formData, shipping_address: e.target.value })}
-                      required
-                      placeholder="أدخل العنوان الكامل بالتفصيل"
-                      rows={3}
-                    />
+                      onValueChange={(v) => setFormData({ ...formData, shipping_address: v })}
+                    >
+                      <SelectTrigger id="address">
+                        <SelectValue placeholder="اختر المحافظة" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {SYRIAN_GOVERNORATES.map((g) => (
+                          <SelectItem key={g} value={g}>{g}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
 
                   <div className="space-y-2">

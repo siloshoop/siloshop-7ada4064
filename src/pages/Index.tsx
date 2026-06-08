@@ -19,7 +19,6 @@ import { useNativeAds } from "@/hooks/useNativeAds";
 
 // Import critical sections directly (not lazy) to prevent chunk loading failures
 import PopularCategories from "@/components/PopularCategories";
-import CategorySection from "@/components/CategorySection";
 import BestSellers from "@/components/BestSellers";
 import FeaturedProducts from "@/components/FeaturedProducts";
 import ProductRecommendations from "@/components/ProductRecommendations";
@@ -191,9 +190,6 @@ const Index = () => {
           <HomeNativeAds />
         </SectionErrorBoundary>
 
-        <SectionErrorBoundary>
-          <CategorySection key={`category-${refreshKey}`} />
-        </SectionErrorBoundary>
         <SectionErrorBoundary>
           <PurchasedRecently key={`purchased-${refreshKey}`} />
         </SectionErrorBoundary>

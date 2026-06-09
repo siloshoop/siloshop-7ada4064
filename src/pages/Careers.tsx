@@ -81,7 +81,7 @@ const Careers = () => {
                           <CardTitle className="text-xl">{job.title}</CardTitle>
                           <CardDescription>{job.description}</CardDescription>
                         </div>
-                        <Button>تقدم الآن</Button>
+                        <Button disabled>قريباً</Button>
                       </div>
                     </CardHeader>
                     <CardContent>
@@ -110,7 +110,7 @@ const Careers = () => {
                 <CardDescription>أرسل لنا سيرتك الذاتية وسنتواصل معك عند توفر فرص مناسبة</CardDescription>
               </CardHeader>
               <CardContent>
-                <Button>أرسل سيرتك الذاتية</Button>
+                <Button disabled>قريباً</Button>
               </CardContent>
             </Card>
           </div>

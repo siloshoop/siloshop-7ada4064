@@ -1,40 +1,11 @@
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Calendar, User } from "lucide-react";
+import { Calendar, User, Clock, ArrowLeft } from "lucide-react";
+import { Link } from "react-router-dom";
+import { blogPosts } from "@/data/blogPosts";
 
 const Blog = () => {
-  const posts = [
-    {
-      title: "نصائح للتسوق الآمن عبر الإنترنت",
-      description: "دليل شامل لحماية نفسك أثناء التسوق الإلكتروني",
-      date: "2024-01-15",
-      author: "فريق SiloShop",
-      image: "/placeholder.svg"
-    },
-    {
-      title: "كيف تختار المنتج المناسب؟",
-      description: "خطوات عملية لاتخاذ قرار شراء صحيح",
-      date: "2024-01-10",
-      author: "فريق SiloShop",
-      image: "/placeholder.svg"
-    },
-    {
-      title: "أحدث صيحات الموضة لهذا الموسم",
-      description: "تعرف على أبرز اتجاهات الموضة والأناقة",
-      date: "2024-01-05",
-      author: "فريق SiloShop",
-      image: "/placeholder.svg"
-    },
-    {
-      title: "دليل البائعين الجدد",
-      description: "كل ما تحتاج معرفته للبدء في البيع على منصتنا",
-      date: "2024-01-01",
-      author: "فريق SiloShop",
-      image: "/placeholder.svg"
-    }
-  ];
-
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
@@ -46,30 +17,44 @@ const Blog = () => {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {posts.map((post, index) => (
-              <Card key={index} className="hover:shadow-lg transition-shadow cursor-pointer">
-                <img 
-                  src={post.image} 
-                  alt={post.title}
-                  className="w-full h-48 object-cover rounded-t-lg"
-                />
-                <CardHeader>
-                  <CardTitle className="text-xl">{post.title}</CardTitle>
-                  <CardDescription>{post.description}</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                    <div className="flex items-center gap-1">
-                      <Calendar className="h-4 w-4" />
-                      <span>{new Date(post.date).toLocaleDateString('ar-SY')}</span>
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <User className="h-4 w-4" />
-                      <span>{post.author}</span>
-                    </div>
+            {blogPosts.map((post) => (
+              <Link key={post.slug} to={`/blog/${post.slug}`} className="group">
+                <Card className="overflow-hidden hover:shadow-xl transition-all duration-300 h-full group-hover:-translate-y-1">
+                  <div className="aspect-[16/9] overflow-hidden bg-muted">
+                    <img
+                      src={post.image}
+                      alt={post.title}
+                      loading="lazy"
+                      width={1024}
+                      height={576}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    />
                   </div>
-                </CardContent>
-              </Card>
+                  <CardHeader>
+                    <CardTitle className="text-xl group-hover:text-primary transition-colors">{post.title}</CardTitle>
+                    <CardDescription>{post.description}</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
+                      <div className="flex items-center gap-1">
+                        <Calendar className="h-4 w-4" />
+                        <span>{new Date(post.date).toLocaleDateString("ar-SY")}</span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <User className="h-4 w-4" />
+                        <span>{post.author}</span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <Clock className="h-4 w-4" />
+                        <span>{post.readTime}</span>
+                      </div>
+                      <span className="mr-auto inline-flex items-center gap-1 text-primary font-medium">
+                        اقرأ المزيد <ArrowLeft className="h-4 w-4" />
+                      </span>
+                    </div>
+                  </CardContent>
+                </Card>
+              </Link>
             ))}
           </div>
         </div>

@@ -11,6 +11,8 @@ export interface BlogPost {
   author: string;
   image: string;
   readTime: string;
+  category: string;
+  tags: string[];
   content: { heading?: string; paragraph: string }[];
 }
 
@@ -23,6 +25,8 @@ export const blogPosts: BlogPost[] = [
     author: "فريق SiloShop",
     image: safeShopping,
     readTime: "5 دقائق",
+    category: "نصائح للمشترين",
+    tags: ["أمان", "تسوق", "حماية", "كلمات مرور"],
     content: [
       {
         paragraph:
@@ -63,6 +67,8 @@ export const blogPosts: BlogPost[] = [
     author: "فريق SiloShop",
     image: chooseProduct,
     readTime: "4 دقائق",
+    category: "نصائح للمشترين",
+    tags: ["مقارنة", "تسوق", "تقييمات"],
     content: [
       {
         paragraph:
@@ -98,6 +104,8 @@ export const blogPosts: BlogPost[] = [
     author: "فريق SiloShop",
     image: fashionTrends,
     readTime: "6 دقائق",
+    category: "الموضة والأناقة",
+    tags: ["موضة", "ألوان", "إكسسوارات", "أحذية"],
     content: [
       {
         paragraph:
@@ -133,6 +141,8 @@ export const blogPosts: BlogPost[] = [
     author: "فريق SiloShop",
     image: sellersGuide,
     readTime: "7 دقائق",
+    category: "دليل البائعين",
+    tags: ["بيع", "بائعين", "متجر", "تسويق"],
     content: [
       {
         paragraph:
@@ -169,3 +179,29 @@ export const blogPosts: BlogPost[] = [
 
 export const getPostBySlug = (slug: string) =>
   blogPosts.find((p) => p.slug === slug);
+
+export const getAllCategories = (): string[] =>
+  Array.from(new Set(blogPosts.map((p) => p.category)));
+
+export const getAllTags = (): string[] =>
+  Array.from(new Set(blogPosts.flatMap((p) => p.tags)));
+
+export const getRelatedPosts = (post: BlogPost, limit = 3): BlogPost[] => {
+  return blogPosts
+    .filter((p) => p.slug !== post.slug)
+    .map((p) => {
+      const sameCategory = p.category === post.category ? 3 : 0;
+      const sharedTags = p.tags.filter((t) => post.tags.includes(t)).length;
+      return { post: p, score: sameCategory + sharedTags };
+    })
+    .sort((a, b) => b.score - a.score)
+    .slice(0, limit)
+    .map((x) => x.post);
+};
+
+export const slugifyHeading = (heading: string): string =>
+  heading
+    .replace(/[^\p{L}\p{N}\s-]/gu, "")
+    .trim()
+    .replace(/\s+/g, "-")
+    .toLowerCase();

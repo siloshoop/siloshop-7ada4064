@@ -1,10 +1,11 @@
 import { useParams, Link, Navigate } from "react-router-dom";
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
-import { Calendar, User, Clock, ArrowRight } from "lucide-react";
-import { getPostBySlug, blogPosts } from "@/data/blogPosts";
+import { Badge } from "@/components/ui/badge";
+import { Calendar, User, Clock, ArrowRight, ShoppingBag, Mail, ListOrdered } from "lucide-react";
+import { getPostBySlug, getRelatedPosts, slugifyHeading } from "@/data/blogPosts";
 
 const BlogPost = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -19,7 +20,11 @@ const BlogPost = () => {
 
   if (!post) return <Navigate to="/blog" replace />;
 
-  const related = blogPosts.filter((p) => p.slug !== post.slug).slice(0, 3);
+  const related = useMemo(() => getRelatedPosts(post, 3), [post]);
+  const toc = post.content
+    .filter((s) => s.heading)
+    .map((s) => ({ id: slugifyHeading(s.heading!), text: s.heading! }));
+  const midIndex = Math.floor(post.content.length / 2);
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -43,6 +48,7 @@ const BlogPost = () => {
                     العودة للمدونة
                   </Button>
                 </Link>
+                <Badge variant="secondary" className="mb-3">{post.category}</Badge>
                 <h1 className="text-3xl md:text-5xl font-bold mb-3">{post.title}</h1>
                 <p className="text-lg text-muted-foreground mb-4">{post.description}</p>
                 <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
@@ -64,17 +70,88 @@ const BlogPost = () => {
           </div>
 
           <div className="container px-4 py-12">
-            <div className="max-w-3xl mx-auto prose prose-lg dark:prose-invert">
-              {post.content.map((section, i) => (
-                <div key={i} className="mb-8">
-                  {section.heading && (
-                    <h2 className="text-2xl font-bold mb-3 text-foreground">{section.heading}</h2>
-                  )}
-                  <p className="text-base md:text-lg leading-relaxed text-muted-foreground">
-                    {section.paragraph}
-                  </p>
+            <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-[1fr_280px] gap-8">
+              <div className="prose prose-lg dark:prose-invert max-w-none">
+                {post.content.map((section, i) => (
+                  <div key={i} className="mb-8">
+                    {section.heading && (
+                      <h2
+                        id={slugifyHeading(section.heading)}
+                        className="text-2xl font-bold mb-3 text-foreground scroll-mt-24"
+                      >
+                        {section.heading}
+                      </h2>
+                    )}
+                    <p className="text-base md:text-lg leading-relaxed text-muted-foreground">
+                      {section.paragraph}
+                    </p>
+                    {i === midIndex && (
+                      <div className="my-8 rounded-xl border bg-gradient-to-br from-primary/10 to-accent/10 p-6 not-prose">
+                        <div className="flex items-start gap-4">
+                          <ShoppingBag className="h-8 w-8 text-primary shrink-0" />
+                          <div className="flex-1">
+                            <h3 className="font-bold mb-1">جرّب الآن على SiloShop</h3>
+                            <p className="text-sm text-muted-foreground mb-3">
+                              اكتشف آلاف المنتجات بأفضل الأسعار وتوصيل سريع.
+                            </p>
+                            <Button asChild size="sm">
+                              <Link to="/">ابدأ التسوق</Link>
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                ))}
+
+                <div className="flex flex-wrap gap-2 pt-6 border-t">
+                  {post.tags.map((t) => (
+                    <Badge key={t} variant="secondary">#{t}</Badge>
+                  ))}
                 </div>
-              ))}
+
+                <div className="mt-10 rounded-xl border bg-card p-6 not-prose text-center">
+                  <Mail className="h-10 w-10 text-primary mx-auto mb-3" />
+                  <h3 className="text-xl font-bold mb-2">أعجبك المقال؟</h3>
+                  <p className="text-muted-foreground mb-4">اشترك في نشرتنا لتصلك أحدث المقالات والعروض</p>
+                  <Button asChild>
+                    <Link to="/contact">تواصل معنا</Link>
+                  </Button>
+                </div>
+              </div>
+
+              <aside className="lg:sticky lg:top-24 self-start space-y-6">
+                {toc.length > 0 && (
+                  <div className="rounded-xl border bg-card p-5">
+                    <div className="flex items-center gap-2 mb-3 font-bold">
+                      <ListOrdered className="h-4 w-4" />
+                      محتويات المقال
+                    </div>
+                    <ul className="space-y-2 text-sm">
+                      {toc.map((item) => (
+                        <li key={item.id}>
+                          <a
+                            href={`#${item.id}`}
+                            className="text-muted-foreground hover:text-primary transition-colors block"
+                          >
+                            {item.text}
+                          </a>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+
+                <div className="rounded-xl border bg-gradient-to-br from-primary/10 to-accent/10 p-5">
+                  <h3 className="font-bold mb-2">ابدأ مشروعك معنا</h3>
+                  <p className="text-sm text-muted-foreground mb-3">
+                    اطلع على باقاتنا واختر ما يناسبك
+                  </p>
+                  <Button asChild size="sm" className="w-full">
+                    <Link to="/pricing">عرض الباقات</Link>
+                  </Button>
+                </div>
+              </aside>
             </div>
           </div>
         </article>
@@ -100,6 +177,7 @@ const BlogPost = () => {
                         />
                       </div>
                       <div className="p-4">
+                        <Badge variant="secondary" className="mb-2 text-xs">{p.category}</Badge>
                         <h3 className="font-bold mb-1 group-hover:text-primary transition-colors">
                           {p.title}
                         </h3>

@@ -79,7 +79,9 @@ const Footer = () => {
                 </Link>
               </li>
               <li>
-                
+                <Link to="/faq" className="hover:text-foreground transition-colors story-link">
+                  الأسئلة الشائعة
+                </Link>
               </li>
               <li>
                 <Link to="/returns" className="hover:text-foreground transition-colors story-link">
@@ -89,6 +91,11 @@ const Footer = () => {
               <li>
                 <Link to="/shipping" className="hover:text-foreground transition-colors story-link">
                   الشحن والتوصيل
+                </Link>
+              </li>
+              <li>
+                <Link to="/pricing" className="hover:text-foreground transition-colors story-link">
+                  الباقات والأسعار
                 </Link>
               </li>
             </ul>

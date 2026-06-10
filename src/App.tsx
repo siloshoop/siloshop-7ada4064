@@ -52,6 +52,7 @@ import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
 import Addresses from "./pages/Addresses";
 import OrderDetails from "./pages/OrderDetails";
+import Pricing from "./pages/Pricing";
 
 const queryClient = new QueryClient(); // App query client
 
@@ -95,6 +96,7 @@ const App = () => (
             <Route path="/compare" element={<Compare />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/faq" element={<FAQ />} />
+            <Route path="/pricing" element={<Pricing />} />
             <Route path="/returns" element={<Returns />} />
             <Route path="/shipping" element={<Shipping />} />
             <Route path="/about" element={<About />} />

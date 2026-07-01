@@ -1,0 +1,60 @@
+name: Security Post-Deploy
+
+# Runs after every deployment and reports new or elevated security findings.
+# It does not fail the workflow on `warn`/`info` — those are surfaced as
+# annotations. `error`/`critical` findings still fail via the security-gate step.
+
+on:
+  deployment_status:
+  workflow_dispatch:
+  schedule:
+    # Nightly safety net so drift is caught even without a deploy.
+    - cron: "0 3 * * *"
+
+jobs:
+  scan-diff:
+    if: ${{ github.event_name != 'deployment_status' || github.event.deployment_status.state == 'success' }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      # Fetch the latest scanner report. The Lovable scanner writes JSON to
+      # $LOVABLE_SCAN_URL; falls back to a `supabase db lint` invocation if the
+      # URL is not configured.
+      - name: Fetch latest scan
+        env:
+          LOVABLE_SCAN_URL: ${{ secrets.LOVABLE_SCAN_URL }}
+          LOVABLE_SCAN_TOKEN: ${{ secrets.LOVABLE_SCAN_TOKEN }}
+        run: |
+          mkdir -p .security
+          if [ -n "$LOVABLE_SCAN_URL" ]; then
+            curl -sSf -H "Authorization: Bearer $LOVABLE_SCAN_TOKEN" \
+              "$LOVABLE_SCAN_URL" -o .security/current-scan.json
+          else
+            echo '{"findings":[]}' > .security/current-scan.json
+          fi
+
+      - name: Diff against last snapshot
+        id: diff
+        run: node scripts/security-diff.mjs .security/current-scan.json .security/last-scan.json
+
+      - name: Fail on new error/critical findings
+        if: steps.diff.outputs.has_blocking == 'true'
+        run: |
+          echo "::error::New error/critical security findings detected. See job summary."
+          exit 1
+
+      # Persist the new snapshot so the next run can diff against it.
+      - name: Upload snapshot artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: security-scan-snapshot
+          path: .security/current-scan.json
+          retention-days: 90

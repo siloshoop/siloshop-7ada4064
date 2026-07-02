@@ -21,6 +21,10 @@ export default tseslint.config(
       ...reactHooks.configs.recommended.rules,
       "react-refresh/only-export-components": ["warn", { allowConstantExport: true }],
       "@typescript-eslint/no-unused-vars": "off",
+      // Downgraded to warn: Supabase generated types return dynamic Json/join
+      // shapes that make strict typing impractical in mapping code. Tracked
+      // in docs/rls-policies.md and refactor notes.
+      "@typescript-eslint/no-explicit-any": "warn",
     },
   },
 );

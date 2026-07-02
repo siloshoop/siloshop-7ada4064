@@ -70,7 +70,7 @@ const FlyingItem = ({
         top: item.startY,
         transform: "translate(-50%, -50%)",
         animation: "flyToCart 0.7s cubic-bezier(0.2, 0, 0.2, 1) forwards",
-        // @ts-ignore
+        // @ts-expect-error - startViewTransition is Chrome-only, not yet in TS lib.dom
         "--fly-dx": `${dx}px`,
         "--fly-dy": `${dy}px`,
       } as React.CSSProperties}

@@ -157,7 +157,9 @@ const Favorites = () => {
         await navigator.clipboard.writeText(`${text}\n${url}`);
         toast({ title: "تم النسخ", description: "تم نسخ رابط القائمة" });
       }
-    } catch {}
+    } catch {
+      /* user aborted share/copy — ignore */
+    }
   };
 
   if (authLoading || loading) {

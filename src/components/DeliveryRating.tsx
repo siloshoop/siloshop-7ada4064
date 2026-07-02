@@ -51,7 +51,7 @@ const DeliveryRating = ({ orderId, userId, isDelivered, existingRating, onRating
       });
       setOpen(false);
       onRatingSubmitted?.();
-    } catch (error: any) {
+    } catch (error) {
       toast({
         title: "خطأ",
         description: error.message || "فشل في إرسال التقييم",

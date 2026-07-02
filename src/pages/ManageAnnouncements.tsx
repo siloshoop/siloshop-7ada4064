@@ -121,7 +121,7 @@ const ManageAnnouncements = () => {
 
       resetForm();
       fetchAnnouncements();
-    } catch (error: any) {
+    } catch (error) {
       toast({
         title: "خطأ",
         description: error.message,

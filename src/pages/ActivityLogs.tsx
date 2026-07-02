@@ -94,7 +94,7 @@ const ActivityLogs = () => {
       }));
 
       setLogs(logsWithProfiles);
-    } catch (error: any) {
+    } catch (error) {
       toast({
         title: "خطأ",
         description: error.message,

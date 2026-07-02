@@ -131,7 +131,7 @@ const VendorOrders = () => {
           });
           setOrderItems(groupedItems);
         }
-      } catch (error: any) {
+      } catch (error) {
         toast({
           title: "خطأ",
           description: "فشل في جلب الطلبات",
@@ -232,7 +232,7 @@ const VendorOrders = () => {
 
       setShippingDialogOpen(false);
       setPendingShipOrderId(null);
-    } catch (error: any) {
+    } catch (error) {
       toast({
         title: "خطأ",
         description: "فشل في تحديث حالة الطلب",
@@ -287,7 +287,7 @@ const VendorOrders = () => {
         title: "تم التحديث",
         description: "تم تحديث حالة الطلب بنجاح",
       });
-    } catch (error: any) {
+    } catch (error) {
       toast({
         title: "خطأ",
         description: "فشل في تحديث حالة الطلب",

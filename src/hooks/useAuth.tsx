@@ -38,7 +38,7 @@ export const useAuth = () => {
         title: "تم تسجيل الخروج بنجاح",
         description: "نراك قريباً!",
       });
-    } catch (error: any) {
+    } catch (error) {
       toast({
         title: "خطأ",
         description: error.message,

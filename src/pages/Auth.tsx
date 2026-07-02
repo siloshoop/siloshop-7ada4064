@@ -120,7 +120,7 @@ const Auth = () => {
       });
 
       navigate("/");
-    } catch (error: any) {
+    } catch (error) {
       toast({
         title: "خطأ في تسجيل الدخول",
         description: error.message,
@@ -186,7 +186,7 @@ const Auth = () => {
       });
 
       navigate("/");
-    } catch (error: any) {
+    } catch (error) {
       toast({
         title: "خطأ في التسجيل",
         description: error.message,

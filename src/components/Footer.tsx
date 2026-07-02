@@ -24,7 +24,7 @@ const Footer = () => {
         description: "شكراً لاشتراكك في نشرتنا البريدية"
       });
       setEmail("");
-    } catch (error: any) {
+    } catch (error) {
       toast({
         title: "خطأ",
         description: error.message.includes("duplicate") ? "هذا البريد مشترك بالفعل" : "حدث خطأ، يرجى المحاولة مرة أخرى",

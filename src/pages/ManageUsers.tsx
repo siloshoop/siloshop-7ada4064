@@ -94,7 +94,7 @@ const ManageUsers = () => {
       });
 
       setUserRoles(rolesMap);
-    } catch (error: any) {
+    } catch (error) {
       toast({
         title: "خطأ",
         description: error.message,
@@ -119,7 +119,7 @@ const ManageUsers = () => {
       });
 
       fetchUsers();
-    } catch (error: any) {
+    } catch (error) {
       if (error.code === "23505") {
         toast({
           title: "تنبيه",
@@ -161,7 +161,7 @@ const ManageUsers = () => {
       });
 
       fetchUsers();
-    } catch (error: any) {
+    } catch (error) {
       toast({
         title: "خطأ",
         description: error.message,
@@ -185,7 +185,7 @@ const ManageUsers = () => {
       });
 
       fetchUsers();
-    } catch (error: any) {
+    } catch (error) {
       toast({
         title: "خطأ",
         description: error.message,
@@ -241,7 +241,7 @@ const ManageUsers = () => {
 
       setBanReason("");
       fetchUsers();
-    } catch (error: any) {
+    } catch (error) {
       toast({
         title: "خطأ",
         description: error.message,
@@ -282,7 +282,7 @@ const ManageUsers = () => {
       });
 
       fetchUsers();
-    } catch (error: any) {
+    } catch (error) {
       toast({
         title: "خطأ",
         description: error.message,

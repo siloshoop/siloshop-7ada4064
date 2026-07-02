@@ -108,7 +108,7 @@ const Checkout = () => {
 
       if (error) throw error;
       setCartItems(data as any || []);
-    } catch (error: any) {
+    } catch (error) {
       toast({
         title: "خطأ",
         description: "فشل في جلب عربة التسوق",
@@ -176,7 +176,7 @@ const Checkout = () => {
         title: "تم التطبيق",
         description: `تم تطبيق كوبون خصم بقيمة ${discountAmount} ل.س`,
       });
-    } catch (error: any) {
+    } catch (error) {
       toast({
         title: "خطأ",
         description: error.message,
@@ -276,7 +276,7 @@ const Checkout = () => {
           amount: total 
         } 
       });
-    } catch (error: any) {
+    } catch (error) {
       toast({
         title: "خطأ",
         description: error.message,

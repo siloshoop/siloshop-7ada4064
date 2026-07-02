@@ -1,4 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
+import type { Json } from "@/integrations/supabase/types";
 
 /**
  * Log a user activity via the `log_activity` SECURITY DEFINER RPC.
@@ -7,7 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 export async function logActivity(
   _userId: string,
   actionType: string,
-  details: Record<string, unknown> = {},
+  details: Json = {},
 ): Promise<void> {
   try {
     await supabase.rpc("log_activity", {

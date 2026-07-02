@@ -1,35 +1,21 @@
+import { ElementType, HTMLAttributes } from "react";
 import { cn } from "@/lib/utils";
 
-interface BrandLogoProps {
-  /** Tailwind classes to control size/cursor/spacing — overrides defaults */
+type BrandLogoProps = HTMLAttributes<HTMLElement> & {
+  as?: ElementType;
   className?: string;
-  /** Render as <h1> for SEO in headers, otherwise <span> */
-  as?: "h1" | "h2" | "span";
-  onClick?: () => void;
-}
+};
 
-/**
- * Unified SiloShop brand wordmark.
- * - Bold weight + primary→accent gradient
- * - Readable in both light/dark modes (no excess glow)
- * - Default sizing scales from mobile up; pass `className` to override
- */
-export const BrandLogo = ({
-  className,
-  as = "span",
-  onClick,
-}: BrandLogoProps) => {
-  const Tag = as as "h1" | "h2" | "span";
+const BrandLogo = ({ as: Tag = "span", className, ...rest }: BrandLogoProps) => {
   return (
     <Tag
-      onClick={onClick}
-      className={cn(
-        "font-extrabold tracking-tight bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent select-none",
-        onClick && "cursor-pointer",
-        className,
-      )}
+      className={cn("inline-flex items-baseline gap-1 font-extrabold tracking-tight", className)}
+      {...rest}
     >
-      SiloShop
+      <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+        Silo
+      </span>
+      <span className="text-foreground">Shop</span>
     </Tag>
   );
 };

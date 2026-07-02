@@ -109,7 +109,7 @@ const Product = () => {
         } else {
           setProduct(null);
         }
-      } catch (error: any) {
+      } catch (error) {
         toast({
           title: "خطأ",
           description: "فشل في جلب المنتج",
@@ -161,7 +161,7 @@ const Product = () => {
         title: "تمت الإضافة",
         description: "تم إضافة المنتج إلى السلة",
       });
-    } catch (error: any) {
+    } catch (error) {
       toast({
         title: "خطأ",
         description: error.message,

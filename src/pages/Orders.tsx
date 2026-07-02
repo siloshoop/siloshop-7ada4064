@@ -148,7 +148,7 @@ const Orders = () => {
       }));
 
       setOrders(ordersWithDetails);
-    } catch (error: any) {
+    } catch (error) {
       console.error("Orders fetch error:", error);
       toast({
         title: "خطأ",

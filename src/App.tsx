@@ -1,3 +1,4 @@
+import { lazy, Suspense } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -5,56 +6,65 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ThemeProvider } from "next-themes";
 import { FlyToCartProvider } from "@/components/FlyToCart";
+// Homepage stays eager (visibility-first per project error-isolation memory).
 import Index from "./pages/Index";
-import Auth from "./pages/Auth";
-import Dashboard from "./pages/Dashboard";
-import AddProduct from "./pages/AddProduct";
-import EditProduct from "./pages/EditProduct";
-import Favorites from "./pages/Favorites";
-import ManageCoupons from "./pages/ManageCoupons";
-import ManageSubcategories from "./pages/ManageSubcategories";
-import TrackOrder from "./pages/TrackOrder";
-import Checkout from "./pages/Checkout";
-import Category from "./pages/Category";
-import Cart from "./pages/Cart";
-import Orders from "./pages/Orders";
-import Product from "./pages/Product";
 import NotFound from "./pages/NotFound";
-import Chat from "./pages/Chat";
-import Payment from "./pages/Payment";
-import Statistics from "./pages/Statistics";
-import InstallPWA from "./pages/InstallPWA";
-import Compare from "./pages/Compare";
-import Contact from "./pages/Contact";
-import FAQ from "./pages/FAQ";
-import Returns from "./pages/Returns";
-import Shipping from "./pages/Shipping";
-import About from "./pages/About";
-import Blog from "./pages/Blog";
-import BlogPost from "./pages/BlogPost";
-import Careers from "./pages/Careers";
-import Partners from "./pages/Partners";
-import VendorOrders from "./pages/VendorOrders";
-import VendorRatings from "./pages/VendorRatings";
-import Subcategory from "./pages/Subcategory";
-import ManageDeals from "./pages/ManageDeals";
-import SearchPage from "./pages/Search";
-import Wishlist from "./pages/Wishlist";
-import SharedWishlist from "./pages/SharedWishlist";
-import Notifications from "./pages/Notifications";
-import NotificationSettings from "./pages/NotificationSettings";
-import FollowedBrands from "./pages/FollowedBrands";
-import ManageAnnouncements from "./pages/ManageAnnouncements";
-import ManageUsers from "./pages/ManageUsers";
-import ActivityLogs from "./pages/ActivityLogs";
-import ManageNativeAds from "./pages/ManageNativeAds";
-import ForgotPassword from "./pages/ForgotPassword";
-import ResetPassword from "./pages/ResetPassword";
-import Addresses from "./pages/Addresses";
-import OrderDetails from "./pages/OrderDetails";
-import Pricing from "./pages/Pricing";
+
+// Lazy-loaded routes. Each becomes its own async chunk.
+const Auth = lazy(() => import("./pages/Auth"));
+const Dashboard = lazy(() => import("./pages/Dashboard"));
+const AddProduct = lazy(() => import("./pages/AddProduct"));
+const EditProduct = lazy(() => import("./pages/EditProduct"));
+const Favorites = lazy(() => import("./pages/Favorites"));
+const ManageCoupons = lazy(() => import("./pages/ManageCoupons"));
+const ManageSubcategories = lazy(() => import("./pages/ManageSubcategories"));
+const TrackOrder = lazy(() => import("./pages/TrackOrder"));
+const Checkout = lazy(() => import("./pages/Checkout"));
+const Category = lazy(() => import("./pages/Category"));
+const Cart = lazy(() => import("./pages/Cart"));
+const Orders = lazy(() => import("./pages/Orders"));
+const Product = lazy(() => import("./pages/Product"));
+const Chat = lazy(() => import("./pages/Chat"));
+const Payment = lazy(() => import("./pages/Payment"));
+const Statistics = lazy(() => import("./pages/Statistics"));
+const InstallPWA = lazy(() => import("./pages/InstallPWA"));
+const Compare = lazy(() => import("./pages/Compare"));
+const Contact = lazy(() => import("./pages/Contact"));
+const FAQ = lazy(() => import("./pages/FAQ"));
+const Returns = lazy(() => import("./pages/Returns"));
+const Shipping = lazy(() => import("./pages/Shipping"));
+const About = lazy(() => import("./pages/About"));
+const Blog = lazy(() => import("./pages/Blog"));
+const BlogPost = lazy(() => import("./pages/BlogPost"));
+const Careers = lazy(() => import("./pages/Careers"));
+const Partners = lazy(() => import("./pages/Partners"));
+const VendorOrders = lazy(() => import("./pages/VendorOrders"));
+const VendorRatings = lazy(() => import("./pages/VendorRatings"));
+const Subcategory = lazy(() => import("./pages/Subcategory"));
+const ManageDeals = lazy(() => import("./pages/ManageDeals"));
+const SearchPage = lazy(() => import("./pages/Search"));
+const Wishlist = lazy(() => import("./pages/Wishlist"));
+const SharedWishlist = lazy(() => import("./pages/SharedWishlist"));
+const Notifications = lazy(() => import("./pages/Notifications"));
+const NotificationSettings = lazy(() => import("./pages/NotificationSettings"));
+const FollowedBrands = lazy(() => import("./pages/FollowedBrands"));
+const ManageAnnouncements = lazy(() => import("./pages/ManageAnnouncements"));
+const ManageUsers = lazy(() => import("./pages/ManageUsers"));
+const ActivityLogs = lazy(() => import("./pages/ActivityLogs"));
+const ManageNativeAds = lazy(() => import("./pages/ManageNativeAds"));
+const ForgotPassword = lazy(() => import("./pages/ForgotPassword"));
+const ResetPassword = lazy(() => import("./pages/ResetPassword"));
+const Addresses = lazy(() => import("./pages/Addresses"));
+const OrderDetails = lazy(() => import("./pages/OrderDetails"));
+const Pricing = lazy(() => import("./pages/Pricing"));
 
 const queryClient = new QueryClient(); // App query client
+
+const RouteFallback = () => (
+  <div className="flex min-h-[60vh] items-center justify-center" role="status" aria-busy="true">
+    <div className="h-10 w-10 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+  </div>
+);
 
 const App = () => (
   <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
@@ -64,6 +74,7 @@ const App = () => (
         <Toaster />
         <Sonner />
         <BrowserRouter>
+          <Suspense fallback={<RouteFallback />}>
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/search" element={<SearchPage />} />
@@ -115,6 +126,7 @@ const App = () => (
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
+          </Suspense>
         </BrowserRouter>
         </FlyToCartProvider>
       </TooltipProvider>

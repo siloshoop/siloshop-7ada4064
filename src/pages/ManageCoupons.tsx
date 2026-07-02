@@ -100,7 +100,7 @@ const ManageCoupons = () => {
       });
       setShowForm(false);
       fetchCoupons();
-    } catch (error: any) {
+    } catch (error) {
       toast({
         title: "خطأ",
         description: error.message,

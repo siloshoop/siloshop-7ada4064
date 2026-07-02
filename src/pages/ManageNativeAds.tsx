@@ -73,7 +73,7 @@ const ManageNativeAds = () => {
 
       if (error) throw error;
       setAds(data || []);
-    } catch (error: any) {
+    } catch (error) {
       toast({ title: "خطأ", description: error.message, variant: "destructive" });
     } finally {
       setLoading(false);
@@ -117,7 +117,7 @@ const ManageNativeAds = () => {
       }
       resetForm();
       fetchAds();
-    } catch (error: any) {
+    } catch (error) {
       toast({ title: "خطأ", description: error.message, variant: "destructive" });
     }
   };

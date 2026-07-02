@@ -76,7 +76,7 @@ export const FavoriteButton = ({ productId, variant = "outline", size = "lg" }: 
           description: "تم إضافة المنتج إلى المفضلة",
         });
       }
-    } catch (error: any) {
+    } catch (error) {
       toast({
         title: "خطأ",
         description: error.message,

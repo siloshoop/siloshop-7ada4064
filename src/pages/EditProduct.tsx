@@ -90,7 +90,7 @@ const EditProduct = () => {
             setExistingImages(images);
           }
         }
-      } catch (error: any) {
+      } catch (error) {
         toast({
           title: "خطأ",
           description: error.message,
@@ -271,7 +271,7 @@ const EditProduct = () => {
       });
 
       navigate("/dashboard");
-    } catch (error: any) {
+    } catch (error) {
       toast({
         title: "خطأ",
         description: error.message,
@@ -303,7 +303,7 @@ const EditProduct = () => {
       });
 
       navigate("/dashboard");
-    } catch (error: any) {
+    } catch (error) {
       toast({
         title: "خطأ",
         description: error.message,

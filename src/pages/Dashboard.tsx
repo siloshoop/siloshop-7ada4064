@@ -111,7 +111,7 @@ const Dashboard = () => {
             favorites: favRes.count || 0,
           });
         }
-      } catch (error: any) {
+      } catch (error) {
         toast({
           title: "خطأ",
           description: "فشل في جلب البيانات",
@@ -184,7 +184,7 @@ const Dashboard = () => {
         title: "تم بنجاح",
         description: "تم حذف المنتج بنجاح",
       });
-    } catch (error: any) {
+    } catch (error) {
       toast({
         title: "خطأ",
         description: error.message,

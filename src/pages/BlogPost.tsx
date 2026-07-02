@@ -18,9 +18,10 @@ const BlogPost = () => {
     }
   }, [post]);
 
+  const related = useMemo(() => (post ? getRelatedPosts(post, 3) : []), [post]);
+
   if (!post) return <Navigate to="/blog" replace />;
 
-  const related = useMemo(() => getRelatedPosts(post, 3), [post]);
   const toc = post.content
     .filter((s) => s.heading)
     .map((s) => ({ id: slugifyHeading(s.heading!), text: s.heading! }));

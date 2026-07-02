@@ -30,7 +30,7 @@ const ForgotPassword = () => {
       if (error) throw error;
       setSent(true);
       toast({ title: "تم الإرسال", description: "تحقق من بريدك الإلكتروني لإعادة تعيين كلمة المرور" });
-    } catch (error: any) {
+    } catch (error) {
       toast({ title: "خطأ", description: error.message, variant: "destructive" });
     } finally {
       setIsLoading(false);

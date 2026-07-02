@@ -143,7 +143,7 @@ const ProductCard = ({
         title: "تمت الإضافة",
         description: "تم إضافة المنتج إلى السلة",
       });
-    } catch (error: any) {
+    } catch (error) {
       toast({
         title: "خطأ",
         description: error.message || "فشل إضافة المنتج إلى السلة",

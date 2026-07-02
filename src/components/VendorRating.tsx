@@ -123,7 +123,7 @@ export const VendorRating = ({ vendorId, vendorName }: VendorRatingProps) => {
 
       setDialogOpen(false);
       fetchVendorRating();
-    } catch (error: any) {
+    } catch (error) {
       toast({
         title: "خطأ",
         description: error.message,

@@ -86,7 +86,7 @@ const ManageSubcategories = () => {
           .order("sort_order");
 
         setSubcategories(subcategoriesData || []);
-      } catch (error: any) {
+      } catch (error) {
         toast({
           title: "خطأ",
           description: "فشل في جلب البيانات",
@@ -178,7 +178,7 @@ const ManageSubcategories = () => {
       }
 
       setDialogOpen(false);
-    } catch (error: any) {
+    } catch (error) {
       toast({
         title: "خطأ",
         description: error.message,
@@ -204,7 +204,7 @@ const ManageSubcategories = () => {
         title: "تم بنجاح",
         description: "تم حذف التصنيف الفرعي",
       });
-    } catch (error: any) {
+    } catch (error) {
       toast({
         title: "خطأ",
         description: error.message,
@@ -230,7 +230,7 @@ const ManageSubcategories = () => {
         title: "تم بنجاح",
         description: `تم ${!currentStatus ? "تفعيل" : "إلغاء تفعيل"} التصنيف الفرعي`,
       });
-    } catch (error: any) {
+    } catch (error) {
       toast({
         title: "خطأ",
         description: error.message,

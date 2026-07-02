@@ -94,7 +94,7 @@ const Cart = () => {
             setDiscounts(discountMap);
           }
         }
-      } catch (error: any) {
+      } catch (error) {
         toast({
           title: "خطأ",
           description: "فشل في جلب عربة التسوق",
@@ -180,7 +180,7 @@ const Cart = () => {
         )
       );
       window.dispatchEvent(new Event("cart-updated"));
-    } catch (error: any) {
+    } catch (error) {
       toast({
         title: "خطأ",
         description: "فشل في تحديث الكمية",
@@ -205,7 +205,7 @@ const Cart = () => {
         title: "تم الحذف",
         description: "تم حذف المنتج من السلة",
       });
-    } catch (error: any) {
+    } catch (error) {
       toast({
         title: "خطأ",
         description: "فشل في حذف المنتج",
@@ -257,7 +257,7 @@ const Cart = () => {
       setAppliedCoupon(data);
       setCouponDiscount(discountAmount);
       toast({ title: "تم التطبيق", description: `تم تطبيق خصم ${discountAmount.toFixed(0)} ل.س` });
-    } catch (error: any) {
+    } catch (error) {
       toast({ title: "خطأ", description: error.message, variant: "destructive" });
     } finally {
       setValidatingCoupon(false);

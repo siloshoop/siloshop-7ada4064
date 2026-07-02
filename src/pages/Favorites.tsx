@@ -140,7 +140,7 @@ const Favorites = () => {
       }
       toast({ title: "تمت الإضافة", description: `أُضيف ${inStock.length} منتج إلى السلة` });
       window.dispatchEvent(new Event("cart:updated"));
-    } catch (e: any) {
+    } catch (e) {
       toast({ title: "خطأ", description: e.message, variant: "destructive" });
     } finally {
       setAddingAll(false);
@@ -157,7 +157,9 @@ const Favorites = () => {
         await navigator.clipboard.writeText(`${text}\n${url}`);
         toast({ title: "تم النسخ", description: "تم نسخ رابط القائمة" });
       }
-    } catch {}
+    } catch {
+      /* user aborted share/copy — ignore */
+    }
   };
 
   if (authLoading || loading) {

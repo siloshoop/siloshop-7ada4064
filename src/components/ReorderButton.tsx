@@ -58,7 +58,7 @@ const ReorderButton = ({ orderId, userId, orderItems }: ReorderButtonProps) => {
       });
 
       navigate("/cart");
-    } catch (error: any) {
+    } catch (error) {
       toast({
         title: "خطأ",
         description: error.message || "فشل في إعادة الطلب",

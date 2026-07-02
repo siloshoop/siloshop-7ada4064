@@ -173,7 +173,7 @@ export const ProductReviews = ({ productId, vendorId }: ProductReviewsProps) => 
       setImagePreview(null);
       setUploadProgress(0);
       fetchReviews();
-    } catch (error: any) {
+    } catch (error) {
       toast({
         title: "خطأ",
         description: error.message,
@@ -207,7 +207,7 @@ export const ProductReviews = ({ productId, vendorId }: ProductReviewsProps) => 
       setReplyText("");
       setReplyingTo(null);
       fetchReviews();
-    } catch (error: any) {
+    } catch (error) {
       toast({
         title: "خطأ",
         description: error.message,

@@ -160,7 +160,7 @@ const Addresses = () => {
       setOpen(false);
       resetForm();
       void fetchAddresses();
-    } catch (err: any) {
+    } catch (err) {
       toast({ title: "خطأ", description: err.message, variant: "destructive" });
     } finally {
       setSaving(false);

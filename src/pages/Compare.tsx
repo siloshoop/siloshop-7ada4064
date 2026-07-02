@@ -263,7 +263,7 @@ const Compare = () => {
       setSaveDialogOpen(false);
       setSaveName("");
       fetchSavedComparisons();
-    } catch (error: any) {
+    } catch (error) {
       toast({
         title: "خطأ",
         description: error.message,
@@ -374,7 +374,7 @@ const Compare = () => {
         title: "تمت الإضافة",
         description: "تم إضافة المنتج إلى السلة",
       });
-    } catch (error: any) {
+    } catch (error) {
       toast({
         title: "خطأ",
         description: error.message,

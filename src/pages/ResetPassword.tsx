@@ -70,7 +70,7 @@ const ResetPassword = () => {
       if (error) throw error;
       setIsSuccess(true);
       toast({ title: "تم بنجاح", description: "تم تغيير كلمة المرور بنجاح" });
-    } catch (error: any) {
+    } catch (error) {
       toast({ title: "خطأ", description: error.message, variant: "destructive" });
     } finally {
       setIsLoading(false);

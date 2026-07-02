@@ -171,7 +171,7 @@ const ManageDeals = () => {
         end_date: "",
         is_active: true,
       });
-    } catch (error: any) {
+    } catch (error) {
       toast({
         title: "خطأ",
         description: error.message,
@@ -209,7 +209,7 @@ const ManageDeals = () => {
         title: "تم بنجاح",
         description: "تم حذف العرض بنجاح",
       });
-    } catch (error: any) {
+    } catch (error) {
       toast({
         title: "خطأ",
         description: error.message,
@@ -235,7 +235,7 @@ const ManageDeals = () => {
         title: "تم بنجاح",
         description: deal.is_active ? "تم إيقاف العرض" : "تم تفعيل العرض",
       });
-    } catch (error: any) {
+    } catch (error) {
       toast({
         title: "خطأ",
         description: error.message,

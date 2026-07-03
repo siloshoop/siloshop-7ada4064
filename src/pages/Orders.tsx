@@ -85,7 +85,11 @@ const Orders = () => {
         .eq("customer_id", user.id)
         .order("created_at", { ascending: false });
 
-      if (ordersError) throw ordersError;
+      if (ordersError) {
+        console.error("Orders fetch error:", ordersError);
+        setOrders([]);
+        return;
+      }
 
       if (!ordersData || ordersData.length === 0) {
         setOrders([]);
@@ -94,7 +98,7 @@ const Orders = () => {
 
       const orderIds = ordersData.map((order) => order.id);
 
-      const [{ data: orderItemsData, error: orderItemsError }, { data: ratingsData, error: ratingsError }] = await Promise.all([
+      const [itemsRes, ratingsRes] = await Promise.allSettled([
         supabase
           .from("order_items")
           .select(`
@@ -111,12 +115,15 @@ const Orders = () => {
           .in("order_id", orderIds),
       ]);
 
-      if (orderItemsError) {
-        console.error("Order items fetch error:", orderItemsError);
+      const orderItemsData =
+        itemsRes.status === "fulfilled" ? itemsRes.value.data : null;
+      if (itemsRes.status === "fulfilled" && itemsRes.value.error) {
+        console.error("Order items fetch error:", itemsRes.value.error);
       }
-
-      if (ratingsError) {
-        console.error("Delivery ratings fetch error:", ratingsError);
+      const ratingsData =
+        ratingsRes.status === "fulfilled" ? ratingsRes.value.data : null;
+      if (ratingsRes.status === "fulfilled" && ratingsRes.value.error) {
+        console.error("Delivery ratings fetch error:", ratingsRes.value.error);
       }
 
       const orderItemsMap = new Map<string, OrderItem[]>();
@@ -150,11 +157,7 @@ const Orders = () => {
       setOrders(ordersWithDetails);
     } catch (error) {
       console.error("Orders fetch error:", error);
-      toast({
-        title: "خطأ",
-        description: "فشل في جلب الطلبات",
-        variant: "destructive",
-      });
+      setOrders([]);
     } finally {
       setLoading(false);
     }

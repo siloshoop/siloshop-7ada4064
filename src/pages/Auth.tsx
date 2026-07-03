@@ -121,9 +121,20 @@ const Auth = () => {
 
       navigate("/");
     } catch (error) {
+      const rawMsg = (error as Error)?.message || "";
+      let description = "حدث خطأ، يرجى المحاولة مرة أخرى";
+      if (/invalid login credentials/i.test(rawMsg)) {
+        description = "البريد الإلكتروني أو كلمة المرور غير صحيحة";
+      } else if (/email not confirmed/i.test(rawMsg)) {
+        description = "يرجى تأكيد بريدك الإلكتروني أولاً";
+      } else if (/too many requests|rate limit/i.test(rawMsg)) {
+        description = "محاولات كثيرة، يرجى الانتظار قليلاً ثم المحاولة مجدداً";
+      } else if (rawMsg) {
+        description = rawMsg;
+      }
       toast({
         title: "خطأ في تسجيل الدخول",
-        description: error.message,
+        description,
         variant: "destructive",
       });
     } finally {

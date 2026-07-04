@@ -122,11 +122,18 @@ const Auth = () => {
       navigate("/");
     } catch (error) {
       const rawMsg = (error as Error)?.message || "";
+      if (/email not confirmed/i.test(rawMsg)) {
+        toast({
+          title: "الحساب غير مفعّل",
+          description: "سنرسل رمز تحقق جديد إلى بريدك",
+        });
+        navigate(`/verify-email?email=${encodeURIComponent(signInEmail)}`);
+        setIsLoading(false);
+        return;
+      }
       let description = "حدث خطأ، يرجى المحاولة مرة أخرى";
       if (/invalid login credentials/i.test(rawMsg)) {
         description = "البريد الإلكتروني أو كلمة المرور غير صحيحة";
-      } else if (/email not confirmed/i.test(rawMsg)) {
-        description = "يرجى تأكيد بريدك الإلكتروني أولاً";
       } else if (/too many requests|rate limit/i.test(rawMsg)) {
         description = "محاولات كثيرة، يرجى الانتظار قليلاً ثم المحاولة مجدداً";
       } else if (rawMsg) {
@@ -173,11 +180,8 @@ const Auth = () => {
 
       if (error) throw error;
 
-      // Log signup activity and notify admins
+      // Notify admins about new user registration (best-effort)
       if (newUser) {
-        await logActivity(newUser.id, "signup", { role: signUpRole });
-        
-        // Notify admins about new user registration
         try {
           await supabase.functions.invoke("notify-admin-new-user", {
             body: {
@@ -192,11 +196,11 @@ const Auth = () => {
       }
 
       toast({
-        title: "تم إنشاء الحساب بنجاح",
-        description: "مرحباً بك في منصتنا!",
+        title: "تم إنشاء الحساب",
+        description: "أدخل رمز التحقق المرسل إلى بريدك لتفعيل حسابك",
       });
 
-      navigate("/");
+      navigate(`/verify-email?email=${encodeURIComponent(signUpEmail)}`);
     } catch (error) {
       toast({
         title: "خطأ في التسجيل",

@@ -5,8 +5,8 @@ describe("perfMonitor.measureFrames", () => {
   it("returns a sample with reducedMotion flag and frame stats", async () => {
     // jsdom lacks rAF — provide one that ticks at ~16ms
     let t = 0;
-    const origRaf = global.requestAnimationFrame;
-    global.requestAnimationFrame = ((cb: FrameRequestCallback) => {
+    const origRaf = globalThis.requestAnimationFrame;
+    globalThis.requestAnimationFrame = ((cb: FrameRequestCallback) => {
       t += 16;
       return setTimeout(() => cb(t), 0) as unknown as number;
     }) as typeof requestAnimationFrame;
@@ -25,6 +25,6 @@ describe("perfMonitor.measureFrames", () => {
     expect(sample.avgFrameMs).toBeGreaterThanOrEqual(0);
     expect((window as any).__perf?.length).toBeGreaterThan(0);
 
-    global.requestAnimationFrame = origRaf;
+    globalThis.requestAnimationFrame = origRaf;
   });
 });

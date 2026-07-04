@@ -57,6 +57,8 @@ const ResetPassword = lazy(() => import("./pages/ResetPassword"));
 const Addresses = lazy(() => import("./pages/Addresses"));
 const OrderDetails = lazy(() => import("./pages/OrderDetails"));
 const Pricing = lazy(() => import("./pages/Pricing"));
+const VerifyEmail = lazy(() => import("./pages/VerifyEmail"));
+import RequireRole from "@/components/RequireRole";
 
 const queryClient = new QueryClient(); // App query client
 
@@ -79,18 +81,19 @@ const App = () => (
             <Route path="/" element={<Index />} />
             <Route path="/search" element={<SearchPage />} />
             <Route path="/auth" element={<Auth />} />
+            <Route path="/verify-email" element={<VerifyEmail />} />
             <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/dashboard/add-product" element={<AddProduct />} />
-            <Route path="/dashboard/edit-product/:id" element={<EditProduct />} />
-            <Route path="/dashboard/coupons" element={<ManageCoupons />} />
-            <Route path="/dashboard/subcategories" element={<ManageSubcategories />} />
-            <Route path="/dashboard/statistics" element={<Statistics />} />
-            <Route path="/dashboard/orders" element={<VendorOrders />} />
-            <Route path="/dashboard/deals" element={<ManageDeals />} />
-            <Route path="/dashboard/announcements" element={<ManageAnnouncements />} />
-            <Route path="/dashboard/users" element={<ManageUsers />} />
-            <Route path="/dashboard/activity-logs" element={<ActivityLogs />} />
-            <Route path="/dashboard/native-ads" element={<ManageNativeAds />} />
+            <Route path="/dashboard/add-product" element={<RequireRole role="vendor"><AddProduct /></RequireRole>} />
+            <Route path="/dashboard/edit-product/:id" element={<RequireRole role="vendor"><EditProduct /></RequireRole>} />
+            <Route path="/dashboard/coupons" element={<RequireRole role="vendor"><ManageCoupons /></RequireRole>} />
+            <Route path="/dashboard/subcategories" element={<RequireRole role={["vendor","admin"]}><ManageSubcategories /></RequireRole>} />
+            <Route path="/dashboard/statistics" element={<RequireRole role="vendor"><Statistics /></RequireRole>} />
+            <Route path="/dashboard/orders" element={<RequireRole role="vendor"><VendorOrders /></RequireRole>} />
+            <Route path="/dashboard/deals" element={<RequireRole role="vendor"><ManageDeals /></RequireRole>} />
+            <Route path="/dashboard/announcements" element={<RequireRole role={["vendor","admin"]}><ManageAnnouncements /></RequireRole>} />
+            <Route path="/dashboard/users" element={<RequireRole role="admin"><ManageUsers /></RequireRole>} />
+            <Route path="/dashboard/activity-logs" element={<RequireRole role="admin"><ActivityLogs /></RequireRole>} />
+            <Route path="/dashboard/native-ads" element={<RequireRole role="admin"><ManageNativeAds /></RequireRole>} />
             <Route path="/favorites" element={<Favorites />} />
             <Route path="/wishlist" element={<Wishlist />} />
             <Route path="/wishlist/shared/:token" element={<SharedWishlist />} />

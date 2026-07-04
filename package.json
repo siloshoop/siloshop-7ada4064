@@ -40,7 +40,7 @@
     "date-fns": "^4.1.0",
     "html2canvas": "^1.4.1",
     "jsdom": "^20.0.3",
-    "jspdf": "^4.0.0",
+    "jspdf": "^4.2.1",
     "lucide-react": "^0.462.0",
     "mapbox-gl": "^3.16.0",
     "next-themes": "^0.3.0",
@@ -52,7 +52,7 @@
     "tailwind-merge": "^2.6.0",
     "tailwindcss-animate": "^1.0.7",
     "vite-plugin-pwa": "^1.1.0",
-    "vitest": "^3.2.4",
+    "vitest": "^4.1.9",
     "zod": "^3.25.76"
   },
   "devDependencies": {

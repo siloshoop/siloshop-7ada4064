@@ -19,7 +19,8 @@ import { SYRIAN_GOVERNORATES } from "@/lib/syrianGovernorates";
 const checkoutSchema = z.object({
   phone: z.string()
     .min(1, "رقم الهاتف مطلوب")
-    .regex(/^09\d{8}$/, "رقم الهاتف يجب أن يكون بصيغة 09xxxxxxxx"),
+    .transform((v) => v.replace(/[\s-]/g, ""))
+    .pipe(z.string().regex(/^09\d{8}$/, "رقم الهاتف يجب أن يكون بصيغة 09xxxxxxxx")),
   shipping_address: z.string()
     .min(1, "يرجى اختيار المحافظة")
     .refine((v) => (SYRIAN_GOVERNORATES as readonly string[]).includes(v), "يرجى اختيار محافظة صحيحة"),
@@ -266,7 +267,7 @@ const Checkout = () => {
 
       toast({
         title: "تم إنشاء الطلب",
-        description: "يرجى إتمام عملية الدفع",
+        description: "يرجى اختيار طريقة الدفع لإتمام الطلب",
       });
 
       // Navigate to payment page

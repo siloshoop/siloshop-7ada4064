@@ -59,37 +59,49 @@ const Wishlist = () => {
   }, [user, authLoading, navigate]);
 
   const fetchWishlists = async () => {
-    if (!user) return;
-
-    const { data } = await supabase
-      .from("wishlists")
-      .select(`
-        *,
-        items:wishlist_items (
-          id,
-          product_id,
-          product:products (
-            id,
-            name,
-            price,
-            original_price,
-            image_url
-          )
-        )
-      `)
-      .eq("user_id", user.id)
-      .order("created_at", { ascending: false });
-
-    if (data) {
-      setWishlists(data.map(w => ({
-        ...w,
-        items: w.items?.map((item: any) => ({
-          ...item,
-          product: item.product
-        }))
-      })));
+    if (!user) {
+      setLoading(false);
+      return;
     }
-    setLoading(false);
+
+    try {
+      // Fetch wishlists first — separate query avoids RLS interaction on the embedded join.
+      const { data: wls, error: wlErr } = await supabase
+        .from("wishlists")
+        .select("id, name, share_token, is_public, created_at, user_id")
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: false });
+
+      if (wlErr) {
+        console.error("wishlists fetch error:", wlErr);
+        toast({ title: "خطأ", description: "تعذّر جلب القوائم", variant: "destructive" });
+        setWishlists([]);
+        return;
+      }
+
+      const lists = wls || [];
+      if (lists.length === 0) {
+        setWishlists([]);
+        return;
+      }
+
+      const listIds = lists.map((w) => w.id);
+      const { data: items } = await supabase
+        .from("wishlist_items")
+        .select("id, wishlist_id, product_id, product:products(id, name, price, original_price, image_url)")
+        .in("wishlist_id", listIds);
+
+      const itemsByList = new Map<string, WishlistItem[]>();
+      (items || []).forEach((it: any) => {
+        const arr = itemsByList.get(it.wishlist_id) || [];
+        arr.push({ id: it.id, product_id: it.product_id, product: it.product });
+        itemsByList.set(it.wishlist_id, arr);
+      });
+
+      setWishlists(lists.map((w) => ({ ...(w as any), items: itemsByList.get(w.id) || [] })));
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {

@@ -1,61 +1,36 @@
-## Goal
-Bring the codebase to "clean, quiet, and fast" without changing UI or business logic. Every change must be justified by a signal (tool report, error, or measurement), and every step ends with a verification.
+# خطة الإصلاحات الشاملة
 
-## Guardrails (non-negotiable)
-- No UI redesign, no feature removal, no business-logic changes.
-- Do not touch: `src/integrations/supabase/{client,types}.ts`, `.env`, `supabase/config.toml`.
-- Preserve all existing routes, RPC calls, RLS, and Realtime subscriptions.
-- Each phase must end green (build passes, security tests pass) before the next starts. If a phase turns red and can't be fixed in one edit, revert that phase's changes.
+قائمة طويلة من الإصلاحات. سأنفذها على 4 مجموعات مرتبة حسب الأولوية. رجاءً أكّد أو أخبرني إذا تريد ترتيباً مختلفاً أو استبعاد بند.
 
-## Phase 1 — Baseline & inventory
-1. Capture current signals: `tsgo` typecheck, `eslint`, `vitest run`, `vite build --mode production` (bundle size + warnings), console log snapshot from preview.
-2. Run `knip` (unused files/exports/deps) and `depcheck` (missing/unused packages) as one-off `bunx` invocations — no config commit yet.
-3. Save the reports under `/tmp/audit/` and produce a short "to-remove" list. Nothing is deleted in this phase.
+## المجموعة 1 — إصلاحات حرجة (Backend/Auth/Data)
 
-## Phase 2 — Safe sweep (low risk)
-- Remove unused imports, unreachable code, commented-out blocks, `console.log` debug lines (keep `console.error`/`warn`).
-- Delete files that `knip` marks unused AND are not referenced by routing, Vite globs, or dynamic imports (manually re-checked with `rg`).
-- Delete unused exports inside kept files.
-- Verify: typecheck + build + vitest + security-rls tests.
+1. **فشل جلب الطلبات (VendorOrders + Orders "طلباتي")**: مراجعة استعلامات RLS/GRANT للتأكد من قراءة البائع لطلباته والعميل لطلباته. إصلاح الأخطاء الظاهرة "فشل في جلب الطلبات".
+2. **فشل تفعيل الإشعارات**: تصحيح PushNotificationManager (VAPID key/permission/subscribe endpoint).
+3. **إنشاء قائمة الأمنيات لا تظهر**: إصلاح refetch بعد الإنشاء + التحقق من RLS على wishlists.
+4. **رقم الهاتف في Checkout يظهر خطأ**: تخفيف/تصحيح regex validation للأرقام السورية (09xxxxxxxx).
+5. **Supabase Auth email template**: التأكد من احتواء القالب على `{{ .Token }}` بدلاً من `{{ .ConfirmationURL }}` لعرض الرمز 6 خانات.
 
-## Phase 3 — Dependency audit
-- For every package `depcheck` flags: confirm with `rg` it's truly unreferenced, then `bun remove`.
-- Do not upgrade major versions. Only patch/minor bumps for packages with known CVEs (from `bun audit`), and only if changelogs show no breaking changes.
-- Verify: full build + tests after each batch of removals.
+## المجموعة 2 — التحكم بالوصول (RBAC)
 
-## Phase 4 — Rendering & bundle optimisation
-- Add `React.lazy` + `Suspense` for heavy, non-critical routes only (Admin, Vendor dashboard sub-pages, Blog article, Pricing, FAQ). Do not lazy-load homepage-critical sections — that's forbidden by our error-isolation memory.
-- Wrap expensive list items in `React.memo` only where profiler-style reasoning shows repeated re-renders (cards that receive stable props). No blanket memoisation.
-- Replace any remaining `import * as` with named imports where tree-shaking is blocked.
-- Verify: production build. Report before/after `dist/assets` sizes.
+6. **صفحة "Access Denied" ودية** بدلاً من redirect صامت — إنشاء `/access-denied` وتحديث `RequireRole` لعرضها مع رسالة واضحة وزر رجوع.
+7. **صفحة إدارة الكوبونات للبائع فقط**: التأكد من `RequireRole role="vendor"` + إخفاء الرابط من قوائم العملاء. التحقق من أن `/dashboard/coupons` لا تُفتح للعميل حتى بتغيير URL يدوياً.
+8. **تحقق من كود الخصم في Checkout**: التأكد من عمل حقل "كود الخصم" فعلياً (استعلام coupons + خصم على الإجمالي + رسالة نجاح/فشل).
+9. **اختبار OTP resend**: التحقق من عداد 60 ثانية وانتهاء 10 دقائق ورسائل عد تنازلي واضحة (موجود في VerifyEmail — سأتحقق فقط).
 
-## Phase 5 — Lint & TypeScript strictness
-- Fix every existing ESLint warning/error surfaced in Phase 1 (unused vars, exhaustive-deps, no-explicit-any where a real type is obvious). Do not tighten `tsconfig` — out of scope.
-- Fix runtime warnings visible in the console snapshot (React key warnings, controlled/uncontrolled input, act warnings in tests, etc.).
-- Verify: `eslint .` returns 0 warnings/errors, `tsgo` returns 0 errors.
+## المجموعة 3 — تحسينات UX/UI
 
-## Phase 6 — Structural tidy
-- Only rename/move a file if it currently lives in the wrong folder per existing conventions (e.g. a hook under `src/components/`). No mass reorganisation.
-- Split any component file over ~400 lines into logical sub-components in a sibling folder, keeping the public export identical so imports don't change.
+10. **أزرار التفعيل/الإلغاء (Switch) في NotificationSettings**: إصلاح مقاس/padding حتى لا تخرج المقبض عن الحد.
+11. **صفحة المفضلة**: تحويل الشبكة إلى grid متجاور (2/3/4 أعمدة) بدلاً من عمود واحد يُظهر منتج واحد في وسط الصفحة.
+12. **زرا "الرسائل" و"الإعدادات"** في MobileBottomNav: ربطهما بمسارات فعلية (`/chat` أو قائمة محادثات + `/notifications/settings`).
+13. **Checkout — طرق الدفع**: استبدال طرق الدفع الحالية بـ: (أ) الدفع عند الاستلام، (ب) شام كاش فقط. حذف كلمة "الدفع" حيث طلب المستخدم في FAQ ("انتقل إلى صفحة إتمام الطلب" بدل "صفحة الدفع").
+14. **العنوان الافتراضي في Checkout**: عند وجود عنوان محفوظ في الإعدادات، استخدامه تلقائياً مع إمكانية تغيير/إضافة (يبدو مطبقاً جزئياً — سأتحقق وأصلح).
 
-## Phase 7 — Final validation
-- `bun install`, `tsgo`, `eslint .`, `bunx vitest run`, production `vite build`.
-- Re-run `security--run_security_scan` and confirm no new findings.
-- Post a short before/after diff: bundle size, warning count, files/deps removed.
+## ملاحظات تقنية
 
-## Rollback strategy
-Each phase is a self-contained set of edits. If verification fails and I can't fix it in a single follow-up patch, I revert that phase's edits and stop — you'll get a report of what was tried, not a broken tree.
+- بعض البنود تتطلب migrations (RLS/GRANT) — سأستخدم supabase migration tool.
+- قالب البريد OTP يتطلب تعديل من لوحة Supabase أو قوالب Lovable Auth Emails.
+- بعد التنفيذ: بناء تلقائي + smoke test للـ homepage.
 
-## Out of scope (call these out so you can add them if wanted)
-- Major-version upgrades (React 19, Vite 6, Tailwind 4).
-- Switching bundler/test runner.
-- Adding new tests beyond what's needed to protect a refactor.
-- Any design/UX change.
-- Server-side/edge function refactors.
+---
 
-## Technical details
-- Tools used ad-hoc: `bunx knip`, `bunx depcheck`, `bun audit`, `tsgo`, `bunx eslint .`, `bunx vitest run`, `bun run build`.
-- No config files added unless required (e.g. a minimal `knip.json` if false-positives dominate).
-- Playwright smoke-check on the top 5 routes (`/`, `/search`, `/orders`, `/favorites`, `/pricing`) after Phase 4 and Phase 7.
-
-Approve to proceed with Phase 1, or tell me which phases to skip.
+**السؤال**: هل أنفذ كل المجموعات الأربع الآن بالترتيب، أم تريد البدء بالمجموعة 1 (الحرجة) فقط والتوقف للمراجعة؟

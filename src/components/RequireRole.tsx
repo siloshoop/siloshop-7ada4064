@@ -2,7 +2,7 @@ import { useEffect, useState, ReactNode } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/hooks/use-toast";
+import AccessDenied from "@/pages/AccessDenied";
 
 type Role = "vendor" | "customer" | "admin";
 
@@ -21,8 +21,8 @@ const RequireRole = ({ role, children }: RequireRoleProps) => {
   const { user, loading } = useAuth();
   const [checking, setChecking] = useState(true);
   const [allowed, setAllowed] = useState(false);
+  const [denied, setDenied] = useState(false);
   const navigate = useNavigate();
-  const { toast } = useToast();
   const roles = Array.isArray(role) ? role : [role];
 
   useEffect(() => {
@@ -47,12 +47,7 @@ const RequireRole = ({ role, children }: RequireRoleProps) => {
           if (profile && roles.includes(profile.role as Role)) ok = true;
         }
         if (!ok) {
-          toast({
-            title: "غير مصرح",
-            description: "هذه الصفحة غير متاحة لحسابك",
-            variant: "destructive",
-          });
-          navigate("/");
+          setDenied(true);
           return;
         }
         setAllowed(true);
@@ -64,6 +59,7 @@ const RequireRole = ({ role, children }: RequireRoleProps) => {
   }, [user, loading]);
 
   if (loading || checking) return <Fallback />;
+  if (denied) return <AccessDenied requiredRole={roles[0]} />;
   if (!allowed) return null;
   return <>{children}</>;
 };

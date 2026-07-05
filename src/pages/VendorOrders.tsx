@@ -92,7 +92,30 @@ const VendorOrders = () => {
       if (!user) return;
 
       try {
-        // Get all order items for vendor's products
+        // 1. Fetch orders via secure RPC (returns empty array when the vendor has none).
+        const { data: ordersData, error: ordersError } = await supabase.rpc("get_vendor_orders");
+
+        if (ordersError) {
+          console.error("get_vendor_orders error:", ordersError);
+          toast({
+            title: "خطأ",
+            description: ordersError.message || "فشل في جلب الطلبات",
+            variant: "destructive",
+          });
+          setOrders([]);
+          setOrderItems({});
+          return;
+        }
+
+        const orders = (ordersData as Order[]) || [];
+        setOrders(orders);
+
+        if (orders.length === 0) {
+          setOrderItems({});
+          return;
+        }
+
+        // 2. Fetch product line items only for this vendor's orders.
         const { data: vendorOrderItems, error: itemsError } = await supabase
           .from("order_items")
           .select(`
@@ -105,38 +128,22 @@ const VendorOrders = () => {
               image_url
             )
           `)
-          .eq("vendor_id", user.id);
+          .eq("vendor_id", user.id)
+          .in("order_id", orders.map((o) => o.id));
 
-        if (itemsError) throw itemsError;
-
-        const orderIds = [...new Set(vendorOrderItems?.map(item => item.order_id))];
-
-        if (orderIds.length > 0) {
-          // Use secure RPC that returns only fulfillment-relevant fields
-          // (no phone, full address, coordinates, or coupon code).
-          const { data: ordersData, error: ordersError } = await supabase
-            .rpc("get_vendor_orders");
-
-          if (ordersError) throw ordersError;
-
-          setOrders((ordersData as Order[]) || []);
-
-          // Group items by order
-          const groupedItems: Record<string, OrderItem[]> = {};
-          vendorOrderItems?.forEach(item => {
-            if (!groupedItems[item.order_id]) {
-              groupedItems[item.order_id] = [];
-            }
-            groupedItems[item.order_id].push(item as OrderItem);
-          });
-          setOrderItems(groupedItems);
+        if (itemsError) {
+          console.error("order_items fetch error:", itemsError);
+          // Non-fatal: still show orders without line items.
+          setOrderItems({});
+          return;
         }
-      } catch (error) {
-        toast({
-          title: "خطأ",
-          description: "فشل في جلب الطلبات",
-          variant: "destructive",
+
+        const groupedItems: Record<string, OrderItem[]> = {};
+        (vendorOrderItems || []).forEach((item: any) => {
+          if (!groupedItems[item.order_id]) groupedItems[item.order_id] = [];
+          groupedItems[item.order_id].push(item as OrderItem);
         });
+        setOrderItems(groupedItems);
       } finally {
         setLoading(false);
       }

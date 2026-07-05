@@ -93,16 +93,6 @@ const Favorites = () => {
     };
   }, [user]);
 
-  const grouped = useMemo(() => {
-    const map = new Map<string, Product[]>();
-    products.forEach((p) => {
-      const key = p.category_name || "أخرى";
-      if (!map.has(key)) map.set(key, []);
-      map.get(key)!.push(p);
-    });
-    return Array.from(map.entries());
-  }, [products]);
-
   const totalValue = useMemo(
     () => products.reduce((s, p) => s + Number(p.price || 0), 0),
     [products]
@@ -229,31 +219,20 @@ const Favorites = () => {
               </div>
             </div>
 
-            <div className="space-y-8">
-              {grouped.map(([catName, items]) => (
-                <section key={catName}>
-                  <div className="flex items-center gap-2 mb-3">
-                    <h2 className="text-lg font-bold">{catName}</h2>
-                    <span className="text-sm text-muted-foreground">({items.length})</span>
-                    <div className="flex-1 h-px bg-border" />
-                  </div>
-                  <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-                    {items.map((product) => (
-                      <ProductCard
-                        key={product.id}
-                        id={product.id}
-                        name={product.name}
-                        price={product.price}
-                        originalPrice={product.original_price || undefined}
-                        image={product.image_url}
-                        rating={4}
-                        reviews={0}
-                        stockQuantity={product.stock_quantity}
-                        discount={product.original_price ? Math.round(((product.original_price - product.price) / product.original_price) * 100) : undefined}
-                      />
-                    ))}
-                  </div>
-                </section>
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4">
+              {products.map((product) => (
+                <ProductCard
+                  key={product.id}
+                  id={product.id}
+                  name={product.name}
+                  price={product.price}
+                  originalPrice={product.original_price || undefined}
+                  image={product.image_url}
+                  rating={4}
+                  reviews={0}
+                  stockQuantity={product.stock_quantity}
+                  discount={product.original_price ? Math.round(((product.original_price - product.price) / product.original_price) * 100) : undefined}
+                />
               ))}
             </div>
           </>

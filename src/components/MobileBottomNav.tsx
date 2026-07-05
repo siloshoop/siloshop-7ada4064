@@ -7,6 +7,8 @@ import {
   Grid3X3, 
   Heart, 
   User,
+  MessageCircle,
+  Settings,
   ShoppingCart,
   Smartphone,
   Shirt,
@@ -52,6 +54,7 @@ const MobileBottomNav = () => {
     { icon: Search, label: "بحث", path: "/search" },
     { icon: Grid3X3, label: "الفئات", action: () => setShowCategories(true) },
     { icon: Heart, label: "المفضلة", path: "/favorites" },
+    { icon: Settings, label: "الإعدادات", path: "/notifications/settings" },
     { icon: User, label: "حسابي", path: "/dashboard" },
   ];
 

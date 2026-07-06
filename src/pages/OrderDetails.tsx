@@ -55,6 +55,24 @@ const OrderDetails = () => {
     void load();
   }, [id, user]);
 
+  // Realtime: reflect status updates from vendor/admin immediately
+  useEffect(() => {
+    if (!user || !id) return;
+    const channel = supabase
+      .channel(`order-detail-${id}`)
+      .on(
+        "postgres_changes",
+        { event: "UPDATE", schema: "public", table: "orders", filter: `id=eq.${id}` },
+        (payload) => {
+          setOrder((prev: any) => (prev ? { ...prev, ...(payload.new as any) } : prev));
+        }
+      )
+      .subscribe();
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [id, user]);
+
   if (authLoading || loading) {
     return (
       <div className="min-h-screen flex flex-col"><Navbar />
@@ -106,6 +124,7 @@ const OrderDetails = () => {
             )}
             {order.phone && <p className="flex items-center gap-2" dir="ltr"><Phone className="h-4 w-4 text-muted-foreground" />{order.phone}</p>}
             {order.notes && <p className="text-muted-foreground bg-muted/50 p-2 rounded">{order.notes}</p>}
+            <p className="flex items-center gap-2"><Receipt className="h-4 w-4 text-muted-foreground" />طريقة الدفع: <span className="font-semibold">الدفع عند الاستلام</span></p>
           </CardContent>
         </Card>
 

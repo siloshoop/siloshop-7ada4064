@@ -14,7 +14,9 @@ import { ar } from "date-fns/locale";
 const statusMap: Record<string, { label: string; variant: "default" | "secondary" | "destructive" | "outline" }> = {
   pending: { label: "قيد المعالجة", variant: "secondary" },
   confirmed: { label: "مؤكد", variant: "default" },
-  shipped: { label: "جاري التوصيل", variant: "outline" },
+  processing: { label: "قيد التحضير", variant: "secondary" },
+  shipped: { label: "تم الشحن", variant: "outline" },
+  out_for_delivery: { label: "في الطريق للتوصيل", variant: "outline" },
   delivered: { label: "تم التوصيل", variant: "default" },
   cancelled: { label: "ملغي", variant: "destructive" },
 };

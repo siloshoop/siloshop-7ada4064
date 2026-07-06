@@ -832,6 +832,7 @@ export type Database = {
           estimated_delivery: string | null
           id: string
           notes: string | null
+          payment_status: string
           phone: string | null
           shipping_address: string | null
           status: string | null
@@ -853,6 +854,7 @@ export type Database = {
           estimated_delivery?: string | null
           id?: string
           notes?: string | null
+          payment_status?: string
           phone?: string | null
           shipping_address?: string | null
           status?: string | null
@@ -874,6 +876,7 @@ export type Database = {
           estimated_delivery?: string | null
           id?: string
           notes?: string | null
+          payment_status?: string
           phone?: string | null
           shipping_address?: string | null
           status?: string | null

@@ -267,16 +267,12 @@ const Checkout = () => {
 
       toast({
         title: "تم إنشاء الطلب",
-        description: "يرجى اختيار طريقة الدفع لإتمام الطلب",
+        description: "الدفع عند الاستلام. يمكنك تتبع طلبك من صفحة طلباتي.",
       });
 
-      // Navigate to payment page
-      navigate("/payment", { 
-        state: { 
-          orderId: order.id, 
-          amount: total 
-        } 
-      });
+      // Cash on Delivery is the only payment method — payment is recorded
+      // automatically by create_order. Send the customer straight to their orders.
+      navigate("/orders");
     } catch (error) {
       toast({
         title: "خطأ",

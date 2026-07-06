@@ -14,7 +14,9 @@ import { ar } from "date-fns/locale";
 const statusMap: Record<string, { label: string; variant: "default" | "secondary" | "destructive" | "outline" }> = {
   pending: { label: "قيد المعالجة", variant: "secondary" },
   confirmed: { label: "مؤكد", variant: "default" },
-  shipped: { label: "جاري التوصيل", variant: "outline" },
+  processing: { label: "قيد التحضير", variant: "secondary" },
+  shipped: { label: "تم الشحن", variant: "outline" },
+  out_for_delivery: { label: "في الطريق للتوصيل", variant: "outline" },
   delivered: { label: "تم التوصيل", variant: "default" },
   cancelled: { label: "ملغي", variant: "destructive" },
 };
@@ -51,6 +53,24 @@ const OrderDetails = () => {
       setLoading(false);
     };
     void load();
+  }, [id, user]);
+
+  // Realtime: reflect status updates from vendor/admin immediately
+  useEffect(() => {
+    if (!user || !id) return;
+    const channel = supabase
+      .channel(`order-detail-${id}`)
+      .on(
+        "postgres_changes",
+        { event: "UPDATE", schema: "public", table: "orders", filter: `id=eq.${id}` },
+        (payload) => {
+          setOrder((prev: any) => (prev ? { ...prev, ...(payload.new as any) } : prev));
+        }
+      )
+      .subscribe();
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, [id, user]);
 
   if (authLoading || loading) {
@@ -104,6 +124,7 @@ const OrderDetails = () => {
             )}
             {order.phone && <p className="flex items-center gap-2" dir="ltr"><Phone className="h-4 w-4 text-muted-foreground" />{order.phone}</p>}
             {order.notes && <p className="text-muted-foreground bg-muted/50 p-2 rounded">{order.notes}</p>}
+            <p className="flex items-center gap-2"><Receipt className="h-4 w-4 text-muted-foreground" />طريقة الدفع: <span className="font-semibold">الدفع عند الاستلام</span></p>
           </CardContent>
         </Card>
 

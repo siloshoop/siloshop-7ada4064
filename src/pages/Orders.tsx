@@ -167,11 +167,29 @@ const Orders = () => {
     void fetchOrders();
   }, [fetchOrders]);
 
+  // Realtime: refresh when this customer's orders are updated by a vendor/admin
+  useEffect(() => {
+    if (!user) return;
+    const channel = supabase
+      .channel(`orders-customer-${user.id}`)
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "orders", filter: `customer_id=eq.${user.id}` },
+        () => { void fetchOrders(); }
+      )
+      .subscribe();
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user, fetchOrders]);
+
   const getStatusBadge = (status: string) => {
     const statusConfig: Record<string, { label: string; variant: "default" | "secondary" | "destructive" | "outline" }> = {
       pending: { label: "قيد المعالجة", variant: "secondary" },
       confirmed: { label: "مؤكد", variant: "default" },
-      shipped: { label: "جاري التوصيل", variant: "outline" },
+      processing: { label: "قيد التحضير", variant: "secondary" },
+      shipped: { label: "تم الشحن", variant: "outline" },
+      out_for_delivery: { label: "في الطريق للتوصيل", variant: "outline" },
       delivered: { label: "تم التوصيل", variant: "default" },
       cancelled: { label: "ملغي", variant: "destructive" },
     };

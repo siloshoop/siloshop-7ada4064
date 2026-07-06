@@ -474,6 +474,11 @@ const Checkout = () => {
                     </div>
                   </div>
 
+                  <div className="rounded-lg border border-primary/20 bg-primary/5 p-3 text-sm">
+                    <p className="font-semibold">طريقة الدفع</p>
+                    <p className="text-muted-foreground">الدفع عند الاستلام (COD)</p>
+                  </div>
+
                   <Button
                     type="submit"
                     className="w-full"

@@ -25,7 +25,6 @@ const Cart = lazy(() => import("./pages/Cart"));
 const Orders = lazy(() => import("./pages/Orders"));
 const Product = lazy(() => import("./pages/Product"));
 const Chat = lazy(() => import("./pages/Chat"));
-const Payment = lazy(() => import("./pages/Payment"));
 const Statistics = lazy(() => import("./pages/Statistics"));
 const InstallPWA = lazy(() => import("./pages/InstallPWA"));
 const Compare = lazy(() => import("./pages/Compare"));
@@ -101,7 +100,6 @@ const App = () => (
             <Route path="/subcategory/:categoryId/:subcategoryId" element={<Subcategory />} />
             <Route path="/cart" element={<Cart />} />
             <Route path="/checkout" element={<Checkout />} />
-            <Route path="/payment" element={<Payment />} />
             <Route path="/orders" element={<Orders />} />
             <Route path="/orders/track/:id" element={<TrackOrder />} />
             <Route path="/orders/:id" element={<OrderDetails />} />

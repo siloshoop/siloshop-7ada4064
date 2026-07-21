@@ -11,6 +11,7 @@ import { Loader2, ArrowRight, Package, MapPin, Phone, Calendar, Receipt, XCircle
 import { format } from "date-fns";
 import { ar } from "date-fns/locale";
 import CancelOrderDialog from "@/components/CancelOrderDialog";
+import ReturnRequestDialog from "@/components/ReturnRequestDialog";
 
 const statusMap: Record<string, { label: string; variant: "default" | "secondary" | "destructive" | "outline" }> = {
   pending: { label: "قيد المعالجة", variant: "secondary" },
@@ -194,6 +195,15 @@ const OrderDetails = () => {
             setOrder((prev: any) => prev ? { ...prev, status: "cancelled" } : prev);
           }}
         />
+        <ReturnRequestDialog
+          order={{ id: order.id, status: order.status, delivered_at: order.delivered_at }}
+          variant="default"
+          size="default"
+          fullWidth
+        />
+        <Button variant="ghost" size="sm" className="w-full" onClick={() => navigate("/my-returns")}>
+          عرض طلبات الإرجاع
+        </Button>
       </main>
       <Footer />
     </div>

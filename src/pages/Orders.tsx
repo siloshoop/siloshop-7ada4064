@@ -14,6 +14,7 @@ import { ar } from "date-fns/locale";
 import DeliveryRating from "@/components/DeliveryRating";
 import ReorderButton from "@/components/ReorderButton";
 import CancelOrderDialog from "@/components/CancelOrderDialog";
+import ReturnRequestDialog from "@/components/ReturnRequestDialog";
 
 interface OrderItem {
   product_id: string;
@@ -30,6 +31,7 @@ interface OrderRecord {
   created_at: string;
   total_amount: number;
   status: string | null;
+  delivered_at: string | null;
 }
 
 interface OrderItemRecord {
@@ -53,6 +55,7 @@ interface Order {
   created_at: string;
   total_amount: number;
   status: string;
+  delivered_at: string | null;
   order_items: OrderItem[];
   delivery_rating?: DeliveryRatingData | null;
 }
@@ -82,7 +85,7 @@ const Orders = () => {
     try {
       const { data: ordersData, error: ordersError } = await supabase
         .from("orders")
-        .select("id, created_at, total_amount, status")
+        .select("id, created_at, total_amount, status, delivered_at")
         .eq("customer_id", user.id)
         .order("created_at", { ascending: false });
 
@@ -151,6 +154,7 @@ const Orders = () => {
         created_at: order.created_at,
         total_amount: order.total_amount,
         status: order.status || "pending",
+        delivered_at: order.delivered_at,
         order_items: orderItemsMap.get(order.id) || [],
         delivery_rating: ratingsMap.get(order.id) || null,
       }));
@@ -292,6 +296,11 @@ const Orders = () => {
                           status={order.status}
                           fullWidth
                           onCancelled={() => void fetchOrders()}
+                        />
+                        <ReturnRequestDialog
+                          order={{ id: order.id, status: order.status, delivered_at: order.delivered_at }}
+                          fullWidth
+                          onCreated={() => void fetchOrders()}
                         />
                       </div>
                     </div>

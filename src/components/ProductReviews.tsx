@@ -46,6 +46,9 @@ export const ProductReviews = ({ productId, vendorId }: ProductReviewsProps) => 
   const [comment, setComment] = useState("");
   const [loading, setLoading] = useState(false);
   const [hasUserReview, setHasUserReview] = useState(false);
+  const [existingReview, setExistingReview] = useState<Review | null>(null);
+  const [existingImageUrl, setExistingImageUrl] = useState<string | null>(null);
+  const [removeExistingImage, setRemoveExistingImage] = useState(false);
   const [averageRating, setAverageRating] = useState(0);
   const [replyingTo, setReplyingTo] = useState<string | null>(null);
   const [replyText, setReplyText] = useState("");
@@ -83,7 +86,19 @@ export const ProductReviews = ({ productId, vendorId }: ProductReviewsProps) => 
       }
 
       if (user) {
-        setHasUserReview(data.some(r => r.user_id === user.id));
+        const mine = data.find((r: any) => r.user_id === user.id) as any;
+        if (mine) {
+          setHasUserReview(true);
+          setExistingReview(mine);
+          setRating(mine.rating);
+          setComment(mine.comment || "");
+          setExistingImageUrl(mine.image_url || null);
+          setRemoveExistingImage(false);
+        } else {
+          setHasUserReview(false);
+          setExistingReview(null);
+          setExistingImageUrl(null);
+        }
       }
     }
   };
@@ -152,26 +167,36 @@ export const ProductReviews = ({ productId, vendorId }: ProductReviewsProps) => 
         setUploading(false);
       }
 
-      const { error } = await supabase.from("reviews").insert({
-        product_id: productId,
-        user_id: user.id,
-        rating,
-        comment: comment.trim() || null,
-        image_url: uploadedUrl,
-      });
+      const finalImageUrl = uploadedUrl
+        ? uploadedUrl
+        : removeExistingImage
+          ? null
+          : existingImageUrl;
+
+      const { error } = await supabase
+        .from("reviews")
+        .upsert(
+          {
+            product_id: productId,
+            user_id: user.id,
+            rating,
+            comment: comment.trim() || null,
+            image_url: finalImageUrl,
+          },
+          { onConflict: "product_id,user_id" }
+        );
 
       if (error) throw error;
 
       toast({
         title: "تم بنجاح",
-        description: "تم إضافة تقييمك",
+        description: hasUserReview ? "تم تحديث تقييمك" : "تم إضافة تقييمك",
       });
 
-      setRating(0);
-      setComment("");
       setImageFile(null);
       setImagePreview(null);
       setUploadProgress(0);
+      setRemoveExistingImage(false);
       fetchReviews();
     } catch (error) {
       toast({
@@ -183,6 +208,31 @@ export const ProductReviews = ({ productId, vendorId }: ProductReviewsProps) => 
       setLoading(false);
       setUploading(false);
       setUploadProgress(0);
+    }
+  };
+
+  const handleDeleteReview = async () => {
+    if (!user || !existingReview) return;
+    if (!confirm("هل تريد حذف تقييمك؟")) return;
+    setLoading(true);
+    try {
+      const { error } = await supabase
+        .from("reviews")
+        .delete()
+        .eq("id", existingReview.id)
+        .eq("user_id", user.id);
+      if (error) throw error;
+      setRating(0);
+      setComment("");
+      setExistingImageUrl(null);
+      setExistingReview(null);
+      setHasUserReview(false);
+      toast({ title: "تم الحذف", description: "تم حذف تقييمك" });
+      fetchReviews();
+    } catch (error: any) {
+      toast({ title: "خطأ", description: error.message, variant: "destructive" });
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -256,8 +306,13 @@ export const ProductReviews = ({ productId, vendorId }: ProductReviewsProps) => 
               totalReviews={reviews.length}
             />
           )}
-          {user && !hasUserReview && !isVendor && (
+          {user && !isVendor && (
             <form onSubmit={handleSubmit} className="space-y-4 mb-6 pb-6 border-b">
+              {hasUserReview && (
+                <div className="text-xs text-muted-foreground">
+                  يمكنك تعديل تقييمك السابق.
+                </div>
+              )}
               <div>
                 <label className="text-sm font-medium mb-2 block">تقييمك</label>
                 <StarRating
@@ -296,6 +351,7 @@ export const ProductReviews = ({ productId, vendorId }: ProductReviewsProps) => 
                     }
                     setImageFile(f);
                     setImagePreview(URL.createObjectURL(f));
+                    setRemoveExistingImage(true);
                   }}
                 />
                 {imagePreview ? (
@@ -311,6 +367,23 @@ export const ProductReviews = ({ productId, vendorId }: ProductReviewsProps) => 
                       <X className="h-3 w-3" />
                     </button>
                   </div>
+                ) : existingImageUrl && !removeExistingImage ? (
+                  <div className="flex items-center gap-2">
+                    <div className="relative inline-block">
+                      <img src={existingImageUrl} alt="الصورة الحالية" className="h-24 w-24 object-cover rounded-lg border" />
+                      <button
+                        type="button"
+                        onClick={() => setRemoveExistingImage(true)}
+                        className="absolute -top-2 -right-2 bg-destructive text-destructive-foreground rounded-full p-1"
+                        aria-label="إزالة الصورة"
+                      >
+                        <X className="h-3 w-3" />
+                      </button>
+                    </div>
+                    <Button type="button" variant="outline" size="sm" onClick={() => fileInputRef.current?.click()}>
+                      <Camera className="h-4 w-4 ml-1" /> استبدال الصورة
+                    </Button>
+                  </div>
                 ) : (
                   <Button type="button" variant="outline" size="sm" onClick={() => fileInputRef.current?.click()}>
                     <Camera className="h-4 w-4 ml-1" /> اختيار صورة
@@ -324,17 +397,18 @@ export const ProductReviews = ({ productId, vendorId }: ProductReviewsProps) => 
                 )}
               </div>
 
-              <Button type="submit" disabled={loading || rating === 0 || uploading}>
-                {(loading || uploading) ? <Loader2 className="h-4 w-4 ml-1 animate-spin" /> : null}
-                {uploading ? "جاري رفع الصورة..." : "إضافة تقييم"}
-              </Button>
+              <div className="flex gap-2">
+                <Button type="submit" disabled={loading || rating === 0 || uploading}>
+                  {(loading || uploading) ? <Loader2 className="h-4 w-4 ml-1 animate-spin" /> : null}
+                  {uploading ? "جاري رفع الصورة..." : hasUserReview ? "تحديث التقييم" : "إضافة تقييم"}
+                </Button>
+                {hasUserReview && (
+                  <Button type="button" variant="outline" onClick={handleDeleteReview} disabled={loading}>
+                    حذف تقييمي
+                  </Button>
+                )}
+              </div>
             </form>
-          )}
-
-          {hasUserReview && user && (
-            <div className="mb-6 pb-6 border-b text-sm text-muted-foreground">
-              لقد قمت بتقييم هذا المنتج بالفعل
-            </div>
           )}
 
           <div className="space-y-4">

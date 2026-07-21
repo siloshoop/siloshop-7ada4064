@@ -30,6 +30,7 @@ interface Product {
   price: number;
   original_price: number | null;
   stock_quantity: number;
+  shipping_cost: number | null;
   image_url: string;
   images: string[] | null;
   vendor_id: string;
@@ -303,8 +304,8 @@ const Product = () => {
               />
             </div>
 
-            {/* Availability */}
-            <div className="flex items-center gap-2 text-sm">
+            {/* Availability + shipping */}
+            <div className="flex flex-wrap items-center gap-2 text-sm">
               <span
                 className={`inline-flex items-center gap-1.5 font-medium ${
                   inStock ? "text-emerald-600 dark:text-emerald-400" : "text-destructive"
@@ -325,6 +326,13 @@ const Product = () => {
                   · الكمية محدودة
                 </span>
               )}
+              <span className="text-muted-foreground">·</span>
+              <span className="inline-flex items-center gap-1.5 font-medium">
+                <Truck className="h-3.5 w-3.5 text-primary" />
+                {product.shipping_cost === 0 || product.shipping_cost === null
+                  ? "شحن مجاني"
+                  : `الشحن: ${Number(product.shipping_cost).toLocaleString()} ل.س`}
+              </span>
             </div>
 
             {/* Quantity + primary actions */}

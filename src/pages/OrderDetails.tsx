@@ -7,9 +7,10 @@ import Footer from "@/components/Footer";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Loader2, ArrowRight, Package, MapPin, Phone, Calendar, Receipt } from "lucide-react";
+import { Loader2, ArrowRight, Package, MapPin, Phone, Calendar, Receipt, XCircle } from "lucide-react";
 import { format } from "date-fns";
 import { ar } from "date-fns/locale";
+import CancelOrderDialog from "@/components/CancelOrderDialog";
 
 const statusMap: Record<string, { label: string; variant: "default" | "secondary" | "destructive" | "outline" }> = {
   pending: { label: "قيد المعالجة", variant: "secondary" },
@@ -125,6 +126,28 @@ const OrderDetails = () => {
             {order.phone && <p className="flex items-center gap-2" dir="ltr"><Phone className="h-4 w-4 text-muted-foreground" />{order.phone}</p>}
             {order.notes && <p className="text-muted-foreground bg-muted/50 p-2 rounded">{order.notes}</p>}
             <p className="flex items-center gap-2"><Receipt className="h-4 w-4 text-muted-foreground" />طريقة الدفع: <span className="font-semibold">الدفع عند الاستلام</span></p>
+            {order.status === "cancelled" && order.cancellation_reason && (
+              <div className="rounded-md border border-destructive/30 bg-destructive/5 p-3 space-y-1">
+                <p className="flex items-center gap-2 font-semibold text-destructive">
+                  <XCircle className="h-4 w-4" /> تم إلغاء الطلب
+                </p>
+                <p className="text-muted-foreground">
+                  السبب: <span className="text-foreground">{order.cancellation_reason}</span>
+                </p>
+                {order.cancelled_at && (
+                  <p className="text-xs text-muted-foreground">
+                    بتاريخ {format(new Date(order.cancelled_at), "dd MMMM yyyy - HH:mm", { locale: ar })}
+                    {order.cancelled_by_role ? ` — بواسطة ${
+                      order.cancelled_by_role === "buyer" ? "المشتري" :
+                      order.cancelled_by_role === "seller" ? "البائع" : "الإدارة"
+                    }` : ""}
+                  </p>
+                )}
+                {order.payment_status === "refund_pending" && (
+                  <p className="text-xs text-amber-600">حالة الاسترداد: قيد المعالجة</p>
+                )}
+              </div>
+            )}
           </CardContent>
         </Card>
 
@@ -162,6 +185,15 @@ const OrderDetails = () => {
         <Button variant="outline" className="w-full" onClick={() => navigate(`/orders/track/${order.id}`)}>
           تتبع الطلب
         </Button>
+        <CancelOrderDialog
+          orderId={order.id}
+          status={order.status}
+          variant="destructive"
+          size="default"
+          onCancelled={() => {
+            setOrder((prev: any) => prev ? { ...prev, status: "cancelled" } : prev);
+          }}
+        />
       </main>
       <Footer />
     </div>

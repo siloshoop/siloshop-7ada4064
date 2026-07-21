@@ -306,8 +306,13 @@ export const ProductReviews = ({ productId, vendorId }: ProductReviewsProps) => 
               totalReviews={reviews.length}
             />
           )}
-          {user && !hasUserReview && !isVendor && (
+          {user && !isVendor && (
             <form onSubmit={handleSubmit} className="space-y-4 mb-6 pb-6 border-b">
+              {hasUserReview && (
+                <div className="text-xs text-muted-foreground">
+                  يمكنك تعديل تقييمك السابق.
+                </div>
+              )}
               <div>
                 <label className="text-sm font-medium mb-2 block">تقييمك</label>
                 <StarRating
@@ -346,6 +351,7 @@ export const ProductReviews = ({ productId, vendorId }: ProductReviewsProps) => 
                     }
                     setImageFile(f);
                     setImagePreview(URL.createObjectURL(f));
+                    setRemoveExistingImage(true);
                   }}
                 />
                 {imagePreview ? (
@@ -361,6 +367,23 @@ export const ProductReviews = ({ productId, vendorId }: ProductReviewsProps) => 
                       <X className="h-3 w-3" />
                     </button>
                   </div>
+                ) : existingImageUrl && !removeExistingImage ? (
+                  <div className="flex items-center gap-2">
+                    <div className="relative inline-block">
+                      <img src={existingImageUrl} alt="الصورة الحالية" className="h-24 w-24 object-cover rounded-lg border" />
+                      <button
+                        type="button"
+                        onClick={() => setRemoveExistingImage(true)}
+                        className="absolute -top-2 -right-2 bg-destructive text-destructive-foreground rounded-full p-1"
+                        aria-label="إزالة الصورة"
+                      >
+                        <X className="h-3 w-3" />
+                      </button>
+                    </div>
+                    <Button type="button" variant="outline" size="sm" onClick={() => fileInputRef.current?.click()}>
+                      <Camera className="h-4 w-4 ml-1" /> استبدال الصورة
+                    </Button>
+                  </div>
                 ) : (
                   <Button type="button" variant="outline" size="sm" onClick={() => fileInputRef.current?.click()}>
                     <Camera className="h-4 w-4 ml-1" /> اختيار صورة
@@ -374,17 +397,18 @@ export const ProductReviews = ({ productId, vendorId }: ProductReviewsProps) => 
                 )}
               </div>
 
-              <Button type="submit" disabled={loading || rating === 0 || uploading}>
-                {(loading || uploading) ? <Loader2 className="h-4 w-4 ml-1 animate-spin" /> : null}
-                {uploading ? "جاري رفع الصورة..." : "إضافة تقييم"}
-              </Button>
+              <div className="flex gap-2">
+                <Button type="submit" disabled={loading || rating === 0 || uploading}>
+                  {(loading || uploading) ? <Loader2 className="h-4 w-4 ml-1 animate-spin" /> : null}
+                  {uploading ? "جاري رفع الصورة..." : hasUserReview ? "تحديث التقييم" : "إضافة تقييم"}
+                </Button>
+                {hasUserReview && (
+                  <Button type="button" variant="outline" onClick={handleDeleteReview} disabled={loading}>
+                    حذف تقييمي
+                  </Button>
+                )}
+              </div>
             </form>
-          )}
-
-          {hasUserReview && user && (
-            <div className="mb-6 pb-6 border-b text-sm text-muted-foreground">
-              لقد قمت بتقييم هذا المنتج بالفعل
-            </div>
           )}
 
           <div className="space-y-4">

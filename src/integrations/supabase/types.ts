@@ -907,6 +907,10 @@ export type Database = {
       }
       orders: {
         Row: {
+          cancellation_reason: string | null
+          cancelled_at: string | null
+          cancelled_by: string | null
+          cancelled_by_role: string | null
           coupon_code: string | null
           courier_name: string | null
           created_at: string | null
@@ -929,6 +933,10 @@ export type Database = {
           updated_at: string | null
         }
         Insert: {
+          cancellation_reason?: string | null
+          cancelled_at?: string | null
+          cancelled_by?: string | null
+          cancelled_by_role?: string | null
           coupon_code?: string | null
           courier_name?: string | null
           created_at?: string | null
@@ -951,6 +959,10 @@ export type Database = {
           updated_at?: string | null
         }
         Update: {
+          cancellation_reason?: string | null
+          cancelled_at?: string | null
+          cancelled_by?: string | null
+          cancelled_by_role?: string | null
           coupon_code?: string | null
           courier_name?: string | null
           created_at?: string | null
@@ -1561,6 +1573,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      cancel_order: {
+        Args: { _order_id: string; _reason: string }
+        Returns: undefined
+      }
       check_contact_rate_limit: {
         Args: { p_email_hash: string }
         Returns: boolean

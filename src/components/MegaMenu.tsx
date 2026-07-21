@@ -94,6 +94,10 @@ const MegaMenu = () => {
               <NavigationMenuTrigger
                 className="gap-1.5 px-2.5 py-1.5 h-9 bg-transparent hover:bg-accent/10 data-[state=open]:bg-accent/10 text-sm"
                 onMouseEnter={() => setActiveCategory(category.id)}
+                onClick={(e) => {
+                  e.preventDefault();
+                  navigate(`/category/${category.id}`);
+                }}
               >
                 <IconComponent className="h-3.5 w-3.5" />
                 <span className="text-xs font-medium">{category.name_ar}</span>

@@ -19,6 +19,8 @@ interface Product {
   original_price: number | null;
   image_url: string;
   vendor_id: string;
+  brand_id: string | null;
+  stock_quantity: number | null;
   reviews: { rating: number }[];
 }
 
@@ -33,6 +35,7 @@ const Category = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
   const [vendorRatings, setVendorRatings] = useState<Map<string, number>>(new Map());
+  const [salesMap, setSalesMap] = useState<Map<string, number>>(new Map());
   const [categoryName, setCategoryName] = useState("");
   const [loading, setLoading] = useState(true);
   const [filters, setFilters] = useState({
@@ -41,6 +44,9 @@ const Category = () => {
     categoryId: "",
     sortBy: "newest",
     minVendorRating: 0,
+    brandId: "",
+    inStockOnly: false,
+    minRating: 0,
   });
 
   useEffect(() => {
@@ -51,7 +57,7 @@ const Category = () => {
 
   useEffect(() => {
     applyFilters();
-  }, [products, filters, vendorRatings]);
+  }, [products, filters, vendorRatings, salesMap]);
 
   const fetchCategoryProducts = async () => {
     // Fetch category info
@@ -75,6 +81,8 @@ const Category = () => {
         original_price,
         image_url,
         vendor_id,
+        brand_id,
+        stock_quantity,
         shipping_cost,
         reviews(rating)
       `)
@@ -107,6 +115,22 @@ const Category = () => {
         });
         setVendorRatings(avgRatings);
       }
+
+      // Fetch sales counts for "best selling" sort
+      const productIds = productsData.map(p => p.id);
+      if (productIds.length > 0) {
+        const { data: salesData } = await supabase
+          .from("order_items")
+          .select("product_id, quantity")
+          .in("product_id", productIds);
+        if (salesData) {
+          const sMap = new Map<string, number>();
+          salesData.forEach((s: any) => {
+            sMap.set(s.product_id, (sMap.get(s.product_id) || 0) + (s.quantity || 0));
+          });
+          setSalesMap(sMap);
+        }
+      }
     }
     setLoading(false);
   };
@@ -125,6 +149,26 @@ const Category = () => {
       });
     }
 
+    // Brand filter
+    if (filters.brandId) {
+      result = result.filter(p => p.brand_id === filters.brandId);
+    }
+
+    // Availability filter
+    if (filters.inStockOnly) {
+      result = result.filter(p => (p.stock_quantity ?? 0) > 0);
+    }
+
+    // Product rating filter
+    if (filters.minRating > 0) {
+      result = result.filter(p => {
+        const avg = p.reviews?.length
+          ? p.reviews.reduce((s, r) => s + r.rating, 0) / p.reviews.length
+          : 0;
+        return avg >= filters.minRating;
+      });
+    }
+
     // Sort
     switch (filters.sortBy) {
       case "price_asc":
@@ -138,6 +182,14 @@ const Category = () => {
         break;
       case "name_desc":
         result.sort((a, b) => b.name.localeCompare(a.name));
+        break;
+      case "rating_desc": {
+        const avgOf = (p: Product) => p.reviews?.length ? p.reviews.reduce((s, r) => s + r.rating, 0) / p.reviews.length : 0;
+        result.sort((a, b) => avgOf(b) - avgOf(a));
+        break;
+      }
+      case "best_selling":
+        result.sort((a, b) => (salesMap.get(b.id) || 0) - (salesMap.get(a.id) || 0));
         break;
     }
 
@@ -168,19 +220,27 @@ const Category = () => {
         <div className="flex items-center justify-between mb-8">
           <div>
             <h1 className="text-3xl font-bold mb-2">{categoryName || "الفئة"}</h1>
-            <p className="text-muted-foreground">{filteredProducts.length} منتج</p>
+            <p className="text-muted-foreground">
+              {filteredProducts.length} من {products.length} منتج
+            </p>
           </div>
-          <SearchFilters onFilterChange={setFilters} />
+          <SearchFilters
+            onFilterChange={(f) => setFilters((prev) => ({ ...prev, ...f }))}
+          />
         </div>
 
         {filteredProducts.length === 0 ? (
           <div className="text-center py-12">
-            <p className="text-muted-foreground text-lg">لا توجد منتجات مطابقة للفلاتر</p>
+            <p className="text-muted-foreground text-lg">
+              {products.length === 0
+                ? "لا توجد منتجات متاحة في هذه الفئة."
+                : "لا توجد منتجات مطابقة للفلاتر"}
+            </p>
           </div>
         ) : (
           <>
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-              {filteredProducts.slice(0, 8).map((product, index) => {
+              {filteredProducts.map((product, index) => {
                 const avgRating = product.reviews?.length > 0
                   ? product.reviews.reduce((sum, r) => sum + r.rating, 0) / product.reviews.length
                   : 4;
@@ -210,47 +270,6 @@ const Category = () => {
                 );
               })}
             </div>
-
-            {/* Ad: In-feed after first 8 products */}
-            {filteredProducts.length > 8 && (
-              <div className="my-6">
-                <AdPlaceholder size="interstitial" slot="category-mid-interstitial" />
-              </div>
-            )}
-
-            {filteredProducts.length > 8 && (
-              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-                {filteredProducts.slice(8).map((product, index) => {
-                  const avgRating = product.reviews?.length > 0
-                    ? product.reviews.reduce((sum, r) => sum + r.rating, 0) / product.reviews.length
-                    : 4;
-                  const discount = product.original_price
-                    ? Math.round(((product.original_price - product.price) / product.original_price) * 100)
-                    : undefined;
-                  return (
-                    <Fragment key={product.id}>
-                      {index > 0 && index % 4 === 0 && nativeAds && nativeAds[Math.floor(index / 4)] && (
-                        <NativeAdCard
-                          ad={nativeAds[Math.floor(index / 4)]}
-                          slot={`native-category-b-${index}`}
-                        />
-                      )}
-                      <ProductCard
-                        id={product.id}
-                        name={product.name}
-                        price={product.price}
-                        originalPrice={product.original_price || undefined}
-                        image={product.image_url}
-                        rating={avgRating}
-                        reviews={product.reviews?.length || 0}
-                        discount={discount}
-                        shippingCost={(product as any).shipping_cost || 0}
-                      />
-                    </Fragment>
-                  );
-                })}
-              </div>
-            )}
 
             {/* Ad: Bottom banner */}
             <div className="mt-8">

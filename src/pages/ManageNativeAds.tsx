@@ -336,7 +336,7 @@ const ManageNativeAds = () => {
                   {destinationType === "category" && (
                     <div className="space-y-2">
                       <Label htmlFor="dest_category">اختر الفئة</Label>
-                      <Select value={destinationId} onValueChange={setDestinationId}>
+                      <Select value={destinationId || undefined} onValueChange={setDestinationId}>
                         <SelectTrigger id="dest_category"><SelectValue placeholder="اختر فئة" /></SelectTrigger>
                         <SelectContent>
                           {categoriesList.map((c) => (
@@ -351,7 +351,7 @@ const ManageNativeAds = () => {
                   {destinationType === "store" && (
                     <div className="space-y-2">
                       <Label htmlFor="dest_vendor">اختر المتجر (البائع)</Label>
-                      <Select value={destinationId} onValueChange={setDestinationId}>
+                      <Select value={destinationId || undefined} onValueChange={setDestinationId}>
                         <SelectTrigger id="dest_vendor"><SelectValue placeholder="اختر متجرًا" /></SelectTrigger>
                         <SelectContent>
                           {vendorsList.map((v) => (

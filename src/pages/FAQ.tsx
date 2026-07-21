@@ -30,10 +30,19 @@ const faqCategories = [
     id: "shipping",
     title: "الشحن والتوصيل",
     image: faqShipping,
-    description: "أوقات وأسعار التوصيل لجميع المحافظات السورية",
+    description: "تكلفة الشحن تحددها إعدادات البائع لكل منتج",
     questions: [
       { question: "كم تستغرق مدة التوصيل؟", answer: "بين 2-5 أيام عمل: دمشق وريفها 2-3 أيام، المدن الرئيسية 3-4 أيام، المحافظات الأخرى 4-5 أيام." },
-      { question: "كيف يتم تحديد تكلفة الشحن؟", answer: "يتم تحديد تكلفة الشحن من قِبل البائع لكل منتج. بعض المنتجات قد تشمل شحنًا مجانيًا، بينما قد يفرض بائعون آخرون رسوم شحن يحددونها بأنفسهم. تظهر تكلفة الشحن بوضوح في صفحة المنتج وأثناء إتمام الطلب قبل تأكيده. إذا حدد البائع التكلفة بـ 0، سيتم عرض \"شحن مجاني\" بدلاً من السعر." },
+      {
+        question: "كيف يتم تحديد تكلفة الشحن؟",
+        answer: "يتم تحديد تكلفة الشحن من قِبل البائع لكل منتج على حدة. بعض المنتجات قد تشمل شحنًا مجانيًا، وبعضها قد يحمل رسوم شحن يحددها البائع وفقًا لطبيعة المنتج ومنطقة التوصيل. تظهر تكلفة الشحن بوضوح في صفحة المنتج، وفي عربة التسوق، وأثناء إتمام الطلب قبل التأكيد النهائي. إذا قام البائع بتعيين تكلفة الشحن إلى 0، فسيتم عرض \"شحن مجاني\" بدلاً من السعر.",
+        translations: {
+          en: {
+            question: "How is the shipping cost determined?",
+            answer: "The shipping cost is determined by the seller for each product. Some products may include free shipping, while others may have a shipping fee set by the seller. The shipping cost is clearly displayed on the product page, in the cart, and during checkout before the order is confirmed. If the seller sets the shipping cost to 0, \"Free Shipping\" is shown instead of a price.",
+          },
+        },
+      },
       { question: "هل يمكنني تحديد وقت التوصيل؟", answer: "نعم. يعتمد وقت التوصيل على البائع وشركة الشحن. إذا كنت بحاجة لتغيير وقت التوصيل، يرجى التواصل مع البائع أو شركة الشحن إذا كان الطلب قد شُحن بالفعل." },
       { question: "ماذا لو لم أكن متواجداً وقت التوصيل؟", answer: "نتواصل معك لإعادة الجدولة، أو يمكنك تحديد شخص آخر لاستلام الطلب." },
     ],

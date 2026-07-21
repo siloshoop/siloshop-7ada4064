@@ -35,6 +35,7 @@ const Dashboard = () => {
   const [filterStatus, setFilterStatus] = useState("all");
   const [sortBy, setSortBy] = useState("date-desc");
   const [isAdmin, setIsAdmin] = useState(false);
+  const [sellerApp, setSellerApp] = useState<{ status: string; rejection_reason: string | null } | null>(null);
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -67,6 +68,14 @@ const Dashboard = () => {
           .maybeSingle();
 
         setIsAdmin(!!adminRole);
+
+        // Detect pending/rejected/suspended seller application
+        const { data: appRow } = await supabase
+          .from("seller_applications")
+          .select("status, rejection_reason")
+          .eq("user_id", user.id)
+          .maybeSingle();
+        if (appRow) setSellerApp(appRow as any);
 
         if (profileData?.role === "vendor") {
           // Get vendor stats and products
@@ -260,6 +269,40 @@ const Dashboard = () => {
             </CardHeader>
             <CardContent>
               <UserStatistics />
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Admin quick link: seller management */}
+        {isAdmin && (
+          <Card className="mb-6 border-primary/30">
+            <CardContent className="pt-6 flex items-center justify-between gap-4">
+              <div>
+                <p className="font-semibold">إدارة البائعين</p>
+                <p className="text-sm text-muted-foreground">مراجعة طلبات التسجيل واعتماد أو رفض البائعين.</p>
+              </div>
+              <Button onClick={() => navigate("/dashboard/sellers")}>فتح لوحة البائعين</Button>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Seller application status banner (pending/rejected/suspended) */}
+        {sellerApp && sellerApp.status !== "approved" && (
+          <Card className="mb-6 border-amber-400/60 bg-amber-50/40 dark:bg-amber-950/10">
+            <CardContent className="pt-6 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+              <div>
+                <p className="font-semibold">
+                  {sellerApp.status === "pending" && "طلب البائع قيد المراجعة"}
+                  {sellerApp.status === "rejected" && "تم رفض طلب البائع"}
+                  {sellerApp.status === "suspended" && "حسابك كبائع موقوف حالياً"}
+                </p>
+                <p className="text-sm text-muted-foreground">
+                  {sellerApp.status === "pending" && "لا يمكنك الوصول إلى لوحة البائع حتى تتم الموافقة على طلبك."}
+                  {sellerApp.status === "rejected" && (sellerApp.rejection_reason ?? "يمكنك تعديل بياناتك وإعادة التقديم.")}
+                  {sellerApp.status === "suspended" && "يرجى التواصل مع الإدارة."}
+                </p>
+              </div>
+              <Button onClick={() => navigate("/seller/application")}>عرض حالة الطلب</Button>
             </CardContent>
           </Card>
         )}

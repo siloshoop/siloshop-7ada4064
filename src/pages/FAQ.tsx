@@ -105,10 +105,15 @@ const FAQ = () => {
       .map((category) => ({
         ...category,
         questions: category.questions.filter(
-          (qq) =>
-            !q ||
-            qq.question.toLowerCase().includes(q) ||
-            qq.answer.toLowerCase().includes(q),
+          (qq) => {
+            if (!q) return true;
+            const en = qq.translations?.en;
+            return (
+              qq.question.toLowerCase().includes(q) ||
+              qq.answer.toLowerCase().includes(q) ||
+              (en && (en.question.toLowerCase().includes(q) || en.answer.toLowerCase().includes(q)))
+            );
+          },
         ),
       }))
       .filter((category) => category.questions.length > 0);

@@ -8,7 +8,6 @@ import { ImageGallery } from "@/components/ImageGallery";
 import { ProductReviews } from "@/components/ProductReviews";
 import { VendorRating } from "@/components/VendorRating";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ShoppingCart, Loader2, Minus, Plus, Star, ArrowLeftRight, Zap, Truck, ShieldCheck, RotateCcw, Store } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";

@@ -11,7 +11,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, ShoppingCart, Tag, MapPin, Plus } from "lucide-react";
+import { Loader2, ShoppingCart, Tag, MapPin, Plus, Truck } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { SYRIAN_GOVERNORATES } from "@/lib/syrianGovernorates";
@@ -408,6 +408,12 @@ const Checkout = () => {
                           <h4 className="font-medium">{item.product.name}</h4>
                           <p className="text-sm text-muted-foreground">
                             الكمية: {item.quantity}
+                          </p>
+                          <p className="text-sm inline-flex items-center gap-1 mt-0.5">
+                            <Truck className="h-3.5 w-3.5 text-primary" />
+                            {Number(item.product.shipping_cost || 0) === 0
+                              ? "شحن مجاني"
+                              : `الشحن: ${Number(item.product.shipping_cost || 0).toLocaleString()} ل.س`}
                           </p>
                         </div>
                         <div className="text-left">

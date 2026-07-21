@@ -1741,6 +1741,17 @@ export type Database = {
           id: string
         }[]
       }
+      get_vendor_sales_stats: {
+        Args: never
+        Returns: {
+          cancelled_orders: number
+          completed_orders: number
+          estimated_revenue: number
+          products_sold: number
+          returned_orders: number
+          total_orders: number
+        }[]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]

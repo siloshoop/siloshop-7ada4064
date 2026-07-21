@@ -35,6 +35,7 @@ const Dashboard = () => {
   const [filterStatus, setFilterStatus] = useState("all");
   const [sortBy, setSortBy] = useState("date-desc");
   const [isAdmin, setIsAdmin] = useState(false);
+  const [sellerApp, setSellerApp] = useState<{ status: string; rejection_reason: string | null } | null>(null);
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -67,6 +68,14 @@ const Dashboard = () => {
           .maybeSingle();
 
         setIsAdmin(!!adminRole);
+
+        // Detect pending/rejected/suspended seller application
+        const { data: appRow } = await supabase
+          .from("seller_applications")
+          .select("status, rejection_reason")
+          .eq("user_id", user.id)
+          .maybeSingle();
+        if (appRow) setSellerApp(appRow as any);
 
         if (profileData?.role === "vendor") {
           // Get vendor stats and products

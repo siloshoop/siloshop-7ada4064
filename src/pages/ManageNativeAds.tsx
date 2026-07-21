@@ -39,6 +39,41 @@ const placementOptions = [
   { value: "category", label: "صفحة التصنيف" },
 ];
 
+type DestinationType = "category" | "store" | "product" | "promotion" | "custom" | "none";
+
+const destinationTypeOptions: { value: DestinationType; label: string }[] = [
+  { value: "none", label: "بدون وجهة" },
+  { value: "category", label: "فئة" },
+  { value: "store", label: "متجر (بائع)" },
+  { value: "product", label: "منتج" },
+  { value: "promotion", label: "عرض ترويجي (صفقات اليوم)" },
+  { value: "custom", label: "مسار مخصص" },
+];
+
+const parseCtaUrl = (url: string | null): { type: DestinationType; id: string; custom: string } => {
+  if (!url) return { type: "none", id: "", custom: "" };
+  const catMatch = url.match(/^\/category\/([^/?#]+)/);
+  if (catMatch) return { type: "category", id: catMatch[1], custom: "" };
+  const vendorMatch = url.match(/^\/vendor\/([^/?#]+)/);
+  if (vendorMatch) return { type: "store", id: vendorMatch[1], custom: "" };
+  const productMatch = url.match(/^\/product\/([^/?#]+)/);
+  if (productMatch) return { type: "product", id: productMatch[1], custom: "" };
+  if (url.startsWith("/#daily-deals") || url.startsWith("/deals")) return { type: "promotion", id: "", custom: "" };
+  return { type: "custom", id: "", custom: url };
+};
+
+const buildCtaUrl = (type: DestinationType, id: string, custom: string): string | null => {
+  switch (type) {
+    case "category": return id ? `/category/${id}` : null;
+    case "store": return id ? `/vendor/${id}/ratings` : null;
+    case "product": return id ? `/product/${id}` : null;
+    case "promotion": return "/#daily-deals";
+    case "custom": return custom.startsWith("/") ? custom : null;
+    case "none":
+    default: return null;
+  }
+};
+
 const ManageNativeAds = () => {
   const { isAdmin, loading: adminLoading } = useAdminCheck();
   const [ads, setAds] = useState<NativeAd[]>([]);
@@ -59,6 +94,25 @@ const ManageNativeAds = () => {
     start_date: "",
     end_date: "",
   });
+
+  const [destinationType, setDestinationType] = useState<DestinationType>("none");
+  const [destinationId, setDestinationId] = useState("");
+  const [customPath, setCustomPath] = useState("");
+
+  const [categoriesList, setCategoriesList] = useState<{ id: string; name: string }[]>([]);
+  const [vendorsList, setVendorsList] = useState<{ id: string; full_name: string | null }[]>([]);
+
+  useEffect(() => {
+    if (!isAdmin) return;
+    (async () => {
+      const [catsRes, vendorsRes] = await Promise.all([
+        supabase.from("categories").select("id, name").order("name"),
+        supabase.from("profiles").select("id, full_name").eq("role", "vendor").order("full_name"),
+      ]);
+      if (catsRes.data) setCategoriesList(catsRes.data as { id: string; name: string }[]);
+      if (vendorsRes.data) setVendorsList(vendorsRes.data as { id: string; full_name: string | null }[]);
+    })();
+  }, [isAdmin]);
 
   useEffect(() => {
     if (isAdmin) fetchAds();
@@ -87,6 +141,9 @@ const ManageNativeAds = () => {
       cta_url: "", sponsor_name: "", placement: "search", priority: "0",
       start_date: "", end_date: "",
     });
+    setDestinationType("none");
+    setDestinationId("");
+    setCustomPath("");
     setEditingId(null);
     setShowForm(false);
   };
@@ -94,12 +151,17 @@ const ManageNativeAds = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
+      const resolvedCtaUrl = buildCtaUrl(destinationType, destinationId, customPath);
+      if (destinationType !== "none" && !resolvedCtaUrl) {
+        toast({ title: "وجهة غير صالحة", description: "يرجى إكمال بيانات الوجهة المختارة.", variant: "destructive" });
+        return;
+      }
       const payload = {
         title: formData.title,
         description: formData.description || null,
         image_url: formData.image_url || null,
         cta_text: formData.cta_text,
-        cta_url: formData.cta_url || null,
+        cta_url: resolvedCtaUrl,
         sponsor_name: formData.sponsor_name,
         placement: formData.placement,
         priority: parseInt(formData.priority),
@@ -136,6 +198,10 @@ const ManageNativeAds = () => {
       start_date: ad.start_date ? ad.start_date.slice(0, 16) : "",
       end_date: ad.end_date ? ad.end_date.slice(0, 16) : "",
     });
+    const parsed = parseCtaUrl(ad.cta_url);
+    setDestinationType(parsed.type);
+    setDestinationId(parsed.id);
+    setCustomPath(parsed.custom);
     setEditingId(ad.id);
     setShowForm(true);
   };

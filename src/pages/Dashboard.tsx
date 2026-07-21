@@ -557,11 +557,11 @@ const Dashboard = () => {
                     <Heart className="h-5 w-5" />
                     <span>المفضلة</span>
                   </Button>
-                  <Button variant="outline" className="h-20 flex-col gap-1" onClick={() => navigate("/chat")}>
+                  <Button variant="outline" className="h-20 flex-col gap-1" onClick={() => navigate("/messages")}>
                     <MessageSquare className="h-5 w-5" />
                     <span>الرسائل</span>
                   </Button>
-                  <Button variant="outline" className="h-20 flex-col gap-1" onClick={() => navigate("/notification-settings")}>
+                  <Button variant="outline" className="h-20 flex-col gap-1" onClick={() => navigate("/settings")}>
                     <Settings className="h-5 w-5" />
                     <span>الإعدادات</span>
                   </Button>

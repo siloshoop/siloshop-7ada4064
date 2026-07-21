@@ -60,6 +60,8 @@ const VerifyEmail = lazy(() => import("./pages/VerifyEmail"));
 const Messages = lazy(() => import("./pages/Messages"));
 const Settings = lazy(() => import("./pages/Settings"));
 const Profile = lazy(() => import("./pages/Profile"));
+const MyReturns = lazy(() => import("./pages/MyReturns"));
+const VendorReturns = lazy(() => import("./pages/VendorReturns"));
 import RequireRole from "@/components/RequireRole";
 
 const queryClient = new QueryClient(); // App query client
@@ -106,6 +108,8 @@ const App = () => (
             <Route path="/orders" element={<Orders />} />
             <Route path="/orders/track/:id" element={<TrackOrder />} />
             <Route path="/orders/:id" element={<OrderDetails />} />
+            <Route path="/my-returns" element={<MyReturns />} />
+            <Route path="/dashboard/returns" element={<RequireRole role={["vendor","admin"]}><VendorReturns /></RequireRole>} />
             <Route path="/account/addresses" element={<Addresses />} />
             <Route path="/product/:id" element={<Product />} />
             <Route path="/compare" element={<Compare />} />

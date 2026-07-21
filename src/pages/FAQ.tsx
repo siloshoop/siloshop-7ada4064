@@ -42,12 +42,21 @@ const faqCategories = [
     id: "returns",
     title: "الإرجاع والاستبدال",
     image: faqReturns,
-    description: "سياسة واضحة لإرجاع المنتجات واسترداد المبالغ",
+    description: "سياسة واضحة لإرجاع المنتجات والاستبدال",
     questions: [
       { question: "ما هي مدة الإرجاع؟", answer: "14 يوماً من تاريخ الاستلام، شرط أن يكون المنتج بحالته الأصلية مع العبوة والفاتورة." },
       { question: "ما هي المنتجات التي لا يمكن إرجاعها؟", answer: "منتجات النظافة الشخصية، المواد الغذائية، البرمجيات الرقمية، والمنتجات المخصصة حسب الطلب." },
       { question: "كيف أطلب إرجاع منتج؟", answer: "من صفحة (طلباتي)، افتح تفاصيل الطلب واضغط على (طلب إرجاع). اختر سبب الإرجاع، أضف ملاحظات، وارفق صوراً أو فيديو إن لزم. أرسل الطلب وسيراجعه البائع. يمكنك متابعة حالة طلب الإرجاع من صفحة (طلباتي) أو (طلبات الإرجاع)، وإذا تمت الموافقة ستصلك تعليمات إرجاع المنتج." },
-      { question: "متى سأستلم المبلغ المسترد؟", answer: "خلال 7-14 يوم عمل بعد استلام المنتج والتحقق من حالته، إلى نفس وسيلة الدفع." },
+      {
+        question: "ماذا يحدث بعد الموافقة على طلب الإرجاع؟",
+        answer: "بعد الموافقة على طلب الإرجاع، سيقدم البائع تعليمات الإرجاع. بمجرد استلام المنتج المرتجع وفحصه، ستُكتمل عملية الإرجاع. يمكنك متابعة حالة طلب الإرجاع في أي وقت من صفحة طلباتي.",
+        translations: {
+          en: {
+            question: "What happens after my return request is approved?",
+            answer: "After your return request is approved, the seller will provide return instructions. Once the returned product is received and inspected, the return process will be completed. You can track the status of your return request at any time from the My Orders page.",
+          },
+        },
+      },
     ],
   },
   {

@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Plus, Package, TrendingUp, DollarSign, ShoppingBag, Loader2, Edit, Trash2, Search, Tag, Star, Layers, Percent, Megaphone, Users, Activity, BarChart3, LayoutGrid, Heart, Settings, MessageSquare } from "lucide-react";
+import { Plus, Package, TrendingUp, DollarSign, ShoppingBag, Loader2, Edit, Trash2, Search, Tag, Star, Layers, Percent, Megaphone, Users, Activity, BarChart3, LayoutGrid, Heart, Settings, MessageSquare, CheckCircle2, XCircle, Undo2, Boxes } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import UserStatistics from "@/components/UserStatistics";
 import { useToast } from "@/hooks/use-toast";
@@ -20,7 +20,15 @@ const Dashboard = () => {
   const [products, setProducts] = useState<any[]>([]);
   const [filteredProducts, setFilteredProducts] = useState<any[]>([]);
   const [recentReviews, setRecentReviews] = useState<any[]>([]);
-  const [stats, setStats] = useState({ totalProducts: 0, totalOrders: 0, totalRevenue: 0 });
+  const [stats, setStats] = useState({
+    totalProducts: 0,
+    totalOrders: 0,
+    completedOrders: 0,
+    cancelledOrders: 0,
+    returnedOrders: 0,
+    productsSold: 0,
+    estimatedRevenue: 0,
+  });
   const [customerStats, setCustomerStats] = useState({ orders: 0, totalSpent: 0, reviewed: 0, favorites: 0 });
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
@@ -70,17 +78,16 @@ const Dashboard = () => {
 
           setProducts(productsData || []);
 
-          const { data: orderItems } = await supabase
-            .from("order_items")
-            .select("*")
-            .eq("vendor_id", user.id);
-
-          const totalRevenue = orderItems?.reduce((sum, item) => sum + Number(item.price) * item.quantity, 0) || 0;
-
+          const { data: salesStats } = await supabase.rpc("get_vendor_sales_stats");
+          const s: any = Array.isArray(salesStats) ? salesStats[0] : salesStats;
           setStats({
             totalProducts: productsData?.length || 0,
-            totalOrders: orderItems?.length || 0,
-            totalRevenue,
+            totalOrders: Number(s?.total_orders || 0),
+            completedOrders: Number(s?.completed_orders || 0),
+            cancelledOrders: Number(s?.cancelled_orders || 0),
+            returnedOrders: Number(s?.returned_orders || 0),
+            productsSold: Number(s?.products_sold || 0),
+            estimatedRevenue: Number(s?.estimated_revenue || 0),
           });
 
           // Get recent reviews

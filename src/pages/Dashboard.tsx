@@ -125,6 +125,28 @@ const Dashboard = () => {
     fetchDashboardData();
   }, [user, toast]);
 
+  // Realtime: keep favorites counter in sync (e.g. after successful order removes items)
+  useEffect(() => {
+    if (!user) return;
+    const channel = supabase
+      .channel(`dashboard-favorites-${user.id}`)
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "favorites", filter: `user_id=eq.${user.id}` },
+        async () => {
+          const { count } = await supabase
+            .from("favorites")
+            .select("id", { count: "exact", head: true })
+            .eq("user_id", user.id);
+          setCustomerStats((s) => ({ ...s, favorites: count || 0 }));
+        }
+      )
+      .subscribe();
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user]);
+
   // Filter and sort products
   useEffect(() => {
     let filtered = [...products];

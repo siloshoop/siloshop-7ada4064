@@ -273,6 +273,40 @@ const Dashboard = () => {
           </Card>
         )}
 
+        {/* Admin quick link: seller management */}
+        {isAdmin && (
+          <Card className="mb-6 border-primary/30">
+            <CardContent className="pt-6 flex items-center justify-between gap-4">
+              <div>
+                <p className="font-semibold">إدارة البائعين</p>
+                <p className="text-sm text-muted-foreground">مراجعة طلبات التسجيل واعتماد أو رفض البائعين.</p>
+              </div>
+              <Button onClick={() => navigate("/dashboard/sellers")}>فتح لوحة البائعين</Button>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Seller application status banner (pending/rejected/suspended) */}
+        {sellerApp && sellerApp.status !== "approved" && (
+          <Card className="mb-6 border-amber-400/60 bg-amber-50/40 dark:bg-amber-950/10">
+            <CardContent className="pt-6 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+              <div>
+                <p className="font-semibold">
+                  {sellerApp.status === "pending" && "طلب البائع قيد المراجعة"}
+                  {sellerApp.status === "rejected" && "تم رفض طلب البائع"}
+                  {sellerApp.status === "suspended" && "حسابك كبائع موقوف حالياً"}
+                </p>
+                <p className="text-sm text-muted-foreground">
+                  {sellerApp.status === "pending" && "لا يمكنك الوصول إلى لوحة البائع حتى تتم الموافقة على طلبك."}
+                  {sellerApp.status === "rejected" && (sellerApp.rejection_reason ?? "يمكنك تعديل بياناتك وإعادة التقديم.")}
+                  {sellerApp.status === "suspended" && "يرجى التواصل مع الإدارة."}
+                </p>
+              </div>
+              <Button onClick={() => navigate("/seller/application")}>عرض حالة الطلب</Button>
+            </CardContent>
+          </Card>
+        )}
+
         {isVendor ? (
           <>
             <div className="mb-4 text-xs text-muted-foreground bg-muted/40 border rounded-md px-3 py-2">

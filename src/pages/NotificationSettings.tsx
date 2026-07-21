@@ -6,9 +6,8 @@ import Footer from "@/components/Footer";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { Bell, Package, Tag, Percent, Loader2, Save, ShoppingBag, Mail, Megaphone } from "lucide-react";
+import { Bell, Package, Tag, Percent, Loader2, ShoppingBag, Mail, Megaphone } from "lucide-react";
 import PushNotificationManager from "@/components/PushNotificationManager";
 
 interface NotificationPreferences {
@@ -24,7 +23,7 @@ const NotificationSettings = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
+  const [savingKey, setSavingKey] = useState<keyof NotificationPreferences | null>(null);
   const [userId, setUserId] = useState<string | null>(null);
   const [preferences, setPreferences] = useState<NotificationPreferences>({
     new_products: true,
@@ -43,12 +42,12 @@ const NotificationSettings = () => {
         return;
       }
       setUserId(user.id);
-      await fetchPreferences(user.id);
+      await fetchOrCreatePreferences(user.id);
     };
     checkAuth();
   }, [navigate]);
 
-  const fetchPreferences = async (uid: string) => {
+  const fetchOrCreatePreferences = async (uid: string) => {
     try {
       const { data, error } = await supabase
         .from("notification_preferences")
@@ -67,6 +66,21 @@ const NotificationSettings = () => {
           promotions: data.promotions,
           newsletter: data.newsletter,
         });
+      } else {
+        // No prefs yet — create defaults
+        const defaults = {
+          new_products: true,
+          daily_deals: true,
+          price_drops: true,
+          order_updates: true,
+          promotions: true,
+          newsletter: false,
+        };
+        const { error: insertError } = await supabase
+          .from("notification_preferences")
+          .insert({ user_id: uid, ...defaults });
+        if (insertError && insertError.code !== "23505") throw insertError;
+        setPreferences(defaults);
       }
     } catch (error) {
       console.error("Error fetching preferences:", error);
@@ -75,43 +89,34 @@ const NotificationSettings = () => {
     }
   };
 
-  const handleToggle = (key: keyof NotificationPreferences) => {
-    setPreferences((prev) => ({
-      ...prev,
-      [key]: !prev[key],
-    }));
-  };
-
-  const savePreferences = async () => {
+  const handleToggle = async (key: keyof NotificationPreferences, value: boolean) => {
     if (!userId) return;
-
-    setSaving(true);
+    const previous = preferences[key];
+    setPreferences((prev) => ({ ...prev, [key]: value }));
+    setSavingKey(key);
     try {
       const { error } = await supabase
         .from("notification_preferences")
-        .upsert({
-          user_id: userId,
-          ...preferences,
-          updated_at: new Date().toISOString(),
-        }, {
-          onConflict: "user_id",
-        });
-
+        .upsert(
+          {
+            user_id: userId,
+            ...preferences,
+            [key]: value,
+            updated_at: new Date().toISOString(),
+          },
+          { onConflict: "user_id" },
+        );
       if (error) throw error;
-
-      toast({
-        title: "تم الحفظ",
-        description: "تم حفظ تفضيلات الإشعارات بنجاح",
-      });
     } catch (error) {
-      console.error("Error saving preferences:", error);
+      console.error("Error saving preference:", error);
+      setPreferences((prev) => ({ ...prev, [key]: previous }));
       toast({
         title: "خطأ",
-        description: "حدث خطأ أثناء حفظ التفضيلات",
+        description: "تعذر حفظ التفضيل، حاول مرة أخرى",
         variant: "destructive",
       });
     } finally {
-      setSaving(false);
+      setSavingKey(null);
     }
   };
 
@@ -218,13 +223,13 @@ const NotificationSettings = () => {
                 return (
                   <div 
                     key={option.key}
-                    className="flex items-center justify-between p-4 rounded-lg border bg-card hover:bg-accent/50 transition-colors"
+                    className="flex items-center justify-between gap-4 p-4 rounded-lg border bg-card hover:bg-accent/50 transition-colors"
                   >
-                    <div className="flex items-center gap-4">
-                      <div className={`p-2 rounded-full ${option.bgColor}`}>
+                    <div className="flex items-center gap-4 min-w-0 flex-1">
+                      <div className={`p-2 rounded-full shrink-0 ${option.bgColor}`}>
                         <IconComponent className={`h-5 w-5 ${option.iconColor}`} />
                       </div>
-                      <div>
+                      <div className="min-w-0">
                         <Label htmlFor={option.key} className="text-base font-medium cursor-pointer">
                           {option.title}
                         </Label>
@@ -233,32 +238,20 @@ const NotificationSettings = () => {
                         </p>
                       </div>
                     </div>
-                    <Switch
-                      id={option.key}
-                      checked={preferences[option.key]}
-                      onCheckedChange={() => handleToggle(option.key)}
-                    />
+                    <div className="shrink-0 flex items-center">
+                      {savingKey === option.key && (
+                        <Loader2 className="h-3.5 w-3.5 animate-spin text-muted-foreground ml-2" />
+                      )}
+                      <Switch
+                        id={option.key}
+                        checked={preferences[option.key]}
+                        onCheckedChange={(v) => handleToggle(option.key, v)}
+                        disabled={savingKey !== null}
+                      />
+                    </div>
                   </div>
                 );
               })}
-
-              <Button 
-                onClick={savePreferences} 
-                className="w-full mt-4"
-                disabled={saving}
-              >
-                {saving ? (
-                  <>
-                    <Loader2 className="h-4 w-4 animate-spin ml-2" />
-                    جاري الحفظ...
-                  </>
-                ) : (
-                  <>
-                    <Save className="h-4 w-4 ml-2" />
-                    حفظ التفضيلات
-                  </>
-                )}
-              </Button>
             </CardContent>
           </Card>
 

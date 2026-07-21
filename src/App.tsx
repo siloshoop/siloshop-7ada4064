@@ -62,6 +62,8 @@ const Settings = lazy(() => import("./pages/Settings"));
 const Profile = lazy(() => import("./pages/Profile"));
 const MyReturns = lazy(() => import("./pages/MyReturns"));
 const VendorReturns = lazy(() => import("./pages/VendorReturns"));
+const SellerApplication = lazy(() => import("./pages/SellerApplication"));
+const SellerManagement = lazy(() => import("./pages/admin/SellerManagement"));
 import RequireRole from "@/components/RequireRole";
 
 const queryClient = new QueryClient(); // App query client
@@ -98,6 +100,8 @@ const App = () => (
             <Route path="/dashboard/users" element={<RequireRole role="admin"><ManageUsers /></RequireRole>} />
             <Route path="/dashboard/activity-logs" element={<RequireRole role="admin"><ActivityLogs /></RequireRole>} />
             <Route path="/dashboard/native-ads" element={<RequireRole role="admin"><ManageNativeAds /></RequireRole>} />
+            <Route path="/dashboard/sellers" element={<RequireRole role="admin"><SellerManagement /></RequireRole>} />
+            <Route path="/seller/application" element={<SellerApplication />} />
             <Route path="/favorites" element={<Favorites />} />
             <Route path="/wishlist" element={<Wishlist />} />
             <Route path="/wishlist/shared/:token" element={<SharedWishlist />} />

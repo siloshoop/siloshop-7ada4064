@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import { useAdminCheck } from "@/hooks/useAdminCheck";
 import { supabase } from "@/integrations/supabase/client";
 import Navbar from "@/components/Navbar";
@@ -251,8 +252,17 @@ const ManageNativeAds = () => {
                       <Input id="cta_text" value={formData.cta_text} onChange={(e) => setFormData({ ...formData, cta_text: e.target.value })} placeholder="تسوق الآن" />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="cta_url">رابط الزر</Label>
-                      <Input id="cta_url" value={formData.cta_url} onChange={(e) => setFormData({ ...formData, cta_url: e.target.value })} placeholder="https://example.com" />
+                      <Label htmlFor="cta_url">وجهة الزر (مسار داخلي)</Label>
+                      <Input
+                        id="cta_url"
+                        value={formData.cta_url}
+                        onChange={(e) => setFormData({ ...formData, cta_url: e.target.value })}
+                        placeholder="/category/xxxx أو /product/xxxx أو /store/xxxx"
+                        pattern="^/.*"
+                      />
+                      <p className="text-xs text-muted-foreground">
+                        الروابط الخارجية غير مسموحة. أدخل مسارًا داخل التطبيق يبدأ بـ /
+                      </p>
                     </div>
                   </div>
 
@@ -351,9 +361,9 @@ const ManageNativeAds = () => {
                             <span>الراعي: {ad.sponsor_name}</span>
                             <span>أولوية: {ad.priority}</span>
                             {ad.cta_url && (
-                              <a href={ad.cta_url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 text-primary hover:underline">
+                              <Link to={ad.cta_url} className="flex items-center gap-1 text-primary hover:underline">
                                 <ExternalLink className="h-3 w-3" /> {ad.cta_text}
-                              </a>
+                              </Link>
                             )}
                           </div>
 

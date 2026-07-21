@@ -30,6 +30,7 @@ interface Product {
   price: number;
   original_price: number | null;
   stock_quantity: number;
+  shipping_cost: number | null;
   image_url: string;
   images: string[] | null;
   vendor_id: string;

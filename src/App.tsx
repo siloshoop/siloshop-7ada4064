@@ -57,6 +57,9 @@ const Addresses = lazy(() => import("./pages/Addresses"));
 const OrderDetails = lazy(() => import("./pages/OrderDetails"));
 const Pricing = lazy(() => import("./pages/Pricing"));
 const VerifyEmail = lazy(() => import("./pages/VerifyEmail"));
+const Messages = lazy(() => import("./pages/Messages"));
+const Settings = lazy(() => import("./pages/Settings"));
+const Profile = lazy(() => import("./pages/Profile"));
 import RequireRole from "@/components/RequireRole";
 
 const queryClient = new QueryClient(); // App query client
@@ -117,6 +120,9 @@ const App = () => (
             <Route path="/careers" element={<Careers />} />
             <Route path="/partners" element={<Partners />} />
             <Route path="/chat/:vendorId" element={<Chat />} />
+            <Route path="/messages" element={<Messages />} />
+            <Route path="/settings" element={<Settings />} />
+            <Route path="/profile" element={<Profile />} />
             <Route path="/vendor/:vendorId/ratings" element={<VendorRatings />} />
             <Route path="/install" element={<InstallPWA />} />
             <Route path="/notifications" element={<Notifications />} />

@@ -15,7 +15,7 @@ interface Conversation {
   vendor_id: string;
   customer_id: string;
   product_id: string | null;
-  updated_at: string;
+  last_message_at: string;
   otherProfile?: { id: string; full_name: string | null; avatar_url: string | null } | null;
   lastMessage?: string | null;
   unread?: number;
@@ -40,7 +40,7 @@ const Messages = () => {
         .from("conversations")
         .select("*")
         .or(`customer_id.eq.${user.id},vendor_id.eq.${user.id}`)
-        .order("updated_at", { ascending: false });
+        .order("last_message_at", { ascending: false });
 
       const list: Conversation[] = convs || [];
 
@@ -116,7 +116,7 @@ const Messages = () => {
                         {c.otherProfile?.full_name || "مستخدم"}
                       </p>
                       <span className="text-xs text-muted-foreground shrink-0">
-                        {formatDistanceToNow(new Date(c.updated_at), { addSuffix: true, locale: ar })}
+                        {formatDistanceToNow(new Date(c.last_message_at), { addSuffix: true, locale: ar })}
                       </span>
                     </div>
                     <p className="text-sm text-muted-foreground truncate">

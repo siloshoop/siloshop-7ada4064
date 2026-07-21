@@ -168,7 +168,7 @@ export const ImageGallery = ({ images, productName }: ImageGalleryProps) => {
 
         {/* Thumbnails: vertical on desktop, horizontal on mobile */}
         {total > 1 && (
-          <div className="flex md:flex-col gap-2 md:w-20 overflow-x-auto md:overflow-y-auto md:max-h-[520px] no-scrollbar">
+          <div className="flex md:flex-col gap-2 md:w-20 overflow-x-auto md:overflow-y-auto md:max-h-[520px] scrollbar-hide">
             {images.map((image, index) => (
               <button
                 key={index}
@@ -353,7 +353,7 @@ const Lightbox = ({
             {index + 1} / {images.length}
           </div>
 
-          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2 max-w-[90vw] overflow-x-auto no-scrollbar px-2 py-1 rounded-full bg-background/70 backdrop-blur">
+          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2 max-w-[90vw] overflow-x-auto scrollbar-hide px-2 py-1 rounded-full bg-background/70 backdrop-blur">
             {images.map((image, i) => (
               <button
                 key={i}

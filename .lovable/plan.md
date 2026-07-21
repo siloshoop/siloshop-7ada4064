@@ -1,36 +1,95 @@
-# خطة الإصلاحات الشاملة
 
-قائمة طويلة من الإصلاحات. سأنفذها على 4 مجموعات مرتبة حسب الأولوية. رجاءً أكّد أو أخبرني إذا تريد ترتيباً مختلفاً أو استبعاد بند.
+# Platform Products Management System
 
-## المجموعة 1 — إصلاحات حرجة (Backend/Auth/Data)
+Build an admin-only management area for "Platform Products" — products owned by the platform (not by sellers). Sellers keep their existing seller-owned products; a new flag distinguishes the two.
 
-1. **فشل جلب الطلبات (VendorOrders + Orders "طلباتي")**: مراجعة استعلامات RLS/GRANT للتأكد من قراءة البائع لطلباته والعميل لطلباته. إصلاح الأخطاء الظاهرة "فشل في جلب الطلبات".
-2. **فشل تفعيل الإشعارات**: تصحيح PushNotificationManager (VAPID key/permission/subscribe endpoint).
-3. **إنشاء قائمة الأمنيات لا تظهر**: إصلاح refetch بعد الإنشاء + التحقق من RLS على wishlists.
-4. **رقم الهاتف في Checkout يظهر خطأ**: تخفيف/تصحيح regex validation للأرقام السورية (09xxxxxxxx).
-5. **Supabase Auth email template**: التأكد من احتواء القالب على `{{ .Token }}` بدلاً من `{{ .ConfirmationURL }}` لعرض الرمز 6 خانات.
+## 1. Database changes
 
-## المجموعة 2 — التحكم بالوصول (RBAC)
+Extend the existing `products` table (non-breaking) so we don't fragment the catalog:
 
-6. **صفحة "Access Denied" ودية** بدلاً من redirect صامت — إنشاء `/access-denied` وتحديث `RequireRole` لعرضها مع رسالة واضحة وزر رجوع.
-7. **صفحة إدارة الكوبونات للبائع فقط**: التأكد من `RequireRole role="vendor"` + إخفاء الرابط من قوائم العملاء. التحقق من أن `/dashboard/coupons` لا تُفتح للعميل حتى بتغيير URL يدوياً.
-8. **تحقق من كود الخصم في Checkout**: التأكد من عمل حقل "كود الخصم" فعلياً (استعلام coupons + خصم على الإجمالي + رسالة نجاح/فشل).
-9. **اختبار OTP resend**: التحقق من عداد 60 ثانية وانتهاء 10 دقائق ورسائل عد تنازلي واضحة (موجود في VerifyEmail — سأتحقق فقط).
+- `product_type` text — `'platform' | 'seller'`, default `'seller'`.
+- `sku` text (unique when not null).
+- `discount_price` numeric (optional).
+- `currency` text, default `'SYP'`.
+- `sizes` text[] (available sizes).
+- `colors` text[] (available colors).
+- `images` text[] (gallery, in addition to existing `image_url` which stays as the main image).
+- `weight` numeric (optional, kg).
+- `is_active` boolean, default true.
+- `source` text — future-proofing: `'manual' | 'supplier_api' | 'xml' | 'csv'`, default `'manual'`.
+- `external_id` text — future supplier sync key (indexed, nullable).
 
-## المجموعة 3 — تحسينات UX/UI
+RLS updates on `products`:
+- Platform products (`product_type = 'platform'`): only admins can insert/update/delete. Everyone can read active platform products.
+- Seller products: existing rules unchanged (`vendor_id = auth.uid()`).
 
-10. **أزرار التفعيل/الإلغاء (Switch) في NotificationSettings**: إصلاح مقاس/padding حتى لا تخرج المقبض عن الحد.
-11. **صفحة المفضلة**: تحويل الشبكة إلى grid متجاور (2/3/4 أعمدة) بدلاً من عمود واحد يُظهر منتج واحد في وسط الصفحة.
-12. **زرا "الرسائل" و"الإعدادات"** في MobileBottomNav: ربطهما بمسارات فعلية (`/chat` أو قائمة محادثات + `/notifications/settings`).
-13. **Checkout — طرق الدفع**: استبدال طرق الدفع الحالية بـ: (أ) الدفع عند الاستلام، (ب) شام كاش فقط. حذف كلمة "الدفع" حيث طلب المستخدم في FAQ ("انتقل إلى صفحة إتمام الطلب" بدل "صفحة الدفع").
-14. **العنوان الافتراضي في Checkout**: عند وجود عنوان محفوظ في الإعدادات، استخدامه تلقائياً مع إمكانية تغيير/إضافة (يبدو مطبقاً جزئياً — سأتحقق وأصلح).
+For platform rows `vendor_id` will store the admin's user id (existing NOT NULL kept intact).
 
-## ملاحظات تقنية
+Categories & brands: tables already exist. Add admin-only write policies if missing so admins can manage them from the same dashboard.
 
-- بعض البنود تتطلب migrations (RLS/GRANT) — سأستخدم supabase migration tool.
-- قالب البريد OTP يتطلب تعديل من لوحة Supabase أو قوالب Lovable Auth Emails.
-- بعد التنفيذ: بناء تلقائي + smoke test للـ homepage.
+## 2. Storage
 
----
+Reuse the existing `product-images` bucket (public). Admin uploads land under `platform/{uuid}/...` to keep them organized.
 
-**السؤال**: هل أنفذ كل المجموعات الأربع الآن بالترتيب، أم تريد البدء بالمجموعة 1 (الحرجة) فقط والتوقف للمراجعة؟
+## 3. Admin UI (`/admin/platform-products`)
+
+Guarded by `useAdminCheck` + `RequireRole('admin')`.
+
+- **List page**: table with filters (category, brand, status, stock), search by name/SKU, bulk actions (activate/deactivate/delete).
+- **Create / Edit form**:
+  - Name, SKU, brand (select), category (select), description.
+  - Price, discount price, currency, stock quantity, weight.
+  - Sizes / colors: tag input (chips).
+  - Status toggle (Active/Inactive).
+  - Image uploader: drag-and-drop, multi-file, reorder, choose main image (radio). Compressed client-side using existing helper.
+- **Bulk import dialog**: accept `.xlsx` and `.csv`. Preview parsed rows in a table with per-row validation errors before committing. On confirm, insert in batches.
+- **Categories & Brands manager**: simple CRUD dialogs from the same page.
+
+## 4. Import format
+
+Column headers (case-insensitive, both English and Arabic accepted):
+
+```text
+name, sku, brand, category, description, price, discount_price,
+currency, stock_quantity, sizes, colors, weight, images, main_image, status
+```
+
+- `sizes` / `colors` / `images`: comma or `|` separated.
+- `brand` / `category`: matched by name (Arabic or English); unknown values reported as errors — no silent creation.
+- `status`: `active` / `inactive` (default active).
+- Parsing done client-side with `xlsx` (SheetJS) which handles both formats. Rows validated via zod, then inserted with `product_type = 'platform'`, `source = 'csv'` or `'xlsx'`.
+
+## 5. Sellers cannot touch platform products
+
+- RLS blocks it at the database level.
+- Existing vendor dashboard queries already scope by `vendor_id = auth.uid()` and will additionally filter `product_type = 'seller'` to be explicit.
+- Public product pages/listings show both types; only the admin sees management for platform ones.
+
+## 6. Future supplier sync (design only, not implemented now)
+
+The `source` + `external_id` columns plus the existing `product_type` flag are enough to let a future edge function upsert supplier feeds without further schema changes:
+
+```text
+upsert products on (source, external_id) where product_type = 'platform'
+```
+
+No code for this now — just the columns.
+
+## Files to add / change (technical)
+
+- Migration: extend `products`, add indexes on `(product_type)`, `(source, external_id)`, unique on `sku` (partial where sku is not null), refresh RLS policies, add admin write policies on `categories` and `brands` if missing.
+- `src/pages/admin/PlatformProducts.tsx` — list + filters + bulk actions.
+- `src/pages/admin/PlatformProductForm.tsx` — create/edit form.
+- `src/components/admin/PlatformProductImport.tsx` — Excel/CSV import dialog with preview & validation (uses `xlsx`).
+- `src/components/admin/PlatformImageUploader.tsx` — drag-drop, reorder, main-image selector (wraps existing compression helper).
+- `src/components/admin/CategoriesBrandsManager.tsx` — inline CRUD.
+- Route registration in `src/App.tsx` under an admin-guarded section.
+- Sidebar entry in the admin dashboard.
+
+## Out of scope for this task
+
+- Actual supplier API/XML sync jobs (columns only).
+- Multi-currency conversion (currency stored as label; display uses existing `ل.س` formatting when `SYP`).
+- Variant-level stock per size/color (single stock number for now; can layer variants later without breaking this schema).
+
+Approve and I'll implement it end-to-end.

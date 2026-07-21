@@ -1809,6 +1809,10 @@ export type Database = {
         Args: { payload: Json; queue_name: string }
         Returns: number
       }
+      get_or_create_conversation: {
+        Args: { p_product_id?: string; p_vendor_id: string }
+        Returns: string
+      }
       get_vendor_orders: {
         Args: never
         Returns: {

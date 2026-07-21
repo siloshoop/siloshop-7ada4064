@@ -55,45 +55,31 @@ const Chat = () => {
         setVendorProfile(profiles[0]);
       }
 
-      // Check if conversation exists
-      let { data: conversation } = await supabase
-        .from("conversations")
-        .select("*")
-        .eq("customer_id", user.id)
-        .eq("vendor_id", vendorId)
-        .eq("product_id", productId || null)
-        .single();
+      // Find or create the conversation atomically (null-safe on product_id,
+      // prevents self-conversations, validates vendor).
+      const { data: convId, error: convErr } = await supabase.rpc(
+        "get_or_create_conversation",
+        { p_vendor_id: vendorId, p_product_id: productId || null }
+      );
 
-      // Create conversation if it doesn't exist
-      if (!conversation) {
-        const { data: newConv, error } = await supabase
-          .from("conversations")
-          .insert({
-            customer_id: user.id,
-            vendor_id: vendorId,
-            product_id: productId || null,
-          })
-          .select()
-          .single();
-
-        if (error) {
-          toast({
-            title: "خطأ",
-            description: "فشل في إنشاء المحادثة",
-            variant: "destructive",
-          });
-          return;
-        }
-        conversation = newConv;
+      if (convErr || !convId) {
+        toast({
+          title: "خطأ",
+          description: convErr?.message || "فشل في إنشاء المحادثة",
+          variant: "destructive",
+        });
+        setLoading(false);
+        return;
       }
 
-      setConversationId(conversation.id);
+      const conversationRow = { id: convId as string };
+      setConversationId(conversationRow.id);
 
       // Fetch messages
       const { data: msgs } = await supabase
         .from("messages")
         .select("*")
-        .eq("conversation_id", conversation.id)
+        .eq("conversation_id", conversationRow.id)
         .order("created_at", { ascending: true });
 
       setMessages(msgs || []);
@@ -103,19 +89,19 @@ const Chat = () => {
       await supabase
         .from("messages")
         .update({ is_read: true })
-        .eq("conversation_id", conversation.id)
+        .eq("conversation_id", conversationRow.id)
         .neq("sender_id", user.id);
 
       // Subscribe to new messages
       const channel = supabase
-        .channel(`messages-${conversation.id}`)
+        .channel(`messages-${conversationRow.id}`)
         .on(
           "postgres_changes",
           {
             event: "INSERT",
             schema: "public",
             table: "messages",
-            filter: `conversation_id=eq.${conversation.id}`,
+            filter: `conversation_id=eq.${conversationRow.id}`,
           },
           (payload) => {
             setMessages((prev) => [...prev, payload.new as Message]);

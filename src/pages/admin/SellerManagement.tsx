@@ -114,7 +114,7 @@ const SellerManagement = () => {
     }
   };
 
-  const runAction = async (fn: () => Promise<{ error: any }>, successMsg: string) => {
+  const runAction = async (fn: () => any, successMsg: string) => {
     setBusy(true);
     const { error } = await fn();
     setBusy(false);

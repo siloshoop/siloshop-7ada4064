@@ -178,7 +178,9 @@ const Index = () => {
           <PopularCategories key={`popular-${refreshKey}`} />
         </SectionErrorBoundary>
         <SectionErrorBoundary>
-          <EnhancedDailyDeals key={`deals-${refreshKey}`} />
+          <div id="daily-deals" style={{ scrollMarginTop: "80px" }}>
+            <EnhancedDailyDeals key={`deals-${refreshKey}`} />
+          </div>
         </SectionErrorBoundary>
 
         <div className="container px-4 py-2">

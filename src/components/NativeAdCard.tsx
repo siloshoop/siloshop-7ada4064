@@ -37,6 +37,16 @@ const NativeAdCard = memo(({
   // Only internal application paths are allowed; anything else is treated as no destination.
   const adCtaUrl = rawCtaUrl && rawCtaUrl.startsWith("/") ? rawCtaUrl : null;
   const hasDestination = Boolean(adCtaUrl);
+
+  // Detect destination type from the internal path for accessibility / labelling.
+  const destinationType: "category" | "store" | "promotion" | "product" | "page" | null = (() => {
+    if (!adCtaUrl) return null;
+    if (adCtaUrl.startsWith("/category/") || adCtaUrl.startsWith("/subcategory/")) return "category";
+    if (adCtaUrl.startsWith("/vendor/")) return "store";
+    if (adCtaUrl.startsWith("/product/")) return "product";
+    if (adCtaUrl.startsWith("/#daily-deals") || adCtaUrl.startsWith("/deals")) return "promotion";
+    return "page";
+  })();
   const adSponsor = ad?.sponsor_name || sponsorName || "إعلان ممول";
   const adSlot = slot || (ad ? `native-${ad.id}` : "native-fallback");
 
@@ -45,7 +55,21 @@ const NativeAdCard = memo(({
   const handleClick = () => {
     if (!hasDestination) return;
     trackClick();
-    navigate(adCtaUrl!);
+    // Hash targets on the home page: navigate then smooth-scroll to the anchor.
+    const url = adCtaUrl!;
+    const hashIndex = url.indexOf("#");
+    if (hashIndex >= 0) {
+      const pathname = url.slice(0, hashIndex) || "/";
+      const hash = url.slice(hashIndex + 1);
+      navigate(pathname);
+      // Defer to next tick so the target section is mounted.
+      requestAnimationFrame(() => {
+        const el = document.getElementById(hash);
+        if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+      });
+      return;
+    }
+    navigate(url);
   };
 
   return (
@@ -58,6 +82,12 @@ const NativeAdCard = memo(({
       }`}
       onClick={hasDestination ? handleClick : undefined}
       role={hasDestination ? "link" : undefined}
+      aria-label={hasDestination && destinationType ? `${adTitle} — ${
+        destinationType === "category" ? "الانتقال إلى الفئة" :
+        destinationType === "store" ? "الانتقال إلى المتجر" :
+        destinationType === "promotion" ? "الانتقال إلى العروض" :
+        destinationType === "product" ? "الانتقال إلى المنتج" : "فتح"
+      }` : undefined}
     >
       {/* Image Container */}
       <div className="relative aspect-square overflow-hidden bg-gradient-to-br from-primary/5 via-accent/5 to-primary/10">

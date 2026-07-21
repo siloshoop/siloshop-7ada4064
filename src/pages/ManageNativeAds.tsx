@@ -39,6 +39,41 @@ const placementOptions = [
   { value: "category", label: "صفحة التصنيف" },
 ];
 
+type DestinationType = "category" | "store" | "product" | "promotion" | "custom" | "none";
+
+const destinationTypeOptions: { value: DestinationType; label: string }[] = [
+  { value: "none", label: "بدون وجهة" },
+  { value: "category", label: "فئة" },
+  { value: "store", label: "متجر (بائع)" },
+  { value: "product", label: "منتج" },
+  { value: "promotion", label: "عرض ترويجي (صفقات اليوم)" },
+  { value: "custom", label: "مسار مخصص" },
+];
+
+const parseCtaUrl = (url: string | null): { type: DestinationType; id: string; custom: string } => {
+  if (!url) return { type: "none", id: "", custom: "" };
+  const catMatch = url.match(/^\/category\/([^/?#]+)/);
+  if (catMatch) return { type: "category", id: catMatch[1], custom: "" };
+  const vendorMatch = url.match(/^\/vendor\/([^/?#]+)/);
+  if (vendorMatch) return { type: "store", id: vendorMatch[1], custom: "" };
+  const productMatch = url.match(/^\/product\/([^/?#]+)/);
+  if (productMatch) return { type: "product", id: productMatch[1], custom: "" };
+  if (url.startsWith("/#daily-deals") || url.startsWith("/deals")) return { type: "promotion", id: "", custom: "" };
+  return { type: "custom", id: "", custom: url };
+};
+
+const buildCtaUrl = (type: DestinationType, id: string, custom: string): string | null => {
+  switch (type) {
+    case "category": return id ? `/category/${id}` : null;
+    case "store": return id ? `/vendor/${id}/ratings` : null;
+    case "product": return id ? `/product/${id}` : null;
+    case "promotion": return "/#daily-deals";
+    case "custom": return custom.startsWith("/") ? custom : null;
+    case "none":
+    default: return null;
+  }
+};
+
 const ManageNativeAds = () => {
   const { isAdmin, loading: adminLoading } = useAdminCheck();
   const [ads, setAds] = useState<NativeAd[]>([]);
@@ -59,6 +94,25 @@ const ManageNativeAds = () => {
     start_date: "",
     end_date: "",
   });
+
+  const [destinationType, setDestinationType] = useState<DestinationType>("none");
+  const [destinationId, setDestinationId] = useState("");
+  const [customPath, setCustomPath] = useState("");
+
+  const [categoriesList, setCategoriesList] = useState<{ id: string; name: string }[]>([]);
+  const [vendorsList, setVendorsList] = useState<{ id: string; full_name: string | null }[]>([]);
+
+  useEffect(() => {
+    if (!isAdmin) return;
+    (async () => {
+      const [catsRes, vendorsRes] = await Promise.all([
+        supabase.from("categories").select("id, name").order("name"),
+        supabase.from("profiles").select("id, full_name").eq("role", "vendor").order("full_name"),
+      ]);
+      if (catsRes.data) setCategoriesList(catsRes.data as { id: string; name: string }[]);
+      if (vendorsRes.data) setVendorsList(vendorsRes.data as { id: string; full_name: string | null }[]);
+    })();
+  }, [isAdmin]);
 
   useEffect(() => {
     if (isAdmin) fetchAds();
@@ -87,6 +141,9 @@ const ManageNativeAds = () => {
       cta_url: "", sponsor_name: "", placement: "search", priority: "0",
       start_date: "", end_date: "",
     });
+    setDestinationType("none");
+    setDestinationId("");
+    setCustomPath("");
     setEditingId(null);
     setShowForm(false);
   };
@@ -94,12 +151,17 @@ const ManageNativeAds = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
+      const resolvedCtaUrl = buildCtaUrl(destinationType, destinationId, customPath);
+      if (destinationType !== "none" && !resolvedCtaUrl) {
+        toast({ title: "وجهة غير صالحة", description: "يرجى إكمال بيانات الوجهة المختارة.", variant: "destructive" });
+        return;
+      }
       const payload = {
         title: formData.title,
         description: formData.description || null,
         image_url: formData.image_url || null,
         cta_text: formData.cta_text,
-        cta_url: formData.cta_url || null,
+        cta_url: resolvedCtaUrl,
         sponsor_name: formData.sponsor_name,
         placement: formData.placement,
         priority: parseInt(formData.priority),
@@ -136,6 +198,10 @@ const ManageNativeAds = () => {
       start_date: ad.start_date ? ad.start_date.slice(0, 16) : "",
       end_date: ad.end_date ? ad.end_date.slice(0, 16) : "",
     });
+    const parsed = parseCtaUrl(ad.cta_url);
+    setDestinationType(parsed.type);
+    setDestinationId(parsed.id);
+    setCustomPath(parsed.custom);
     setEditingId(ad.id);
     setShowForm(true);
   };
@@ -252,19 +318,85 @@ const ManageNativeAds = () => {
                       <Input id="cta_text" value={formData.cta_text} onChange={(e) => setFormData({ ...formData, cta_text: e.target.value })} placeholder="تسوق الآن" />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="cta_url">وجهة الزر (مسار داخلي)</Label>
+                      <Label htmlFor="destination_type">نوع الوجهة</Label>
+                      <Select
+                        value={destinationType}
+                        onValueChange={(v) => { setDestinationType(v as DestinationType); setDestinationId(""); }}
+                      >
+                        <SelectTrigger id="destination_type"><SelectValue /></SelectTrigger>
+                        <SelectContent>
+                          {destinationTypeOptions.map((o) => (
+                            <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+
+                  {destinationType === "category" && (
+                    <div className="space-y-2">
+                      <Label htmlFor="dest_category">اختر الفئة</Label>
+                      <Select value={destinationId || undefined} onValueChange={setDestinationId}>
+                        <SelectTrigger id="dest_category"><SelectValue placeholder="اختر فئة" /></SelectTrigger>
+                        <SelectContent>
+                          {categoriesList.map((c) => (
+                            <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <p className="text-xs text-muted-foreground">سيوجَّه الزر إلى صفحة الفئة داخل التطبيق.</p>
+                    </div>
+                  )}
+
+                  {destinationType === "store" && (
+                    <div className="space-y-2">
+                      <Label htmlFor="dest_vendor">اختر المتجر (البائع)</Label>
+                      <Select value={destinationId || undefined} onValueChange={setDestinationId}>
+                        <SelectTrigger id="dest_vendor"><SelectValue placeholder="اختر متجرًا" /></SelectTrigger>
+                        <SelectContent>
+                          {vendorsList.map((v) => (
+                            <SelectItem key={v.id} value={v.id}>{v.full_name || "بائع"}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <p className="text-xs text-muted-foreground">سيوجَّه الزر إلى صفحة المتجر.</p>
+                    </div>
+                  )}
+
+                  {destinationType === "product" && (
+                    <div className="space-y-2">
+                      <Label htmlFor="dest_product">معرّف المنتج</Label>
                       <Input
-                        id="cta_url"
-                        value={formData.cta_url}
-                        onChange={(e) => setFormData({ ...formData, cta_url: e.target.value })}
-                        placeholder="/category/xxxx أو /product/xxxx أو /store/xxxx"
+                        id="dest_product"
+                        value={destinationId}
+                        onChange={(e) => setDestinationId(e.target.value.trim())}
+                        placeholder="UUID المنتج"
+                      />
+                      <p className="text-xs text-muted-foreground">انسخ معرّف المنتج من صفحته أو من لوحة الإدارة.</p>
+                    </div>
+                  )}
+
+                  {destinationType === "promotion" && (
+                    <p className="text-xs text-muted-foreground">
+                      سيوجَّه الزر إلى قسم "صفقات اليوم" في الصفحة الرئيسية.
+                    </p>
+                  )}
+
+                  {destinationType === "custom" && (
+                    <div className="space-y-2">
+                      <Label htmlFor="dest_custom">مسار داخلي مخصص</Label>
+                      <Input
+                        id="dest_custom"
+                        value={customPath}
+                        onChange={(e) => setCustomPath(e.target.value)}
+                        placeholder="/blog/xxxx"
                         pattern="^/.*"
                       />
                       <p className="text-xs text-muted-foreground">
                         الروابط الخارجية غير مسموحة. أدخل مسارًا داخل التطبيق يبدأ بـ /
                       </p>
                     </div>
-                  </div>
+                  )}
 
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div className="space-y-2">

@@ -93,11 +93,6 @@ const Footer = () => {
                   الشحن والتوصيل
                 </Link>
               </li>
-              <li>
-                <Link to="/pricing" className="hover:text-foreground transition-colors story-link">
-                  الباقات والأسعار
-                </Link>
-              </li>
             </ul>
           </div>
 

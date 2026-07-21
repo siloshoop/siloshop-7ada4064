@@ -1045,8 +1045,12 @@ export type Database = {
         Row: {
           brand_id: string | null
           category_id: string | null
+          colors: string[]
           created_at: string | null
+          currency: string
           description: string | null
+          discount_price: number | null
+          external_id: string | null
           id: string
           image_url: string | null
           images: string[] | null
@@ -1054,17 +1058,26 @@ export type Database = {
           name: string
           original_price: number | null
           price: number
+          product_type: string
           shipping_cost: number
+          sizes: string[]
+          sku: string | null
+          source: string
           stock_quantity: number | null
           subcategory_id: string | null
           updated_at: string | null
           vendor_id: string
+          weight: number | null
         }
         Insert: {
           brand_id?: string | null
           category_id?: string | null
+          colors?: string[]
           created_at?: string | null
+          currency?: string
           description?: string | null
+          discount_price?: number | null
+          external_id?: string | null
           id?: string
           image_url?: string | null
           images?: string[] | null
@@ -1072,17 +1085,26 @@ export type Database = {
           name: string
           original_price?: number | null
           price: number
+          product_type?: string
           shipping_cost?: number
+          sizes?: string[]
+          sku?: string | null
+          source?: string
           stock_quantity?: number | null
           subcategory_id?: string | null
           updated_at?: string | null
           vendor_id: string
+          weight?: number | null
         }
         Update: {
           brand_id?: string | null
           category_id?: string | null
+          colors?: string[]
           created_at?: string | null
+          currency?: string
           description?: string | null
+          discount_price?: number | null
+          external_id?: string | null
           id?: string
           image_url?: string | null
           images?: string[] | null
@@ -1090,11 +1112,16 @@ export type Database = {
           name?: string
           original_price?: number | null
           price?: number
+          product_type?: string
           shipping_cost?: number
+          sizes?: string[]
+          sku?: string | null
+          source?: string
           stock_quantity?: number | null
           subcategory_id?: string | null
           updated_at?: string | null
           vendor_id?: string
+          weight?: number | null
         }
         Relationships: [
           {

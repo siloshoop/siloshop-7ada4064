@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
@@ -45,6 +45,46 @@ const Dashboard = () => {
     }
   }, [user, authLoading, navigate]);
 
+  const fetchCustomerStats = useCallback(async (uid: string) => {
+    const [ordersRes, favRes, reviewsRes] = await Promise.all([
+      supabase.from("orders").select("total_amount, status").eq("customer_id", uid),
+      supabase.from("favorites").select("id", { count: "exact", head: true }).eq("user_id", uid),
+      supabase.from("reviews").select("id", { count: "exact", head: true }).eq("user_id", uid),
+    ]);
+    const orders = ordersRes.data || [];
+    // Successful orders = not cancelled; Revenue = delivered only
+    const successfulOrders = orders.filter((o: any) => o.status !== "cancelled");
+    const deliveredRevenue = orders
+      .filter((o: any) => o.status === "delivered")
+      .reduce((s: number, o: any) => s + Number(o.total_amount || 0), 0);
+    setCustomerStats({
+      orders: successfulOrders.length,
+      totalSpent: deliveredRevenue,
+      reviewed: reviewsRes.count || 0,
+      favorites: favRes.count || 0,
+    });
+  }, []);
+
+  const fetchVendorStats = useCallback(async (uid: string) => {
+    const { data: productsData } = await supabase
+      .from("products")
+      .select("*")
+      .eq("vendor_id", uid)
+      .order("created_at", { ascending: false });
+    setProducts(productsData || []);
+    const { data: salesStats } = await supabase.rpc("get_vendor_sales_stats");
+    const s: any = Array.isArray(salesStats) ? salesStats[0] : salesStats;
+    setStats({
+      totalProducts: productsData?.length || 0,
+      totalOrders: Number(s?.total_orders || 0),
+      completedOrders: Number(s?.completed_orders || 0),
+      cancelledOrders: Number(s?.cancelled_orders || 0),
+      returnedOrders: Number(s?.returned_orders || 0),
+      productsSold: Number(s?.products_sold || 0),
+      estimatedRevenue: Number(s?.estimated_revenue || 0),
+    });
+  }, []);
+
   useEffect(() => {
     const fetchDashboardData = async () => {
       if (!user) return;
@@ -78,26 +118,7 @@ const Dashboard = () => {
         if (appRow) setSellerApp(appRow as any);
 
         if (profileData?.role === "vendor") {
-          // Get vendor stats and products
-          const { data: productsData } = await supabase
-            .from("products")
-            .select("*")
-            .eq("vendor_id", user.id)
-            .order("created_at", { ascending: false });
-
-          setProducts(productsData || []);
-
-          const { data: salesStats } = await supabase.rpc("get_vendor_sales_stats");
-          const s: any = Array.isArray(salesStats) ? salesStats[0] : salesStats;
-          setStats({
-            totalProducts: productsData?.length || 0,
-            totalOrders: Number(s?.total_orders || 0),
-            completedOrders: Number(s?.completed_orders || 0),
-            cancelledOrders: Number(s?.cancelled_orders || 0),
-            returnedOrders: Number(s?.returned_orders || 0),
-            productsSold: Number(s?.products_sold || 0),
-            estimatedRevenue: Number(s?.estimated_revenue || 0),
-          });
+          await fetchVendorStats(user.id);
 
           // Get recent reviews
           const { data: reviewsData } = await supabase
@@ -113,19 +134,7 @@ const Dashboard = () => {
 
           setRecentReviews(reviewsData || []);
         } else {
-          // Customer stats
-          const [ordersRes, favRes, reviewsRes] = await Promise.all([
-            supabase.from("orders").select("total_amount, status").eq("customer_id", user.id),
-            supabase.from("favorites").select("id", { count: "exact", head: true }).eq("user_id", user.id),
-            supabase.from("reviews").select("id", { count: "exact", head: true }).eq("user_id", user.id),
-          ]);
-          const orders = ordersRes.data || [];
-          setCustomerStats({
-            orders: orders.length,
-            totalSpent: orders.reduce((s, o: any) => s + Number(o.total_amount || 0), 0),
-            reviewed: reviewsRes.count || 0,
-            favorites: favRes.count || 0,
-          });
+          await fetchCustomerStats(user.id);
         }
       } catch (error) {
         toast({
@@ -139,29 +148,61 @@ const Dashboard = () => {
     };
 
     fetchDashboardData();
-  }, [user, toast]);
+  }, [user, toast, fetchCustomerStats, fetchVendorStats]);
 
-  // Realtime: keep favorites counter in sync (e.g. after successful order removes items)
+  // Realtime: keep customer dashboard stats in sync
   useEffect(() => {
-    if (!user) return;
+    if (!user || profile?.role === "vendor") return;
+    const refresh = () => fetchCustomerStats(user.id);
     const channel = supabase
-      .channel(`dashboard-favorites-${user.id}`)
+      .channel(`dashboard-customer-${user.id}`)
       .on(
         "postgres_changes",
         { event: "*", schema: "public", table: "favorites", filter: `user_id=eq.${user.id}` },
-        async () => {
-          const { count } = await supabase
-            .from("favorites")
-            .select("id", { count: "exact", head: true })
-            .eq("user_id", user.id);
-          setCustomerStats((s) => ({ ...s, favorites: count || 0 }));
-        }
+        refresh
+      )
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "orders", filter: `customer_id=eq.${user.id}` },
+        refresh
+      )
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "reviews", filter: `user_id=eq.${user.id}` },
+        refresh
       )
       .subscribe();
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [user]);
+  }, [user, profile?.role, fetchCustomerStats]);
+
+  // Realtime: keep vendor sales stats in sync (orders/items/reviews changes)
+  useEffect(() => {
+    if (!user || profile?.role !== "vendor") return;
+    const refresh = () => fetchVendorStats(user.id);
+    const channel = supabase
+      .channel(`dashboard-vendor-${user.id}`)
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "orders" },
+        refresh
+      )
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "order_items" },
+        refresh
+      )
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "returns" },
+        refresh
+      )
+      .subscribe();
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user, profile?.role, fetchVendorStats]);
 
   // Filter and sort products
   useEffect(() => {

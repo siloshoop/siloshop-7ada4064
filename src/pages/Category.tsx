@@ -224,7 +224,9 @@ const Category = () => {
               {filteredProducts.length} من {products.length} منتج
             </p>
           </div>
-          <SearchFilters onFilterChange={setFilters} />
+          <SearchFilters
+            onFilterChange={(f) => setFilters((prev) => ({ ...prev, ...f }))}
+          />
         </div>
 
         {filteredProducts.length === 0 ? (

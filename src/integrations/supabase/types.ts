@@ -1497,6 +1497,66 @@ export type Database = {
         }
         Relationships: []
       }
+      seller_applications: {
+        Row: {
+          address: string | null
+          business_document_url: string | null
+          contact_email: string | null
+          contact_phone: string | null
+          created_at: string
+          governorate: string | null
+          id: string
+          identity_document_url: string | null
+          rejection_reason: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: Database["public"]["Enums"]["seller_status"]
+          store_description: string | null
+          store_name: string | null
+          submitted_at: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          address?: string | null
+          business_document_url?: string | null
+          contact_email?: string | null
+          contact_phone?: string | null
+          created_at?: string
+          governorate?: string | null
+          id?: string
+          identity_document_url?: string | null
+          rejection_reason?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: Database["public"]["Enums"]["seller_status"]
+          store_description?: string | null
+          store_name?: string | null
+          submitted_at?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          address?: string | null
+          business_document_url?: string | null
+          contact_email?: string | null
+          contact_phone?: string | null
+          created_at?: string
+          governorate?: string | null
+          id?: string
+          identity_document_url?: string | null
+          rejection_reason?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: Database["public"]["Enums"]["seller_status"]
+          store_description?: string | null
+          store_name?: string | null
+          submitted_at?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       subcategories: {
         Row: {
           category_id: string
@@ -1683,6 +1743,32 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      admin_list_seller_applications: {
+        Args: never
+        Returns: {
+          address: string
+          business_document_url: string
+          contact_phone: string
+          created_at: string
+          email: string
+          full_name: string
+          governorate: string
+          id: string
+          identity_document_url: string
+          orders_count: number
+          products_count: number
+          rejection_reason: string
+          status: Database["public"]["Enums"]["seller_status"]
+          store_description: string
+          store_name: string
+          submitted_at: string
+          user_id: string
+        }[]
+      }
+      approve_seller_application: {
+        Args: { _app_id: string }
+        Returns: undefined
+      }
       cancel_order: {
         Args: { _order_id: string; _reason: string }
         Returns: undefined
@@ -1717,6 +1803,7 @@ export type Database = {
         Args: { message_id: number; queue_name: string }
         Returns: boolean
       }
+      delete_seller_account: { Args: { _user_id: string }; Returns: undefined }
       email_queue_dispatch: { Args: never; Returns: undefined }
       enqueue_email: {
         Args: { payload: Json; queue_name: string }
@@ -1776,6 +1863,7 @@ export type Database = {
         }
         Returns: number
       }
+      reactivate_seller: { Args: { _user_id: string }; Returns: undefined }
       read_email_batch: {
         Args: { batch_size: number; queue_name: string; vt: number }
         Returns: {
@@ -1806,6 +1894,10 @@ export type Database = {
           id: string
         }[]
       }
+      reject_seller_application: {
+        Args: { _app_id: string; _reason: string }
+        Returns: undefined
+      }
       send_notification: {
         Args: {
           _message: string
@@ -1817,6 +1909,23 @@ export type Database = {
         Returns: undefined
       }
       set_default_address: { Args: { _address_id: string }; Returns: undefined }
+      submit_seller_application: {
+        Args: {
+          _address: string
+          _business_document_url: string
+          _contact_email: string
+          _contact_phone: string
+          _governorate: string
+          _identity_document_url: string
+          _store_description: string
+          _store_name: string
+        }
+        Returns: string
+      }
+      suspend_seller: {
+        Args: { _reason: string; _user_id: string }
+        Returns: undefined
+      }
       update_own_profile: {
         Args: { _avatar_url?: string; _full_name?: string; _phone?: string }
         Returns: undefined
@@ -1850,6 +1959,7 @@ export type Database = {
     }
     Enums: {
       app_role: "customer" | "vendor" | "admin"
+      seller_status: "pending" | "approved" | "rejected" | "suspended"
       user_role: "customer" | "vendor"
     }
     CompositeTypes: {
@@ -1979,6 +2089,7 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["customer", "vendor", "admin"],
+      seller_status: ["pending", "approved", "rejected", "suspended"],
       user_role: ["customer", "vendor"],
     },
   },

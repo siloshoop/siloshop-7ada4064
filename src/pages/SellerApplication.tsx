@@ -12,7 +12,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { SYRIAN_GOVERNORATES } from "@/lib/syrianGovernorates";
 import { Loader2, ShieldCheck, Clock, XCircle, PauseCircle, Upload, FileCheck2 } from "lucide-react";
 
@@ -184,10 +183,10 @@ const SellerApplication = () => {
                 </div>
                 <p className="text-sm text-muted-foreground">{meta.description}</p>
                 {status === "rejected" && app?.rejection_reason && (
-                  <Alert className="mt-3 border-red-200 bg-red-50 dark:bg-red-950/20">
-                    <AlertTitle>سبب الرفض</AlertTitle>
-                    <AlertDescription>{app.rejection_reason}</AlertDescription>
-                  </Alert>
+                  <div className="mt-3 rounded-lg border border-red-200 bg-red-50 dark:bg-red-950/20 p-3">
+                    <p className="font-semibold text-red-700 dark:text-red-300 mb-1">سبب الرفض</p>
+                    <p className="text-sm text-red-700 dark:text-red-200">{app.rejection_reason}</p>
+                  </div>
                 )}
                 {status === "approved" && (
                   <Button className="mt-3" onClick={() => navigate("/dashboard")}>

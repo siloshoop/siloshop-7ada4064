@@ -917,6 +917,7 @@ export type Database = {
           current_location_lat: number | null
           current_location_lng: number | null
           customer_id: string
+          delivered_at: string | null
           delivery_lat: number | null
           delivery_lng: number | null
           discount_amount: number | null
@@ -943,6 +944,7 @@ export type Database = {
           current_location_lat?: number | null
           current_location_lng?: number | null
           customer_id: string
+          delivered_at?: string | null
           delivery_lat?: number | null
           delivery_lng?: number | null
           discount_amount?: number | null
@@ -969,6 +971,7 @@ export type Database = {
           current_location_lat?: number | null
           current_location_lng?: number | null
           customer_id?: string
+          delivered_at?: string | null
           delivery_lat?: number | null
           delivery_lng?: number | null
           discount_amount?: number | null
@@ -1287,6 +1290,113 @@ export type Database = {
           },
         ]
       }
+      return_status_history: {
+        Row: {
+          changed_by: string | null
+          changed_by_role: string | null
+          created_at: string
+          from_status: string | null
+          id: string
+          note: string | null
+          return_id: string
+          to_status: string
+        }
+        Insert: {
+          changed_by?: string | null
+          changed_by_role?: string | null
+          created_at?: string
+          from_status?: string | null
+          id?: string
+          note?: string | null
+          return_id: string
+          to_status: string
+        }
+        Update: {
+          changed_by?: string | null
+          changed_by_role?: string | null
+          created_at?: string
+          from_status?: string | null
+          id?: string
+          note?: string | null
+          return_id?: string
+          to_status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "return_status_history_return_id_fkey"
+            columns: ["return_id"]
+            isOneToOne: false
+            referencedRelation: "returns"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      returns: {
+        Row: {
+          created_at: string
+          customer_id: string
+          id: string
+          images: string[]
+          notes: string | null
+          order_id: string
+          order_item_id: string | null
+          reason: string
+          resolved_at: string | null
+          review_note: string | null
+          status: string
+          updated_at: string
+          vendor_id: string
+          video_url: string | null
+        }
+        Insert: {
+          created_at?: string
+          customer_id: string
+          id?: string
+          images?: string[]
+          notes?: string | null
+          order_id: string
+          order_item_id?: string | null
+          reason: string
+          resolved_at?: string | null
+          review_note?: string | null
+          status?: string
+          updated_at?: string
+          vendor_id: string
+          video_url?: string | null
+        }
+        Update: {
+          created_at?: string
+          customer_id?: string
+          id?: string
+          images?: string[]
+          notes?: string | null
+          order_id?: string
+          order_item_id?: string | null
+          reason?: string
+          resolved_at?: string | null
+          review_note?: string | null
+          status?: string
+          updated_at?: string
+          vendor_id?: string
+          video_url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "returns_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "returns_order_item_id_fkey"
+            columns: ["order_item_id"]
+            isOneToOne: false
+            referencedRelation: "order_items"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       review_replies: {
         Row: {
           created_at: string
@@ -1592,6 +1702,17 @@ export type Database = {
         }
         Returns: string
       }
+      create_return_request: {
+        Args: {
+          _images: string[]
+          _notes: string
+          _order_id: string
+          _order_item_id: string
+          _reason: string
+          _video_url: string
+        }
+        Returns: string
+      }
       delete_email: {
         Args: { message_id: number; queue_name: string }
         Returns: boolean
@@ -1687,6 +1808,10 @@ export type Database = {
       set_default_address: { Args: { _address_id: string }; Returns: undefined }
       update_own_profile: {
         Args: { _avatar_url?: string; _full_name?: string; _phone?: string }
+        Returns: undefined
+      }
+      update_return_status: {
+        Args: { _new_status: string; _note: string; _return_id: string }
         Returns: undefined
       }
       validate_coupon: {

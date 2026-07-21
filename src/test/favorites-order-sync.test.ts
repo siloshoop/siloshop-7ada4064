@@ -168,14 +168,14 @@ describe("Realtime favorites broadcast – multi-tab sync", () => {
     favoritesTab.on(
       "postgres_changes",
       { event: "*", schema: "public", table: "favorites", filter: `user_id=eq.${USER}` },
-      () => favRefetch()
+      favRefetch as unknown as (payload: any) => void
     );
 
     // Tab B: /dashboard subscribes and refreshes the counter
     dashboardTab.on(
       "postgres_changes",
       { event: "*", schema: "public", table: "favorites", filter: `user_id=eq.${USER}` },
-      () => dashRecount()
+      dashRecount as unknown as (payload: any) => void
     );
   });
 

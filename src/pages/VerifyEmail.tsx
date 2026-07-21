@@ -73,6 +73,16 @@ const VerifyEmail = () => {
       const { error } = await supabase.auth.verifyOtp({ email, token: code, type: "email" });
       if (error) throw error;
       toast({ title: "تم تفعيل الحساب بنجاح", description: "مرحباً بك!" });
+      // If this account has a pending seller application, route to it.
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        const { data: app } = await supabase
+          .from("seller_applications")
+          .select("status")
+          .eq("user_id", user.id)
+          .maybeSingle();
+        if (app) { navigate("/seller/application"); return; }
+      }
       navigate("/");
     } catch (err) {
       const msg = (err as Error)?.message || "";

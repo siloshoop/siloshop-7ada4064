@@ -135,21 +135,22 @@ describe("Realtime favorites broadcast – multi-tab sync", () => {
 
   const makeMockChannel = () => {
     const handlers: Handler[] = [];
-    return {
+    const channel = {
       handlers,
-      on: vi.fn((_type: string, _filter: any, cb: Handler) => {
+      on(_type: string, _filter: any, cb: Handler) {
         handlers.push(cb);
-        return channelApi;
-      }),
-      subscribe: vi.fn(() => channelApi),
-      broadcastDelete: (row: FavoriteRow) => {
+        return channel;
+      },
+      subscribe() {
+        return channel;
+      },
+      broadcastDelete(row: FavoriteRow) {
         handlers.forEach((h) =>
           h({ eventType: "DELETE", old: row, new: {}, table: "favorites" })
         );
       },
-    } as any;
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    function channelApi() {}
+    };
+    return channel;
   };
 
   let favoritesTab: ReturnType<typeof makeMockChannel>;

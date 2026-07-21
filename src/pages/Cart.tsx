@@ -346,6 +346,12 @@ const Cart = () => {
                               <p className="text-sm text-muted-foreground">
                                 {item.product.price} ل.س للقطعة
                               </p>
+                              <p className="text-sm inline-flex items-center gap-1 mt-0.5">
+                                <Truck className="h-3.5 w-3.5 text-primary" />
+                                {Number(item.product.shipping_cost || 0) === 0
+                                  ? "شحن مجاني"
+                                  : `الشحن: ${Number(item.product.shipping_cost || 0).toLocaleString()} ل.س`}
+                              </p>
                             </div>
                             <Button
                               variant="ghost"

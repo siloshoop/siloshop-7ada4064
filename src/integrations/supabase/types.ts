@@ -1700,6 +1700,13 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "wishlist_items_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "wishlist_items_wishlist_id_fkey"
             columns: ["wishlist_id"]
             isOneToOne: false

@@ -108,6 +108,18 @@ const Wishlist = () => {
     fetchWishlists();
   }, [user]);
 
+  useEffect(() => {
+    if (!user) return;
+    const channel = supabase
+      .channel(`wishlists-${user.id}`)
+      .on("postgres_changes", { event: "*", schema: "public", table: "wishlists", filter: `user_id=eq.${user.id}` }, () => fetchWishlists())
+      .on("postgres_changes", { event: "*", schema: "public", table: "wishlist_items" }, () => fetchWishlists())
+      .subscribe();
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user]);
+
   const createWishlist = async () => {
     if (!user || !newListName.trim()) return;
 

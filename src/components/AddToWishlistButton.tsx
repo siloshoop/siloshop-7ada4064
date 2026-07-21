@@ -74,31 +74,35 @@ const AddToWishlistButton = ({
     setLoading(true);
 
     if (hasProduct) {
-      await supabase
+      const { error } = await supabase
         .from("wishlist_items")
         .delete()
         .eq("wishlist_id", wishlistId)
         .eq("product_id", productId);
-      
-      toast({
-        title: "تمت الإزالة",
-        description: "تم إزالة المنتج من القائمة"
-      });
+      if (error) {
+        toast({ title: "خطأ", description: error.message, variant: "destructive" });
+      } else {
+        toast({ title: "تمت الإزالة", description: "تم إزالة المنتج من القائمة" });
+      }
     } else {
-      await supabase
+      const { error } = await supabase
         .from("wishlist_items")
         .insert({
           wishlist_id: wishlistId,
           product_id: productId
         });
-      
-      toast({
-        title: "تمت الإضافة",
-        description: "تم إضافة المنتج إلى القائمة"
-      });
+      if (error) {
+        if ((error as any).code === "23505") {
+          toast({ title: "موجود مسبقاً", description: "هذا المنتج موجود في هذه القائمة بالفعل" });
+        } else {
+          toast({ title: "خطأ", description: error.message, variant: "destructive" });
+        }
+      } else {
+        toast({ title: "تمت الإضافة", description: "تم إضافة المنتج إلى القائمة" });
+      }
     }
 
-    fetchWishlists();
+    await fetchWishlists();
     setLoading(false);
   };
 
@@ -115,22 +119,26 @@ const AddToWishlistButton = ({
       .select()
       .single();
 
-    if (!error && data) {
-      await supabase
+    if (error || !data) {
+      toast({ title: "خطأ", description: error?.message || "تعذّر إنشاء القائمة", variant: "destructive" });
+      setLoading(false);
+      return;
+    }
+
+    const { error: itemErr } = await supabase
         .from("wishlist_items")
         .insert({
           wishlist_id: data.id,
           product_id: productId
         });
 
-      toast({
-        title: "تم",
-        description: "تم إنشاء القائمة وإضافة المنتج"
-      });
-
+    if (itemErr) {
+      toast({ title: "خطأ", description: itemErr.message, variant: "destructive" });
+    } else {
+      toast({ title: "تم", description: "تم إنشاء القائمة وإضافة المنتج" });
       setNewListName("");
       setDialogOpen(false);
-      fetchWishlists();
+      await fetchWishlists();
     }
 
     setLoading(false);

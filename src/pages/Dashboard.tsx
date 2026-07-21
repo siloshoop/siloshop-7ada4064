@@ -266,7 +266,10 @@ const Dashboard = () => {
 
         {isVendor ? (
           <>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <div className="mb-4 text-xs text-muted-foreground bg-muted/40 border rounded-md px-3 py-2">
+              الدفع عند الاستلام فقط — يتم تحصيل المبلغ منك مباشرة من العميل عند التسليم. المنصة لا تحتفظ بأي أموال ولا تتقاضى أي عمولات.
+            </div>
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-8">
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-sm font-medium">إجمالي المنتجات</CardTitle>
@@ -279,7 +282,7 @@ const Dashboard = () => {
 
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">الطلبات</CardTitle>
+                  <CardTitle className="text-sm font-medium">إجمالي الطلبات</CardTitle>
                   <ShoppingBag className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
@@ -289,12 +292,53 @@ const Dashboard = () => {
 
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">الإيرادات</CardTitle>
+                  <CardTitle className="text-sm font-medium">الطلبات المكتملة</CardTitle>
+                  <CheckCircle2 className="h-4 w-4 text-green-500" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">{stats.completedOrders}</div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">الطلبات الملغاة</CardTitle>
+                  <XCircle className="h-4 w-4 text-destructive" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">{stats.cancelledOrders}</div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">الطلبات المرتجعة</CardTitle>
+                  <Undo2 className="h-4 w-4 text-orange-500" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">{stats.returnedOrders}</div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">المنتجات المُباعة</CardTitle>
+                  <Boxes className="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">{stats.productsSold}</div>
+                </CardContent>
+              </Card>
+
+              <Card className="col-span-2">
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">الإيرادات التقديرية (طلبات مُسلَّمة)</CardTitle>
                   <DollarSign className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{stats.totalRevenue} ل.س</div>
-              </CardContent>
+                <CardContent>
+                  <div className="text-2xl font-bold">{stats.estimatedRevenue.toLocaleString('ar-SY')} ل.س</div>
+                  <p className="text-xs text-muted-foreground mt-1">قيمة تقديرية للطلبات التي تم تسليمها فقط. يتم تحصيلها منك مباشرة من العميل عند الاستلام.</p>
+                </CardContent>
               </Card>
             </div>
 

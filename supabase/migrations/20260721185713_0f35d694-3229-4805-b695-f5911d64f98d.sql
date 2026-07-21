@@ -1,0 +1,1 @@
+DROP POLICY IF EXISTS "Vendors can view orders containing their items" ON public.orders;

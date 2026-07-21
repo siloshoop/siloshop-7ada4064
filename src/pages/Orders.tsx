@@ -13,6 +13,7 @@ import { format } from "date-fns";
 import { ar } from "date-fns/locale";
 import DeliveryRating from "@/components/DeliveryRating";
 import ReorderButton from "@/components/ReorderButton";
+import CancelOrderDialog from "@/components/CancelOrderDialog";
 
 interface OrderItem {
   product_id: string;
@@ -286,6 +287,12 @@ const Orders = () => {
                             onRatingSubmitted={() => void fetchOrders()}
                           />
                         )}
+                        <CancelOrderDialog
+                          orderId={order.id}
+                          status={order.status}
+                          fullWidth
+                          onCancelled={() => void fetchOrders()}
+                        />
                       </div>
                     </div>
                   </div>

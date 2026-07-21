@@ -318,19 +318,85 @@ const ManageNativeAds = () => {
                       <Input id="cta_text" value={formData.cta_text} onChange={(e) => setFormData({ ...formData, cta_text: e.target.value })} placeholder="تسوق الآن" />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="cta_url">وجهة الزر (مسار داخلي)</Label>
+                      <Label htmlFor="destination_type">نوع الوجهة</Label>
+                      <Select
+                        value={destinationType}
+                        onValueChange={(v) => { setDestinationType(v as DestinationType); setDestinationId(""); }}
+                      >
+                        <SelectTrigger id="destination_type"><SelectValue /></SelectTrigger>
+                        <SelectContent>
+                          {destinationTypeOptions.map((o) => (
+                            <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+
+                  {destinationType === "category" && (
+                    <div className="space-y-2">
+                      <Label htmlFor="dest_category">اختر الفئة</Label>
+                      <Select value={destinationId} onValueChange={setDestinationId}>
+                        <SelectTrigger id="dest_category"><SelectValue placeholder="اختر فئة" /></SelectTrigger>
+                        <SelectContent>
+                          {categoriesList.map((c) => (
+                            <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <p className="text-xs text-muted-foreground">سيوجَّه الزر إلى صفحة الفئة داخل التطبيق.</p>
+                    </div>
+                  )}
+
+                  {destinationType === "store" && (
+                    <div className="space-y-2">
+                      <Label htmlFor="dest_vendor">اختر المتجر (البائع)</Label>
+                      <Select value={destinationId} onValueChange={setDestinationId}>
+                        <SelectTrigger id="dest_vendor"><SelectValue placeholder="اختر متجرًا" /></SelectTrigger>
+                        <SelectContent>
+                          {vendorsList.map((v) => (
+                            <SelectItem key={v.id} value={v.id}>{v.full_name || "بائع"}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <p className="text-xs text-muted-foreground">سيوجَّه الزر إلى صفحة المتجر.</p>
+                    </div>
+                  )}
+
+                  {destinationType === "product" && (
+                    <div className="space-y-2">
+                      <Label htmlFor="dest_product">معرّف المنتج</Label>
                       <Input
-                        id="cta_url"
-                        value={formData.cta_url}
-                        onChange={(e) => setFormData({ ...formData, cta_url: e.target.value })}
-                        placeholder="/category/xxxx أو /product/xxxx أو /store/xxxx"
+                        id="dest_product"
+                        value={destinationId}
+                        onChange={(e) => setDestinationId(e.target.value.trim())}
+                        placeholder="UUID المنتج"
+                      />
+                      <p className="text-xs text-muted-foreground">انسخ معرّف المنتج من صفحته أو من لوحة الإدارة.</p>
+                    </div>
+                  )}
+
+                  {destinationType === "promotion" && (
+                    <p className="text-xs text-muted-foreground">
+                      سيوجَّه الزر إلى قسم "صفقات اليوم" في الصفحة الرئيسية.
+                    </p>
+                  )}
+
+                  {destinationType === "custom" && (
+                    <div className="space-y-2">
+                      <Label htmlFor="dest_custom">مسار داخلي مخصص</Label>
+                      <Input
+                        id="dest_custom"
+                        value={customPath}
+                        onChange={(e) => setCustomPath(e.target.value)}
+                        placeholder="/blog/xxxx"
                         pattern="^/.*"
                       />
                       <p className="text-xs text-muted-foreground">
                         الروابط الخارجية غير مسموحة. أدخل مسارًا داخل التطبيق يبدأ بـ /
                       </p>
                     </div>
-                  </div>
+                  )}
 
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div className="space-y-2">

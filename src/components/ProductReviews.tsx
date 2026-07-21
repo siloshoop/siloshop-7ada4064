@@ -46,6 +46,9 @@ export const ProductReviews = ({ productId, vendorId }: ProductReviewsProps) => 
   const [comment, setComment] = useState("");
   const [loading, setLoading] = useState(false);
   const [hasUserReview, setHasUserReview] = useState(false);
+  const [existingReview, setExistingReview] = useState<Review | null>(null);
+  const [existingImageUrl, setExistingImageUrl] = useState<string | null>(null);
+  const [removeExistingImage, setRemoveExistingImage] = useState(false);
   const [averageRating, setAverageRating] = useState(0);
   const [replyingTo, setReplyingTo] = useState<string | null>(null);
   const [replyText, setReplyText] = useState("");
@@ -83,7 +86,19 @@ export const ProductReviews = ({ productId, vendorId }: ProductReviewsProps) => 
       }
 
       if (user) {
-        setHasUserReview(data.some(r => r.user_id === user.id));
+        const mine = data.find((r: any) => r.user_id === user.id) as any;
+        if (mine) {
+          setHasUserReview(true);
+          setExistingReview(mine);
+          setRating(mine.rating);
+          setComment(mine.comment || "");
+          setExistingImageUrl(mine.image_url || null);
+          setRemoveExistingImage(false);
+        } else {
+          setHasUserReview(false);
+          setExistingReview(null);
+          setExistingImageUrl(null);
+        }
       }
     }
   };
@@ -152,26 +167,36 @@ export const ProductReviews = ({ productId, vendorId }: ProductReviewsProps) => 
         setUploading(false);
       }
 
-      const { error } = await supabase.from("reviews").insert({
-        product_id: productId,
-        user_id: user.id,
-        rating,
-        comment: comment.trim() || null,
-        image_url: uploadedUrl,
-      });
+      const finalImageUrl = uploadedUrl
+        ? uploadedUrl
+        : removeExistingImage
+          ? null
+          : existingImageUrl;
+
+      const { error } = await supabase
+        .from("reviews")
+        .upsert(
+          {
+            product_id: productId,
+            user_id: user.id,
+            rating,
+            comment: comment.trim() || null,
+            image_url: finalImageUrl,
+          },
+          { onConflict: "product_id,user_id" }
+        );
 
       if (error) throw error;
 
       toast({
         title: "تم بنجاح",
-        description: "تم إضافة تقييمك",
+        description: hasUserReview ? "تم تحديث تقييمك" : "تم إضافة تقييمك",
       });
 
-      setRating(0);
-      setComment("");
       setImageFile(null);
       setImagePreview(null);
       setUploadProgress(0);
+      setRemoveExistingImage(false);
       fetchReviews();
     } catch (error) {
       toast({
@@ -183,6 +208,31 @@ export const ProductReviews = ({ productId, vendorId }: ProductReviewsProps) => 
       setLoading(false);
       setUploading(false);
       setUploadProgress(0);
+    }
+  };
+
+  const handleDeleteReview = async () => {
+    if (!user || !existingReview) return;
+    if (!confirm("هل تريد حذف تقييمك؟")) return;
+    setLoading(true);
+    try {
+      const { error } = await supabase
+        .from("reviews")
+        .delete()
+        .eq("id", existingReview.id)
+        .eq("user_id", user.id);
+      if (error) throw error;
+      setRating(0);
+      setComment("");
+      setExistingImageUrl(null);
+      setExistingReview(null);
+      setHasUserReview(false);
+      toast({ title: "تم الحذف", description: "تم حذف تقييمك" });
+      fetchReviews();
+    } catch (error: any) {
+      toast({ title: "خطأ", description: error.message, variant: "destructive" });
+    } finally {
+      setLoading(false);
     }
   };
 

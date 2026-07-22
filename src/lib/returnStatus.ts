@@ -25,7 +25,7 @@ export const RETURN_STATUS: Record<
   closed: { label: "مغلق", variant: "secondary", description: "طلب الإرجاع مغلق" },
 };
 
-export const RETURN_WINDOW_DAYS = 14;
+const RETURN_WINDOW_DAYS = 14;
 
 export function isReturnEligible(order: {
   status?: string | null;
@@ -37,8 +37,4 @@ export function isReturnEligible(order: {
   const windowMs = RETURN_WINDOW_DAYS * 24 * 60 * 60 * 1000;
   if (Date.now() - deliveredMs > windowMs) return { eligible: false, reason: "expired" };
   return { eligible: true };
-}
-
-export function returnDeadline(deliveredAt: string): Date {
-  return new Date(new Date(deliveredAt).getTime() + RETURN_WINDOW_DAYS * 24 * 60 * 60 * 1000);
 }

@@ -1,7 +1,7 @@
 import { supabase } from "@/integrations/supabase/client";
 import type { User, Session } from "@supabase/supabase-js";
 
-export interface AuthResponse {
+interface AuthResponse {
   user: User | null;
   session: Session | null;
   error: Error | null;
@@ -45,19 +45,4 @@ export const signIn = async (email: string, password: string): Promise<AuthRespo
     session: data.session,
     error: error as Error | null
   };
-};
-
-export const signOut = async (): Promise<{ error: Error | null }> => {
-  const { error } = await supabase.auth.signOut();
-  return { error: error as Error | null };
-};
-
-export const getCurrentUser = async (): Promise<User | null> => {
-  const { data: { user } } = await supabase.auth.getUser();
-  return user;
-};
-
-export const getCurrentSession = async (): Promise<Session | null> => {
-  const { data: { session } } = await supabase.auth.getSession();
-  return session;
 };

@@ -1,95 +1,61 @@
+# Marketplace Administration System — Phased Plan
 
-# Platform Products Management System
+This request is very large. Much of it already exists in the project (RBAC, seller approval, platform vs seller products, RLS, cancel/update orders, notifications, admin search of users/sellers, dashboard stats). I'll extend what exists rather than rebuild, and split the new work into reviewable phases. Please approve the plan (and pick a starting phase) before I implement.
 
-Build an admin-only management area for "Platform Products" — products owned by the platform (not by sellers). Sellers keep their existing seller-owned products; a new flag distinguishes the two.
+## Already in place — will reuse, not rebuild
+- Roles: `app_role` enum (`admin`, `vendor`, `customer`) with `user_roles` table + `has_role()` security-definer function.
+- Seller approval lifecycle: `seller_applications` + `approve/reject/suspend/reactivate/delete_seller_*` RPCs + notifications.
+- Platform vs seller products: `products.product_type` + admin-only platform RLS + `PlatformProducts` admin UI + bulk import.
+- Order lifecycle: `create_order`, `cancel_order`, `vendor_update_order_status`, status history, notifications.
+- Admin pages: users, sellers, native ads, activity logs, platform products.
+- RLS + GRANTs across 40+ tables; realtime scoping; rate-limits; return system.
+- COD payments via `record_payment` (cash-only currently).
 
-## 1. Database changes
+## New / changed work — phases
 
-Extend the existing `products` table (non-breaking) so we don't fragment the catalog:
+### Phase 1 — Roles & moderation foundation (DB migration)
+- Extend `app_role` enum with `super_admin` and `moderator`.
+- Add `has_any_role(_user_id, _roles app_role[])` helper.
+- Add `profiles.account_status` enum: `active | suspended | banned` (default `active`); RPCs `admin_suspend_user`, `admin_activate_user`, `admin_ban_user`, `admin_delete_user` (super_admin only for delete/ban).
+- Add `products.moderation_status` enum: `pending | approved | rejected | hidden` (seller products default `pending`; platform products auto-`approved`).
+- Update public product SELECT policies to require `moderation_status = 'approved' AND is_active = true`.
+- RPCs: `admin_moderate_product(id, action, reason)` covering approve/reject/hide/restore/suspend/delete; writes to a new `product_moderation_log`.
 
-- `product_type` text — `'platform' | 'seller'`, default `'seller'`.
-- `sku` text (unique when not null).
-- `discount_price` numeric (optional).
-- `currency` text, default `'SYP'`.
-- `sizes` text[] (available sizes).
-- `colors` text[] (available colors).
-- `images` text[] (gallery, in addition to existing `image_url` which stays as the main image).
-- `weight` numeric (optional, kg).
-- `is_active` boolean, default true.
-- `source` text — future-proofing: `'manual' | 'supplier_api' | 'xml' | 'csv'`, default `'manual'`.
-- `external_id` text — future supplier sync key (indexed, nullable).
+### Phase 2 — Reports system (DB + admin UI)
+- New table `reports(id, reporter_id, target_type: product|seller|buyer|message, target_id, reason, details, status: open|reviewing|resolved|dismissed, resolution_note, resolved_by, resolved_at, created_at)` with GRANTs + RLS (reporter can insert/see own; admin/moderator can see all + update).
+- Client "Report" buttons on Product page, vendor page, message bubble, and buyer profile from an order.
+- Admin page `/dashboard/reports` with filters, detail drawer, and actions (delete content, suspend user, close report) wired to existing RPCs.
 
-RLS updates on `products`:
-- Platform products (`product_type = 'platform'`): only admins can insert/update/delete. Everyone can read active platform products.
-- Seller products: existing rules unchanged (`vendor_id = auth.uid()`).
+### Phase 3 — Chat moderation
+- Add `messages.is_deleted`, `conversations.is_blocked`, `conversations.is_suspended`.
+- RPCs: `moderator_delete_message`, `moderator_block_conversation`, `moderator_suspend_conversation` (admin + moderator only).
+- Admin page `/dashboard/chat-moderation` listing conversations with search, message viewer, and action buttons. Regular users see deleted messages as "تم حذف الرسالة".
 
-For platform rows `vendor_id` will store the admin's user id (existing NOT NULL kept intact).
+### Phase 4 — Sham Cash for platform products (payments split)
+- Extend `payments.payment_method` to include `sham_cash`.
+- `create_order` reworked: when cart contains only platform products → allowed payment methods = `sham_cash`; when cart contains only seller products → `cash` only; mixed carts split into two orders server-side.
+- `record_payment` accepts `sham_cash` only for platform orders; stores platform owner's Sham Cash account reference from a new `platform_payment_settings` singleton table (super_admin managed). No seller access.
+- Checkout UI branches on cart composition and shows the correct method(s).
 
-Categories & brands: tables already exist. Add admin-only write policies if missing so admins can manage them from the same dashboard.
+### Phase 5 — Admin dashboard stats + global search
+- Extend existing admin dashboard with tiles: users, sellers, buyers, products, platform products, seller products, orders, revenue, pending sellers, pending products, suspended accounts, open reports — via one aggregate RPC `admin_dashboard_stats()`.
+- Global search page `/dashboard/search` (admin) hitting users/sellers/buyers/products/orders/reports through paginated RPCs.
+- Login/activity history view built on the existing `activity_logs` table with filters.
 
-## 2. Storage
+### Phase 6 — Performance & polish
+- Add covering indexes for new filters (`products(moderation_status, is_active, created_at)`, `reports(status, created_at)`, `messages(conversation_id, created_at)`).
+- Server-side pagination on every admin list.
+- Verify all new tables have GRANTs + RLS + service_role grants.
+- Fix any linter findings surfaced by the migrations.
 
-Reuse the existing `product-images` bucket (public). Admin uploads land under `platform/{uuid}/...` to keep them organized.
+## Explicitly out of scope for this plan
+- Building multi-currency, multi-language, wallet, loyalty, affiliate, or a mobile app now. The schema additions above are compatible with adding them later, but I won't implement them in this pass.
 
-## 3. Admin UI (`/admin/platform-products`)
+## Technical notes
+- All privileged writes go through `SECURITY DEFINER` RPCs that check `has_any_role(auth.uid(), ARRAY['admin','super_admin','moderator'])` — never client-side role checks for enforcement.
+- Every new `public` table ships with `GRANT` + `ENABLE RLS` + policies in the same migration.
+- Notifications reuse the existing `notifications` table + trigger pattern.
+- Client role gating uses the existing `RequireRole` component, extended to accept `super_admin` / `moderator`.
 
-Guarded by `useAdminCheck` + `RequireRole('admin')`.
-
-- **List page**: table with filters (category, brand, status, stock), search by name/SKU, bulk actions (activate/deactivate/delete).
-- **Create / Edit form**:
-  - Name, SKU, brand (select), category (select), description.
-  - Price, discount price, currency, stock quantity, weight.
-  - Sizes / colors: tag input (chips).
-  - Status toggle (Active/Inactive).
-  - Image uploader: drag-and-drop, multi-file, reorder, choose main image (radio). Compressed client-side using existing helper.
-- **Bulk import dialog**: accept `.xlsx` and `.csv`. Preview parsed rows in a table with per-row validation errors before committing. On confirm, insert in batches.
-- **Categories & Brands manager**: simple CRUD dialogs from the same page.
-
-## 4. Import format
-
-Column headers (case-insensitive, both English and Arabic accepted):
-
-```text
-name, sku, brand, category, description, price, discount_price,
-currency, stock_quantity, sizes, colors, weight, images, main_image, status
-```
-
-- `sizes` / `colors` / `images`: comma or `|` separated.
-- `brand` / `category`: matched by name (Arabic or English); unknown values reported as errors — no silent creation.
-- `status`: `active` / `inactive` (default active).
-- Parsing done client-side with `xlsx` (SheetJS) which handles both formats. Rows validated via zod, then inserted with `product_type = 'platform'`, `source = 'csv'` or `'xlsx'`.
-
-## 5. Sellers cannot touch platform products
-
-- RLS blocks it at the database level.
-- Existing vendor dashboard queries already scope by `vendor_id = auth.uid()` and will additionally filter `product_type = 'seller'` to be explicit.
-- Public product pages/listings show both types; only the admin sees management for platform ones.
-
-## 6. Future supplier sync (design only, not implemented now)
-
-The `source` + `external_id` columns plus the existing `product_type` flag are enough to let a future edge function upsert supplier feeds without further schema changes:
-
-```text
-upsert products on (source, external_id) where product_type = 'platform'
-```
-
-No code for this now — just the columns.
-
-## Files to add / change (technical)
-
-- Migration: extend `products`, add indexes on `(product_type)`, `(source, external_id)`, unique on `sku` (partial where sku is not null), refresh RLS policies, add admin write policies on `categories` and `brands` if missing.
-- `src/pages/admin/PlatformProducts.tsx` — list + filters + bulk actions.
-- `src/pages/admin/PlatformProductForm.tsx` — create/edit form.
-- `src/components/admin/PlatformProductImport.tsx` — Excel/CSV import dialog with preview & validation (uses `xlsx`).
-- `src/components/admin/PlatformImageUploader.tsx` — drag-drop, reorder, main-image selector (wraps existing compression helper).
-- `src/components/admin/CategoriesBrandsManager.tsx` — inline CRUD.
-- Route registration in `src/App.tsx` under an admin-guarded section.
-- Sidebar entry in the admin dashboard.
-
-## Out of scope for this task
-
-- Actual supplier API/XML sync jobs (columns only).
-- Multi-currency conversion (currency stored as label; display uses existing `ل.س` formatting when `SYP`).
-- Variant-level stock per size/color (single stock number for now; can layer variants later without breaking this schema).
-
-Approve and I'll implement it end-to-end.
+## How to proceed
+Please confirm, and tell me which phase to start with (I recommend Phase 1 first — everything else depends on the new roles and product moderation status). I'll implement one phase per turn so you can review each migration before the next.

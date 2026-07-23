@@ -84,8 +84,8 @@ const Reports = () => {
     if (!isAdmin) return;
     setLoading(true);
     const { data, error } = await supabase.rpc("admin_list_reports", {
-      _status: statusFilter === "all" ? null : statusFilter,
-      _type: typeFilter === "all" ? null : typeFilter,
+      _status: (statusFilter === "all" ? null : statusFilter) as ReportStatus | null,
+      _type: (typeFilter === "all" ? null : typeFilter) as ReportType | null,
       _search: debounced || null,
       _limit: PAGE_SIZE,
       _offset: page * PAGE_SIZE,

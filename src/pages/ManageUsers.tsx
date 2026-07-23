@@ -46,7 +46,7 @@ interface UserProfile {
 
 interface UserRole {
   user_id: string;
-  role: "customer" | "vendor" | "admin";
+  role: "customer" | "vendor" | "admin" | "moderator" | "super_admin";
 }
 
 const ManageUsers = () => {

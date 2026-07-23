@@ -622,9 +622,12 @@ export type Database = {
           content: string | null
           conversation_id: string
           created_at: string
+          deleted_at: string | null
+          deleted_by: string | null
           file_name: string | null
           file_url: string | null
           id: string
+          is_deleted: boolean
           is_read: boolean
           message_type: string
           sender_id: string
@@ -633,9 +636,12 @@ export type Database = {
           content?: string | null
           conversation_id: string
           created_at?: string
+          deleted_at?: string | null
+          deleted_by?: string | null
           file_name?: string | null
           file_url?: string | null
           id?: string
+          is_deleted?: boolean
           is_read?: boolean
           message_type?: string
           sender_id: string
@@ -644,9 +650,12 @@ export type Database = {
           content?: string | null
           conversation_id?: string
           created_at?: string
+          deleted_at?: string | null
+          deleted_by?: string | null
           file_name?: string | null
           file_url?: string | null
           id?: string
+          is_deleted?: boolean
           is_read?: boolean
           message_type?: string
           sender_id?: string
@@ -1382,6 +1391,51 @@ export type Database = {
           },
         ]
       }
+      reports: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          reason: string
+          report_type: Database["public"]["Enums"]["report_type"]
+          reporter_id: string
+          resolution_note: string | null
+          resolved_at: string | null
+          resolved_by: string | null
+          status: Database["public"]["Enums"]["report_status"]
+          target_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          reason: string
+          report_type: Database["public"]["Enums"]["report_type"]
+          reporter_id: string
+          resolution_note?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          status?: Database["public"]["Enums"]["report_status"]
+          target_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          reason?: string
+          report_type?: Database["public"]["Enums"]["report_type"]
+          reporter_id?: string
+          resolution_note?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          status?: Database["public"]["Enums"]["report_status"]
+          target_id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       return_status_history: {
         Row: {
           changed_by: string | null
@@ -1528,8 +1582,12 @@ export type Database = {
         Row: {
           comment: string | null
           created_at: string
+          hidden_at: string | null
+          hidden_by: string | null
+          hidden_reason: string | null
           id: string
           image_url: string | null
+          is_hidden: boolean
           product_id: string
           rating: number
           updated_at: string
@@ -1538,8 +1596,12 @@ export type Database = {
         Insert: {
           comment?: string | null
           created_at?: string
+          hidden_at?: string | null
+          hidden_by?: string | null
+          hidden_reason?: string | null
           id?: string
           image_url?: string | null
+          is_hidden?: boolean
           product_id: string
           rating: number
           updated_at?: string
@@ -1548,8 +1610,12 @@ export type Database = {
         Update: {
           comment?: string | null
           created_at?: string
+          hidden_at?: string | null
+          hidden_by?: string | null
+          hidden_reason?: string | null
           id?: string
           image_url?: string | null
+          is_hidden?: boolean
           product_id?: string
           rating?: number
           updated_at?: string
@@ -1847,6 +1913,40 @@ export type Database = {
         Args: { _reason: string; _user_id: string }
         Returns: undefined
       }
+      admin_delete_message: {
+        Args: { _message_id: string }
+        Returns: undefined
+      }
+      admin_hide_review: {
+        Args: { _reason: string; _review_id: string }
+        Returns: undefined
+      }
+      admin_list_reports: {
+        Args: {
+          _limit?: number
+          _offset?: number
+          _search?: string
+          _status?: Database["public"]["Enums"]["report_status"]
+          _type?: Database["public"]["Enums"]["report_type"]
+        }
+        Returns: {
+          created_at: string
+          description: string
+          id: string
+          reason: string
+          report_type: Database["public"]["Enums"]["report_type"]
+          reporter_email: string
+          reporter_id: string
+          reporter_name: string
+          resolution_note: string
+          resolved_at: string
+          resolved_by: string
+          status: Database["public"]["Enums"]["report_status"]
+          target_id: string
+          total_count: number
+          updated_at: string
+        }[]
+      }
       admin_list_seller_applications: {
         Args: never
         Returns: {
@@ -1875,6 +1975,15 @@ export type Database = {
       }
       admin_suspend_user: {
         Args: { _reason: string; _user_id: string }
+        Returns: undefined
+      }
+      admin_unhide_review: { Args: { _review_id: string }; Returns: undefined }
+      admin_update_report: {
+        Args: {
+          _note?: string
+          _report_id: string
+          _status: Database["public"]["Enums"]["report_status"]
+        }
         Returns: undefined
       }
       approve_seller_application: {
@@ -1955,6 +2064,7 @@ export type Database = {
           total_orders: number
         }[]
       }
+      has_any_admin_role: { Args: { _user_id: string }; Returns: boolean }
       has_any_role: {
         Args: { _roles: string[]; _user_id: string }
         Returns: boolean
@@ -2029,6 +2139,15 @@ export type Database = {
         Returns: undefined
       }
       set_default_address: { Args: { _address_id: string }; Returns: undefined }
+      submit_report: {
+        Args: {
+          _description?: string
+          _reason: string
+          _report_type: Database["public"]["Enums"]["report_type"]
+          _target_id: string
+        }
+        Returns: string
+      }
       submit_seller_application: {
         Args: {
           _address: string
@@ -2079,6 +2198,8 @@ export type Database = {
     }
     Enums: {
       app_role: "customer" | "vendor" | "admin" | "super_admin" | "moderator"
+      report_status: "pending" | "under_review" | "resolved" | "rejected"
+      report_type: "product" | "seller" | "buyer" | "message" | "review"
       seller_status: "pending" | "approved" | "rejected" | "suspended"
       user_role: "customer" | "vendor"
     }
@@ -2209,6 +2330,8 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["customer", "vendor", "admin", "super_admin", "moderator"],
+      report_status: ["pending", "under_review", "resolved", "rejected"],
+      report_type: ["product", "seller", "buyer", "message", "review"],
       seller_status: ["pending", "approved", "rejected", "suspended"],
       user_role: ["customer", "vendor"],
     },

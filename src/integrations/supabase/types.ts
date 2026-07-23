@@ -1041,6 +1041,47 @@ export type Database = {
           },
         ]
       }
+      product_moderation_log: {
+        Row: {
+          action: string
+          created_at: string
+          from_status: string | null
+          id: string
+          performed_by: string
+          product_id: string
+          reason: string | null
+          to_status: string | null
+        }
+        Insert: {
+          action: string
+          created_at?: string
+          from_status?: string | null
+          id?: string
+          performed_by: string
+          product_id: string
+          reason?: string | null
+          to_status?: string | null
+        }
+        Update: {
+          action?: string
+          created_at?: string
+          from_status?: string | null
+          id?: string
+          performed_by?: string
+          product_id?: string
+          reason?: string | null
+          to_status?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_moderation_log_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       products: {
         Row: {
           brand_id: string | null
@@ -1055,6 +1096,10 @@ export type Database = {
           image_url: string | null
           images: string[] | null
           is_active: boolean | null
+          moderated_at: string | null
+          moderated_by: string | null
+          moderation_reason: string | null
+          moderation_status: string
           name: string
           original_price: number | null
           price: number
@@ -1082,6 +1127,10 @@ export type Database = {
           image_url?: string | null
           images?: string[] | null
           is_active?: boolean | null
+          moderated_at?: string | null
+          moderated_by?: string | null
+          moderation_reason?: string | null
+          moderation_status?: string
           name: string
           original_price?: number | null
           price: number
@@ -1109,6 +1158,10 @@ export type Database = {
           image_url?: string | null
           images?: string[] | null
           is_active?: boolean | null
+          moderated_at?: string | null
+          moderated_by?: string | null
+          moderation_reason?: string | null
+          moderation_status?: string
           name?: string
           original_price?: number | null
           price?: number
@@ -1156,6 +1209,7 @@ export type Database = {
       }
       profiles: {
         Row: {
+          account_status: string
           avatar_url: string | null
           ban_reason: string | null
           banned_at: string | null
@@ -1165,9 +1219,13 @@ export type Database = {
           is_banned: boolean
           phone: string | null
           role: Database["public"]["Enums"]["user_role"]
+          status_changed_at: string | null
+          status_changed_by: string | null
+          status_reason: string | null
           updated_at: string | null
         }
         Insert: {
+          account_status?: string
           avatar_url?: string | null
           ban_reason?: string | null
           banned_at?: string | null
@@ -1177,9 +1235,13 @@ export type Database = {
           is_banned?: boolean
           phone?: string | null
           role?: Database["public"]["Enums"]["user_role"]
+          status_changed_at?: string | null
+          status_changed_by?: string | null
+          status_reason?: string | null
           updated_at?: string | null
         }
         Update: {
+          account_status?: string
           avatar_url?: string | null
           ban_reason?: string | null
           banned_at?: string | null
@@ -1189,6 +1251,9 @@ export type Database = {
           is_banned?: boolean
           phone?: string | null
           role?: Database["public"]["Enums"]["user_role"]
+          status_changed_at?: string | null
+          status_changed_by?: string | null
+          status_reason?: string | null
           updated_at?: string | null
         }
         Relationships: []
@@ -1777,6 +1842,11 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      admin_activate_user: { Args: { _user_id: string }; Returns: undefined }
+      admin_ban_user: {
+        Args: { _reason: string; _user_id: string }
+        Returns: undefined
+      }
       admin_list_seller_applications: {
         Args: never
         Returns: {
@@ -1798,6 +1868,14 @@ export type Database = {
           submitted_at: string
           user_id: string
         }[]
+      }
+      admin_moderate_product: {
+        Args: { _action: string; _product_id: string; _reason?: string }
+        Returns: undefined
+      }
+      admin_suspend_user: {
+        Args: { _reason: string; _user_id: string }
+        Returns: undefined
       }
       approve_seller_application: {
         Args: { _app_id: string }
@@ -1876,6 +1954,10 @@ export type Database = {
           returned_orders: number
           total_orders: number
         }[]
+      }
+      has_any_role: {
+        Args: { _roles: string[]; _user_id: string }
+        Returns: boolean
       }
       has_role: {
         Args: {
@@ -1996,7 +2078,7 @@ export type Database = {
       }
     }
     Enums: {
-      app_role: "customer" | "vendor" | "admin"
+      app_role: "customer" | "vendor" | "admin" | "super_admin" | "moderator"
       seller_status: "pending" | "approved" | "rejected" | "suspended"
       user_role: "customer" | "vendor"
     }
@@ -2126,7 +2208,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["customer", "vendor", "admin"],
+      app_role: ["customer", "vendor", "admin", "super_admin", "moderator"],
       seller_status: ["pending", "approved", "rejected", "suspended"],
       user_role: ["customer", "vendor"],
     },

@@ -339,6 +339,18 @@ const Dashboard = () => {
           </Card>
         )}
 
+        {isAdmin && (
+          <Card className="mb-6 border-primary/30">
+            <CardContent className="pt-6 flex items-center justify-between gap-4">
+              <div>
+                <p className="font-semibold">البلاغات والإشراف</p>
+                <p className="text-sm text-muted-foreground">مراجعة بلاغات المستخدمين واتخاذ إجراءات على المحتوى المخالف.</p>
+              </div>
+              <Button onClick={() => navigate("/dashboard/reports")}>فتح لوحة البلاغات</Button>
+            </CardContent>
+          </Card>
+        )}
+
         {/* Seller application status banner (pending/rejected/suspended) */}
         {sellerApp && sellerApp.status !== "approved" && (
           <Card className="mb-6 border-amber-400/60 bg-amber-50/40 dark:bg-amber-950/10">

@@ -1913,13 +1913,52 @@ export type Database = {
         Args: { _reason: string; _user_id: string }
         Returns: undefined
       }
+      admin_cancel_order: {
+        Args: { _order_id: string; _reason: string }
+        Returns: undefined
+      }
       admin_delete_message: {
         Args: { _message_id: string }
         Returns: undefined
       }
+      admin_get_order_detail: { Args: { _order_id: string }; Returns: Json }
       admin_hide_review: {
         Args: { _reason: string; _review_id: string }
         Returns: undefined
+      }
+      admin_list_orders: {
+        Args: {
+          _from?: string
+          _limit?: number
+          _offset?: number
+          _payment_status?: string
+          _search?: string
+          _status?: string
+          _to?: string
+        }
+        Returns: {
+          cancellation_reason: string
+          cancelled_at: string
+          coupon_code: string
+          courier_name: string
+          created_at: string
+          customer_email: string
+          customer_id: string
+          customer_name: string
+          delivered_at: string
+          discount_amount: number
+          id: string
+          items_count: number
+          payment_status: string
+          phone: string
+          shipping_address: string
+          status: string
+          total_amount: number
+          total_count: number
+          tracking_number: string
+          updated_at: string
+          vendors_count: number
+        }[]
       }
       admin_list_reports: {
         Args: {
@@ -1973,11 +2012,25 @@ export type Database = {
         Args: { _action: string; _product_id: string; _reason?: string }
         Returns: undefined
       }
+      admin_refund_order: {
+        Args: { _order_id: string; _reason: string }
+        Returns: undefined
+      }
       admin_suspend_user: {
         Args: { _reason: string; _user_id: string }
         Returns: undefined
       }
       admin_unhide_review: { Args: { _review_id: string }; Returns: undefined }
+      admin_update_order_status: {
+        Args: {
+          _courier_name?: string
+          _note?: string
+          _order_id: string
+          _status: string
+          _tracking_number?: string
+        }
+        Returns: undefined
+      }
       admin_update_report: {
         Args: {
           _note?: string
@@ -1985,6 +2038,16 @@ export type Database = {
           _status: Database["public"]["Enums"]["report_status"]
         }
         Returns: undefined
+      }
+      admin_user_order_history: {
+        Args: { _limit?: number; _user_id: string }
+        Returns: {
+          created_at: string
+          id: string
+          role: string
+          status: string
+          total_amount: number
+        }[]
       }
       approve_seller_application: {
         Args: { _app_id: string }

@@ -50,6 +50,20 @@ const Chat = () => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  const suspensionActive =
+    !!convState?.is_suspended &&
+    (!convState.suspended_until || new Date(convState.suspended_until) > new Date());
+  const chatDisabled = !!convState?.is_blocked || suspensionActive;
+  const disabledReason = convState?.is_blocked
+    ? convState.moderation_reason
+      ? `تم حظر هذه المحادثة: ${convState.moderation_reason}`
+      : "تم حظر هذه المحادثة من قبل الإدارة."
+    : suspensionActive
+      ? convState?.moderation_reason
+        ? `المحادثة معلّقة مؤقتاً: ${convState.moderation_reason}`
+        : "المحادثة معلّقة مؤقتاً."
+      : null;
+
   useEffect(() => {
     if (!user || !vendorId) return;
 

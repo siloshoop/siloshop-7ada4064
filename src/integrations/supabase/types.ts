@@ -238,6 +238,57 @@ export type Database = {
         }
         Relationships: []
       }
+      chat_moderation_log: {
+        Row: {
+          action: string
+          conversation_id: string | null
+          created_at: string
+          id: string
+          message_id: string | null
+          metadata: Json
+          performed_by: string
+          performed_by_role: string | null
+          reason: string | null
+        }
+        Insert: {
+          action: string
+          conversation_id?: string | null
+          created_at?: string
+          id?: string
+          message_id?: string | null
+          metadata?: Json
+          performed_by: string
+          performed_by_role?: string | null
+          reason?: string | null
+        }
+        Update: {
+          action?: string
+          conversation_id?: string | null
+          created_at?: string
+          id?: string
+          message_id?: string | null
+          metadata?: Json
+          performed_by?: string
+          performed_by_role?: string | null
+          reason?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "chat_moderation_log_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "conversations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "chat_moderation_log_message_id_fkey"
+            columns: ["message_id"]
+            isOneToOne: false
+            referencedRelation: "messages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       contact_messages: {
         Row: {
           created_at: string
@@ -297,24 +348,42 @@ export type Database = {
           created_at: string
           customer_id: string
           id: string
+          is_blocked: boolean
+          is_suspended: boolean
           last_message_at: string | null
+          moderated_at: string | null
+          moderated_by: string | null
+          moderation_reason: string | null
           product_id: string | null
+          suspended_until: string | null
           vendor_id: string
         }
         Insert: {
           created_at?: string
           customer_id: string
           id?: string
+          is_blocked?: boolean
+          is_suspended?: boolean
           last_message_at?: string | null
+          moderated_at?: string | null
+          moderated_by?: string | null
+          moderation_reason?: string | null
           product_id?: string | null
+          suspended_until?: string | null
           vendor_id: string
         }
         Update: {
           created_at?: string
           customer_id?: string
           id?: string
+          is_blocked?: boolean
+          is_suspended?: boolean
           last_message_at?: string | null
+          moderated_at?: string | null
+          moderated_by?: string | null
+          moderation_reason?: string | null
           product_id?: string | null
+          suspended_until?: string | null
           vendor_id?: string
         }
         Relationships: [
@@ -1913,18 +1982,67 @@ export type Database = {
         Args: { _reason: string; _user_id: string }
         Returns: undefined
       }
+      admin_block_conversation: {
+        Args: { _block?: boolean; _conversation_id: string; _reason: string }
+        Returns: undefined
+      }
       admin_cancel_order: {
         Args: { _order_id: string; _reason: string }
         Returns: undefined
       }
-      admin_delete_message: {
-        Args: { _message_id: string }
-        Returns: undefined
+      admin_delete_message:
+        | { Args: { _message_id: string }; Returns: undefined }
+        | {
+            Args: { _message_id: string; _reason?: string }
+            Returns: undefined
+          }
+      admin_get_conversation_messages: {
+        Args: { _conversation_id: string }
+        Returns: {
+          content: string
+          conversation_id: string
+          created_at: string
+          deleted_at: string
+          deleted_by: string
+          file_name: string
+          file_url: string
+          id: string
+          is_deleted: boolean
+          message_type: string
+          report_count: number
+          sender_id: string
+          sender_name: string
+        }[]
       }
       admin_get_order_detail: { Args: { _order_id: string }; Returns: Json }
       admin_hide_review: {
         Args: { _reason: string; _review_id: string }
         Returns: undefined
+      }
+      admin_list_conversations: {
+        Args: {
+          _filter?: string
+          _limit?: number
+          _offset?: number
+          _search?: string
+        }
+        Returns: {
+          created_at: string
+          customer_id: string
+          customer_name: string
+          id: string
+          is_blocked: boolean
+          is_suspended: boolean
+          last_message: string
+          last_message_at: string
+          message_count: number
+          moderation_reason: string
+          product_id: string
+          reported_count: number
+          suspended_until: string
+          vendor_id: string
+          vendor_name: string
+        }[]
       }
       admin_list_orders: {
         Args: {
@@ -2014,6 +2132,15 @@ export type Database = {
       }
       admin_refund_order: {
         Args: { _order_id: string; _reason: string }
+        Returns: undefined
+      }
+      admin_suspend_conversation: {
+        Args: {
+          _conversation_id: string
+          _reason: string
+          _suspend?: boolean
+          _until?: string
+        }
         Returns: undefined
       }
       admin_suspend_user: {

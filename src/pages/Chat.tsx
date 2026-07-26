@@ -20,6 +20,7 @@ interface Message {
   file_name: string | null;
   created_at: string;
   is_read: boolean;
+  is_deleted?: boolean;
 }
 
 interface Profile {
@@ -38,10 +39,30 @@ const Chat = () => {
   const [newMessage, setNewMessage] = useState("");
   const [conversationId, setConversationId] = useState<string | null>(null);
   const [vendorProfile, setVendorProfile] = useState<Profile | null>(null);
+  const [convState, setConvState] = useState<{
+    is_blocked: boolean;
+    is_suspended: boolean;
+    suspended_until: string | null;
+    moderation_reason: string | null;
+  } | null>(null);
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const suspensionActive =
+    !!convState?.is_suspended &&
+    (!convState.suspended_until || new Date(convState.suspended_until) > new Date());
+  const chatDisabled = !!convState?.is_blocked || suspensionActive;
+  const disabledReason = convState?.is_blocked
+    ? convState.moderation_reason
+      ? `تم حظر هذه المحادثة: ${convState.moderation_reason}`
+      : "تم حظر هذه المحادثة من قبل الإدارة."
+    : suspensionActive
+      ? convState?.moderation_reason
+        ? `المحادثة معلّقة مؤقتاً: ${convState.moderation_reason}`
+        : "المحادثة معلّقة مؤقتاً."
+      : null;
 
   useEffect(() => {
     if (!user || !vendorId) return;
@@ -74,6 +95,14 @@ const Chat = () => {
 
       const conversationRow = { id: convId as string };
       setConversationId(conversationRow.id);
+
+      // Load moderation state
+      const { data: convRow } = await supabase
+        .from("conversations")
+        .select("is_blocked, is_suspended, suspended_until, moderation_reason")
+        .eq("id", conversationRow.id)
+        .maybeSingle();
+      if (convRow) setConvState(convRow as typeof convState);
 
       // Fetch messages
       const { data: msgs } = await supabase
@@ -113,6 +142,43 @@ const Chat = () => {
             }
           }
         )
+        .on(
+          "postgres_changes",
+          {
+            event: "UPDATE",
+            schema: "public",
+            table: "messages",
+            filter: `conversation_id=eq.${conversationRow.id}`,
+          },
+          (payload) => {
+            setMessages((prev) =>
+              prev.map((m) => (m.id === (payload.new as Message).id ? (payload.new as Message) : m)),
+            );
+          },
+        )
+        .on(
+          "postgres_changes",
+          {
+            event: "UPDATE",
+            schema: "public",
+            table: "conversations",
+            filter: `id=eq.${conversationRow.id}`,
+          },
+          (payload) => {
+            const c = payload.new as {
+              is_blocked: boolean;
+              is_suspended: boolean;
+              suspended_until: string | null;
+              moderation_reason: string | null;
+            };
+            setConvState({
+              is_blocked: c.is_blocked,
+              is_suspended: c.is_suspended,
+              suspended_until: c.suspended_until,
+              moderation_reason: c.moderation_reason,
+            });
+          },
+        )
         .subscribe();
 
       return () => {
@@ -129,6 +195,7 @@ const Chat = () => {
 
   const handleSendMessage = async () => {
     if (!newMessage.trim() || !conversationId || !user) return;
+    if (chatDisabled) return;
 
     setSending(true);
     const { error } = await supabase.from("messages").insert({
@@ -157,6 +224,10 @@ const Chat = () => {
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file || !conversationId || !user) return;
+    if (chatDisabled) {
+      toast({ title: "المحادثة غير متاحة", variant: "destructive" });
+      return;
+    }
 
     setSending(true);
     const fileExt = file.name.split(".").pop();
@@ -280,6 +351,12 @@ const Chat = () => {
           <div ref={messagesEndRef} />
         </div>
 
+        {disabledReason && (
+          <div className="px-4 py-2 text-sm text-center bg-destructive/10 text-destructive border-t border-destructive/30">
+            {disabledReason}
+          </div>
+        )}
+
         {/* Input */}
         <div className="p-4 border-t flex gap-2">
           <input
@@ -293,18 +370,18 @@ const Chat = () => {
             variant="ghost"
             size="icon"
             onClick={() => fileInputRef.current?.click()}
-            disabled={sending}
+            disabled={sending || chatDisabled}
           >
             <ImageIcon className="h-5 w-5" />
           </Button>
           <Input
             value={newMessage}
             onChange={(e) => setNewMessage(e.target.value)}
-            placeholder="اكتب رسالة..."
+            placeholder={chatDisabled ? "الإرسال غير متاح" : "اكتب رسالة..."}
             onKeyPress={(e) => e.key === "Enter" && handleSendMessage()}
-            disabled={sending}
+            disabled={sending || chatDisabled}
           />
-          <Button onClick={handleSendMessage} disabled={sending || !newMessage.trim()}>
+          <Button onClick={handleSendMessage} disabled={sending || chatDisabled || !newMessage.trim()}>
             {sending ? (
               <Loader2 className="h-5 w-5 animate-spin" />
             ) : (

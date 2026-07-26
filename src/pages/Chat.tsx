@@ -351,6 +351,12 @@ const Chat = () => {
           <div ref={messagesEndRef} />
         </div>
 
+        {disabledReason && (
+          <div className="px-4 py-2 text-sm text-center bg-destructive/10 text-destructive border-t border-destructive/30">
+            {disabledReason}
+          </div>
+        )}
+
         {/* Input */}
         <div className="p-4 border-t flex gap-2">
           <input
@@ -364,18 +370,18 @@ const Chat = () => {
             variant="ghost"
             size="icon"
             onClick={() => fileInputRef.current?.click()}
-            disabled={sending}
+            disabled={sending || chatDisabled}
           >
             <ImageIcon className="h-5 w-5" />
           </Button>
           <Input
             value={newMessage}
             onChange={(e) => setNewMessage(e.target.value)}
-            placeholder="اكتب رسالة..."
+            placeholder={chatDisabled ? "الإرسال غير متاح" : "اكتب رسالة..."}
             onKeyPress={(e) => e.key === "Enter" && handleSendMessage()}
-            disabled={sending}
+            disabled={sending || chatDisabled}
           />
-          <Button onClick={handleSendMessage} disabled={sending || !newMessage.trim()}>
+          <Button onClick={handleSendMessage} disabled={sending || chatDisabled || !newMessage.trim()}>
             {sending ? (
               <Loader2 className="h-5 w-5 animate-spin" />
             ) : (

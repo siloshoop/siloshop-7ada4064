@@ -68,6 +68,7 @@ const PlatformProducts = lazy(() => import("./pages/admin/PlatformProducts"));
 const Reports = lazy(() => import("./pages/admin/Reports"));
 const AdminOrders = lazy(() => import("./pages/admin/AdminOrders"));
 const ChatModeration = lazy(() => import("./pages/admin/ChatModeration"));
+const AdminAnalytics = lazy(() => import("./pages/admin/Analytics"));
 import RequireRole from "@/components/RequireRole";
 
 const queryClient = new QueryClient(); // App query client
@@ -109,6 +110,7 @@ const App = () => (
             <Route path="/dashboard/reports" element={<RequireRole role="admin"><Reports /></RequireRole>} />
             <Route path="/dashboard/admin-orders" element={<RequireRole role="admin"><AdminOrders /></RequireRole>} />
             <Route path="/dashboard/chat-moderation" element={<RequireRole role="admin"><ChatModeration /></RequireRole>} />
+            <Route path="/dashboard/analytics" element={<RequireRole role="admin"><AdminAnalytics /></RequireRole>} />
             <Route path="/seller/application" element={<SellerApplication />} />
             <Route path="/favorites" element={<Favorites />} />
             <Route path="/wishlist" element={<Wishlist />} />

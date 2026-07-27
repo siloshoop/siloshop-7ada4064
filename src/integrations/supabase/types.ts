@@ -1996,6 +1996,7 @@ export type Database = {
             Args: { _message_id: string; _reason?: string }
             Returns: undefined
           }
+      admin_get_analytics: { Args: { _days?: number }; Returns: Json }
       admin_get_conversation_messages: {
         Args: { _conversation_id: string }
         Returns: {

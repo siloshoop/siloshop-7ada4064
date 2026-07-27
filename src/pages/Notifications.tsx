@@ -1,6 +1,10 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Bell, Search, Trash2, Filter, X, CheckCheck, Package, Tag, Info, AlertTriangle, Settings, Percent } from "lucide-react";
+import {
+  Bell, Search, Trash2, Filter, X, CheckCheck, Package, Tag, Info,
+  AlertTriangle, Settings, Percent, Store, ShieldCheck, ShieldAlert,
+  UserCheck, UserX, Truck, RotateCcw, MessageSquare, Star, Ban,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -32,15 +36,52 @@ interface Notification {
   related_id: string | null;
 }
 
+const BLUE = "bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300";
+const GREEN = "bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300";
+const RED = "bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300";
+const ORANGE = "bg-orange-100 text-orange-700 dark:bg-orange-900 dark:text-orange-300";
+const PURPLE = "bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-300";
+const GRAY = "bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300";
+const YELLOW = "bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-300";
+
 const NotificationTypeConfig: Record<string, { label: string; icon: React.ReactNode; color: string }> = {
-  order: { label: "طلب", icon: <Package className="h-4 w-4" />, color: "bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300" },
-  order_status: { label: "حالة طلب", icon: <Package className="h-4 w-4" />, color: "bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300" },
-  price_change: { label: "تغيير سعر", icon: <Tag className="h-4 w-4" />, color: "bg-orange-100 text-orange-700 dark:bg-orange-900 dark:text-orange-300" },
-  price_drop: { label: "تخفيض سعر", icon: <Percent className="h-4 w-4" />, color: "bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300" },
-  daily_deal: { label: "عرض يومي", icon: <Tag className="h-4 w-4" />, color: "bg-orange-100 text-orange-700 dark:bg-orange-900 dark:text-orange-300" },
-  new_product: { label: "منتج جديد", icon: <Package className="h-4 w-4" />, color: "bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-300" },
-  warning: { label: "تحذير", icon: <AlertTriangle className="h-4 w-4" />, color: "bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300" },
-  info: { label: "معلومات", icon: <Info className="h-4 w-4" />, color: "bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300" },
+  // Orders & shipments
+  order: { label: "طلب جديد", icon: <Package className="h-4 w-4" />, color: BLUE },
+  order_status: { label: "حالة الطلب", icon: <Truck className="h-4 w-4" />, color: GREEN },
+  order_cancelled: { label: "إلغاء طلب", icon: <Ban className="h-4 w-4" />, color: RED },
+  order_refunded: { label: "استرداد مبلغ", icon: RotateCcw && <RotateCcw className="h-4 w-4" />, color: BLUE },
+  return_status: { label: "حالة إرجاع", icon: <RotateCcw className="h-4 w-4" />, color: ORANGE },
+  // Seller lifecycle
+  seller_approved: { label: "اعتماد بائع", icon: <ShieldCheck className="h-4 w-4" />, color: GREEN },
+  seller_rejected: { label: "رفض طلب بائع", icon: <ShieldAlert className="h-4 w-4" />, color: RED },
+  seller_suspended: { label: "إيقاف بائع", icon: <ShieldAlert className="h-4 w-4" />, color: YELLOW },
+  seller_reactivated: { label: "إعادة تفعيل بائع", icon: <ShieldCheck className="h-4 w-4" />, color: GREEN },
+  // Product moderation
+  product_approve: { label: "اعتماد منتج", icon: <ShieldCheck className="h-4 w-4" />, color: GREEN },
+  product_reject: { label: "رفض منتج", icon: <ShieldAlert className="h-4 w-4" />, color: RED },
+  product_hide: { label: "إخفاء منتج", icon: <ShieldAlert className="h-4 w-4" />, color: YELLOW },
+  product_restore: { label: "استعادة منتج", icon: <ShieldCheck className="h-4 w-4" />, color: GREEN },
+  product_suspend: { label: "تعليق منتج", icon: <ShieldAlert className="h-4 w-4" />, color: YELLOW },
+  product_deleted: { label: "حذف منتج", icon: <Trash2 className="h-4 w-4" />, color: RED },
+  // Account lifecycle
+  account_activated: { label: "تفعيل حساب", icon: <UserCheck className="h-4 w-4" />, color: GREEN },
+  account_suspended: { label: "إيقاف حساب", icon: <UserX className="h-4 w-4" />, color: YELLOW },
+  account_banned: { label: "حظر حساب", icon: <Ban className="h-4 w-4" />, color: RED },
+  // Catalog / promos
+  price_change: { label: "تغيير سعر", icon: <Tag className="h-4 w-4" />, color: ORANGE },
+  price_drop: { label: "تخفيض سعر", icon: <Percent className="h-4 w-4" />, color: GREEN },
+  daily_deal: { label: "عرض يومي", icon: <Tag className="h-4 w-4" />, color: ORANGE },
+  deal: { label: "عرض", icon: <Tag className="h-4 w-4" />, color: ORANGE },
+  deal_ended: { label: "انتهاء عرض", icon: <Tag className="h-4 w-4" />, color: GRAY },
+  new_product: { label: "منتج جديد", icon: <Store className="h-4 w-4" />, color: PURPLE },
+  push_new_product: { label: "منتج جديد", icon: <Store className="h-4 w-4" />, color: PURPLE },
+  // Reviews & chat
+  rating: { label: "تقييم", icon: <Star className="h-4 w-4" />, color: YELLOW },
+  review_reply: { label: "رد على تقييم", icon: <MessageSquare className="h-4 w-4" />, color: BLUE },
+  report_update: { label: "تحديث بلاغ", icon: <Info className="h-4 w-4" />, color: BLUE },
+  // Fallbacks
+  warning: { label: "تحذير", icon: <AlertTriangle className="h-4 w-4" />, color: RED },
+  info: { label: "معلومات", icon: <Info className="h-4 w-4" />, color: GRAY },
 };
 
 const Notifications = () => {
@@ -186,16 +227,52 @@ const Notifications = () => {
   };
 
   const handleNotificationClick = (notification: Notification) => {
-    if (!notification.is_read) {
-      markAsRead(notification.id);
+    if (!notification.is_read) markAsRead(notification.id);
+
+    const { type, related_id } = notification;
+
+    // Types that don't need related_id
+    if (type === "seller_approved" || type === "seller_reactivated") {
+      navigate("/dashboard");
+      return;
     }
-    
-    if (notification.related_id) {
-      if (notification.type === "price_change" || notification.type === "price_drop" || notification.type === "daily_deal" || notification.type === "new_product") {
-        navigate(`/product/${notification.related_id}`);
-      } else if (notification.type === "order" || notification.type === "order_status") {
-        navigate(`/orders/track/${notification.related_id}`);
-      }
+    if (type === "seller_rejected" || type === "seller_suspended") {
+      navigate("/seller-application");
+      return;
+    }
+    if (type === "account_activated" || type === "account_suspended" || type === "account_banned") {
+      navigate("/profile");
+      return;
+    }
+
+    if (!related_id) return;
+
+    if (
+      type === "order" || type === "order_status" ||
+      type === "order_cancelled" || type === "order_refunded"
+    ) {
+      navigate(`/orders/track/${related_id}`);
+      return;
+    }
+    if (type === "return_status") {
+      navigate("/my-returns");
+      return;
+    }
+    if (type.startsWith("product_") && type !== "product_deleted") {
+      navigate(`/product/${related_id}`);
+      return;
+    }
+    if (
+      type === "price_change" || type === "price_drop" ||
+      type === "daily_deal" || type === "deal" || type === "deal_ended" ||
+      type === "new_product" || type === "push_new_product"
+    ) {
+      navigate(`/product/${related_id}`);
+      return;
+    }
+    if (type === "rating" || type === "review_reply") {
+      navigate(`/product/${related_id}`);
+      return;
     }
   };
 

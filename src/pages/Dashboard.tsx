@@ -355,6 +355,18 @@ const Dashboard = () => {
           <Card className="mb-6 border-primary/30">
             <CardContent className="pt-6 flex items-center justify-between gap-4">
               <div>
+                <p className="font-semibold flex items-center gap-2"><BarChart3 className="h-4 w-4" /> لوحة التحليلات والإحصائيات</p>
+                <p className="text-sm text-muted-foreground">نظرة شاملة على المستخدمين، الطلبات، الإيرادات، المنتجات، البلاغات، والبائعين.</p>
+              </div>
+              <Button onClick={() => navigate("/dashboard/analytics")}>فتح لوحة التحليلات</Button>
+            </CardContent>
+          </Card>
+        )}
+
+        {isAdmin && (
+          <Card className="mb-6 border-primary/30">
+            <CardContent className="pt-6 flex items-center justify-between gap-4">
+              <div>
                 <p className="font-semibold">إدارة الطلبات</p>
                 <p className="text-sm text-muted-foreground">عرض كل الطلبات، البحث والفلترة، التتبع، الإلغاء، والاسترداد وتصدير CSV.</p>
               </div>

@@ -16,7 +16,25 @@ jobs:
       - run: bun install --frozen-lockfile
 
       # 1. Run RLS regression tests against the live anon endpoint.
+      #    Skip gracefully if secrets are not configured on the repository so
+      #    forked PRs / fresh clones do not fail the workflow. Configure
+      #    VITE_SUPABASE_URL and VITE_SUPABASE_PUBLISHABLE_KEY under
+      #    Repository Settings -> Secrets and variables -> Actions to enable.
+      - name: Check Supabase secrets present
+        id: check_secrets
+        env:
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}
+        run: |
+          if [ -n "$VITE_SUPABASE_URL" ] && [ -n "$VITE_SUPABASE_PUBLISHABLE_KEY" ]; then
+            echo "present=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "present=false" >> "$GITHUB_OUTPUT"
+            echo "::warning::Supabase secrets not configured — skipping RLS regression tests."
+          fi
+
       - name: Run security regression tests
+        if: steps.check_secrets.outputs.present == 'true'
         env:
           VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
           VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}

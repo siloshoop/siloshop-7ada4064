@@ -340,13 +340,24 @@ export const ProductReviews = ({ productId, vendorId }: ProductReviewsProps) => 
                 <input
                   ref={fileInputRef}
                   type="file"
-                  accept="image/*"
+                  accept="image/jpeg,image/png,image/webp,image/gif"
                   className="hidden"
                   onChange={(e) => {
                     const f = e.target.files?.[0];
                     if (!f) return;
+                    const allowed = ["image/jpeg", "image/png", "image/webp", "image/gif"];
+                    if (!allowed.includes(f.type)) {
+                      toast({
+                        title: "نوع الملف غير مدعوم",
+                        description: "الصور المسموح بها فقط: JPEG, PNG, WebP, GIF",
+                        variant: "destructive",
+                      });
+                      if (fileInputRef.current) fileInputRef.current.value = "";
+                      return;
+                    }
                     if (f.size > 5 * 1024 * 1024) {
                       toast({ title: "الملف كبير", description: "حجم الصورة يجب أن يكون أقل من 5 ميجا", variant: "destructive" });
+                      if (fileInputRef.current) fileInputRef.current.value = "";
                       return;
                     }
                     setImageFile(f);

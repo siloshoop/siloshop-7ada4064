@@ -983,6 +983,24 @@ export type Database = {
           },
         ]
       }
+      order_track_rate_limits: {
+        Row: {
+          client_hash: string
+          created_at: string
+          id: string
+        }
+        Insert: {
+          client_hash: string
+          created_at?: string
+          id?: string
+        }
+        Update: {
+          client_hash?: string
+          created_at?: string
+          id?: string
+        }
+        Relationships: []
+      }
       orders: {
         Row: {
           cancellation_reason: string | null
@@ -2355,6 +2373,10 @@ export type Database = {
       suspend_seller: {
         Args: { _reason: string; _user_id: string }
         Returns: undefined
+      }
+      track_order_public: {
+        Args: { _order_id: string; _phone: string }
+        Returns: Json
       }
       update_own_profile: {
         Args: { _avatar_url?: string; _full_name?: string; _phone?: string }

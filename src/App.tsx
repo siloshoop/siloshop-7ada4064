@@ -71,6 +71,7 @@ const ChatModeration = lazy(() => import("./pages/admin/ChatModeration"));
 const AdminAnalytics = lazy(() => import("./pages/admin/Analytics"));
 const Privacy = lazy(() => import("./pages/Privacy"));
 const Terms = lazy(() => import("./pages/Terms"));
+const GuestTrack = lazy(() => import("./pages/GuestTrack"));
 import RequireRole from "@/components/RequireRole";
 
 const queryClient = new QueryClient(); // App query client
@@ -123,6 +124,7 @@ const App = () => (
             <Route path="/checkout" element={<Checkout />} />
             <Route path="/orders" element={<Orders />} />
             <Route path="/orders/track/:id" element={<TrackOrder />} />
+            <Route path="/track" element={<GuestTrack />} />
             <Route path="/orders/:id" element={<OrderDetails />} />
             <Route path="/my-returns" element={<MyReturns />} />
             <Route path="/dashboard/returns" element={<RequireRole role={["vendor","admin"]}><VendorReturns /></RequireRole>} />

@@ -485,6 +485,8 @@ const Checkout = () => {
                     <p className="text-muted-foreground">الدفع عند الاستلام (COD)</p>
                   </div>
 
+                  <ReturnsPolicyNote />
+
                   <Button
                     type="submit"
                     className="w-full"

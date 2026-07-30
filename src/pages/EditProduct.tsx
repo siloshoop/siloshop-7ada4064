@@ -32,6 +32,7 @@ const EditProduct = () => {
     original_price: "",
     stock_quantity: "",
     shipping_cost: "0",
+    ships_within_days: "",
     category_id: "",
     subcategory_id: "",
     is_active: true,
@@ -77,6 +78,7 @@ const EditProduct = () => {
               original_price: product.original_price?.toString() || "",
               stock_quantity: product.stock_quantity?.toString() || "0",
               shipping_cost: (product as any).shipping_cost?.toString() || "0",
+              ships_within_days: (product as any).ships_within_days?.toString() || "",
               category_id: product.category_id || "",
               subcategory_id: product.subcategory_id || "",
               is_active: product.is_active ?? true,
@@ -253,6 +255,7 @@ const EditProduct = () => {
           original_price: formData.original_price ? parseFloat(formData.original_price) : null,
           stock_quantity: parseInt(formData.stock_quantity),
           shipping_cost: parseFloat(formData.shipping_cost) || 0,
+          ships_within_days: formData.ships_within_days ? parseInt(formData.ships_within_days) : null,
           category_id: formData.category_id || null,
           subcategory_id: formData.subcategory_id || null,
           image_url: allImages[0],
@@ -398,6 +401,20 @@ const EditProduct = () => {
                   placeholder="0 = شحن مجاني"
                 />
                 <p className="text-xs text-muted-foreground">اتركه 0 للشحن المجاني</p>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="ships_within_days">مدة التجهيز والشحن (أيام)</Label>
+                <Input
+                  id="ships_within_days"
+                  type="number"
+                  min="0"
+                  max="60"
+                  value={formData.ships_within_days}
+                  onChange={(e) => setFormData({ ...formData, ships_within_days: e.target.value })}
+                  placeholder="مثال: 3"
+                />
+                <p className="text-xs text-muted-foreground">تُعرض للمشتري كـ «يشحن خلال X أيام».</p>
               </div>
 
               <div className="space-y-2">

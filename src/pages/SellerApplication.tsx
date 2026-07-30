@@ -266,6 +266,12 @@ const SellerApplication = () => {
                   {status === "rejected" ? "إعادة تقديم الطلب" : "إرسال الطلب للمراجعة"}
                 </Button>
               )}
+              <p className="text-xs text-muted-foreground">
+                بإرسال الطلب فإنك توافق على{" "}
+                <a href="/terms" className="text-primary hover:underline">الشروط والأحكام</a>
+                {" "}و{" "}
+                <a href="/privacy" className="text-primary hover:underline">سياسة الخصوصية</a>
+              </p>
             </form>
           </CardContent>
         </Card>

@@ -30,6 +30,7 @@ const AddProduct = () => {
     original_price: "",
     stock_quantity: "",
     shipping_cost: "0",
+    ships_within_days: "",
     category_id: "",
     subcategory_id: "",
     image_url: "",
@@ -166,7 +167,7 @@ const AddProduct = () => {
     return uploadedUrls;
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent, asDraft = false) => {
     e.preventDefault();
     if (!user) return;
 
@@ -198,18 +199,22 @@ const AddProduct = () => {
         original_price: formData.original_price ? parseFloat(formData.original_price) : null,
         stock_quantity: parseInt(formData.stock_quantity),
         shipping_cost: parseFloat(formData.shipping_cost) || 0,
+        ships_within_days: formData.ships_within_days ? parseInt(formData.ships_within_days) : null,
         category_id: formData.category_id || null,
         subcategory_id: formData.subcategory_id || null,
         image_url: mainImageUrl,
         images: imageUrls.length > 0 ? imageUrls : null,
-        is_active: true,
+        is_active: !asDraft,
+        moderation_status: asDraft ? "draft" : "pending",
       } as any);
 
       if (error) throw error;
 
       toast({
         title: "تم بنجاح",
-        description: "تم إضافة المنتج بنجاح",
+        description: asDraft
+          ? "تم حفظ المنتج كمسودة. يمكنك إرساله للمراجعة لاحقاً."
+          : "تم إرسال المنتج للمراجعة",
       });
 
       navigate("/dashboard");
@@ -320,6 +325,22 @@ const AddProduct = () => {
                   placeholder="0 = شحن مجاني"
                 />
                 <p className="text-xs text-muted-foreground">اتركه 0 للشحن المجاني</p>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="ships_within_days">مدة التجهيز والشحن (أيام)</Label>
+                <Input
+                  id="ships_within_days"
+                  type="number"
+                  min="0"
+                  max="60"
+                  value={formData.ships_within_days}
+                  onChange={(e) => setFormData({ ...formData, ships_within_days: e.target.value })}
+                  placeholder="مثال: 3"
+                />
+                <p className="text-xs text-muted-foreground">
+                  تُعرض للمشتري كـ «يشحن خلال X أيام». اتركه فارغاً إن لم تكن متأكداً.
+                </p>
               </div>
 
               {/* Category Selection - Amazon Style */}
@@ -457,9 +478,18 @@ const AddProduct = () => {
                   ) : (
                     <>
                       <Upload className="ml-2 h-5 w-5" />
-                      إضافة المنتج
+                      إرسال للمراجعة
                     </>
                   )}
+                </Button>
+                <Button
+                  type="button"
+                  variant="secondary"
+                  size="lg"
+                  disabled={loading}
+                  onClick={(e) => handleSubmit(e as any, true)}
+                >
+                  حفظ كمسودة
                 </Button>
                 <Button
                   type="button"

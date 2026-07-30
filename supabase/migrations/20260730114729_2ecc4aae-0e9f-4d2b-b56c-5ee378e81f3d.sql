@@ -1,0 +1,1 @@
+DROP FUNCTION IF EXISTS public.admin_moderate_product(uuid, text, text);

@@ -15,6 +15,7 @@ import { Loader2, ShoppingCart, Tag, MapPin, Plus, Truck } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { SYRIAN_GOVERNORATES } from "@/lib/syrianGovernorates";
+import ReturnsPolicyNote from "@/components/ReturnsPolicyNote";
 
 const checkoutSchema = z.object({
   phone: z.string()
@@ -484,6 +485,8 @@ const Checkout = () => {
                     <p className="font-semibold">طريقة الدفع</p>
                     <p className="text-muted-foreground">الدفع عند الاستلام (COD)</p>
                   </div>
+
+                  <ReturnsPolicyNote />
 
                   <Button
                     type="submit"

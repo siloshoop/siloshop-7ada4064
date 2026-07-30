@@ -983,6 +983,24 @@ export type Database = {
           },
         ]
       }
+      order_track_rate_limits: {
+        Row: {
+          client_hash: string
+          created_at: string
+          id: string
+        }
+        Insert: {
+          client_hash: string
+          created_at?: string
+          id?: string
+        }
+        Update: {
+          client_hash?: string
+          created_at?: string
+          id?: string
+        }
+        Relationships: []
+      }
       orders: {
         Row: {
           cancellation_reason: string | null
@@ -1177,12 +1195,14 @@ export type Database = {
           moderated_at: string | null
           moderated_by: string | null
           moderation_reason: string | null
+          moderation_reason_code: string | null
           moderation_status: string
           name: string
           original_price: number | null
           price: number
           product_type: string
           shipping_cost: number
+          ships_within_days: number | null
           sizes: string[]
           sku: string | null
           source: string
@@ -1208,12 +1228,14 @@ export type Database = {
           moderated_at?: string | null
           moderated_by?: string | null
           moderation_reason?: string | null
+          moderation_reason_code?: string | null
           moderation_status?: string
           name: string
           original_price?: number | null
           price: number
           product_type?: string
           shipping_cost?: number
+          ships_within_days?: number | null
           sizes?: string[]
           sku?: string | null
           source?: string
@@ -1239,12 +1261,14 @@ export type Database = {
           moderated_at?: string | null
           moderated_by?: string | null
           moderation_reason?: string | null
+          moderation_reason_code?: string | null
           moderation_status?: string
           name?: string
           original_price?: number | null
           price?: number
           product_type?: string
           shipping_cost?: number
+          ships_within_days?: number | null
           sizes?: string[]
           sku?: string | null
           source?: string
@@ -2128,7 +2152,12 @@ export type Database = {
         }[]
       }
       admin_moderate_product: {
-        Args: { _action: string; _product_id: string; _reason?: string }
+        Args: {
+          _action: string
+          _product_id: string
+          _reason?: string
+          _reason_code?: string
+        }
         Returns: undefined
       }
       admin_refund_order: {
@@ -2356,6 +2385,10 @@ export type Database = {
         Args: { _reason: string; _user_id: string }
         Returns: undefined
       }
+      track_order_public: {
+        Args: { _order_id: string; _phone: string }
+        Returns: Json
+      }
       update_own_profile: {
         Args: { _avatar_url?: string; _full_name?: string; _phone?: string }
         Returns: undefined
@@ -2376,6 +2409,10 @@ export type Database = {
           used_count: number
           vendor_id: string
         }[]
+      }
+      vendor_submit_product_for_review: {
+        Args: { _product_id: string }
+        Returns: undefined
       }
       vendor_update_order_status: {
         Args: {

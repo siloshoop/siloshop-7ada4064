@@ -2151,20 +2151,15 @@ export type Database = {
           user_id: string
         }[]
       }
-      admin_moderate_product:
-        | {
-            Args: { _action: string; _product_id: string; _reason?: string }
-            Returns: undefined
-          }
-        | {
-            Args: {
-              _action: string
-              _product_id: string
-              _reason?: string
-              _reason_code?: string
-            }
-            Returns: undefined
-          }
+      admin_moderate_product: {
+        Args: {
+          _action: string
+          _product_id: string
+          _reason?: string
+          _reason_code?: string
+        }
+        Returns: undefined
+      }
       admin_refund_order: {
         Args: { _order_id: string; _reason: string }
         Returns: undefined

@@ -413,7 +413,9 @@ const Product = () => {
               <div className="flex flex-col items-center text-center gap-1 rounded-xl border bg-muted/30 p-3">
                 <Truck className="h-4 w-4 text-primary" />
                 <span className="text-[11px] text-muted-foreground leading-tight">
-                  شحن لجميع المحافظات
+                  {(product as any).ships_within_days
+                    ? `يشحن خلال ${(product as any).ships_within_days} أيام`
+                    : "شحن لجميع المحافظات"}
                 </span>
               </div>
               <div className="flex flex-col items-center text-center gap-1 rounded-xl border bg-muted/30 p-3">

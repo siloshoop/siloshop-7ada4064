@@ -145,7 +145,7 @@ const Reports = () => {
     } else if (selected.report_type === "review") {
       ({ error } = await supabase.rpc("admin_hide_review", { _review_id: selected.target_id, _reason: note || selected.reason }));
     } else if (selected.report_type === "product") {
-      ({ error } = await supabase.rpc("admin_moderate_product", { _product_id: selected.target_id, _action: "hidden", _reason: note || selected.reason }));
+      ({ error } = await supabase.rpc("admin_moderate_product", { _product_id: selected.target_id, _action: "hide", _reason: note || selected.reason }));
     } else if (selected.report_type === "seller") {
       ({ error } = await supabase.rpc("suspend_seller", { _user_id: selected.target_id, _reason: note || selected.reason }));
     } else if (selected.report_type === "buyer") {
@@ -175,7 +175,7 @@ const Reports = () => {
     if (selected.report_type === "review") {
       ({ error } = await supabase.rpc("admin_unhide_review", { _review_id: selected.target_id }));
     } else if (selected.report_type === "product") {
-      ({ error } = await supabase.rpc("admin_moderate_product", { _product_id: selected.target_id, _action: "restored", _reason: "restored from report" }));
+      ({ error } = await supabase.rpc("admin_moderate_product", { _product_id: selected.target_id, _action: "restore", _reason: "restored from report" }));
     } else if (selected.report_type === "seller") {
       ({ error } = await supabase.rpc("reactivate_seller", { _user_id: selected.target_id }));
     } else if (selected.report_type === "buyer") {

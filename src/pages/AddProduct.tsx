@@ -30,6 +30,7 @@ const AddProduct = () => {
     original_price: "",
     stock_quantity: "",
     shipping_cost: "0",
+    ships_within_days: "",
     category_id: "",
     subcategory_id: "",
     image_url: "",

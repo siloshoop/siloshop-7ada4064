@@ -327,6 +327,22 @@ const AddProduct = () => {
                 <p className="text-xs text-muted-foreground">اتركه 0 للشحن المجاني</p>
               </div>
 
+              <div className="space-y-2">
+                <Label htmlFor="ships_within_days">مدة التجهيز والشحن (أيام)</Label>
+                <Input
+                  id="ships_within_days"
+                  type="number"
+                  min="0"
+                  max="60"
+                  value={formData.ships_within_days}
+                  onChange={(e) => setFormData({ ...formData, ships_within_days: e.target.value })}
+                  placeholder="مثال: 3"
+                />
+                <p className="text-xs text-muted-foreground">
+                  تُعرض للمشتري كـ «يشحن خلال X أيام». اتركه فارغاً إن لم تكن متأكداً.
+                </p>
+              </div>
+
               {/* Category Selection - Amazon Style */}
               <div className="space-y-4 p-4 bg-muted/30 rounded-lg border">
                 <h3 className="font-semibold text-lg flex items-center gap-2">

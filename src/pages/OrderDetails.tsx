@@ -12,6 +12,7 @@ import { format } from "date-fns";
 import { ar } from "date-fns/locale";
 import CancelOrderDialog from "@/components/CancelOrderDialog";
 import ReturnRequestDialog from "@/components/ReturnRequestDialog";
+import OrderStatusTimeline from "@/components/OrderStatusTimeline";
 
 const statusMap: Record<string, { label: string; variant: "default" | "secondary" | "destructive" | "outline" }> = {
   pending: { label: "قيد المعالجة", variant: "secondary" },
@@ -118,6 +119,10 @@ const OrderDetails = () => {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3 text-sm">
+            <OrderStatusTimeline
+              status={order.tracking_status || order.status || "pending"}
+              className="pb-3"
+            />
             <p className="flex items-center gap-2"><Calendar className="h-4 w-4 text-muted-foreground" />
               {format(new Date(order.created_at), "dd MMMM yyyy - HH:mm", { locale: ar })}
             </p>

@@ -16,6 +16,7 @@ import { useToast } from "@/hooks/use-toast";
 import { FavoriteButton } from "@/components/FavoriteButton";
 import AddToWishlistButton from "@/components/AddToWishlistButton";
 import ChatButton from "@/components/ChatButton";
+import ReturnsPolicyNote from "@/components/ReturnsPolicyNote";
 import { useRecentlyViewed } from "@/hooks/useRecentlyViewed";
 import SimilarProducts from "@/components/SimilarProducts";
 import MarketPriceBar from "@/components/MarketPriceBar";
@@ -428,6 +429,8 @@ const Product = () => {
                 </span>
               </div>
             </div>
+
+            <ReturnsPolicyNote className="mt-2" />
           </div>
         </div>
 

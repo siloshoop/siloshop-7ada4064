@@ -478,9 +478,18 @@ const AddProduct = () => {
                   ) : (
                     <>
                       <Upload className="ml-2 h-5 w-5" />
-                      إضافة المنتج
+                      إرسال للمراجعة
                     </>
                   )}
+                </Button>
+                <Button
+                  type="button"
+                  variant="secondary"
+                  size="lg"
+                  disabled={loading}
+                  onClick={(e) => handleSubmit(e as any, true)}
+                >
+                  حفظ كمسودة
                 </Button>
                 <Button
                   type="button"

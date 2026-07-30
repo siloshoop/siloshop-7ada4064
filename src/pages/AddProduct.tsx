@@ -167,7 +167,7 @@ const AddProduct = () => {
     return uploadedUrls;
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent, asDraft = false) => {
     e.preventDefault();
     if (!user) return;
 
@@ -199,18 +199,22 @@ const AddProduct = () => {
         original_price: formData.original_price ? parseFloat(formData.original_price) : null,
         stock_quantity: parseInt(formData.stock_quantity),
         shipping_cost: parseFloat(formData.shipping_cost) || 0,
+        ships_within_days: formData.ships_within_days ? parseInt(formData.ships_within_days) : null,
         category_id: formData.category_id || null,
         subcategory_id: formData.subcategory_id || null,
         image_url: mainImageUrl,
         images: imageUrls.length > 0 ? imageUrls : null,
-        is_active: true,
+        is_active: !asDraft,
+        moderation_status: asDraft ? "draft" : "pending",
       } as any);
 
       if (error) throw error;
 
       toast({
         title: "تم بنجاح",
-        description: "تم إضافة المنتج بنجاح",
+        description: asDraft
+          ? "تم حفظ المنتج كمسودة. يمكنك إرساله للمراجعة لاحقاً."
+          : "تم إرسال المنتج للمراجعة",
       });
 
       navigate("/dashboard");

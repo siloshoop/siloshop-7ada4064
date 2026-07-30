@@ -93,6 +93,16 @@ const Footer = () => {
                   الشحن والتوصيل
                 </Link>
               </li>
+              <li>
+                <Link to="/privacy" className="hover:text-foreground transition-colors story-link">
+                  سياسة الخصوصية
+                </Link>
+              </li>
+              <li>
+                <Link to="/terms" className="hover:text-foreground transition-colors story-link">
+                  الشروط والأحكام
+                </Link>
+              </li>
             </ul>
           </div>
 

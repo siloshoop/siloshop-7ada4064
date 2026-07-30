@@ -1195,12 +1195,14 @@ export type Database = {
           moderated_at: string | null
           moderated_by: string | null
           moderation_reason: string | null
+          moderation_reason_code: string | null
           moderation_status: string
           name: string
           original_price: number | null
           price: number
           product_type: string
           shipping_cost: number
+          ships_within_days: number | null
           sizes: string[]
           sku: string | null
           source: string
@@ -1226,12 +1228,14 @@ export type Database = {
           moderated_at?: string | null
           moderated_by?: string | null
           moderation_reason?: string | null
+          moderation_reason_code?: string | null
           moderation_status?: string
           name: string
           original_price?: number | null
           price: number
           product_type?: string
           shipping_cost?: number
+          ships_within_days?: number | null
           sizes?: string[]
           sku?: string | null
           source?: string
@@ -1257,12 +1261,14 @@ export type Database = {
           moderated_at?: string | null
           moderated_by?: string | null
           moderation_reason?: string | null
+          moderation_reason_code?: string | null
           moderation_status?: string
           name?: string
           original_price?: number | null
           price?: number
           product_type?: string
           shipping_cost?: number
+          ships_within_days?: number | null
           sizes?: string[]
           sku?: string | null
           source?: string
@@ -2145,10 +2151,20 @@ export type Database = {
           user_id: string
         }[]
       }
-      admin_moderate_product: {
-        Args: { _action: string; _product_id: string; _reason?: string }
-        Returns: undefined
-      }
+      admin_moderate_product:
+        | {
+            Args: { _action: string; _product_id: string; _reason?: string }
+            Returns: undefined
+          }
+        | {
+            Args: {
+              _action: string
+              _product_id: string
+              _reason?: string
+              _reason_code?: string
+            }
+            Returns: undefined
+          }
       admin_refund_order: {
         Args: { _order_id: string; _reason: string }
         Returns: undefined
@@ -2398,6 +2414,10 @@ export type Database = {
           used_count: number
           vendor_id: string
         }[]
+      }
+      vendor_submit_product_for_review: {
+        Args: { _product_id: string }
+        Returns: undefined
       }
       vendor_update_order_status: {
         Args: {

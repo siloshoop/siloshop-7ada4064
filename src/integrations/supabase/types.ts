@@ -1808,6 +1808,87 @@ export type Database = {
         }
         Relationships: []
       }
+      showroom_items: {
+        Row: {
+          badge_label: string | null
+          campaign_type: string
+          cover_image_url: string | null
+          created_at: string
+          created_by: string | null
+          display_order: number
+          end_date: string | null
+          id: string
+          is_active: boolean
+          is_pinned: boolean
+          is_verified: boolean
+          item_type: string
+          link_url: string | null
+          logo_url: string | null
+          priority: number
+          product_id: string | null
+          rating: number | null
+          settings: Json
+          sponsor_name: string | null
+          start_date: string | null
+          subtitle: string | null
+          title: string
+          updated_at: string
+          vendor_id: string | null
+        }
+        Insert: {
+          badge_label?: string | null
+          campaign_type?: string
+          cover_image_url?: string | null
+          created_at?: string
+          created_by?: string | null
+          display_order?: number
+          end_date?: string | null
+          id?: string
+          is_active?: boolean
+          is_pinned?: boolean
+          is_verified?: boolean
+          item_type: string
+          link_url?: string | null
+          logo_url?: string | null
+          priority?: number
+          product_id?: string | null
+          rating?: number | null
+          settings?: Json
+          sponsor_name?: string | null
+          start_date?: string | null
+          subtitle?: string | null
+          title: string
+          updated_at?: string
+          vendor_id?: string | null
+        }
+        Update: {
+          badge_label?: string | null
+          campaign_type?: string
+          cover_image_url?: string | null
+          created_at?: string
+          created_by?: string | null
+          display_order?: number
+          end_date?: string | null
+          id?: string
+          is_active?: boolean
+          is_pinned?: boolean
+          is_verified?: boolean
+          item_type?: string
+          link_url?: string | null
+          logo_url?: string | null
+          priority?: number
+          product_id?: string | null
+          rating?: number | null
+          settings?: Json
+          sponsor_name?: string | null
+          start_date?: string | null
+          subtitle?: string | null
+          title?: string
+          updated_at?: string
+          vendor_id?: string | null
+        }
+        Relationships: []
+      }
       subcategories: {
         Row: {
           category_id: string

@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback, Fragment } from "react";
 import { useSearchParams } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import AnnouncementBar from "@/components/AnnouncementBar";
-import HeroSection from "@/components/HeroSection";
+import PremiumShowroom from "@/components/PremiumShowroom";
 import { SearchFilters } from "@/components/SearchFilters";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2 } from "lucide-react";
@@ -168,7 +168,9 @@ const Index = () => {
       <AnnouncementBar />
       <Navbar />
       <main className="flex-1 pb-[120px] md:pb-0 page-enter">
-        <HeroSection />
+        <SectionErrorBoundary>
+          <PremiumShowroom />
+        </SectionErrorBoundary>
 
         <div className="container px-4 py-4">
           <AdPlaceholder size="leaderboard" slot="home-top-leaderboard" />

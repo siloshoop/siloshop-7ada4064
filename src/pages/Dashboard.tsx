@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Plus, Package, TrendingUp, DollarSign, ShoppingBag, Loader2, Edit, Trash2, Search, Tag, Star, Layers, Percent, Megaphone, Users, Activity, BarChart3, LayoutGrid, Heart, Settings, MessageSquare, CheckCircle2, XCircle, Undo2, Boxes } from "lucide-react";
+import { Plus, Package, TrendingUp, DollarSign, ShoppingBag, Loader2, Edit, Trash2, Search, Tag, Star, Layers, Percent, Megaphone, Users, Activity, BarChart3, LayoutGrid, Heart, Settings, MessageSquare, CheckCircle2, XCircle, Undo2, Boxes, Sparkles } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import UserStatistics from "@/components/UserStatistics";
 import { useToast } from "@/hooks/use-toast";
@@ -599,6 +599,13 @@ const Dashboard = () => {
                         >
                           <LayoutGrid className="ml-2 h-4 w-4" />
                           الإعلانات المدمجة
+                        </Button>
+                        <Button 
+                          variant="outline"
+                          onClick={() => navigate("/dashboard/showroom")}
+                        >
+                          <Sparkles className="ml-2 h-4 w-4" />
+                          المعرض المميز
                         </Button>
                         <Button 
                           variant="outline"

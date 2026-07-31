@@ -602,6 +602,13 @@ const Dashboard = () => {
                         </Button>
                         <Button 
                           variant="outline"
+                          onClick={() => navigate("/dashboard/showroom")}
+                        >
+                          <Sparkles className="ml-2 h-4 w-4" />
+                          المعرض المميز
+                        </Button>
+                        <Button 
+                          variant="outline"
                           onClick={() => navigate("/dashboard/users")}
                         >
                           <Users className="ml-2 h-4 w-4" />

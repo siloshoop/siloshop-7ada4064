@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { useAdminCheck } from "@/hooks/useAdminCheck";
 import { supabase } from "@/integrations/supabase/client";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -44,7 +43,6 @@ const statusMeta: Record<string, { label: string; className: string }> = {
 };
 
 const ShowroomManagement = () => {
-  const { loading: adminLoading } = useAdminCheck();
   const { items, setItems, loading, refresh } = useShowroomAdmin();
   const { toast } = useToast();
   const [form, setForm] = useState({ ...emptyForm });
@@ -164,7 +162,7 @@ const ShowroomManagement = () => {
     persistOrder(list);
   };
 
-  if (adminLoading || loading) {
+  if (loading) {
     return (
       <div className="min-h-screen flex flex-col">
         <Navbar />

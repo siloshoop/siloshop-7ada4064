@@ -9,7 +9,7 @@ import HeroSection from "@/components/HeroSection";
 const targetOf = (item: ShowroomItem) => {
   if (item.link_url && item.link_url.startsWith("/")) return item.link_url;
   if (item.item_type === "product" && item.product_id) return `/product/${item.product_id}`;
-  if (item.item_type === "store" && item.vendor_id) return `/search?vendor=${item.vendor_id}`;
+  if (item.item_type === "store" && item.vendor_id) return `/vendor/${item.vendor_id}/ratings`;
   return null;
 };
 

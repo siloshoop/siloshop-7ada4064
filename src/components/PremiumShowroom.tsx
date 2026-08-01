@@ -4,7 +4,6 @@ import { ChevronLeft, ChevronRight, Star, BadgeCheck, Store, Sparkles, ArrowLeft
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useShowroom, type ShowroomItem } from "@/hooks/useShowroom";
-import HeroSection from "@/components/HeroSection";
 
 const targetOf = (item: ShowroomItem) => {
   if (item.link_url && item.link_url.startsWith("/")) return item.link_url;

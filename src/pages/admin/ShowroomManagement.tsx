@@ -356,7 +356,7 @@ const ShowroomManagement = () => {
             <DialogHeader>
               <DialogTitle>معاينة المعرض قبل النشر</DialogTitle>
             </DialogHeader>
-            <PremiumShowroom />
+            <PremiumShowroom showEmptyState />
           </DialogContent>
         </Dialog>
       </main>

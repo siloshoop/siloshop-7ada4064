@@ -122,7 +122,7 @@ const ShowroomStand = ({
   );
 };
 
-const PremiumShowroom = () => {
+const PremiumShowroom = ({ showEmptyState = false }: { showEmptyState?: boolean }) => {
   const { items, loading } = useShowroom();
   const [index, setIndex] = useState(0);
   const [drag, setDrag] = useState(0);
@@ -135,14 +135,10 @@ const PremiumShowroom = () => {
     [count]
   );
 
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "ArrowRight") go(-1);
-      if (e.key === "ArrowLeft") go(1);
-    };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [go]);
+  const onStageKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "ArrowRight") { e.preventDefault(); go(-1); }
+    if (e.key === "ArrowLeft") { e.preventDefault(); go(1); }
+  };
 
   const onPointerDown = (e: React.PointerEvent) => {
     startX.current = e.clientX;
@@ -175,7 +171,20 @@ const PremiumShowroom = () => {
     );
   }
 
-  if (count === 0) return <HeroSection />;
+  if (count === 0) {
+    if (!showEmptyState) return null;
+    return (
+      <section className="container px-4 py-10">
+        <div className="mx-auto max-w-xl rounded-2xl border border-dashed border-border bg-card/60 p-10 text-center">
+          <Sparkles className="mx-auto mb-3 h-8 w-8 text-primary" />
+          <h2 className="text-lg font-bold">لا توجد عناصر منشورة في المعرض</h2>
+          <p className="mt-1 text-sm text-muted-foreground">
+            أضف متجراً أو منتجاً مميزاً ليظهر هنا وعلى الصفحة الرئيسية.
+          </p>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section
@@ -216,6 +225,10 @@ const PremiumShowroom = () => {
           onPointerMove={onPointerMove}
           onPointerUp={onPointerUp}
           onPointerCancel={onPointerUp}
+          onKeyDown={onStageKeyDown}
+          tabIndex={0}
+          role="group"
+          aria-label="عناصر المعرض — استخدم الأسهم للتنقل"
           className="relative h-[380px] md:h-[460px] touch-pan-y select-none"
           style={{ perspective: "1400px", perspectiveOrigin: "50% 50%" }}
         >

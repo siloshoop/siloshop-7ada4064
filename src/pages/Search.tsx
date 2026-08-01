@@ -35,9 +35,6 @@ import {
   Loader2, Search as SearchIcon, SlidersHorizontal, Star, X, Tag, 
   DollarSign, User, Layers, ArrowUpDown, RotateCcw, Gem 
 } from "lucide-react";
-import AdPlaceholder from "@/components/AdPlaceholder";
-import NativeAdCard from "@/components/NativeAdCard";
-import { useNativeAds } from "@/hooks/useNativeAds";
 import { matchesSearchTerm } from "@/lib/search";
 
 interface Product {
@@ -127,7 +124,6 @@ const SearchPage = () => {
   const [loading, setLoading] = useState(true);
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
   const [salesCounts, setSalesCounts] = useState<Map<string, number>>(new Map());
-  const { data: nativeAds = [] } = useNativeAds("search");
   const urlSearchQuery = searchParams.get("q")?.trim() || "";
 
   const [filters, setFilters] = useState<Filters>(() => {
@@ -764,10 +760,6 @@ const SearchPage = () => {
               </div>
             ) : (
               <>
-                {/* Ad: top of search results — high intent users */}
-                <div className="mb-4">
-                  <AdPlaceholder size="leaderboard" slot="search-top-leaderboard" />
-                </div>
                 <div className="grid grid-cols-2 gap-4 sm:gap-6 xl:grid-cols-3">
                   {products.map((product, index) => {
                     const avgRating = getAverageRating(product.reviews);
@@ -776,14 +768,6 @@ const SearchPage = () => {
                       : undefined;
                     return (
                       <Fragment key={product.id}>
-                        {/* Native ad after every 4th product */}
-                        {index > 0 && index % 4 === 0 && (() => {
-                          const adIndex = Math.floor(index / 4) - 1;
-                          const ad = nativeAds[adIndex % nativeAds.length];
-                          return ad 
-                            ? <NativeAdCard ad={ad} slot={`native-search-${adIndex}`} />
-                            : <NativeAdCard slot={`native-search-${adIndex}`} />;
-                        })()}
                         <ProductCard
                           id={product.id}
                           name={product.name}
@@ -798,10 +782,6 @@ const SearchPage = () => {
                       </Fragment>
                     );
                   })}
-                </div>
-                {/* Ad: bottom banner */}
-                <div className="mt-6">
-                  <AdPlaceholder size="banner" slot="search-bottom-banner" />
                 </div>
               </>
             )}

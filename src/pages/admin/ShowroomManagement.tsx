@@ -15,6 +15,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Loader2, Plus, Trash2, Pencil, Pin, PinOff, Eye, GripVertical, Sparkles } from "lucide-react";
 import { useShowroomAdmin, getShowroomStatus, type ShowroomItem } from "@/hooks/useShowroom";
 import PremiumShowroom from "@/components/PremiumShowroom";
+import { VendorPicker, ProductPicker } from "@/components/admin/ShowroomEntityPicker";
 
 const emptyForm = {
   item_type: "store",
@@ -51,12 +52,16 @@ const ShowroomManagement = () => {
   const [saving, setSaving] = useState(false);
   const [previewOpen, setPreviewOpen] = useState(false);
   const [dragId, setDragId] = useState<string | null>(null);
+  const [vendorLabel, setVendorLabel] = useState("");
+  const [productLabel, setProductLabel] = useState("");
 
   const set = (k: string, v: unknown) => setForm((f) => ({ ...f, [k]: v }));
 
   const openNew = () => {
     setForm({ ...emptyForm });
     setEditingId(null);
+    setVendorLabel("");
+    setProductLabel("");
     setOpen(true);
   };
 
@@ -80,12 +85,22 @@ const ShowroomManagement = () => {
       is_active: item.is_active,
     });
     setEditingId(item.id);
+    setVendorLabel(item.item_type === "store" ? item.title : "");
+    setProductLabel(item.item_type === "product" ? item.title : "");
     setOpen(true);
   };
 
   const save = async () => {
     if (!form.title.trim()) {
       toast({ title: "العنوان مطلوب", variant: "destructive" });
+      return;
+    }
+    if (form.item_type === "store" && !form.vendor_id) {
+      toast({ title: "اختر متجرًا حقيقيًا من نتائج البحث", variant: "destructive" });
+      return;
+    }
+    if (form.item_type === "product" && !form.product_id) {
+      toast({ title: "اختر منتجًا حقيقيًا من نتائج البحث", variant: "destructive" });
       return;
     }
     setSaving(true);

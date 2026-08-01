@@ -20,10 +20,6 @@ import ReturnsPolicyNote from "@/components/ReturnsPolicyNote";
 import { useRecentlyViewed } from "@/hooks/useRecentlyViewed";
 import SimilarProducts from "@/components/SimilarProducts";
 import MarketPriceBar from "@/components/MarketPriceBar";
-import AdPlaceholder from "@/components/AdPlaceholder";
-import StickyMobileAd from "@/components/StickyMobileAd";
-
-
 interface Product {
   id: string;
   name: string;
@@ -520,22 +516,12 @@ const Product = () => {
           </Tabs>
         </section>
 
-        {/* Ad: Leaderboard after product info — high-intent placement */}
-        <div className="mt-10">
-          <AdPlaceholder size="leaderboard" slot="product-top-leaderboard" />
-        </div>
-
         {/* Vendor Rating Section */}
         <div className="mt-10">
           <VendorRating 
             vendorId={product.vendor_id} 
             vendorName={product.vendor.full_name} 
           />
-        </div>
-
-        {/* Ad: Rectangle between reviews and similar products */}
-        <div className="mt-10 flex justify-center">
-          <AdPlaceholder size="rectangle" slot="product-mid-rectangle" />
         </div>
 
         {/* Similar Products Section */}
@@ -545,10 +531,6 @@ const Product = () => {
           vendorId={product.vendor_id} 
         />
 
-        {/* Ad: Banner after similar products */}
-        <div className="mt-8">
-          <AdPlaceholder size="banner" slot="product-bottom-banner" />
-        </div>
       </main>
 
       {/* Sticky mobile action bar */}
@@ -579,7 +561,6 @@ const Product = () => {
         </div>
       </div>
 
-      <StickyMobileAd />
       <Footer />
     </div>
   );

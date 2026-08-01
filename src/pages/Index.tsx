@@ -9,13 +9,9 @@ import { Loader2 } from "lucide-react";
 import ProductCard from "@/components/ProductCard";
 import Footer from "@/components/Footer";
 import MobileBottomNav from "@/components/MobileBottomNav";
-import StickyMobileAd from "@/components/StickyMobileAd";
 import PullToRefreshIndicator from "@/components/PullToRefresh";
 import { usePullToRefresh } from "@/hooks/usePullToRefresh";
 import SectionErrorBoundary from "@/components/SectionErrorBoundary";
-import AdPlaceholder from "@/components/AdPlaceholder";
-import NativeAdCard from "@/components/NativeAdCard";
-import { useNativeAds } from "@/hooks/useNativeAds";
 
 // Import critical sections directly (not lazy) to prevent chunk loading failures
 import PopularCategories from "@/components/PopularCategories";
@@ -172,10 +168,6 @@ const Index = () => {
           <PremiumShowroom />
         </SectionErrorBoundary>
 
-        <div className="container px-4 py-4">
-          <AdPlaceholder size="leaderboard" slot="home-top-leaderboard" />
-        </div>
-
         <SectionErrorBoundary>
           <PopularCategories key={`popular-${refreshKey}`} />
         </SectionErrorBoundary>
@@ -185,22 +177,9 @@ const Index = () => {
           </div>
         </SectionErrorBoundary>
 
-        <div className="container px-4 py-2">
-          <AdPlaceholder size="banner" slot="home-mid-banner" />
-        </div>
-
-        {/* Native Ads Section for Mobile */}
-        <SectionErrorBoundary>
-          <HomeNativeAds />
-        </SectionErrorBoundary>
-
         <SectionErrorBoundary>
           <PurchasedRecently key={`purchased-${refreshKey}`} />
         </SectionErrorBoundary>
-
-        <div className="container px-4 py-2 flex justify-center">
-          <AdPlaceholder size="rectangle" slot="home-mid-rectangle" />
-        </div>
 
         <SectionErrorBoundary>
           <BestSellers key={`bestsellers-${refreshKey}`} />
@@ -208,10 +187,6 @@ const Index = () => {
         <SectionErrorBoundary>
           <RecentlyViewed key={`recent-${refreshKey}`} />
         </SectionErrorBoundary>
-
-        <div className="container px-4 py-2">
-          <AdPlaceholder size="interstitial" slot="home-interstitial" />
-        </div>
 
         <SectionErrorBoundary>
           <ProductRecommendations key={`recommendations-${refreshKey}`} />
@@ -221,32 +196,8 @@ const Index = () => {
         </SectionErrorBoundary>
       </main>
       <Footer />
-      <StickyMobileAd />
       <MobileBottomNav />
     </div>
-  );
-};
-
-// Home Native Ads component
-const HomeNativeAds = () => {
-  const { data: ads } = useNativeAds("home");
-
-  if (!ads || ads.length === 0) return null;
-
-  return (
-    <section className="py-4">
-      <div className="container px-4">
-        <div className="flex items-center gap-2 mb-3">
-          <h3 className="text-sm font-semibold text-muted-foreground">إعلانات مميزة</h3>
-          <div className="flex-1 h-px bg-border" />
-        </div>
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
-          {ads.slice(0, 4).map((ad) => (
-            <NativeAdCard key={ad.id} ad={ad} slot={`native-home-${ad.id}`} />
-          ))}
-        </div>
-      </div>
-    </section>
   );
 };
 

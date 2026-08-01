@@ -4,14 +4,8 @@ import { supabase } from "@/integrations/supabase/client";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import ProductCard from "@/components/ProductCard";
-import NativeAdCard from "@/components/NativeAdCard";
-import { useNativeAds } from "@/hooks/useNativeAds";
 import { SearchFilters } from "@/components/SearchFilters";
 import { Loader2 } from "lucide-react";
-import AdPlaceholder from "@/components/AdPlaceholder";
-import StickyMobileAd from "@/components/StickyMobileAd";
-
-
 interface Product {
   id: string;
   name: string;
@@ -31,7 +25,6 @@ interface VendorRating {
 
 const Category = () => {
   const { categoryId } = useParams();
-  const { data: nativeAds } = useNativeAds("category");
   const [products, setProducts] = useState<Product[]>([]);
   const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
   const [vendorRatings, setVendorRatings] = useState<Map<string, number>>(new Map());
@@ -212,11 +205,6 @@ const Category = () => {
     <div className="min-h-screen flex flex-col">
       <Navbar />
       <main className="flex-1 container px-4 py-8">
-        {/* Ad: Top banner */}
-        <div className="mb-6">
-          <AdPlaceholder size="leaderboard" slot="category-top-banner" />
-        </div>
-
         <div className="flex items-center justify-between mb-8">
           <div>
             <h1 className="text-3xl font-bold mb-2">{categoryName || "الفئة"}</h1>
@@ -249,12 +237,6 @@ const Category = () => {
                   : undefined;
                 return (
                   <Fragment key={product.id}>
-                    {index > 0 && index % 4 === 0 && nativeAds && nativeAds[Math.floor(index / 4) - 1] && (
-                      <NativeAdCard
-                        ad={nativeAds[Math.floor(index / 4) - 1]}
-                        slot={`native-category-${index}`}
-                      />
-                    )}
                     <ProductCard
                       id={product.id}
                       name={product.name}
@@ -270,15 +252,9 @@ const Category = () => {
                 );
               })}
             </div>
-
-            {/* Ad: Bottom banner */}
-            <div className="mt-8">
-              <AdPlaceholder size="banner" slot="category-bottom-banner" />
-            </div>
           </>
         )}
       </main>
-      <StickyMobileAd />
       <Footer />
     </div>
   );

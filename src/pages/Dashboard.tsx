@@ -595,13 +595,6 @@ const Dashboard = () => {
                         </Button>
                         <Button 
                           variant="outline"
-                          onClick={() => navigate("/dashboard/native-ads")}
-                        >
-                          <LayoutGrid className="ml-2 h-4 w-4" />
-                          الإعلانات المدمجة
-                        </Button>
-                        <Button 
-                          variant="outline"
                           onClick={() => navigate("/dashboard/showroom")}
                         >
                           <Sparkles className="ml-2 h-4 w-4" />

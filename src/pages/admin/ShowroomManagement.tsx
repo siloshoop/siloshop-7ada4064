@@ -15,6 +15,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Loader2, Plus, Trash2, Pencil, Pin, PinOff, Eye, GripVertical, Sparkles } from "lucide-react";
 import { useShowroomAdmin, getShowroomStatus, type ShowroomItem } from "@/hooks/useShowroom";
 import PremiumShowroom from "@/components/PremiumShowroom";
+import { VendorPicker, ProductPicker } from "@/components/admin/ShowroomEntityPicker";
 
 const emptyForm = {
   item_type: "store",
@@ -51,12 +52,16 @@ const ShowroomManagement = () => {
   const [saving, setSaving] = useState(false);
   const [previewOpen, setPreviewOpen] = useState(false);
   const [dragId, setDragId] = useState<string | null>(null);
+  const [vendorLabel, setVendorLabel] = useState("");
+  const [productLabel, setProductLabel] = useState("");
 
   const set = (k: string, v: unknown) => setForm((f) => ({ ...f, [k]: v }));
 
   const openNew = () => {
     setForm({ ...emptyForm });
     setEditingId(null);
+    setVendorLabel("");
+    setProductLabel("");
     setOpen(true);
   };
 
@@ -80,12 +85,22 @@ const ShowroomManagement = () => {
       is_active: item.is_active,
     });
     setEditingId(item.id);
+    setVendorLabel(item.item_type === "store" ? item.title : "");
+    setProductLabel(item.item_type === "product" ? item.title : "");
     setOpen(true);
   };
 
   const save = async () => {
     if (!form.title.trim()) {
       toast({ title: "العنوان مطلوب", variant: "destructive" });
+      return;
+    }
+    if (form.item_type === "store" && !form.vendor_id) {
+      toast({ title: "اختر متجرًا حقيقيًا من نتائج البحث", variant: "destructive" });
+      return;
+    }
+    if (form.item_type === "product" && !form.product_id) {
+      toast({ title: "اختر منتجًا حقيقيًا من نتائج البحث", variant: "destructive" });
       return;
     }
     setSaving(true);
@@ -230,6 +245,11 @@ const ShowroomManagement = () => {
                         {item.is_pinned && <Pin className="h-3.5 w-3.5 text-primary" />}
                       </div>
                       <p className="line-clamp-1 text-xs text-muted-foreground">{item.subtitle}</p>
+                      <p className="mt-0.5 text-[11px] text-muted-foreground">
+                        ترتيب #{item.display_order + 1}
+                        {item.start_date && ` · من ${new Date(item.start_date).toLocaleDateString("ar-SY")}`}
+                        {item.end_date && ` · إلى ${new Date(item.end_date).toLocaleDateString("ar-SY")}`}
+                      </p>
                     </div>
                     <Badge variant="secondary">{item.item_type === "store" ? "متجر" : "منتج"}</Badge>
                     <Badge className={statusMeta[status].className}>{statusMeta[status].label}</Badge>
@@ -308,16 +328,73 @@ const ShowroomManagement = () => {
                   <Input value={form.badge_label} onChange={(e) => set("badge_label", e.target.value)} placeholder="مثال: الأكثر مبيعًا" />
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-3">
+              {form.item_type === "store" ? (
                 <div className="space-y-2">
-                  <Label>معرّف البائع</Label>
-                  <Input dir="ltr" value={form.vendor_id} onChange={(e) => set("vendor_id", e.target.value)} />
+                  <Label>اختيار المتجر (من قاعدة البيانات)</Label>
+                  <VendorPicker
+                    selectedId={form.vendor_id}
+                    selectedLabel={vendorLabel}
+                    onSelect={(v) => {
+                      setVendorLabel(v.name);
+                      setForm((f) => ({
+                        ...f,
+                        vendor_id: v.vendor_id,
+                        product_id: "",
+                        title: f.title.trim() && f.title !== vendorLabel ? f.title : v.name,
+                        logo_url: v.logo_url || f.logo_url,
+                        cover_image_url: f.cover_image_url || v.logo_url || "",
+                        rating: v.rating != null ? String(v.rating) : f.rating,
+                      }));
+                    }}
+                    onClear={() => {
+                      setVendorLabel("");
+                      set("vendor_id", "");
+                    }}
+                  />
                 </div>
-                <div className="space-y-2">
-                  <Label>معرّف المنتج</Label>
-                  <Input dir="ltr" value={form.product_id} onChange={(e) => set("product_id", e.target.value)} />
+              ) : (
+                <div className="space-y-3">
+                  <div className="space-y-2">
+                    <Label>تصفية حسب المتجر (اختياري)</Label>
+                    <VendorPicker
+                      selectedId={form.vendor_id}
+                      selectedLabel={vendorLabel}
+                      onSelect={(v) => {
+                        setVendorLabel(v.name);
+                        set("vendor_id", v.vendor_id);
+                      }}
+                      onClear={() => {
+                        setVendorLabel("");
+                        set("vendor_id", "");
+                      }}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>اختيار المنتج (من قاعدة البيانات)</Label>
+                    <ProductPicker
+                      selectedId={form.product_id}
+                      selectedLabel={productLabel}
+                      vendorFilter={form.vendor_id || null}
+                      onSelect={(p) => {
+                        setProductLabel(p.name);
+                        setForm((f) => ({
+                          ...f,
+                          product_id: p.product_id,
+                          vendor_id: p.vendor_id,
+                          title: f.title.trim() && f.title !== productLabel ? f.title : p.name,
+                          subtitle: f.subtitle || p.vendor_name,
+                          cover_image_url: f.cover_image_url || p.image_url || "",
+                          rating: p.rating != null ? String(p.rating) : f.rating,
+                        }));
+                      }}
+                      onClear={() => {
+                        setProductLabel("");
+                        set("product_id", "");
+                      }}
+                    />
+                  </div>
                 </div>
-              </div>
+              )}
               <div className="space-y-2">
                 <Label>مسار داخلي مخصص (اختياري)</Label>
                 <Input dir="ltr" value={form.link_url} onChange={(e) => set("link_url", e.target.value)} placeholder="/category/..." />

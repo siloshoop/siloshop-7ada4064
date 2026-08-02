@@ -24,6 +24,12 @@ export interface ShowroomItem {
   priority: number;
 }
 
+export interface ShowroomItemLive extends ShowroomItem {
+  /** Live product price loaded from `products` for featured-product stands. */
+  price?: number | null;
+  discount_price?: number | null;
+}
+
 export const sortShowroom = (items: ShowroomItem[]) =>
   [...items].sort(
     (a, b) =>
@@ -34,7 +40,7 @@ export const sortShowroom = (items: ShowroomItem[]) =>
 
 /** Live (published) showroom items for the homepage. */
 export const useShowroom = () => {
-  const [items, setItems] = useState<ShowroomItem[]>([]);
+  const [items, setItems] = useState<ShowroomItemLive[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -53,7 +59,28 @@ export const useShowroom = () => {
           (!i.start_date || new Date(i.start_date).getTime() <= now) &&
           (!i.end_date || new Date(i.end_date).getTime() >= now)
       );
-      setItems(sortShowroom(live as ShowroomItem[]));
+      const sorted = sortShowroom(live as ShowroomItem[]) as ShowroomItemLive[];
+      const productIds = sorted
+        .filter((i) => i.item_type === "product" && i.product_id)
+        .map((i) => i.product_id as string);
+
+      if (productIds.length > 0) {
+        const { data: prices } = await supabase
+          .from("products")
+          .select("id, price, discount_price")
+          .in("id", productIds);
+        if (!active) return;
+        const byId = new Map((prices || []).map((p) => [p.id, p]));
+        sorted.forEach((item) => {
+          const p = item.product_id ? byId.get(item.product_id) : undefined;
+          if (p) {
+            item.price = p.price;
+            item.discount_price = p.discount_price;
+          }
+        });
+      }
+
+      setItems(sorted);
       setLoading(false);
     })();
     return () => {

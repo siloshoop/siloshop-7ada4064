@@ -3,7 +3,9 @@ import { useNavigate } from "react-router-dom";
 import { ChevronLeft, ChevronRight, Star, BadgeCheck, Store, Sparkles, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { useShowroom, type ShowroomItem } from "@/hooks/useShowroom";
+import { useShowroom, type ShowroomItem, type ShowroomItemLive } from "@/hooks/useShowroom";
+
+const formatPrice = (n: number) => `${Number(n).toLocaleString("ar-SY")} ل.س`;
 
 const targetOf = (item: ShowroomItem) => {
   if (item.link_url && item.link_url.startsWith("/")) return item.link_url;
@@ -18,7 +20,7 @@ const ShowroomStand = ({
   isCenter,
   onSelect,
 }: {
-  item: ShowroomItem;
+  item: ShowroomItemLive;
   offset: number;
   isCenter: boolean;
   onSelect: () => void;
@@ -96,6 +98,19 @@ const ShowroomStand = ({
         <h3 className="line-clamp-1 text-lg md:text-xl font-bold">{item.title}</h3>
         {item.subtitle && (
           <p className="line-clamp-2 text-sm text-muted-foreground">{item.subtitle}</p>
+        )}
+
+        {item.item_type === "product" && item.price != null && (
+          <div className="flex items-baseline gap-2">
+            <span className="text-lg font-extrabold text-primary">
+              {formatPrice(item.discount_price ?? item.price)}
+            </span>
+            {item.discount_price != null && item.discount_price < item.price && (
+              <span className="text-sm text-muted-foreground line-through">
+                {formatPrice(item.price)}
+              </span>
+            )}
+          </div>
         )}
 
         <div className="flex gap-2 pt-1">

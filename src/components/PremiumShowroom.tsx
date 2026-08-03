@@ -4,6 +4,7 @@ import { ChevronLeft, ChevronRight, Star, BadgeCheck, Store, Sparkles, ArrowLeft
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useShowroom, type ShowroomItem, type ShowroomItemLive } from "@/hooks/useShowroom";
+import { showroomDemoItems } from "@/data/showroomDemo";
 
 const formatPrice = (n: number) => `${Number(n).toLocaleString("ar-SY")} ل.س`;
 
@@ -19,14 +20,16 @@ const ShowroomStand = ({
   offset,
   isCenter,
   onSelect,
+  isDemo = false,
 }: {
   item: ShowroomItemLive;
   offset: number;
   isCenter: boolean;
   onSelect: () => void;
+  isDemo?: boolean;
 }) => {
   const navigate = useNavigate();
-  const target = targetOf(item);
+  const target = isDemo ? null : targetOf(item);
   const abs = Math.abs(offset);
   const style: React.CSSProperties = {
     transform: `translate(-50%, -50%) translateX(${offset * 58}%) translateZ(${isCenter ? 0 : -120 - abs * 40}px) rotateY(${offset * -14}deg) scale(${isCenter ? 1 : 0.84 - (abs - 1) * 0.06})`,
@@ -140,13 +143,17 @@ const ShowroomStand = ({
 const PremiumShowroom = ({
   showEmptyState = false,
   demoItems,
+  demoFallback = false,
 }: {
   showEmptyState?: boolean;
   /** Visual-only preview data (Super Admin preview). Never used on the homepage. */
   demoItems?: ShowroomItemLive[];
+  /** When there are zero real active items, render frontend-only demo stands. */
+  demoFallback?: boolean;
 }) => {
   const { items: liveItems, loading: liveLoading } = useShowroom();
-  const items = demoItems ?? liveItems;
+  const usingDemo = !!demoItems || (demoFallback && !liveLoading && liveItems.length === 0);
+  const items = demoItems ?? (usingDemo ? showroomDemoItems : liveItems);
   const loading = demoItems ? false : liveLoading;
   const [index, setIndex] = useState(0);
   const [drag, setDrag] = useState(0);
@@ -232,6 +239,11 @@ const PremiumShowroom = ({
               <span className="bg-gradient-to-l from-primary to-accent bg-clip-text text-transparent"> فاخرة </span>
               مختارة بعناية
             </h1>
+            {usingDemo && (
+              <p className="mt-2 text-xs font-medium text-muted-foreground">
+                عرض تجريبي للتصميم فقط — لا توجد عناصر منشورة حالياً
+              </p>
+            )}
           </div>
           <div className="hidden gap-2 md:flex">
             <Button variant="outline" size="icon" aria-label="السابق" onClick={() => go(-1)} disabled={index === 0}>
@@ -263,6 +275,7 @@ const PremiumShowroom = ({
               offset={i - index + dragOffset}
               isCenter={i === index}
               onSelect={() => setIndex(i)}
+              isDemo={usingDemo}
             />
           ))}
         </div>

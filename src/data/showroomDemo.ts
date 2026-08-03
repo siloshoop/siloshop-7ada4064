@@ -3,13 +3,15 @@ import luxuryFashion from "@/assets/showroom-demo/luxury-fashion-product.jpg";
 import clothingStore from "@/assets/showroom-demo/modern-clothing-store.jpg";
 import premiumProduct from "@/assets/showroom-demo/premium-product.jpg";
 import featuredStore from "@/assets/showroom-demo/featured-store.jpg";
+import featuredShoes from "@/assets/showroom-demo/featured-shoes.jpg";
 import logoGold from "@/assets/showroom-demo/logo-gold.png";
 import logoViolet from "@/assets/showroom-demo/logo-violet.png";
 
 /**
  * Visual-only preview data for the Premium Showroom.
- * NEVER inserted into the database and never rendered on the homepage —
- * used exclusively inside the Super Admin preview dialog.
+ * NEVER inserted into the database. Rendered only as a frontend-only fallback
+ * when there are zero real active showroom items, and inside the Super Admin
+ * preview dialog. Demo stands are not clickable and not purchasable.
  */
 const base = {
   display_order: 0,
@@ -81,5 +83,20 @@ export const showroomDemoItems: ShowroomItemLive[] = [
     is_verified: true,
     badge_label: "الأكثر زيارة",
     display_order: 4,
+  },
+  {
+    ...base,
+    id: "demo-product-3",
+    item_type: "product",
+    title: "حذاء جلد طبيعي فاخر",
+    subtitle: "حذاء رياضي أنيق من الجلد الطبيعي مع نعل مريح.",
+    cover_image_url: featuredShoes,
+    logo_url: logoGold,
+    rating: 4.8,
+    is_verified: true,
+    badge_label: "وصل حديثاً",
+    display_order: 5,
+    price: 480000,
+    discount_price: 420000,
   },
 ];

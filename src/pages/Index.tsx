@@ -165,7 +165,7 @@ const Index = () => {
       <Navbar />
       <main className="flex-1 pb-[120px] md:pb-0 page-enter">
         <SectionErrorBoundary>
-          <PremiumShowroom />
+          <PremiumShowroom demoFallback />
         </SectionErrorBoundary>
 
         <SectionErrorBoundary>

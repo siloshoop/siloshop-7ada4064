@@ -137,8 +137,17 @@ const ShowroomStand = ({
   );
 };
 
-const PremiumShowroom = ({ showEmptyState = false }: { showEmptyState?: boolean }) => {
-  const { items, loading } = useShowroom();
+const PremiumShowroom = ({
+  showEmptyState = false,
+  demoItems,
+}: {
+  showEmptyState?: boolean;
+  /** Visual-only preview data (Super Admin preview). Never used on the homepage. */
+  demoItems?: ShowroomItemLive[];
+}) => {
+  const { items: liveItems, loading: liveLoading } = useShowroom();
+  const items = demoItems ?? liveItems;
+  const loading = demoItems ? false : liveLoading;
   const [index, setIndex] = useState(0);
   const [drag, setDrag] = useState(0);
   const startX = useRef<number | null>(null);

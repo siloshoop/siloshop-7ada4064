@@ -16,6 +16,7 @@ import { Loader2, Plus, Trash2, Pencil, Pin, PinOff, Eye, GripVertical, Sparkles
 import { useShowroomAdmin, getShowroomStatus, type ShowroomItem } from "@/hooks/useShowroom";
 import PremiumShowroom from "@/components/PremiumShowroom";
 import { VendorPicker, ProductPicker } from "@/components/admin/ShowroomEntityPicker";
+import { showroomDemoItems } from "@/data/showroomDemo";
 
 const emptyForm = {
   item_type: "store",
@@ -51,6 +52,7 @@ const ShowroomManagement = () => {
   const [open, setOpen] = useState(false);
   const [saving, setSaving] = useState(false);
   const [previewOpen, setPreviewOpen] = useState(false);
+  const [previewDemo, setPreviewDemo] = useState(false);
   const [dragId, setDragId] = useState<string | null>(null);
   const [vendorLabel, setVendorLabel] = useState("");
   const [productLabel, setProductLabel] = useState("");
@@ -204,8 +206,25 @@ const ShowroomManagement = () => {
             </p>
           </div>
           <div className="flex gap-2">
-            <Button variant="outline" className="gap-2" onClick={() => setPreviewOpen(true)}>
+            <Button
+              variant="outline"
+              className="gap-2"
+              onClick={() => {
+                setPreviewDemo(false);
+                setPreviewOpen(true);
+              }}
+            >
               <Eye className="h-4 w-4" /> معاينة
+            </Button>
+            <Button
+              variant="secondary"
+              className="gap-2"
+              onClick={() => {
+                setPreviewDemo(true);
+                setPreviewOpen(true);
+              }}
+            >
+              <Sparkles className="h-4 w-4" /> معاينة تجريبية
             </Button>
             <Button className="gap-2" onClick={openNew}>
               <Plus className="h-4 w-4" /> إضافة عنصر
@@ -431,9 +450,32 @@ const ShowroomManagement = () => {
         <Dialog open={previewOpen} onOpenChange={setPreviewOpen}>
           <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-4xl">
             <DialogHeader>
-              <DialogTitle>معاينة المعرض قبل النشر</DialogTitle>
+              <DialogTitle>
+                {previewDemo ? "معاينة تجريبية للمعرض (محتوى للعرض فقط)" : "معاينة المعرض قبل النشر"}
+              </DialogTitle>
             </DialogHeader>
-            <PremiumShowroom showEmptyState />
+            <div className="mb-3 flex flex-wrap items-center gap-2">
+              <Button
+                size="sm"
+                variant={previewDemo ? "outline" : "default"}
+                onClick={() => setPreviewDemo(false)}
+              >
+                العناصر الحقيقية
+              </Button>
+              <Button
+                size="sm"
+                variant={previewDemo ? "default" : "outline"}
+                onClick={() => setPreviewDemo(true)}
+              >
+                محتوى تجريبي
+              </Button>
+            </div>
+            {previewDemo && (
+              <p className="mb-3 rounded-lg border border-dashed border-border bg-muted/40 p-3 text-xs text-muted-foreground">
+                محتوى تجريبي للمعاينة البصرية فقط — غير محفوظ في قاعدة البيانات ولا يظهر للزوار في الصفحة الرئيسية.
+              </p>
+            )}
+            <PremiumShowroom showEmptyState demoItems={previewDemo ? showroomDemoItems : undefined} />
           </DialogContent>
         </Dialog>
       </main>

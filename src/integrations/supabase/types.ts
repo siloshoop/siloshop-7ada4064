@@ -1808,6 +1808,45 @@ export type Database = {
         }
         Relationships: []
       }
+      showroom_audit_log: {
+        Row: {
+          action: string
+          changed_fields: string[]
+          created_at: string
+          id: string
+          item_title: string | null
+          new_values: Json | null
+          old_values: Json | null
+          performed_by: string | null
+          performed_by_role: string | null
+          showroom_item_id: string | null
+        }
+        Insert: {
+          action: string
+          changed_fields?: string[]
+          created_at?: string
+          id?: string
+          item_title?: string | null
+          new_values?: Json | null
+          old_values?: Json | null
+          performed_by?: string | null
+          performed_by_role?: string | null
+          showroom_item_id?: string | null
+        }
+        Update: {
+          action?: string
+          changed_fields?: string[]
+          created_at?: string
+          id?: string
+          item_title?: string | null
+          new_values?: Json | null
+          old_values?: Json | null
+          performed_by?: string | null
+          performed_by_role?: string | null
+          showroom_item_id?: string | null
+        }
+        Relationships: []
+      }
       showroom_items: {
         Row: {
           badge_label: string | null

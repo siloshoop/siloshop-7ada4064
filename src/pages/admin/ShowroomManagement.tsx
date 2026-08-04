@@ -12,7 +12,8 @@ import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Plus, Trash2, Pencil, Pin, PinOff, Eye, GripVertical, Sparkles } from "lucide-react";
+import { Loader2, Plus, Trash2, Pencil, Pin, PinOff, Eye, GripVertical, Sparkles, ScrollText } from "lucide-react";
+import { Link } from "react-router-dom";
 import { useShowroomAdmin, getShowroomStatus, type ShowroomItem } from "@/hooks/useShowroom";
 import PremiumShowroom from "@/components/PremiumShowroom";
 import { VendorPicker, ProductPicker } from "@/components/admin/ShowroomEntityPicker";
@@ -206,6 +207,11 @@ const ShowroomManagement = () => {
             </p>
           </div>
           <div className="flex gap-2">
+            <Button asChild variant="outline" className="gap-2">
+              <Link to="/dashboard/showroom/audit">
+                <ScrollText className="h-4 w-4" /> سجل التدقيق
+              </Link>
+            </Button>
             <Button
               variant="outline"
               className="gap-2"

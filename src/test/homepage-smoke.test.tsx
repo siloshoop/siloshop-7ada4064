@@ -75,10 +75,11 @@ describe("Homepage Smoke Test", () => {
     expect(container.querySelector("main")).toBeInTheDocument();
   });
 
-  it("renders multiple sections (no blank page)", () => {
+  it("renders multiple sections (no blank page)", async () => {
     const { container } = renderHomepage();
-    const sections = container.querySelectorAll("section");
-    expect(sections.length).toBeGreaterThanOrEqual(2);
+    await waitFor(() => {
+      expect(container.querySelectorAll("section").length).toBeGreaterThanOrEqual(2);
+    });
   });
 
   it("renders the footer", () => {

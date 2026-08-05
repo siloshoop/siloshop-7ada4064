@@ -105,8 +105,11 @@ describe("Homepage Smoke Test", () => {
     }, { timeout: 2000 });
   });
 
-  it("hero section content is present", () => {
+  it("renders only the premium showroom and no legacy hero or ads", async () => {
     const { container } = renderHomepage();
-    expect(container.textContent).toContain("اكتشف");
+    await waitFor(() => expect(container.textContent).toContain("المعرض المميز"));
+    expect(container.textContent).not.toContain("تسوق من تشكيلة واسعة");
+    expect(container.textContent).not.toContain("إعلان عريض");
+    expect(container.textContent).not.toContain("إعلان ثابت");
   });
 });

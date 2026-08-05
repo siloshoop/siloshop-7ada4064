@@ -121,23 +121,16 @@ const PopularCategories = () => {
 
   const fetchPopularCategories = async () => {
     try {
-      const [categoriesRes, subcategoriesRes] = await Promise.all([
+      const [categoriesRes, subcategoriesRes, productsRes] = await Promise.all([
         supabase.from("categories").select("id, name_ar, icon"),
         supabase.from("subcategories").select("*").eq("is_active", true).order("sort_order"),
+        supabase.from("products").select("category_id").eq("is_active", true),
       ]);
 
       if (categoriesRes.error) throw categoriesRes.error;
 
       if (categoriesRes.data && categoriesRes.data.length > 0) {
-        // Fetch counts for all categories in one go using a better query if possible, 
-        // or keep current logic but optimized if needed. 
-        // Actually, we can just use the returned data if we adjust the select.
-        const { data: countsData } = await supabase
-          .from("products")
-          .select("category_id")
-          .eq("is_active", true);
-
-        const counts = (countsData || []).reduce((acc: Record<string, number>, p) => {
+        const counts = (productsRes.data || []).reduce((acc: Record<string, number>, p) => {
           if (p.category_id) acc[p.category_id] = (acc[p.category_id] || 0) + 1;
           return acc;
         }, {});
@@ -149,7 +142,6 @@ const PopularCategories = () => {
 
         withCounts.sort((a, b) => (b.product_count || 0) - (a.product_count || 0));
         setCategories(withCounts);
-      }
       } else {
         setCategories(demoCategories);
       }

@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Bell, BellOff, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { getPushWorkerRegistration } from "@/lib/pushWorker";
 
 interface PushNotificationManagerProps {
   variant?: "button" | "icon";
@@ -37,7 +38,8 @@ const PushNotificationManager = ({
         return;
       }
 
-      const registration = await navigator.serviceWorker.ready;
+      const registration = await getPushWorkerRegistration();
+      if (!registration) return;
       const subscription = await registration.pushManager.getSubscription();
       
       if (subscription) {
@@ -108,8 +110,8 @@ const PushNotificationManager = ({
         throw new Error("Failed to get VAPID key");
       }
 
-      // Register service worker if not already
-      const registration = await navigator.serviceWorker.ready;
+      const registration = await getPushWorkerRegistration();
+      if (!registration) throw new Error("Push notifications are not supported");
 
       // Subscribe to push
       const subscription = await registration.pushManager.subscribe({
@@ -158,7 +160,8 @@ const PushNotificationManager = ({
     setLoading(true);
 
     try {
-      const registration = await navigator.serviceWorker.ready;
+      const registration = await getPushWorkerRegistration();
+      if (!registration) return;
       const subscription = await registration.pushManager.getSubscription();
 
       if (subscription) {

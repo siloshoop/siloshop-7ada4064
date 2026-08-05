@@ -48,7 +48,7 @@ export const useShowroom = () => {
     (async () => {
       const { data } = await supabase
         .from("showroom_items")
-        .select("*")
+        .select("id,item_type,title,subtitle,cover_image_url,logo_url,rating,is_verified,badge_label,vendor_id,product_id,link_url,display_order,is_pinned,is_active,start_date,end_date,campaign_type,sponsor_name,priority")
         .eq("is_active", true)
         .order("is_pinned", { ascending: false })
         .order("display_order", { ascending: true });

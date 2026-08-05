@@ -99,7 +99,7 @@ const demoCategories: PopularCategory[] = [
 
 const PopularCategories = () => {
   // small subcomponent declared via const below
-  const [categories, setCategories] = useState<PopularCategory[]>(demoCategories);
+  const [categories, setCategories] = useState<PopularCategory[]>([]);
   const [subcategories, setSubcategories] = useState<Subcategory[]>([]);
   const [loading, setLoading] = useState(true);
   const [expandedCategoryId, setExpandedCategoryId] = useState<string | null>(null);
@@ -129,18 +129,27 @@ const PopularCategories = () => {
       if (categoriesRes.error) throw categoriesRes.error;
 
       if (categoriesRes.data && categoriesRes.data.length > 0) {
-        const withCounts = await Promise.all(
-          categoriesRes.data.map(async (cat) => {
-            const { count } = await supabase
-              .from("products")
-              .select("id", { count: "exact", head: true })
-              .eq("category_id", cat.id)
-              .eq("is_active", true);
-            return { ...cat, product_count: count || 0 };
-          })
-        );
+        // Fetch counts for all categories in one go using a better query if possible, 
+        // or keep current logic but optimized if needed. 
+        // Actually, we can just use the returned data if we adjust the select.
+        const { data: countsData } = await supabase
+          .from("products")
+          .select("category_id")
+          .eq("is_active", true);
+
+        const counts = (countsData || []).reduce((acc: Record<string, number>, p) => {
+          if (p.category_id) acc[p.category_id] = (acc[p.category_id] || 0) + 1;
+          return acc;
+        }, {});
+
+        const withCounts = categoriesRes.data.map(cat => ({
+          ...cat,
+          product_count: counts[cat.id] || 0
+        }));
+
         withCounts.sort((a, b) => (b.product_count || 0) - (a.product_count || 0));
         setCategories(withCounts);
+      }
       } else {
         setCategories(demoCategories);
       }

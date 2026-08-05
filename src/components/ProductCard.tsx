@@ -8,7 +8,7 @@ import { useCompareProducts } from "@/hooks/useCompareProducts";
 import { useFlyToCart } from "@/components/FlyToCart";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
-import { useState } from "react";
+import React, { useState, memo } from "react";
 
 interface ProductCardProps {
   id?: string;
@@ -23,7 +23,7 @@ interface ProductCardProps {
   stockQuantity?: number | null;
 }
 
-const ProductCard = ({
+const ProductCard = memo(({
   id,
   name,
   price,
@@ -83,7 +83,6 @@ const ProductCard = ({
     e.stopPropagation();
     e.preventDefault();
 
-    // Capture button position before any async work (currentTarget becomes null after await)
     const buttonRect = e.currentTarget.getBoundingClientRect();
 
     if (isOutOfStock) {
@@ -100,53 +99,38 @@ const ProductCard = ({
       return;
     }
 
-    if (!id) {
-      toast({
-        title: "خطأ",
-        description: "لا يمكن إضافة هذا المنتج حالياً",
-        variant: "destructive",
-      });
-      return;
-    }
-
     try {
-      const { data: existingItem, error: existingError } = await supabase
+      const { data: existingItem } = await supabase
         .from("cart_items")
         .select("id, quantity")
         .eq("user_id", user.id)
-        .eq("product_id", id)
+        .eq("product_id", productId)
         .maybeSingle();
 
-      if (existingError) throw existingError;
-
       if (existingItem) {
-        const { error: updateError } = await supabase
+        await supabase
           .from("cart_items")
           .update({ quantity: existingItem.quantity + 1 })
           .eq("id", existingItem.id);
-
-        if (updateError) throw updateError;
       } else {
-        const { error: insertError } = await supabase.from("cart_items").insert({
+        await supabase.from("cart_items").insert({
           user_id: user.id,
-          product_id: id,
+          product_id: productId,
           quantity: 1,
         });
-
-        if (insertError) throw insertError;
       }
 
       triggerFly(buttonRect.left + buttonRect.width / 2, buttonRect.top, image);
-      window.dispatchEvent(new Event("cart-updated"));
 
       toast({
         title: "تمت الإضافة",
         description: "تم إضافة المنتج إلى السلة",
       });
     } catch (error) {
+      console.error("Cart error:", error);
       toast({
         title: "خطأ",
-        description: error.message || "فشل إضافة المنتج إلى السلة",
+        description: "فشل في إضافة المنتج للسلة",
         variant: "destructive",
       });
     }
@@ -161,9 +145,7 @@ const ProductCard = ({
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      {/* Image Container */}
       <div className="relative aspect-square overflow-hidden bg-muted/30">
-        {/* Discount Badge */}
         {discount && (
           <div className="absolute top-2 left-2 z-10">
             <Badge className="bg-sale text-sale-foreground font-bold text-[10px] px-1.5 py-0.5 rounded-md shadow-lg backdrop-blur-sm border-0">
@@ -172,7 +154,6 @@ const ProductCard = ({
           </div>
         )}
 
-        {/* Stock Badges */}
         {isOutOfStock && (
           <div className="absolute inset-0 z-20 flex items-center justify-center bg-background/60 backdrop-blur-[2px]">
             <Badge className="bg-destructive text-destructive-foreground font-bold text-sm px-3 py-1 rounded-md shadow-lg border-0 animate-pop-in">
@@ -188,7 +169,6 @@ const ProductCard = ({
           </div>
         )}
 
-        {/* Action Buttons */}
         <div className="absolute top-2 right-2 z-10 flex flex-col gap-1">
           {id ? (
             <FavoriteButton productId={id} variant="ghost" size="icon" />
@@ -214,21 +194,19 @@ const ProductCard = ({
           )}
         </div>
 
-        {/* Image */}
         <img
           src={image}
           alt={name}
           loading="lazy"
+          decoding="async"
           onLoad={() => setImageLoaded(true)}
           className={`object-cover w-full h-full transition-all duration-700 ease-out ${
             imageLoaded ? "opacity-100" : "opacity-0"
           } ${isHovered ? "scale-110" : "scale-100"}`}
         />
 
-        {/* Hover Overlay */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-black/10 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-500" />
 
-        {/* Quick View Button */}
         <div className="absolute bottom-0 left-0 right-0 p-2 translate-y-full group-hover:translate-y-0 transition-transform duration-400 ease-out">
           <button
             className="w-full flex items-center justify-center gap-1.5 bg-background/90 backdrop-blur-md text-foreground py-2 rounded-lg text-xs font-semibold shadow-lg hover:bg-primary hover:text-primary-foreground transition-colors duration-200"
@@ -243,55 +221,46 @@ const ProductCard = ({
         </div>
       </div>
 
-      {/* Content */}
       <div className="p-3 space-y-1.5">
-        {/* Product Name */}
         <h3 className="font-semibold text-xs leading-snug line-clamp-2 min-h-[2rem] text-foreground group-hover:text-primary transition-colors duration-300">
           {name}
         </h3>
-
-        {/* Rating */}
-        <div className="flex items-center gap-1.5">
-          <div className="flex gap-0.5">
+        
+        <div className="flex items-center gap-1">
+          <div className="flex text-amber-400">
             {[...Array(5)].map((_, i) => (
               <Star
                 key={i}
-                className={`h-3 w-3 ${
-                  i < filledStars
-                    ? "fill-amber-400 text-amber-400"
-                    : "fill-muted text-muted"
-                }`}
+                className={`h-2.5 w-2.5 ${i < filledStars ? "fill-current" : "text-muted"}`}
               />
             ))}
           </div>
-          <span className="text-[11px] text-muted-foreground">({reviews})</span>
+          <span className="text-[10px] text-muted-foreground">({reviews})</span>
         </div>
 
-        {/* Price */}
-        <div className="flex items-end gap-1.5">
-          <div className="flex items-baseline gap-0.5">
-            <span className="font-bold text-base text-primary leading-none">
-              {price.toLocaleString()}
-            </span>
-            <span className="text-[10px] text-muted-foreground font-medium">ل.س</span>
-          </div>
-          {originalPrice && (
-            <span className="text-[10px] text-muted-foreground/70 line-through mr-auto">
-              {originalPrice.toLocaleString()}
+        <div className="flex items-baseline gap-1.5">
+          <span className="text-sm font-bold text-primary">
+            {price.toLocaleString()} ل.س
+          </span>
+          {originalPrice && originalPrice > price && (
+            <span className="text-[10px] text-muted-foreground line-through">
+              {originalPrice.toLocaleString()} ل.س
             </span>
           )}
         </div>
 
-        {/* Shipping Cost */}
-        <div className="text-[11px]">
-          {shippingCost && shippingCost > 0 ? (
-            <span className="text-muted-foreground">🚚 شحن: {shippingCost.toLocaleString()} ل.س</span>
+        <div className="text-[10px] flex items-center gap-1">
+          {shippingCost !== undefined ? (
+            shippingCost > 0 ? (
+              <span className="text-muted-foreground">🚚 شحن: {shippingCost.toLocaleString()} ل.س</span>
+            ) : (
+              <span className="text-green-600 dark:text-green-400 font-medium">🚚 شحن مجاني</span>
+            )
           ) : (
             <span className="text-green-600 dark:text-green-400 font-medium">🚚 شحن مجاني</span>
           )}
         </div>
 
-        {/* Add to Cart Button */}
         <Button
           className="w-full rounded-lg font-semibold text-xs h-8 shadow-sm hover:shadow-md transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] group/btn active:scale-95 disabled:opacity-60"
           onClick={handleAddToCart}
@@ -304,6 +273,8 @@ const ProductCard = ({
       </div>
     </div>
   );
-};
+});
+
+ProductCard.displayName = "ProductCard";
 
 export default ProductCard;

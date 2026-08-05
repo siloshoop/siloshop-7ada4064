@@ -14,7 +14,10 @@ export default defineConfig(({ mode }) => ({
     react(), 
     mode === "development" && componentTagger(),
     VitePWA({
+      strategies: 'generateSW',
       registerType: 'autoUpdate',
+      injectRegister: null,
+      filename: 'sw.js',
       includeAssets: ['favicon.ico', 'robots.txt'],
       manifest: {
         name: 'متجر - تطبيق التسوق الإلكتروني',
@@ -48,8 +51,20 @@ export default defineConfig(({ mode }) => ({
       workbox: {
         cleanupOutdatedCaches: true,
         skipWaiting: true,
-        maximumFileSizeToCacheInBytes: 5 * 1024 * 1024 // 5 MB
-      }
+        clientsClaim: true,
+        maximumFileSizeToCacheInBytes: 5 * 1024 * 1024,
+        navigateFallbackDenylist: [/^\/~oauth/],
+        runtimeCaching: [{
+          urlPattern: ({ request }) => request.mode === 'navigate',
+          handler: 'NetworkFirst',
+          options: { cacheName: 'siloshop-pages', networkTimeoutSeconds: 3, expiration: { maxEntries: 20, maxAgeSeconds: 86400 } }
+        }, {
+          urlPattern: ({ url }) => url.origin === url.protocol + '//' + url.host && /\/assets\/.*-[\w-]+\.(?:js|css)$/.test(url.pathname),
+          handler: 'CacheFirst',
+          options: { cacheName: 'siloshop-versioned-assets', expiration: { maxEntries: 80, maxAgeSeconds: 2592000 } }
+        }]
+      },
+      devOptions: { enabled: false }
     })
   ].filter(Boolean),
   resolve: {

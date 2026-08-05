@@ -75,10 +75,11 @@ describe("Homepage Smoke Test", () => {
     expect(container.querySelector("main")).toBeInTheDocument();
   });
 
-  it("renders multiple sections (no blank page)", () => {
+  it("renders multiple sections (no blank page)", async () => {
     const { container } = renderHomepage();
-    const sections = container.querySelectorAll("section");
-    expect(sections.length).toBeGreaterThanOrEqual(2);
+    await waitFor(() => {
+      expect(container.querySelectorAll("section").length).toBeGreaterThanOrEqual(2);
+    });
   });
 
   it("renders the footer", () => {
@@ -105,8 +106,11 @@ describe("Homepage Smoke Test", () => {
     }, { timeout: 2000 });
   });
 
-  it("hero section content is present", () => {
+  it("renders only the premium showroom and no legacy hero or ads", async () => {
     const { container } = renderHomepage();
-    expect(container.textContent).toContain("اكتشف");
+    await waitFor(() => expect(container.textContent).toContain("المعرض المميز"));
+    expect(container.textContent).not.toContain("تسوق من تشكيلة واسعة");
+    expect(container.textContent).not.toContain("إعلان عريض");
+    expect(container.textContent).not.toContain("إعلان ثابت");
   });
 });

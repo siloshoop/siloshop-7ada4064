@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, Fragment } from "react";
+import React, { useState, useEffect, useCallback, Fragment, lazy, Suspense } from "react";
 import { useSearchParams } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import AnnouncementBar from "@/components/AnnouncementBar";
@@ -12,15 +12,16 @@ import MobileBottomNav from "@/components/MobileBottomNav";
 import PullToRefreshIndicator from "@/components/PullToRefresh";
 import { usePullToRefresh } from "@/hooks/usePullToRefresh";
 import SectionErrorBoundary from "@/components/SectionErrorBoundary";
+import LazySection from "@/components/LazySection";
 
-// Import critical sections directly (not lazy) to prevent chunk loading failures
-import PopularCategories from "@/components/PopularCategories";
-import BestSellers from "@/components/BestSellers";
-import FeaturedProducts from "@/components/FeaturedProducts";
-import ProductRecommendations from "@/components/ProductRecommendations";
-import EnhancedDailyDeals from "@/components/EnhancedDailyDeals";
-import PurchasedRecently from "@/components/PurchasedRecently";
-import RecentlyViewed from "@/components/RecentlyViewed";
+// Below-fold sections are lazy loaded to improve initial performance
+const PopularCategories = lazy(() => import("@/components/PopularCategories"));
+const BestSellers = lazy(() => import("@/components/BestSellers"));
+const FeaturedProducts = lazy(() => import("@/components/FeaturedProducts"));
+const ProductRecommendations = lazy(() => import("@/components/ProductRecommendations"));
+const EnhancedDailyDeals = lazy(() => import("@/components/EnhancedDailyDeals"));
+const PurchasedRecently = lazy(() => import("@/components/PurchasedRecently"));
+const RecentlyViewed = lazy(() => import("@/components/RecentlyViewed"));
 
 interface Product {
   id: string;
@@ -108,8 +109,8 @@ const Index = () => {
         <main className="flex-1 container px-4 py-8">
           <div className="flex items-center justify-between mb-6">
             <div>
-              <h1 className="text-2xl font-bold mb-2">نتائج البحث عن "{searchQuery}"</h1>
-              <p className="text-muted-foreground">{products.length} منتج</p>
+              <h1 className="text-2xl font-bold mb-2 text-right">نتائج البحث عن "{searchQuery}"</h1>
+              <p className="text-muted-foreground text-right">{products.length} منتج</p>
             </div>
             <SearchFilters onFilterChange={setFilters} />
           </div>
@@ -124,7 +125,7 @@ const Index = () => {
             </div>
           ) : (
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-              {products.map((product, index) => (
+              {products.map((product) => (
                 <Fragment key={product.id}>
                   <ProductCard
                     id={product.id}
@@ -168,32 +169,49 @@ const Index = () => {
           <PremiumShowroom demoFallback />
         </SectionErrorBoundary>
 
-        <SectionErrorBoundary>
-          <PopularCategories key={`popular-${refreshKey}`} />
-        </SectionErrorBoundary>
-        <SectionErrorBoundary>
-          <div id="daily-deals" style={{ scrollMarginTop: "80px" }}>
-            <EnhancedDailyDeals key={`deals-${refreshKey}`} />
-          </div>
-        </SectionErrorBoundary>
+        <LazySection>
+          <SectionErrorBoundary>
+            <PopularCategories key={`popular-${refreshKey}`} />
+          </SectionErrorBoundary>
+        </LazySection>
 
-        <SectionErrorBoundary>
-          <PurchasedRecently key={`purchased-${refreshKey}`} />
-        </SectionErrorBoundary>
+        <LazySection>
+          <SectionErrorBoundary>
+            <div id="daily-deals" style={{ scrollMarginTop: "80px" }}>
+              <EnhancedDailyDeals key={`deals-${refreshKey}`} />
+            </div>
+          </SectionErrorBoundary>
+        </LazySection>
 
-        <SectionErrorBoundary>
-          <BestSellers key={`bestsellers-${refreshKey}`} />
-        </SectionErrorBoundary>
-        <SectionErrorBoundary>
-          <RecentlyViewed key={`recent-${refreshKey}`} />
-        </SectionErrorBoundary>
+        <LazySection>
+          <SectionErrorBoundary>
+            <PurchasedRecently key={`purchased-${refreshKey}`} />
+          </SectionErrorBoundary>
+        </LazySection>
 
-        <SectionErrorBoundary>
-          <ProductRecommendations key={`recommendations-${refreshKey}`} />
-        </SectionErrorBoundary>
-        <SectionErrorBoundary>
-          <FeaturedProducts key={`featured-${refreshKey}`} />
-        </SectionErrorBoundary>
+        <LazySection>
+          <SectionErrorBoundary>
+            <BestSellers key={`bestsellers-${refreshKey}`} />
+          </SectionErrorBoundary>
+        </LazySection>
+
+        <LazySection>
+          <SectionErrorBoundary>
+            <RecentlyViewed key={`recent-${refreshKey}`} />
+          </SectionErrorBoundary>
+        </LazySection>
+
+        <LazySection>
+          <SectionErrorBoundary>
+            <ProductRecommendations key={`recommendations-${refreshKey}`} />
+          </SectionErrorBoundary>
+        </LazySection>
+
+        <LazySection>
+          <SectionErrorBoundary>
+            <FeaturedProducts key={`featured-${refreshKey}`} />
+          </SectionErrorBoundary>
+        </LazySection>
       </main>
       <Footer />
       <MobileBottomNav />

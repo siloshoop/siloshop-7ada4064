@@ -1,4 +1,5 @@
-import { useCallback, useMemo, useRef, useState } from "react";
+import React, { useCallback, useMemo, useRef, useState, memo } from "react";
+
 import { useNavigate } from "react-router-dom";
 import { ChevronLeft, ChevronRight, Star, BadgeCheck, Store, Sparkles, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -14,7 +15,21 @@ const targetOf = (item: ShowroomItem) => {
   if (item.item_type === "store" && item.vendor_id) return `/vendor/${item.vendor_id}/ratings`;
   return null;
 };
-
+const ShowroomStand = memo(({ 
+  item,
+  offset,
+  isCenter,
+  onSelect,
+  isDemo = false,
+  priority = false
+}: {
+  item: ShowroomItemLive;
+  offset: number;
+  isCenter: boolean;
+  onSelect: () => void;
+  isDemo?: boolean;
+  priority?: boolean;
+}) => {
 const ShowroomStand = ({
   item,
   offset,
@@ -54,7 +69,8 @@ const ShowroomStand = ({
           <img
             src={item.cover_image_url}
             alt={item.title}
-            loading="lazy"
+            loading={priority ? "eager" : "lazy"}
+            fetchPriority={priority ? "high" : "auto"}
             decoding="async"
             width={800}
             height={500}
@@ -73,7 +89,8 @@ const ShowroomStand = ({
           <img
             src={item.logo_url}
             alt=""
-            loading="lazy"
+            loading={priority ? "eager" : "lazy"}
+            fetchPriority={priority ? "high" : "auto"}
             className="absolute -bottom-6 end-4 h-14 w-14 rounded-2xl border-2 border-background object-cover shadow-lg bg-card"
           />
         )}
@@ -121,7 +138,7 @@ const ShowroomStand = ({
             size="sm"
             className="gap-1.5 group"
             tabIndex={isCenter ? 0 : -1}
-            onClick={(e) => {
+});
               e.stopPropagation();
               if (target) navigate(target);
             }}
@@ -273,7 +290,7 @@ const PremiumShowroom = ({
               key={item.id}
               item={item}
               offset={i - index + dragOffset}
-              isCenter={i === index}
+              isCenter={i === index} priority={i === 0}
               onSelect={() => setIndex(i)}
               isDemo={usingDemo}
             />

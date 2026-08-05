@@ -59,7 +59,7 @@ export default defineConfig(({ mode }) => ({
           handler: 'NetworkFirst',
           options: { cacheName: 'siloshop-pages', networkTimeoutSeconds: 3, expiration: { maxEntries: 20, maxAgeSeconds: 86400 } }
         }, {
-          urlPattern: ({ url }) => url.origin === self.location.origin && /\/assets\/.*-[\w-]+\.(?:js|css)$/.test(url.pathname),
+          urlPattern: ({ url }) => url.origin === url.protocol + '//' + url.host && /\/assets\/.*-[\w-]+\.(?:js|css)$/.test(url.pathname),
           handler: 'CacheFirst',
           options: { cacheName: 'siloshop-versioned-assets', expiration: { maxEntries: 80, maxAgeSeconds: 2592000 } }
         }]

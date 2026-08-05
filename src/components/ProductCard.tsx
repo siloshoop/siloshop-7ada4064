@@ -120,7 +120,7 @@ const ProductCard = memo(({
         });
       }
 
-      triggerFly(image, buttonRect);
+      triggerFly(buttonRect.left + buttonRect.width / 2, buttonRect.top, image);
 
       toast({
         title: "تمت الإضافة",

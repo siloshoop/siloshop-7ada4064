@@ -27,9 +27,9 @@ const ShowroomStand = memo(({ item, offset, isCenter, isDemo, priority, onSelect
   };
 
   return (
-    <article style={style} onClick={() => isCenter ? target && navigate(target) : onSelect()} className={cn("absolute left-1/2 top-1/2 w-[76%] cursor-pointer select-none overflow-hidden rounded-2xl border border-border/60 bg-card/80 sm:w-[58%] lg:w-[42%]", "transition-[transform,opacity] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]", isCenter ? "shadow-[var(--shadow-elegant)] ring-1 ring-primary/20" : "shadow-[var(--shadow-card)]")}>
+    <article style={style} onClick={() => isCenter ? target && navigate(target) : onSelect()} className={cn("absolute left-1/2 top-1/2 w-[76%] cursor-pointer select-none overflow-hidden rounded-2xl border border-border/60 bg-card/80 sm:w-[58%] lg:w-[42%]", "transition-[transform,opacity] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none", isCenter ? "shadow-[var(--shadow-elegant)] ring-1 ring-primary/20" : "shadow-[var(--shadow-card)]")}>
       <div className="relative aspect-[16/10] overflow-hidden bg-muted">
-        {item.cover_image_url ? <img src={item.cover_image_url} alt={item.title} loading={priority ? "eager" : "lazy"} decoding="async" width={800} height={500} className="h-full w-full object-cover transition-transform duration-700 hover:scale-105" /> : <div className="h-full w-full bg-gradient-to-br from-primary/20 to-accent/20" />}
+        {item.cover_image_url ? <img src={item.cover_image_url} alt={item.title} loading={priority ? "eager" : "lazy"} decoding="async" width={800} height={500} className="h-full w-full object-cover transition-transform duration-700 hover:scale-105 motion-reduce:transition-none" /> : <div className="h-full w-full bg-gradient-to-br from-primary/20 to-accent/20" />}
         <div className="absolute inset-0 bg-gradient-to-t from-background/85 via-background/10 to-transparent" />
         {item.badge_label && <span className="absolute start-3 top-3 rounded-full bg-accent px-3 py-1 text-xs font-bold text-accent-foreground shadow-md">{item.badge_label}</span>}
         {item.logo_url && <img src={item.logo_url} alt="" loading="lazy" decoding="async" width={56} height={56} className="absolute -bottom-6 end-4 h-14 w-14 rounded-2xl border-2 border-background bg-card object-cover shadow-lg" />}

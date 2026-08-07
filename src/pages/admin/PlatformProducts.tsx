@@ -71,13 +71,30 @@ const PlatformProducts = () => {
 
   const bulk = async (action: "activate" | "deactivate" | "delete") => {
     if (selected.size === 0) return;
-    if (action === "delete" && !confirm(`حذف ${selected.size} منتج؟`)) return;
     const ids = Array.from(selected);
-    const q =
-      action === "delete"
-        ? supabase.from("products").delete().in("id", ids)
-        : supabase.from("products").update({ is_active: action === "activate" }).in("id", ids);
-    const { error } = await q;
+
+    if (action === "delete") {
+      if (!confirm(`حذف ${ids.length} منتج؟ المنتجات المرتبطة بطلبات ستتم أرشفتها بدلاً من حذفها.`)) return;
+      let deleted = 0, archived = 0, failed = 0;
+      for (const id of ids) {
+        const { data, error } = await supabase.rpc("delete_or_archive_product", { _product_id: id });
+        if (error) failed++;
+        else if (data === "deleted") deleted++;
+        else archived++;
+      }
+      toast({
+        title: "تم",
+        description: `حُذف ${deleted}، وأُرشف ${archived}${failed ? `، وفشل ${failed}` : ""}.`,
+      });
+      setSelected(new Set());
+      load();
+      return;
+    }
+
+    const { error } = await supabase
+      .from("products")
+      .update({ is_active: action === "activate" })
+      .in("id", ids);
     if (error) toast({ title: "خطأ", description: error.message, variant: "destructive" });
     else {
       toast({ title: "تم" });
@@ -87,10 +104,20 @@ const PlatformProducts = () => {
   };
 
   const remove = async (id: string) => {
-    if (!confirm("حذف المنتج؟")) return;
-    const { error } = await supabase.from("products").delete().eq("id", id);
-    if (error) toast({ title: "خطأ", description: error.message, variant: "destructive" });
-    else { toast({ title: "تم الحذف" }); load(); }
+    if (!confirm("حذف المنتج؟ إذا كان مرتبطاً بطلبات سابقة فسيتم أرشفته بدلاً من حذفه.")) return;
+    const { data, error } = await supabase.rpc("delete_or_archive_product", { _product_id: id });
+    if (error) {
+      toast({ title: "خطأ", description: "تعذّر تنفيذ العملية.", variant: "destructive" });
+      return;
+    }
+    toast({
+      title: data === "deleted" ? "تم الحذف" : "تمت الأرشفة",
+      description:
+        data === "deleted"
+          ? "تم حذف المنتج نهائياً."
+          : "لا يمكن حذف هذا المنتج نهائياً لأنه مرتبط بطلبات عملاء موجودة. تمت أرشفته بدلاً من ذلك.",
+    });
+    load();
   };
 
   const openEdit = (p: any) => {

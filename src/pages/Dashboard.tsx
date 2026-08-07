@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Plus, Package, TrendingUp, DollarSign, ShoppingBag, Loader2, Edit, Trash2, Search, Tag, Star, Layers, Percent, Megaphone, Users, Activity, BarChart3, LayoutGrid, Heart, Settings, MessageSquare, CheckCircle2, XCircle, Undo2, Boxes, Sparkles } from "lucide-react";
+import { Plus, Package, TrendingUp, DollarSign, ShoppingBag, Loader2, Edit, Trash2, Search, Tag, Star, Layers, Percent, Megaphone, Users, Activity, BarChart3, LayoutGrid, Heart, Settings, MessageSquare, CheckCircle2, XCircle, Undo2, Boxes, Sparkles, Archive, ArchiveRestore } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import UserStatistics from "@/components/UserStatistics";
 import { useToast } from "@/hooks/use-toast";
@@ -218,9 +218,12 @@ const Dashboard = () => {
 
     // Status filter
     if (filterStatus !== "all") {
-      filtered = filtered.filter(p => 
-        filterStatus === "active" ? p.is_active : !p.is_active
-      );
+      filtered = filtered.filter((p) => {
+        const archived = p.moderation_status === "archived";
+        if (filterStatus === "archived") return archived;
+        if (filterStatus === "active") return p.is_active && !archived;
+        return !p.is_active && !archived;
+      });
     }
 
     // Sort
@@ -247,29 +250,82 @@ const Dashboard = () => {
   }, [products, searchQuery, filterStatus, sortBy]);
 
   const handleDeleteProduct = async (productId: string) => {
-    if (!confirm("هل أنت متأكد من حذف هذا المنتج؟")) return;
+    if (!confirm("هل أنت متأكد من حذف هذا المنتج؟ إذا كان مرتبطاً بطلبات سابقة فسيتم أرشفته بدلاً من حذفه.")) return;
 
-    try {
-      const { error } = await supabase
-        .from("products")
-        .delete()
-        .eq("id", productId)
-        .eq("vendor_id", user?.id);
+    const { data, error } = await supabase.rpc("delete_or_archive_product", {
+      _product_id: productId,
+    });
 
-      if (error) throw error;
-
-      setProducts(products.filter(p => p.id !== productId));
+    if (error) {
       toast({
-        title: "تم بنجاح",
-        description: "تم حذف المنتج بنجاح",
-      });
-    } catch (error) {
-      toast({
-        title: "خطأ",
-        description: error.message,
+        title: "تعذّر تنفيذ العملية",
+        description: "حدث خطأ غير متوقع. يرجى المحاولة مرة أخرى.",
         variant: "destructive",
       });
+      return;
     }
+
+    if (data === "deleted") {
+      setProducts((prev) => prev.filter((p) => p.id !== productId));
+      toast({ title: "تم الحذف", description: "تم حذف المنتج نهائياً." });
+    } else {
+      setProducts((prev) =>
+        prev.map((p) =>
+          p.id === productId ? { ...p, moderation_status: "archived", is_active: false } : p
+        )
+      );
+      toast({
+        title: "تمت الأرشفة",
+        description:
+          "لا يمكن حذف هذا المنتج نهائياً لأنه مرتبط بطلبات عملاء موجودة. تمت أرشفته بدلاً من ذلك.",
+      });
+    }
+  };
+
+  const handleArchiveProduct = async (productId: string) => {
+    if (!confirm("أرشفة هذا المنتج؟ سيتم إخفاؤه عن العملاء ومنع الشراء.")) return;
+    const { error } = await supabase.rpc("archive_product", { _product_id: productId });
+    if (error) {
+      toast({
+        title: "تعذّر تنفيذ العملية",
+        description: "حدث خطأ غير متوقع. يرجى المحاولة مرة أخرى.",
+        variant: "destructive",
+      });
+      return;
+    }
+    setProducts((prev) =>
+      prev.map((p) =>
+        p.id === productId ? { ...p, moderation_status: "archived", is_active: false } : p
+      )
+    );
+    toast({ title: "تمت الأرشفة", description: "المنتج مؤرشف ومخفي عن العملاء." });
+  };
+
+  const handleRestoreProduct = async (productId: string) => {
+    const { data, error } = await supabase.rpc("restore_product", { _product_id: productId });
+    if (error) {
+      toast({
+        title: "تعذّر تنفيذ العملية",
+        description: "حدث خطأ غير متوقع. يرجى المحاولة مرة أخرى.",
+        variant: "destructive",
+      });
+      return;
+    }
+    const status = (data as string) || "pending";
+    setProducts((prev) =>
+      prev.map((p) =>
+        p.id === productId
+          ? { ...p, moderation_status: status, is_active: status === "approved" }
+          : p
+      )
+    );
+    toast({
+      title: "تم الاستعادة",
+      description:
+        status === "approved"
+          ? "تمت استعادة المنتج ونشره."
+          : "تمت استعادة المنتج وهو الآن بانتظار المراجعة.",
+    });
   };
 
   if (authLoading || loading) {
@@ -644,6 +700,7 @@ const Dashboard = () => {
                           <SelectItem value="all">الكل</SelectItem>
                           <SelectItem value="active">نشط</SelectItem>
                           <SelectItem value="inactive">غير نشط</SelectItem>
+                          <SelectItem value="archived">مؤرشف</SelectItem>
                         </SelectContent>
                       </Select>
 
@@ -677,9 +734,15 @@ const Dashboard = () => {
                         <div className="flex-1">
                           <div className="flex items-center gap-2">
                             <h3 className="font-semibold">{product.name}</h3>
-                            <span className={`text-xs px-2 py-1 rounded ${product.is_active ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}`}>
-                              {product.is_active ? 'نشط' : 'غير نشط'}
-                            </span>
+                            {product.moderation_status === "archived" ? (
+                              <span className="text-xs px-2 py-1 rounded bg-muted text-muted-foreground">
+                                مؤرشف
+                              </span>
+                            ) : (
+                              <span className={`text-xs px-2 py-1 rounded ${product.is_active ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}`}>
+                                {product.is_active ? 'نشط' : 'غير نشط'}
+                              </span>
+                            )}
                           </div>
                           <p className="text-sm text-muted-foreground">
                             {product.price} ل.س
@@ -689,16 +752,39 @@ const Dashboard = () => {
                           </p>
                         </div>
                         <div className="flex gap-2">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => navigate(`/dashboard/edit-product/${product.id}`)}
-                          >
-                            <Edit className="h-4 w-4" />
-                          </Button>
+                          {product.moderation_status === "archived" ? (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              title="استعادة المنتج"
+                              onClick={() => handleRestoreProduct(product.id)}
+                            >
+                              <ArchiveRestore className="h-4 w-4" />
+                            </Button>
+                          ) : (
+                            <>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                title="تعديل"
+                                onClick={() => navigate(`/dashboard/edit-product/${product.id}`)}
+                              >
+                                <Edit className="h-4 w-4" />
+                              </Button>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                title="أرشفة المنتج"
+                                onClick={() => handleArchiveProduct(product.id)}
+                              >
+                                <Archive className="h-4 w-4" />
+                              </Button>
+                            </>
+                          )}
                           <Button
                             variant="destructive"
                             size="sm"
+                            title="حذف نهائي (متاح فقط للمنتجات غير المرتبطة بطلبات)"
                             onClick={() => handleDeleteProduct(product.id)}
                           >
                             <Trash2 className="h-4 w-4" />

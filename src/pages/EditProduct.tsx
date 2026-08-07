@@ -291,30 +291,29 @@ const EditProduct = () => {
     if (!confirm("هل أنت متأكد من حذف هذا المنتج؟")) return;
 
     setLoading(true);
-    try {
-      const { error } = await supabase
-        .from("products")
-        .delete()
-        .eq("id", id)
-        .eq("vendor_id", user.id);
+    const { data, error } = await supabase.rpc("delete_or_archive_product", {
+      _product_id: id,
+    });
+    setLoading(false);
 
-      if (error) throw error;
-
+    if (error) {
       toast({
-        title: "تم بنجاح",
-        description: "تم حذف المنتج بنجاح",
-      });
-
-      navigate("/dashboard");
-    } catch (error) {
-      toast({
-        title: "خطأ",
-        description: error.message,
+        title: "تعذّر تنفيذ العملية",
+        description: "حدث خطأ غير متوقع. يرجى المحاولة مرة أخرى.",
         variant: "destructive",
       });
-    } finally {
-      setLoading(false);
+      return;
     }
+
+    toast({
+      title: data === "deleted" ? "تم الحذف" : "تمت الأرشفة",
+      description:
+        data === "deleted"
+          ? "تم حذف المنتج نهائياً."
+          : "لا يمكن حذف هذا المنتج نهائياً لأنه مرتبط بطلبات عملاء موجودة. تمت أرشفته بدلاً من ذلك.",
+    });
+
+    navigate("/dashboard");
   };
 
   if (authLoading || fetching) {

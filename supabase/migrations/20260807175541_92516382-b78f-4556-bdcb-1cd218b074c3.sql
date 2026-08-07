@@ -1,0 +1,12 @@
+REVOKE ALL ON FUNCTION public.archive_product(uuid) FROM PUBLIC, anon;
+REVOKE ALL ON FUNCTION public.restore_product(uuid) FROM PUBLIC, anon;
+REVOKE ALL ON FUNCTION public.delete_or_archive_product(uuid) FROM PUBLIC, anon;
+REVOKE ALL ON FUNCTION public.product_can_manage(uuid) FROM PUBLIC, anon;
+GRANT EXECUTE ON FUNCTION public.archive_product(uuid) TO authenticated;
+GRANT EXECUTE ON FUNCTION public.restore_product(uuid) TO authenticated;
+GRANT EXECUTE ON FUNCTION public.delete_or_archive_product(uuid) TO authenticated;
+GRANT EXECUTE ON FUNCTION public.product_can_manage(uuid) TO authenticated;
+GRANT EXECUTE ON FUNCTION public.archive_product(uuid) TO service_role;
+GRANT EXECUTE ON FUNCTION public.restore_product(uuid) TO service_role;
+GRANT EXECUTE ON FUNCTION public.delete_or_archive_product(uuid) TO service_role;
+GRANT EXECUTE ON FUNCTION public.product_can_manage(uuid) TO service_role;

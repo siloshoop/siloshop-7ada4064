@@ -2354,6 +2354,7 @@ export type Database = {
         Args: { _app_id: string }
         Returns: undefined
       }
+      archive_product: { Args: { _product_id: string }; Returns: string }
       cancel_order: {
         Args: { _order_id: string; _reason: string }
         Returns: undefined
@@ -2387,6 +2388,10 @@ export type Database = {
       delete_email: {
         Args: { message_id: number; queue_name: string }
         Returns: boolean
+      }
+      delete_or_archive_product: {
+        Args: { _product_id: string }
+        Returns: string
       }
       delete_seller_account: { Args: { _user_id: string }; Returns: undefined }
       email_queue_dispatch: { Args: never; Returns: undefined }
@@ -2457,6 +2462,7 @@ export type Database = {
         }
         Returns: number
       }
+      product_can_manage: { Args: { _product_id: string }; Returns: boolean }
       reactivate_seller: { Args: { _user_id: string }; Returns: undefined }
       read_email_batch: {
         Args: { batch_size: number; queue_name: string; vt: number }
@@ -2492,6 +2498,7 @@ export type Database = {
         Args: { _app_id: string; _reason: string }
         Returns: undefined
       }
+      restore_product: { Args: { _product_id: string }; Returns: string }
       send_notification: {
         Args: {
           _message: string

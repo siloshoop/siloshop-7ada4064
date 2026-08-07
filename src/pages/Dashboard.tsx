@@ -218,9 +218,12 @@ const Dashboard = () => {
 
     // Status filter
     if (filterStatus !== "all") {
-      filtered = filtered.filter(p => 
-        filterStatus === "active" ? p.is_active : !p.is_active
-      );
+      filtered = filtered.filter((p) => {
+        const archived = p.moderation_status === "archived";
+        if (filterStatus === "archived") return archived;
+        if (filterStatus === "active") return p.is_active && !archived;
+        return !p.is_active && !archived;
+      });
     }
 
     // Sort
@@ -247,29 +250,82 @@ const Dashboard = () => {
   }, [products, searchQuery, filterStatus, sortBy]);
 
   const handleDeleteProduct = async (productId: string) => {
-    if (!confirm("هل أنت متأكد من حذف هذا المنتج؟")) return;
+    if (!confirm("هل أنت متأكد من حذف هذا المنتج؟ إذا كان مرتبطاً بطلبات سابقة فسيتم أرشفته بدلاً من حذفه.")) return;
 
-    try {
-      const { error } = await supabase
-        .from("products")
-        .delete()
-        .eq("id", productId)
-        .eq("vendor_id", user?.id);
+    const { data, error } = await supabase.rpc("delete_or_archive_product", {
+      _product_id: productId,
+    });
 
-      if (error) throw error;
-
-      setProducts(products.filter(p => p.id !== productId));
+    if (error) {
       toast({
-        title: "تم بنجاح",
-        description: "تم حذف المنتج بنجاح",
-      });
-    } catch (error) {
-      toast({
-        title: "خطأ",
-        description: error.message,
+        title: "تعذّر تنفيذ العملية",
+        description: "حدث خطأ غير متوقع. يرجى المحاولة مرة أخرى.",
         variant: "destructive",
       });
+      return;
     }
+
+    if (data === "deleted") {
+      setProducts((prev) => prev.filter((p) => p.id !== productId));
+      toast({ title: "تم الحذف", description: "تم حذف المنتج نهائياً." });
+    } else {
+      setProducts((prev) =>
+        prev.map((p) =>
+          p.id === productId ? { ...p, moderation_status: "archived", is_active: false } : p
+        )
+      );
+      toast({
+        title: "تمت الأرشفة",
+        description:
+          "لا يمكن حذف هذا المنتج نهائياً لأنه مرتبط بطلبات عملاء موجودة. تمت أرشفته بدلاً من ذلك.",
+      });
+    }
+  };
+
+  const handleArchiveProduct = async (productId: string) => {
+    if (!confirm("أرشفة هذا المنتج؟ سيتم إخفاؤه عن العملاء ومنع الشراء.")) return;
+    const { error } = await supabase.rpc("archive_product", { _product_id: productId });
+    if (error) {
+      toast({
+        title: "تعذّر تنفيذ العملية",
+        description: "حدث خطأ غير متوقع. يرجى المحاولة مرة أخرى.",
+        variant: "destructive",
+      });
+      return;
+    }
+    setProducts((prev) =>
+      prev.map((p) =>
+        p.id === productId ? { ...p, moderation_status: "archived", is_active: false } : p
+      )
+    );
+    toast({ title: "تمت الأرشفة", description: "المنتج مؤرشف ومخفي عن العملاء." });
+  };
+
+  const handleRestoreProduct = async (productId: string) => {
+    const { data, error } = await supabase.rpc("restore_product", { _product_id: productId });
+    if (error) {
+      toast({
+        title: "تعذّر تنفيذ العملية",
+        description: "حدث خطأ غير متوقع. يرجى المحاولة مرة أخرى.",
+        variant: "destructive",
+      });
+      return;
+    }
+    const status = (data as string) || "pending";
+    setProducts((prev) =>
+      prev.map((p) =>
+        p.id === productId
+          ? { ...p, moderation_status: status, is_active: status === "approved" }
+          : p
+      )
+    );
+    toast({
+      title: "تم الاستعادة",
+      description:
+        status === "approved"
+          ? "تمت استعادة المنتج ونشره."
+          : "تمت استعادة المنتج وهو الآن بانتظار المراجعة.",
+    });
   };
 
   if (authLoading || loading) {

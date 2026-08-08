@@ -1020,6 +1020,8 @@ export type Database = {
           estimated_delivery: string | null
           id: string
           notes: string | null
+          order_kind: string
+          payment_method: string
           payment_status: string
           phone: string | null
           shipping_address: string | null
@@ -1047,6 +1049,8 @@ export type Database = {
           estimated_delivery?: string | null
           id?: string
           notes?: string | null
+          order_kind?: string
+          payment_method?: string
           payment_status?: string
           phone?: string | null
           shipping_address?: string | null
@@ -1074,6 +1078,8 @@ export type Database = {
           estimated_delivery?: string | null
           id?: string
           notes?: string | null
+          order_kind?: string
+          payment_method?: string
           payment_status?: string
           phone?: string | null
           shipping_address?: string | null
@@ -1136,6 +1142,33 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      platform_payment_settings: {
+        Row: {
+          id: number
+          instructions: string
+          is_active: boolean
+          sham_cash_account_name: string
+          sham_cash_account_number: string
+          updated_at: string
+        }
+        Insert: {
+          id?: number
+          instructions?: string
+          is_active?: boolean
+          sham_cash_account_name?: string
+          sham_cash_account_number?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: number
+          instructions?: string
+          is_active?: boolean
+          sham_cash_account_name?: string
+          sham_cash_account_number?: string
+          updated_at?: string
+        }
+        Relationships: []
       }
       product_moderation_log: {
         Row: {

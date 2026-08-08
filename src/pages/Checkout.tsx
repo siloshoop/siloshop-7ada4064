@@ -11,7 +11,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, ShoppingCart, Tag, MapPin, Plus, Truck } from "lucide-react";
+import { Loader2, ShoppingCart, Tag, MapPin, Plus, Truck, Wallet, Banknote, AlertTriangle } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { SYRIAN_GOVERNORATES } from "@/lib/syrianGovernorates";
@@ -39,7 +39,15 @@ interface CartItem {
     image_url: string;
     vendor_id: string;
     shipping_cost?: number;
+    product_type?: string;
   };
+}
+
+interface PlatformPaymentSettings {
+  sham_cash_account_name: string;
+  sham_cash_account_number: string;
+  instructions: string;
+  is_active: boolean;
 }
 
 const Checkout = () => {
@@ -52,6 +60,7 @@ const Checkout = () => {
   const [discount, setDiscount] = useState(0);
   const [savedAddresses, setSavedAddresses] = useState<any[]>([]);
   const [selectedAddressId, setSelectedAddressId] = useState<string>("");
+  const [shamSettings, setShamSettings] = useState<PlatformPaymentSettings | null>(null);
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -104,7 +113,7 @@ const Checkout = () => {
           id,
           quantity,
           product_id,
-          product:products(id, name, price, image_url, vendor_id, shipping_cost)
+          product:products(id, name, price, image_url, vendor_id, shipping_cost, product_type)
         `)
         .eq("user_id", user.id);
 
@@ -132,6 +141,25 @@ const Checkout = () => {
   );
 
   const total = subtotal + shippingTotal - discount;
+
+  // Payment model: platform products are paid with Sham Cash to the platform
+  // owner's account only; seller products are Cash on Delivery only.
+  const hasPlatformItems = cartItems.some((i) => i.product.product_type === "platform");
+  const hasSellerItems = cartItems.some((i) => i.product.product_type !== "platform");
+  const isMixedCart = hasPlatformItems && hasSellerItems;
+  const paymentMethod: "sham_cash" | "cod" = hasPlatformItems && !isMixedCart ? "sham_cash" : "cod";
+
+  useEffect(() => {
+    if (!hasPlatformItems) return;
+    void (async () => {
+      const { data } = await supabase
+        .from("platform_payment_settings")
+        .select("sham_cash_account_name, sham_cash_account_number, instructions, is_active")
+        .eq("id", 1)
+        .maybeSingle();
+      if (data) setShamSettings(data as PlatformPaymentSettings);
+    })();
+  }, [hasPlatformItems]);
 
   const applyCoupon = async () => {
     if (!couponCode.trim()) {
@@ -190,6 +218,16 @@ const Checkout = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user || cartItems.length === 0) return;
+
+    if (isMixedCart) {
+      toast({
+        title: "لا يمكن إتمام الطلب",
+        description:
+          "منتجات المنصة تُدفع عبر شام كاش ومنتجات البائعين تُدفع عند الاستلام. يرجى إتمام كل نوع في طلب منفصل.",
+        variant: "destructive",
+      });
+      return;
+    }
 
     // Validate form data with zod schema
     const validationResult = checkoutSchema.safeParse(formData);
@@ -268,13 +306,24 @@ const Checkout = () => {
 
       toast({
         title: "تم إنشاء الطلب",
-        description: "الدفع عند الاستلام. يمكنك تتبع طلبك من صفحة طلباتي.",
+        description:
+          paymentMethod === "sham_cash"
+            ? "يرجى تحويل المبلغ إلى حساب شام كاش الخاص بالمنصة لتأكيد الطلب."
+            : "الدفع عند الاستلام. يمكنك تتبع طلبك من صفحة طلباتي.",
       });
 
-      // Cash on Delivery is the only payment method — payment is recorded
-      // automatically by create_order. Send the customer straight to their orders.
+      // Payment record is created automatically by create_order with the
+      // method enforced server-side. Send the customer straight to their orders.
       navigate("/orders");
     } catch (error) {
+      if (String(error?.message || "").includes("MIXED_CART")) {
+        toast({
+          title: "لا يمكن إتمام الطلب",
+          description: "لا يمكن دمج منتجات المنصة مع منتجات البائعين في طلب واحد.",
+          variant: "destructive",
+        });
+        return;
+      }
       toast({
         title: "خطأ",
         description: error.message,
@@ -481,10 +530,51 @@ const Checkout = () => {
                     </div>
                   </div>
 
-                  <div className="rounded-lg border border-primary/20 bg-primary/5 p-3 text-sm">
-                    <p className="font-semibold">طريقة الدفع</p>
-                    <p className="text-muted-foreground">الدفع عند الاستلام (COD)</p>
-                  </div>
+                  {isMixedCart ? (
+                    <div className="rounded-lg border border-destructive/30 bg-destructive/5 p-3 text-sm space-y-1">
+                      <p className="font-semibold flex items-center gap-1.5 text-destructive">
+                        <AlertTriangle className="h-4 w-4" /> طلب مختلط
+                      </p>
+                      <p className="text-muted-foreground">
+                        سلتك تحتوي منتجات المنصة (شام كاش) ومنتجات بائعين (الدفع عند الاستلام). يرجى
+                        إتمام كل نوع في طلب منفصل.
+                      </p>
+                    </div>
+                  ) : paymentMethod === "sham_cash" ? (
+                    <div className="rounded-lg border border-primary/20 bg-primary/5 p-3 text-sm space-y-1">
+                      <p className="font-semibold flex items-center gap-1.5">
+                        <Wallet className="h-4 w-4" /> طريقة الدفع: شام كاش
+                      </p>
+                      <p className="text-muted-foreground">
+                        منتجات المنصة تُدفع عبر شام كاش إلى حساب المنصة فقط.
+                      </p>
+                      {shamSettings?.sham_cash_account_number ? (
+                        <div className="pt-1 space-y-0.5">
+                          {shamSettings.sham_cash_account_name && (
+                            <p>اسم الحساب: <span className="font-semibold">{shamSettings.sham_cash_account_name}</span></p>
+                          )}
+                          <p>
+                            رقم المحفظة:{" "}
+                            <span className="font-semibold" dir="ltr">{shamSettings.sham_cash_account_number}</span>
+                          </p>
+                          {shamSettings.instructions && (
+                            <p className="text-muted-foreground">{shamSettings.instructions}</p>
+                          )}
+                        </div>
+                      ) : (
+                        <p className="text-muted-foreground">
+                          سيتم تزويدك بتفاصيل حساب شام كاش بعد تأكيد الطلب.
+                        </p>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="rounded-lg border border-primary/20 bg-primary/5 p-3 text-sm">
+                      <p className="font-semibold flex items-center gap-1.5">
+                        <Banknote className="h-4 w-4" /> طريقة الدفع: الدفع عند الاستلام (COD)
+                      </p>
+                      <p className="text-muted-foreground">منتجات البائعين تُدفع نقداً عند الاستلام.</p>
+                    </div>
+                  )}
 
                   <ReturnsPolicyNote />
 
@@ -492,7 +582,7 @@ const Checkout = () => {
                     type="submit"
                     className="w-full"
                     size="lg"
-                    disabled={submitting}
+                    disabled={submitting || isMixedCart}
                   >
                     {submitting ? (
                       <>

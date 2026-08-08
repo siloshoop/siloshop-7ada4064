@@ -13,6 +13,7 @@ import { Loader2, Plus, Upload, Edit2, Trash2, Package, Settings2, Search } from
 import PlatformProductForm, { PlatformProduct } from "@/components/admin/PlatformProductForm";
 import PlatformProductImport from "@/components/admin/PlatformProductImport";
 import CategoriesBrandsManager from "@/components/admin/CategoriesBrandsManager";
+import PlatformShamCashSettings from "@/components/admin/PlatformShamCashSettings";
 
 const PlatformProducts = () => {
   const { toast } = useToast();
@@ -171,6 +172,8 @@ const PlatformProducts = () => {
             </Button>
           </div>
         </div>
+
+        <PlatformShamCashSettings />
 
         <Card className="mb-4">
           <CardHeader className="pb-3">

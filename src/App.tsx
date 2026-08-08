@@ -111,7 +111,7 @@ const App = () => (
             <Route path="/dashboard/showroom" element={<RequireRole role="super_admin"><ShowroomManagement /></RequireRole>} />
             <Route path="/dashboard/showroom/audit" element={<RequireRole role={["admin","super_admin"]}><ShowroomAuditLog /></RequireRole>} />
             <Route path="/dashboard/sellers" element={<RequireRole role="admin"><SellerManagement /></RequireRole>} />
-            <Route path="/dashboard/platform-products" element={<RequireRole role="admin"><PlatformProducts /></RequireRole>} />
+            <Route path="/dashboard/platform-products" element={<RequireRole role="super_admin"><PlatformProducts /></RequireRole>} />
             <Route path="/dashboard/reports" element={<RequireRole role="admin"><Reports /></RequireRole>} />
             <Route path="/dashboard/admin-orders" element={<RequireRole role="admin"><AdminOrders /></RequireRole>} />
             <Route path="/dashboard/chat-moderation" element={<RequireRole role="admin"><ChatModeration /></RequireRole>} />

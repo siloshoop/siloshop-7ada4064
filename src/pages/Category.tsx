@@ -3,6 +3,7 @@ import { useParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import { ProductGridSkeleton } from "@/components/skeletons/ProductSkeletons";
 import ProductCard from "@/components/ProductCard";
 import { SearchFilters } from "@/components/SearchFilters";
 import { Loader2 } from "lucide-react";
@@ -193,9 +194,9 @@ const Category = () => {
     return (
       <div className="min-h-screen flex flex-col">
         <Navbar />
-        <div className="flex-1 flex items-center justify-center">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
-        </div>
+        <main className="flex-1 container mx-auto px-4 py-8">
+          <ProductGridSkeleton count={12} />
+        </main>
         <Footer />
       </div>
     );

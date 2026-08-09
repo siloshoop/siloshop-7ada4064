@@ -2,6 +2,7 @@ import { ShoppingCart, Search, Menu, Heart, User, LogOut, LayoutDashboard, Slide
 import { useFlyToCart } from "@/components/FlyToCart";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import SearchAutocomplete from "@/components/search/SearchAutocomplete";
 import { NotificationsDropdown } from "@/components/NotificationsDropdown";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import PushNotificationManager from "@/components/PushNotificationManager";

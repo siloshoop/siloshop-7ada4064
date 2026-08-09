@@ -10,6 +10,7 @@ import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, X } from "lucide-react";
+import { productNumbersSchema, firstIssue, friendlyDbError } from "@/lib/productValidation";
 import PlatformImageUploader from "./PlatformImageUploader";
 
 export interface PlatformProduct {

@@ -237,7 +237,7 @@ const Notifications = () => {
       return;
     }
     if (type === "seller_rejected" || type === "seller_suspended") {
-      navigate("/seller-application");
+      navigate("/seller/application");
       return;
     }
     if (type === "account_activated" || type === "account_suspended" || type === "account_banned") {

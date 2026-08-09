@@ -359,7 +359,9 @@ const Chat = () => {
           </Avatar>
           <div>
             <h2 className="font-bold">{vendorProfile?.full_name || "بائع"}</h2>
-            <p className="text-sm text-muted-foreground">نشط</p>
+            <p className="text-sm text-muted-foreground">
+              {peerTyping ? "يكتب الآن..." : "نشط"}
+            </p>
           </div>
         </div>
 
@@ -367,6 +369,18 @@ const Chat = () => {
         <div className="flex-1 overflow-y-auto p-4 space-y-4">
           {messages.map((msg) => {
             const isSender = msg.sender_id === user?.id;
+            if (msg.is_deleted) {
+              return (
+                <div
+                  key={msg.id}
+                  className={`flex ${isSender ? "justify-end" : "justify-start"}`}
+                >
+                  <div className="max-w-[70%] rounded-lg p-3 bg-muted/60 text-muted-foreground text-sm italic">
+                    تم حذف هذه الرسالة من قبل الإدارة
+                  </div>
+                </div>
+              );
+            }
             return (
               <div
                 key={msg.id}
@@ -398,11 +412,17 @@ const Chat = () => {
                     </a>
                   )}
                   {msg.content && <p>{msg.content}</p>}
-                  <p className="text-xs opacity-70 mt-1">
+                  <p className="text-xs opacity-70 mt-1 flex items-center gap-1">
                     {formatDistanceToNow(new Date(msg.created_at), {
                       addSuffix: true,
                       locale: ar,
                     })}
+                    {isSender &&
+                      (msg.is_read ? (
+                        <CheckCheck className="h-3.5 w-3.5" aria-label="تم القراءة" />
+                      ) : (
+                        <Check className="h-3.5 w-3.5" aria-label="تم الإرسال" />
+                      ))}
                   </p>
                 </div>
               </div>
@@ -410,6 +430,10 @@ const Chat = () => {
           })}
           <div ref={messagesEndRef} />
         </div>
+
+        {peerTyping && (
+          <div className="px-4 pb-2 text-xs text-muted-foreground">يكتب الآن...</div>
+        )}
 
         {disabledReason && (
           <div className="px-4 py-2 text-sm text-center bg-destructive/10 text-destructive border-t border-destructive/30">
@@ -436,10 +460,14 @@ const Chat = () => {
           </Button>
           <Input
             value={newMessage}
-            onChange={(e) => setNewMessage(e.target.value)}
+            onChange={(e) => {
+              setNewMessage(e.target.value);
+              broadcastTyping();
+            }}
             placeholder={chatDisabled ? "الإرسال غير متاح" : "اكتب رسالة..."}
-            onKeyPress={(e) => e.key === "Enter" && handleSendMessage()}
+            onKeyDown={(e) => e.key === "Enter" && handleSendMessage()}
             disabled={sending || chatDisabled}
+            maxLength={2000}
           />
           <Button onClick={handleSendMessage} disabled={sending || chatDisabled || !newMessage.trim()}>
             {sending ? (

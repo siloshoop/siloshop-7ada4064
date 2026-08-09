@@ -341,6 +341,33 @@ const Checkout = () => {
         });
         return;
       }
+      if (message.includes("OUT_OF_STOCK")) {
+        const name = message.split("OUT_OF_STOCK:")[1]?.split("\n")[0]?.trim();
+        toast({
+          title: "الكمية غير متوفرة",
+          description: name
+            ? `الكمية المطلوبة من "${name}" غير متوفرة حالياً. يرجى تعديل الكمية.`
+            : "أحد المنتجات لم تعد كميته متوفرة. يرجى تحديث السلة.",
+          variant: "destructive",
+        });
+        return;
+      }
+      if (message.includes("ORDER_RATE_LIMIT")) {
+        toast({
+          title: "تم تجاوز الحد المسموح",
+          description: "يمكنك إنشاء 5 طلبات كحد أقصى في الساعة. يرجى المحاولة لاحقاً.",
+          variant: "destructive",
+        });
+        return;
+      }
+      if (message.includes("TOO_MANY_OPEN_ORDERS")) {
+        toast({
+          title: "لديك طلبات قيد المعالجة",
+          description: "يوجد 10 طلبات قيد المعالجة على حسابك. يرجى انتظار إتمامها قبل إنشاء طلب جديد.",
+          variant: "destructive",
+        });
+        return;
+      }
       toast({
         title: "خطأ",
         description: error.message,

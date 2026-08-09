@@ -42,8 +42,8 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { FavoriteButton } from "@/components/FavoriteButton";
 import { useCompareProducts } from "@/hooks/useCompareProducts";
-import html2canvas from "html2canvas";
-import { jsPDF } from "jspdf";
+// html2canvas (~200 kB) and jspdf (~350 kB) are loaded on demand inside the
+// export handlers so opening the comparison page stays lightweight.
 
 interface Product {
   id: string;
@@ -104,6 +104,7 @@ const Compare = () => {
     
     setExporting(true);
     try {
+      const { default: html2canvas } = await import("html2canvas");
       const canvas = await html2canvas(comparisonRef.current, {
         backgroundColor: "#ffffff",
         scale: 2,
@@ -136,6 +137,10 @@ const Compare = () => {
     
     setExporting(true);
     try {
+      const [{ default: html2canvas }, { jsPDF }] = await Promise.all([
+        import("html2canvas"),
+        import("jspdf"),
+      ]);
       const canvas = await html2canvas(comparisonRef.current, {
         backgroundColor: "#ffffff",
         scale: 2,

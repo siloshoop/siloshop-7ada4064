@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import Navbar from "@/components/Navbar";
 import ProductOriginBadge from "@/components/product/ProductOriginBadge";
 import SellerInfoCard from "@/components/product/SellerInfoCard";
+import ReportDialog from "@/components/ReportDialog";
 import ShippingReturnsInfo from "@/components/product/ShippingReturnsInfo";
 import ProductSpecs from "@/components/product/ProductSpecs";
 import FrequentlyBoughtTogether from "@/components/product/FrequentlyBoughtTogether";

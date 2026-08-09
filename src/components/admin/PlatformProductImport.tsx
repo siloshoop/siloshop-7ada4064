@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, Download, AlertCircle } from "lucide-react";
+import { productNumbersSchema, friendlyDbError } from "@/lib/productValidation";
 
 interface Row {
   data: any;

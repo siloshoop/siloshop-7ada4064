@@ -167,16 +167,24 @@ const Index = () => {
       <AnnouncementBar />
       <Navbar />
       <main className="flex-1 pb-[120px] md:pb-0 page-enter">
+        {/* Hero — full-width auto-rotating slider */}
         <SectionErrorBoundary>
-          <PremiumShowroom demoFallback />
+          <HeroSlider />
         </SectionErrorBoundary>
 
-        <LazySection>
-          <SectionErrorBoundary>
-            <PopularCategories key={`popular-${refreshKey}`} />
-          </SectionErrorBoundary>
-        </LazySection>
+        {/* 🇸🇾 Local Marketplace (Phase 1) */}
+        <SectionErrorBoundary>
+          <LocalMarketplaceBanner />
+        </SectionErrorBoundary>
 
+        {/* 🇹🇷 Shop From Turkey — renders nothing until the feature flag is on */}
+        <SectionErrorBoundary>
+          <Suspense fallback={null}>
+            <TurkeyMarketplace />
+          </Suspense>
+        </SectionErrorBoundary>
+
+        {/* Flash deals */}
         <LazySection>
           <SectionErrorBoundary>
             <div id="daily-deals" style={{ scrollMarginTop: "80px" }}>
@@ -185,33 +193,69 @@ const Index = () => {
           </SectionErrorBoundary>
         </LazySection>
 
+        {/* Today's offers */}
         <LazySection>
           <SectionErrorBoundary>
-            <PurchasedRecently key={`purchased-${refreshKey}`} />
+            <ProductRail
+              key={`offers-${refreshKey}`}
+              variant="todays_offers"
+              icon={Tag}
+              eyebrow="عروض اليوم"
+              title="أفضل عروض اليوم"
+              subtitle="منتجات بأسعار مخفّضة عن سعرها الأصلي"
+              href="/search?sort=discount"
+              tone="accent"
+            />
           </SectionErrorBoundary>
         </LazySection>
 
+        {/* New arrivals */}
+        <LazySection>
+          <SectionErrorBoundary>
+            <ProductRail
+              key={`new-${refreshKey}`}
+              variant="new_arrivals"
+              icon={Sparkles}
+              eyebrow="وصل حديثاً"
+              title="أحدث المنتجات"
+              subtitle="آخر ما أضافه البائعون على سيلو شوب"
+              href="/search?sort=newest"
+            />
+          </SectionErrorBoundary>
+        </LazySection>
+
+        {/* Best sellers */}
         <LazySection>
           <SectionErrorBoundary>
             <BestSellers key={`bestsellers-${refreshKey}`} />
           </SectionErrorBoundary>
         </LazySection>
 
-        <LazySection>
-          <SectionErrorBoundary>
-            <RecentlyViewed key={`recent-${refreshKey}`} />
-          </SectionErrorBoundary>
-        </LazySection>
-
+        {/* Recommended for you */}
         <LazySection>
           <SectionErrorBoundary>
             <ProductRecommendations key={`recommendations-${refreshKey}`} />
           </SectionErrorBoundary>
         </LazySection>
 
+        {/* Featured stores */}
         <LazySection>
           <SectionErrorBoundary>
-            <FeaturedProducts key={`featured-${refreshKey}`} />
+            <FeaturedStores key={`stores-${refreshKey}`} />
+          </SectionErrorBoundary>
+        </LazySection>
+
+        {/* Popular categories */}
+        <LazySection>
+          <SectionErrorBoundary>
+            <PopularCategories key={`popular-${refreshKey}`} />
+          </SectionErrorBoundary>
+        </LazySection>
+
+        {/* Recently viewed */}
+        <LazySection>
+          <SectionErrorBoundary>
+            <RecentlyViewed key={`recent-${refreshKey}`} />
           </SectionErrorBoundary>
         </LazySection>
       </main>

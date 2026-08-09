@@ -324,7 +324,16 @@ const Checkout = () => {
       // method enforced server-side. Send the customer straight to their orders.
       navigate("/orders");
     } catch (error) {
-      if (String(error?.message || "").includes("MIXED_CART")) {
+      const message = String(error?.message || "");
+      if (message.includes("PLATFORM_MARKETPLACE_DISABLED") || message.includes("SHAM_CASH_DISABLED")) {
+        toast({
+          title: "غير متاح حالياً",
+          description: "منتجات المنصة المستوردة غير متاحة للشراء بعد. يرجى إزالتها من السلة.",
+          variant: "destructive",
+        });
+        return;
+      }
+      if (message.includes("MIXED_CART")) {
         toast({
           title: "لا يمكن إتمام الطلب",
           description: "لا يمكن دمج منتجات المنصة مع منتجات البائعين في طلب واحد.",

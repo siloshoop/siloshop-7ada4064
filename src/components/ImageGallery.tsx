@@ -1,11 +1,13 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { ChevronLeft, ChevronRight, X, ZoomIn, Maximize2 } from "lucide-react";
+import { ChevronLeft, ChevronRight, X, ZoomIn, Maximize2, Play } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 
 interface ImageGalleryProps {
   images: string[];
   productName: string;
+  /** Optional product video (mp4/webm URL or YouTube/Vimeo embed link). */
+  videoUrl?: string | null;
 }
 
 /**
@@ -16,15 +18,18 @@ interface ImageGalleryProps {
  *  - Lightbox with pinch-to-zoom on touch, wheel-zoom on desktop
  *  - Lazy-loaded images, fade transitions between slides
  */
-export const ImageGallery = ({ images, productName }: ImageGalleryProps) => {
+export const ImageGallery = ({ images, productName, videoUrl }: ImageGalleryProps) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isLightboxOpen, setIsLightboxOpen] = useState(false);
   const [isZooming, setIsZooming] = useState(false);
   const [zoomOrigin, setZoomOrigin] = useState({ x: 50, y: 50 });
   const [fadeKey, setFadeKey] = useState(0);
+  const [showVideo, setShowVideo] = useState(false);
   const swipeStart = useRef<{ x: number; y: number } | null>(null);
 
   const total = images.length;
+  const embedUrl = toEmbedUrl(videoUrl);
+  const isFile = !!videoUrl && !embedUrl;
 
   const goToPrevious = useCallback(() => {
     setCurrentIndex((prev) => (prev === 0 ? total - 1 : prev - 1));
@@ -39,6 +44,7 @@ export const ImageGallery = ({ images, productName }: ImageGalleryProps) => {
   const goToImage = (index: number) => {
     setCurrentIndex(index);
     setFadeKey((k) => k + 1);
+    setShowVideo(false);
   };
 
   // Keyboard navigation (works in RTL — left key moves to next in RTL semantics for images)

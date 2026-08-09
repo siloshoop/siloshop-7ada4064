@@ -254,6 +254,12 @@ const Product = () => {
                 {product.name}
               </h1>
 
+              <PlatformProductBadges
+                productType={(product as any).product_type}
+                shipsWithinDays={(product as any).ships_within_days}
+                className="pt-1"
+              />
+
               {/* Rating summary */}
               <div className="flex items-center gap-2 pt-1">
                 <div className="flex items-center gap-0.5">

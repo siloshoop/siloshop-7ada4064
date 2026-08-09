@@ -561,12 +561,28 @@ const Product = () => {
           />
         </div>
 
+        {/* Frequently bought together */}
+        <FrequentlyBoughtTogether
+          product={{
+            id: product.id,
+            name: product.name,
+            price: product.price,
+            image_url: product.image_url,
+            stock_quantity: product.stock_quantity,
+          }}
+          categoryId={product.category_id}
+          vendorId={product.vendor_id}
+        />
+
         {/* Similar Products Section */}
         <SimilarProducts 
           productId={id!} 
           categoryId={product.category_id} 
           vendorId={product.vendor_id} 
         />
+
+        {/* Recommended for you */}
+        <ProductRecommendations />
 
       </main>
 

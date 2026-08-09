@@ -110,6 +110,7 @@ const FrequentlyBoughtTogether = ({ product, categoryId, vendorId }: Props) => {
       src={item.image_url || "/placeholder.svg"}
       alt={item.name}
       loading="lazy"
+      decoding="async"
       className="h-20 w-20 rounded-xl border object-cover"
     />
   );

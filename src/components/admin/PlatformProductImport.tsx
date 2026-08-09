@@ -186,7 +186,7 @@ const PlatformProductImport = ({ open, onOpenChange, categories, brands, onImpor
               onChange={(e) => e.target.files?.[0] && parse(e.target.files[0])}
               className="max-w-sm"
             />
-            <Button type="button" variant="outline" onClick={downloadTemplate}>
+            <Button type="button" variant="outline" onClick={() => { void downloadTemplate(); }}>
               <Download className="h-4 w-4 ml-2" /> تحميل قالب
             </Button>
           </div>

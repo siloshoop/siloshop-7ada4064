@@ -5,7 +5,6 @@ import { supabase } from "@/integrations/supabase/client";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Loader2, Package, Eye, EyeOff, Truck } from "lucide-react";
 import OrderStatusBadge from "@/components/orders/OrderStatusBadge";
@@ -14,8 +13,6 @@ import ShippingInfoDialog from "@/components/orders/ShippingInfoDialog";
 import { allowedNextStatuses, changeOrderStatus, friendlyOrderError, normalizeStatus, type OrderStatus } from "@/lib/orderStatus";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
@@ -23,14 +20,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
 interface Order {
   id: string;
   created_at: string;
@@ -79,8 +68,6 @@ const VendorOrders = () => {
   // Shipping dialog state
   const [shippingDialogOpen, setShippingDialogOpen] = useState(false);
   const [pendingShipOrderId, setPendingShipOrderId] = useState<string | null>(null);
-  const [trackingNumber, setTrackingNumber] = useState("");
-  const [courierName, setCourierName] = useState("");
   
   const navigate = useNavigate();
   const { toast } = useToast();

@@ -106,9 +106,12 @@ describe("Homepage Smoke Test", () => {
     }, { timeout: 2000 });
   });
 
-  it("renders only the premium showroom and no legacy hero or ads", async () => {
+  it("renders the hero slider and local marketplace, and no legacy hero or ads", async () => {
     const { container } = renderHomepage();
-    await waitFor(() => expect(container.textContent).toContain("المعرض المميز"));
+    await waitFor(() => expect(container.textContent).toContain("🇸🇾 السوق المحلي"));
+    expect(container.textContent).toContain("تسوّق من متاجر سوريا في مكان واحد");
+    // Phase 2 section must stay completely hidden while the flag is off.
+    expect(container.textContent).not.toContain("منتجات مستوردة من تركيا");
     expect(container.textContent).not.toContain("تسوق من تشكيلة واسعة");
     expect(container.textContent).not.toContain("إعلان عريض");
     expect(container.textContent).not.toContain("إعلان ثابت");

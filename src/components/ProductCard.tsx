@@ -1,8 +1,9 @@
-import { Heart, Star, Scale, ShoppingCart, Eye } from "lucide-react";
+import { Heart, Star, Scale, ShoppingCart, Eye, Store } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { FavoriteButton } from "@/components/FavoriteButton";
+import ProductOriginBadge from "@/components/product/ProductOriginBadge";
 import { useToast } from "@/hooks/use-toast";
 import { useCompareProducts } from "@/hooks/useCompareProducts";
 import { useFlyToCart } from "@/components/FlyToCart";
@@ -21,6 +22,12 @@ interface ProductCardProps {
   discount?: number;
   shippingCost?: number;
   stockQuantity?: number | null;
+  /** Store (seller) display name */
+  storeName?: string | null;
+  /** "seller" (local) or "platform" (imported) */
+  productType?: string | null;
+  /** Preparation/shipping window in days */
+  shipsWithinDays?: number | null;
 }
 
 const ProductCard = memo(({
@@ -34,6 +41,9 @@ const ProductCard = memo(({
   discount,
   shippingCost,
   stockQuantity,
+  storeName,
+  productType,
+  shipsWithinDays,
 }: ProductCardProps) => {
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -225,7 +235,18 @@ const ProductCard = memo(({
         <h3 className="font-semibold text-xs leading-snug line-clamp-2 min-h-[2rem] text-foreground group-hover:text-primary transition-colors duration-300">
           {name}
         </h3>
-        
+
+        {/* Store name */}
+        {storeName && (
+          <p className="flex items-center gap-1 text-[10px] text-muted-foreground truncate">
+            <Store className="h-2.5 w-2.5 shrink-0" />
+            <span className="truncate">{storeName}</span>
+          </p>
+        )}
+
+        {/* Local seller / imported-from-Turkey badge */}
+        <ProductOriginBadge productType={productType} compact />
+
         <div className="flex items-center gap-1">
           <div className="flex text-amber-400">
             {[...Array(5)].map((_, i) => (
@@ -235,7 +256,9 @@ const ProductCard = memo(({
               />
             ))}
           </div>
-          <span className="text-[10px] text-muted-foreground">({reviews})</span>
+          <span className="text-[10px] text-muted-foreground">
+            {rating > 0 ? rating.toFixed(1) : "—"} ({reviews} تقييم)
+          </span>
         </div>
 
         <div className="flex items-baseline gap-1.5">
@@ -260,6 +283,14 @@ const ProductCard = memo(({
             <span className="text-green-600 dark:text-green-400 font-medium">🚚 شحن مجاني</span>
           )}
         </div>
+
+        <p className="text-[10px] text-muted-foreground">
+          {shipsWithinDays && shipsWithinDays > 0
+            ? `التوصيل خلال ${shipsWithinDays} أيام`
+            : productType === "platform"
+            ? "التوصيل خلال 7-14 يوم"
+            : "التوصيل خلال 1-3 أيام"}
+        </p>
 
         <Button
           className="w-full rounded-lg font-semibold text-xs h-8 shadow-sm hover:shadow-md transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] group/btn active:scale-95 disabled:opacity-60"

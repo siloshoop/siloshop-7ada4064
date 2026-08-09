@@ -1,12 +1,24 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { ChevronLeft, ChevronRight, X, ZoomIn, Maximize2 } from "lucide-react";
+import { ChevronLeft, ChevronRight, X, ZoomIn, Maximize2, Play } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 
 interface ImageGalleryProps {
   images: string[];
   productName: string;
+  /** Optional product video (mp4/webm URL or YouTube/Vimeo embed link). */
+  videoUrl?: string | null;
 }
+
+/** Converts a YouTube/Vimeo watch link into an embeddable URL; null for direct files. */
+const toEmbedUrl = (url?: string | null): string | null => {
+  if (!url) return null;
+  const yt = url.match(/(?:youtube\.com\/(?:watch\?v=|embed\/)|youtu\.be\/)([\w-]{6,})/);
+  if (yt) return `https://www.youtube.com/embed/${yt[1]}`;
+  const vimeo = url.match(/vimeo\.com\/(?:video\/)?(\d+)/);
+  if (vimeo) return `https://player.vimeo.com/video/${vimeo[1]}`;
+  return null;
+};
 
 /**
  * Premium product image gallery
@@ -16,15 +28,18 @@ interface ImageGalleryProps {
  *  - Lightbox with pinch-to-zoom on touch, wheel-zoom on desktop
  *  - Lazy-loaded images, fade transitions between slides
  */
-export const ImageGallery = ({ images, productName }: ImageGalleryProps) => {
+export const ImageGallery = ({ images, productName, videoUrl }: ImageGalleryProps) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isLightboxOpen, setIsLightboxOpen] = useState(false);
   const [isZooming, setIsZooming] = useState(false);
   const [zoomOrigin, setZoomOrigin] = useState({ x: 50, y: 50 });
   const [fadeKey, setFadeKey] = useState(0);
+  const [showVideo, setShowVideo] = useState(false);
   const swipeStart = useRef<{ x: number; y: number } | null>(null);
 
   const total = images.length;
+  const embedUrl = toEmbedUrl(videoUrl);
+  const isFile = !!videoUrl && !embedUrl;
 
   const goToPrevious = useCallback(() => {
     setCurrentIndex((prev) => (prev === 0 ? total - 1 : prev - 1));
@@ -39,6 +54,7 @@ export const ImageGallery = ({ images, productName }: ImageGalleryProps) => {
   const goToImage = (index: number) => {
     setCurrentIndex(index);
     setFadeKey((k) => k + 1);
+    setShowVideo(false);
   };
 
   // Keyboard navigation (works in RTL — left key moves to next in RTL semantics for images)
@@ -99,6 +115,25 @@ export const ImageGallery = ({ images, productName }: ImageGalleryProps) => {
           onMouseLeave={() => setIsZooming(false)}
           onMouseMove={onMouseMove}
         >
+          {showVideo && videoUrl ? (
+            embedUrl ? (
+              <iframe
+                src={embedUrl}
+                title={`${productName} - فيديو المنتج`}
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; picture-in-picture"
+                allowFullScreen
+                className="absolute inset-0 h-full w-full bg-black"
+              />
+            ) : (
+              <video
+                src={videoUrl}
+                controls
+                playsInline
+                preload="metadata"
+                className="absolute inset-0 h-full w-full bg-black object-contain"
+              />
+            )
+          ) : (
           <img
             key={fadeKey}
             src={images[currentIndex]}
@@ -116,19 +151,22 @@ export const ImageGallery = ({ images, productName }: ImageGalleryProps) => {
                 : undefined
             }
           />
+          )}
 
           {/* Fullscreen button */}
           <Button
             variant="secondary"
             size="icon"
             aria-label="عرض بالحجم الكامل"
-            className="absolute top-3 left-3 h-9 w-9 rounded-full opacity-0 group-hover:opacity-100 transition-opacity backdrop-blur"
+            className={`absolute top-3 left-3 h-9 w-9 rounded-full opacity-0 group-hover:opacity-100 transition-opacity backdrop-blur ${
+              showVideo ? "hidden" : ""
+            }`}
             onClick={() => setIsLightboxOpen(true)}
           >
             <Maximize2 className="h-4 w-4" />
           </Button>
 
-          {total > 1 && (
+          {total > 1 && !showVideo && (
             <>
               <Button
                 variant="secondary"
@@ -167,8 +205,30 @@ export const ImageGallery = ({ images, productName }: ImageGalleryProps) => {
         </div>
 
         {/* Thumbnails: vertical on desktop, horizontal on mobile */}
-        {total > 1 && (
+        {(total > 1 || !!videoUrl) && (
           <div className="flex md:flex-col gap-2 md:w-20 overflow-x-auto md:overflow-y-auto md:max-h-[520px] scrollbar-hide">
+            {!!videoUrl && (
+              <button
+                onClick={() => setShowVideo(true)}
+                aria-label="تشغيل فيديو المنتج"
+                aria-current={showVideo}
+                className={`relative shrink-0 w-16 h-16 md:w-full md:h-20 rounded-lg overflow-hidden border transition-all ${
+                  showVideo
+                    ? "border-primary ring-2 ring-primary/40"
+                    : "border-border/60 opacity-80 hover:opacity-100"
+                }`}
+              >
+                <img
+                  src={images[0]}
+                  alt={`${productName} فيديو`}
+                  loading="lazy"
+                  className="h-full w-full object-cover"
+                />
+                <span className="absolute inset-0 flex items-center justify-center bg-foreground/45">
+                  <Play className="h-5 w-5 fill-background text-background" />
+                </span>
+              </button>
+            )}
             {images.map((image, index) => (
               <button
                 key={index}

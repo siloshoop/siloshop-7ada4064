@@ -1358,10 +1358,12 @@ export type Database = {
           sizes: string[]
           sku: string | null
           source: string
+          specs: Json
           stock_quantity: number | null
           subcategory_id: string | null
           updated_at: string | null
           vendor_id: string
+          video_url: string | null
           weight: number | null
         }
         Insert: {
@@ -1391,10 +1393,12 @@ export type Database = {
           sizes?: string[]
           sku?: string | null
           source?: string
+          specs?: Json
           stock_quantity?: number | null
           subcategory_id?: string | null
           updated_at?: string | null
           vendor_id: string
+          video_url?: string | null
           weight?: number | null
         }
         Update: {
@@ -1424,10 +1428,12 @@ export type Database = {
           sizes?: string[]
           sku?: string | null
           source?: string
+          specs?: Json
           stock_quantity?: number | null
           subcategory_id?: string | null
           updated_at?: string | null
           vendor_id?: string
+          video_url?: string | null
           weight?: number | null
         }
         Relationships: [

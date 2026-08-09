@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import ProductCard from "./ProductCard";
 import { Loader2 } from "lucide-react";
+import { useVendorNames } from "@/hooks/useVendorNames";
 
 interface SimilarProductsProps {
   productId: string;
@@ -16,19 +17,25 @@ interface Product {
   original_price: number | null;
   image_url: string | null;
   vendor_id: string;
+  product_type?: string | null;
+  ships_within_days?: number | null;
+  shipping_cost?: number | null;
   reviews: { rating: number }[];
 }
 
 const SimilarProducts = ({ productId, categoryId, vendorId }: SimilarProductsProps) => {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
+  const storeNames = useVendorNames(products.map((p) => p.vendor_id));
 
   useEffect(() => {
     const fetchSimilarProducts = async () => {
       try {
         let query = supabase
           .from("products")
-          .select("id, name, price, original_price, image_url, vendor_id, reviews(rating)")
+          .select(
+            "id, name, price, original_price, image_url, vendor_id, product_type, ships_within_days, shipping_cost, reviews(rating)",
+          )
           .eq("is_active", true)
           .neq("id", productId)
           .limit(8);
@@ -46,7 +53,9 @@ const SimilarProducts = ({ productId, categoryId, vendorId }: SimilarProductsPro
         if ((!data || data.length < 4) && vendorId) {
           const { data: vendorProducts } = await supabase
             .from("products")
-            .select("id, name, price, original_price, image_url, vendor_id, reviews(rating)")
+            .select(
+              "id, name, price, original_price, image_url, vendor_id, product_type, ships_within_days, shipping_cost, reviews(rating)",
+            )
             .eq("is_active", true)
             .eq("vendor_id", vendorId)
             .neq("id", productId)
@@ -80,7 +89,7 @@ const SimilarProducts = ({ productId, categoryId, vendorId }: SimilarProductsPro
 
   return (
     <section className="mt-12">
-      <h2 className="text-2xl font-bold mb-6">منتجات مشابهة</h2>
+      <h2 className="mb-6 text-xl font-bold md:text-2xl">منتجات ذات صلة</h2>
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {products.map((product) => {
           const avgRating = product.reviews && product.reviews.length > 0
@@ -101,6 +110,10 @@ const SimilarProducts = ({ productId, categoryId, vendorId }: SimilarProductsPro
               rating={avgRating}
               reviews={product.reviews?.length || 0}
               discount={discount}
+              storeName={storeNames[product.vendor_id]}
+              productType={product.product_type}
+              shipsWithinDays={product.ships_within_days}
+              shippingCost={product.shipping_cost ?? undefined}
             />
           );
         })}

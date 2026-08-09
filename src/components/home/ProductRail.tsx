@@ -4,6 +4,7 @@ import { Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import ProductCard from "@/components/ProductCard";
 import SectionHeader from "@/components/home/SectionHeader";
+import { useVendorNames } from "@/hooks/useVendorNames";
 
 export type RailVariant = "new_arrivals" | "todays_offers";
 
@@ -16,6 +17,9 @@ interface ProductRow {
   image_url: string;
   shipping_cost: number | null;
   stock_quantity: number | null;
+  vendor_id: string;
+  product_type: string | null;
+  ships_within_days: number | null;
   reviews: { rating: number }[] | null;
 }
 
@@ -31,7 +35,7 @@ interface ProductRailProps {
 }
 
 const SELECT =
-  "id, name, price, original_price, discount_price, image_url, shipping_cost, stock_quantity, reviews(rating)";
+  "id, name, price, original_price, discount_price, image_url, shipping_cost, stock_quantity, vendor_id, product_type, ships_within_days, reviews(rating)";
 
 const ProductRail = ({
   variant,
@@ -46,6 +50,7 @@ const ProductRail = ({
   const [products, setProducts] = useState<ProductRow[]>([]);
   const [loading, setLoading] = useState(true);
   const sectionRef = useRef<HTMLElement>(null);
+  const storeNames = useVendorNames(products.map((p) => p.vendor_id));
 
   useEffect(() => {
     let cancelled = false;
@@ -126,6 +131,9 @@ const ProductRail = ({
                     reviews={ratings.length}
                     shippingCost={product.shipping_cost ?? undefined}
                     stockQuantity={product.stock_quantity}
+                    storeName={storeNames[product.vendor_id]}
+                    productType={product.product_type}
+                    shipsWithinDays={product.ships_within_days}
                     discount={
                       base && base > effectivePrice
                         ? Math.round(((base - effectivePrice) / base) * 100)

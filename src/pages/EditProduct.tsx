@@ -33,6 +33,7 @@ const EditProduct = () => {
     stock_quantity: "",
     shipping_cost: "0",
     ships_within_days: "",
+    video_url: "",
     category_id: "",
     subcategory_id: "",
     is_active: true,
@@ -79,6 +80,7 @@ const EditProduct = () => {
               stock_quantity: product.stock_quantity?.toString() || "0",
               shipping_cost: (product as any).shipping_cost?.toString() || "0",
               ships_within_days: (product as any).ships_within_days?.toString() || "",
+              video_url: (product as any).video_url || "",
               category_id: product.category_id || "",
               subcategory_id: product.subcategory_id || "",
               is_active: product.is_active ?? true,
@@ -256,6 +258,7 @@ const EditProduct = () => {
           stock_quantity: parseInt(formData.stock_quantity),
           shipping_cost: parseFloat(formData.shipping_cost) || 0,
           ships_within_days: formData.ships_within_days ? parseInt(formData.ships_within_days) : null,
+          video_url: formData.video_url.trim() || null,
           category_id: formData.category_id || null,
           subcategory_id: formData.subcategory_id || null,
           image_url: allImages[0],
@@ -414,6 +417,21 @@ const EditProduct = () => {
                   placeholder="مثال: 3"
                 />
                 <p className="text-xs text-muted-foreground">تُعرض للمشتري كـ «يشحن خلال X أيام».</p>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="video_url">رابط فيديو المنتج (اختياري)</Label>
+                <Input
+                  id="video_url"
+                  type="url"
+                  inputMode="url"
+                  value={formData.video_url}
+                  onChange={(e) => setFormData({ ...formData, video_url: e.target.value })}
+                  placeholder="https://youtube.com/watch?v=... أو رابط mp4"
+                />
+                <p className="text-xs text-muted-foreground">
+                  يظهر الفيديو داخل معرض صور المنتج (يوتيوب، فيميو، أو ملف mp4).
+                </p>
               </div>
 
               <div className="space-y-2">

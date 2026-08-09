@@ -16,6 +16,7 @@ import { Link } from "react-router-dom";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { SYRIAN_GOVERNORATES } from "@/lib/syrianGovernorates";
 import ReturnsPolicyNote from "@/components/ReturnsPolicyNote";
+import { useFeatureFlags } from "@/hooks/useFeatureFlags";
 
 const checkoutSchema = z.object({
   phone: z.string()
@@ -63,6 +64,7 @@ const Checkout = () => {
   const [shamSettings, setShamSettings] = useState<PlatformPaymentSettings | null>(null);
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { isEnabled } = useFeatureFlags();
 
   const [formData, setFormData] = useState({
     phone: "",

@@ -86,6 +86,7 @@ const Privacy = lazy(() => import("./pages/Privacy"));
 const Terms = lazy(() => import("./pages/Terms"));
 const GuestTrack = lazy(() => import("./pages/GuestTrack"));
 import RequireRole from "@/components/RequireRole";
+const RequireApprovedSeller = lazy(() => import("@/components/seller/RequireApprovedSeller"));
 
 const queryClient = new QueryClient(); // App query client
 
@@ -110,13 +111,13 @@ const App = () => (
             <Route path="/auth" element={<Auth />} />
             <Route path="/verify-email" element={<VerifyEmail />} />
             <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/dashboard/add-product" element={<RequireRole role="vendor"><AddProduct /></RequireRole>} />
-            <Route path="/dashboard/edit-product/:id" element={<RequireRole role="vendor"><EditProduct /></RequireRole>} />
-            <Route path="/dashboard/coupons" element={<RequireRole role="vendor"><ManageCoupons /></RequireRole>} />
+            <Route path="/dashboard/add-product" element={<RequireApprovedSeller><AddProduct /></RequireApprovedSeller>} />
+            <Route path="/dashboard/edit-product/:id" element={<RequireApprovedSeller><EditProduct /></RequireApprovedSeller>} />
+            <Route path="/dashboard/coupons" element={<RequireApprovedSeller><ManageCoupons /></RequireApprovedSeller>} />
             <Route path="/dashboard/subcategories" element={<RequireRole role={["vendor","admin"]}><ManageSubcategories /></RequireRole>} />
-            <Route path="/dashboard/statistics" element={<RequireRole role="vendor"><Statistics /></RequireRole>} />
-            <Route path="/dashboard/orders" element={<RequireRole role="vendor"><VendorOrders /></RequireRole>} />
-            <Route path="/dashboard/deals" element={<RequireRole role="vendor"><ManageDeals /></RequireRole>} />
+            <Route path="/dashboard/statistics" element={<RequireApprovedSeller><Statistics /></RequireApprovedSeller>} />
+            <Route path="/dashboard/orders" element={<RequireApprovedSeller><VendorOrders /></RequireApprovedSeller>} />
+            <Route path="/dashboard/deals" element={<RequireApprovedSeller><ManageDeals /></RequireApprovedSeller>} />
             <Route path="/dashboard/announcements" element={<RequireRole role={["vendor","admin"]}><ManageAnnouncements /></RequireRole>} />
             <Route path="/dashboard/users" element={<RequireRole role="admin"><ManageUsers /></RequireRole>} />
             <Route path="/dashboard/activity-logs" element={<RequireRole role="admin"><ActivityLogs /></RequireRole>} />

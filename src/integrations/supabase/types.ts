@@ -1978,6 +1978,54 @@ export type Database = {
         }
         Relationships: []
       }
+      seller_violations: {
+        Row: {
+          created_at: string
+          id: string
+          issued_by: string | null
+          reason: string | null
+          reason_code: string
+          related_id: string | null
+          related_type: string | null
+          revoked_at: string | null
+          revoked_by: string | null
+          severity: string
+          status: string
+          updated_at: string
+          vendor_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          issued_by?: string | null
+          reason?: string | null
+          reason_code: string
+          related_id?: string | null
+          related_type?: string | null
+          revoked_at?: string | null
+          revoked_by?: string | null
+          severity?: string
+          status?: string
+          updated_at?: string
+          vendor_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          issued_by?: string | null
+          reason?: string | null
+          reason_code?: string
+          related_id?: string | null
+          related_type?: string | null
+          revoked_at?: string | null
+          revoked_by?: string | null
+          severity?: string
+          status?: string
+          updated_at?: string
+          vendor_id?: string
+        }
+        Relationships: []
+      }
       sham_cash_merchant_config: {
         Row: {
           api_base_url: string | null
@@ -2391,6 +2439,17 @@ export type Database = {
         Args: { _reason: string; _review_id: string }
         Returns: undefined
       }
+      admin_issue_violation: {
+        Args: {
+          _reason?: string
+          _reason_code: string
+          _related_id?: string
+          _related_type?: string
+          _severity: string
+          _vendor_id: string
+        }
+        Returns: string
+      }
       admin_list_conversations: {
         Args: {
           _filter?: string
@@ -2514,6 +2573,10 @@ export type Database = {
       }
       admin_refund_order: {
         Args: { _order_id: string; _reason: string }
+        Returns: undefined
+      }
+      admin_revoke_violation: {
+        Args: { _note?: string; _violation_id: string }
         Returns: undefined
       }
       admin_search_showroom_products: {

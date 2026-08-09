@@ -2182,6 +2182,53 @@ export type Database = {
         }
         Relationships: []
       }
+      stock_movements: {
+        Row: {
+          created_at: string
+          delta: number
+          id: string
+          note: string | null
+          performed_by: string | null
+          product_id: string
+          quantity_after: number | null
+          quantity_before: number | null
+          reason: string
+          vendor_id: string
+        }
+        Insert: {
+          created_at?: string
+          delta: number
+          id?: string
+          note?: string | null
+          performed_by?: string | null
+          product_id: string
+          quantity_after?: number | null
+          quantity_before?: number | null
+          reason?: string
+          vendor_id: string
+        }
+        Update: {
+          created_at?: string
+          delta?: number
+          id?: string
+          note?: string | null
+          performed_by?: string | null
+          product_id?: string
+          quantity_after?: number | null
+          quantity_before?: number | null
+          reason?: string
+          vendor_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "stock_movements_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       subcategories: {
         Row: {
           category_id: string

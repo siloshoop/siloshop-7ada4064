@@ -347,6 +347,8 @@ const Orders = () => {
                         <img
                           src={item.product?.image_url || "/placeholder.svg"}
                           alt={item.product?.name || "منتج"}
+                          loading="lazy"
+                          decoding="async"
                           className="w-16 h-16 object-cover rounded-lg"
                         />
                         <div className="flex-1">

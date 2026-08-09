@@ -860,6 +860,30 @@ const Dashboard = () => {
                     <Heart className="h-5 w-5" />
                     <span>المفضلة</span>
                   </Button>
+                  <Button variant="outline" className="h-20 flex-col gap-1" onClick={() => navigate("/wishlist")}>
+                    <ListChecks className="h-5 w-5" />
+                    <span>قوائم الرغبات</span>
+                  </Button>
+                  <Button variant="outline" className="h-20 flex-col gap-1" onClick={() => navigate("/compare")}>
+                    <ArrowLeftRight className="h-5 w-5" />
+                    <span>مقارنة المنتجات</span>
+                  </Button>
+                  <Button variant="outline" className="h-20 flex-col gap-1" onClick={() => navigate("/followed-stores")}>
+                    <Store className="h-5 w-5" />
+                    <span>متاجر أتابعها</span>
+                  </Button>
+                  <Button variant="outline" className="h-20 flex-col gap-1" onClick={() => navigate("/followed-brands")}>
+                    <Tag className="h-5 w-5" />
+                    <span>ماركات أتابعها</span>
+                  </Button>
+                  <Button variant="outline" className="h-20 flex-col gap-1" onClick={() => navigate("/notifications")}>
+                    <Bell className="h-5 w-5" />
+                    <span>الإشعارات</span>
+                  </Button>
+                  <Button variant="outline" className="h-20 flex-col gap-1" onClick={() => navigate("/my-returns")}>
+                    <RotateCcw className="h-5 w-5" />
+                    <span>طلبات الإرجاع</span>
+                  </Button>
                   <Button variant="outline" className="h-20 flex-col gap-1" onClick={() => navigate("/messages")}>
                     <MessageSquare className="h-5 w-5" />
                     <span>الرسائل</span>

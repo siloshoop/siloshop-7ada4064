@@ -2,7 +2,8 @@ import React, { useState, useEffect, useCallback, Fragment, lazy, Suspense } fro
 import { useSearchParams } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import AnnouncementBar from "@/components/AnnouncementBar";
-import PremiumShowroom from "@/components/PremiumShowroom";
+import HeroSlider from "@/components/home/HeroSlider";
+import LocalMarketplaceBanner from "@/components/home/LocalMarketplaceBanner";
 import { SearchFilters } from "@/components/SearchFilters";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2 } from "lucide-react";
@@ -15,12 +16,13 @@ import SectionErrorBoundary from "@/components/SectionErrorBoundary";
 import LazySection from "@/components/LazySection";
 
 // Below-fold sections are lazy loaded to improve initial performance
+const TurkeyMarketplace = lazy(() => import("@/components/home/TurkeyMarketplace"));
+const ProductRail = lazy(() => import("@/components/home/ProductRail"));
+const FeaturedStores = lazy(() => import("@/components/home/FeaturedStores"));
 const PopularCategories = lazy(() => import("@/components/PopularCategories"));
 const BestSellers = lazy(() => import("@/components/BestSellers"));
-const FeaturedProducts = lazy(() => import("@/components/FeaturedProducts"));
 const ProductRecommendations = lazy(() => import("@/components/ProductRecommendations"));
 const EnhancedDailyDeals = lazy(() => import("@/components/EnhancedDailyDeals"));
-const PurchasedRecently = lazy(() => import("@/components/PurchasedRecently"));
 const RecentlyViewed = lazy(() => import("@/components/RecentlyViewed"));
 
 interface Product {

@@ -325,28 +325,36 @@ const VendorOrders = () => {
 
                             {/* Status Update Section */}
                             <div className="border-t pt-4 mt-4">
-                              <div className="flex items-center gap-4">
+                              <div className="flex flex-wrap items-center gap-3">
                                 <p className="text-sm font-medium">تحديث الحالة:</p>
                                 <Select
-                                  value={order.status}
+                                  value=""
                                   onValueChange={(value) => handleStatusChange(order.id, value)}
                                   disabled={updatingStatus === order.id}
                                 >
                                   <SelectTrigger className="w-[180px]">
-                                    <SelectValue placeholder="اختر الحالة" />
+                                    <SelectValue placeholder="اختر الحالة التالية" />
                                   </SelectTrigger>
                                   <SelectContent className="bg-background">
-                                    <SelectItem value="pending">قيد الانتظار</SelectItem>
-                                    <SelectItem value="processing">قيد المعالجة</SelectItem>
-                                    <SelectItem value="shipped">تم الشحن</SelectItem>
-                                    <SelectItem value="delivered">تم التوصيل</SelectItem>
-                                    <SelectItem value="cancelled">ملغى</SelectItem>
+                                    {allowedNextStatuses(order.status, "seller").map((s) => (
+                                      <SelectItem key={s.key} value={s.key}>{s.label}</SelectItem>
+                                    ))}
                                   </SelectContent>
                                 </Select>
+                                <Button variant="outline" size="sm" className="gap-2"
+                                  onClick={() => openShippingDialog(order.id)}>
+                                  <Truck className="h-4 w-4" />
+                                  معلومات الشحن
+                                </Button>
                                 {updatingStatus === order.id && (
                                   <Loader2 className="h-4 w-4 animate-spin" />
                                 )}
                               </div>
+                            </div>
+
+                            <div className="border-t pt-4">
+                              <p className="text-sm font-medium mb-3">سجل الطلب</p>
+                              <OrderTimelineLog orderId={order.id} />
                             </div>
                           </div>
                         </CardContent>

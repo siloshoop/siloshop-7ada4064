@@ -33,9 +33,10 @@ import {
 } from "@/components/ui/sheet";
 import { 
   Loader2, Search as SearchIcon, SlidersHorizontal, Star, X, Tag, 
-  DollarSign, User, Layers, ArrowUpDown, RotateCcw, Gem 
+  DollarSign, User, Layers, ArrowUpDown, RotateCcw, Gem, Globe, Truck, Palette, Ruler, Percent
 } from "lucide-react";
 import { matchesSearchTerm } from "@/lib/search";
+import { addRecentSearch } from "@/lib/searchHistory";
 
 interface Product {
   id: string;
@@ -48,6 +49,10 @@ interface Product {
   subcategory_id: string | null;
   stock_quantity: number | null;
   shipping_cost?: number;
+  product_type?: string | null;
+  ships_within_days?: number | null;
+  colors?: string[] | null;
+  sizes?: string[] | null;
   reviews: { rating: number }[];
 }
 
@@ -85,6 +90,14 @@ interface Filters {
   hasDiscount: boolean;
   inStock: boolean;
   freeShipping: boolean;
+  colors: string[];
+  sizes: string[];
+  /** "" = all, "local" = Syria (seller), "turkey" = platform imports */
+  country: string;
+  /** Max preparation/shipping days; 0 = any */
+  maxDeliveryDays: number;
+  /** Minimum discount percentage; 0 = any */
+  minDiscount: number;
 }
 
 const defaultFilters: Filters = {
@@ -100,9 +113,24 @@ const defaultFilters: Filters = {
   hasDiscount: false,
   inStock: false,
   freeShipping: false,
+  colors: [],
+  sizes: [],
+  country: "",
+  maxDeliveryDays: 0,
+  minDiscount: 0,
 };
 
-const FILTERS_STORAGE_KEY = "search_filters_v1";
+const FILTERS_STORAGE_KEY = "search_filters_v2";
+
+const DELIVERY_OPTIONS = [
+  { value: 0, label: "أي مدة" },
+  { value: 2, label: "خلال يومين" },
+  { value: 3, label: "خلال 3 أيام" },
+  { value: 7, label: "خلال أسبوع" },
+  { value: 14, label: "خلال أسبوعين" },
+];
+
+const DISCOUNT_OPTIONS = [10, 25, 50, 70];
 
 const loadStoredFilters = (): Partial<Filters> | null => {
   try {

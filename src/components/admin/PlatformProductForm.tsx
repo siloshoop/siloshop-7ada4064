@@ -128,24 +128,33 @@ const PlatformProductForm = ({ open, onOpenChange, product, onSaved, categories,
 
   const save = async () => {
     if (!user) return;
-    if (!form.name.trim() || !form.price || form.price <= 0) {
-      toast({ title: "خطأ", description: "الاسم والسعر مطلوبان", variant: "destructive" });
+    const parsed = productNumbersSchema.safeParse({
+      name: form.name,
+      price: form.price,
+      discount_price: form.discount_price,
+      stock_quantity: form.stock_quantity ?? 0,
+      weight: form.weight,
+      sku: form.sku,
+    });
+    if (!parsed.success) {
+      toast({ title: "بيانات غير صالحة", description: firstIssue(parsed.error), variant: "destructive" });
       return;
     }
+    const values = parsed.data;
     setSaving(true);
     const payload: any = {
-      name: form.name.trim(),
-      sku: form.sku?.trim() || null,
+      name: values.name,
+      sku: values.sku ?? null,
       brand_id: form.brand_id,
       category_id: form.category_id,
       description: form.description?.trim() || null,
-      price: form.price,
-      discount_price: form.discount_price,
+      price: values.price,
+      discount_price: values.discount_price ?? null,
       currency: form.currency || "SYP",
-      stock_quantity: form.stock_quantity || 0,
+      stock_quantity: values.stock_quantity ?? 0,
       sizes: form.sizes,
       colors: form.colors,
-      weight: form.weight,
+      weight: values.weight ?? null,
       image_url: form.image_url,
       images: form.images,
       is_active: form.is_active,
@@ -160,7 +169,7 @@ const PlatformProductForm = ({ open, onOpenChange, product, onSaved, categories,
     const { error } = await q;
     setSaving(false);
     if (error) {
-      toast({ title: "خطأ", description: error.message, variant: "destructive" });
+      toast({ title: "خطأ", description: friendlyDbError(error), variant: "destructive" });
       return;
     }
     toast({ title: "تم الحفظ", description: "تم حفظ المنتج بنجاح" });

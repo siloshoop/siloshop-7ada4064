@@ -2,6 +2,7 @@ import { ShoppingCart, Search, Menu, Heart, User, LogOut, LayoutDashboard, Slide
 import { useFlyToCart } from "@/components/FlyToCart";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import SearchAutocomplete from "@/components/search/SearchAutocomplete";
 import { NotificationsDropdown } from "@/components/NotificationsDropdown";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import PushNotificationManager from "@/components/PushNotificationManager";
@@ -176,23 +177,7 @@ const Navbar = () => {
 
         {/* Center - Search */}
         <div className="flex-1 max-w-2xl flex items-center gap-2">
-          <form className="relative flex-1" onSubmit={(e) => {
-            e.preventDefault();
-            const input = e.currentTarget.querySelector('input');
-            const value = input?.value;
-            if (value) {
-              input?.blur();
-              navigate(`/search?q=${encodeURIComponent(value)}`);
-            }
-          }}>
-            <Search className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input
-              type="search"
-              placeholder="ابحث عن المنتجات..."
-              className="pr-10 w-full"
-              enterKeyHint="search"
-            />
-          </form>
+          <SearchAutocomplete className="flex-1" />
           <Button 
             variant="outline" 
             size="icon"

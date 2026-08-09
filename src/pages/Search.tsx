@@ -33,9 +33,10 @@ import {
 } from "@/components/ui/sheet";
 import { 
   Loader2, Search as SearchIcon, SlidersHorizontal, Star, X, Tag, 
-  DollarSign, User, Layers, ArrowUpDown, RotateCcw, Gem 
+  DollarSign, User, Layers, ArrowUpDown, RotateCcw, Gem, Globe, Truck, Palette, Ruler, Percent
 } from "lucide-react";
 import { matchesSearchTerm } from "@/lib/search";
+import { addRecentSearch } from "@/lib/searchHistory";
 
 interface Product {
   id: string;
@@ -48,6 +49,10 @@ interface Product {
   subcategory_id: string | null;
   stock_quantity: number | null;
   shipping_cost?: number;
+  product_type?: string | null;
+  ships_within_days?: number | null;
+  colors?: string[] | null;
+  sizes?: string[] | null;
   reviews: { rating: number }[];
 }
 
@@ -85,6 +90,14 @@ interface Filters {
   hasDiscount: boolean;
   inStock: boolean;
   freeShipping: boolean;
+  colors: string[];
+  sizes: string[];
+  /** "" = all, "local" = Syria (seller), "turkey" = platform imports */
+  country: string;
+  /** Max preparation/shipping days; 0 = any */
+  maxDeliveryDays: number;
+  /** Minimum discount percentage; 0 = any */
+  minDiscount: number;
 }
 
 const defaultFilters: Filters = {
@@ -100,9 +113,24 @@ const defaultFilters: Filters = {
   hasDiscount: false,
   inStock: false,
   freeShipping: false,
+  colors: [],
+  sizes: [],
+  country: "",
+  maxDeliveryDays: 0,
+  minDiscount: 0,
 };
 
-const FILTERS_STORAGE_KEY = "search_filters_v1";
+const FILTERS_STORAGE_KEY = "search_filters_v2";
+
+const DELIVERY_OPTIONS = [
+  { value: 0, label: "أي مدة" },
+  { value: 2, label: "خلال يومين" },
+  { value: 3, label: "خلال 3 أيام" },
+  { value: 7, label: "خلال أسبوع" },
+  { value: 14, label: "خلال أسبوعين" },
+];
+
+const DISCOUNT_OPTIONS = [10, 25, 50, 70];
 
 const loadStoredFilters = (): Partial<Filters> | null => {
   try {
@@ -125,6 +153,9 @@ const SearchPage = () => {
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
   const [salesCounts, setSalesCounts] = useState<Map<string, number>>(new Map());
   const urlSearchQuery = searchParams.get("q")?.trim() || "";
+  const urlBrandId = searchParams.get("brand")?.trim() || "";
+  const [availableColors, setAvailableColors] = useState<string[]>([]);
+  const [availableSizes, setAvailableSizes] = useState<string[]>([]);
 
   const [filters, setFilters] = useState<Filters>(() => {
     const stored = loadStoredFilters();
@@ -133,8 +164,12 @@ const SearchPage = () => {
       ...(stored || {}),
       // URL search query always wins on initial load if provided
       search: urlSearchQuery || stored?.search || "",
+      brandIds: urlBrandId ? [urlBrandId] : stored?.brandIds ?? [],
     };
   });
+
+  /** Uncontrolled-feel input with debounced commit, so typing stays fast. */
+  const [searchInput, setSearchInput] = useState(() => urlSearchQuery);
 
   const [priceRange, setPriceRange] = useState<number[]>(() => {
     const stored = loadStoredFilters();
@@ -164,6 +199,21 @@ const SearchPage = () => {
       if (subcategoriesRes.data) setSubcategories(subcategoriesRes.data);
       if (vendorsRes.data) setVendors(vendorsRes.data as Vendor[]);
       if (brandsRes.data) setBrands(brandsRes.data);
+
+      // Collect the color/size vocabulary actually used by live products.
+      const { data: variantRows } = await supabase
+        .from("products")
+        .select("colors, sizes")
+        .eq("is_active", true)
+        .limit(1000);
+      const colorSet = new Set<string>();
+      const sizeSet = new Set<string>();
+      (variantRows ?? []).forEach((row: any) => {
+        (row.colors ?? []).forEach((c: string) => c && colorSet.add(c));
+        (row.sizes ?? []).forEach((s: string) => s && sizeSet.add(s));
+      });
+      setAvailableColors([...colorSet].sort());
+      setAvailableSizes([...sizeSet].sort());
     };
 
     fetchFilterData();
@@ -178,7 +228,18 @@ const SearchPage = () => {
             search: urlSearchQuery,
           }
     ));
+    setSearchInput(urlSearchQuery);
   }, [urlSearchQuery]);
+
+  // Debounced live search: commit the typed term after a short pause.
+  useEffect(() => {
+    if (searchInput === filters.search) return;
+    const timer = window.setTimeout(() => {
+      setFilters((prev) => ({ ...prev, search: searchInput }));
+      if (searchInput.trim().length >= 2) addRecentSearch(searchInput);
+    }, 300);
+    return () => window.clearTimeout(timer);
+  }, [searchInput, filters.search]);
 
   // Search products when filters change
   useEffect(() => {
@@ -208,7 +269,9 @@ const SearchPage = () => {
     try {
       let query = supabase
         .from("products")
-        .select("id, name, price, original_price, image_url, vendor_id, category_id, subcategory_id, stock_quantity, shipping_cost, reviews(rating)", { count: "exact" })
+        .select(
+          "id, name, price, original_price, image_url, vendor_id, category_id, subcategory_id, stock_quantity, shipping_cost, product_type, ships_within_days, colors, sizes, reviews(rating)",
+        )
         .eq("is_active", true);
 
       // Price range
@@ -249,6 +312,26 @@ const SearchPage = () => {
         query = query.eq("shipping_cost", 0);
       }
 
+      // Country of origin (local seller vs. imported platform products)
+      if (filters.country === "local") {
+        query = query.eq("product_type", "seller");
+      } else if (filters.country === "turkey") {
+        query = query.eq("product_type", "platform");
+      }
+
+      // Color / size variants
+      if (filters.colors.length > 0) {
+        query = query.overlaps("colors", filters.colors);
+      }
+      if (filters.sizes.length > 0) {
+        query = query.overlaps("sizes", filters.sizes);
+      }
+
+      // Delivery time
+      if (filters.maxDeliveryDays > 0) {
+        query = query.lte("ships_within_days", filters.maxDeliveryDays);
+      }
+
       // Sorting
       switch (filters.sortBy) {
         case "price_asc":
@@ -273,11 +356,20 @@ const SearchPage = () => {
           query = query.order("created_at", { ascending: false });
       }
 
-      const { data, error } = await query;
+      // Cap the result window so search stays fast on large catalogs.
+      const { data, error } = await query.limit(120);
 
       if (error) throw error;
 
       let filteredProducts = (data || []) as Product[];
+
+      // Minimum discount percentage (computed field)
+      if (filters.minDiscount > 0) {
+        filteredProducts = filteredProducts.filter((p) => {
+          if (!p.original_price || p.original_price <= p.price) return false;
+          return ((p.original_price - p.price) / p.original_price) * 100 >= filters.minDiscount;
+        });
+      }
 
       if (filters.search.trim()) {
         filteredProducts = filteredProducts.filter((product) =>
@@ -334,6 +426,16 @@ const SearchPage = () => {
     });
   };
 
+  const toggleVariant = (key: "colors" | "sizes", value: string) => {
+    setFilters((prev) => {
+      const list = prev[key];
+      return {
+        ...prev,
+        [key]: list.includes(value) ? list.filter((v) => v !== value) : [...list, value],
+      };
+    });
+  };
+
   const applyPriceRange = () => {
     setFilters((prev) => ({
       ...prev,
@@ -345,6 +447,7 @@ const SearchPage = () => {
   const resetFilters = () => {
     setFilters(defaultFilters);
     setPriceRange([0, 10000000]);
+    setSearchInput("");
     try {
       localStorage.removeItem(FILTERS_STORAGE_KEY);
     } catch {
@@ -361,7 +464,12 @@ const SearchPage = () => {
     (filters.hasDiscount ? 1 : 0) +
     (filters.inStock ? 1 : 0) +
     (filters.minPrice > 0 || filters.maxPrice < 10000000 ? 1 : 0) +
-    (filters.freeShipping ? 1 : 0);
+    (filters.freeShipping ? 1 : 0) +
+    filters.colors.length +
+    filters.sizes.length +
+    (filters.country ? 1 : 0) +
+    (filters.maxDeliveryDays > 0 ? 1 : 0) +
+    (filters.minDiscount > 0 ? 1 : 0);
 
   const getAverageRating = (reviews: { rating: number }[]) => {
     if (!reviews || reviews.length === 0) return 0;
@@ -434,6 +542,36 @@ const SearchPage = () => {
               <Badge variant="secondary" className="gap-1">
                 شحن مجاني
                 <X className="h-3 w-3 cursor-pointer" onClick={() => updateFilter("freeShipping", false)} />
+              </Badge>
+            )}
+            {filters.country && (
+              <Badge variant="secondary" className="gap-1">
+                {filters.country === "local" ? "🇸🇾 سوريا" : "🇹🇷 تركيا"}
+                <X className="h-3 w-3 cursor-pointer" onClick={() => updateFilter("country", "")} />
+              </Badge>
+            )}
+            {filters.colors.map((color) => (
+              <Badge key={color} variant="secondary" className="gap-1">
+                {color}
+                <X className="h-3 w-3 cursor-pointer" onClick={() => toggleVariant("colors", color)} />
+              </Badge>
+            ))}
+            {filters.sizes.map((size) => (
+              <Badge key={size} variant="secondary" className="gap-1">
+                مقاس {size}
+                <X className="h-3 w-3 cursor-pointer" onClick={() => toggleVariant("sizes", size)} />
+              </Badge>
+            ))}
+            {filters.maxDeliveryDays > 0 && (
+              <Badge variant="secondary" className="gap-1">
+                توصيل ≤ {filters.maxDeliveryDays} أيام
+                <X className="h-3 w-3 cursor-pointer" onClick={() => updateFilter("maxDeliveryDays", 0)} />
+              </Badge>
+            )}
+            {filters.minDiscount > 0 && (
+              <Badge variant="secondary" className="gap-1">
+                خصم {filters.minDiscount}%+
+                <X className="h-3 w-3 cursor-pointer" onClick={() => updateFilter("minDiscount", 0)} />
               </Badge>
             )}
           </div>
@@ -651,9 +789,159 @@ const SearchPage = () => {
             </div>
           </AccordionContent>
         </AccordionItem>
+
+        {/* Country of origin */}
+        <AccordionItem value="country">
+          <AccordionTrigger className="hover:no-underline">
+            <div className="flex items-center gap-2">
+              <Globe className="h-4 w-4" />
+              بلد المنتج
+            </div>
+          </AccordionTrigger>
+          <AccordionContent className="space-y-2 pt-2">
+            {[
+              { value: "", label: "كل البلدان" },
+              { value: "local", label: "🇸🇾 منتجات محلية (سوريا)" },
+              { value: "turkey", label: "🇹🇷 مستورد من تركيا" },
+            ].map((option) => (
+              <div key={option.value || "all"} className="flex items-center gap-2">
+                <Checkbox
+                  id={`country-${option.value || "all"}`}
+                  checked={filters.country === option.value}
+                  onCheckedChange={() => updateFilter("country", option.value)}
+                />
+                <label htmlFor={`country-${option.value || "all"}`} className="text-sm cursor-pointer flex-1">
+                  {option.label}
+                </label>
+              </div>
+            ))}
+          </AccordionContent>
+        </AccordionItem>
+
+        {/* Colors */}
+        {availableColors.length > 0 && (
+          <AccordionItem value="colors">
+            <AccordionTrigger className="hover:no-underline">
+              <div className="flex items-center gap-2">
+                <Palette className="h-4 w-4" />
+                اللون
+              </div>
+            </AccordionTrigger>
+            <AccordionContent className="pt-2">
+              <div className="flex flex-wrap gap-2">
+                {availableColors.map((color) => (
+                  <button
+                    key={color}
+                    type="button"
+                    onClick={() => toggleVariant("colors", color)}
+                    className={`rounded-full border px-3 py-1 text-xs transition-colors ${
+                      filters.colors.includes(color)
+                        ? "border-primary bg-primary text-primary-foreground"
+                        : "hover:bg-accent"
+                    }`}
+                  >
+                    {color}
+                  </button>
+                ))}
+              </div>
+            </AccordionContent>
+          </AccordionItem>
+        )}
+
+        {/* Sizes */}
+        {availableSizes.length > 0 && (
+          <AccordionItem value="sizes">
+            <AccordionTrigger className="hover:no-underline">
+              <div className="flex items-center gap-2">
+                <Ruler className="h-4 w-4" />
+                المقاس
+              </div>
+            </AccordionTrigger>
+            <AccordionContent className="pt-2">
+              <div className="flex flex-wrap gap-2">
+                {availableSizes.map((size) => (
+                  <button
+                    key={size}
+                    type="button"
+                    onClick={() => toggleVariant("sizes", size)}
+                    className={`rounded-md border px-3 py-1 text-xs transition-colors ${
+                      filters.sizes.includes(size)
+                        ? "border-primary bg-primary text-primary-foreground"
+                        : "hover:bg-accent"
+                    }`}
+                  >
+                    {size}
+                  </button>
+                ))}
+              </div>
+            </AccordionContent>
+          </AccordionItem>
+        )}
+
+        {/* Delivery time */}
+        <AccordionItem value="delivery">
+          <AccordionTrigger className="hover:no-underline">
+            <div className="flex items-center gap-2">
+              <Truck className="h-4 w-4" />
+              مدة التوصيل
+            </div>
+          </AccordionTrigger>
+          <AccordionContent className="space-y-2 pt-2">
+            {DELIVERY_OPTIONS.map((option) => (
+              <div key={option.value} className="flex items-center gap-2">
+                <Checkbox
+                  id={`delivery-${option.value}`}
+                  checked={filters.maxDeliveryDays === option.value}
+                  onCheckedChange={() => updateFilter("maxDeliveryDays", option.value)}
+                />
+                <label htmlFor={`delivery-${option.value}`} className="text-sm cursor-pointer flex-1">
+                  {option.label}
+                </label>
+              </div>
+            ))}
+          </AccordionContent>
+        </AccordionItem>
+
+        {/* Discount */}
+        <AccordionItem value="discount">
+          <AccordionTrigger className="hover:no-underline">
+            <div className="flex items-center gap-2">
+              <Percent className="h-4 w-4" />
+              نسبة الخصم
+            </div>
+          </AccordionTrigger>
+          <AccordionContent className="pt-2">
+            <div className="flex flex-wrap gap-2">
+              <button
+                type="button"
+                onClick={() => updateFilter("minDiscount", 0)}
+                className={`rounded-md border px-3 py-1 text-xs transition-colors ${
+                  filters.minDiscount === 0 ? "border-primary bg-primary text-primary-foreground" : "hover:bg-accent"
+                }`}
+              >
+                أي خصم
+              </button>
+              {DISCOUNT_OPTIONS.map((value) => (
+                <button
+                  key={value}
+                  type="button"
+                  onClick={() => updateFilter("minDiscount", value)}
+                  className={`rounded-md border px-3 py-1 text-xs transition-colors ${
+                    filters.minDiscount === value
+                      ? "border-primary bg-primary text-primary-foreground"
+                      : "hover:bg-accent"
+                  }`}
+                >
+                  {value}% وأكثر
+                </button>
+              ))}
+            </div>
+          </AccordionContent>
+        </AccordionItem>
       </Accordion>
     </div>
   );
+
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -664,17 +952,23 @@ const SearchPage = () => {
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
             <form className="relative w-full flex-1" onSubmit={(e) => {
               e.preventDefault();
+              if (searchInput.trim()) addRecentSearch(searchInput);
+              setFilters((prev) => ({ ...prev, search: searchInput }));
               (e.currentTarget.querySelector('input') as HTMLInputElement)?.blur();
             }}>
               <SearchIcon className="absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
               <Input
                 type="search"
                 placeholder="ابحث عن المنتجات..."
-                value={filters.search}
-                onChange={(e) => updateFilter("search", e.target.value)}
+                value={searchInput}
+                onChange={(e) => setSearchInput(e.target.value)}
                 className="pr-10 text-lg h-12"
                 enterKeyHint="search"
+                aria-label="البحث عن المنتجات"
               />
+              {loading && (
+                <Loader2 className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 animate-spin text-primary" />
+              )}
             </form>
             
             {/* Mobile Filters Button */}
@@ -778,6 +1072,8 @@ const SearchPage = () => {
                           reviews={product.reviews?.length || 0}
                           discount={discount}
                           shippingCost={(product as any).shipping_cost || 0}
+                          productType={product.product_type}
+                          shipsWithinDays={product.ships_within_days}
                         />
                       </Fragment>
                     );

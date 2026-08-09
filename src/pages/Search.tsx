@@ -941,50 +941,6 @@ const SearchPage = () => {
     </div>
   );
 
-  const LegacyOther = () => (
-    <Accordion type="multiple">
-        <AccordionItem value="other-legacy">
-          <AccordionTrigger className="hover:no-underline">
-            <div className="flex items-center gap-2">
-              <SlidersHorizontal className="h-4 w-4" />
-              خيارات أخرى
-            </div>
-          </AccordionTrigger>
-          <AccordionContent className="space-y-3 pt-2">
-            <div className="flex items-center gap-2">
-              <Checkbox
-                id="hasDiscount"
-                checked={filters.hasDiscount}
-                onCheckedChange={(checked) => updateFilter("hasDiscount", !!checked)}
-              />
-              <label htmlFor="hasDiscount" className="text-sm cursor-pointer">
-                عروض وخصومات فقط
-              </label>
-            </div>
-             <div className="flex items-center gap-2">
-              <Checkbox
-                id="inStock"
-                checked={filters.inStock}
-                onCheckedChange={(checked) => updateFilter("inStock", !!checked)}
-              />
-              <label htmlFor="inStock" className="text-sm cursor-pointer">
-                المنتجات المتوفرة فقط
-              </label>
-            </div>
-            <div className="flex items-center gap-2">
-              <Checkbox
-                id="freeShipping"
-                checked={filters.freeShipping}
-                onCheckedChange={(checked) => updateFilter("freeShipping", !!checked)}
-              />
-              <label htmlFor="freeShipping" className="text-sm cursor-pointer">
-                🚚 شحن مجاني فقط
-              </label>
-            </div>
-          </AccordionContent>
-        </AccordionItem>
-      </Accordion>
-  );
 
   return (
     <div className="min-h-screen flex flex-col">

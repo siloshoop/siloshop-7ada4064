@@ -261,7 +261,11 @@ const Product = () => {
               </Badge>
             )}
             <div className="lg:sticky lg:top-24">
-              <ImageGallery images={productImages} productName={product.name} />
+              <ImageGallery
+                images={productImages}
+                productName={product.name}
+                videoUrl={product.video_url}
+              />
             </div>
           </div>
 
@@ -280,9 +284,9 @@ const Product = () => {
                 {product.name}
               </h1>
 
-              <PlatformProductBadges
-                productType={(product as any).product_type}
-                shipsWithinDays={(product as any).ships_within_days}
+              <ProductOriginBadge
+                productType={product.product_type}
+                shipsWithinDays={product.ships_within_days}
                 className="pt-1"
               />
 

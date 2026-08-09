@@ -464,6 +464,15 @@ const Product = () => {
               </div>
             </div>
 
+            <SellerInfoCard
+              vendorId={product.vendor_id}
+              vendorName={product.vendor.full_name}
+              productId={id}
+              isPlatform={product.product_type === "platform"}
+              rating={vendorStats.avg}
+              ratingCount={vendorStats.count}
+            />
+
             <ReturnsPolicyNote className="mt-2" />
           </div>
         </div>

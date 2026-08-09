@@ -39,6 +39,7 @@ const Careers = lazy(() => import("./pages/Careers"));
 const Partners = lazy(() => import("./pages/Partners"));
 const VendorOrders = lazy(() => import("./pages/VendorOrders"));
 const VendorRatings = lazy(() => import("./pages/VendorRatings"));
+const Store = lazy(() => import("./pages/Store"));
 const Subcategory = lazy(() => import("./pages/Subcategory"));
 const ManageDeals = lazy(() => import("./pages/ManageDeals"));
 const SearchPage = lazy(() => import("./pages/Search"));
@@ -150,6 +151,7 @@ const App = () => (
             <Route path="/settings" element={<Settings />} />
             <Route path="/profile" element={<Profile />} />
             <Route path="/vendor/:vendorId/ratings" element={<VendorRatings />} />
+            <Route path="/store/:vendorId" element={<Store />} />
             <Route path="/install" element={<InstallPWA />} />
             <Route path="/notifications" element={<Notifications />} />
             <Route path="/notifications/settings" element={<NotificationSettings />} />

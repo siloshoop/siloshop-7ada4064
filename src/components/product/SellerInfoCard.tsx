@@ -56,7 +56,7 @@ const SellerInfoCard = ({
           variant="outline"
           size="sm"
           className="rounded-full"
-          onClick={() => navigate(`/vendor/${vendorId}/ratings`)}
+          onClick={() => navigate(`/store/${vendorId}`)}
         >
           <ChevronLeft className="ml-1 h-4 w-4" />
           زيارة المتجر

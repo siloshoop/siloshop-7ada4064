@@ -2226,6 +2226,27 @@ export type Database = {
         }
         Relationships: []
       }
+      vendor_followers: {
+        Row: {
+          created_at: string
+          id: string
+          user_id: string
+          vendor_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          user_id: string
+          vendor_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          user_id?: string
+          vendor_id?: string
+        }
+        Relationships: []
+      }
       vendor_ratings: {
         Row: {
           comment: string | null
@@ -2613,6 +2634,26 @@ export type Database = {
       get_or_create_conversation: {
         Args: { p_product_id?: string; p_vendor_id: string }
         Returns: string
+      }
+      get_store_public_profile: {
+        Args: { _vendor_id: string }
+        Returns: {
+          avatar_url: string
+          city: string
+          cover_image_url: string
+          description: string
+          follower_count: number
+          governorate: string
+          is_verified: boolean
+          logo_url: string
+          member_since: string
+          owner_name: string
+          product_count: number
+          rating: number
+          review_count: number
+          store_name: string
+          vendor_id: string
+        }[]
       }
       get_vendor_orders: {
         Args: never

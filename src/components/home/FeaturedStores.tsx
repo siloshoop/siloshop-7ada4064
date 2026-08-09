@@ -95,7 +95,7 @@ const FeaturedStores = () => {
             {stores.map((store, i) => (
               <Link
                 key={store.id}
-                to={`/vendor/${store.id}/ratings`}
+                to={`/store/${store.id}`}
                 className="group animate-fade-in overflow-hidden rounded-2xl border border-border/60 bg-card shadow-[var(--shadow-card)] transition-all duration-300 hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-[var(--shadow-elegant)] motion-reduce:transition-none"
                 style={{ animationDelay: `${Math.min(i, 6) * 50}ms` }}
               >

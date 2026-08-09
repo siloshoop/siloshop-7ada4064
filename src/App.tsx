@@ -93,6 +93,8 @@ const SellerInventory = lazy(() => import("./pages/seller/SellerInventory"));
 const SellerCustomers = lazy(() => import("./pages/seller/SellerCustomers"));
 const SellerReviews = lazy(() => import("./pages/seller/SellerReviews"));
 const SellerReports = lazy(() => import("./pages/seller/SellerReports"));
+const SellerViolations = lazy(() => import("./pages/seller/SellerViolations"));
+const AdminSellerViolations = lazy(() => import("./pages/admin/SellerViolations"));
 
 const queryClient = new QueryClient(); // App query client
 
@@ -147,6 +149,7 @@ const App = () => (
             <Route path="/admin/homepage" element={<RequireRole role={["admin","super_admin"]}><ShowroomManagement /></RequireRole>} />
             <Route path="/admin/banners" element={<RequireRole role="admin"><ManageBanners /></RequireRole>} />
             <Route path="/admin/reports" element={<RequireRole role="admin"><Reports /></RequireRole>} />
+            <Route path="/admin/violations" element={<RequireRole role="admin"><AdminSellerViolations /></RequireRole>} />
             <Route path="/admin/chats" element={<RequireRole role="admin"><ChatModeration /></RequireRole>} />
             <Route path="/admin/notifications" element={<RequireRole role="admin"><AdminNotifications /></RequireRole>} />
             <Route path="/admin/statistics" element={<RequireRole role="admin"><AdminAnalytics /></RequireRole>} />
@@ -163,6 +166,7 @@ const App = () => (
             <Route path="/seller/customers" element={<RequireApprovedSeller><SellerCustomers /></RequireApprovedSeller>} />
             <Route path="/seller/reviews" element={<RequireApprovedSeller><SellerReviews /></RequireApprovedSeller>} />
             <Route path="/seller/reports" element={<RequireApprovedSeller><SellerReports /></RequireApprovedSeller>} />
+            <Route path="/seller/violations" element={<RequireApprovedSeller><SellerViolations /></RequireApprovedSeller>} />
             <Route path="/favorites" element={<Favorites />} />
             <Route path="/wishlist" element={<Wishlist />} />
             <Route path="/wishlist/shared/:token" element={<SharedWishlist />} />

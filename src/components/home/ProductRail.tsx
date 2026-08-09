@@ -1,9 +1,9 @@
 import { useEffect, useRef, useState } from "react";
 import type { LucideIcon } from "lucide-react";
-import { Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import ProductCard from "@/components/ProductCard";
 import SectionHeader from "@/components/home/SectionHeader";
+import { ProductRailSkeleton } from "@/components/skeletons/ProductSkeletons";
 import { useVendorNames } from "@/hooks/useVendorNames";
 
 export type RailVariant = "new_arrivals" | "todays_offers";

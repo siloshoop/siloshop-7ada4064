@@ -31,6 +31,7 @@ const AddProduct = () => {
     stock_quantity: "",
     shipping_cost: "0",
     ships_within_days: "",
+    video_url: "",
     category_id: "",
     subcategory_id: "",
     image_url: "",
@@ -200,6 +201,7 @@ const AddProduct = () => {
         stock_quantity: parseInt(formData.stock_quantity),
         shipping_cost: parseFloat(formData.shipping_cost) || 0,
         ships_within_days: formData.ships_within_days ? parseInt(formData.ships_within_days) : null,
+        video_url: formData.video_url.trim() || null,
         category_id: formData.category_id || null,
         subcategory_id: formData.subcategory_id || null,
         image_url: mainImageUrl,
@@ -340,6 +342,21 @@ const AddProduct = () => {
                 />
                 <p className="text-xs text-muted-foreground">
                   تُعرض للمشتري كـ «يشحن خلال X أيام». اتركه فارغاً إن لم تكن متأكداً.
+                </p>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="video_url">رابط فيديو المنتج (اختياري)</Label>
+                <Input
+                  id="video_url"
+                  type="url"
+                  inputMode="url"
+                  value={formData.video_url}
+                  onChange={(e) => setFormData({ ...formData, video_url: e.target.value })}
+                  placeholder="https://youtube.com/watch?v=... أو رابط mp4"
+                />
+                <p className="text-xs text-muted-foreground">
+                  يظهر الفيديو داخل معرض صور المنتج (يوتيوب، فيميو، أو ملف mp4).
                 </p>
               </div>
 

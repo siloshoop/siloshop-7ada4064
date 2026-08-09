@@ -1,8 +1,9 @@
-import { Heart, Star, Scale, ShoppingCart, Eye } from "lucide-react";
+import { Heart, Star, Scale, ShoppingCart, Eye, Store } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { FavoriteButton } from "@/components/FavoriteButton";
+import ProductOriginBadge from "@/components/product/ProductOriginBadge";
 import { useToast } from "@/hooks/use-toast";
 import { useCompareProducts } from "@/hooks/useCompareProducts";
 import { useFlyToCart } from "@/components/FlyToCart";
@@ -21,6 +22,12 @@ interface ProductCardProps {
   discount?: number;
   shippingCost?: number;
   stockQuantity?: number | null;
+  /** Store (seller) display name */
+  storeName?: string | null;
+  /** "seller" (local) or "platform" (imported) */
+  productType?: string | null;
+  /** Preparation/shipping window in days */
+  shipsWithinDays?: number | null;
 }
 
 const ProductCard = memo(({
@@ -34,6 +41,9 @@ const ProductCard = memo(({
   discount,
   shippingCost,
   stockQuantity,
+  storeName,
+  productType,
+  shipsWithinDays,
 }: ProductCardProps) => {
   const navigate = useNavigate();
   const { user } = useAuth();

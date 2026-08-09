@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Plus, Package, TrendingUp, DollarSign, ShoppingBag, Loader2, Edit, Trash2, Search, Tag, Star, Layers, Percent, Megaphone, Users, Activity, BarChart3, LayoutGrid, Heart, Settings, MessageSquare, CheckCircle2, XCircle, Undo2, Boxes, Sparkles, Archive, ArchiveRestore } from "lucide-react";
+import { Plus, Package, TrendingUp, DollarSign, ShoppingBag, Loader2, Edit, Trash2, Search, Tag, Star, Layers, Percent, Megaphone, Users, Activity, BarChart3, LayoutGrid, Heart, Settings, MessageSquare, CheckCircle2, XCircle, Undo2, Boxes, Sparkles, Archive, ArchiveRestore, ListChecks, ArrowLeftRight, Store, Bell, RotateCcw } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import UserStatistics from "@/components/UserStatistics";
 import { useToast } from "@/hooks/use-toast";
@@ -859,6 +859,30 @@ const Dashboard = () => {
                   <Button variant="outline" className="h-20 flex-col gap-1" onClick={() => navigate("/favorites")}>
                     <Heart className="h-5 w-5" />
                     <span>المفضلة</span>
+                  </Button>
+                  <Button variant="outline" className="h-20 flex-col gap-1" onClick={() => navigate("/wishlist")}>
+                    <ListChecks className="h-5 w-5" />
+                    <span>قوائم الرغبات</span>
+                  </Button>
+                  <Button variant="outline" className="h-20 flex-col gap-1" onClick={() => navigate("/compare")}>
+                    <ArrowLeftRight className="h-5 w-5" />
+                    <span>مقارنة المنتجات</span>
+                  </Button>
+                  <Button variant="outline" className="h-20 flex-col gap-1" onClick={() => navigate("/followed-stores")}>
+                    <Store className="h-5 w-5" />
+                    <span>متاجر أتابعها</span>
+                  </Button>
+                  <Button variant="outline" className="h-20 flex-col gap-1" onClick={() => navigate("/followed-brands")}>
+                    <Tag className="h-5 w-5" />
+                    <span>ماركات أتابعها</span>
+                  </Button>
+                  <Button variant="outline" className="h-20 flex-col gap-1" onClick={() => navigate("/notifications")}>
+                    <Bell className="h-5 w-5" />
+                    <span>الإشعارات</span>
+                  </Button>
+                  <Button variant="outline" className="h-20 flex-col gap-1" onClick={() => navigate("/my-returns")}>
+                    <RotateCcw className="h-5 w-5" />
+                    <span>طلبات الإرجاع</span>
                   </Button>
                   <Button variant="outline" className="h-20 flex-col gap-1" onClick={() => navigate("/messages")}>
                     <MessageSquare className="h-5 w-5" />

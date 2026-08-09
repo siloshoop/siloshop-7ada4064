@@ -3,6 +3,7 @@ import { Store, MessageCircle, Star, ShieldCheck, ChevronLeft } from "lucide-rea
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import ChatButton from "@/components/ChatButton";
+import ReportDialog from "@/components/ReportDialog";
 
 interface Props {
   vendorId: string;
@@ -70,6 +71,18 @@ const SellerInfoCard = ({
           <ChatButton vendorId={vendorId} productId={productId} />
         )}
       </div>
+
+      {!isPlatform && (
+        <div className="mt-2 flex justify-end">
+          <ReportDialog
+            kind="seller"
+            targetId={vendorId}
+            targetName={displayName}
+            label="الإبلاغ عن البائع"
+            className="h-8 text-xs text-muted-foreground"
+          />
+        </div>
+      )}
     </div>
   );
 };

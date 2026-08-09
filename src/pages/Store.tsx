@@ -16,6 +16,7 @@ import Footer from "@/components/Footer";
 import ProductCard from "@/components/ProductCard";
 import ChatButton from "@/components/ChatButton";
 import FollowStoreButton from "@/components/store/FollowStoreButton";
+import ReportDialog from "@/components/ReportDialog";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -215,6 +216,14 @@ const Store = () => {
                 onCountChange={setFollowers}
               />
               <ChatButton vendorId={profile.vendor_id} />
+              <ReportDialog
+                kind="seller"
+                targetId={profile.vendor_id}
+                targetName={profile.store_name}
+                variant="outline"
+                size="default"
+                label="إبلاغ"
+              />
             </div>
           </div>
 

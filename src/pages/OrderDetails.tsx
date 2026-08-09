@@ -163,7 +163,13 @@ const OrderDetails = () => {
             {items.map((it, idx) => (
               <Link to={it.product?.id ? `/product/${it.product.id}` : "#"} key={idx}
                 className="flex items-center gap-3 p-3 rounded-lg bg-muted/30 hover:bg-muted/60 transition-colors">
-                <img src={it.product?.image_url || "/placeholder.svg"} alt={it.product?.name} className="w-16 h-16 rounded object-cover" />
+                <img
+                  src={it.product?.image_url || "/placeholder.svg"}
+                  alt={it.product?.name ?? "منتج"}
+                  loading="lazy"
+                  decoding="async"
+                  className="w-16 h-16 rounded object-cover"
+                />
                 <div className="flex-1">
                   <p className="font-medium">{it.product?.name || "منتج"}</p>
                   <p className="text-xs text-muted-foreground">{it.quantity} × {Number(it.price).toLocaleString()} ل.س</p>

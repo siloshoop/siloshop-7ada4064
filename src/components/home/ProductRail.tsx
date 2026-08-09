@@ -52,22 +52,21 @@ const ProductRail = ({
 
     const load = async () => {
       try {
-        let query = supabase.from("products").select(SELECT).eq("is_active", true);
-
-        if (variant === "todays_offers") {
-          query = query.not("original_price", "is", null).order("created_at", { ascending: false });
-        } else {
-          query = query.order("created_at", { ascending: false });
-        }
-
-        const { data } = await query.limit(limit);
+        // `todays_offers` is filtered client-side (discount vs. original price)
+        // so it fetches a wider window before trimming.
+        const { data } = await supabase
+          .from("products")
+          .select(SELECT)
+          .eq("is_active", true)
+          .order("created_at", { ascending: false })
+          .limit(variant === "todays_offers" ? limit * 4 : limit);
         if (cancelled) return;
 
         const rows = ((data ?? []) as unknown as ProductRow[]).filter((row) =>
           variant === "todays_offers"
             ? row.original_price != null && row.original_price > row.price
             : true,
-        );
+        ).slice(0, limit);
         setProducts(rows);
       } catch (error) {
         console.error(`ProductRail(${variant}) error:`, error);

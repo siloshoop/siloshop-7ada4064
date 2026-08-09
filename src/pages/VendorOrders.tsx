@@ -225,7 +225,7 @@ const VendorOrders = () => {
               <TabsList className="grid w-full grid-cols-5">
                 <TabsTrigger value="all">الكل</TabsTrigger>
                 <TabsTrigger value="pending">قيد الانتظار</TabsTrigger>
-                <TabsTrigger value="processing">قيد المعالجة</TabsTrigger>
+                <TabsTrigger value="preparing">قيد التجهيز</TabsTrigger>
                 <TabsTrigger value="shipped">تم الشحن</TabsTrigger>
                 <TabsTrigger value="delivered">تم التوصيل</TabsTrigger>
               </TabsList>
@@ -354,7 +354,7 @@ const VendorOrders = () => {
                     <p className="text-muted-foreground">
                       {activeTab === "all" 
                         ? "لا توجد طلبات حالياً" 
-                        : `لا توجد طلبات ${activeTab === "pending" ? "قيد الانتظار" : activeTab === "processing" ? "قيد المعالجة" : activeTab === "shipped" ? "تم شحنها" : "تم توصيلها"}`
+                        : `لا توجد طلبات ${activeTab === "pending" ? "قيد الانتظار" : activeTab === "preparing" ? "قيد التجهيز" : activeTab === "shipped" ? "تم شحنها" : "تم توصيلها"}`
                       }
                     </p>
                   </div>

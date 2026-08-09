@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { logAdminAction } from "@/lib/auditLog";
 import AdminLayout from "@/components/admin/AdminLayout";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -103,6 +104,11 @@ const ManageBanners = () => {
       return;
     }
     toast({ title: editing ? "تم تحديث البانر" : "تمت إضافة البانر" });
+    void logAdminAction(editing ? "banner_updated" : "banner_created", {
+      banner_id: editing?.id ?? null,
+      title: payload.title,
+      placement: payload.placement,
+    });
     setOpen(false);
     void load();
   };
@@ -115,6 +121,7 @@ const ManageBanners = () => {
     }
     setRows((prev) => prev.filter((r) => r.id !== row.id));
     toast({ title: "تم حذف البانر" });
+    void logAdminAction("banner_deleted", { banner_id: row.id, title: row.title });
   };
 
   const toggleActive = async (row: BannerRow) => {
@@ -127,6 +134,10 @@ const ManageBanners = () => {
       return;
     }
     setRows((prev) => prev.map((r) => (r.id === row.id ? { ...r, is_active: !r.is_active } : r)));
+    void logAdminAction("banner_visibility_changed", {
+      banner_id: row.id,
+      is_active: !row.is_active,
+    });
   };
 
   return (

@@ -466,6 +466,21 @@ const Dashboard = () => {
 
         {isVendor ? (
           <>
+            {sellerApp?.status === "approved" && (
+              <Card className="mb-6 border-primary/40 bg-primary/5">
+                <CardContent className="flex flex-col gap-3 pt-6 md:flex-row md:items-center md:justify-between">
+                  <div>
+                    <p className="flex items-center gap-2 font-semibold">
+                      <Store className="h-4 w-4 text-primary" /> بائع موثّق — لوحة البائع الاحترافية جاهزة
+                    </p>
+                    <p className="text-sm text-muted-foreground">
+                      أدر منتجاتك ومخزونك وطلباتك ومرتجعاتك وتقييماتك وتقاريرك من مكان واحد.
+                    </p>
+                  </div>
+                  <Button onClick={() => navigate("/seller")}>فتح لوحة البائع</Button>
+                </CardContent>
+              </Card>
+            )}
             <div className="mb-4 text-xs text-muted-foreground bg-muted/40 border rounded-md px-3 py-2">
               الدفع عند الاستلام فقط — يتم تحصيل المبلغ منك مباشرة من العميل عند التسليم. المنصة لا تحتفظ بأي أموال ولا تتقاضى أي عمولات.
             </div>

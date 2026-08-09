@@ -165,6 +165,9 @@ const Store = () => {
             <img
               src={profile.cover_image_url}
               alt={`غلاف متجر ${profile.store_name}`}
+              loading="eager"
+              decoding="async"
+              fetchPriority="high"
               className="h-full w-full object-cover"
             />
           )}
@@ -176,7 +179,13 @@ const Store = () => {
           <div className="-mt-12 flex flex-col gap-4 rounded-2xl border bg-card p-4 shadow-[var(--shadow-card)] md:-mt-16 md:flex-row md:items-center md:p-6">
             <div className="flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-2xl border bg-background md:h-24 md:w-24">
               {logo ? (
-                <img src={logo} alt={`شعار ${profile.store_name}`} className="h-full w-full object-cover" />
+                <img
+                  src={logo}
+                  alt={`شعار ${profile.store_name}`}
+                  loading="eager"
+                  decoding="async"
+                  className="h-full w-full object-cover"
+                />
               ) : (
                 <StoreIcon className="h-9 w-9 text-primary" />
               )}

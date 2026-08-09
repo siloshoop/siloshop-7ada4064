@@ -123,7 +123,11 @@ const PopularCategories = () => {
     try {
       const [categoriesRes, subcategoriesRes, productsRes] = await Promise.all([
         supabase.from("categories").select("id, name_ar, icon"),
-        supabase.from("subcategories").select("*").eq("is_active", true).order("sort_order"),
+        supabase
+          .from("subcategories")
+          .select("id, category_id, name_ar, icon")
+          .eq("is_active", true)
+          .order("sort_order"),
         supabase.from("products").select("category_id").eq("is_active", true),
       ]);
 

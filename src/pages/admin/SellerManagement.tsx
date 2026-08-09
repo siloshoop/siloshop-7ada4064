@@ -25,8 +25,11 @@ interface AppRow {
   full_name: string | null;
   email: string | null;
   store_name: string | null;
+  owner_name: string | null;
   contact_phone: string | null;
+  contact_email: string | null;
   governorate: string | null;
+  city: string | null;
   status: Status;
   rejection_reason: string | null;
   identity_document_url: string | null;
@@ -255,8 +258,11 @@ const SellerManagement = () => {
               </div>
 
               <div className="grid grid-cols-2 gap-3 text-sm">
+                <Field label="اسم المالك" value={selected.owner_name} />
                 <Field label="الهاتف" value={selected.contact_phone} />
+                <Field label="البريد للتواصل" value={selected.contact_email} />
                 <Field label="المحافظة" value={selected.governorate} />
+                <Field label="المدينة" value={selected.city} />
                 <Field label="العنوان" value={selected.address} />
                 <Field label="تاريخ التسجيل" value={selected.created_at ? new Date(selected.created_at).toLocaleDateString("ar") : null} />
                 <Field label="عدد المنتجات" value={String(selected.products_count)} />

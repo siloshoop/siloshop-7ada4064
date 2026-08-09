@@ -1785,12 +1785,16 @@ export type Database = {
         Row: {
           address: string | null
           business_document_url: string | null
+          city: string | null
           contact_email: string | null
           contact_phone: string | null
+          cover_image_url: string | null
           created_at: string
           governorate: string | null
           id: string
           identity_document_url: string | null
+          logo_url: string | null
+          owner_name: string | null
           rejection_reason: string | null
           reviewed_at: string | null
           reviewed_by: string | null
@@ -1804,12 +1808,16 @@ export type Database = {
         Insert: {
           address?: string | null
           business_document_url?: string | null
+          city?: string | null
           contact_email?: string | null
           contact_phone?: string | null
+          cover_image_url?: string | null
           created_at?: string
           governorate?: string | null
           id?: string
           identity_document_url?: string | null
+          logo_url?: string | null
+          owner_name?: string | null
           rejection_reason?: string | null
           reviewed_at?: string | null
           reviewed_by?: string | null
@@ -1823,12 +1831,16 @@ export type Database = {
         Update: {
           address?: string | null
           business_document_url?: string | null
+          city?: string | null
           contact_email?: string | null
           contact_phone?: string | null
+          cover_image_url?: string | null
           created_at?: string
           governorate?: string | null
           id?: string
           identity_document_url?: string | null
+          logo_url?: string | null
+          owner_name?: string | null
           rejection_reason?: string | null
           reviewed_at?: string | null
           reviewed_by?: string | null
@@ -2287,14 +2299,19 @@ export type Database = {
         Returns: {
           address: string
           business_document_url: string
+          city: string
+          contact_email: string
           contact_phone: string
+          cover_image_url: string
           created_at: string
           email: string
           full_name: string
           governorate: string
           id: string
           identity_document_url: string
+          logo_url: string
           orders_count: number
+          owner_name: string
           products_count: number
           rejection_reason: string
           status: Database["public"]["Enums"]["seller_status"]
@@ -2554,13 +2571,15 @@ export type Database = {
       }
       submit_seller_application: {
         Args: {
-          _address: string
-          _business_document_url: string
+          _address?: string
+          _city: string
           _contact_email: string
           _contact_phone: string
+          _cover_image_url?: string
           _governorate: string
-          _identity_document_url: string
-          _store_description: string
+          _logo_url?: string
+          _owner_name: string
+          _store_description?: string
           _store_name: string
         }
         Returns: string

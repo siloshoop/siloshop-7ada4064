@@ -11,7 +11,7 @@ export const signUp = async (
   email: string,
   password: string,
   fullName: string,
-  role: 'customer' | 'vendor'
+  phone?: string
 ): Promise<AuthResponse> => {
   const redirectUrl = `${window.location.origin}/`;
   
@@ -22,7 +22,7 @@ export const signUp = async (
       emailRedirectTo: redirectUrl,
       data: {
         full_name: fullName,
-        role: role
+        phone: phone ?? ""
       }
     }
   });

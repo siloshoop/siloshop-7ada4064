@@ -686,6 +686,36 @@ export type Database = {
           },
         ]
       }
+      feature_flags: {
+        Row: {
+          created_at: string
+          description: string | null
+          enabled: boolean
+          key: string
+          label_ar: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          enabled?: boolean
+          key: string
+          label_ar: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          enabled?: boolean
+          key?: string
+          label_ar?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
       messages: {
         Row: {
           content: string | null
@@ -1098,6 +1128,95 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      payment_transactions: {
+        Row: {
+          amount: number
+          created_at: string
+          currency: string
+          failure_reason: string | null
+          id: string
+          idempotency_key: string | null
+          order_id: string
+          provider: string
+          provider_payload: Json
+          provider_reference: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          currency?: string
+          failure_reason?: string | null
+          id?: string
+          idempotency_key?: string | null
+          order_id: string
+          provider?: string
+          provider_payload?: Json
+          provider_reference?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          currency?: string
+          failure_reason?: string | null
+          id?: string
+          idempotency_key?: string | null
+          order_id?: string
+          provider?: string
+          provider_payload?: Json
+          provider_reference?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payment_transactions_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      payment_webhook_events: {
+        Row: {
+          created_at: string
+          error_message: string | null
+          event_id: string | null
+          event_type: string | null
+          id: string
+          payload: Json
+          processed: boolean
+          provider: string
+          signature_valid: boolean
+        }
+        Insert: {
+          created_at?: string
+          error_message?: string | null
+          event_id?: string | null
+          event_type?: string | null
+          id?: string
+          payload?: Json
+          processed?: boolean
+          provider?: string
+          signature_valid?: boolean
+        }
+        Update: {
+          created_at?: string
+          error_message?: string | null
+          event_id?: string | null
+          event_type?: string | null
+          id?: string
+          payload?: Json
+          processed?: boolean
+          provider?: string
+          signature_valid?: boolean
+        }
+        Relationships: []
       }
       payments: {
         Row: {
@@ -1853,6 +1972,42 @@ export type Database = {
         }
         Relationships: []
       }
+      sham_cash_merchant_config: {
+        Row: {
+          api_base_url: string | null
+          callback_url: string | null
+          created_at: string
+          environment: string
+          id: number
+          is_active: boolean
+          merchant_id: string | null
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          api_base_url?: string | null
+          callback_url?: string | null
+          created_at?: string
+          environment?: string
+          id?: number
+          is_active?: boolean
+          merchant_id?: string | null
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          api_base_url?: string | null
+          callback_url?: string | null
+          created_at?: string
+          environment?: string
+          id?: number
+          is_active?: boolean
+          merchant_id?: string | null
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
       showroom_audit_log: {
         Row: {
           action: string
@@ -2495,6 +2650,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      is_feature_enabled: { Args: { _key: string }; Returns: boolean }
       log_activity: {
         Args: {
           _action_details?: Json

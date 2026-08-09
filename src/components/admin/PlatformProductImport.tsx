@@ -74,8 +74,19 @@ const PlatformProductImport = ({ open, onOpenChange, categories, brands, onImpor
       }
       const errors: string[] = [];
       if (!norm.name || !String(norm.name).trim()) errors.push("الاسم مطلوب");
-      const price = Number(norm.price);
-      if (!price || price <= 0) errors.push("السعر غير صالح");
+      const rowCheck = productNumbersSchema.safeParse({
+        name: norm.name,
+        price: norm.price,
+        discount_price: norm.discount_price,
+        stock_quantity: norm.stock_quantity === "" || norm.stock_quantity == null ? 0 : norm.stock_quantity,
+        weight: norm.weight,
+        sku: norm.sku,
+      });
+      if (!rowCheck.success) {
+        for (const issue of rowCheck.error.issues) errors.push(issue.message);
+      } else {
+        norm.__values = rowCheck.data;
+      }
       if (norm.brand) {
         const b = brands.find(
           (x) => x.name.toLowerCase() === String(norm.brand).toLowerCase() ||
@@ -109,22 +120,23 @@ const PlatformProductImport = ({ open, onOpenChange, categories, brands, onImpor
       const images = splitList(data.images);
       const main =
         (data.main_image && String(data.main_image).trim()) || images[0] || null;
+      const v = data.__values ?? {};
       return {
         vendor_id: user.id,
         product_type: "platform",
         source: sourceType,
-        name: String(data.name).trim(),
-        sku: data.sku ? String(data.sku).trim() : null,
+        name: v.name ?? String(data.name).trim(),
+        sku: v.sku ?? null,
         brand_id: data.__brand_id || null,
         category_id: data.__category_id || null,
         description: data.description ? String(data.description) : null,
-        price: Number(data.price),
-        discount_price: data.discount_price ? Number(data.discount_price) : null,
+        price: v.price,
+        discount_price: v.discount_price ?? null,
         currency: (data.currency && String(data.currency).trim()) || "SYP",
-        stock_quantity: Number(data.stock_quantity) || 0,
+        stock_quantity: v.stock_quantity ?? 0,
         sizes: splitList(data.sizes),
         colors: splitList(data.colors),
-        weight: data.weight ? Number(data.weight) : null,
+        weight: v.weight ?? null,
         images,
         image_url: main,
         is_active: String(data.status || "active").toLowerCase() !== "inactive",
@@ -135,7 +147,7 @@ const PlatformProductImport = ({ open, onOpenChange, categories, brands, onImpor
     for (let i = 0; i < payloads.length; i += 100) {
       const { error } = await supabase.from("products").insert(payloads.slice(i, i + 100));
       if (error) {
-        toast({ title: "خطأ", description: error.message, variant: "destructive" });
+        toast({ title: "خطأ", description: friendlyDbError(error), variant: "destructive" });
         setImporting(false);
         return;
       }

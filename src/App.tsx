@@ -48,6 +48,7 @@ const SharedWishlist = lazy(() => import("./pages/SharedWishlist"));
 const Notifications = lazy(() => import("./pages/Notifications"));
 const NotificationSettings = lazy(() => import("./pages/NotificationSettings"));
 const FollowedBrands = lazy(() => import("./pages/FollowedBrands"));
+const FollowedStores = lazy(() => import("./pages/FollowedStores"));
 const ManageAnnouncements = lazy(() => import("./pages/ManageAnnouncements"));
 const ManageUsers = lazy(() => import("./pages/ManageUsers"));
 const ActivityLogs = lazy(() => import("./pages/ActivityLogs"));
@@ -156,6 +157,7 @@ const App = () => (
             <Route path="/notifications" element={<Notifications />} />
             <Route path="/notifications/settings" element={<NotificationSettings />} />
             <Route path="/followed-brands" element={<FollowedBrands />} />
+            <Route path="/followed-stores" element={<FollowedStores />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/reset-password" element={<ResetPassword />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

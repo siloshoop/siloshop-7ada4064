@@ -951,17 +951,23 @@ const SearchPage = () => {
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
             <form className="relative w-full flex-1" onSubmit={(e) => {
               e.preventDefault();
+              if (searchInput.trim()) addRecentSearch(searchInput);
+              setFilters((prev) => ({ ...prev, search: searchInput }));
               (e.currentTarget.querySelector('input') as HTMLInputElement)?.blur();
             }}>
               <SearchIcon className="absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
               <Input
                 type="search"
                 placeholder="ابحث عن المنتجات..."
-                value={filters.search}
-                onChange={(e) => updateFilter("search", e.target.value)}
+                value={searchInput}
+                onChange={(e) => setSearchInput(e.target.value)}
                 className="pr-10 text-lg h-12"
                 enterKeyHint="search"
+                aria-label="البحث عن المنتجات"
               />
+              {loading && (
+                <Loader2 className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 animate-spin text-primary" />
+              )}
             </form>
             
             {/* Mobile Filters Button */}

@@ -9,7 +9,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Loader2, Save, Search } from "lucide-react";
+import { History, Loader2, Save, Search } from "lucide-react";
+import { Link } from "react-router-dom";
 import { LOW_STOCK_THRESHOLD } from "@/lib/productModeration";
 
 interface Row {
@@ -89,6 +90,9 @@ const SellerInventory = () => {
             <Search className="absolute end-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="ابحث عن منتج" className="pe-9" />
           </div>
+          <Button variant="outline" size="sm" asChild>
+            <Link to="/seller/stock-log"><History className="me-2 h-4 w-4" /> سجل الحركات</Link>
+          </Button>
         </CardContent>
       </Card>
 

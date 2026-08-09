@@ -90,6 +90,7 @@ const RequireApprovedSeller = lazy(() => import("@/components/seller/RequireAppr
 const SellerHome = lazy(() => import("./pages/seller/SellerHome"));
 const SellerProducts = lazy(() => import("./pages/seller/SellerProducts"));
 const SellerInventory = lazy(() => import("./pages/seller/SellerInventory"));
+const SellerStockLog = lazy(() => import("./pages/seller/SellerStockLog"));
 const SellerCustomers = lazy(() => import("./pages/seller/SellerCustomers"));
 const SellerReviews = lazy(() => import("./pages/seller/SellerReviews"));
 const SellerReports = lazy(() => import("./pages/seller/SellerReports"));
@@ -163,6 +164,7 @@ const App = () => (
             <Route path="/seller" element={<RequireApprovedSeller><SellerHome /></RequireApprovedSeller>} />
             <Route path="/seller/products" element={<RequireApprovedSeller><SellerProducts /></RequireApprovedSeller>} />
             <Route path="/seller/inventory" element={<RequireApprovedSeller><SellerInventory /></RequireApprovedSeller>} />
+            <Route path="/seller/stock-log" element={<RequireApprovedSeller><SellerStockLog /></RequireApprovedSeller>} />
             <Route path="/seller/customers" element={<RequireApprovedSeller><SellerCustomers /></RequireApprovedSeller>} />
             <Route path="/seller/reviews" element={<RequireApprovedSeller><SellerReviews /></RequireApprovedSeller>} />
             <Route path="/seller/reports" element={<RequireApprovedSeller><SellerReports /></RequireApprovedSeller>} />

@@ -153,6 +153,9 @@ const SearchPage = () => {
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
   const [salesCounts, setSalesCounts] = useState<Map<string, number>>(new Map());
   const urlSearchQuery = searchParams.get("q")?.trim() || "";
+  const urlBrandId = searchParams.get("brand")?.trim() || "";
+  const [availableColors, setAvailableColors] = useState<string[]>([]);
+  const [availableSizes, setAvailableSizes] = useState<string[]>([]);
 
   const [filters, setFilters] = useState<Filters>(() => {
     const stored = loadStoredFilters();
@@ -161,8 +164,12 @@ const SearchPage = () => {
       ...(stored || {}),
       // URL search query always wins on initial load if provided
       search: urlSearchQuery || stored?.search || "",
+      brandIds: urlBrandId ? [urlBrandId] : stored?.brandIds ?? [],
     };
   });
+
+  /** Uncontrolled-feel input with debounced commit, so typing stays fast. */
+  const [searchInput, setSearchInput] = useState(() => urlSearchQuery);
 
   const [priceRange, setPriceRange] = useState<number[]>(() => {
     const stored = loadStoredFilters();
@@ -192,6 +199,21 @@ const SearchPage = () => {
       if (subcategoriesRes.data) setSubcategories(subcategoriesRes.data);
       if (vendorsRes.data) setVendors(vendorsRes.data as Vendor[]);
       if (brandsRes.data) setBrands(brandsRes.data);
+
+      // Collect the color/size vocabulary actually used by live products.
+      const { data: variantRows } = await supabase
+        .from("products")
+        .select("colors, sizes")
+        .eq("is_active", true)
+        .limit(1000);
+      const colorSet = new Set<string>();
+      const sizeSet = new Set<string>();
+      (variantRows ?? []).forEach((row: any) => {
+        (row.colors ?? []).forEach((c: string) => c && colorSet.add(c));
+        (row.sizes ?? []).forEach((s: string) => s && sizeSet.add(s));
+      });
+      setAvailableColors([...colorSet].sort());
+      setAvailableSizes([...sizeSet].sort());
     };
 
     fetchFilterData();
@@ -206,7 +228,18 @@ const SearchPage = () => {
             search: urlSearchQuery,
           }
     ));
+    setSearchInput(urlSearchQuery);
   }, [urlSearchQuery]);
+
+  // Debounced live search: commit the typed term after a short pause.
+  useEffect(() => {
+    if (searchInput === filters.search) return;
+    const timer = window.setTimeout(() => {
+      setFilters((prev) => ({ ...prev, search: searchInput }));
+      if (searchInput.trim().length >= 2) addRecentSearch(searchInput);
+    }, 300);
+    return () => window.clearTimeout(timer);
+  }, [searchInput, filters.search]);
 
   // Search products when filters change
   useEffect(() => {

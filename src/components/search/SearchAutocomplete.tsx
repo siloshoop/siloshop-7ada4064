@@ -135,6 +135,7 @@ const SearchAutocomplete = ({
                       src={p.image_url || "/placeholder.svg"}
                       alt={p.name}
                       loading="lazy"
+                      decoding="async"
                       className="h-10 w-10 shrink-0 rounded-md object-cover"
                     />
                     <span className="flex-1 truncate text-sm">{p.name}</span>

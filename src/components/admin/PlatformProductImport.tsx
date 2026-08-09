@@ -1,5 +1,6 @@
 import { useState } from "react";
-import * as XLSX from "xlsx";
+// xlsx (~430 kB) is only needed when an admin actually parses or downloads a
+// spreadsheet, so it is imported on demand.
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
@@ -60,6 +61,7 @@ const PlatformProductImport = ({ open, onOpenChange, categories, brands, onImpor
     const isCsv = file.name.toLowerCase().endsWith(".csv");
     setSourceType(isCsv ? "csv" : "xlsx");
     const buf = await file.arrayBuffer();
+    const XLSX = await import("xlsx");
     const wb = XLSX.read(buf, { type: "array" });
     const sheet = wb.Sheets[wb.SheetNames[0]];
     const raw: any[] = XLSX.utils.sheet_to_json(sheet, { defval: "", raw: false });
@@ -147,7 +149,8 @@ const PlatformProductImport = ({ open, onOpenChange, categories, brands, onImpor
     onOpenChange(false);
   };
 
-  const downloadTemplate = () => {
+  const downloadTemplate = async () => {
+    const XLSX = await import("xlsx");
     const headers = [
       "name","sku","brand","category","description","price","discount_price",
       "currency","stock_quantity","sizes","colors","weight","images","main_image","status",
@@ -183,7 +186,7 @@ const PlatformProductImport = ({ open, onOpenChange, categories, brands, onImpor
               onChange={(e) => e.target.files?.[0] && parse(e.target.files[0])}
               className="max-w-sm"
             />
-            <Button type="button" variant="outline" onClick={downloadTemplate}>
+            <Button type="button" variant="outline" onClick={() => { void downloadTemplate(); }}>
               <Download className="h-4 w-4 ml-2" /> تحميل قالب
             </Button>
           </div>

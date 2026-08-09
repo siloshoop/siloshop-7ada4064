@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { logAdminAction } from "@/lib/auditLog";
 import AdminLayout from "@/components/admin/AdminLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -111,6 +112,12 @@ const AdminNotifications = () => {
     toast({
       title: "تم الإرسال",
       description: `${targets.length - failed} إشعار تم إرساله${failed ? ` · فشل ${failed}` : ""}`,
+    });
+    void logAdminAction("broadcast_notification_sent", {
+      audience,
+      recipients: targets.length,
+      failed,
+      title: title.trim(),
     });
     setTitle("");
     setMessage("");

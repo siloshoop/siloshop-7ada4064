@@ -141,7 +141,13 @@ const FollowedStores = () => {
                       className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-full border bg-muted"
                     >
                       {store.logo_url ? (
-                        <img src={store.logo_url} alt={store.store_name} className="h-full w-full object-cover" />
+                        <img
+                          src={store.logo_url}
+                          alt={store.store_name}
+                          loading="lazy"
+                          decoding="async"
+                          className="h-full w-full object-cover"
+                        />
                       ) : (
                         <StoreIcon className="h-6 w-6 text-primary" />
                       )}

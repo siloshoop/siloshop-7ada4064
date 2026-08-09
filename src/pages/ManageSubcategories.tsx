@@ -15,10 +15,24 @@ import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { 
   Plus, Loader2, Edit, Trash2, ArrowRight, Layers,
-  Footprints, Baby, Sofa, Gamepad2, Sparkles, ShoppingBag, Dumbbell, BookOpen, Gem
+  Footprints, Baby, Sofa, Gamepad2, Sparkles, ShoppingBag, Dumbbell, BookOpen, Gem,
+  User, HeartHandshake, Sun, Briefcase, GraduationCap, Bed, Square, Armchair,
+  Archive, Monitor, Heart, Car, Palette, Scissors, Droplet, Wand2, Backpack,
+  Luggage, Wallet, Laptop, Shirt, Circle, Waves, Bike, BookMarked, Library,
+  Star, Link as LinkIcon, Watch
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import * as LucideIcons from "lucide-react";
+
+// Explicit map instead of `import * as LucideIcons` — a namespace import pulls
+// the entire icon library (~700 kB) into this route's bundle.
+const iconComponents: Record<string, React.ComponentType<{ className?: string }>> = {
+  Footprints, User, Baby, HeartHandshake, Sun, Briefcase, Dumbbell,
+  GraduationCap, Bed, Sofa, Square, Armchair, Archive, Monitor,
+  BookOpen, Gamepad2, Heart, Car, Palette, Sparkles, Scissors,
+  Droplet, Wand2, ShoppingBag, Backpack, Luggage, Wallet, Laptop,
+  Shirt, Circle, Waves, Bike, BookMarked, Library, Star, Link: LinkIcon,
+  Watch, Layers, Gem,
+};
 
 const iconOptions = [
   "Footprints", "User", "Baby", "HeartHandshake", "Sun", "Briefcase", "Dumbbell",
@@ -240,7 +254,7 @@ const ManageSubcategories = () => {
   };
 
   const renderIcon = (iconName: string) => {
-    const IconComponent = (LucideIcons as any)[iconName];
+    const IconComponent = iconComponents[iconName];
     return IconComponent ? <IconComponent className="h-4 w-4" /> : <Layers className="h-4 w-4" />;
   };
 

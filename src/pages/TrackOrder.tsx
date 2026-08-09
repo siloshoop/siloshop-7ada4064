@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, lazy, Suspense } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
@@ -11,8 +11,8 @@ import { Button } from "@/components/ui/button";
 import { Loader2, Package, MapPin, Clock, Truck, ExternalLink, RefreshCw, Wifi, WifiOff } from "lucide-react";
 import { format, formatDistanceToNow } from "date-fns";
 import { ar } from "date-fns/locale";
-import mapboxgl from 'mapbox-gl';
-import 'mapbox-gl/dist/mapbox-gl.css';
+
+const OrderTrackingMap = lazy(() => import("@/components/orders/OrderTrackingMap"));
 
 // روابط تتبع شركات الشحن
 const courierTrackingUrls: Record<string, (trackingNumber: string) => string> = {
@@ -86,8 +86,6 @@ const TrackOrder = () => {
   const [highlightedIndex, setHighlightedIndex] = useState<number | null>(null);
   const [, forceTick] = useState(0);
   const navigate = useNavigate();
-  const mapContainer = useRef<HTMLDivElement>(null);
-  const map = useRef<mapboxgl.Map | null>(null);
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -183,60 +181,6 @@ const TrackOrder = () => {
     const t = setInterval(() => forceTick((n) => n + 1), 30000);
     return () => clearInterval(t);
   }, []);
-
-  // Initialize map
-  useEffect(() => {
-    if (!mapContainer.current || !order || map.current) return;
-
-    const initMap = async () => {
-      try {
-        // Fetch Mapbox token from edge function
-        const { data, error } = await supabase.functions.invoke('get-mapbox-token');
-        
-        if (error) throw error;
-        
-        const MAPBOX_TOKEN = data.token;
-        
-        mapboxgl.accessToken = MAPBOX_TOKEN;
-
-        map.current = new mapboxgl.Map({
-          container: mapContainer.current!,
-          style: 'mapbox://styles/mapbox/streets-v12',
-          center: [
-            order.current_location_lng || 46.6753,
-            order.current_location_lat || 24.7136
-          ],
-          zoom: 12
-        });
-
-        map.current.addControl(new mapboxgl.NavigationControl());
-
-        // Add delivery location marker
-        if (order.delivery_lat && order.delivery_lng) {
-          new mapboxgl.Marker({ color: '#22c55e' })
-            .setLngLat([order.delivery_lng, order.delivery_lat])
-            .setPopup(new mapboxgl.Popup().setHTML('<p>وجهة التسليم</p>'))
-            .addTo(map.current);
-        }
-
-        // Add current location marker
-        if (order.current_location_lat && order.current_location_lng) {
-          new mapboxgl.Marker({ color: '#3b82f6' })
-            .setLngLat([order.current_location_lng, order.current_location_lat])
-            .setPopup(new mapboxgl.Popup().setHTML('<p>الموقع الحالي</p>'))
-            .addTo(map.current);
-        }
-      } catch (error) {
-        console.error('Error initializing map:', error);
-      }
-    };
-
-    initMap();
-
-    return () => {
-      map.current?.remove();
-    };
-  }, [order]);
 
   const fetchOrder = async () => {
     if (!user || !id) return;
@@ -534,10 +478,16 @@ const TrackOrder = () => {
                   <CardTitle>موقع التتبع</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div
-                    ref={mapContainer}
-                    className="w-full h-96 rounded-lg"
-                  />
+                  <Suspense
+                    fallback={<div className="w-full h-96 rounded-lg animate-pulse bg-muted" />}
+                  >
+                    <OrderTrackingMap
+                      currentLat={order.current_location_lat}
+                      currentLng={order.current_location_lng}
+                      deliveryLat={order.delivery_lat}
+                      deliveryLng={order.delivery_lng}
+                    />
+                  </Suspense>
                   <p className="text-xs text-muted-foreground mt-4 text-center">
                     📍 الأخضر: وجهة التسليم | 🔵 الأزرق: الموقع الحالي
                   </p>

@@ -3,6 +3,7 @@ import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import Navbar from "@/components/Navbar";
+import PlatformProductBadges from "@/components/PlatformProductBadges";
 import Footer from "@/components/Footer";
 import { ImageGallery } from "@/components/ImageGallery";
 import { ProductReviews } from "@/components/ProductReviews";
@@ -253,6 +254,12 @@ const Product = () => {
               <h1 className="text-xl md:text-2xl font-semibold leading-snug tracking-tight">
                 {product.name}
               </h1>
+
+              <PlatformProductBadges
+                productType={(product as any).product_type}
+                shipsWithinDays={(product as any).ships_within_days}
+                className="pt-1"
+              />
 
               {/* Rating summary */}
               <div className="flex items-center gap-2 pt-1">

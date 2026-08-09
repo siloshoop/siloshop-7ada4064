@@ -16,6 +16,7 @@ import { Link } from "react-router-dom";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { SYRIAN_GOVERNORATES } from "@/lib/syrianGovernorates";
 import ReturnsPolicyNote from "@/components/ReturnsPolicyNote";
+import { useFeatureFlags } from "@/hooks/useFeatureFlags";
 
 const checkoutSchema = z.object({
   phone: z.string()
@@ -63,6 +64,7 @@ const Checkout = () => {
   const [shamSettings, setShamSettings] = useState<PlatformPaymentSettings | null>(null);
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { isEnabled } = useFeatureFlags();
 
   const [formData, setFormData] = useState({
     phone: "",
@@ -142,15 +144,21 @@ const Checkout = () => {
 
   const total = subtotal + shippingTotal - discount;
 
-  // Payment model: platform products are paid with Sham Cash to the platform
-  // owner's account only; seller products are Cash on Delivery only.
+  // Payment model (enforced server-side in create_order):
+  //  - Seller products  -> Cash on Delivery ONLY (Phase 1).
+  //  - Platform products -> Sham Cash ONLY, and only once both Phase 2 feature
+  //    flags are enabled. While disabled, platform items cannot be checked out.
   const hasPlatformItems = cartItems.some((i) => i.product.product_type === "platform");
   const hasSellerItems = cartItems.some((i) => i.product.product_type !== "platform");
   const isMixedCart = hasPlatformItems && hasSellerItems;
-  const paymentMethod: "sham_cash" | "cod" = hasPlatformItems && !isMixedCart ? "sham_cash" : "cod";
+  const platformEnabled = isEnabled("platform_marketplace");
+  const shamCashEnabled = isEnabled("sham_cash_payments");
+  const platformBlocked = hasPlatformItems && (!platformEnabled || !shamCashEnabled);
+  const paymentMethod: "sham_cash" | "cod" =
+    hasPlatformItems && !isMixedCart && platformEnabled && shamCashEnabled ? "sham_cash" : "cod";
 
   useEffect(() => {
-    if (!hasPlatformItems) return;
+    if (!hasPlatformItems || !shamCashEnabled) return;
     void (async () => {
       const { data } = await supabase
         .from("platform_payment_settings")
@@ -159,7 +167,7 @@ const Checkout = () => {
         .maybeSingle();
       if (data) setShamSettings(data as PlatformPaymentSettings);
     })();
-  }, [hasPlatformItems]);
+  }, [hasPlatformItems, shamCashEnabled]);
 
   const applyCoupon = async () => {
     if (!couponCode.trim()) {
@@ -316,7 +324,16 @@ const Checkout = () => {
       // method enforced server-side. Send the customer straight to their orders.
       navigate("/orders");
     } catch (error) {
-      if (String(error?.message || "").includes("MIXED_CART")) {
+      const message = String(error?.message || "");
+      if (message.includes("PLATFORM_MARKETPLACE_DISABLED") || message.includes("SHAM_CASH_DISABLED")) {
+        toast({
+          title: "غير متاح حالياً",
+          description: "منتجات المنصة المستوردة غير متاحة للشراء بعد. يرجى إزالتها من السلة.",
+          variant: "destructive",
+        });
+        return;
+      }
+      if (message.includes("MIXED_CART")) {
         toast({
           title: "لا يمكن إتمام الطلب",
           description: "لا يمكن دمج منتجات المنصة مع منتجات البائعين في طلب واحد.",
@@ -530,7 +547,17 @@ const Checkout = () => {
                     </div>
                   </div>
 
-                  {isMixedCart ? (
+                  {platformBlocked ? (
+                    <div className="rounded-lg border border-destructive/30 bg-destructive/5 p-3 text-sm space-y-1">
+                      <p className="font-semibold flex items-center gap-1.5 text-destructive">
+                        <AlertTriangle className="h-4 w-4" /> غير متاح حالياً
+                      </p>
+                      <p className="text-muted-foreground">
+                        منتجات المنصة (المستوردة) غير متاحة للشراء في الوقت الحالي. يرجى إزالتها من
+                        السلة ومتابعة الشراء من منتجات البائعين المحليين.
+                      </p>
+                    </div>
+                  ) : isMixedCart ? (
                     <div className="rounded-lg border border-destructive/30 bg-destructive/5 p-3 text-sm space-y-1">
                       <p className="font-semibold flex items-center gap-1.5 text-destructive">
                         <AlertTriangle className="h-4 w-4" /> طلب مختلط
@@ -582,7 +609,7 @@ const Checkout = () => {
                     type="submit"
                     className="w-full"
                     size="lg"
-                    disabled={submitting || isMixedCart}
+                    disabled={submitting || isMixedCart || platformBlocked}
                   >
                     {submitting ? (
                       <>

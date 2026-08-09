@@ -14,6 +14,8 @@ import PlatformProductForm, { PlatformProduct } from "@/components/admin/Platfor
 import PlatformProductImport from "@/components/admin/PlatformProductImport";
 import CategoriesBrandsManager from "@/components/admin/CategoriesBrandsManager";
 import PlatformShamCashSettings from "@/components/admin/PlatformShamCashSettings";
+import FeatureFlagsManager from "@/components/admin/FeatureFlagsManager";
+import ShamCashMerchantConfig from "@/components/admin/ShamCashMerchantConfig";
 
 const PlatformProducts = () => {
   const { toast } = useToast();
@@ -173,7 +175,14 @@ const PlatformProducts = () => {
           </div>
         </div>
 
-        <PlatformShamCashSettings />
+        <div className="grid gap-4 lg:grid-cols-2 mb-4">
+          <FeatureFlagsManager />
+          <PlatformShamCashSettings />
+        </div>
+
+        <div className="mb-4">
+          <ShamCashMerchantConfig />
+        </div>
 
         <Card className="mb-4">
           <CardHeader className="pb-3">

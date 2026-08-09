@@ -72,6 +72,16 @@ const Reports = lazy(() => import("./pages/admin/Reports"));
 const AdminOrders = lazy(() => import("./pages/admin/AdminOrders"));
 const ChatModeration = lazy(() => import("./pages/admin/ChatModeration"));
 const AdminAnalytics = lazy(() => import("./pages/admin/Analytics"));
+const AdminHome = lazy(() => import("./pages/admin/AdminHome"));
+const AdminUsers = lazy(() => import("./pages/admin/AdminUsers"));
+const ProductModeration = lazy(() => import("./pages/admin/ProductModeration"));
+const ManageCategoriesAdmin = lazy(() => import("./pages/admin/ManageCategories"));
+const ManageBrands = lazy(() => import("./pages/admin/ManageBrands"));
+const ManageBanners = lazy(() => import("./pages/admin/ManageBanners"));
+const AdminNotifications = lazy(() => import("./pages/admin/AdminNotifications"));
+const AdminRevenue = lazy(() => import("./pages/admin/Revenue"));
+const FeatureFlagsPage = lazy(() => import("./pages/admin/FeatureFlagsPage"));
+const ShamCashSettings = lazy(() => import("./pages/admin/ShamCashSettings"));
 const Privacy = lazy(() => import("./pages/Privacy"));
 const Terms = lazy(() => import("./pages/Terms"));
 const GuestTrack = lazy(() => import("./pages/GuestTrack"));
@@ -118,6 +128,26 @@ const App = () => (
             <Route path="/dashboard/admin-orders" element={<RequireRole role="admin"><AdminOrders /></RequireRole>} />
             <Route path="/dashboard/chat-moderation" element={<RequireRole role="admin"><ChatModeration /></RequireRole>} />
             <Route path="/dashboard/analytics" element={<RequireRole role="admin"><AdminAnalytics /></RequireRole>} />
+            {/* Unified admin console */}
+            <Route path="/admin" element={<RequireRole role="admin"><AdminHome /></RequireRole>} />
+            <Route path="/admin/buyers" element={<RequireRole role="admin"><AdminUsers mode="buyers" /></RequireRole>} />
+            <Route path="/admin/sellers" element={<RequireRole role="admin"><AdminUsers mode="sellers" /></RequireRole>} />
+            <Route path="/admin/seller-applications" element={<RequireRole role="admin"><SellerManagement /></RequireRole>} />
+            <Route path="/admin/products" element={<RequireRole role="admin"><ProductModeration /></RequireRole>} />
+            <Route path="/admin/orders" element={<RequireRole role="admin"><AdminOrders /></RequireRole>} />
+            <Route path="/admin/categories" element={<RequireRole role="admin"><ManageCategoriesAdmin /></RequireRole>} />
+            <Route path="/admin/brands" element={<RequireRole role="admin"><ManageBrands /></RequireRole>} />
+            <Route path="/admin/homepage" element={<RequireRole role={["admin","super_admin"]}><ShowroomManagement /></RequireRole>} />
+            <Route path="/admin/banners" element={<RequireRole role="admin"><ManageBanners /></RequireRole>} />
+            <Route path="/admin/reports" element={<RequireRole role="admin"><Reports /></RequireRole>} />
+            <Route path="/admin/chats" element={<RequireRole role="admin"><ChatModeration /></RequireRole>} />
+            <Route path="/admin/notifications" element={<RequireRole role="admin"><AdminNotifications /></RequireRole>} />
+            <Route path="/admin/statistics" element={<RequireRole role="admin"><AdminAnalytics /></RequireRole>} />
+            <Route path="/admin/revenue" element={<RequireRole role="admin"><AdminRevenue /></RequireRole>} />
+            <Route path="/admin/activity" element={<RequireRole role="admin"><ActivityLogs /></RequireRole>} />
+            <Route path="/admin/features" element={<RequireRole role="super_admin"><FeatureFlagsPage /></RequireRole>} />
+            <Route path="/admin/platform-products" element={<RequireRole role="super_admin"><PlatformProducts /></RequireRole>} />
+            <Route path="/admin/sham-cash" element={<RequireRole role="super_admin"><ShamCashSettings /></RequireRole>} />
             <Route path="/seller/application" element={<SellerApplication />} />
             <Route path="/favorites" element={<Favorites />} />
             <Route path="/wishlist" element={<Wishlist />} />

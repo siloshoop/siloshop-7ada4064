@@ -13,6 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, Upload, ChevronLeft } from "lucide-react";
 import imageCompression from 'browser-image-compression';
+import { productNumbersSchema, firstIssue, friendlyDbError } from "@/lib/productValidation";
 
 const AddProduct = () => {
   const { user, loading: authLoading } = useAuth();
@@ -174,6 +175,22 @@ const AddProduct = () => {
 
     setLoading(true);
     try {
+      const parsed = productNumbersSchema.safeParse({
+        name: formData.name,
+        price: formData.price,
+        original_price: formData.original_price,
+        shipping_cost: formData.shipping_cost,
+        stock_quantity: formData.stock_quantity,
+        ships_within_days: formData.ships_within_days,
+      });
+
+      if (!parsed.success) {
+        toast({ title: "بيانات غير صالحة", description: firstIssue(parsed.error), variant: "destructive" });
+        setLoading(false);
+        return;
+      }
+      const values = parsed.data;
+
       let imageUrls: string[] = [];
       let mainImageUrl = formData.image_url;
 
@@ -194,13 +211,13 @@ const AddProduct = () => {
 
       const { error } = await supabase.from("products").insert({
         vendor_id: user.id,
-        name: formData.name,
+        name: values.name,
         description: formData.description,
-        price: parseFloat(formData.price),
-        original_price: formData.original_price ? parseFloat(formData.original_price) : null,
-        stock_quantity: parseInt(formData.stock_quantity),
-        shipping_cost: parseFloat(formData.shipping_cost) || 0,
-        ships_within_days: formData.ships_within_days ? parseInt(formData.ships_within_days) : null,
+        price: values.price,
+        original_price: values.original_price ?? null,
+        stock_quantity: values.stock_quantity,
+        shipping_cost: values.shipping_cost ?? 0,
+        ships_within_days: values.ships_within_days ?? null,
         video_url: formData.video_url.trim() || null,
         category_id: formData.category_id || null,
         subcategory_id: formData.subcategory_id || null,
@@ -223,7 +240,7 @@ const AddProduct = () => {
     } catch (error) {
       toast({
         title: "خطأ",
-        description: error.message,
+        description: friendlyDbError(error),
         variant: "destructive",
       });
     } finally {

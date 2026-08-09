@@ -115,6 +115,25 @@ export const ImageGallery = ({ images, productName, videoUrl }: ImageGalleryProp
           onMouseLeave={() => setIsZooming(false)}
           onMouseMove={onMouseMove}
         >
+          {showVideo && videoUrl ? (
+            embedUrl ? (
+              <iframe
+                src={embedUrl}
+                title={`${productName} - فيديو المنتج`}
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; picture-in-picture"
+                allowFullScreen
+                className="absolute inset-0 h-full w-full bg-black"
+              />
+            ) : (
+              <video
+                src={videoUrl}
+                controls
+                playsInline
+                preload="metadata"
+                className="absolute inset-0 h-full w-full bg-black object-contain"
+              />
+            )
+          ) : (
           <img
             key={fadeKey}
             src={images[currentIndex]}
@@ -132,19 +151,22 @@ export const ImageGallery = ({ images, productName, videoUrl }: ImageGalleryProp
                 : undefined
             }
           />
+          )}
 
           {/* Fullscreen button */}
           <Button
             variant="secondary"
             size="icon"
             aria-label="عرض بالحجم الكامل"
-            className="absolute top-3 left-3 h-9 w-9 rounded-full opacity-0 group-hover:opacity-100 transition-opacity backdrop-blur"
+            className={`absolute top-3 left-3 h-9 w-9 rounded-full opacity-0 group-hover:opacity-100 transition-opacity backdrop-blur ${
+              showVideo ? "hidden" : ""
+            }`}
             onClick={() => setIsLightboxOpen(true)}
           >
             <Maximize2 className="h-4 w-4" />
           </Button>
 
-          {total > 1 && (
+          {total > 1 && !showVideo && (
             <>
               <Button
                 variant="secondary"

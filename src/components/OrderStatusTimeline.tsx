@@ -1,25 +1,8 @@
 import { cn } from "@/lib/utils";
-import { Check, Clock, PackageCheck, Package, Truck, Bike, Home, XCircle, RotateCcw } from "lucide-react";
+import { Check, XCircle, RotateCcw } from "lucide-react";
+import { ORDER_STEPS, ORDER_STATUS_LABELS, normalizeStatus, statusClasses } from "@/lib/orderStatus";
 
-export const ORDER_STEPS = [
-  { key: "pending", label: "قيد الانتظار", icon: Clock },
-  { key: "confirmed", label: "تم التأكيد", icon: PackageCheck },
-  { key: "processing", label: "قيد التجهيز", icon: Package },
-  { key: "shipped", label: "تم الشحن", icon: Truck },
-  { key: "out_for_delivery", label: "خارج للتوصيل", icon: Bike },
-  { key: "delivered", label: "تم التوصيل", icon: Home },
-] as const;
-
-export const ORDER_STATUS_LABELS: Record<string, string> = {
-  pending: "قيد الانتظار",
-  confirmed: "تم التأكيد",
-  processing: "قيد التجهيز",
-  shipped: "تم الشحن",
-  out_for_delivery: "خارج للتوصيل",
-  delivered: "تم التوصيل",
-  cancelled: "ملغي",
-  returned: "مرتجع",
-};
+export { ORDER_STEPS, ORDER_STATUS_LABELS };
 
 interface Props {
   status: string;
@@ -28,8 +11,9 @@ interface Props {
 }
 
 const OrderStatusTimeline = ({ status, latestNote, className }: Props) => {
-  const isCancelled = status === "cancelled";
-  const isReturned = status === "returned";
+  const current = normalizeStatus(status);
+  const isCancelled = current === "cancelled";
+  const isReturned = current === "returned";
 
   if (isCancelled || isReturned) {
     const Icon = isCancelled ? XCircle : RotateCcw;
@@ -51,7 +35,7 @@ const OrderStatusTimeline = ({ status, latestNote, className }: Props) => {
     );
   }
 
-  const currentIndex = Math.max(0, ORDER_STEPS.findIndex((s) => s.key === status));
+  const currentIndex = Math.max(0, ORDER_STEPS.findIndex((s) => s.key === current));
 
   return (
     <div className={cn("w-full", className)} dir="rtl">
@@ -60,6 +44,7 @@ const OrderStatusTimeline = ({ status, latestNote, className }: Props) => {
           const done = i < currentIndex;
           const active = i === currentIndex;
           const Icon = step.icon;
+          const c = statusClasses(step.key);
           return (
             <div key={step.key} className="flex-1 flex flex-col items-center relative min-w-0">
               {i > 0 && (
@@ -75,8 +60,8 @@ const OrderStatusTimeline = ({ status, latestNote, className }: Props) => {
               <div
                 className={cn(
                   "relative z-10 flex h-8 w-8 items-center justify-center rounded-full border-2 transition-colors",
-                  done && "bg-primary border-primary text-primary-foreground",
-                  active && "border-primary text-primary bg-background animate-pulse",
+                  done && cn(c.bg, c.border, "text-background"),
+                  active && cn(c.border, c.text, "bg-background animate-pulse"),
                   !done && !active && "border-border text-muted-foreground bg-background"
                 )}
               >
@@ -85,7 +70,7 @@ const OrderStatusTimeline = ({ status, latestNote, className }: Props) => {
               <span
                 className={cn(
                   "mt-2 text-[10px] sm:text-xs text-center leading-tight",
-                  active ? "text-primary font-semibold" : "text-muted-foreground"
+                  active ? cn(c.text, "font-semibold") : "text-muted-foreground"
                 )}
               >
                 {step.label}

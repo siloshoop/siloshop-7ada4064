@@ -5,13 +5,14 @@ import { supabase } from "@/integrations/supabase/client";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Loader2, Package, Eye, EyeOff, Truck } from "lucide-react";
+import OrderStatusBadge from "@/components/orders/OrderStatusBadge";
+import OrderTimelineLog from "@/components/orders/OrderTimelineLog";
+import ShippingInfoDialog from "@/components/orders/ShippingInfoDialog";
+import { allowedNextStatuses, changeOrderStatus, friendlyOrderError, normalizeStatus, type OrderStatus } from "@/lib/orderStatus";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
@@ -19,14 +20,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
 interface Order {
   id: string;
   created_at: string;
@@ -75,8 +68,6 @@ const VendorOrders = () => {
   // Shipping dialog state
   const [shippingDialogOpen, setShippingDialogOpen] = useState(false);
   const [pendingShipOrderId, setPendingShipOrderId] = useState<string | null>(null);
-  const [trackingNumber, setTrackingNumber] = useState("");
-  const [courierName, setCourierName] = useState("");
   
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -157,133 +148,29 @@ const VendorOrders = () => {
   };
 
   const getStatusBadge = (status: string) => {
-    const statusMap: Record<string, { label: string; variant: "default" | "secondary" | "destructive" | "outline" }> = {
-      pending: { label: "قيد الانتظار", variant: "secondary" },
-      processing: { label: "قيد المعالجة", variant: "default" },
-      shipped: { label: "تم الشحن", variant: "outline" },
-      delivered: { label: "تم التوصيل", variant: "default" },
-      cancelled: { label: "ملغى", variant: "destructive" },
-    };
-    
-    const statusInfo = statusMap[status] || statusMap.pending;
-    return <Badge variant={statusInfo.variant}>{statusInfo.label}</Badge>;
+    return <OrderStatusBadge status={status} />;
   };
 
   const filterOrders = (status: string) => {
     if (status === "all") return orders;
-    return orders.filter(order => order.status === status);
+    return orders.filter(order => normalizeStatus(order.status) === status);
   };
 
   const handleStatusChange = (orderId: string, newStatus: string) => {
-    if (newStatus === "shipped") {
-      // Open shipping dialog for tracking info
-      setPendingShipOrderId(orderId);
-      setTrackingNumber("");
-      setCourierName("");
-      setShippingDialogOpen(true);
-    } else {
-      updateOrderStatus(orderId, newStatus);
-    }
+    updateOrderStatus(orderId, newStatus as OrderStatus);
   };
 
-  const handleShippingConfirm = async () => {
-    if (!pendingShipOrderId) return;
-    
-    setUpdatingStatus(pendingShipOrderId);
-    try {
-      // Update order status via SECURITY DEFINER RPC (avoids exposing customer PII through UPDATE RLS).
-      const { error: orderError } = await supabase.rpc("vendor_update_order_status", {
-        _order_id: pendingShipOrderId,
-        _status: "shipped",
-        _tracking_number: trackingNumber || null,
-        _courier_name: courierName || null,
-      });
-
-      if (orderError) throw orderError;
-
-      // Add to status history
-      const { error: historyError } = await supabase
-        .from("order_status_history")
-        .insert({
-          order_id: pendingShipOrderId,
-          status: "shipped",
-          notes: trackingNumber ? `رقم التتبع: ${trackingNumber}${courierName ? ` - شركة الشحن: ${courierName}` : ''}` : null,
-        });
-
-      if (historyError) throw historyError;
-
-      // Send email notification to customer
-      try {
-        await supabase.functions.invoke("notify-customer-order-status", {
-          body: {
-            order_id: pendingShipOrderId,
-            new_status: "shipped",
-            notes: trackingNumber ? `رقم التتبع: ${trackingNumber}` : undefined,
-          },
-        });
-      } catch (emailError) {
-        console.error("Failed to send email notification:", emailError);
-      }
-
-      // Update local state
-      setOrders(prev =>
-        prev.map(order =>
-          order.id === pendingShipOrderId ? { ...order, status: "shipped" } : order
-        )
-      );
-
-      toast({
-        title: "تم التحديث",
-        description: "تم تحديث حالة الطلب وإضافة معلومات الشحن",
-      });
-
-      setShippingDialogOpen(false);
-      setPendingShipOrderId(null);
-    } catch (error) {
-      toast({
-        title: "خطأ",
-        description: "فشل في تحديث حالة الطلب",
-        variant: "destructive",
-      });
-    } finally {
-      setUpdatingStatus(null);
-    }
+  const openShippingDialog = (orderId: string) => {
+    setPendingShipOrderId(orderId);
+    setShippingDialogOpen(true);
   };
 
-  const updateOrderStatus = async (orderId: string, newStatus: string) => {
+  const updateOrderStatus = async (orderId: string, newStatus: OrderStatus) => {
     setUpdatingStatus(orderId);
     try {
-      // Update order status via SECURITY DEFINER RPC.
-      const { error: orderError } = await supabase.rpc("vendor_update_order_status", {
-        _order_id: orderId,
-        _status: newStatus,
-      });
+      // Audited, transition-validated update (records actor, IP and device server side).
+      await changeOrderStatus(orderId, newStatus);
 
-      if (orderError) throw orderError;
-
-      // Add to status history
-      const { error: historyError } = await supabase
-        .from("order_status_history")
-        .insert({
-          order_id: orderId,
-          status: newStatus,
-        });
-
-      if (historyError) throw historyError;
-
-      // Send email notification to customer
-      try {
-        await supabase.functions.invoke("notify-customer-order-status", {
-          body: {
-            order_id: orderId,
-            new_status: newStatus,
-          },
-        });
-      } catch (emailError) {
-        console.error("Failed to send email notification:", emailError);
-      }
-
-      // Update local state
       setOrders(prev =>
         prev.map(order =>
           order.id === orderId ? { ...order, status: newStatus } : order
@@ -297,7 +184,7 @@ const VendorOrders = () => {
     } catch (error) {
       toast({
         title: "خطأ",
-        description: "فشل في تحديث حالة الطلب",
+        description: friendlyOrderError(error),
         variant: "destructive",
       });
     } finally {
@@ -338,7 +225,7 @@ const VendorOrders = () => {
               <TabsList className="grid w-full grid-cols-5">
                 <TabsTrigger value="all">الكل</TabsTrigger>
                 <TabsTrigger value="pending">قيد الانتظار</TabsTrigger>
-                <TabsTrigger value="processing">قيد المعالجة</TabsTrigger>
+                <TabsTrigger value="preparing">قيد التجهيز</TabsTrigger>
                 <TabsTrigger value="shipped">تم الشحن</TabsTrigger>
                 <TabsTrigger value="delivered">تم التوصيل</TabsTrigger>
               </TabsList>
@@ -425,28 +312,36 @@ const VendorOrders = () => {
 
                             {/* Status Update Section */}
                             <div className="border-t pt-4 mt-4">
-                              <div className="flex items-center gap-4">
+                              <div className="flex flex-wrap items-center gap-3">
                                 <p className="text-sm font-medium">تحديث الحالة:</p>
                                 <Select
-                                  value={order.status}
+                                  value=""
                                   onValueChange={(value) => handleStatusChange(order.id, value)}
                                   disabled={updatingStatus === order.id}
                                 >
                                   <SelectTrigger className="w-[180px]">
-                                    <SelectValue placeholder="اختر الحالة" />
+                                    <SelectValue placeholder="اختر الحالة التالية" />
                                   </SelectTrigger>
                                   <SelectContent className="bg-background">
-                                    <SelectItem value="pending">قيد الانتظار</SelectItem>
-                                    <SelectItem value="processing">قيد المعالجة</SelectItem>
-                                    <SelectItem value="shipped">تم الشحن</SelectItem>
-                                    <SelectItem value="delivered">تم التوصيل</SelectItem>
-                                    <SelectItem value="cancelled">ملغى</SelectItem>
+                                    {allowedNextStatuses(order.status, "seller").map((s) => (
+                                      <SelectItem key={s.key} value={s.key}>{s.label}</SelectItem>
+                                    ))}
                                   </SelectContent>
                                 </Select>
+                                <Button variant="outline" size="sm" className="gap-2"
+                                  onClick={() => openShippingDialog(order.id)}>
+                                  <Truck className="h-4 w-4" />
+                                  معلومات الشحن
+                                </Button>
                                 {updatingStatus === order.id && (
                                   <Loader2 className="h-4 w-4 animate-spin" />
                                 )}
                               </div>
+                            </div>
+
+                            <div className="border-t pt-4">
+                              <p className="text-sm font-medium mb-3">سجل الطلب</p>
+                              <OrderTimelineLog orderId={order.id} />
                             </div>
                           </div>
                         </CardContent>
@@ -459,7 +354,7 @@ const VendorOrders = () => {
                     <p className="text-muted-foreground">
                       {activeTab === "all" 
                         ? "لا توجد طلبات حالياً" 
-                        : `لا توجد طلبات ${activeTab === "pending" ? "قيد الانتظار" : activeTab === "processing" ? "قيد المعالجة" : activeTab === "shipped" ? "تم شحنها" : "تم توصيلها"}`
+                        : `لا توجد طلبات ${activeTab === "pending" ? "قيد الانتظار" : activeTab === "preparing" ? "قيد التجهيز" : activeTab === "shipped" ? "تم شحنها" : "تم توصيلها"}`
                       }
                     </p>
                   </div>
@@ -472,61 +367,11 @@ const VendorOrders = () => {
       <Footer />
 
       {/* Shipping Dialog */}
-      <Dialog open={shippingDialogOpen} onOpenChange={setShippingDialogOpen}>
-        <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <Truck className="h-5 w-5" />
-              معلومات الشحن
-            </DialogTitle>
-            <DialogDescription>
-              أدخل معلومات تتبع الشحن للعميل (اختياري)
-            </DialogDescription>
-          </DialogHeader>
-          <div className="grid gap-4 py-4">
-            <div className="grid gap-2">
-              <Label htmlFor="courierName">شركة الشحن</Label>
-              <Input
-                id="courierName"
-                placeholder="مثال: أرامكس، DHL، سمسا"
-                value={courierName}
-                onChange={(e) => setCourierName(e.target.value)}
-              />
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="trackingNumber">رقم التتبع</Label>
-              <Input
-                id="trackingNumber"
-                placeholder="أدخل رقم تتبع الشحنة"
-                value={trackingNumber}
-                onChange={(e) => setTrackingNumber(e.target.value)}
-              />
-            </div>
-          </div>
-          <DialogFooter className="gap-2">
-            <Button
-              variant="outline"
-              onClick={() => setShippingDialogOpen(false)}
-              disabled={updatingStatus === pendingShipOrderId}
-            >
-              إلغاء
-            </Button>
-            <Button
-              onClick={handleShippingConfirm}
-              disabled={updatingStatus === pendingShipOrderId}
-            >
-              {updatingStatus === pendingShipOrderId ? (
-                <>
-                  <Loader2 className="h-4 w-4 animate-spin ml-2" />
-                  جاري التحديث...
-                </>
-              ) : (
-                "تأكيد الشحن"
-              )}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <ShippingInfoDialog
+        orderId={pendingShipOrderId}
+        open={shippingDialogOpen}
+        onOpenChange={setShippingDialogOpen}
+      />
     </div>
   );
 };

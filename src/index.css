@@ -73,9 +73,33 @@ All colors MUST be HSL.
     --sidebar-border: 220 13% 91%;
 
     --sidebar-ring: 263 70% 50%;
+
+    /* Order status tokens (light) */
+    --status-pending: 45 93% 47%;
+    --status-confirmed: 217 91% 55%;
+    --status-preparing: 263 70% 50%;
+    --status-ready: 25 95% 50%;
+    --status-shipped: 189 94% 40%;
+    --status-out: 239 84% 60%;
+    --status-delivered: 142 71% 40%;
+    --status-completed: 150 75% 26%;
+    --status-cancelled: 0 84% 52%;
+    --status-returned: 215 16% 47%;
   }
 
   .dark {
+    /* Order status tokens (dark) */
+    --status-pending: 45 93% 58%;
+    --status-confirmed: 217 91% 65%;
+    --status-preparing: 263 70% 65%;
+    --status-ready: 25 95% 60%;
+    --status-shipped: 189 94% 50%;
+    --status-out: 239 84% 70%;
+    --status-delivered: 142 71% 50%;
+    --status-completed: 150 70% 38%;
+    --status-cancelled: 0 84% 65%;
+    --status-returned: 215 16% 60%;
+
     --background: 222 47% 11%;
     --foreground: 210 40% 98%;
 

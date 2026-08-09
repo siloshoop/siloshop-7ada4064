@@ -788,8 +788,202 @@ const SearchPage = () => {
             </div>
           </AccordionContent>
         </AccordionItem>
+
+        {/* Country of origin */}
+        <AccordionItem value="country">
+          <AccordionTrigger className="hover:no-underline">
+            <div className="flex items-center gap-2">
+              <Globe className="h-4 w-4" />
+              بلد المنتج
+            </div>
+          </AccordionTrigger>
+          <AccordionContent className="space-y-2 pt-2">
+            {[
+              { value: "", label: "كل البلدان" },
+              { value: "local", label: "🇸🇾 منتجات محلية (سوريا)" },
+              { value: "turkey", label: "🇹🇷 مستورد من تركيا" },
+            ].map((option) => (
+              <div key={option.value || "all"} className="flex items-center gap-2">
+                <Checkbox
+                  id={`country-${option.value || "all"}`}
+                  checked={filters.country === option.value}
+                  onCheckedChange={() => updateFilter("country", option.value)}
+                />
+                <label htmlFor={`country-${option.value || "all"}`} className="text-sm cursor-pointer flex-1">
+                  {option.label}
+                </label>
+              </div>
+            ))}
+          </AccordionContent>
+        </AccordionItem>
+
+        {/* Colors */}
+        {availableColors.length > 0 && (
+          <AccordionItem value="colors">
+            <AccordionTrigger className="hover:no-underline">
+              <div className="flex items-center gap-2">
+                <Palette className="h-4 w-4" />
+                اللون
+              </div>
+            </AccordionTrigger>
+            <AccordionContent className="pt-2">
+              <div className="flex flex-wrap gap-2">
+                {availableColors.map((color) => (
+                  <button
+                    key={color}
+                    type="button"
+                    onClick={() => toggleVariant("colors", color)}
+                    className={`rounded-full border px-3 py-1 text-xs transition-colors ${
+                      filters.colors.includes(color)
+                        ? "border-primary bg-primary text-primary-foreground"
+                        : "hover:bg-accent"
+                    }`}
+                  >
+                    {color}
+                  </button>
+                ))}
+              </div>
+            </AccordionContent>
+          </AccordionItem>
+        )}
+
+        {/* Sizes */}
+        {availableSizes.length > 0 && (
+          <AccordionItem value="sizes">
+            <AccordionTrigger className="hover:no-underline">
+              <div className="flex items-center gap-2">
+                <Ruler className="h-4 w-4" />
+                المقاس
+              </div>
+            </AccordionTrigger>
+            <AccordionContent className="pt-2">
+              <div className="flex flex-wrap gap-2">
+                {availableSizes.map((size) => (
+                  <button
+                    key={size}
+                    type="button"
+                    onClick={() => toggleVariant("sizes", size)}
+                    className={`rounded-md border px-3 py-1 text-xs transition-colors ${
+                      filters.sizes.includes(size)
+                        ? "border-primary bg-primary text-primary-foreground"
+                        : "hover:bg-accent"
+                    }`}
+                  >
+                    {size}
+                  </button>
+                ))}
+              </div>
+            </AccordionContent>
+          </AccordionItem>
+        )}
+
+        {/* Delivery time */}
+        <AccordionItem value="delivery">
+          <AccordionTrigger className="hover:no-underline">
+            <div className="flex items-center gap-2">
+              <Truck className="h-4 w-4" />
+              مدة التوصيل
+            </div>
+          </AccordionTrigger>
+          <AccordionContent className="space-y-2 pt-2">
+            {DELIVERY_OPTIONS.map((option) => (
+              <div key={option.value} className="flex items-center gap-2">
+                <Checkbox
+                  id={`delivery-${option.value}`}
+                  checked={filters.maxDeliveryDays === option.value}
+                  onCheckedChange={() => updateFilter("maxDeliveryDays", option.value)}
+                />
+                <label htmlFor={`delivery-${option.value}`} className="text-sm cursor-pointer flex-1">
+                  {option.label}
+                </label>
+              </div>
+            ))}
+          </AccordionContent>
+        </AccordionItem>
+
+        {/* Discount */}
+        <AccordionItem value="discount">
+          <AccordionTrigger className="hover:no-underline">
+            <div className="flex items-center gap-2">
+              <Percent className="h-4 w-4" />
+              نسبة الخصم
+            </div>
+          </AccordionTrigger>
+          <AccordionContent className="pt-2">
+            <div className="flex flex-wrap gap-2">
+              <button
+                type="button"
+                onClick={() => updateFilter("minDiscount", 0)}
+                className={`rounded-md border px-3 py-1 text-xs transition-colors ${
+                  filters.minDiscount === 0 ? "border-primary bg-primary text-primary-foreground" : "hover:bg-accent"
+                }`}
+              >
+                أي خصم
+              </button>
+              {DISCOUNT_OPTIONS.map((value) => (
+                <button
+                  key={value}
+                  type="button"
+                  onClick={() => updateFilter("minDiscount", value)}
+                  className={`rounded-md border px-3 py-1 text-xs transition-colors ${
+                    filters.minDiscount === value
+                      ? "border-primary bg-primary text-primary-foreground"
+                      : "hover:bg-accent"
+                  }`}
+                >
+                  {value}% وأكثر
+                </button>
+              ))}
+            </div>
+          </AccordionContent>
+        </AccordionItem>
       </Accordion>
     </div>
+  );
+
+  const LegacyOther = () => (
+    <Accordion type="multiple">
+        <AccordionItem value="other-legacy">
+          <AccordionTrigger className="hover:no-underline">
+            <div className="flex items-center gap-2">
+              <SlidersHorizontal className="h-4 w-4" />
+              خيارات أخرى
+            </div>
+          </AccordionTrigger>
+          <AccordionContent className="space-y-3 pt-2">
+            <div className="flex items-center gap-2">
+              <Checkbox
+                id="hasDiscount"
+                checked={filters.hasDiscount}
+                onCheckedChange={(checked) => updateFilter("hasDiscount", !!checked)}
+              />
+              <label htmlFor="hasDiscount" className="text-sm cursor-pointer">
+                عروض وخصومات فقط
+              </label>
+            </div>
+             <div className="flex items-center gap-2">
+              <Checkbox
+                id="inStock"
+                checked={filters.inStock}
+                onCheckedChange={(checked) => updateFilter("inStock", !!checked)}
+              />
+              <label htmlFor="inStock" className="text-sm cursor-pointer">
+                المنتجات المتوفرة فقط
+              </label>
+            </div>
+            <div className="flex items-center gap-2">
+              <Checkbox
+                id="freeShipping"
+                checked={filters.freeShipping}
+                onCheckedChange={(checked) => updateFilter("freeShipping", !!checked)}
+              />
+              <label htmlFor="freeShipping" className="text-sm cursor-pointer">
+                🚚 شحن مجاني فقط
+              </label>
+            </div>
+          </AccordionContent>
+        </AccordionItem>
+      </Accordion>
   );
 
   return (

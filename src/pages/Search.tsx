@@ -269,7 +269,9 @@ const SearchPage = () => {
     try {
       let query = supabase
         .from("products")
-        .select("id, name, price, original_price, image_url, vendor_id, category_id, subcategory_id, stock_quantity, shipping_cost, reviews(rating)", { count: "exact" })
+        .select(
+          "id, name, price, original_price, image_url, vendor_id, category_id, subcategory_id, stock_quantity, shipping_cost, product_type, ships_within_days, colors, sizes, reviews(rating)",
+        )
         .eq("is_active", true);
 
       // Price range
@@ -310,6 +312,26 @@ const SearchPage = () => {
         query = query.eq("shipping_cost", 0);
       }
 
+      // Country of origin (local seller vs. imported platform products)
+      if (filters.country === "local") {
+        query = query.eq("product_type", "seller");
+      } else if (filters.country === "turkey") {
+        query = query.eq("product_type", "platform");
+      }
+
+      // Color / size variants
+      if (filters.colors.length > 0) {
+        query = query.overlaps("colors", filters.colors);
+      }
+      if (filters.sizes.length > 0) {
+        query = query.overlaps("sizes", filters.sizes);
+      }
+
+      // Delivery time
+      if (filters.maxDeliveryDays > 0) {
+        query = query.lte("ships_within_days", filters.maxDeliveryDays);
+      }
+
       // Sorting
       switch (filters.sortBy) {
         case "price_asc":
@@ -339,6 +361,14 @@ const SearchPage = () => {
       if (error) throw error;
 
       let filteredProducts = (data || []) as Product[];
+
+      // Minimum discount percentage (computed field)
+      if (filters.minDiscount > 0) {
+        filteredProducts = filteredProducts.filter((p) => {
+          if (!p.original_price || p.original_price <= p.price) return false;
+          return ((p.original_price - p.price) / p.original_price) * 100 >= filters.minDiscount;
+        });
+      }
 
       if (filters.search.trim()) {
         filteredProducts = filteredProducts.filter((product) =>
@@ -395,6 +425,16 @@ const SearchPage = () => {
     });
   };
 
+  const toggleVariant = (key: "colors" | "sizes", value: string) => {
+    setFilters((prev) => {
+      const list = prev[key];
+      return {
+        ...prev,
+        [key]: list.includes(value) ? list.filter((v) => v !== value) : [...list, value],
+      };
+    });
+  };
+
   const applyPriceRange = () => {
     setFilters((prev) => ({
       ...prev,
@@ -406,6 +446,7 @@ const SearchPage = () => {
   const resetFilters = () => {
     setFilters(defaultFilters);
     setPriceRange([0, 10000000]);
+    setSearchInput("");
     try {
       localStorage.removeItem(FILTERS_STORAGE_KEY);
     } catch {
@@ -422,7 +463,12 @@ const SearchPage = () => {
     (filters.hasDiscount ? 1 : 0) +
     (filters.inStock ? 1 : 0) +
     (filters.minPrice > 0 || filters.maxPrice < 10000000 ? 1 : 0) +
-    (filters.freeShipping ? 1 : 0);
+    (filters.freeShipping ? 1 : 0) +
+    filters.colors.length +
+    filters.sizes.length +
+    (filters.country ? 1 : 0) +
+    (filters.maxDeliveryDays > 0 ? 1 : 0) +
+    (filters.minDiscount > 0 ? 1 : 0);
 
   const getAverageRating = (reviews: { rating: number }[]) => {
     if (!reviews || reviews.length === 0) return 0;

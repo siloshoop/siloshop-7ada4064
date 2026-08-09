@@ -543,6 +543,36 @@ const SearchPage = () => {
                 <X className="h-3 w-3 cursor-pointer" onClick={() => updateFilter("freeShipping", false)} />
               </Badge>
             )}
+            {filters.country && (
+              <Badge variant="secondary" className="gap-1">
+                {filters.country === "local" ? "🇸🇾 سوريا" : "🇹🇷 تركيا"}
+                <X className="h-3 w-3 cursor-pointer" onClick={() => updateFilter("country", "")} />
+              </Badge>
+            )}
+            {filters.colors.map((color) => (
+              <Badge key={color} variant="secondary" className="gap-1">
+                {color}
+                <X className="h-3 w-3 cursor-pointer" onClick={() => toggleVariant("colors", color)} />
+              </Badge>
+            ))}
+            {filters.sizes.map((size) => (
+              <Badge key={size} variant="secondary" className="gap-1">
+                مقاس {size}
+                <X className="h-3 w-3 cursor-pointer" onClick={() => toggleVariant("sizes", size)} />
+              </Badge>
+            ))}
+            {filters.maxDeliveryDays > 0 && (
+              <Badge variant="secondary" className="gap-1">
+                توصيل ≤ {filters.maxDeliveryDays} أيام
+                <X className="h-3 w-3 cursor-pointer" onClick={() => updateFilter("maxDeliveryDays", 0)} />
+              </Badge>
+            )}
+            {filters.minDiscount > 0 && (
+              <Badge variant="secondary" className="gap-1">
+                خصم {filters.minDiscount}%+
+                <X className="h-3 w-3 cursor-pointer" onClick={() => updateFilter("minDiscount", 0)} />
+              </Badge>
+            )}
           </div>
         </div>
       )}

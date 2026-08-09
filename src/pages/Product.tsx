@@ -500,6 +500,12 @@ const Product = () => {
                 التقييمات ({product.reviews?.length || 0})
               </TabsTrigger>
               <TabsTrigger
+                value="shipping"
+                className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none px-4 py-2.5"
+              >
+                الشحن والإرجاع
+              </TabsTrigger>
+              <TabsTrigger
                 value="qa"
                 className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none px-4 py-2.5"
               >
@@ -516,38 +522,24 @@ const Product = () => {
             </TabsContent>
 
             <TabsContent value="specs" className="pt-6 animate-fade-in">
-              <div className="max-w-2xl rounded-xl border overflow-hidden">
-                <dl className="divide-y">
-                  <div className="grid grid-cols-3 p-3 text-sm">
-                    <dt className="text-muted-foreground col-span-1">البائع</dt>
-                    <dd className="col-span-2 font-medium">{product.vendor.full_name}</dd>
-                  </div>
-                  <div className="grid grid-cols-3 p-3 text-sm">
-                    <dt className="text-muted-foreground col-span-1">التوفر</dt>
-                    <dd className="col-span-2 font-medium">
-                      {inStock ? `${product.stock_quantity} قطعة متوفرة` : "غير متوفر"}
-                    </dd>
-                  </div>
-                  <div className="grid grid-cols-3 p-3 text-sm">
-                    <dt className="text-muted-foreground col-span-1">السعر</dt>
-                    <dd className="col-span-2 font-medium">
-                      {product.price.toLocaleString()} ل.س
-                    </dd>
-                  </div>
-                  {product.original_price && (
-                    <div className="grid grid-cols-3 p-3 text-sm">
-                      <dt className="text-muted-foreground col-span-1">السعر الأصلي</dt>
-                      <dd className="col-span-2 font-medium line-through text-muted-foreground">
-                        {product.original_price.toLocaleString()} ل.س
-                      </dd>
-                    </div>
-                  )}
-                </dl>
-              </div>
+              <ProductSpecs
+                product={product as unknown as Record<string, any>}
+                vendorName={product.vendor.full_name}
+                categoryName={product.categories?.name_ar}
+                brandName={product.brands?.name_ar}
+              />
             </TabsContent>
 
             <TabsContent value="reviews" className="pt-6 animate-fade-in">
               <ProductReviews productId={id!} vendorId={product.vendor_id} />
+            </TabsContent>
+
+            <TabsContent value="shipping" className="pt-6 animate-fade-in">
+              <ShippingReturnsInfo
+                shippingCost={product.shipping_cost}
+                shipsWithinDays={product.ships_within_days}
+                isPlatform={product.product_type === "platform"}
+              />
             </TabsContent>
 
             <TabsContent value="qa" className="pt-6 animate-fade-in">

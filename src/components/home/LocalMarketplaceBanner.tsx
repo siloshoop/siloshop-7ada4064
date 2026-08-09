@@ -50,7 +50,7 @@ const LocalMarketplaceBanner = () => (
                 className="rounded-2xl border border-border/60 bg-background/70 p-4 backdrop-blur-sm transition-transform duration-300 hover:-translate-y-0.5 motion-reduce:transition-none"
               >
                 <span className="mb-2 inline-flex h-9 w-9 items-center justify-center rounded-xl bg-primary/10 text-primary">
-                  <Icon className="h-4.5 w-4.5" />
+                  <Icon className="h-4 w-4" />
                 </span>
                 <p className="text-sm font-bold">{title}</p>
                 <p className="mt-1 text-xs leading-relaxed text-muted-foreground">{body}</p>

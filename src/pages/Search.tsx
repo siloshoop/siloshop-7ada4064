@@ -356,7 +356,8 @@ const SearchPage = () => {
           query = query.order("created_at", { ascending: false });
       }
 
-      const { data, error } = await query;
+      // Cap the result window so search stays fast on large catalogs.
+      const { data, error } = await query.limit(120);
 
       if (error) throw error;
 
@@ -1071,6 +1072,8 @@ const SearchPage = () => {
                           reviews={product.reviews?.length || 0}
                           discount={discount}
                           shippingCost={(product as any).shipping_cost || 0}
+                          productType={product.product_type}
+                          shipsWithinDays={product.ships_within_days}
                         />
                       </Fragment>
                     );

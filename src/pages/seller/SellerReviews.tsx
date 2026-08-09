@@ -54,10 +54,11 @@ const SellerReviews = () => {
   const reply = async (r: ReviewRow) => {
     const text = (drafts[r.id] ?? "").trim();
     if (!text || !user) return;
+    const existingId = r.review_replies?.[0]?.id;
     setSaving(r.id);
-    const { error } = await supabase
-      .from("review_replies")
-      .upsert({ review_id: r.id, vendor_id: user.id, reply: text }, { onConflict: "review_id" });
+    const { error } = existingId
+      ? await supabase.from("review_replies").update({ reply: text }).eq("id", existingId)
+      : await supabase.from("review_replies").insert({ review_id: r.id, vendor_id: user.id, reply: text });
     setSaving(null);
     if (error) {
       toast({ title: "تعذّر إرسال الرد", description: error.message, variant: "destructive" });

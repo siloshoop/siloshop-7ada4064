@@ -3,7 +3,12 @@ import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import Navbar from "@/components/Navbar";
-import PlatformProductBadges from "@/components/PlatformProductBadges";
+import ProductOriginBadge from "@/components/product/ProductOriginBadge";
+import SellerInfoCard from "@/components/product/SellerInfoCard";
+import ShippingReturnsInfo from "@/components/product/ShippingReturnsInfo";
+import ProductSpecs from "@/components/product/ProductSpecs";
+import FrequentlyBoughtTogether from "@/components/product/FrequentlyBoughtTogether";
+import ProductRecommendations from "@/components/ProductRecommendations";
 import Footer from "@/components/Footer";
 import { ImageGallery } from "@/components/ImageGallery";
 import { ProductReviews } from "@/components/ProductReviews";
@@ -33,6 +38,11 @@ interface Product {
   images: string[] | null;
   vendor_id: string;
   category_id: string | null;
+  video_url?: string | null;
+  product_type?: string | null;
+  ships_within_days?: number | null;
+  categories?: { name_ar: string } | null;
+  brands?: { name_ar: string } | null;
   vendor: {
     full_name: string;
   };
@@ -52,6 +62,7 @@ const Product = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { trackProductView } = useRecentlyViewed();
+  const [vendorStats, setVendorStats] = useState<{ avg: number; count: number }>({ avg: 0, count: 0 });
 
   const addToCompare = () => {
     const currentCompare = searchParams.get("compare")?.split(",") || [];
@@ -92,7 +103,9 @@ const Product = () => {
           .from("products")
           .select(`
             *,
-            reviews(rating)
+            reviews(rating),
+            categories(name_ar),
+            brands(name_ar)
           `)
           .eq("id", id)
           .maybeSingle();
@@ -106,6 +119,18 @@ const Product = () => {
           
           const vendorName = vendorInfo?.[0]?.full_name || null;
           setProduct({ ...data, vendor: { full_name: vendorName } } as any);
+
+          // Seller rating summary for the seller information card
+          const { data: vendorRatings } = await supabase
+            .from("vendor_ratings")
+            .select("rating")
+            .eq("vendor_id", data.vendor_id);
+          if (vendorRatings && vendorRatings.length > 0) {
+            setVendorStats({
+              avg: vendorRatings.reduce((s, r) => s + r.rating, 0) / vendorRatings.length,
+              count: vendorRatings.length,
+            });
+          }
         } else {
           setProduct(null);
         }

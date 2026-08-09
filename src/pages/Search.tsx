@@ -1039,9 +1039,7 @@ const SearchPage = () => {
           {/* Products Grid */}
           <div className="flex-1">
             {loading ? (
-              <div className="flex items-center justify-center py-20">
-                <Loader2 className="h-10 w-10 animate-spin text-primary" />
-              </div>
+              <ProductGridSkeleton count={12} />
             ) : products.length === 0 ? (
               <div className="text-center py-20 space-y-4">
                 <SearchIcon className="h-16 w-16 mx-auto text-muted-foreground" />

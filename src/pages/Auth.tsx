@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
 import { signIn, signUp } from "@/lib/auth";
 import { supabase } from "@/integrations/supabase/client";
@@ -37,9 +37,16 @@ const signUpSchema = z.object({
     .regex(/[A-Z]/, "يجب أن تحتوي على حرف كبير واحد على الأقل")
     .regex(/[a-z]/, "يجب أن تحتوي على حرف صغير واحد على الأقل")
     .regex(/[0-9]/, "يجب أن تحتوي على رقم واحد على الأقل"),
-  role: z.enum(["customer", "vendor"], {
-    errorMap: () => ({ message: "يرجى اختيار نوع الحساب" }),
+  phone: z.string()
+    .min(1, "رقم الهاتف مطلوب")
+    .regex(/^[0-9+\-\s]{6,20}$/, "رقم الهاتف غير صالح"),
+  confirmPassword: z.string().min(1, "تأكيد كلمة المرور مطلوب"),
+  acceptTerms: z.literal(true, {
+    errorMap: () => ({ message: "يجب الموافقة على الشروط والأحكام" }),
   }),
+}).refine((d) => d.password === d.confirmPassword, {
+  path: ["confirmPassword"],
+  message: "كلمتا المرور غير متطابقتين",
 });
 
 const Auth = () => {
@@ -57,8 +64,10 @@ const Auth = () => {
   const [signUpEmail, setSignUpEmail] = useState("");
   const [signUpPassword, setSignUpPassword] = useState("");
   const [signUpFullName, setSignUpFullName] = useState("");
-  const [signUpRole, setSignUpRole] = useState<'customer' | 'vendor'>('customer');
-  const [signUpErrors, setSignUpErrors] = useState<{ fullName?: string; email?: string; password?: string; role?: string }>({});
+  const [signUpPhone, setSignUpPhone] = useState("");
+  const [signUpConfirmPassword, setSignUpConfirmPassword] = useState("");
+  const [acceptTerms, setAcceptTerms] = useState(false);
+  const [signUpErrors, setSignUpErrors] = useState<{ fullName?: string; email?: string; phone?: string; password?: string; confirmPassword?: string; acceptTerms?: string }>({});
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -157,17 +166,21 @@ const Auth = () => {
     const result = signUpSchema.safeParse({
       fullName: signUpFullName,
       email: signUpEmail,
+      phone: signUpPhone,
       password: signUpPassword,
-      role: signUpRole,
+      confirmPassword: signUpConfirmPassword,
+      acceptTerms: acceptTerms as true,
     });
 
     if (!result.success) {
-      const errors: { fullName?: string; email?: string; password?: string; role?: string } = {};
+      const errors: typeof signUpErrors = {};
       result.error.errors.forEach((err) => {
         if (err.path[0] === "fullName") errors.fullName = err.message;
         if (err.path[0] === "email") errors.email = err.message;
+        if (err.path[0] === "phone") errors.phone = err.message;
         if (err.path[0] === "password") errors.password = err.message;
-        if (err.path[0] === "role") errors.role = err.message;
+        if (err.path[0] === "confirmPassword") errors.confirmPassword = err.message;
+        if (err.path[0] === "acceptTerms") errors.acceptTerms = err.message;
       });
       setSignUpErrors(errors);
       return;
@@ -176,7 +189,7 @@ const Auth = () => {
     setIsLoading(true);
 
     try {
-      const { user: newUser, error } = await signUp(signUpEmail, signUpPassword, signUpFullName, signUpRole);
+      const { user: newUser, error } = await signUp(signUpEmail, signUpPassword, signUpFullName, signUpPhone);
 
       if (error) throw error;
 
@@ -339,6 +352,23 @@ const Auth = () => {
                 </div>
 
                 <div className="space-y-2">
+                  <Label htmlFor="signup-phone">رقم الهاتف</Label>
+                  <Input
+                    id="signup-phone"
+                    type="tel"
+                    dir="ltr"
+                    placeholder="09XXXXXXXX"
+                    value={signUpPhone}
+                    onChange={(e) => setSignUpPhone(e.target.value)}
+                    disabled={isLoading}
+                    className={signUpErrors.phone ? "border-destructive" : ""}
+                  />
+                  {signUpErrors.phone && (
+                    <p className="text-sm text-destructive">{signUpErrors.phone}</p>
+                  )}
+                </div>
+
+                <div className="space-y-2">
                   <Label htmlFor="signup-password">كلمة المرور</Label>
                   <div className="relative">
                     <Input
@@ -368,24 +398,39 @@ const Auth = () => {
                   </p>
                 </div>
 
-                <div className="space-y-3">
-                  <Label>نوع الحساب</Label>
-                  <RadioGroup value={signUpRole} onValueChange={(value: 'customer' | 'vendor') => setSignUpRole(value)}>
-                    <div className="flex items-center space-x-2 space-x-reverse">
-                      <RadioGroupItem value="customer" id="customer" />
-                      <Label htmlFor="customer" className="cursor-pointer">
-                        عميل - أريد الشراء من المنصة
-                      </Label>
-                    </div>
-                    <div className="flex items-center space-x-2 space-x-reverse">
-                      <RadioGroupItem value="vendor" id="vendor" />
-                      <Label htmlFor="vendor" className="cursor-pointer">
-                        بائع - أريد بيع المنتجات
-                      </Label>
-                    </div>
-                  </RadioGroup>
-                  {signUpErrors.role && (
-                    <p className="text-sm text-destructive">{signUpErrors.role}</p>
+                <div className="space-y-2">
+                  <Label htmlFor="signup-confirm-password">تأكيد كلمة المرور</Label>
+                  <Input
+                    id="signup-confirm-password"
+                    type={showPassword ? "text" : "password"}
+                    placeholder="••••••••"
+                    value={signUpConfirmPassword}
+                    onChange={(e) => setSignUpConfirmPassword(e.target.value)}
+                    disabled={isLoading}
+                    className={signUpErrors.confirmPassword ? "border-destructive" : ""}
+                  />
+                  {signUpErrors.confirmPassword && (
+                    <p className="text-sm text-destructive">{signUpErrors.confirmPassword}</p>
+                  )}
+                </div>
+
+                <div className="space-y-2">
+                  <div className="flex items-start gap-2">
+                    <Checkbox
+                      id="accept-terms"
+                      checked={acceptTerms}
+                      onCheckedChange={(v) => setAcceptTerms(v === true)}
+                      disabled={isLoading}
+                    />
+                    <Label htmlFor="accept-terms" className="text-sm font-normal leading-5 cursor-pointer">
+                      أوافق على{" "}
+                      <a href="/terms" target="_blank" rel="noreferrer" className="text-primary hover:underline">الشروط والأحكام</a>
+                      {" "}و{" "}
+                      <a href="/privacy" target="_blank" rel="noreferrer" className="text-primary hover:underline">سياسة الخصوصية</a>
+                    </Label>
+                  </div>
+                  {signUpErrors.acceptTerms && (
+                    <p className="text-sm text-destructive">{signUpErrors.acceptTerms}</p>
                   )}
                 </div>
 
@@ -400,10 +445,7 @@ const Auth = () => {
                   )}
                 </Button>
                 <p className="text-xs text-muted-foreground text-center">
-                  بإنشاء الحساب فإنك توافق على{" "}
-                  <a href="/terms" className="text-primary hover:underline">الشروط والأحكام</a>
-                  {" "}و{" "}
-                  <a href="/privacy" className="text-primary hover:underline">سياسة الخصوصية</a>
+                  جميع الحسابات الجديدة تُنشأ كحساب مشتري. يمكنك فتح متجر لاحقاً من إعدادات حسابك.
                 </p>
               </form>
             </TabsContent>

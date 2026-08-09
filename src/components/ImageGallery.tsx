@@ -10,6 +10,16 @@ interface ImageGalleryProps {
   videoUrl?: string | null;
 }
 
+/** Converts a YouTube/Vimeo watch link into an embeddable URL; null for direct files. */
+const toEmbedUrl = (url?: string | null): string | null => {
+  if (!url) return null;
+  const yt = url.match(/(?:youtube\.com\/(?:watch\?v=|embed\/)|youtu\.be\/)([\w-]{6,})/);
+  if (yt) return `https://www.youtube.com/embed/${yt[1]}`;
+  const vimeo = url.match(/vimeo\.com\/(?:video\/)?(\d+)/);
+  if (vimeo) return `https://player.vimeo.com/video/${vimeo[1]}`;
+  return null;
+};
+
 /**
  * Premium product image gallery
  *  - Vertical thumbnails on desktop, horizontal strip on mobile

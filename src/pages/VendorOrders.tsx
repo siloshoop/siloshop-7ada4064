@@ -380,61 +380,11 @@ const VendorOrders = () => {
       <Footer />
 
       {/* Shipping Dialog */}
-      <Dialog open={shippingDialogOpen} onOpenChange={setShippingDialogOpen}>
-        <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <Truck className="h-5 w-5" />
-              معلومات الشحن
-            </DialogTitle>
-            <DialogDescription>
-              أدخل معلومات تتبع الشحن للعميل (اختياري)
-            </DialogDescription>
-          </DialogHeader>
-          <div className="grid gap-4 py-4">
-            <div className="grid gap-2">
-              <Label htmlFor="courierName">شركة الشحن</Label>
-              <Input
-                id="courierName"
-                placeholder="مثال: أرامكس، DHL، سمسا"
-                value={courierName}
-                onChange={(e) => setCourierName(e.target.value)}
-              />
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="trackingNumber">رقم التتبع</Label>
-              <Input
-                id="trackingNumber"
-                placeholder="أدخل رقم تتبع الشحنة"
-                value={trackingNumber}
-                onChange={(e) => setTrackingNumber(e.target.value)}
-              />
-            </div>
-          </div>
-          <DialogFooter className="gap-2">
-            <Button
-              variant="outline"
-              onClick={() => setShippingDialogOpen(false)}
-              disabled={updatingStatus === pendingShipOrderId}
-            >
-              إلغاء
-            </Button>
-            <Button
-              onClick={handleShippingConfirm}
-              disabled={updatingStatus === pendingShipOrderId}
-            >
-              {updatingStatus === pendingShipOrderId ? (
-                <>
-                  <Loader2 className="h-4 w-4 animate-spin ml-2" />
-                  جاري التحديث...
-                </>
-              ) : (
-                "تأكيد الشحن"
-              )}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <ShippingInfoDialog
+        orderId={pendingShipOrderId}
+        open={shippingDialogOpen}
+        onOpenChange={setShippingDialogOpen}
+      />
     </div>
   );
 };

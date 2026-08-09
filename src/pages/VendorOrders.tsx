@@ -8,6 +8,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Loader2, Package, Eye, EyeOff, Truck } from "lucide-react";
+import OrderStatusBadge from "@/components/orders/OrderStatusBadge";
+import OrderTimelineLog from "@/components/orders/OrderTimelineLog";
+import ShippingInfoDialog from "@/components/orders/ShippingInfoDialog";
+import { allowedNextStatuses, changeOrderStatus, friendlyOrderError, normalizeStatus, type OrderStatus } from "@/lib/orderStatus";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -157,133 +161,29 @@ const VendorOrders = () => {
   };
 
   const getStatusBadge = (status: string) => {
-    const statusMap: Record<string, { label: string; variant: "default" | "secondary" | "destructive" | "outline" }> = {
-      pending: { label: "قيد الانتظار", variant: "secondary" },
-      processing: { label: "قيد المعالجة", variant: "default" },
-      shipped: { label: "تم الشحن", variant: "outline" },
-      delivered: { label: "تم التوصيل", variant: "default" },
-      cancelled: { label: "ملغى", variant: "destructive" },
-    };
-    
-    const statusInfo = statusMap[status] || statusMap.pending;
-    return <Badge variant={statusInfo.variant}>{statusInfo.label}</Badge>;
+    return <OrderStatusBadge status={status} />;
   };
 
   const filterOrders = (status: string) => {
     if (status === "all") return orders;
-    return orders.filter(order => order.status === status);
+    return orders.filter(order => normalizeStatus(order.status) === status);
   };
 
   const handleStatusChange = (orderId: string, newStatus: string) => {
-    if (newStatus === "shipped") {
-      // Open shipping dialog for tracking info
-      setPendingShipOrderId(orderId);
-      setTrackingNumber("");
-      setCourierName("");
-      setShippingDialogOpen(true);
-    } else {
-      updateOrderStatus(orderId, newStatus);
-    }
+    updateOrderStatus(orderId, newStatus as OrderStatus);
   };
 
-  const handleShippingConfirm = async () => {
-    if (!pendingShipOrderId) return;
-    
-    setUpdatingStatus(pendingShipOrderId);
-    try {
-      // Update order status via SECURITY DEFINER RPC (avoids exposing customer PII through UPDATE RLS).
-      const { error: orderError } = await supabase.rpc("vendor_update_order_status", {
-        _order_id: pendingShipOrderId,
-        _status: "shipped",
-        _tracking_number: trackingNumber || null,
-        _courier_name: courierName || null,
-      });
-
-      if (orderError) throw orderError;
-
-      // Add to status history
-      const { error: historyError } = await supabase
-        .from("order_status_history")
-        .insert({
-          order_id: pendingShipOrderId,
-          status: "shipped",
-          notes: trackingNumber ? `رقم التتبع: ${trackingNumber}${courierName ? ` - شركة الشحن: ${courierName}` : ''}` : null,
-        });
-
-      if (historyError) throw historyError;
-
-      // Send email notification to customer
-      try {
-        await supabase.functions.invoke("notify-customer-order-status", {
-          body: {
-            order_id: pendingShipOrderId,
-            new_status: "shipped",
-            notes: trackingNumber ? `رقم التتبع: ${trackingNumber}` : undefined,
-          },
-        });
-      } catch (emailError) {
-        console.error("Failed to send email notification:", emailError);
-      }
-
-      // Update local state
-      setOrders(prev =>
-        prev.map(order =>
-          order.id === pendingShipOrderId ? { ...order, status: "shipped" } : order
-        )
-      );
-
-      toast({
-        title: "تم التحديث",
-        description: "تم تحديث حالة الطلب وإضافة معلومات الشحن",
-      });
-
-      setShippingDialogOpen(false);
-      setPendingShipOrderId(null);
-    } catch (error) {
-      toast({
-        title: "خطأ",
-        description: "فشل في تحديث حالة الطلب",
-        variant: "destructive",
-      });
-    } finally {
-      setUpdatingStatus(null);
-    }
+  const openShippingDialog = (orderId: string) => {
+    setPendingShipOrderId(orderId);
+    setShippingDialogOpen(true);
   };
 
-  const updateOrderStatus = async (orderId: string, newStatus: string) => {
+  const updateOrderStatus = async (orderId: string, newStatus: OrderStatus) => {
     setUpdatingStatus(orderId);
     try {
-      // Update order status via SECURITY DEFINER RPC.
-      const { error: orderError } = await supabase.rpc("vendor_update_order_status", {
-        _order_id: orderId,
-        _status: newStatus,
-      });
+      // Audited, transition-validated update (records actor, IP and device server side).
+      await changeOrderStatus(orderId, newStatus);
 
-      if (orderError) throw orderError;
-
-      // Add to status history
-      const { error: historyError } = await supabase
-        .from("order_status_history")
-        .insert({
-          order_id: orderId,
-          status: newStatus,
-        });
-
-      if (historyError) throw historyError;
-
-      // Send email notification to customer
-      try {
-        await supabase.functions.invoke("notify-customer-order-status", {
-          body: {
-            order_id: orderId,
-            new_status: newStatus,
-          },
-        });
-      } catch (emailError) {
-        console.error("Failed to send email notification:", emailError);
-      }
-
-      // Update local state
       setOrders(prev =>
         prev.map(order =>
           order.id === orderId ? { ...order, status: newStatus } : order
@@ -297,7 +197,7 @@ const VendorOrders = () => {
     } catch (error) {
       toast({
         title: "خطأ",
-        description: "فشل في تحديث حالة الطلب",
+        description: friendlyOrderError(error),
         variant: "destructive",
       });
     } finally {

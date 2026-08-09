@@ -6,10 +6,19 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { Avatar } from "@/components/ui/avatar";
-import { Send, Image as ImageIcon, Paperclip, Loader2 } from "lucide-react";
+import { Send, Image as ImageIcon, Paperclip, Loader2, Check, CheckCheck } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { formatDistanceToNow } from "date-fns";
 import { ar } from "date-fns/locale";
+
+const MAX_UPLOAD_BYTES = 5 * 1024 * 1024;
+const ALLOWED_MIME = [
+  "image/jpeg",
+  "image/png",
+  "image/webp",
+  "image/gif",
+  "application/pdf",
+];
 
 interface Message {
   id: string;
@@ -47,8 +56,12 @@ const Chat = () => {
   } | null>(null);
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
+  const [peerTyping, setPeerTyping] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const typingChannelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
+  const lastTypingSentRef = useRef(0);
+  const typingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const suspensionActive =
     !!convState?.is_suspended &&
@@ -181,8 +194,23 @@ const Chat = () => {
         )
         .subscribe();
 
+      // Typing indicator (ephemeral broadcast, nothing stored)
+      const typingChannel = supabase
+        .channel(`typing-${conversationRow.id}`, { config: { broadcast: { self: false } } })
+        .on("broadcast", { event: "typing" }, (payload) => {
+          if ((payload.payload as { userId?: string })?.userId === user.id) return;
+          setPeerTyping(true);
+          if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
+          typingTimeoutRef.current = setTimeout(() => setPeerTyping(false), 3000);
+        })
+        .subscribe();
+      typingChannelRef.current = typingChannel;
+
       return () => {
         supabase.removeChannel(channel);
+        supabase.removeChannel(typingChannel);
+        typingChannelRef.current = null;
+        if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
       };
     };
 
@@ -191,7 +219,19 @@ const Chat = () => {
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
+  }, [messages, peerTyping]);
+
+  const broadcastTyping = () => {
+    if (!typingChannelRef.current || !user || chatDisabled) return;
+    const now = Date.now();
+    if (now - lastTypingSentRef.current < 1500) return;
+    lastTypingSentRef.current = now;
+    typingChannelRef.current.send({
+      type: "broadcast",
+      event: "typing",
+      payload: { userId: user.id },
+    });
+  };
 
   const handleSendMessage = async () => {
     if (!newMessage.trim() || !conversationId || !user) return;
@@ -230,13 +270,33 @@ const Chat = () => {
     }
 
     setSending(true);
+    if (file.size > MAX_UPLOAD_BYTES) {
+      toast({
+        title: "الملف كبير جداً",
+        description: "الحجم الأقصى المسموح 5 ميغابايت",
+        variant: "destructive",
+      });
+      setSending(false);
+      e.target.value = "";
+      return;
+    }
+    if (!ALLOWED_MIME.includes(file.type)) {
+      toast({
+        title: "نوع ملف غير مدعوم",
+        description: "يُسمح بالصور (JPG, PNG, WEBP, GIF) وملفات PDF فقط",
+        variant: "destructive",
+      });
+      setSending(false);
+      e.target.value = "";
+      return;
+    }
     const fileExt = file.name.split(".").pop();
     const fileName = `${Math.random()}.${fileExt}`;
     const filePath = `chat/${conversationId}/${fileName}`;
 
     const { error: uploadError } = await supabase.storage
       .from("product-images")
-      .upload(filePath, file);
+      .upload(filePath, file, { contentType: file.type });
 
     if (uploadError) {
       toast({
@@ -299,7 +359,9 @@ const Chat = () => {
           </Avatar>
           <div>
             <h2 className="font-bold">{vendorProfile?.full_name || "بائع"}</h2>
-            <p className="text-sm text-muted-foreground">نشط</p>
+            <p className="text-sm text-muted-foreground">
+              {peerTyping ? "يكتب الآن..." : "نشط"}
+            </p>
           </div>
         </div>
 
@@ -307,6 +369,18 @@ const Chat = () => {
         <div className="flex-1 overflow-y-auto p-4 space-y-4">
           {messages.map((msg) => {
             const isSender = msg.sender_id === user?.id;
+            if (msg.is_deleted) {
+              return (
+                <div
+                  key={msg.id}
+                  className={`flex ${isSender ? "justify-end" : "justify-start"}`}
+                >
+                  <div className="max-w-[70%] rounded-lg p-3 bg-muted/60 text-muted-foreground text-sm italic">
+                    تم حذف هذه الرسالة من قبل الإدارة
+                  </div>
+                </div>
+              );
+            }
             return (
               <div
                 key={msg.id}
@@ -338,11 +412,17 @@ const Chat = () => {
                     </a>
                   )}
                   {msg.content && <p>{msg.content}</p>}
-                  <p className="text-xs opacity-70 mt-1">
+                  <p className="text-xs opacity-70 mt-1 flex items-center gap-1">
                     {formatDistanceToNow(new Date(msg.created_at), {
                       addSuffix: true,
                       locale: ar,
                     })}
+                    {isSender &&
+                      (msg.is_read ? (
+                        <CheckCheck className="h-3.5 w-3.5" aria-label="تم القراءة" />
+                      ) : (
+                        <Check className="h-3.5 w-3.5" aria-label="تم الإرسال" />
+                      ))}
                   </p>
                 </div>
               </div>
@@ -350,6 +430,10 @@ const Chat = () => {
           })}
           <div ref={messagesEndRef} />
         </div>
+
+        {peerTyping && (
+          <div className="px-4 pb-2 text-xs text-muted-foreground">يكتب الآن...</div>
+        )}
 
         {disabledReason && (
           <div className="px-4 py-2 text-sm text-center bg-destructive/10 text-destructive border-t border-destructive/30">
@@ -376,10 +460,14 @@ const Chat = () => {
           </Button>
           <Input
             value={newMessage}
-            onChange={(e) => setNewMessage(e.target.value)}
+            onChange={(e) => {
+              setNewMessage(e.target.value);
+              broadcastTyping();
+            }}
             placeholder={chatDisabled ? "الإرسال غير متاح" : "اكتب رسالة..."}
-            onKeyPress={(e) => e.key === "Enter" && handleSendMessage()}
+            onKeyDown={(e) => e.key === "Enter" && handleSendMessage()}
             disabled={sending || chatDisabled}
+            maxLength={2000}
           />
           <Button onClick={handleSendMessage} disabled={sending || chatDisabled || !newMessage.trim()}>
             {sending ? (

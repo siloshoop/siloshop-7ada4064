@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { logAdminAction } from "@/lib/auditLog";
 import AdminLayout from "@/components/admin/AdminLayout";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -68,6 +69,10 @@ const ManageBrands = () => {
       return;
     }
     toast({ title: editing ? "تم تحديث العلامة" : "تمت إضافة العلامة" });
+    void logAdminAction(editing ? "brand_updated" : "brand_created", {
+      brand_id: editing?.id ?? null,
+      name_ar: payload.name_ar,
+    });
     setOpen(false);
     void load();
   };
@@ -82,6 +87,10 @@ const ManageBrands = () => {
       return;
     }
     setRows((prev) => prev.map((r) => (r.id === row.id ? { ...r, is_active: !r.is_active } : r)));
+    void logAdminAction("brand_visibility_changed", {
+      brand_id: row.id,
+      is_active: !row.is_active,
+    });
   };
 
   return (

@@ -475,6 +475,16 @@ const Product = () => {
             />
 
             <ReturnsPolicyNote className="mt-2" />
+
+            <div className="flex justify-end">
+              <ReportDialog
+                kind="product"
+                targetId={id!}
+                targetName={product.name}
+                label="الإبلاغ عن هذا المنتج"
+                className="text-muted-foreground"
+              />
+            </div>
           </div>
         </div>
 

@@ -1,6 +1,6 @@
 import {
   LayoutDashboard, Package, PlusCircle, Boxes, ShoppingBag, Undo2, Users,
-  MessageSquare, Star, Megaphone, Percent, BarChart3, FileText, Bell, Settings,
+  MessageSquare, Star, Megaphone, Percent, BarChart3, FileText, Bell, Settings, ShieldAlert,
 } from "lucide-react";
 
 export interface SellerModule {
@@ -27,6 +27,7 @@ export const SELLER_MODULES: SellerModule[] = [
   { key: "analytics", label: "الإحصائيات", path: "/dashboard/statistics", icon: BarChart3, group: "growth" },
   { key: "reports", label: "التقارير", path: "/seller/reports", icon: FileText, group: "growth" },
   { key: "notifications", label: "الإشعارات", path: "/notifications", icon: Bell, group: "account" },
+  { key: "violations", label: "المخالفات", path: "/seller/violations", icon: ShieldAlert, group: "account" },
   { key: "settings", label: "الإعدادات", path: "/settings", icon: Settings, group: "account" },
 ];
 

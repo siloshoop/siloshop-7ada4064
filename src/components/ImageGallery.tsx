@@ -205,8 +205,30 @@ export const ImageGallery = ({ images, productName, videoUrl }: ImageGalleryProp
         </div>
 
         {/* Thumbnails: vertical on desktop, horizontal on mobile */}
-        {total > 1 && (
+        {(total > 1 || !!videoUrl) && (
           <div className="flex md:flex-col gap-2 md:w-20 overflow-x-auto md:overflow-y-auto md:max-h-[520px] scrollbar-hide">
+            {!!videoUrl && (
+              <button
+                onClick={() => setShowVideo(true)}
+                aria-label="تشغيل فيديو المنتج"
+                aria-current={showVideo}
+                className={`relative shrink-0 w-16 h-16 md:w-full md:h-20 rounded-lg overflow-hidden border transition-all ${
+                  showVideo
+                    ? "border-primary ring-2 ring-primary/40"
+                    : "border-border/60 opacity-80 hover:opacity-100"
+                }`}
+              >
+                <img
+                  src={images[0]}
+                  alt={`${productName} فيديو`}
+                  loading="lazy"
+                  className="h-full w-full object-cover"
+                />
+                <span className="absolute inset-0 flex items-center justify-center bg-foreground/45">
+                  <Play className="h-5 w-5 fill-background text-background" />
+                </span>
+              </button>
+            )}
             {images.map((image, index) => (
               <button
                 key={index}

@@ -170,7 +170,6 @@ export const friendlyDbError = (error: any): string => {
   if (code === "22P02" || /invalid input syntax/i.test(msg)) {
     return "أحد الحقول يحتوي على قيمة غير صالحة. تأكد من إدخال الأرقام بشكل صحيح.";
   }
-  if (code === "23505" || code === "23505") return msg;
   if (code === "23514" || /violates check constraint/i.test(msg)) {
     return "القيم المُدخلة لا تطابق الشروط المطلوبة. يرجى مراجعة الأسعار والكميات.";
   }
@@ -180,7 +179,7 @@ export const friendlyDbError = (error: any): string => {
   if (code === "23502" || /null value in column/i.test(msg)) {
     return "يرجى تعبئة جميع الحقول المطلوبة.";
   }
-  if (code === "23505") return "هذا العنصر موجود مسبقاً.";
+  if (code === "23505") return "رمز المنتج (SKU) مستخدم مسبقاً.";
   if (code === "42501" || /permission denied|row-level security/i.test(msg)) {
     return "ليست لديك صلاحية لتنفيذ هذه العملية.";
   }

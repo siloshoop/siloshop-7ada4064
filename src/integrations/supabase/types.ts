@@ -977,31 +977,49 @@ export type Database = {
       }
       order_status_history: {
         Row: {
+          changed_by: string | null
+          changed_by_role: string | null
           created_at: string
+          from_status: string | null
           id: string
+          ip_address: string | null
+          is_override: boolean
           location_lat: number | null
           location_lng: number | null
           notes: string | null
           order_id: string
           status: string
+          user_agent: string | null
         }
         Insert: {
+          changed_by?: string | null
+          changed_by_role?: string | null
           created_at?: string
+          from_status?: string | null
           id?: string
+          ip_address?: string | null
+          is_override?: boolean
           location_lat?: number | null
           location_lng?: number | null
           notes?: string | null
           order_id: string
           status: string
+          user_agent?: string | null
         }
         Update: {
+          changed_by?: string | null
+          changed_by_role?: string | null
           created_at?: string
+          from_status?: string | null
           id?: string
+          ip_address?: string | null
+          is_override?: boolean
           location_lat?: number | null
           location_lng?: number | null
           notes?: string | null
           order_id?: string
           status?: string
+          user_agent?: string | null
         }
         Relationships: [
           {
@@ -1037,6 +1055,7 @@ export type Database = {
           cancelled_at: string | null
           cancelled_by: string | null
           cancelled_by_role: string | null
+          completed_at: string | null
           coupon_code: string | null
           courier_name: string | null
           created_at: string | null
@@ -1046,14 +1065,22 @@ export type Database = {
           delivered_at: string | null
           delivery_lat: number | null
           delivery_lng: number | null
+          delivery_notes: string | null
           discount_amount: number | null
+          driver_name: string | null
+          driver_phone: string | null
           estimated_delivery: string | null
+          frozen_at: string | null
+          frozen_by: string | null
+          frozen_reason: string | null
           id: string
+          is_frozen: boolean
           notes: string | null
           order_kind: string
           payment_method: string
           payment_status: string
           phone: string | null
+          refund_status: string
           shipping_address: string | null
           status: string | null
           total_amount: number
@@ -1066,6 +1093,7 @@ export type Database = {
           cancelled_at?: string | null
           cancelled_by?: string | null
           cancelled_by_role?: string | null
+          completed_at?: string | null
           coupon_code?: string | null
           courier_name?: string | null
           created_at?: string | null
@@ -1075,14 +1103,22 @@ export type Database = {
           delivered_at?: string | null
           delivery_lat?: number | null
           delivery_lng?: number | null
+          delivery_notes?: string | null
           discount_amount?: number | null
+          driver_name?: string | null
+          driver_phone?: string | null
           estimated_delivery?: string | null
+          frozen_at?: string | null
+          frozen_by?: string | null
+          frozen_reason?: string | null
           id?: string
+          is_frozen?: boolean
           notes?: string | null
           order_kind?: string
           payment_method?: string
           payment_status?: string
           phone?: string | null
+          refund_status?: string
           shipping_address?: string | null
           status?: string | null
           total_amount: number
@@ -1095,6 +1131,7 @@ export type Database = {
           cancelled_at?: string | null
           cancelled_by?: string | null
           cancelled_by_role?: string | null
+          completed_at?: string | null
           coupon_code?: string | null
           courier_name?: string | null
           created_at?: string | null
@@ -1104,14 +1141,22 @@ export type Database = {
           delivered_at?: string | null
           delivery_lat?: number | null
           delivery_lng?: number | null
+          delivery_notes?: string | null
           discount_amount?: number | null
+          driver_name?: string | null
+          driver_phone?: string | null
           estimated_delivery?: string | null
+          frozen_at?: string | null
+          frozen_by?: string | null
+          frozen_reason?: string | null
           id?: string
+          is_frozen?: boolean
           notes?: string | null
           order_kind?: string
           payment_method?: string
           payment_status?: string
           phone?: string | null
+          refund_status?: string
           shipping_address?: string | null
           status?: string | null
           total_amount?: number
@@ -2622,6 +2667,26 @@ export type Database = {
         Args: { _order_id: string; _reason: string }
         Returns: undefined
       }
+      admin_reopen_order: {
+        Args: {
+          _ip_address?: string
+          _order_id: string
+          _reason: string
+          _status: string
+          _user_agent?: string
+        }
+        Returns: undefined
+      }
+      admin_resolve_return_dispute: {
+        Args: {
+          _decision: string
+          _ip_address?: string
+          _note: string
+          _return_id: string
+          _user_agent?: string
+        }
+        Returns: undefined
+      }
       admin_revoke_violation: {
         Args: { _note?: string; _violation_id: string }
         Returns: undefined
@@ -2649,6 +2714,16 @@ export type Database = {
           rating: number
           vendor_id: string
         }[]
+      }
+      admin_set_order_freeze: {
+        Args: {
+          _frozen: boolean
+          _ip_address?: string
+          _order_id: string
+          _reason?: string
+          _user_agent?: string
+        }
+        Returns: undefined
       }
       admin_suspend_conversation: {
         Args: {
@@ -2745,6 +2820,36 @@ export type Database = {
         Args: { p_product_id?: string; p_vendor_id: string }
         Returns: string
       }
+      get_order_timeline: {
+        Args: { _order_id: string }
+        Returns: {
+          actor_name: string
+          changed_by_role: string
+          created_at: string
+          from_status: string
+          id: string
+          ip_address: string
+          is_override: boolean
+          notes: string
+          status: string
+          user_agent: string
+        }[]
+      }
+      get_seller_performance: {
+        Args: { _vendor_id?: string }
+        Returns: {
+          avg_delivery_hours: number
+          avg_prep_hours: number
+          cancellation_rate: number
+          cancelled_orders: number
+          delivered_orders: number
+          ratings_count: number
+          return_rate: number
+          returned_orders: number
+          satisfaction_score: number
+          total_orders: number
+        }[]
+      }
       get_store_public_profile: {
         Args: { _vendor_id: string }
         Returns: {
@@ -2808,6 +2913,7 @@ export type Database = {
         Returns: boolean
       }
       is_feature_enabled: { Args: { _key: string }; Returns: boolean }
+      is_valid_order_status: { Args: { _status: string }; Returns: boolean }
       log_activity: {
         Args: {
           _action_details?: Json
@@ -2824,6 +2930,11 @@ export type Database = {
           source_queue: string
         }
         Returns: number
+      }
+      normalize_order_status: { Args: { _status: string }; Returns: string }
+      order_status_can_transition: {
+        Args: { _from: string; _role: string; _to: string }
+        Returns: boolean
       }
       product_can_manage: { Args: { _product_id: string }; Returns: boolean }
       reactivate_seller: { Args: { _user_id: string }; Returns: undefined }
@@ -2873,6 +2984,20 @@ export type Database = {
         Returns: undefined
       }
       set_default_address: { Args: { _address_id: string }; Returns: undefined }
+      set_order_shipping_info: {
+        Args: {
+          _courier_name?: string
+          _delivery_notes?: string
+          _driver_name?: string
+          _driver_phone?: string
+          _estimated_delivery?: string
+          _ip_address?: string
+          _order_id: string
+          _tracking_number?: string
+          _user_agent?: string
+        }
+        Returns: undefined
+      }
       submit_report: {
         Args: {
           _description?: string
@@ -2905,8 +3030,29 @@ export type Database = {
         Args: { _order_id: string; _phone: string }
         Returns: Json
       }
+      update_order_status: {
+        Args: {
+          _ip_address?: string
+          _note?: string
+          _order_id: string
+          _override?: boolean
+          _status: string
+          _user_agent?: string
+        }
+        Returns: undefined
+      }
       update_own_profile: {
         Args: { _avatar_url?: string; _full_name?: string; _phone?: string }
+        Returns: undefined
+      }
+      update_refund_status: {
+        Args: {
+          _ip_address?: string
+          _note?: string
+          _order_id: string
+          _status: string
+          _user_agent?: string
+        }
         Returns: undefined
       }
       update_return_status: {

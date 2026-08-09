@@ -1,7 +1,7 @@
 import {
   LayoutDashboard, Users, Store, FileCheck, PackageSearch, ShoppingBag,
   FolderTree, Tag, LayoutTemplate, Image, Flag, MessagesSquare, Bell,
-  BarChart3, DollarSign, Globe, Wallet, ToggleLeft, ScrollText,
+  BarChart3, DollarSign, Globe, Wallet, ToggleLeft, ScrollText, ShieldAlert,
 } from "lucide-react";
 import type { FeatureFlagKey } from "@/hooks/useFeatureFlags";
 
@@ -27,6 +27,7 @@ export const ADMIN_MODULES: AdminModule[] = [
   { label: "أقسام الصفحة الرئيسية", description: "واجهة العرض والترتيب", href: "/admin/homepage", icon: LayoutTemplate },
   { label: "البانرات", description: "الإعلانات الترويجية الداخلية", href: "/admin/banners", icon: Image },
   { label: "البلاغات", description: "بلاغات المنتجات والبائعين", href: "/admin/reports", icon: Flag },
+  { label: "المخالفات", description: "إنذارات ومخالفات البائعين", href: "/admin/violations", icon: ShieldAlert },
   { label: "المحادثات", description: "الإشراف على الدردشة", href: "/admin/chats", icon: MessagesSquare },
   { label: "الإشعارات", description: "إرسال إشعارات للمستخدمين", href: "/admin/notifications", icon: Bell },
   { label: "الإحصائيات", description: "لوحة التحليلات التفصيلية", href: "/admin/statistics", icon: BarChart3 },

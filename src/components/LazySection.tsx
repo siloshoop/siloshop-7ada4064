@@ -30,7 +30,7 @@ const LazySection = ({ children, threshold = 0.1, rootMargin = "200px" }: LazySe
   }, [threshold, rootMargin]);
 
   return (
-    <div ref={sectionRef} className="min-h-[320px] md:min-h-[360px]">
+    <div ref={sectionRef} className="min-h-[320px] md:min-h-[2px]">
       {isIntersecting ? (
         <Suspense fallback={
           <div className="flex items-center justify-center py-12">

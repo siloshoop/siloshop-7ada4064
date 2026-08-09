@@ -6,7 +6,7 @@ import HeroSlider from "@/components/home/HeroSlider";
 import LocalMarketplaceBanner from "@/components/home/LocalMarketplaceBanner";
 import { SearchFilters } from "@/components/SearchFilters";
 import { supabase } from "@/integrations/supabase/client";
-import { Loader2 } from "lucide-react";
+import { Loader2, Sparkles, Tag } from "lucide-react";
 import ProductCard from "@/components/ProductCard";
 import Footer from "@/components/Footer";
 import MobileBottomNav from "@/components/MobileBottomNav";

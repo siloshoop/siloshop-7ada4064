@@ -191,6 +191,39 @@ const OrderDetails = () => {
           </CardContent>
         </Card>
 
+        {(order.courier_name || order.tracking_number || order.driver_name || order.delivery_notes) && (
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-base">
+                <Truck className="h-5 w-5" /> معلومات الشحن
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-1 text-sm">
+              {order.courier_name && <p>شركة الشحن: <span className="font-semibold">{order.courier_name}</span></p>}
+              {order.tracking_number && (
+                <p dir="ltr" className="text-start">رقم التتبع: <span className="font-mono font-semibold">{order.tracking_number}</span></p>
+              )}
+              {order.driver_name && (
+                <p>مندوب التوصيل: <span className="font-semibold">{order.driver_name}</span>
+                  {order.driver_phone ? <span dir="ltr"> ({order.driver_phone})</span> : null}
+                </p>
+              )}
+              {order.delivery_notes && <p className="text-muted-foreground">{order.delivery_notes}</p>}
+            </CardContent>
+          </Card>
+        )}
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-base">
+              <History className="h-5 w-5" /> سجل تحديثات الطلب
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <OrderTimelineLog orderId={order.id} />
+          </CardContent>
+        </Card>
+
         <Card>
           <CardHeader><CardTitle className="flex items-center gap-2"><Receipt className="h-5 w-5" />ملخص الفاتورة</CardTitle></CardHeader>
           <CardContent className="space-y-2 text-sm">

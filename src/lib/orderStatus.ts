@@ -297,3 +297,69 @@ export const fetchOrderTimeline = async (orderId: string): Promise<TimelineEntry
   if (error) throw error;
   return (data || []) as TimelineEntry[];
 };
+
+/* ------------------------------------------------------------------ */
+/* Return disputes (admin final decision)                              */
+/* ------------------------------------------------------------------ */
+
+export const resolveReturnDispute = async (
+  returnId: string,
+  decision: "approve" | "reject",
+  note: string,
+) => {
+  const { ip, userAgent } = await getClientMeta();
+  const { error } = await supabase.rpc("admin_resolve_return_dispute", {
+    _return_id: returnId,
+    _decision: decision,
+    _note: note,
+    _ip_address: ip,
+    _user_agent: userAgent,
+  });
+  if (error) throw error;
+};
+
+/* ------------------------------------------------------------------ */
+/* Seller performance                                                  */
+/* ------------------------------------------------------------------ */
+
+export interface SellerPerformance {
+  total_orders: number;
+  delivered_orders: number;
+  cancelled_orders: number;
+  returned_orders: number;
+  avg_prep_hours: number;
+  avg_delivery_hours: number;
+  cancellation_rate: number;
+  return_rate: number;
+  satisfaction_score: number;
+  ratings_count: number;
+}
+
+export const fetchSellerPerformance = async (vendorId?: string | null): Promise<SellerPerformance> => {
+  const { data, error } = await supabase.rpc("get_seller_performance", {
+    _vendor_id: vendorId ?? null,
+  });
+  if (error) throw error;
+  const row = (Array.isArray(data) ? data[0] : data) as Record<string, unknown> | undefined;
+  const num = (v: unknown) => Number(v ?? 0);
+  return {
+    total_orders: num(row?.total_orders),
+    delivered_orders: num(row?.delivered_orders),
+    cancelled_orders: num(row?.cancelled_orders),
+    returned_orders: num(row?.returned_orders),
+    avg_prep_hours: num(row?.avg_prep_hours),
+    avg_delivery_hours: num(row?.avg_delivery_hours),
+    cancellation_rate: num(row?.cancellation_rate),
+    return_rate: num(row?.return_rate),
+    satisfaction_score: num(row?.satisfaction_score),
+    ratings_count: num(row?.ratings_count),
+  };
+};
+
+/** Human readable duration in Arabic from a number of hours. */
+export const formatHours = (hours: number): string => {
+  if (!hours || hours <= 0) return "—";
+  if (hours < 1) return `${Math.round(hours * 60)} دقيقة`;
+  if (hours < 48) return `${hours.toFixed(1)} ساعة`;
+  return `${(hours / 24).toFixed(1)} يوم`;
+};

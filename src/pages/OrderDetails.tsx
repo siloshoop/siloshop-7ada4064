@@ -13,6 +13,8 @@ import { ar } from "date-fns/locale";
 import CancelOrderDialog from "@/components/CancelOrderDialog";
 import ReturnRequestDialog from "@/components/ReturnRequestDialog";
 import OrderStatusTimeline from "@/components/OrderStatusTimeline";
+import OrderTimelineLog from "@/components/orders/OrderTimelineLog";
+import { Truck, History } from "lucide-react";
 
 const statusMap: Record<string, { label: string; variant: "default" | "secondary" | "destructive" | "outline" }> = {
   pending: { label: "قيد المعالجة", variant: "secondary" },
@@ -132,6 +134,15 @@ const OrderDetails = () => {
             {order.phone && <p className="flex items-center gap-2" dir="ltr"><Phone className="h-4 w-4 text-muted-foreground" />{order.phone}</p>}
             {order.notes && <p className="text-muted-foreground bg-muted/50 p-2 rounded">{order.notes}</p>}
             <p className="flex items-center gap-2"><Receipt className="h-4 w-4 text-muted-foreground" />طريقة الدفع: <span className="font-semibold">الدفع عند الاستلام</span></p>
+            {order.estimated_delivery && (
+              <p className="flex items-center gap-2">
+                <Calendar className="h-4 w-4 text-muted-foreground" />
+                موعد التسليم المتوقع:{" "}
+                <span className="font-semibold">
+                  {format(new Date(order.estimated_delivery), "dd MMMM yyyy", { locale: ar })}
+                </span>
+              </p>
+            )}
             {order.status === "cancelled" && order.cancellation_reason && (
               <div className="rounded-md border border-destructive/30 bg-destructive/5 p-3 space-y-1">
                 <p className="flex items-center gap-2 font-semibold text-destructive">

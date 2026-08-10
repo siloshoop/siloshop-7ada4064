@@ -1,37 +1,43 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { useAdminCheck } from "@/hooks/useAdminCheck";
 import { useToast } from "@/hooks/use-toast";
-import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
+import AdminLayout from "@/components/admin/AdminLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
   Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle,
 } from "@/components/ui/dialog";
-import { Loader2, Search, Download, Eye, XCircle, Undo2, Truck, RefreshCw, ExternalLink } from "lucide-react";
+import {
+  Loader2, Search, Download, Eye, Snowflake, Unlock, RotateCcw, Truck, RefreshCw,
+  ExternalLink, ShieldAlert, Wallet, ScrollText,
+} from "lucide-react";
+import OrderStatusBadge from "@/components/orders/OrderStatusBadge";
+import OrderTimelineLog from "@/components/orders/OrderTimelineLog";
+import ShippingInfoDialog from "@/components/orders/ShippingInfoDialog";
+import {
+  ORDER_STATUSES, ORDER_STATUS_LABELS, changeOrderStatus, setOrderFreeze, reopenOrder,
+  changeRefundStatus, nextRefundStatuses, REFUND_LABELS, resolveReturnDispute,
+  friendlyOrderError, normalizeStatus, type OrderStatus, type RefundStatus,
+} from "@/lib/orderStatus";
+import { RETURN_STATUS, RETURN_REASONS } from "@/lib/returnStatus";
 
 type OrderRow = {
   id: string;
   created_at: string;
-  updated_at: string;
   status: string;
   payment_status: string;
   total_amount: number;
-  discount_amount: number | null;
-  coupon_code: string | null;
   phone: string | null;
-  shipping_address: string | null;
   tracking_number: string | null;
   courier_name: string | null;
-  delivered_at: string | null;
-  cancelled_at: string | null;
-  cancellation_reason: string | null;
   customer_id: string;
   customer_name: string | null;
   customer_email: string | null;
@@ -41,71 +47,68 @@ type OrderRow = {
 };
 
 type DetailPayload = {
-  order: any;
-  items: Array<any>;
-  payments: Array<any>;
-  timeline: Array<{ id: string; status: string; notes: string | null; created_at: string }>;
-  customer: any;
+  order: Record<string, any>;
+  items: Array<Record<string, any>>;
+  payments: Array<Record<string, any>>;
+  customer: Record<string, any> | null;
 };
 
-const STATUSES = ["pending", "confirmed", "processing", "shipped", "out_for_delivery", "delivered", "cancelled"];
-const STATUS_LABEL: Record<string, string> = {
-  pending: "قيد الانتظار",
-  confirmed: "مؤكد",
-  processing: "قيد التجهيز",
-  shipped: "تم الشحن",
-  out_for_delivery: "قيد التوصيل",
-  delivered: "تم التوصيل",
-  cancelled: "ملغي",
-};
-const STATUS_VARIANT: Record<string, "default" | "secondary" | "destructive" | "outline"> = {
-  pending: "secondary",
-  confirmed: "default",
-  processing: "default",
-  shipped: "default",
-  out_for_delivery: "default",
-  delivered: "outline",
-  cancelled: "destructive",
+type ReturnRow = {
+  id: string;
+  order_id: string;
+  customer_id: string;
+  vendor_id: string;
+  reason: string;
+  notes: string | null;
+  status: string;
+  review_note: string | null;
+  created_at: string;
 };
 
 const PAY_STATUSES = ["pending", "completed", "failed", "refunded"];
 const PAY_LABEL: Record<string, string> = {
-  pending: "بانتظار الدفع",
-  completed: "مدفوع",
-  failed: "فشل",
-  refunded: "مسترد",
+  pending: "بانتظار الدفع", completed: "مدفوع", failed: "فشل", refunded: "مسترد",
 };
-
+const REOPEN_TARGETS: OrderStatus[] = ["pending", "confirmed", "preparing", "ready_for_shipping", "shipped"];
+const DISPUTE_STATUSES = ["pending", "under_review", "info_requested", "rejected", "approved"];
 const PAGE_SIZE = 25;
+const money = (n: unknown) => `${Number(n ?? 0).toLocaleString("ar-SY")} ل.س`;
 
 const AdminOrders = () => {
-  const { isAdmin, loading: adminLoading } = useAdminCheck();
   const { toast } = useToast();
 
   const [rows, setRows] = useState<OrderRow[]>([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(0);
-  const [status, setStatus] = useState<string>("all");
-  const [payStatus, setPayStatus] = useState<string>("all");
-  const [from, setFrom] = useState<string>("");
-  const [to, setTo] = useState<string>("");
+  const [status, setStatus] = useState("all");
+  const [payStatus, setPayStatus] = useState("all");
+  const [from, setFrom] = useState("");
+  const [to, setTo] = useState("");
   const [search, setSearch] = useState("");
   const [debounced, setDebounced] = useState("");
 
-  const [openDetail, setOpenDetail] = useState<OrderRow | null>(null);
+  const [openId, setOpenId] = useState<string | null>(null);
   const [detail, setDetail] = useState<DetailPayload | null>(null);
   const [detailLoading, setDetailLoading] = useState(false);
   const [busy, setBusy] = useState(false);
+  const [shippingOpen, setShippingOpen] = useState(false);
 
   // action forms
-  const [nextStatus, setNextStatus] = useState<string>("processing");
-  const [tracking, setTracking] = useState("");
-  const [courier, setCourier] = useState("");
+  const [nextStatus, setNextStatus] = useState<OrderStatus>("confirmed");
+  const [override, setOverride] = useState(false);
   const [statusNote, setStatusNote] = useState("");
-  const [cancelReason, setCancelReason] = useState("");
-  const [refundReason, setRefundReason] = useState("");
-  const [history, setHistory] = useState<Array<{ id: string; created_at: string; status: string; total_amount: number; role: string }>>([]);
+  const [freezeReason, setFreezeReason] = useState("");
+  const [reopenStatus, setReopenStatus] = useState<OrderStatus>("confirmed");
+  const [reopenReason, setReopenReason] = useState("");
+  const [refundNext, setRefundNext] = useState<RefundStatus | "">("");
+  const [refundNote, setRefundNote] = useState("");
+  const [history, setHistory] = useState<Array<{ id: string; status: string; total_amount: number; role: string }>>([]);
+
+  // return disputes
+  const [returns, setReturns] = useState<ReturnRow[]>([]);
+  const [returnsLoading, setReturnsLoading] = useState(true);
+  const [disputeNotes, setDisputeNotes] = useState<Record<string, string>>({});
 
   useEffect(() => {
     const t = setTimeout(() => { setDebounced(search); setPage(0); }, 350);
@@ -113,7 +116,6 @@ const AdminOrders = () => {
   }, [search]);
 
   const load = useCallback(async () => {
-    if (!isAdmin) return;
     setLoading(true);
     const { data, error } = await supabase.rpc("admin_list_orders", {
       _search: debounced || null,
@@ -128,84 +130,84 @@ const AdminOrders = () => {
       toast({ title: "تعذر تحميل الطلبات", description: error.message, variant: "destructive" });
       setRows([]); setTotal(0);
     } else {
-      const list = (data as OrderRow[]) || [];
+      const list = (data as unknown as OrderRow[]) || [];
       setRows(list);
       setTotal(list[0]?.total_count ?? 0);
     }
     setLoading(false);
-  }, [isAdmin, debounced, status, payStatus, from, to, page, toast]);
+  }, [debounced, status, payStatus, from, to, page, toast]);
 
-  useEffect(() => { load(); }, [load]);
+  useEffect(() => { void load(); }, [load]);
 
-  // Realtime refresh on order changes
+  const loadReturns = useCallback(async () => {
+    setReturnsLoading(true);
+    const { data, error } = await supabase
+      .from("returns")
+      .select("id,order_id,customer_id,vendor_id,reason,notes,status,review_note,created_at")
+      .in("status", DISPUTE_STATUSES)
+      .order("created_at", { ascending: false })
+      .limit(100);
+    if (error) toast({ title: "تعذر تحميل طلبات الإرجاع", description: error.message, variant: "destructive" });
+    setReturns((data as ReturnRow[]) || []);
+    setReturnsLoading(false);
+  }, [toast]);
+
+  useEffect(() => { void loadReturns(); }, [loadReturns]);
+
+  // Realtime refresh
   useEffect(() => {
-    if (!isAdmin) return;
     const ch = supabase
-      .channel("admin-orders")
-      .on("postgres_changes", { event: "*", schema: "public", table: "orders" }, () => load())
+      .channel("admin-orders-live")
+      .on("postgres_changes", { event: "*", schema: "public", table: "orders" }, () => void load())
+      .on("postgres_changes", { event: "*", schema: "public", table: "returns" }, () => void loadReturns())
       .subscribe();
     return () => { supabase.removeChannel(ch); };
-  }, [isAdmin, load]);
+  }, [load, loadReturns]);
 
-  const openOrder = async (row: OrderRow) => {
-    setOpenDetail(row);
+  const openOrder = useCallback(async (orderId: string, customerId?: string) => {
+    setOpenId(orderId);
     setDetail(null); setDetailLoading(true);
-    setNextStatus(row.status || "processing");
-    setTracking(row.tracking_number || "");
-    setCourier(row.courier_name || "");
-    setStatusNote(""); setCancelReason(""); setRefundReason("");
+    setStatusNote(""); setFreezeReason(""); setReopenReason(""); setRefundNote("");
+    setOverride(false); setRefundNext("");
     const [{ data: d, error }, { data: h }] = await Promise.all([
-      supabase.rpc("admin_get_order_detail", { _order_id: row.id }),
-      supabase.rpc("admin_user_order_history", { _user_id: row.customer_id, _limit: 10 }),
+      supabase.rpc("admin_get_order_detail", { _order_id: orderId }),
+      customerId
+        ? supabase.rpc("admin_user_order_history", { _user_id: customerId, _limit: 10 })
+        : Promise.resolve({ data: [] as unknown }),
     ]);
     if (error) toast({ title: "تعذر تحميل تفاصيل الطلب", description: error.message, variant: "destructive" });
-    setDetail((d as unknown as DetailPayload) || null);
+    const payload = (d as unknown as DetailPayload) || null;
+    setDetail(payload);
     setHistory((h as any[]) || []);
+    setNextStatus(normalizeStatus(payload?.order?.status));
+    setReopenStatus("confirmed");
     setDetailLoading(false);
+  }, [toast]);
+
+  const refreshDetail = async () => {
+    if (!openId) return;
+    await Promise.all([load(), openOrder(openId, detail?.order?.customer_id)]);
   };
 
-  const closeDetail = () => { setOpenDetail(null); setDetail(null); setHistory([]); };
-
-  const doUpdateStatus = async () => {
-    if (!openDetail) return;
+  const run = async (fn: () => Promise<void>, successTitle: string) => {
     setBusy(true);
-    const { error } = await supabase.rpc("admin_update_order_status", {
-      _order_id: openDetail.id,
-      _status: nextStatus,
-      _tracking_number: tracking || null,
-      _courier_name: courier || null,
-      _note: statusNote || null,
-    });
-    setBusy(false);
-    if (error) return toast({ title: "تعذر التحديث", description: error.message, variant: "destructive" });
-    toast({ title: "تم تحديث حالة الطلب" });
-    await Promise.all([load(), openOrder(openDetail)]);
+    try {
+      await fn();
+      toast({ title: successTitle });
+      await refreshDetail();
+    } catch (e) {
+      toast({ title: "تعذر تنفيذ العملية", description: friendlyOrderError(e), variant: "destructive" });
+    } finally {
+      setBusy(false);
+    }
   };
 
-  const doCancel = async () => {
-    if (!openDetail) return;
-    if (!cancelReason.trim()) return toast({ title: "يرجى إدخال سبب الإلغاء", variant: "destructive" });
-    setBusy(true);
-    const { error } = await supabase.rpc("admin_cancel_order", { _order_id: openDetail.id, _reason: cancelReason.trim() });
-    setBusy(false);
-    if (error) return toast({ title: "تعذر الإلغاء", description: error.message, variant: "destructive" });
-    toast({ title: "تم إلغاء الطلب" });
-    await Promise.all([load(), openOrder(openDetail)]);
-  };
-
-  const doRefund = async () => {
-    if (!openDetail) return;
-    if (!refundReason.trim()) return toast({ title: "يرجى إدخال سبب الاسترداد", variant: "destructive" });
-    setBusy(true);
-    const { error } = await supabase.rpc("admin_refund_order", { _order_id: openDetail.id, _reason: refundReason.trim() });
-    setBusy(false);
-    if (error) return toast({ title: "تعذر الاسترداد", description: error.message, variant: "destructive" });
-    toast({ title: "تم تسجيل الاسترداد" });
-    await Promise.all([load(), openOrder(openDetail)]);
-  };
+  const order = detail?.order;
+  const isFrozen = !!order?.is_frozen;
+  const refundStatus = (order?.refund_status || "none") as RefundStatus;
+  const isClosed = ["cancelled", "completed", "returned"].includes(normalizeStatus(order?.status));
 
   const exportCSV = async () => {
-    // Export current filter set (up to 1000 rows)
     const { data, error } = await supabase.rpc("admin_list_orders", {
       _search: debounced || null,
       _status: status === "all" ? null : status,
@@ -216,10 +218,11 @@ const AdminOrders = () => {
       _offset: 0,
     });
     if (error) return toast({ title: "تعذر تصدير الطلبات", description: error.message, variant: "destructive" });
-    const list = (data as OrderRow[]) || [];
+    const list = (data as unknown as OrderRow[]) || [];
     const headers = [
-      "id","created_at","status","payment_status","total_amount","discount_amount","coupon_code",
-      "customer_name","customer_email","phone","items_count","vendors_count","tracking_number","courier_name","delivered_at",
+      "id", "created_at", "status", "payment_status", "total_amount",
+      "customer_name", "customer_email", "phone", "items_count", "vendors_count",
+      "tracking_number", "courier_name",
     ];
     const csv = [
       headers.join(","),
@@ -233,251 +236,440 @@ const AdminOrders = () => {
     const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
-    a.href = url; a.download = `orders-${new Date().toISOString().slice(0,10)}.csv`;
+    a.href = url; a.download = `orders-${new Date().toISOString().slice(0, 10)}.csv`;
     a.click();
     URL.revokeObjectURL(url);
   };
 
   const totalPages = useMemo(() => Math.max(1, Math.ceil(total / PAGE_SIZE)), [total]);
 
-  if (adminLoading) {
-    return (
-      <div className="flex min-h-screen items-center justify-center"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>
-    );
-  }
-  if (!isAdmin) return null;
+  const decideDispute = async (r: ReturnRow, decision: "approve" | "reject") => {
+    const note = (disputeNotes[r.id] || "").trim();
+    if (!note) {
+      toast({ title: "السبب مطلوب", description: "اكتب قرار الإدارة قبل الحفظ", variant: "destructive" });
+      return;
+    }
+    setBusy(true);
+    try {
+      await resolveReturnDispute(r.id, decision, note);
+      toast({ title: decision === "approve" ? "تمت الموافقة على الإرجاع" : "تم رفض الإرجاع" });
+      setDisputeNotes((p) => ({ ...p, [r.id]: "" }));
+      await loadReturns();
+    } catch (e) {
+      toast({ title: "تعذر حفظ القرار", description: friendlyOrderError(e), variant: "destructive" });
+    } finally {
+      setBusy(false);
+    }
+  };
 
   return (
-    <div className="min-h-screen bg-background">
-      <Navbar />
-      <main className="container mx-auto px-4 py-6 space-y-4">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <div>
-            <h1 className="text-2xl font-bold">إدارة الطلبات</h1>
-            <p className="text-sm text-muted-foreground">عرض كل الطلبات، البحث، الفلترة، التتبع، الإلغاء، والاسترداد.</p>
-          </div>
-          <div className="flex gap-2">
-            <Button variant="outline" onClick={load} disabled={loading}>
-              <RefreshCw className="h-4 w-4 ml-1" /> تحديث
-            </Button>
-            <Button onClick={exportCSV} disabled={loading || !rows.length}>
-              <Download className="h-4 w-4 ml-1" /> تصدير CSV
-            </Button>
-          </div>
+    <AdminLayout
+      title="إدارة الطلبات"
+      description="متابعة الطلبات، تجاوز الحالات، التجميد وإعادة الفتح، الاسترداد، ونزاعات الإرجاع."
+      actions={
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={() => void load()} disabled={loading}>
+            <RefreshCw className="h-4 w-4 ms-1" /> تحديث
+          </Button>
+          <Button onClick={exportCSV} disabled={loading || !rows.length}>
+            <Download className="h-4 w-4 ms-1" /> تصدير CSV
+          </Button>
         </div>
+      }
+    >
+      <Tabs defaultValue="orders" dir="rtl">
+        <TabsList>
+          <TabsTrigger value="orders">الطلبات</TabsTrigger>
+          <TabsTrigger value="disputes">
+            نزاعات الإرجاع {returns.length > 0 && `(${returns.length})`}
+          </TabsTrigger>
+        </TabsList>
 
-        <Card>
-          <CardContent className="pt-6 grid gap-3 md:grid-cols-6">
-            <div className="md:col-span-2 relative">
-              <Search className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                placeholder="بحث برقم الطلب، الهاتف، الاسم، البريد، رقم التتبع..."
-                className="pr-9"
-              />
-            </div>
-            <Select value={status} onValueChange={(v) => { setStatus(v); setPage(0); }}>
-              <SelectTrigger><SelectValue placeholder="الحالة" /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">كل الحالات</SelectItem>
-                {STATUSES.map((s) => <SelectItem key={s} value={s}>{STATUS_LABEL[s]}</SelectItem>)}
-              </SelectContent>
-            </Select>
-            <Select value={payStatus} onValueChange={(v) => { setPayStatus(v); setPage(0); }}>
-              <SelectTrigger><SelectValue placeholder="حالة الدفع" /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">كل حالات الدفع</SelectItem>
-                {PAY_STATUSES.map((s) => <SelectItem key={s} value={s}>{PAY_LABEL[s]}</SelectItem>)}
-              </SelectContent>
-            </Select>
-            <Input type="date" value={from} onChange={(e) => { setFrom(e.target.value); setPage(0); }} aria-label="من تاريخ" />
-            <Input type="date" value={to} onChange={(e) => { setTo(e.target.value); setPage(0); }} aria-label="إلى تاريخ" />
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-base">النتائج ({total.toLocaleString("ar")})</CardTitle>
-          </CardHeader>
-          <CardContent className="p-0">
-            {loading ? (
-              <div className="flex justify-center py-12"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>
-            ) : rows.length === 0 ? (
-              <p className="py-12 text-center text-sm text-muted-foreground">لا توجد طلبات مطابقة.</p>
-            ) : (
-              <div className="overflow-x-auto">
-                <table className="w-full text-sm">
-                  <thead className="bg-muted/40 text-muted-foreground">
-                    <tr>
-                      <th className="px-3 py-2 text-right">الطلب</th>
-                      <th className="px-3 py-2 text-right">العميل</th>
-                      <th className="px-3 py-2 text-right">الحالة</th>
-                      <th className="px-3 py-2 text-right">الدفع</th>
-                      <th className="px-3 py-2 text-right">المبلغ</th>
-                      <th className="px-3 py-2 text-right">التاريخ</th>
-                      <th className="px-3 py-2 text-right">إجراءات</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {rows.map((r) => (
-                      <tr key={r.id} className="border-t">
-                        <td className="px-3 py-2 font-mono text-xs">{r.id.slice(0, 8)}</td>
-                        <td className="px-3 py-2">
-                          <div className="flex flex-col">
-                            <span>{r.customer_name || "—"}</span>
-                            <span className="text-xs text-muted-foreground">{r.customer_email || r.phone || ""}</span>
-                          </div>
-                        </td>
-                        <td className="px-3 py-2"><Badge variant={STATUS_VARIANT[r.status] || "default"}>{STATUS_LABEL[r.status] || r.status}</Badge></td>
-                        <td className="px-3 py-2"><Badge variant="outline">{PAY_LABEL[r.payment_status] || r.payment_status}</Badge></td>
-                        <td className="px-3 py-2 whitespace-nowrap">{Number(r.total_amount).toLocaleString("ar")} ل.س</td>
-                        <td className="px-3 py-2 whitespace-nowrap text-xs text-muted-foreground">{new Date(r.created_at).toLocaleDateString("ar")}</td>
-                        <td className="px-3 py-2">
-                          <div className="flex gap-1">
-                            <Button size="sm" variant="ghost" onClick={() => openOrder(r)}><Eye className="h-4 w-4" /></Button>
-                            <Button asChild size="sm" variant="ghost"><Link to={`/orders/track/${r.id}`}><ExternalLink className="h-4 w-4" /></Link></Button>
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+        <TabsContent value="orders" className="space-y-4">
+          <Card>
+            <CardContent className="grid gap-3 pt-6 md:grid-cols-6">
+              <div className="relative md:col-span-2">
+                <Search className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                <Input
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  placeholder="بحث برقم الطلب، الهاتف، الاسم، البريد، رقم التتبع..."
+                  className="pr-9"
+                />
               </div>
-            )}
-          </CardContent>
-        </Card>
+              <Select value={status} onValueChange={(v) => { setStatus(v); setPage(0); }}>
+                <SelectTrigger><SelectValue placeholder="الحالة" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">كل الحالات</SelectItem>
+                  {ORDER_STATUSES.map((s) => <SelectItem key={s.key} value={s.key}>{s.label}</SelectItem>)}
+                </SelectContent>
+              </Select>
+              <Select value={payStatus} onValueChange={(v) => { setPayStatus(v); setPage(0); }}>
+                <SelectTrigger><SelectValue placeholder="حالة الدفع" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">كل حالات الدفع</SelectItem>
+                  {PAY_STATUSES.map((s) => <SelectItem key={s} value={s}>{PAY_LABEL[s]}</SelectItem>)}
+                </SelectContent>
+              </Select>
+              <Input type="date" value={from} onChange={(e) => { setFrom(e.target.value); setPage(0); }} aria-label="من تاريخ" />
+              <Input type="date" value={to} onChange={(e) => { setTo(e.target.value); setPage(0); }} aria-label="إلى تاريخ" />
+            </CardContent>
+          </Card>
 
-        <div className="flex items-center justify-between">
-          <p className="text-xs text-muted-foreground">صفحة {page + 1} من {totalPages}</p>
-          <div className="flex gap-2">
-            <Button size="sm" variant="outline" disabled={page === 0 || loading} onClick={() => setPage((p) => Math.max(0, p - 1))}>السابق</Button>
-            <Button size="sm" variant="outline" disabled={page + 1 >= totalPages || loading} onClick={() => setPage((p) => p + 1)}>التالي</Button>
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-base">النتائج ({total.toLocaleString("ar-SY")})</CardTitle>
+            </CardHeader>
+            <CardContent className="p-0">
+              {loading ? (
+                <div className="flex justify-center py-12"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>
+              ) : rows.length === 0 ? (
+                <p className="py-12 text-center text-sm text-muted-foreground">لا توجد طلبات مطابقة.</p>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead className="bg-muted/40 text-muted-foreground">
+                      <tr>
+                        <th className="px-3 py-2 text-right">الطلب</th>
+                        <th className="px-3 py-2 text-right">العميل</th>
+                        <th className="px-3 py-2 text-right">الحالة</th>
+                        <th className="px-3 py-2 text-right">الدفع</th>
+                        <th className="px-3 py-2 text-right">المبلغ</th>
+                        <th className="px-3 py-2 text-right">التاريخ</th>
+                        <th className="px-3 py-2 text-right">إجراءات</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {rows.map((r) => (
+                        <tr key={r.id} className="border-t">
+                          <td className="px-3 py-2 font-mono text-xs">{r.id.slice(0, 8)}</td>
+                          <td className="px-3 py-2">
+                            <div className="flex flex-col">
+                              <span>{r.customer_name || "—"}</span>
+                              <span className="text-xs text-muted-foreground">{r.customer_email || r.phone || ""}</span>
+                            </div>
+                          </td>
+                          <td className="px-3 py-2"><OrderStatusBadge status={r.status} /></td>
+                          <td className="px-3 py-2"><Badge variant="outline">{PAY_LABEL[r.payment_status] || r.payment_status}</Badge></td>
+                          <td className="whitespace-nowrap px-3 py-2">{money(r.total_amount)}</td>
+                          <td className="whitespace-nowrap px-3 py-2 text-xs text-muted-foreground">
+                            {new Date(r.created_at).toLocaleDateString("ar-SY")}
+                          </td>
+                          <td className="px-3 py-2">
+                            <div className="flex gap-1">
+                              <Button size="sm" variant="ghost" aria-label="تفاصيل" onClick={() => void openOrder(r.id, r.customer_id)}>
+                                <Eye className="h-4 w-4" />
+                              </Button>
+                              <Button asChild size="sm" variant="ghost" aria-label="تتبع">
+                                <Link to={`/orders/track/${r.id}`}><ExternalLink className="h-4 w-4" /></Link>
+                              </Button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          <div className="flex items-center justify-between">
+            <p className="text-xs text-muted-foreground">صفحة {page + 1} من {totalPages}</p>
+            <div className="flex gap-2">
+              <Button size="sm" variant="outline" disabled={page === 0 || loading} onClick={() => setPage((p) => Math.max(0, p - 1))}>السابق</Button>
+              <Button size="sm" variant="outline" disabled={page + 1 >= totalPages || loading} onClick={() => setPage((p) => p + 1)}>التالي</Button>
+            </div>
           </div>
-        </div>
-      </main>
+        </TabsContent>
 
-      <Dialog open={!!openDetail} onOpenChange={(o) => !o && closeDetail()}>
-        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+        <TabsContent value="disputes">
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="flex items-center gap-2 text-base">
+                <RotateCcw className="h-4 w-4" /> نزاعات الإرجاع والاستبدال
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              {returnsLoading ? (
+                <div className="flex justify-center py-10"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>
+              ) : returns.length === 0 ? (
+                <p className="py-8 text-center text-sm text-muted-foreground">لا توجد نزاعات إرجاع بحاجة لقرار.</p>
+              ) : (
+                returns.map((r) => {
+                  const s = RETURN_STATUS[r.status] || RETURN_STATUS.pending;
+                  const reason = RETURN_REASONS.find((x) => x.value === r.reason)?.label || r.reason;
+                  return (
+                    <div key={r.id} className="space-y-2 rounded-lg border p-3 text-sm">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span className="font-mono text-xs">إرجاع #{r.id.slice(0, 8)}</span>
+                        <Badge variant={s.variant}>{s.label}</Badge>
+                        <span className="text-muted-foreground">السبب: {reason}</span>
+                        <Button asChild size="sm" variant="ghost" className="ms-auto">
+                          <Link to={`/orders/track/${r.order_id}`}>الطلب {r.order_id.slice(0, 8)}</Link>
+                        </Button>
+                        <Button size="sm" variant="outline" onClick={() => void openOrder(r.order_id, r.customer_id)}>
+                          فتح الطلب
+                        </Button>
+                      </div>
+                      {r.notes && <p className="rounded bg-muted/40 p-2 text-xs">{r.notes}</p>}
+                      {r.review_note && (
+                        <p className="rounded border border-primary/20 bg-primary/5 p-2 text-xs">
+                          <b>ملاحظة سابقة: </b>{r.review_note}
+                        </p>
+                      )}
+                      <Textarea
+                        rows={2}
+                        placeholder="قرار الإدارة النهائي وسببه (إلزامي)"
+                        value={disputeNotes[r.id] || ""}
+                        onChange={(e) => setDisputeNotes((p) => ({ ...p, [r.id]: e.target.value }))}
+                      />
+                      <div className="flex gap-2">
+                        <Button size="sm" disabled={busy} onClick={() => void decideDispute(r, "approve")}>
+                          موافقة نهائية
+                        </Button>
+                        <Button size="sm" variant="destructive" disabled={busy} onClick={() => void decideDispute(r, "reject")}>
+                          رفض نهائي
+                        </Button>
+                      </div>
+                    </div>
+                  );
+                })
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
+
+      <Dialog open={!!openId} onOpenChange={(o) => { if (!o) { setOpenId(null); setDetail(null); setHistory([]); } }}>
+        <DialogContent className="max-h-[90vh] max-w-3xl overflow-y-auto" dir="rtl">
           <DialogHeader>
-            <DialogTitle>تفاصيل الطلب {openDetail?.id.slice(0, 8)}</DialogTitle>
-            <DialogDescription>عرض ومعالجة الطلب من قِبَل الإدارة.</DialogDescription>
+            <DialogTitle className="flex flex-wrap items-center gap-2">
+              تفاصيل الطلب {openId?.slice(0, 8)}
+              {order && <OrderStatusBadge status={order.status} />}
+              {isFrozen && (
+                <Badge variant="destructive" className="gap-1">
+                  <Snowflake className="h-3 w-3" /> مجمّد
+                </Badge>
+              )}
+            </DialogTitle>
+            <DialogDescription>عرض ومعالجة الطلب من قِبَل الإدارة مع تسجيل كامل للعمليات.</DialogDescription>
           </DialogHeader>
 
-          {detailLoading || !detail ? (
+          {detailLoading || !detail || !order ? (
             <div className="flex justify-center py-10"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>
           ) : (
             <div className="space-y-4">
-              <div className="grid gap-3 md:grid-cols-2 text-sm">
+              <div className="grid gap-3 text-sm md:grid-cols-2">
                 <div className="rounded border p-3">
-                  <p className="font-semibold mb-1">العميل</p>
+                  <p className="mb-1 font-semibold">العميل</p>
                   <p>{detail.customer?.full_name || "—"}</p>
-                  <p className="text-muted-foreground text-xs">{detail.customer?.email}</p>
-                  <p className="text-muted-foreground text-xs">{detail.customer?.phone || openDetail?.phone}</p>
+                  <p className="text-xs text-muted-foreground">{detail.customer?.email}</p>
+                  <p className="text-xs text-muted-foreground">{detail.customer?.phone || order.phone}</p>
                   {detail.customer?.account_status && detail.customer.account_status !== "active" && (
                     <Badge variant="destructive" className="mt-1">{detail.customer.account_status}</Badge>
                   )}
                 </div>
                 <div className="rounded border p-3">
-                  <p className="font-semibold mb-1">الشحن</p>
-                  <p className="text-xs text-muted-foreground">{detail.order?.shipping_address || "—"}</p>
-                  <p className="text-xs mt-1">شركة الشحن: {detail.order?.courier_name || "—"}</p>
-                  <p className="text-xs">رقم التتبع: {detail.order?.tracking_number || "—"}</p>
+                  <div className="mb-1 flex items-center justify-between">
+                    <p className="font-semibold">الشحن</p>
+                    <Button size="sm" variant="outline" onClick={() => setShippingOpen(true)}>
+                      <Truck className="h-4 w-4 ms-1" /> تعديل
+                    </Button>
+                  </div>
+                  <p className="text-xs text-muted-foreground">{order.shipping_address || "—"}</p>
+                  <p className="mt-1 text-xs">شركة الشحن: {order.courier_name || "—"}</p>
+                  <p className="text-xs">رقم التتبع: {order.tracking_number || "—"}</p>
+                  <p className="text-xs">السائق: {order.driver_name || "—"} {order.driver_phone ? `(${order.driver_phone})` : ""}</p>
+                  <p className="text-xs">
+                    موعد التسليم المتوقع:{" "}
+                    {order.estimated_delivery ? new Date(order.estimated_delivery).toLocaleDateString("ar-SY") : "—"}
+                  </p>
+                  {order.delivery_notes && <p className="mt-1 text-xs text-muted-foreground">{order.delivery_notes}</p>}
                 </div>
               </div>
 
               <div>
-                <p className="font-semibold mb-2 text-sm">المنتجات ({detail.items.length})</p>
+                <p className="mb-2 text-sm font-semibold">المنتجات ({detail.items.length}) — {money(order.total_amount)}</p>
                 <div className="space-y-2">
-                  {detail.items.map((it: any) => (
+                  {detail.items.map((it) => (
                     <div key={it.id} className="flex items-center gap-3 rounded border p-2">
-                      {it.product_image && <img src={it.product_image} alt="" className="h-12 w-12 rounded object-cover" />}
-                      <div className="flex-1 min-w-0">
+                      {it.product_image && (
+                        <img src={it.product_image} alt="" loading="lazy" decoding="async" className="h-12 w-12 rounded object-cover" />
+                      )}
+                      <div className="min-w-0 flex-1">
                         <p className="truncate text-sm">{it.product_name || "منتج"}</p>
                         <p className="text-xs text-muted-foreground">البائع: {it.vendor_name || "—"}</p>
                       </div>
-                      <div className="text-xs whitespace-nowrap">{it.quantity} × {Number(it.price).toLocaleString("ar")} ل.س</div>
+                      <div className="whitespace-nowrap text-xs">{it.quantity} × {money(it.price)}</div>
                     </div>
                   ))}
                 </div>
               </div>
 
-              <div className="grid gap-3 md:grid-cols-2 text-sm">
-                <div className="rounded border p-3">
-                  <p className="font-semibold mb-2">الجدول الزمني</p>
-                  <ul className="space-y-1 max-h-40 overflow-y-auto">
-                    {detail.timeline.length === 0 && <li className="text-xs text-muted-foreground">لا توجد أحداث.</li>}
-                    {detail.timeline.map((t) => (
-                      <li key={t.id} className="text-xs">
-                        <span className="text-muted-foreground">{new Date(t.created_at).toLocaleString("ar")}</span>
-                        {" — "}<b>{STATUS_LABEL[t.status] || t.status}</b>
-                        {t.notes ? ` — ${t.notes}` : ""}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-                <div className="rounded border p-3">
-                  <p className="font-semibold mb-2">آخر طلبات هذا العميل</p>
-                  <ul className="space-y-1 max-h-40 overflow-y-auto">
-                    {history.length === 0 && <li className="text-xs text-muted-foreground">—</li>}
-                    {history.map((h) => (
-                      <li key={`${h.role}-${h.id}`} className="text-xs flex justify-between gap-2">
-                        <Link to={`/orders/track/${h.id}`} className="underline">{h.id.slice(0, 8)}</Link>
-                        <span className="text-muted-foreground">{h.role}</span>
-                        <span>{STATUS_LABEL[h.status] || h.status}</span>
-                        <span>{Number(h.total_amount).toLocaleString("ar")} ل.س</span>
-                      </li>
-                    ))}
-                  </ul>
+              <div className="rounded border p-3">
+                <p className="mb-2 flex items-center gap-2 text-sm font-semibold">
+                  <ScrollText className="h-4 w-4" /> سجل الطلب الكامل (المنفّذ، الجهاز، IP)
+                </p>
+                <div className="max-h-72 overflow-y-auto">
+                  <OrderTimelineLog orderId={order.id} />
                 </div>
               </div>
 
-              {/* Actions */}
+              <div className="rounded border p-3 text-sm">
+                <p className="mb-2 font-semibold">آخر طلبات هذا العميل</p>
+                <ul className="max-h-40 space-y-1 overflow-y-auto">
+                  {history.length === 0 && <li className="text-xs text-muted-foreground">—</li>}
+                  {history.map((h) => (
+                    <li key={`${h.role}-${h.id}`} className="flex justify-between gap-2 text-xs">
+                      <Link to={`/orders/track/${h.id}`} className="underline">{h.id.slice(0, 8)}</Link>
+                      <span className="text-muted-foreground">{h.role}</span>
+                      <span>{ORDER_STATUS_LABELS[normalizeStatus(h.status)]}</span>
+                      <span>{money(h.total_amount)}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              {/* Admin actions */}
               <div className="grid gap-3 md:grid-cols-2">
-                <div className="rounded border p-3 space-y-2">
-                  <p className="font-semibold text-sm flex items-center gap-1"><Truck className="h-4 w-4" /> تحديث الحالة والشحن</p>
-                  <Select value={nextStatus} onValueChange={setNextStatus}>
+                <div className="space-y-2 rounded border p-3">
+                  <p className="flex items-center gap-1 text-sm font-semibold">
+                    <ShieldAlert className="h-4 w-4" /> تغيير / تجاوز الحالة
+                  </p>
+                  <Select value={nextStatus} onValueChange={(v) => setNextStatus(v as OrderStatus)}>
                     <SelectTrigger><SelectValue /></SelectTrigger>
                     <SelectContent>
-                      {STATUSES.map((s) => <SelectItem key={s} value={s}>{STATUS_LABEL[s]}</SelectItem>)}
+                      {ORDER_STATUSES.map((s) => <SelectItem key={s.key} value={s.key}>{s.label}</SelectItem>)}
                     </SelectContent>
                   </Select>
-                  <Input value={courier} onChange={(e) => setCourier(e.target.value)} placeholder="شركة الشحن" />
-                  <Input value={tracking} onChange={(e) => setTracking(e.target.value)} placeholder="رقم التتبع" />
-                  <Textarea value={statusNote} onChange={(e) => setStatusNote(e.target.value)} placeholder="ملاحظة (اختياري)" rows={2} />
-                  <Button onClick={doUpdateStatus} disabled={busy} size="sm">
-                    {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : "حفظ التحديث"}
+                  <Textarea rows={2} value={statusNote} onChange={(e) => setStatusNote(e.target.value)} placeholder="ملاحظة (اختياري)" />
+                  <div className="flex items-center justify-between gap-2 rounded bg-muted/40 p-2">
+                    <Label htmlFor="override" className="text-xs">
+                      تجاوز قواعد الانتقال (يُسجَّل كتجاوز إداري)
+                    </Label>
+                    <Switch id="override" checked={override} onCheckedChange={setOverride} />
+                  </div>
+                  <Button
+                    size="sm"
+                    disabled={busy}
+                    onClick={() => void run(
+                      () => changeOrderStatus(order.id, nextStatus, statusNote || null, override),
+                      "تم تحديث حالة الطلب",
+                    )}
+                  >
+                    {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : "حفظ الحالة"}
                   </Button>
                 </div>
 
                 <div className="space-y-3">
-                  <div className="rounded border p-3 space-y-2">
-                    <p className="font-semibold text-sm flex items-center gap-1 text-destructive"><XCircle className="h-4 w-4" /> إلغاء الطلب</p>
-                    <Textarea value={cancelReason} onChange={(e) => setCancelReason(e.target.value)} placeholder="سبب الإلغاء" rows={2} />
-                    <Button size="sm" variant="destructive" onClick={doCancel} disabled={busy || ["delivered","cancelled"].includes(openDetail?.status || "")}>
-                      تأكيد الإلغاء
+                  <div className="space-y-2 rounded border p-3">
+                    <p className="flex items-center gap-1 text-sm font-semibold">
+                      {isFrozen ? <Unlock className="h-4 w-4" /> : <Snowflake className="h-4 w-4" />}
+                      {isFrozen ? "إلغاء تجميد الطلب" : "تجميد الطلب"}
+                    </p>
+                    {isFrozen && order.frozen_reason && (
+                      <p className="text-xs text-muted-foreground">سبب التجميد: {order.frozen_reason}</p>
+                    )}
+                    <Textarea rows={2} value={freezeReason} onChange={(e) => setFreezeReason(e.target.value)}
+                      placeholder={isFrozen ? "سبب إلغاء التجميد" : "سبب التجميد"} />
+                    <Button
+                      size="sm"
+                      variant={isFrozen ? "outline" : "destructive"}
+                      disabled={busy}
+                      onClick={() => void run(
+                        () => setOrderFreeze(order.id, !isFrozen, freezeReason || null),
+                        isFrozen ? "تم إلغاء التجميد" : "تم تجميد الطلب",
+                      )}
+                    >
+                      {isFrozen ? "إلغاء التجميد" : "تجميد"}
                     </Button>
                   </div>
-                  <div className="rounded border p-3 space-y-2">
-                    <p className="font-semibold text-sm flex items-center gap-1"><Undo2 className="h-4 w-4" /> استرداد المبلغ</p>
-                    <Textarea value={refundReason} onChange={(e) => setRefundReason(e.target.value)} placeholder="سبب الاسترداد" rows={2} />
-                    <Button size="sm" variant="outline" onClick={doRefund} disabled={busy || openDetail?.payment_status === "refunded"}>
-                      تسجيل الاسترداد
+
+                  <div className="space-y-2 rounded border p-3">
+                    <p className="flex items-center gap-1 text-sm font-semibold">
+                      <RotateCcw className="h-4 w-4" /> إعادة فتح طلب مغلق
+                    </p>
+                    <Select value={reopenStatus} onValueChange={(v) => setReopenStatus(v as OrderStatus)}>
+                      <SelectTrigger><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        {REOPEN_TARGETS.map((s) => (
+                          <SelectItem key={s} value={s}>{ORDER_STATUS_LABELS[s]}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <Textarea rows={2} value={reopenReason} onChange={(e) => setReopenReason(e.target.value)} placeholder="سبب إعادة الفتح (إلزامي)" />
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      disabled={busy || !isClosed}
+                      onClick={() => void run(
+                        () => reopenOrder(order.id, reopenStatus, reopenReason.trim()),
+                        "تم إعادة فتح الطلب",
+                      )}
+                    >
+                      إعادة الفتح
                     </Button>
+                    {!isClosed && <p className="text-xs text-muted-foreground">الطلب غير مغلق حاليًا.</p>}
                   </div>
                 </div>
+              </div>
+
+              <div className="space-y-2 rounded border p-3">
+                <p className="flex items-center gap-1 text-sm font-semibold">
+                  <Wallet className="h-4 w-4" /> مسار الاسترداد — الحالة الحالية: {REFUND_LABELS[refundStatus]}
+                </p>
+                {nextRefundStatuses(refundStatus).length === 0 ? (
+                  <p className="text-xs text-muted-foreground">لا توجد خطوة تالية في مسار الاسترداد.</p>
+                ) : (
+                  <>
+                    <Select value={refundNext} onValueChange={(v) => setRefundNext(v as RefundStatus)}>
+                      <SelectTrigger><SelectValue placeholder="الخطوة التالية" /></SelectTrigger>
+                      <SelectContent>
+                        {nextRefundStatuses(refundStatus).map((s) => (
+                          <SelectItem key={s} value={s}>{REFUND_LABELS[s]}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <Textarea rows={2} value={refundNote} onChange={(e) => setRefundNote(e.target.value)} placeholder="ملاحظة الاسترداد (اختياري)" />
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      disabled={busy || !refundNext}
+                      onClick={() => void run(
+                        () => changeRefundStatus(order.id, refundNext as RefundStatus, refundNote || null),
+                        "تم تحديث مسار الاسترداد",
+                      )}
+                    >
+                      حفظ خطوة الاسترداد
+                    </Button>
+                  </>
+                )}
               </div>
             </div>
           )}
 
           <DialogFooter>
-            <Button variant="outline" onClick={closeDetail}>إغلاق</Button>
+            <Button variant="outline" onClick={() => { setOpenId(null); setDetail(null); }}>إغلاق</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
-      <Footer />
-    </div>
+      <ShippingInfoDialog
+        orderId={openId}
+        open={shippingOpen}
+        onOpenChange={setShippingOpen}
+        initial={{
+          courierName: order?.courier_name,
+          trackingNumber: order?.tracking_number,
+          driverName: order?.driver_name,
+          driverPhone: order?.driver_phone,
+          deliveryNotes: order?.delivery_notes,
+          estimatedDelivery: order?.estimated_delivery,
+        }}
+        onSaved={() => void refreshDetail()}
+      />
+    </AdminLayout>
   );
 };
 

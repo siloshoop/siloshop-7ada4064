@@ -7,12 +7,13 @@ import Footer from "@/components/Footer";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Loader2, ArrowRight, Package, MapPin, Phone, Calendar, Receipt, XCircle } from "lucide-react";
+import { Loader2, ArrowRight, Package, MapPin, Phone, Calendar, Receipt, XCircle, Truck, History } from "lucide-react";
 import { format } from "date-fns";
 import { ar } from "date-fns/locale";
 import CancelOrderDialog from "@/components/CancelOrderDialog";
 import ReturnRequestDialog from "@/components/ReturnRequestDialog";
 import OrderStatusTimeline from "@/components/OrderStatusTimeline";
+import OrderTimelineLog from "@/components/orders/OrderTimelineLog";
 
 const statusMap: Record<string, { label: string; variant: "default" | "secondary" | "destructive" | "outline" }> = {
   pending: { label: "قيد المعالجة", variant: "secondary" },
@@ -132,6 +133,15 @@ const OrderDetails = () => {
             {order.phone && <p className="flex items-center gap-2" dir="ltr"><Phone className="h-4 w-4 text-muted-foreground" />{order.phone}</p>}
             {order.notes && <p className="text-muted-foreground bg-muted/50 p-2 rounded">{order.notes}</p>}
             <p className="flex items-center gap-2"><Receipt className="h-4 w-4 text-muted-foreground" />طريقة الدفع: <span className="font-semibold">الدفع عند الاستلام</span></p>
+            {order.estimated_delivery && (
+              <p className="flex items-center gap-2">
+                <Calendar className="h-4 w-4 text-muted-foreground" />
+                موعد التسليم المتوقع:{" "}
+                <span className="font-semibold">
+                  {format(new Date(order.estimated_delivery), "dd MMMM yyyy", { locale: ar })}
+                </span>
+              </p>
+            )}
             {order.status === "cancelled" && order.cancellation_reason && (
               <div className="rounded-md border border-destructive/30 bg-destructive/5 p-3 space-y-1">
                 <p className="flex items-center gap-2 font-semibold text-destructive">
@@ -177,6 +187,39 @@ const OrderDetails = () => {
                 <p className="font-bold">{(Number(it.price) * it.quantity).toLocaleString()} ل.س</p>
               </Link>
             ))}
+          </CardContent>
+        </Card>
+
+        {(order.courier_name || order.tracking_number || order.driver_name || order.delivery_notes) && (
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-base">
+                <Truck className="h-5 w-5" /> معلومات الشحن
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-1 text-sm">
+              {order.courier_name && <p>شركة الشحن: <span className="font-semibold">{order.courier_name}</span></p>}
+              {order.tracking_number && (
+                <p dir="ltr" className="text-start">رقم التتبع: <span className="font-mono font-semibold">{order.tracking_number}</span></p>
+              )}
+              {order.driver_name && (
+                <p>مندوب التوصيل: <span className="font-semibold">{order.driver_name}</span>
+                  {order.driver_phone ? <span dir="ltr"> ({order.driver_phone})</span> : null}
+                </p>
+              )}
+              {order.delivery_notes && <p className="text-muted-foreground">{order.delivery_notes}</p>}
+            </CardContent>
+          </Card>
+        )}
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-base">
+              <History className="h-5 w-5" /> سجل تحديثات الطلب
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <OrderTimelineLog orderId={order.id} />
           </CardContent>
         </Card>
 

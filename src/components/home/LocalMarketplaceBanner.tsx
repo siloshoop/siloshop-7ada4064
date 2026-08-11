@@ -34,7 +34,7 @@ const LocalMarketplaceBanner = () => (
                 <ArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-0.5 motion-reduce:transition-none" />
               </Link>
               <Link
-                to="/seller-application"
+                to="/seller/application"
                 className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-5 py-2.5 text-sm font-semibold transition-colors hover:border-primary/40 hover:text-primary"
               >
                 <Store className="h-4 w-4" />

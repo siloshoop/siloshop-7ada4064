@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback, Fragment, lazy, Suspense } fro
 import { useSearchParams } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import AnnouncementBar from "@/components/AnnouncementBar";
-import HeroSlider from "@/components/home/HeroSlider";
+import PremiumShowroom from "@/components/PremiumShowroom";
 import LocalMarketplaceBanner from "@/components/home/LocalMarketplaceBanner";
 import { SearchFilters } from "@/components/SearchFilters";
 import { supabase } from "@/integrations/supabase/client";
@@ -167,9 +167,16 @@ const Index = () => {
       <AnnouncementBar />
       <Navbar />
       <main className="flex-1 pb-[120px] md:pb-0 page-enter">
-        {/* Hero — full-width auto-rotating slider */}
+        {/* Featured showroom — real items, or the frontend-only demo when empty */}
         <SectionErrorBoundary>
-          <HeroSlider />
+          <PremiumShowroom demoFallback />
+        </SectionErrorBoundary>
+
+        {/* Categories */}
+        <SectionErrorBoundary>
+          <Suspense fallback={null}>
+            <PopularCategories key={`popular-${refreshKey}`} />
+          </Suspense>
         </SectionErrorBoundary>
 
         {/* 🇸🇾 Local Marketplace (Phase 1) */}
@@ -242,13 +249,6 @@ const Index = () => {
         <LazySection>
           <SectionErrorBoundary>
             <FeaturedStores key={`stores-${refreshKey}`} />
-          </SectionErrorBoundary>
-        </LazySection>
-
-        {/* Popular categories */}
-        <LazySection>
-          <SectionErrorBoundary>
-            <PopularCategories key={`popular-${refreshKey}`} />
           </SectionErrorBoundary>
         </LazySection>
 

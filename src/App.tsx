@@ -21,6 +21,7 @@ const ManageSubcategories = lazy(() => import("./pages/ManageSubcategories"));
 const TrackOrder = lazy(() => import("./pages/TrackOrder"));
 const Checkout = lazy(() => import("./pages/Checkout"));
 const Category = lazy(() => import("./pages/Category"));
+const Categories = lazy(() => import("./pages/Categories"));
 const Cart = lazy(() => import("./pages/Cart"));
 const Orders = lazy(() => import("./pages/Orders"));
 const Product = lazy(() => import("./pages/Product"));
@@ -175,6 +176,7 @@ const App = () => (
             <Route path="/wishlist" element={<Wishlist />} />
             <Route path="/wishlist/shared/:token" element={<SharedWishlist />} />
             <Route path="/category/:categoryId" element={<Category />} />
+            <Route path="/categories" element={<Categories />} />
             <Route path="/subcategory/:categoryId/:subcategoryId" element={<Subcategory />} />
             <Route path="/cart" element={<Cart />} />
             <Route path="/checkout" element={<Checkout />} />

@@ -339,7 +339,13 @@ const Chat = () => {
     setSending(false);
   };
 
-  if (loading) {
+  // Chat requires an authenticated buyer/seller — send guests to sign-in
+  // instead of leaving them on an endless loading spinner.
+  if (!authLoading && !user) {
+    return <Navigate to="/auth" replace state={{ from: location.pathname }} />;
+  }
+
+  if (authLoading || loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />

@@ -53,7 +53,12 @@ const ProductCard = memo(({
   const [imageLoaded, setImageLoaded] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
 
-  const productId = id || Math.random().toString(36).substr(2, 9);
+  const productId = id;
+
+  const goToProduct = () => {
+    if (!productId) return;
+    navigate(`/product/${productId}`);
+  };
 
   const handleCompare = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -104,6 +109,8 @@ const ProductCard = memo(({
       return;
     }
 
+    if (!productId) return;
+
     if (!user) {
       navigate("/auth");
       return;
@@ -151,7 +158,7 @@ const ProductCard = memo(({
   return (
     <div
       className="group relative cursor-pointer rounded-xl overflow-hidden bg-card border border-border/40 hover:border-primary/40 transition-all duration-400 ease-[cubic-bezier(0.22,1,0.36,1)] hover:shadow-[0_8px_40px_-12px_hsl(var(--primary)/0.25)] active:scale-[0.98]"
-      onClick={() => navigate(`/product/${productId}`)}
+      onClick={goToProduct}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
@@ -222,7 +229,7 @@ const ProductCard = memo(({
             className="w-full flex items-center justify-center gap-1.5 bg-background/90 backdrop-blur-md text-foreground py-2 rounded-lg text-xs font-semibold shadow-lg hover:bg-primary hover:text-primary-foreground transition-colors duration-200"
             onClick={(e) => {
               e.stopPropagation();
-              navigate(`/product/${productId}`);
+              goToProduct();
             }}
           >
             <Eye className="h-3.5 w-3.5" />

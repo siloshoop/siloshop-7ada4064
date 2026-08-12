@@ -115,10 +115,9 @@ const ReturnCard = ({ r, onChanged }: { r: ReturnRow; onChanged: () => void }) =
           </div>
         )}
         {r.video_url && (
-          <a
-            href="#"
-            onClick={async (e) => {
-              e.preventDefault();
+          <button
+            type="button"
+            onClick={async () => {
               const { data } = await supabase.storage
                 .from("returns-media")
                 .createSignedUrl(r.video_url as string, 3600);
@@ -127,7 +126,7 @@ const ReturnCard = ({ r, onChanged }: { r: ReturnRow; onChanged: () => void }) =
             className="text-primary underline"
           >
             عرض الفيديو
-          </a>
+          </button>
         )}
         <p className="text-xs text-muted-foreground">
           {format(new Date(r.created_at), "dd MMMM yyyy - HH:mm", { locale: ar })}

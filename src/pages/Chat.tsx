@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef } from "react";
-import { useParams, useSearchParams } from "react-router-dom";
+import { useParams, useSearchParams, Navigate, useLocation } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
@@ -42,7 +42,8 @@ const Chat = () => {
   const { vendorId } = useParams();
   const [searchParams] = useSearchParams();
   const productId = searchParams.get("product");
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
+  const location = useLocation();
   const { toast } = useToast();
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState("");

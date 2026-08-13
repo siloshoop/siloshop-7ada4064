@@ -16,25 +16,58 @@ export interface FeatureFlag {
   description: string | null;
 }
 
+/**
+ * Flags are identical for every consumer, so the fetch is shared process-wide.
+ * Without this, each mounted component issued its own request (the homepage
+ * alone fired 37 identical `feature_flags` queries).
+ */
+let cache: FeatureFlag[] | null = null;
+let inflight: Promise<FeatureFlag[]> | null = null;
+const listeners = new Set<(rows: FeatureFlag[]) => void>();
+
+const fetchFlags = (force = false): Promise<FeatureFlag[]> => {
+  if (!force && cache) return Promise.resolve(cache);
+  if (!force && inflight) return inflight;
+  inflight = supabase
+    .from("feature_flags")
+    .select("key, enabled, label_ar, description")
+    .order("key")
+    .then(({ data }) => {
+      cache = (data ?? []) as FeatureFlag[];
+      inflight = null;
+      listeners.forEach((fn) => fn(cache as FeatureFlag[]));
+      return cache;
+    });
+  return inflight;
+};
+
 export const useFeatureFlags = () => {
-  const [flags, setFlags] = useState<Record<string, boolean>>({});
-  const [rows, setRows] = useState<FeatureFlag[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [rows, setRows] = useState<FeatureFlag[]>(cache ?? []);
+  const [loading, setLoading] = useState(cache === null);
 
   const load = useCallback(async () => {
-    const { data } = await supabase
-      .from("feature_flags")
-      .select("key, enabled, label_ar, description")
-      .order("key");
-    const list = (data ?? []) as FeatureFlag[];
+    setLoading(true);
+    const list = await fetchFlags(true);
     setRows(list);
-    setFlags(Object.fromEntries(list.map((f) => [f.key, f.enabled])));
     setLoading(false);
   }, []);
 
   useEffect(() => {
-    void load();
-  }, [load]);
+    const onUpdate = (list: FeatureFlag[]) => setRows(list);
+    listeners.add(onUpdate);
+    void fetchFlags().then((list) => {
+      setRows(list);
+      setLoading(false);
+    });
+    return () => {
+      listeners.delete(onUpdate);
+    };
+  }, []);
+
+  const flags = useMemo(
+    () => Object.fromEntries(rows.map((f) => [f.key, f.enabled])) as Record<string, boolean>,
+    [rows]
+  );
 
   const isEnabled = useCallback(
     (key: FeatureFlagKey) => flags[key] === true,

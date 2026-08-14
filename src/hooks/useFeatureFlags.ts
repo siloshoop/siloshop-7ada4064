@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useMemo, useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
 /**
@@ -25,19 +25,19 @@ let cache: FeatureFlag[] | null = null;
 let inflight: Promise<FeatureFlag[]> | null = null;
 const listeners = new Set<(rows: FeatureFlag[]) => void>();
 
-const fetchFlags = (force = false): Promise<FeatureFlag[]> => {
+const fetchFlags = async (force = false): Promise<FeatureFlag[]> => {
   if (!force && cache) return Promise.resolve(cache);
   if (!force && inflight) return inflight;
-  inflight = supabase
-    .from("feature_flags")
-    .select("key, enabled, label_ar, description")
-    .order("key")
-    .then(({ data }) => {
-      cache = (data ?? []) as FeatureFlag[];
-      inflight = null;
-      listeners.forEach((fn) => fn(cache as FeatureFlag[]));
-      return cache;
-    });
+  inflight = (async () => {
+    const { data } = await supabase
+      .from("feature_flags")
+      .select("key, enabled, label_ar, description")
+      .order("key");
+    cache = (data ?? []) as FeatureFlag[];
+    inflight = null;
+    listeners.forEach((fn) => fn(cache as FeatureFlag[]));
+    return cache;
+  })();
   return inflight;
 };
 

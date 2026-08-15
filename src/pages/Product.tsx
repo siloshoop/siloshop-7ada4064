@@ -151,7 +151,10 @@ const Product = () => {
       // Track product view for recently viewed feature
       trackProductView(id);
     }
-  }, [id, toast, trackProductView]);
+    // Only re-fetch when the product changes. `toast` / `trackProductView` are
+    // intentionally omitted — including them re-ran this effect on every render.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id]);
 
   const addToCart = async () => {
     if (!user) {

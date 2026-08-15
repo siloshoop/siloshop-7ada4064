@@ -1,10 +1,13 @@
+import { useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 
 export const useRecentlyViewed = () => {
   const { user } = useAuth();
 
-  const trackProductView = async (productId: string) => {
+  // Stable identity: consumers use this in effect dependency arrays, and a new
+  // function on every render would re-trigger those effects in a loop.
+  const trackProductView = useCallback(async (productId: string) => {
     if (!user) return;
 
     try {
@@ -43,7 +46,7 @@ export const useRecentlyViewed = () => {
     } catch (error) {
       console.error("Error in trackProductView:", error);
     }
-  };
+  }, [user?.id]);
 
   return { trackProductView };
 };

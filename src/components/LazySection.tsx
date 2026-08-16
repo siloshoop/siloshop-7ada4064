@@ -5,9 +5,21 @@ interface LazySectionProps {
   children: React.ReactNode;
   threshold?: number;
   rootMargin?: string;
+  /**
+   * Space reserved before the section mounts, so the page does not jump
+   * (CLS) when the lazy chunk arrives. Roughly matches a product rail:
+   * header + one row of cards. Released once the real content is mounted,
+   * so short sections never leave an empty gap.
+   */
+  reserveClassName?: string;
 }
 
-const LazySection = ({ children, threshold = 0.1, rootMargin = "200px" }: LazySectionProps) => {
+const LazySection = ({
+  children,
+  threshold = 0.1,
+  rootMargin = "200px",
+  reserveClassName = "min-h-[340px] md:min-h-[400px]",
+}: LazySectionProps) => {
   const [isIntersecting, setIntersecting] = useState(false);
   const sectionRef = useRef<HTMLDivElement>(null);
 
@@ -30,13 +42,15 @@ const LazySection = ({ children, threshold = 0.1, rootMargin = "200px" }: LazySe
   }, [threshold, rootMargin]);
 
   return (
-    <div ref={sectionRef} className="min-h-[320px] md:min-h-[2px]">
+    <div ref={sectionRef} className={isIntersecting ? undefined : reserveClassName}>
       {isIntersecting ? (
-        <Suspense fallback={
-          <div className="flex items-center justify-center py-12">
-            <Loader2 className="h-6 w-6 animate-spin text-primary/30" />
-          </div>
-        }>
+        <Suspense
+          fallback={
+            <div className={`flex items-center justify-center ${reserveClassName}`}>
+              <Loader2 className="h-6 w-6 animate-spin text-primary/30" />
+            </div>
+          }
+        >
           {children}
         </Suspense>
       ) : null}

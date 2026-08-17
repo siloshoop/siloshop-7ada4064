@@ -17,7 +17,7 @@ interface LazySectionProps {
 const LazySection = ({
   children,
   threshold = 0.1,
-  rootMargin = "900px",
+  rootMargin = "1800px",
   reserveClassName = "min-h-[200px] md:min-h-[240px]",
 }: LazySectionProps) => {
   const [isIntersecting, setIntersecting] = useState(false);

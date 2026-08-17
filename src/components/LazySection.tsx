@@ -17,8 +17,8 @@ interface LazySectionProps {
 const LazySection = ({
   children,
   threshold = 0.1,
-  rootMargin = "200px",
-  reserveClassName = "min-h-[340px] md:min-h-[400px]",
+  rootMargin = "900px",
+  reserveClassName = "min-h-[200px] md:min-h-[240px]",
 }: LazySectionProps) => {
   const [isIntersecting, setIntersecting] = useState(false);
   const sectionRef = useRef<HTMLDivElement>(null);

@@ -98,9 +98,16 @@ const Chat = () => {
       );
 
       if (convErr || !convId) {
+        // Surface known backend guards in Arabic instead of the raw DB message.
+        const raw = convErr?.message || "";
+        const description = raw.includes("conversation with yourself")
+          ? "لا يمكنك بدء محادثة مع نفسك"
+          : raw.includes("not_authenticated")
+            ? "يجب تسجيل الدخول لبدء المحادثة"
+            : raw || "فشل في إنشاء المحادثة";
         toast({
           title: "خطأ",
-          description: convErr?.message || "فشل في إنشاء المحادثة",
+          description,
           variant: "destructive",
         });
         setLoading(false);

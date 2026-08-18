@@ -14,6 +14,18 @@ import UserStatistics from "@/components/UserStatistics";
 import { useToast } from "@/hooks/use-toast";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
+/**
+ * Attaches reviewer display names to review rows. reviews.user_id references
+ * auth.users, so PostgREST cannot embed the profile directly.
+ */
+const attachReviewerNames = async (rows: any[]) => {
+  const ids = [...new Set(rows.map((r) => r.user_id).filter(Boolean))];
+  if (!ids.length) return rows;
+  const { data } = await supabase.from("profiles").select("id, full_name").in("id", ids);
+  const nameById = new Map((data || []).map((p) => [p.id, p.full_name]));
+  return rows.map((r) => ({ ...r, profiles: { full_name: nameById.get(r.user_id) ?? null } }));
+};
+
 const Dashboard = () => {
   const { user, loading: authLoading } = useAuth();
   const [profile, setProfile] = useState<any>(null);
@@ -99,15 +111,16 @@ const Dashboard = () => {
 
         setProfile(profileData);
 
-        // Check if user is admin
-        const { data: adminRole } = await supabase
+        // Check if user has an administrative role (admin or super_admin).
+        // super_admin inherits admin capabilities, so it must be included here.
+        const { data: adminRoles } = await supabase
           .from("user_roles")
           .select("role")
           .eq("user_id", user.id)
-          .eq("role", "admin")
-          .maybeSingle();
+          .in("role", ["admin", "super_admin"])
+          .limit(1);
 
-        setIsAdmin(!!adminRole);
+        setIsAdmin(!!adminRoles && adminRoles.length > 0);
 
         // Detect pending/rejected/suspended seller application
         const { data: appRow } = await supabase
@@ -120,19 +133,16 @@ const Dashboard = () => {
         if (profileData?.role === "vendor") {
           await fetchVendorStats(user.id);
 
-          // Get recent reviews
+          // Get recent reviews. reviews.user_id points at auth.users, so the
+          // reviewer profile cannot be embedded — it is fetched separately.
           const { data: reviewsData } = await supabase
             .from("reviews")
-            .select(`
-              *,
-              products!inner(name, vendor_id),
-              profiles(full_name)
-            `)
+            .select(`*, products!inner(name, vendor_id)`)
             .eq("products.vendor_id", user.id)
             .order("created_at", { ascending: false })
             .limit(5);
 
-          setRecentReviews(reviewsData || []);
+          setRecentReviews(await attachReviewerNames(reviewsData || []));
         } else {
           await fetchCustomerStats(user.id);
         }

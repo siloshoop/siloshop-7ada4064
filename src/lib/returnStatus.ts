@@ -1,9 +1,9 @@
 export const RETURN_REASONS = [
-  { value: "damaged", label: "منتج تالف" },
   { value: "wrong_product", label: "منتج خاطئ" },
+  { value: "damaged", label: "منتج تالف" },
+  { value: "defective", label: "منتج معيب" },
   { value: "missing_parts", label: "أجزاء مفقودة" },
   { value: "not_as_described", label: "غير مطابق للوصف" },
-  { value: "defective", label: "منتج معيب" },
   { value: "changed_mind", label: "غيّرت رأيي" },
   { value: "other", label: "سبب آخر" },
 ] as const;
@@ -14,18 +14,74 @@ export const RETURN_STATUS: Record<
   string,
   { label: string; variant: "default" | "secondary" | "destructive" | "outline"; description: string }
 > = {
-  pending: { label: "قيد الانتظار", variant: "secondary", description: "طلبك بانتظار مراجعة البائع" },
+  pending: { label: "قيد المراجعة الأولية", variant: "secondary", description: "طلبك بانتظار مراجعة البائع" },
   under_review: { label: "قيد المراجعة", variant: "secondary", description: "البائع يراجع طلبك" },
   info_requested: { label: "معلومات مطلوبة", variant: "outline", description: "البائع طلب معلومات إضافية" },
   approved: { label: "موافق عليه", variant: "default", description: "تمت الموافقة على الإرجاع" },
   rejected: { label: "مرفوض", variant: "destructive", description: "تم رفض طلب الإرجاع" },
+  awaiting_return: {
+    label: "بانتظار إرجاع المنتج",
+    variant: "outline",
+    description: "يرجى إرسال المنتج وفق تعليمات البائع",
+  },
+  item_shipped: { label: "تم إرسال المنتج", variant: "outline", description: "المنتج في طريقه إلى البائع" },
+  item_received: { label: "تم استلام المنتج", variant: "default", description: "استلم البائع المنتج المرتجع" },
+  inspection: { label: "قيد الفحص", variant: "secondary", description: "يتم فحص المنتج المرتجع" },
+  completed: { label: "تم إكمال الإرجاع", variant: "default", description: "تم إكمال عملية الإرجاع" },
   return_in_progress: { label: "الإرجاع جارٍ", variant: "outline", description: "المنتج في طريقه للبائع" },
   returned: { label: "تم الإرجاع", variant: "default", description: "استلم البائع المنتج" },
   refunded: { label: "تم رد المبلغ", variant: "default", description: "تم رد المبلغ" },
   closed: { label: "مغلق", variant: "secondary", description: "طلب الإرجاع مغلق" },
 };
 
-const RETURN_WINDOW_DAYS = 14;
+/** Return window (days after delivery) during which a return can be requested. */
+export const RETURN_WINDOW_DAYS = 7;
+
+/** Ordered lifecycle used for the customer-facing timeline. */
+export const RETURN_TIMELINE = [
+  "pending",
+  "under_review",
+  "approved",
+  "awaiting_return",
+  "item_shipped",
+  "item_received",
+  "inspection",
+  "completed",
+] as const;
+
+/** Statuses a seller/admin can move a return to, in workflow order. */
+export const RETURN_NEXT_STATUSES = [
+  "under_review",
+  "info_requested",
+  "awaiting_return",
+  "item_shipped",
+  "item_received",
+  "inspection",
+  "completed",
+  "refunded",
+  "closed",
+] as const;
+
+export const returnStatusLabel = (status: string) => RETURN_STATUS[status]?.label ?? status;
+
+/** Index of a status inside RETURN_TIMELINE; -1 for terminal/off-track statuses. */
+export function returnTimelineIndex(status: string): number {
+  const alias: Record<string, string> = {
+    return_in_progress: "item_shipped",
+    returned: "item_received",
+    refunded: "completed",
+    closed: "completed",
+  };
+  return (RETURN_TIMELINE as readonly string[]).indexOf(alias[status] ?? status);
+}
+
+/** Days left to request a return, or null when not applicable. */
+export function returnDaysRemaining(deliveredAt?: string | null): number | null {
+  if (!deliveredAt) return null;
+  const endMs = new Date(deliveredAt).getTime() + RETURN_WINDOW_DAYS * 86400000;
+  const left = Math.ceil((endMs - Date.now()) / 86400000);
+  return left > 0 ? left : 0;
+}
 
 export function isReturnEligible(order: {
   status?: string | null;

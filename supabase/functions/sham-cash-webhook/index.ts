@@ -66,6 +66,15 @@ Deno.serve(async (req) => {
   const orderId = typeof payload.order_id === "string" ? payload.order_id : null;
   const reference =
     typeof payload.transaction_id === "string" ? payload.transaction_id : null;
+  const amountRaw = payload.amount;
+  const amount =
+    typeof amountRaw === "number"
+      ? amountRaw
+      : typeof amountRaw === "string" && amountRaw.trim() !== "" && !isNaN(Number(amountRaw))
+        ? Number(amountRaw)
+        : null;
+  const currency = typeof payload.currency === "string" ? payload.currency : "SYP";
+  const uuidRe = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
   // Idempotent event log (unique on provider + event_id).
   const { error: logError } = await admin.from("payment_webhook_events").insert({
@@ -92,19 +101,58 @@ Deno.serve(async (req) => {
   }
 
   const succeeded = ["succeeded", "paid", "completed"].includes(eventType.toLowerCase());
-  const status = succeeded ? "succeeded" : "failed";
 
-  if (orderId) {
+  if (!orderId || !uuidRe.test(orderId)) {
     await admin
-      .from("payment_transactions")
-      .update({ status, provider_reference: reference, provider_payload: payload })
-      .eq("order_id", orderId)
-      .eq("provider", "sham_cash");
+      .from("payment_webhook_events")
+      .update({ error_message: "invalid or missing order_id" })
+      .eq("provider", "sham_cash")
+      .eq("event_id", eventId);
+    return json({ error: "Invalid order_id" }, 400);
+  }
 
+  // All settlement logic (amount + currency + order-kind verification, payment
+  // and order updates, one status-history row, one notification) happens inside
+  // a single locked transaction in the database. A mismatching or forged
+  // payload can never mark an order as paid.
+  const { data: settlement, error: settleError } = await admin.rpc(
+    "settle_sham_cash_payment",
+    {
+      _order_id: orderId,
+      _succeeded: succeeded,
+      _provider_reference: reference,
+      _amount: amount,
+      _currency: currency,
+      _failure_reason: succeeded ? null : eventType,
+    },
+  );
+
+  if (settleError) {
+    // Never log provider secrets — only the failure message.
+    console.error("settlement failed", settleError.message);
     await admin
-      .from("payments")
-      .update({ payment_status: succeeded ? "paid" : "failed" })
-      .eq("order_id", orderId);
+      .from("payment_webhook_events")
+      .update({ error_message: settleError.message })
+      .eq("provider", "sham_cash")
+      .eq("event_id", eventId);
+    return json({ error: "Settlement failed" }, 500);
+  }
+
+  const result = (settlement ?? {}) as { ok?: boolean; reason?: string; status?: string };
+
+  await admin
+    .from("payment_transactions")
+    .update({ provider_payload: payload })
+    .eq("order_id", orderId)
+    .eq("provider", "sham_cash");
+
+  if (result.ok !== true) {
+    await admin
+      .from("payment_webhook_events")
+      .update({ error_message: result.reason ?? "rejected" })
+      .eq("provider", "sham_cash")
+      .eq("event_id", eventId);
+    return json({ error: result.reason ?? "rejected" }, 400);
   }
 
   await admin
@@ -113,5 +161,5 @@ Deno.serve(async (req) => {
     .eq("provider", "sham_cash")
     .eq("event_id", eventId);
 
-  return json({ ok: true, status });
+  return json({ ok: true, status: result.status ?? (succeeded ? "paid" : "failed") });
 });

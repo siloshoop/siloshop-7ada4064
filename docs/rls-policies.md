@@ -45,8 +45,25 @@ leak other customers' rows to any authenticated subscriber.
    its own transaction only.
 
 ### `payments`
-No client INSERT policy. `record_payment()` (SECURITY DEFINER) locks the order
-`FOR UPDATE`, derives the amount from `orders.total_amount`, and blocks double-pay.
+No client INSERT/UPDATE policy. `record_payment()` (SECURITY DEFINER) locks the order
+`FOR UPDATE`, derives the amount from `orders.total_amount`, and blocks double-pay —
+and since the payment audit its `EXECUTE` is granted to `service_role` only.
+Previously `authenticated` could call it and mark its own pending COD order
+`completed` / `confirmed` with an arbitrary `payment_method`.
+
+`payment_status` and `payment_method` are constrained by CHECK
+(`pending|paid|completed|failed|cancelled|refunded`, `cod|cash|sham_cash|syriatel|mtn|card|bank_transfer`).
+
+### `settle_sham_cash_payment()`
+The only path that may mark an order paid. `service_role`-only (EXECUTE revoked from
+`anon`/`authenticated`, plus an in-function `auth.role()` check). It locks the order,
+requires `order_kind = 'platform'` and `payment_method = 'sham_cash'`, verifies the
+callback amount against `orders.total_amount` and the currency against `SYP`, is
+idempotent per order, refuses to un-pay a paid/refunded order, and writes exactly one
+`order_status_history` row and one customer notification per settlement.
+`sham-cash-webhook` verifies the HMAC signature first (fail-closed: a missing
+`SHAM_CASH_WEBHOOK_SECRET` or missing header yields `401`) and then delegates all
+state changes to this RPC.
 
 ### `notifications`
 No direct client `INSERT` policy. All notifications are produced by SECURITY DEFINER

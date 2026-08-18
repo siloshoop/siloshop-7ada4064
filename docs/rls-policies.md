@@ -80,6 +80,31 @@ checks, `admin` satisfies `moderator`. An `admin` never satisfies `super_admin`.
 Role grants/revokes go through `admin_set_user_role()` (super_admin only, audited);
 `user_roles` has no client write policy.
 
+### Verified permission matrix (moderator vs admin vs super_admin)
+All admin policies use `has_role()`/`has_any_admin_role()` — never an exact
+`user_roles.role = 'admin'` comparison, which used to lock `super_admin` out of
+`activity_logs`, `announcements` and `profiles`.
+
+| Surface | moderator | admin | super_admin |
+| --- | --- | --- | --- |
+| profiles (read), conversations, messages, reviews, reports, violations, product moderation, analytics | yes | yes | yes |
+| payments, payment_transactions, activity_logs, admin_audit_log, user_roles (read) | no | yes | yes |
+| orders: list/detail/history, status change, cancel, freeze, reopen, refund, refund status, shipping info | no | yes | yes |
+| announcements (write) | no | yes | yes |
+| role grant/revoke (`admin_set_user_role`) | no | no | yes |
+| platform products (`product_can_manage`), showroom pickers | no | no | yes |
+| `record_payment`, `settle_sham_cash_payment` | no | no | no (service_role only) |
+
+Every `admin_*` RPC plus `log_activity`, `send_notification`, `update_order_status`,
+`set_order_shipping_info`, `archive_product`, `delete_or_archive_product` and the seller
+lifecycle RPCs have `EXECUTE` revoked from `PUBLIC` and `anon`, granted to
+`authenticated` + `service_role` only; each one re-checks the caller's role internally.
+
+Verified live (Aug 2026) with temporary role grants on real sessions: non-admin gets
+`not_authorized`/`forbidden` and zero rows everywhere; moderator is blocked from all
+financial/order/role surfaces; admin passes them but is refused role management;
+super_admin passes everything. Temporary grants and test rows were removed afterwards.
+
 No direct client `INSERT` policy. All notifications are produced by SECURITY DEFINER
 trigger functions (order status change, price drop, brand follow, …) or by the
 `send_notification()` RPC, which requires admin role when the target user differs from

@@ -18,7 +18,18 @@ import {
 import { Loader2, RotateCcw, CheckCircle2, XCircle, MessageCircle } from "lucide-react";
 import { format } from "date-fns";
 import { ar } from "date-fns/locale";
-import { RETURN_STATUS, RETURN_REASONS } from "@/lib/returnStatus";
+import { RETURN_STATUS, RETURN_REASONS, RETURN_NEXT_STATUSES } from "@/lib/returnStatus";
+import ReturnTimeline from "@/components/returns/ReturnTimeline";
+import ReturnHistory from "@/components/returns/ReturnHistory";
+import { Input } from "@/components/ui/input";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 
 interface ReturnRow {
@@ -32,21 +43,17 @@ interface ReturnRow {
   video_url: string | null;
   status: string;
   review_note: string | null;
+  rejection_reason: string | null;
+  return_instructions: string | null;
+  return_address: string | null;
   created_at: string;
 }
 
 const reasonLabel = (v: string) => RETURN_REASONS.find((r) => r.value === v)?.label || v;
 
-const NEXT_STATUSES = [
-  "under_review",
-  "info_requested",
-  "approved",
-  "rejected",
-  "return_in_progress",
-  "returned",
-  "refunded",
-  "closed",
-];
+const NEXT_STATUSES = [...RETURN_NEXT_STATUSES];
+
+const DECIDABLE = ["pending", "under_review", "info_requested"];
 
 const MediaThumb = ({ path }: { path: string }) => {
   const [url, setUrl] = useState<string | null>(null);
@@ -73,6 +80,10 @@ const ReturnCard = ({ r, onChanged }: { r: ReturnRow; onChanged: () => void }) =
   const [note, setNote] = useState("");
   const [nextStatus, setNextStatus] = useState<string>("");
   const [saving, setSaving] = useState(false);
+  const [decision, setDecision] = useState<"approve" | "reject" | null>(null);
+  const [instructions, setInstructions] = useState("");
+  const [address, setAddress] = useState("");
+  const [rejectReason, setRejectReason] = useState("");
   const s = RETURN_STATUS[r.status] || RETURN_STATUS.pending;
 
   const update = async (status: string) => {
@@ -93,6 +104,38 @@ const ReturnCard = ({ r, onChanged }: { r: ReturnRow; onChanged: () => void }) =
     onChanged();
   };
 
+  const submitDecision = async () => {
+    if (!decision) return;
+    if (decision === "reject" && rejectReason.trim().length < 5) {
+      toast({ title: "سبب الرفض مطلوب", variant: "destructive" });
+      return;
+    }
+    if (decision === "approve" && (instructions.trim().length < 5 || address.trim().length < 5)) {
+      toast({ title: "تعليمات الإرجاع وعنوان الإرجاع مطلوبان", variant: "destructive" });
+      return;
+    }
+    setSaving(true);
+    const { error } = await supabase.rpc("review_return_request", {
+      _return_id: r.id,
+      _decision: decision,
+      _note: decision === "reject" ? rejectReason.trim() : note.trim() || null,
+      _instructions: decision === "approve" ? instructions.trim() : null,
+      _address: decision === "approve" ? address.trim() : null,
+    });
+    setSaving(false);
+    if (error) {
+      toast({ title: "تعذر تنفيذ القرار", description: error.message, variant: "destructive" });
+      return;
+    }
+    toast({ title: decision === "approve" ? "تمت الموافقة على الإرجاع" : "تم رفض طلب الإرجاع" });
+    setDecision(null);
+    setInstructions("");
+    setAddress("");
+    setRejectReason("");
+    setNote("");
+    onChanged();
+  };
+
   return (
     <Card>
       <CardHeader>
@@ -102,6 +145,7 @@ const ReturnCard = ({ r, onChanged }: { r: ReturnRow; onChanged: () => void }) =
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-3 text-sm">
+        <ReturnTimeline status={r.status} />
         <p>
           <span className="text-muted-foreground">السبب: </span>
           <span className="font-medium">{reasonLabel(r.reason)}</span>
@@ -140,15 +184,15 @@ const ReturnCard = ({ r, onChanged }: { r: ReturnRow; onChanged: () => void }) =
             rows={2}
           />
           <div className="flex flex-wrap gap-2">
-            {r.status === "pending" && (
+            {DECIDABLE.includes(r.status) && (
               <>
-                <Button size="sm" onClick={() => update("approved")} disabled={saving}>
+                <Button size="sm" onClick={() => setDecision("approve")} disabled={saving}>
                   <CheckCircle2 className="h-4 w-4 ml-1" /> موافقة
                 </Button>
                 <Button
                   size="sm"
                   variant="destructive"
-                  onClick={() => update("rejected")}
+                  onClick={() => setDecision("reject")}
                   disabled={saving}
                 >
                   <XCircle className="h-4 w-4 ml-1" /> رفض
@@ -186,7 +230,71 @@ const ReturnCard = ({ r, onChanged }: { r: ReturnRow; onChanged: () => void }) =
             </Button>
           </div>
         </div>
+
+        {r.return_instructions && (
+          <div className="rounded border border-primary/20 bg-primary/5 p-2">
+            <p className="font-semibold">تعليمات الإرجاع المرسلة للمشتري</p>
+            <p>{r.return_instructions}</p>
+            {r.return_address && <p className="text-muted-foreground">العنوان: {r.return_address}</p>}
+          </div>
+        )}
+        {r.rejection_reason && (
+          <p className="rounded border border-destructive/30 bg-destructive/5 p-2">
+            سبب الرفض: {r.rejection_reason}
+          </p>
+        )}
+
+        <div className="rounded-lg border bg-muted/20 p-3">
+          <p className="mb-2 text-xs font-semibold">سجل الطلب</p>
+          <ReturnHistory returnId={r.id} />
+        </div>
       </CardContent>
+
+      <Dialog open={!!decision} onOpenChange={(o) => !o && !saving && setDecision(null)}>
+        <DialogContent dir="rtl">
+          <DialogHeader>
+            <DialogTitle>
+              {decision === "approve" ? "الموافقة على الإرجاع" : "رفض طلب الإرجاع"}
+            </DialogTitle>
+            <DialogDescription>
+              {decision === "approve"
+                ? "أضف تعليمات الإرجاع وعنوان الاستلام ليتمكن المشتري من إرسال المنتج."
+                : "سبب الرفض إلزامي وسيُرسل للمشتري."}
+            </DialogDescription>
+          </DialogHeader>
+          {decision === "approve" ? (
+            <div className="space-y-3">
+              <Textarea
+                value={instructions}
+                onChange={(e) => setInstructions(e.target.value.slice(0, 800))}
+                placeholder="تعليمات الإرجاع (طريقة التغليف، شركة الشحن، المرفقات المطلوبة...)"
+                rows={3}
+              />
+              <Input
+                value={address}
+                onChange={(e) => setAddress(e.target.value.slice(0, 300))}
+                placeholder="عنوان إرجاع المنتج"
+              />
+            </div>
+          ) : (
+            <Textarea
+              value={rejectReason}
+              onChange={(e) => setRejectReason(e.target.value.slice(0, 500))}
+              placeholder="سبب الرفض (إلزامي)"
+              rows={3}
+            />
+          )}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setDecision(null)} disabled={saving}>
+              إلغاء
+            </Button>
+            <Button onClick={() => void submitDecision()} disabled={saving}>
+              {saving && <Loader2 className="h-4 w-4 animate-spin ml-1" />}
+              تأكيد
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </Card>
   );
 };

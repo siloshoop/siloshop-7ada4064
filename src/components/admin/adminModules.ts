@@ -2,6 +2,7 @@ import {
   LayoutDashboard, Users, Store, FileCheck, PackageSearch, ShoppingBag,
   FolderTree, Tag, LayoutTemplate, Image, Flag, MessagesSquare, Bell,
   BarChart3, DollarSign, Globe, Wallet, ToggleLeft, ScrollText, ShieldAlert,
+  CreditCard, RotateCcw, Megaphone, UserCog, FileClock,
 } from "lucide-react";
 import type { FeatureFlagKey } from "@/hooks/useFeatureFlags";
 
@@ -22,6 +23,9 @@ export const ADMIN_MODULES: AdminModule[] = [
   { label: "طلبات الانتساب", description: "مراجعة طلبات فتح المتاجر", href: "/admin/seller-applications", icon: FileCheck },
   { label: "منتجات البائعين", description: "الموافقة على المنتجات ورفضها", href: "/admin/products", icon: PackageSearch },
   { label: "الطلبات", description: "متابعة الطلبات وحالاتها", href: "/admin/orders", icon: ShoppingBag },
+  { label: "المدفوعات", description: "سجل عمليات الدفع للعرض فقط", href: "/admin/payments", icon: CreditCard },
+  { label: "الإرجاعات", description: "مراجعة طلبات الإرجاع والخلافات", href: "/admin/returns", icon: RotateCcw },
+  { label: "المتاجر", description: "متاجر البائعين المعتمدة", href: "/admin/stores", icon: Store },
   { label: "الفئات", description: "الفئات والفئات الفرعية", href: "/admin/categories", icon: FolderTree },
   { label: "العلامات التجارية", description: "إدارة الماركات", href: "/admin/brands", icon: Tag },
   { label: "أقسام الصفحة الرئيسية", description: "واجهة العرض والترتيب", href: "/admin/homepage", icon: LayoutTemplate },
@@ -32,6 +36,9 @@ export const ADMIN_MODULES: AdminModule[] = [
   { label: "الإشعارات", description: "إرسال إشعارات للمستخدمين", href: "/admin/notifications", icon: Bell },
   { label: "الإحصائيات", description: "لوحة التحليلات التفصيلية", href: "/admin/statistics", icon: BarChart3 },
   { label: "الإيرادات", description: "إيرادات الدفع عند الاستلام", href: "/admin/revenue", icon: DollarSign },
+  { label: "الإعلانات النصية", description: "الشريط العلوي والتنبيهات", href: "/admin/announcements", icon: Megaphone },
+  { label: "الأدوار والصلاحيات", description: "منح وسحب صلاحيات الإدارة", href: "/admin/roles", icon: UserCog },
+  { label: "سجل التدقيق", description: "كل عمليات الإدارة مع القيم السابقة", href: "/admin/audit", icon: FileClock },
   { label: "سجل النشاط", description: "سجل عمليات الإدارة", href: "/admin/activity", icon: ScrollText },
   { label: "خصائص المنصة", description: "تشغيل وإيقاف الوحدات المستقبلية", href: "/admin/features", icon: ToggleLeft },
   {

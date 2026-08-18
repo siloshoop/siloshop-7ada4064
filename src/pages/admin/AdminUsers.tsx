@@ -155,6 +155,9 @@ const AdminUsers = ({ mode }: { mode: Mode }) => {
                 >
                   {STATUS_LABEL[row.is_banned ? "banned" : row.account_status] ?? row.account_status}
                 </Badge>
+                <Button asChild variant="outline" size="sm">
+                  <Link to={`/admin/users/${row.id}`}>الملف</Link>
+                </Button>
                 {mode === "sellers" && (
                   <Button asChild variant="outline" size="sm">
                     <Link to={`/store/${row.id}`}>

@@ -187,12 +187,12 @@ const AdminUserDetail = () => {
             <p className="text-xs text-muted-foreground" dir="ltr">{profile.id}</p>
             <p>الهاتف: {profile.phone || "—"}</p>
             <p>النوع: {profile.role === "vendor" ? "بائع" : "مشتري"}</p>
-            <p>
-              الحالة:{" "}
+            <div className="flex items-center gap-1">
+              <span>الحالة:</span>
               <Badge variant={isActive ? "default" : "destructive"}>
                 {STATUS_LABEL[profile.is_banned ? "banned" : profile.account_status] ?? profile.account_status}
               </Badge>
-            </p>
+            </div>
             {profile.status_reason && (
               <p className="text-xs text-destructive">السبب: {profile.status_reason}</p>
             )}

@@ -58,7 +58,7 @@ const SharedWishlist = () => {
           )
         `)
         .eq("share_token", token)
-        .single();
+        .maybeSingle();
 
       if (error || !data) {
         setNotFound(true);

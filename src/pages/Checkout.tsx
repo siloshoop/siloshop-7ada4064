@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Navigate, useNavigate } from "react-router-dom";
 import { z } from "zod";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
@@ -390,9 +390,10 @@ const Checkout = () => {
     );
   }
 
+  // Declarative redirect: calling navigate() during render triggers a
+  // "cannot update a component while rendering" React warning.
   if (cartItems.length === 0) {
-    navigate("/cart");
-    return null;
+    return <Navigate to="/cart" replace />;
   }
 
   return (

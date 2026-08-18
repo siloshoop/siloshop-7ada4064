@@ -125,20 +125,24 @@ const Statistics = () => {
         averageOrder: totalOrders > 0 ? totalRevenue / totalOrders : 0,
       });
 
-      // Fetch recent reviews
+      // Fetch recent reviews. reviews.user_id references auth.users, so the
+      // reviewer profile is fetched separately instead of embedded.
       const { data: reviews } = await supabase
         .from("reviews")
-        .select(`
-          *,
-          products!inner(name, vendor_id),
-          profiles(full_name)
-        `)
+        .select(`*, products!inner(name, vendor_id)`)
         .eq("products.vendor_id", user.id)
         .order("created_at", { ascending: false })
         .limit(10);
 
       if (reviews) {
-        setRecentReviews(reviews as any);
+        const reviewerIds = [...new Set(reviews.map((r: any) => r.user_id).filter(Boolean))];
+        const { data: reviewerProfiles } = reviewerIds.length
+          ? await supabase.from("profiles").select("id, full_name").in("id", reviewerIds)
+          : { data: [] as { id: string; full_name: string | null }[] };
+        const nameById = new Map((reviewerProfiles || []).map((p) => [p.id, p.full_name]));
+        setRecentReviews(
+          reviews.map((r: any) => ({ ...r, profiles: { full_name: nameById.get(r.user_id) ?? null } })) as any,
+        );
         const avgRating = reviews.length > 0
           ? reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length
           : 0;

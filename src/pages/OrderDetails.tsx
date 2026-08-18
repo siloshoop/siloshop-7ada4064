@@ -243,6 +243,7 @@ const OrderDetails = () => {
         <CancelOrderDialog
           orderId={order.id}
           status={order.status}
+          trackingStatus={order.tracking_status}
           variant="destructive"
           size="default"
           onCancelled={() => {

@@ -74,6 +74,45 @@ export type Database = {
         }
         Relationships: []
       }
+      admin_audit_log: {
+        Row: {
+          action: string
+          actor_id: string | null
+          actor_role: string | null
+          created_at: string
+          id: string
+          new_value: Json | null
+          old_value: Json | null
+          reason: string | null
+          target_id: string | null
+          target_type: string
+        }
+        Insert: {
+          action: string
+          actor_id?: string | null
+          actor_role?: string | null
+          created_at?: string
+          id?: string
+          new_value?: Json | null
+          old_value?: Json | null
+          reason?: string | null
+          target_id?: string | null
+          target_type: string
+        }
+        Update: {
+          action?: string
+          actor_id?: string | null
+          actor_role?: string | null
+          created_at?: string
+          id?: string
+          new_value?: Json | null
+          old_value?: Json | null
+          reason?: string | null
+          target_id?: string | null
+          target_type?: string
+        }
+        Relationships: []
+      }
       announcements: {
         Row: {
           created_at: string
@@ -2497,6 +2536,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      actor_admin_role: { Args: { _user_id: string }; Returns: string }
       admin_activate_user: { Args: { _user_id: string }; Returns: undefined }
       admin_ban_user: {
         Args: { _reason: string; _user_id: string }
@@ -2734,6 +2774,15 @@ export type Database = {
         }
         Returns: undefined
       }
+      admin_set_user_role: {
+        Args: {
+          _grant: boolean
+          _reason?: string
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: undefined
+      }
       admin_suspend_conversation: {
         Args: {
           _conversation_id: string
@@ -2928,6 +2977,17 @@ export type Database = {
           _action_details?: Json
           _action_type: string
           _user_agent?: string
+        }
+        Returns: undefined
+      }
+      log_admin_action: {
+        Args: {
+          _action: string
+          _new_value?: Json
+          _old_value?: Json
+          _reason?: string
+          _target_id: string
+          _target_type: string
         }
         Returns: undefined
       }

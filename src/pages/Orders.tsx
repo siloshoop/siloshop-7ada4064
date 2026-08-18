@@ -329,6 +329,7 @@ const Orders = () => {
                         <CancelOrderDialog
                           orderId={order.id}
                           status={order.status}
+                          trackingStatus={order.tracking_status}
                           fullWidth
                           onCancelled={() => void fetchOrders()}
                         />

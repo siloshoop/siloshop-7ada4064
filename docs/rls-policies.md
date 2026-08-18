@@ -66,6 +66,20 @@ idempotent per order, refuses to un-pay a paid/refunded order, and writes exactl
 state changes to this RPC.
 
 ### `notifications`
+### `admin_audit_log`
+Append-only. `SELECT` for `has_any_admin_role(auth.uid())`; no INSERT/UPDATE/DELETE policy —
+rows are written only by the `audit_admin_change()` trigger (installed on `profiles`,
+`user_roles`, `products`, `orders`, `showroom_items`, `reports`, `announcements`,
+`messages`, `conversations`, `returns`, `seller_applications`, `categories`, `brands`,
+`native_ads`, `feature_flags`) and by `log_admin_action()`. The trigger records a
+field-level diff only when the acting user holds an admin role.
+
+### Role hierarchy
+`has_role()` now resolves a hierarchy: `super_admin` satisfies `admin` and `moderator`
+checks, `admin` satisfies `moderator`. An `admin` never satisfies `super_admin`.
+Role grants/revokes go through `admin_set_user_role()` (super_admin only, audited);
+`user_roles` has no client write policy.
+
 No direct client `INSERT` policy. All notifications are produced by SECURITY DEFINER
 trigger functions (order status change, price drop, brand follow, …) or by the
 `send_notification()` RPC, which requires admin role when the target user differs from

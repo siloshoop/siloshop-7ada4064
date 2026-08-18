@@ -83,6 +83,12 @@ const AdminNotifications = lazy(() => import("./pages/admin/AdminNotifications")
 const AdminRevenue = lazy(() => import("./pages/admin/Revenue"));
 const FeatureFlagsPage = lazy(() => import("./pages/admin/FeatureFlagsPage"));
 const ShamCashSettings = lazy(() => import("./pages/admin/ShamCashSettings"));
+const AdminPayments = lazy(() => import("./pages/admin/AdminPayments"));
+const AdminReturns = lazy(() => import("./pages/admin/AdminReturns"));
+const AdminStores = lazy(() => import("./pages/admin/AdminStores"));
+const AdminRoles = lazy(() => import("./pages/admin/AdminRoles"));
+const AdminAuditLog = lazy(() => import("./pages/admin/AdminAuditLog"));
+const AdminUserDetail = lazy(() => import("./pages/admin/AdminUserDetail"));
 const Privacy = lazy(() => import("./pages/Privacy"));
 const Terms = lazy(() => import("./pages/Terms"));
 const GuestTrack = lazy(() => import("./pages/GuestTrack"));
@@ -161,6 +167,13 @@ const App = () => (
             <Route path="/admin/features" element={<RequireRole role="super_admin"><FeatureFlagsPage /></RequireRole>} />
             <Route path="/admin/platform-products" element={<RequireRole role="super_admin"><PlatformProducts /></RequireRole>} />
             <Route path="/admin/sham-cash" element={<RequireRole role="super_admin"><ShamCashSettings /></RequireRole>} />
+            <Route path="/admin/users/:id" element={<RequireRole role="admin"><AdminUserDetail /></RequireRole>} />
+            <Route path="/admin/stores" element={<RequireRole role="admin"><AdminStores /></RequireRole>} />
+            <Route path="/admin/payments" element={<RequireRole role="admin"><AdminPayments /></RequireRole>} />
+            <Route path="/admin/returns" element={<RequireRole role="admin"><AdminReturns /></RequireRole>} />
+            <Route path="/admin/announcements" element={<RequireRole role="admin"><ManageAnnouncements /></RequireRole>} />
+            <Route path="/admin/audit" element={<RequireRole role="admin"><AdminAuditLog /></RequireRole>} />
+            <Route path="/admin/roles" element={<RequireRole role="super_admin"><AdminRoles /></RequireRole>} />
             <Route path="/seller/application" element={<SellerApplication />} />
             {/* Seller console (selling only, approved sellers) */}
             <Route path="/seller" element={<RequireApprovedSeller><SellerHome /></RequireApprovedSeller>} />

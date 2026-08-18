@@ -18,10 +18,21 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Loader2, XCircle } from "lucide-react";
 
-const CANCELLABLE_STATUSES = ["pending", "confirmed", "processing"] as const;
+import { normalizeStatus } from "@/lib/orderStatus";
 
-export const canCancelOrder = (status: string | null | undefined) =>
-  !!status && (CANCELLABLE_STATUSES as readonly string[]).includes(status);
+/** Buyers may cancel only while the order is pending / confirmed / preparing. */
+const CANCELLABLE_STATUSES = ["pending", "confirmed", "preparing"] as const;
+
+export const canCancelOrder = (
+  status: string | null | undefined,
+  trackingStatus?: string | null,
+) => {
+  const stages = [status, trackingStatus].filter(Boolean) as string[];
+  if (stages.length === 0) return false;
+  return stages.every((s) =>
+    (CANCELLABLE_STATUSES as readonly string[]).includes(normalizeStatus(s)),
+  );
+};
 
 const REASONS = [
   { value: "changed_mind", label: "غيّرت رأيي" },
@@ -34,20 +45,21 @@ const REASONS = [
 interface Props {
   orderId: string;
   status: string | null | undefined;
+  trackingStatus?: string | null;
   onCancelled?: () => void;
   size?: "sm" | "default";
   variant?: "outline" | "destructive" | "default";
   fullWidth?: boolean;
 }
 
-const CancelOrderDialog = ({ orderId, status, onCancelled, size = "sm", variant = "destructive", fullWidth }: Props) => {
+const CancelOrderDialog = ({ orderId, status, trackingStatus, onCancelled, size = "sm", variant = "destructive", fullWidth }: Props) => {
   const [open, setOpen] = useState(false);
   const [reason, setReason] = useState<string>("");
   const [details, setDetails] = useState("");
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
 
-  if (!canCancelOrder(status)) return null;
+  if (!canCancelOrder(status, trackingStatus)) return null;
 
   const submit = async () => {
     if (!reason) {

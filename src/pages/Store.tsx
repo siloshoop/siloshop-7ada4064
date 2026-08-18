@@ -390,7 +390,7 @@ const Store = () => {
                     </div>
                     <div className="flex justify-between rounded-lg border p-3">
                       <dt className="text-muted-foreground">سياسة الإرجاع</dt>
-                      <dd className="font-medium">14 يوماً</dd>
+                      <dd className="font-medium">7 أيام</dd>
                     </div>
                   </dl>
                 </CardContent>

@@ -47,14 +47,12 @@ Deno.serve(async (req) => {
     return json({ error: "logout_failed", status: res.status }, 502);
   }
 
-  await admin.rpc("log_admin_action", {
-    _action: "force_logout",
-    _target_type: "auth_user",
-    _target_id: userId,
-    _old_value: null,
-    _new_value: null,
-    _reason: null,
-  }).catch(() => {});
+  await admin.from("admin_audit_log").insert({
+    actor_id: caller.user.id,
+    action: "force_logout",
+    target_type: "auth_user",
+    target_id: userId,
+  });
 
   return json({ success: true });
 });

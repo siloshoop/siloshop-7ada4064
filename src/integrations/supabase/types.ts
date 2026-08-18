@@ -1831,8 +1831,13 @@ export type Database = {
           order_id: string
           order_item_id: string | null
           reason: string
+          received_at: string | null
+          rejection_reason: string | null
           resolved_at: string | null
+          return_address: string | null
+          return_instructions: string | null
           review_note: string | null
+          shipped_at: string | null
           status: string
           updated_at: string
           vendor_id: string
@@ -1847,8 +1852,13 @@ export type Database = {
           order_id: string
           order_item_id?: string | null
           reason: string
+          received_at?: string | null
+          rejection_reason?: string | null
           resolved_at?: string | null
+          return_address?: string | null
+          return_instructions?: string | null
           review_note?: string | null
+          shipped_at?: string | null
           status?: string
           updated_at?: string
           vendor_id: string
@@ -1863,8 +1873,13 @@ export type Database = {
           order_id?: string
           order_item_id?: string | null
           reason?: string
+          received_at?: string | null
+          rejection_reason?: string | null
           resolved_at?: string | null
+          return_address?: string | null
+          return_instructions?: string | null
           review_note?: string | null
+          shipped_at?: string | null
           status?: string
           updated_at?: string
           vendor_id?: string
@@ -2861,6 +2876,10 @@ export type Database = {
         }
         Returns: string
       }
+      customer_ship_return: {
+        Args: { _note?: string; _return_id: string }
+        Returns: undefined
+      }
       delete_email: {
         Args: { message_id: number; queue_name: string }
         Returns: boolean
@@ -3043,6 +3062,16 @@ export type Database = {
         Returns: undefined
       }
       restore_product: { Args: { _product_id: string }; Returns: string }
+      review_return_request: {
+        Args: {
+          _address?: string
+          _decision: string
+          _instructions?: string
+          _note: string
+          _return_id: string
+        }
+        Returns: undefined
+      }
       send_notification: {
         Args: {
           _message: string

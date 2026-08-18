@@ -4,7 +4,7 @@ import { ArrowLeft, BadgeCheck, Banknote, RotateCcw, Store } from "lucide-react"
 const PERKS = [
   { icon: BadgeCheck, title: "بائعون موثّقون", body: "كل متجر يخضع لمراجعة الإدارة قبل النشر." },
   { icon: Banknote, title: "دفع عند الاستلام", body: "ادفع نقداً عند وصول طلبك إلى بابك." },
-  { icon: RotateCcw, title: "إرجاع 14 يوماً", body: "طلب إرجاع بسيط ومتابعة لحالته خطوة بخطوة." },
+  { icon: RotateCcw, title: "إرجاع 7 أيام", body: "طلب إرجاع بسيط ومتابعة لحالته خطوة بخطوة." },
 ];
 
 const LocalMarketplaceBanner = () => (

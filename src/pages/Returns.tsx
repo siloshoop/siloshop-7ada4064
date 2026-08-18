@@ -8,7 +8,7 @@ const Returns = () => {
       <main className="flex-1 container px-4 py-12">
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-12">
-            <h1 className="text-4xl font-bold mb-4">سياسة الإرجاع والاستبدال</h1>
+            <h1 className="text-4xl font-bold mb-4">سياسة الإرجاع</h1>
             <p className="text-muted-foreground text-lg">نضمن لك تجربة تسوق آمنة ومريحة</p>
           </div>
 
@@ -20,7 +20,7 @@ const Returns = () => {
               <CardContent className="space-y-4">
                 <div className="flex items-start gap-3">
                   <CheckCircle2 className="h-5 w-5 text-primary mt-0.5 shrink-0" />
-                  <p>يمكن إرجاع المنتجات خلال 14 يوماً من تاريخ الاستلام</p>
+                  <p>يمكن طلب إرجاع المنتجات خلال 7 أيام من تاريخ الاستلام</p>
                 </div>
                 <div className="flex items-start gap-3">
                   <CheckCircle2 className="h-5 w-5 text-primary mt-0.5 shrink-0" />
@@ -75,11 +75,13 @@ const Returns = () => {
 
             <Card>
               <CardHeader>
-                <CardTitle>سياسة الاستبدال</CardTitle>
+                <CardTitle>مراحل طلب الإرجاع</CardTitle>
               </CardHeader>
               <CardContent>
                 <p className="text-muted-foreground">
-                  في حال وجود عيب في المنتج أو عدم مطابقته للمواصفات، يمكنك استبداله بمنتج مماثل أو آخر من نفس القيمة أو أرجاعه . يتحمل  البائع تكاليف الشحن في حالة العيوب المصنعية فقط.
+                  قيد المراجعة الأولية ← قيد المراجعة ← موافقة أو رفض ← بانتظار إرجاع المنتج ← تم إرسال
+                  المنتج ← تم استلام المنتج ← قيد الفحص ← تم إكمال الإرجاع. لا تتوفر خدمة الاستبدال حالياً؛
+                  يمكنك طلب الإرجاع فقط.
                 </p>
               </CardContent>
             </Card>

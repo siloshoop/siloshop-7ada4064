@@ -463,7 +463,7 @@ const Product = () => {
               <div className="flex flex-col items-center text-center gap-1 rounded-xl border bg-muted/30 p-3">
                 <RotateCcw className="h-4 w-4 text-primary" />
                 <span className="text-[11px] text-muted-foreground leading-tight">
-                  إرجاع خلال 14 يوماً
+                  إرجاع خلال 7 أيام
                 </span>
               </div>
             </div>

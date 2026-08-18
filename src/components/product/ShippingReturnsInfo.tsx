@@ -61,7 +61,7 @@ const ShippingReturnsInfo = ({ shippingCost, shipsWithinDays, isPlatform }: Prop
           <RotateCcw className="h-4 w-4 text-primary" /> سياسة الإرجاع
         </h3>
         <ul className="space-y-2 text-sm text-muted-foreground">
-          <li>يمكنك طلب الإرجاع خلال 14 يوماً من تاريخ الاستلام.</li>
+          <li>يمكنك طلب الإرجاع خلال 7 أيام من تاريخ الاستلام.</li>
           <li>يجب أن يكون المنتج بحالته الأصلية مع العلبة والملحقات.</li>
           <li>ترسل طلب الإرجاع من صفحة «طلباتي» مع ذكر السبب وإرفاق صور.</li>
           <li>بعد موافقة البائع يزوّدك بتعليمات الإرجاع، ويكتمل الطلب بعد فحص المنتج.</li>

@@ -21,7 +21,13 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { RotateCcw, Loader2, X, ImagePlus, Video } from "lucide-react";
-import { RETURN_REASONS, isReturnEligible, type ReturnReason } from "@/lib/returnStatus";
+import {
+  RETURN_REASONS,
+  isReturnEligible,
+  returnDaysRemaining,
+  RETURN_WINDOW_DAYS,
+  type ReturnReason,
+} from "@/lib/returnStatus";
 
 interface ReturnRequestDialogProps {
   order: { id: string; status?: string | null; delivered_at?: string | null };
@@ -32,7 +38,7 @@ interface ReturnRequestDialogProps {
   onCreated?: (returnId: string) => void;
 }
 
-const MAX_IMAGES = 10;
+const MAX_IMAGES = 5;
 
 const ReturnRequestDialog = ({
   order,
@@ -54,6 +60,7 @@ const ReturnRequestDialog = ({
   const [checking, setChecking] = useState(true);
 
   const eligibility = isReturnEligible(order);
+  const daysLeft = returnDaysRemaining(order.delivered_at);
 
   useEffect(() => {
     let alive = true;
@@ -113,6 +120,14 @@ const ReturnRequestDialog = ({
       toast({ title: "اختر سبب الإرجاع", variant: "destructive" });
       return;
     }
+    if (notes.trim().length < 10) {
+      toast({
+        title: "وصف المشكلة مطلوب",
+        description: "اكتب 10 أحرف على الأقل لشرح سبب الإرجاع",
+        variant: "destructive",
+      });
+      return;
+    }
     if (!user) return;
     setSubmitting(true);
     try {
@@ -141,10 +156,12 @@ const ReturnRequestDialog = ({
     } catch (e) {
       const msg = (e as { message?: string })?.message || "";
       const map: Record<string, string> = {
-        return_window_expired: "انتهت مدة الإرجاع (14 يوماً)",
+        return_window_expired: `انتهت مدة الإرجاع (${RETURN_WINDOW_DAYS} أيام)`,
+        description_required: "يرجى كتابة وصف واضح للمشكلة (10 أحرف على الأقل)",
+        reason_required: "اختر سبب الإرجاع",
         order_not_delivered: "لا يمكن الإرجاع قبل استلام الطلب",
         duplicate_return_request: "يوجد طلب إرجاع مفتوح لهذا العنصر",
-        too_many_images: "الحد الأقصى 10 صور",
+        too_many_images: `الحد الأقصى ${MAX_IMAGES} صور`,
         not_order_owner: "غير مصرح لك",
       };
       toast({
@@ -173,7 +190,8 @@ const ReturnRequestDialog = ({
           <DialogHeader>
             <DialogTitle>طلب إرجاع منتج</DialogTitle>
             <DialogDescription>
-              اختر السبب وأرفق الصور/الفيديو لتسريع مراجعة البائع.
+              اختر السبب واشرح المشكلة، ويمكنك إرفاق حتى {MAX_IMAGES} صور.
+              {daysLeft !== null && ` (متبقٍ ${daysLeft} يوم من مدة الإرجاع)`}
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
@@ -193,16 +211,17 @@ const ReturnRequestDialog = ({
               </Select>
             </div>
             <div className="space-y-2">
-              <Label>ملاحظات إضافية (اختياري)</Label>
+              <Label>وصف المشكلة *</Label>
               <Textarea
                 value={notes}
                 onChange={(e) => setNotes(e.target.value.slice(0, 1000))}
                 placeholder="اشرح المشكلة بمزيد من التفاصيل..."
                 rows={3}
               />
+              <p className="text-xs text-muted-foreground">{notes.trim().length}/10 حرف كحد أدنى</p>
             </div>
             <div className="space-y-2">
-              <Label>الصور (حتى {MAX_IMAGES})</Label>
+              <Label>الصور (اختياري — حتى {MAX_IMAGES})</Label>
               <label className="flex items-center gap-2 border border-dashed rounded-md p-3 cursor-pointer hover:bg-muted/40">
                 <ImagePlus className="h-4 w-4" />
                 <span className="text-sm text-muted-foreground">

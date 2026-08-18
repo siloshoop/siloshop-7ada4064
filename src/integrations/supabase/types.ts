@@ -1267,33 +1267,42 @@ export type Database = {
         Row: {
           amount: number
           created_at: string
+          currency: string
+          failure_reason: string | null
           id: string
           order_id: string
           payment_details: Json | null
           payment_method: string
           payment_status: string
+          provider_reference: string | null
           transaction_id: string | null
           updated_at: string
         }
         Insert: {
           amount: number
           created_at?: string
+          currency?: string
+          failure_reason?: string | null
           id?: string
           order_id: string
           payment_details?: Json | null
           payment_method: string
           payment_status?: string
+          provider_reference?: string | null
           transaction_id?: string | null
           updated_at?: string
         }
         Update: {
           amount?: number
           created_at?: string
+          currency?: string
+          failure_reason?: string | null
           id?: string
           order_id?: string
           payment_details?: Json | null
           payment_method?: string
           payment_status?: string
+          provider_reference?: string | null
           transaction_id?: string | null
           updated_at?: string
         }
@@ -2997,6 +3006,17 @@ export type Database = {
           _user_agent?: string
         }
         Returns: undefined
+      }
+      settle_sham_cash_payment: {
+        Args: {
+          _amount?: number
+          _currency?: string
+          _failure_reason?: string
+          _order_id: string
+          _provider_reference?: string
+          _succeeded: boolean
+        }
+        Returns: Json
       }
       submit_report: {
         Args: {

@@ -2830,6 +2830,7 @@ export type Database = {
         Returns: undefined
       }
       archive_product: { Args: { _product_id: string }; Returns: string }
+      bootstrap_first_super_admin: { Args: { _email: string }; Returns: Json }
       cancel_order: {
         Args: { _order_id: string; _reason: string }
         Returns: undefined

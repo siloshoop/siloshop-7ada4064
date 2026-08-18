@@ -11,7 +11,12 @@ import {
   Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle,
 } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
-import { RETURN_STATUS, RETURN_REASONS } from "@/lib/returnStatus";
+import { RETURN_STATUS, RETURN_REASONS, RETURN_NEXT_STATUSES } from "@/lib/returnStatus";
+import ReturnTimeline from "@/components/returns/ReturnTimeline";
+import ReturnHistory from "@/components/returns/ReturnHistory";
+import {
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+} from "@/components/ui/select";
 import { Loader2, Search, RotateCcw } from "lucide-react";
 
 interface ReturnRow {
@@ -23,10 +28,14 @@ interface ReturnRow {
   notes: string | null;
   status: string;
   review_note: string | null;
+  rejection_reason: string | null;
   created_at: string;
 }
 
-const FILTERS = ["all", "pending", "under_review", "approved", "rejected", "refunded"] as const;
+const FILTERS = [
+  "all", "pending", "under_review", "awaiting_return", "item_shipped",
+  "item_received", "inspection", "completed", "rejected",
+] as const;
 
 const reasonLabel = (v: string) =>
   RETURN_REASONS.find((r) => r.value === v)?.label ?? v;
@@ -40,12 +49,32 @@ const AdminReturns = () => {
   const [decision, setDecision] = useState<{ row: ReturnRow; type: "approve" | "reject" } | null>(null);
   const [note, setNote] = useState("");
   const [working, setWorking] = useState(false);
+  const [override, setOverride] = useState<Record<string, string>>({});
+
+  const applyOverride = async (row: ReturnRow) => {
+    const status = override[row.id];
+    if (!status) return;
+    setWorking(true);
+    const { error } = await supabase.rpc("update_return_status", {
+      _return_id: row.id,
+      _new_status: status,
+      _note: "تحديث من الإدارة",
+    });
+    setWorking(false);
+    if (error) {
+      toast({ title: "تعذر تحديث الحالة", description: error.message, variant: "destructive" });
+      return;
+    }
+    toast({ title: "تم تحديث حالة الإرجاع" });
+    setOverride((prev) => ({ ...prev, [row.id]: "" }));
+    void load();
+  };
 
   const load = async () => {
     setLoading(true);
     const { data } = await supabase
       .from("returns")
-      .select("id, order_id, customer_id, vendor_id, reason, notes, status, review_note, created_at")
+      .select("id, order_id, customer_id, vendor_id, reason, notes, status, review_note, rejection_reason, created_at")
       .order("created_at", { ascending: false })
       .limit(300);
     setRows((data as ReturnRow[]) ?? []);
@@ -133,7 +162,8 @@ const AdminReturns = () => {
             const meta = RETURN_STATUS[r.status];
             return (
               <Card key={r.id}>
-                <CardContent className="flex flex-wrap items-center gap-3 p-4">
+                <CardContent className="space-y-3 p-4">
+                <div className="flex flex-wrap items-center gap-3">
                   <RotateCcw className="h-5 w-5 shrink-0 text-muted-foreground" />
                   <div className="min-w-0 flex-1">
                     <p className="truncate font-semibold">{reasonLabel(r.reason)}</p>
@@ -161,6 +191,46 @@ const AdminReturns = () => {
                   >
                     رفض
                   </Button>
+                </div>
+
+                <ReturnTimeline status={r.status} />
+
+                <div className="flex flex-wrap items-center gap-2">
+                  <Select
+                    value={override[r.id] ?? ""}
+                    onValueChange={(v) => setOverride((prev) => ({ ...prev, [r.id]: v }))}
+                  >
+                    <SelectTrigger className="w-56">
+                      <SelectValue placeholder="تجاوز الحالة (الإدارة)" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {RETURN_NEXT_STATUSES.filter((x) => x !== r.status).map((x) => (
+                        <SelectItem key={x} value={x}>
+                          {RETURN_STATUS[x]?.label ?? x}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <Button
+                    size="sm"
+                    variant="secondary"
+                    disabled={!override[r.id] || working}
+                    onClick={() => void applyOverride(r)}
+                  >
+                    تطبيق
+                  </Button>
+                </div>
+
+                {r.rejection_reason && (
+                  <p className="rounded border border-destructive/30 bg-destructive/5 p-2 text-xs">
+                    سبب الرفض: {r.rejection_reason}
+                  </p>
+                )}
+
+                <div className="rounded-lg border bg-muted/20 p-3">
+                  <p className="mb-2 text-xs font-semibold">السجل الكامل</p>
+                  <ReturnHistory returnId={r.id} />
+                </div>
                 </CardContent>
               </Card>
             );

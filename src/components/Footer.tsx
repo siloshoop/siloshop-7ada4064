@@ -146,7 +146,7 @@ const Footer = () => {
 
         <div className="border-t mt-8 pt-8 text-center text-muted-foreground">
           <p className="text-base">
-            © 2024 <BrandLogo className="text-base" />. جميع الحقوق محفوظة.
+            © 2024 siloshop. جميع الحقوق محفوظة.
           </p>
         </div>
       </div>

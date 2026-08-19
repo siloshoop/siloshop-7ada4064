@@ -181,11 +181,13 @@ const Auth = () => {
     e.preventDefault();
     setSignUpErrors({});
 
+    const fullPhone = `${findCountry(phoneCountry).dial}${phoneLocal.replace(/\D/g, "").replace(/^0+/, "")}`;
+
     // Validate input
     const result = signUpSchema.safeParse({
       fullName: signUpFullName,
       email: signUpEmail,
-      phone: signUpPhone,
+      phone: fullPhone,
       password: signUpPassword,
       confirmPassword: signUpConfirmPassword,
       acceptTerms: acceptTerms as true,
@@ -387,16 +389,35 @@ const Auth = () => {
 
                 <div className="space-y-2">
                   <Label htmlFor="signup-phone">رقم الهاتف</Label>
-                  <Input
-                    id="signup-phone"
-                    type="tel"
-                    dir="ltr"
-                    placeholder="09XXXXXXXX"
-                    value={signUpPhone}
-                    onChange={(e) => setSignUpPhone(e.target.value)}
-                    disabled={isLoading}
-                    className={signUpErrors.phone ? "border-destructive" : ""}
-                  />
+                  <div className="flex gap-2" dir="ltr">
+                    <Select value={phoneCountry} onValueChange={setPhoneCountry} disabled={isLoading}>
+                      <SelectTrigger className="w-[130px] shrink-0" aria-label="مفتاح الدولة">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent className="max-h-72">
+                        {COUNTRY_CODES.map((c) => (
+                          <SelectItem key={c.code} value={c.code}>
+                            <span className="flex items-center gap-2">
+                              <span>{c.flag}</span>
+                              <span className="font-mono">{c.dial}</span>
+                              <span className="text-muted-foreground text-xs">{c.nameAr}</span>
+                            </span>
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <Input
+                      id="signup-phone"
+                      type="tel"
+                      inputMode="tel"
+                      dir="ltr"
+                      placeholder="9XXXXXXXX"
+                      value={phoneLocal}
+                      onChange={(e) => setPhoneLocal(e.target.value.replace(/[^\d\s]/g, ""))}
+                      disabled={isLoading}
+                      className={`flex-1 ${signUpErrors.phone ? "border-destructive" : ""}`}
+                    />
+                  </div>
                   {signUpErrors.phone && (
                     <p className="text-sm text-destructive">{signUpErrors.phone}</p>
                   )}

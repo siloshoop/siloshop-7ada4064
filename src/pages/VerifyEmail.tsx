@@ -6,7 +6,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, ShoppingBag, MailCheck } from "lucide-react";
+import { Loader2, MailCheck, CheckCircle2, AlertCircle, Send } from "lucide-react";
+import { checkEmail } from "@/lib/authGuard";
 
 const RESEND_COOLDOWN = 60;
 const EXPIRY_SECONDS = 600;
@@ -19,6 +20,8 @@ const VerifyEmail = () => {
   const [loading, setLoading] = useState(false);
   const [resendCooldown, setResendCooldown] = useState(0);
   const [expiresIn, setExpiresIn] = useState(EXPIRY_SECONDS);
+  const [sendState, setSendState] = useState<"idle" | "checking" | "sending" | "sent" | "error">("idle");
+  const [sendMessage, setSendMessage] = useState("");
   const autoResentRef = useRef(false);
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -37,14 +40,49 @@ const VerifyEmail = () => {
       return;
     }
     if (resendCooldown > 0) return;
+
+    // Verify the email belongs to an account (and is not already active) first
+    setSendState("checking");
+    setSendMessage("جاري التحقق من البريد الإلكتروني...");
+    const check = await checkEmail(email);
+    if (check.status === "not_registered") {
+      setSendState("error");
+      setSendMessage("لا يوجد حساب مرتبط بهذا البريد الإلكتروني، أنشئ حساباً جديداً");
+      if (!silent) toast({ title: "بريد غير مسجّل", description: check.messageAr, variant: "destructive" });
+      return;
+    }
+    if (check.status === "invalid" || check.status === "rate_limited") {
+      setSendState("error");
+      setSendMessage(check.messageAr);
+      if (!silent) toast({ title: "تعذّر الإرسال", description: check.messageAr, variant: "destructive" });
+      return;
+    }
+    if (check.status === "registered" && check.confirmed) {
+      setSendState("error");
+      setSendMessage("هذا الحساب مفعّل مسبقاً، يمكنك تسجيل الدخول مباشرة");
+      toast({ title: "الحساب مفعّل مسبقاً", description: "يمكنك تسجيل الدخول" });
+      navigate("/auth");
+      return;
+    }
+
     try {
+      setSendState("sending");
+      setSendMessage("جاري إرسال رمز التحقق إلى بريدك...");
       const { error } = await supabase.auth.resend({ type: "signup", email });
       if (error) throw error;
       setResendCooldown(RESEND_COOLDOWN);
       setExpiresIn(EXPIRY_SECONDS);
+      setSendState("sent");
+      setSendMessage(`تم إرسال رمز مكوّن من 6 أرقام إلى ${email}. تحقق من صندوق الوارد وأيضاً مجلد الرسائل غير المرغوب فيها.`);
       if (!silent) toast({ title: "تم إرسال رمز جديد", description: "تحقق من بريدك الإلكتروني" });
     } catch (err) {
       const msg = (err as Error)?.message || "";
+      setSendState("error");
+      setSendMessage(
+        /rate limit|too many/i.test(msg)
+          ? "عدد المحاولات كبير، انتظر دقيقة ثم أعد الإرسال"
+          : "تعذّر إرسال رمز التحقق، حاول مرة أخرى"
+      );
       if (/already/i.test(msg)) {
         toast({ title: "الحساب مفعّل مسبقاً", description: "يمكنك تسجيل الدخول" });
         navigate("/auth");
@@ -96,6 +134,7 @@ const VerifyEmail = () => {
 
   const mm = String(Math.floor(expiresIn / 60)).padStart(2, "0");
   const ss = String(expiresIn % 60).padStart(2, "0");
+  const busy = sendState === "checking" || sendState === "sending";
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/5 via-background to-accent/5 p-4">
@@ -141,6 +180,30 @@ const VerifyEmail = () => {
                   : "انتهت صلاحية الرمز، اضغط إعادة الإرسال"}
               </p>
             </div>
+
+            {sendMessage && (
+              <div
+                className={`flex items-start gap-2 rounded-lg border p-3 text-sm ${
+                  sendState === "error"
+                    ? "border-destructive/40 bg-destructive/10 text-destructive"
+                    : sendState === "sent"
+                      ? "border-primary/40 bg-primary/10 text-foreground"
+                      : "border-border bg-muted/50 text-muted-foreground"
+                }`}
+                role="status"
+                aria-live="polite"
+              >
+                {busy ? (
+                  <Loader2 className="h-4 w-4 mt-0.5 animate-spin shrink-0" />
+                ) : sendState === "error" ? (
+                  <AlertCircle className="h-4 w-4 mt-0.5 shrink-0" />
+                ) : (
+                  <CheckCircle2 className="h-4 w-4 mt-0.5 shrink-0 text-primary" />
+                )}
+                <span>{sendMessage}</span>
+              </div>
+            )}
+
             <Button type="submit" className="w-full" size="lg" disabled={loading || code.length !== 6}>
               {loading ? (
                 <><Loader2 className="ml-2 h-4 w-4 animate-spin" /> جاري التحقق...</>
@@ -150,12 +213,18 @@ const VerifyEmail = () => {
             </Button>
             <Button
               type="button"
-              variant="ghost"
+              variant="outline"
               className="w-full"
-              disabled={resendCooldown > 0}
+              disabled={resendCooldown > 0 || busy}
               onClick={() => triggerResend(false)}
             >
-              {resendCooldown > 0 ? `إعادة الإرسال بعد ${resendCooldown}s` : "إعادة إرسال الرمز"}
+              {busy ? (
+                <><Loader2 className="ml-2 h-4 w-4 animate-spin" /> جاري الإرسال...</>
+              ) : resendCooldown > 0 ? (
+                `إعادة الإرسال متاحة بعد ${resendCooldown} ثانية`
+              ) : (
+                <><Send className="ml-2 h-4 w-4" /> إعادة إرسال الرمز</>
+              )}
             </Button>
             <Button
               type="button"

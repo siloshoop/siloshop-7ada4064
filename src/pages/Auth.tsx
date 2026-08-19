@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -14,6 +14,14 @@ import { logActivity } from "@/hooks/useActivityLog";
 import { Eye, EyeOff, Loader2, ShoppingBag } from "lucide-react";
 import { z } from "zod";
 import { COUNTRY_CODES, DEFAULT_COUNTRY, findCountry } from "@/lib/countryCodes";
+import {
+  CAPTCHA_AFTER,
+  checkEmail,
+  clearAttempts,
+  getAttemptState,
+  makeChallenge,
+  recordFailedAttempt,
+} from "@/lib/authGuard";
 
 // Maps raw Supabase auth errors to clear Arabic messages
 const authErrorMessageAr = (raw: string): string => {
@@ -77,6 +85,24 @@ const Auth = () => {
   const [signInEmail, setSignInEmail] = useState("");
   const [signInPassword, setSignInPassword] = useState("");
   const [signInErrors, setSignInErrors] = useState<{ email?: string; password?: string }>({});
+  const [failedAttempts, setFailedAttempts] = useState(0);
+  const [lockSeconds, setLockSeconds] = useState(0);
+  const [challenge, setChallenge] = useState(() => makeChallenge());
+  const [captchaInput, setCaptchaInput] = useState("");
+  const needsCaptcha = failedAttempts >= CAPTCHA_AFTER;
+
+  // Restore throttle state and tick down any active lock
+  useEffect(() => {
+    const state = getAttemptState();
+    setFailedAttempts(state.count);
+    setLockSeconds(state.remainingLock);
+  }, []);
+
+  useEffect(() => {
+    if (lockSeconds <= 0) return;
+    const t = setInterval(() => setLockSeconds((s) => (s > 1 ? s - 1 : 0)), 1000);
+    return () => clearInterval(t);
+  }, [lockSeconds]);
 
   // Sign Up State
   const [signUpEmail, setSignUpEmail] = useState("");
@@ -91,6 +117,26 @@ const Auth = () => {
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
     setSignInErrors({});
+
+    if (lockSeconds > 0) {
+      toast({
+        title: "تم إيقاف المحاولات مؤقتاً",
+        description: `لأسباب أمنية، أعد المحاولة بعد ${lockSeconds} ثانية`,
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (needsCaptcha && captchaInput.trim() !== challenge.answer) {
+      setChallenge(makeChallenge());
+      setCaptchaInput("");
+      toast({
+        title: "تحقق أمني غير صحيح",
+        description: "أجب على العملية الحسابية بشكل صحيح للمتابعة",
+        variant: "destructive",
+      });
+      return;
+    }
 
     // Validate input
     const result = signInSchema.safeParse({
@@ -111,6 +157,25 @@ const Auth = () => {
     setIsLoading(true);
 
     try {
+      // Tell the user clearly whether this email has an account before trying to sign in
+      const check = await checkEmail(signInEmail);
+      if (check.status === "not_registered") {
+        setSignInErrors({ email: "لا يوجد حساب مرتبط بهذا البريد الإلكتروني" });
+        toast({
+          title: "بريد غير مسجّل",
+          description: "لا يوجد حساب بهذا البريد. أنشئ حساباً جديداً أو تحقق من كتابة البريد.",
+          variant: "destructive",
+        });
+        setIsLoading(false);
+        return;
+      }
+      if (check.status === "registered" && check.confirmed === false) {
+        toast({ title: "الحساب غير مفعّل", description: "سنرسل رمز تحقق جديد إلى بريدك" });
+        navigate(`/verify-email?email=${encodeURIComponent(signInEmail)}`);
+        setIsLoading(false);
+        return;
+      }
+
       const { user: signedInUser, error } = await signIn(signInEmail, signInPassword);
 
       if (error) throw error;
@@ -142,6 +207,9 @@ const Auth = () => {
         await logActivity(signedInUser.id, "login");
       }
 
+      clearAttempts();
+      setFailedAttempts(0);
+      setCaptchaInput("");
       toast({
         title: "تم تسجيل الدخول بنجاح",
         description: "مرحباً بعودتك!",
@@ -150,6 +218,21 @@ const Auth = () => {
       navigate("/");
     } catch (error) {
       const rawMsg = (error as Error)?.message || "";
+      const attempt = recordFailedAttempt();
+      setFailedAttempts(attempt.count);
+      setChallenge(makeChallenge());
+      setCaptchaInput("");
+      if (attempt.lockedSeconds) {
+        setFailedAttempts(0);
+        setLockSeconds(attempt.lockedSeconds);
+        toast({
+          title: "محاولات كثيرة جداً",
+          description: `تم إيقاف تسجيل الدخول مؤقتاً لمدة ${attempt.lockedSeconds} ثانية لحماية حسابك`,
+          variant: "destructive",
+        });
+        setIsLoading(false);
+        return;
+      }
       if (/email not confirmed/i.test(rawMsg)) {
         toast({
           title: "الحساب غير مفعّل",
@@ -332,12 +415,40 @@ const Auth = () => {
                   </Button>
                 </div>
 
-                <Button type="submit" className="w-full" size="lg" disabled={isLoading}>
+                {needsCaptcha && lockSeconds === 0 && (
+                  <div className="space-y-2 rounded-lg border border-border bg-muted/40 p-3">
+                    <Label htmlFor="captcha" className="text-sm">
+                      تحقق أمني: كم ناتج {challenge.question}؟
+                    </Label>
+                    <Input
+                      id="captcha"
+                      inputMode="numeric"
+                      dir="ltr"
+                      placeholder="الإجابة"
+                      value={captchaInput}
+                      onChange={(e) => setCaptchaInput(e.target.value.replace(/\D/g, ""))}
+                      disabled={isLoading}
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      طُلب هذا التحقق بعد {failedAttempts} محاولات فاشلة لحماية حسابك.
+                    </p>
+                  </div>
+                )}
+
+                {lockSeconds > 0 && (
+                  <div className="rounded-lg border border-destructive/40 bg-destructive/10 p-3 text-sm text-destructive" role="status">
+                    تم إيقاف محاولات تسجيل الدخول مؤقتاً. يمكنك المحاولة مجدداً بعد {lockSeconds} ثانية.
+                  </div>
+                )}
+
+                <Button type="submit" className="w-full" size="lg" disabled={isLoading || lockSeconds > 0}>
                   {isLoading ? (
                     <>
                       <Loader2 className="ml-2 h-4 w-4 animate-spin" />
                       جاري تسجيل الدخول...
                     </>
+                  ) : lockSeconds > 0 ? (
+                    `المحاولة متاحة بعد ${lockSeconds} ثانية`
                   ) : (
                     "تسجيل الدخول"
                   )}

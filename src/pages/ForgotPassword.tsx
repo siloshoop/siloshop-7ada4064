@@ -7,6 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { ArrowRight, Loader2, Mail, ShoppingBag } from "lucide-react";
+import { checkEmail } from "@/lib/authGuard";
 
 const ForgotPassword = () => {
   const [email, setEmail] = useState("");
@@ -24,6 +25,22 @@ const ForgotPassword = () => {
 
     setIsLoading(true);
     try {
+      const check = await checkEmail(email);
+      if (check.status === "not_registered") {
+        toast({
+          title: "بريد غير مسجّل",
+          description: "لا يوجد حساب مرتبط بهذا البريد الإلكتروني، تأكد من كتابته أو أنشئ حساباً جديداً",
+          variant: "destructive",
+        });
+        setIsLoading(false);
+        return;
+      }
+      if (check.status === "invalid" || check.status === "rate_limited") {
+        toast({ title: "تعذّر الإرسال", description: check.messageAr, variant: "destructive" });
+        setIsLoading(false);
+        return;
+      }
+
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
         redirectTo: `${window.location.origin}/reset-password`,
       });

@@ -70,8 +70,17 @@ const ResetPassword = () => {
       if (error) throw error;
       setIsSuccess(true);
       toast({ title: "تم بنجاح", description: "تم تغيير كلمة المرور بنجاح" });
+      navigate("/password-changed", { replace: true });
     } catch (error) {
-      toast({ title: "خطأ", description: error.message, variant: "destructive" });
+      const raw = (error as Error)?.message || "";
+      const description = /known to be weak|pwned/i.test(raw)
+        ? "كلمة المرور مكشوفة في تسريبات معروفة، اختر كلمة مرور أقوى"
+        : /same as the old|should be different/i.test(raw)
+          ? "كلمة المرور الجديدة مطابقة للقديمة، اختر كلمة مختلفة"
+          : /expired|invalid/i.test(raw)
+            ? "انتهت صلاحية رابط إعادة التعيين، اطلب رابطاً جديداً"
+            : raw || "تعذّر تغيير كلمة المرور";
+      toast({ title: "خطأ", description, variant: "destructive" });
     } finally {
       setIsLoading(false);
     }

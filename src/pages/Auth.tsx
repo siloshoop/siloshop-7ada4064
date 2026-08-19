@@ -6,12 +6,30 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { signIn, signUp } from "@/lib/auth";
 import { supabase } from "@/integrations/supabase/client";
 import { logActivity } from "@/hooks/useActivityLog";
 import { Eye, EyeOff, Loader2, ShoppingBag } from "lucide-react";
 import { z } from "zod";
+import { COUNTRY_CODES, DEFAULT_COUNTRY, findCountry } from "@/lib/countryCodes";
+
+// Maps raw Supabase auth errors to clear Arabic messages
+const authErrorMessageAr = (raw: string): string => {
+  if (/known to be weak|pwned|weak and easy to guess/i.test(raw))
+    return "كلمة المرور هذه مكشوفة في تسريبات معروفة وسهلة التخمين. اختر كلمة مرور أقوى وغير مستخدمة في مواقع أخرى.";
+  if (/already registered|already been registered|user already exists/i.test(raw))
+    return "هذا البريد الإلكتروني مسجّل مسبقاً. سجّل الدخول أو استخدم \"نسيت كلمة المرور؟\".";
+  if (/invalid login credentials/i.test(raw)) return "البريد الإلكتروني أو كلمة المرور غير صحيحة";
+  if (/email not confirmed/i.test(raw)) return "الحساب غير مفعّل، تحقق من بريدك الإلكتروني";
+  if (/password should be at least/i.test(raw)) return "كلمة المرور قصيرة جداً";
+  if (/rate limit|too many requests|over_email_send_rate_limit/i.test(raw))
+    return "عدد المحاولات كبير، يرجى الانتظار قليلاً ثم المحاولة مجدداً";
+  if (/invalid email/i.test(raw)) return "البريد الإلكتروني غير صالح";
+  if (/signups not allowed|signup is disabled/i.test(raw)) return "التسجيل معطّل حالياً";
+  return raw || "حدث خطأ، يرجى المحاولة مرة أخرى";
+};
 
 // Validation schemas
 const signInSchema = z.object({
@@ -39,7 +57,7 @@ const signUpSchema = z.object({
     .regex(/[0-9]/, "يجب أن تحتوي على رقم واحد على الأقل"),
   phone: z.string()
     .min(1, "رقم الهاتف مطلوب")
-    .regex(/^[0-9+\-\s]{6,20}$/, "رقم الهاتف غير صالح"),
+    .regex(/^\+[0-9]{7,17}$/, "رقم الهاتف غير صالح، تأكد من اختيار الدولة والرقم"),
   confirmPassword: z.string().min(1, "تأكيد كلمة المرور مطلوب"),
   acceptTerms: z.literal(true, {
     errorMap: () => ({ message: "يجب الموافقة على الشروط والأحكام" }),
@@ -64,7 +82,8 @@ const Auth = () => {
   const [signUpEmail, setSignUpEmail] = useState("");
   const [signUpPassword, setSignUpPassword] = useState("");
   const [signUpFullName, setSignUpFullName] = useState("");
-  const [signUpPhone, setSignUpPhone] = useState("");
+  const [phoneCountry, setPhoneCountry] = useState(DEFAULT_COUNTRY);
+  const [phoneLocal, setPhoneLocal] = useState("");
   const [signUpConfirmPassword, setSignUpConfirmPassword] = useState("");
   const [acceptTerms, setAcceptTerms] = useState(false);
   const [signUpErrors, setSignUpErrors] = useState<{ fullName?: string; email?: string; phone?: string; password?: string; confirmPassword?: string; acceptTerms?: string }>({});
@@ -140,17 +159,9 @@ const Auth = () => {
         setIsLoading(false);
         return;
       }
-      let description = "حدث خطأ، يرجى المحاولة مرة أخرى";
-      if (/invalid login credentials/i.test(rawMsg)) {
-        description = "البريد الإلكتروني أو كلمة المرور غير صحيحة";
-      } else if (/too many requests|rate limit/i.test(rawMsg)) {
-        description = "محاولات كثيرة، يرجى الانتظار قليلاً ثم المحاولة مجدداً";
-      } else if (rawMsg) {
-        description = rawMsg;
-      }
       toast({
         title: "خطأ في تسجيل الدخول",
-        description,
+        description: authErrorMessageAr(rawMsg),
         variant: "destructive",
       });
     } finally {
@@ -162,11 +173,13 @@ const Auth = () => {
     e.preventDefault();
     setSignUpErrors({});
 
+    const fullPhone = `${findCountry(phoneCountry).dial}${phoneLocal.replace(/\D/g, "").replace(/^0+/, "")}`;
+
     // Validate input
     const result = signUpSchema.safeParse({
       fullName: signUpFullName,
       email: signUpEmail,
-      phone: signUpPhone,
+      phone: fullPhone,
       password: signUpPassword,
       confirmPassword: signUpConfirmPassword,
       acceptTerms: acceptTerms as true,
@@ -189,9 +202,20 @@ const Auth = () => {
     setIsLoading(true);
 
     try {
-      const { user: newUser, error } = await signUp(signUpEmail, signUpPassword, signUpFullName, signUpPhone);
+      const { user: newUser, error } = await signUp(signUpEmail, signUpPassword, signUpFullName, fullPhone);
 
       if (error) throw error;
+
+      // Supabase returns an obfuscated user with no identities when the email already exists
+      if (newUser && Array.isArray(newUser.identities) && newUser.identities.length === 0) {
+        toast({
+          title: "البريد مسجّل مسبقاً",
+          description: "هذا البريد الإلكتروني له حساب بالفعل. سجّل الدخول أو أعد تعيين كلمة المرور.",
+          variant: "destructive",
+        });
+        setIsLoading(false);
+        return;
+      }
 
       // Notify admins about new user registration (best-effort)
       if (newUser) {
@@ -215,9 +239,13 @@ const Auth = () => {
 
       navigate(`/verify-email?email=${encodeURIComponent(signUpEmail)}`);
     } catch (error) {
+      const rawMsg = (error as Error)?.message || "";
+      if (/already registered|already been registered|user already exists/i.test(rawMsg)) {
+        setSignUpErrors((prev) => ({ ...prev, email: "هذا البريد الإلكتروني مسجّل مسبقاً" }));
+      }
       toast({
         title: "خطأ في التسجيل",
-        description: error.message,
+        description: authErrorMessageAr(rawMsg),
         variant: "destructive",
       });
     } finally {
@@ -353,16 +381,35 @@ const Auth = () => {
 
                 <div className="space-y-2">
                   <Label htmlFor="signup-phone">رقم الهاتف</Label>
-                  <Input
-                    id="signup-phone"
-                    type="tel"
-                    dir="ltr"
-                    placeholder="09XXXXXXXX"
-                    value={signUpPhone}
-                    onChange={(e) => setSignUpPhone(e.target.value)}
-                    disabled={isLoading}
-                    className={signUpErrors.phone ? "border-destructive" : ""}
-                  />
+                  <div className="flex gap-2" dir="ltr">
+                    <Select value={phoneCountry} onValueChange={setPhoneCountry} disabled={isLoading}>
+                      <SelectTrigger className="w-[130px] shrink-0" aria-label="مفتاح الدولة">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent className="max-h-72">
+                        {COUNTRY_CODES.map((c) => (
+                          <SelectItem key={c.code} value={c.code}>
+                            <span className="flex items-center gap-2">
+                              <span>{c.flag}</span>
+                              <span className="font-mono">{c.dial}</span>
+                              <span className="text-muted-foreground text-xs">{c.nameAr}</span>
+                            </span>
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <Input
+                      id="signup-phone"
+                      type="tel"
+                      inputMode="tel"
+                      dir="ltr"
+                      placeholder="9XXXXXXXX"
+                      value={phoneLocal}
+                      onChange={(e) => setPhoneLocal(e.target.value.replace(/[^\d\s]/g, ""))}
+                      disabled={isLoading}
+                      className={`flex-1 ${signUpErrors.phone ? "border-destructive" : ""}`}
+                    />
+                  </div>
                   {signUpErrors.phone && (
                     <p className="text-sm text-destructive">{signUpErrors.phone}</p>
                   )}

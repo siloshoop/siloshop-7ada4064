@@ -415,12 +415,40 @@ const Auth = () => {
                   </Button>
                 </div>
 
-                <Button type="submit" className="w-full" size="lg" disabled={isLoading}>
+                {needsCaptcha && lockSeconds === 0 && (
+                  <div className="space-y-2 rounded-lg border border-border bg-muted/40 p-3">
+                    <Label htmlFor="captcha" className="text-sm">
+                      تحقق أمني: كم ناتج {challenge.question}؟
+                    </Label>
+                    <Input
+                      id="captcha"
+                      inputMode="numeric"
+                      dir="ltr"
+                      placeholder="الإجابة"
+                      value={captchaInput}
+                      onChange={(e) => setCaptchaInput(e.target.value.replace(/\D/g, ""))}
+                      disabled={isLoading}
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      طُلب هذا التحقق بعد {failedAttempts} محاولات فاشلة لحماية حسابك.
+                    </p>
+                  </div>
+                )}
+
+                {lockSeconds > 0 && (
+                  <div className="rounded-lg border border-destructive/40 bg-destructive/10 p-3 text-sm text-destructive" role="status">
+                    تم إيقاف محاولات تسجيل الدخول مؤقتاً. يمكنك المحاولة مجدداً بعد {lockSeconds} ثانية.
+                  </div>
+                )}
+
+                <Button type="submit" className="w-full" size="lg" disabled={isLoading || lockSeconds > 0}>
                   {isLoading ? (
                     <>
                       <Loader2 className="ml-2 h-4 w-4 animate-spin" />
                       جاري تسجيل الدخول...
                     </>
+                  ) : lockSeconds > 0 ? (
+                    `المحاولة متاحة بعد ${lockSeconds} ثانية`
                   ) : (
                     "تسجيل الدخول"
                   )}

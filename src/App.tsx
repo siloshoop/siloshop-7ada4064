@@ -57,6 +57,7 @@ const ShowroomManagement = lazy(() => import("./pages/admin/ShowroomManagement")
 const ShowroomAuditLog = lazy(() => import("./pages/admin/ShowroomAuditLog"));
 const ForgotPassword = lazy(() => import("./pages/ForgotPassword"));
 const ResetPassword = lazy(() => import("./pages/ResetPassword"));
+const PasswordChanged = lazy(() => import("./pages/PasswordChanged"));
 const Addresses = lazy(() => import("./pages/Addresses"));
 const OrderDetails = lazy(() => import("./pages/OrderDetails"));
 const Pricing = lazy(() => import("./pages/Pricing"));
@@ -227,6 +228,7 @@ const App = () => (
             <Route path="/followed-stores" element={<FollowedStores />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/reset-password" element={<ResetPassword />} />
+            <Route path="/password-changed" element={<PasswordChanged />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

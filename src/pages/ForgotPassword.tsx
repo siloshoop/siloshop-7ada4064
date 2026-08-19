@@ -31,7 +31,13 @@ const ForgotPassword = () => {
       setSent(true);
       toast({ title: "تم الإرسال", description: "تحقق من بريدك الإلكتروني لإعادة تعيين كلمة المرور" });
     } catch (error) {
-      toast({ title: "خطأ", description: error.message, variant: "destructive" });
+      const raw = (error as Error)?.message || "";
+      const description = /rate limit|too many|over_email_send/i.test(raw)
+        ? "عدد المحاولات كبير، انتظر دقيقة ثم أعد المحاولة"
+        : /invalid email/i.test(raw)
+          ? "البريد الإلكتروني غير صالح"
+          : raw || "تعذّر إرسال الرابط، حاول مرة أخرى";
+      toast({ title: "خطأ", description, variant: "destructive" });
     } finally {
       setIsLoading(false);
     }

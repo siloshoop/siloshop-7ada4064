@@ -159,17 +159,9 @@ const Auth = () => {
         setIsLoading(false);
         return;
       }
-      let description = "حدث خطأ، يرجى المحاولة مرة أخرى";
-      if (/invalid login credentials/i.test(rawMsg)) {
-        description = "البريد الإلكتروني أو كلمة المرور غير صحيحة";
-      } else if (/too many requests|rate limit/i.test(rawMsg)) {
-        description = "محاولات كثيرة، يرجى الانتظار قليلاً ثم المحاولة مجدداً";
-      } else if (rawMsg) {
-        description = rawMsg;
-      }
       toast({
         title: "خطأ في تسجيل الدخول",
-        description,
+        description: authErrorMessageAr(rawMsg),
         variant: "destructive",
       });
     } finally {

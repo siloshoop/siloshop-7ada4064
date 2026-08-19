@@ -6,12 +6,30 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { signIn, signUp } from "@/lib/auth";
 import { supabase } from "@/integrations/supabase/client";
 import { logActivity } from "@/hooks/useActivityLog";
 import { Eye, EyeOff, Loader2, ShoppingBag } from "lucide-react";
 import { z } from "zod";
+import { COUNTRY_CODES, DEFAULT_COUNTRY, findCountry } from "@/lib/countryCodes";
+
+// Maps raw Supabase auth errors to clear Arabic messages
+const authErrorMessageAr = (raw: string): string => {
+  if (/known to be weak|pwned|weak and easy to guess/i.test(raw))
+    return "كلمة المرور هذه مكشوفة في تسريبات معروفة وسهلة التخمين. اختر كلمة مرور أقوى وغير مستخدمة في مواقع أخرى.";
+  if (/already registered|already been registered|user already exists/i.test(raw))
+    return "هذا البريد الإلكتروني مسجّل مسبقاً. سجّل الدخول أو استخدم \"نسيت كلمة المرور؟\".";
+  if (/invalid login credentials/i.test(raw)) return "البريد الإلكتروني أو كلمة المرور غير صحيحة";
+  if (/email not confirmed/i.test(raw)) return "الحساب غير مفعّل، تحقق من بريدك الإلكتروني";
+  if (/password should be at least/i.test(raw)) return "كلمة المرور قصيرة جداً";
+  if (/rate limit|too many requests|over_email_send_rate_limit/i.test(raw))
+    return "عدد المحاولات كبير، يرجى الانتظار قليلاً ثم المحاولة مجدداً";
+  if (/invalid email/i.test(raw)) return "البريد الإلكتروني غير صالح";
+  if (/signups not allowed|signup is disabled/i.test(raw)) return "التسجيل معطّل حالياً";
+  return raw || "حدث خطأ، يرجى المحاولة مرة أخرى";
+};
 
 // Validation schemas
 const signInSchema = z.object({
@@ -39,7 +57,7 @@ const signUpSchema = z.object({
     .regex(/[0-9]/, "يجب أن تحتوي على رقم واحد على الأقل"),
   phone: z.string()
     .min(1, "رقم الهاتف مطلوب")
-    .regex(/^[0-9+\-\s]{6,20}$/, "رقم الهاتف غير صالح"),
+    .regex(/^\+[0-9]{7,17}$/, "رقم الهاتف غير صالح، تأكد من اختيار الدولة والرقم"),
   confirmPassword: z.string().min(1, "تأكيد كلمة المرور مطلوب"),
   acceptTerms: z.literal(true, {
     errorMap: () => ({ message: "يجب الموافقة على الشروط والأحكام" }),

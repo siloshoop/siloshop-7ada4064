@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -14,6 +14,14 @@ import { logActivity } from "@/hooks/useActivityLog";
 import { Eye, EyeOff, Loader2, ShoppingBag } from "lucide-react";
 import { z } from "zod";
 import { COUNTRY_CODES, DEFAULT_COUNTRY, findCountry } from "@/lib/countryCodes";
+import {
+  CAPTCHA_AFTER,
+  checkEmail,
+  clearAttempts,
+  getAttemptState,
+  makeChallenge,
+  recordFailedAttempt,
+} from "@/lib/authGuard";
 
 // Maps raw Supabase auth errors to clear Arabic messages
 const authErrorMessageAr = (raw: string): string => {

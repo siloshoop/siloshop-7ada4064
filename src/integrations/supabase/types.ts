@@ -149,6 +149,24 @@ export type Database = {
         }
         Relationships: []
       }
+      auth_email_checks: {
+        Row: {
+          created_at: string
+          email_hash: string
+          id: string
+        }
+        Insert: {
+          created_at?: string
+          email_hash: string
+          id?: string
+        }
+        Update: {
+          created_at?: string
+          email_hash?: string
+          id?: string
+        }
+        Relationships: []
+      }
       brand_followers: {
         Row: {
           brand_id: string
@@ -2854,6 +2872,7 @@ export type Database = {
         Args: { p_email_hash: string }
         Returns: boolean
       }
+      check_email_registered: { Args: { p_email: string }; Returns: Json }
       cleanup_old_rate_limits: { Args: never; Returns: undefined }
       create_order: {
         Args: {

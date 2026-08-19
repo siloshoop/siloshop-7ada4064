@@ -82,7 +82,8 @@ const Auth = () => {
   const [signUpEmail, setSignUpEmail] = useState("");
   const [signUpPassword, setSignUpPassword] = useState("");
   const [signUpFullName, setSignUpFullName] = useState("");
-  const [signUpPhone, setSignUpPhone] = useState("");
+  const [phoneCountry, setPhoneCountry] = useState(DEFAULT_COUNTRY);
+  const [phoneLocal, setPhoneLocal] = useState("");
   const [signUpConfirmPassword, setSignUpConfirmPassword] = useState("");
   const [acceptTerms, setAcceptTerms] = useState(false);
   const [signUpErrors, setSignUpErrors] = useState<{ fullName?: string; email?: string; phone?: string; password?: string; confirmPassword?: string; acceptTerms?: string }>({});
@@ -207,9 +208,20 @@ const Auth = () => {
     setIsLoading(true);
 
     try {
-      const { user: newUser, error } = await signUp(signUpEmail, signUpPassword, signUpFullName, signUpPhone);
+      const { user: newUser, error } = await signUp(signUpEmail, signUpPassword, signUpFullName, fullPhone);
 
       if (error) throw error;
+
+      // Supabase returns an obfuscated user with no identities when the email already exists
+      if (newUser && Array.isArray(newUser.identities) && newUser.identities.length === 0) {
+        toast({
+          title: "البريد مسجّل مسبقاً",
+          description: "هذا البريد الإلكتروني له حساب بالفعل. سجّل الدخول أو أعد تعيين كلمة المرور.",
+          variant: "destructive",
+        });
+        setIsLoading(false);
+        return;
+      }
 
       // Notify admins about new user registration (best-effort)
       if (newUser) {
@@ -233,9 +245,13 @@ const Auth = () => {
 
       navigate(`/verify-email?email=${encodeURIComponent(signUpEmail)}`);
     } catch (error) {
+      const rawMsg = (error as Error)?.message || "";
+      if (/already registered|already been registered|user already exists/i.test(rawMsg)) {
+        setSignUpErrors((prev) => ({ ...prev, email: "هذا البريد الإلكتروني مسجّل مسبقاً" }));
+      }
       toast({
         title: "خطأ في التسجيل",
-        description: error.message,
+        description: authErrorMessageAr(rawMsg),
         variant: "destructive",
       });
     } finally {

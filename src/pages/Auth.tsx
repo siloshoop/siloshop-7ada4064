@@ -85,6 +85,24 @@ const Auth = () => {
   const [signInEmail, setSignInEmail] = useState("");
   const [signInPassword, setSignInPassword] = useState("");
   const [signInErrors, setSignInErrors] = useState<{ email?: string; password?: string }>({});
+  const [failedAttempts, setFailedAttempts] = useState(0);
+  const [lockSeconds, setLockSeconds] = useState(0);
+  const [challenge, setChallenge] = useState(() => makeChallenge());
+  const [captchaInput, setCaptchaInput] = useState("");
+  const needsCaptcha = failedAttempts >= CAPTCHA_AFTER;
+
+  // Restore throttle state and tick down any active lock
+  useEffect(() => {
+    const state = getAttemptState();
+    setFailedAttempts(state.count);
+    setLockSeconds(state.remainingLock);
+  }, []);
+
+  useEffect(() => {
+    if (lockSeconds <= 0) return;
+    const t = setInterval(() => setLockSeconds((s) => (s > 1 ? s - 1 : 0)), 1000);
+    return () => clearInterval(t);
+  }, [lockSeconds]);
 
   // Sign Up State
   const [signUpEmail, setSignUpEmail] = useState("");
@@ -99,6 +117,26 @@ const Auth = () => {
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
     setSignInErrors({});
+
+    if (lockSeconds > 0) {
+      toast({
+        title: "تم إيقاف المحاولات مؤقتاً",
+        description: `لأسباب أمنية، أعد المحاولة بعد ${lockSeconds} ثانية`,
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (needsCaptcha && captchaInput.trim() !== challenge.answer) {
+      setChallenge(makeChallenge());
+      setCaptchaInput("");
+      toast({
+        title: "تحقق أمني غير صحيح",
+        description: "أجب على العملية الحسابية بشكل صحيح للمتابعة",
+        variant: "destructive",
+      });
+      return;
+    }
 
     // Validate input
     const result = signInSchema.safeParse({
@@ -119,6 +157,25 @@ const Auth = () => {
     setIsLoading(true);
 
     try {
+      // Tell the user clearly whether this email has an account before trying to sign in
+      const check = await checkEmail(signInEmail);
+      if (check.status === "not_registered") {
+        setSignInErrors({ email: "لا يوجد حساب مرتبط بهذا البريد الإلكتروني" });
+        toast({
+          title: "بريد غير مسجّل",
+          description: "لا يوجد حساب بهذا البريد. أنشئ حساباً جديداً أو تحقق من كتابة البريد.",
+          variant: "destructive",
+        });
+        setIsLoading(false);
+        return;
+      }
+      if (check.status === "registered" && check.confirmed === false) {
+        toast({ title: "الحساب غير مفعّل", description: "سنرسل رمز تحقق جديد إلى بريدك" });
+        navigate(`/verify-email?email=${encodeURIComponent(signInEmail)}`);
+        setIsLoading(false);
+        return;
+      }
+
       const { user: signedInUser, error } = await signIn(signInEmail, signInPassword);
 
       if (error) throw error;
@@ -150,6 +207,9 @@ const Auth = () => {
         await logActivity(signedInUser.id, "login");
       }
 
+      clearAttempts();
+      setFailedAttempts(0);
+      setCaptchaInput("");
       toast({
         title: "تم تسجيل الدخول بنجاح",
         description: "مرحباً بعودتك!",
@@ -158,6 +218,21 @@ const Auth = () => {
       navigate("/");
     } catch (error) {
       const rawMsg = (error as Error)?.message || "";
+      const attempt = recordFailedAttempt();
+      setFailedAttempts(attempt.count);
+      setChallenge(makeChallenge());
+      setCaptchaInput("");
+      if (attempt.lockedSeconds) {
+        setFailedAttempts(0);
+        setLockSeconds(attempt.lockedSeconds);
+        toast({
+          title: "محاولات كثيرة جداً",
+          description: `تم إيقاف تسجيل الدخول مؤقتاً لمدة ${attempt.lockedSeconds} ثانية لحماية حسابك`,
+          variant: "destructive",
+        });
+        setIsLoading(false);
+        return;
+      }
       if (/email not confirmed/i.test(rawMsg)) {
         toast({
           title: "الحساب غير مفعّل",

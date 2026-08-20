@@ -333,6 +333,21 @@ const VendorOrders = () => {
                                   <Truck className="h-4 w-4" />
                                   معلومات الشحن
                                 </Button>
+                                <PrintOrderDocs
+                                  order={{
+                                    id: order.id,
+                                    created_at: order.created_at,
+                                    status: order.status,
+                                    customer_name: order.customer_name,
+                                    city: order.city,
+                                    items: (orderItems[order.id] ?? []).map((it) => ({
+                                      name: it.products?.name ?? "منتج",
+                                      quantity: it.quantity,
+                                      price: it.price,
+                                    })),
+                                  }}
+                                />
+
                                 {updatingStatus === order.id && (
                                   <Loader2 className="h-4 w-4 animate-spin" />
                                 )}

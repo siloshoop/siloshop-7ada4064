@@ -55,9 +55,9 @@ const AdminReturns = () => {
     const status = override[row.id];
     if (!status) return;
     setWorking(true);
-    const { error } = await supabase.rpc("update_return_status", {
+    const { error } = await supabase.rpc("return_transition", {
       _return_id: row.id,
-      _new_status: status,
+      _to_status: status,
       _note: "تحديث من الإدارة",
     });
     setWorking(false);

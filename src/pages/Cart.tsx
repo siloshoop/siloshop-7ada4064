@@ -38,6 +38,18 @@ interface CartItemWithDiscount extends CartItem {
   savings: number;
 }
 
+interface SavedItem {
+  id: string;
+  quantity: number;
+  product: {
+    id: string;
+    name: string;
+    price: number;
+    image_url: string;
+    stock_quantity: number;
+  };
+}
+
 const Cart = () => {
   const { user, loading: authLoading } = useAuth();
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
@@ -48,6 +60,10 @@ const Cart = () => {
   const [couponDiscount, setCouponDiscount] = useState(0);
   const [validatingCoupon, setValidatingCoupon] = useState(false);
   const [defaultAddress, setDefaultAddress] = useState<any>(null);
+  const [savedItems, setSavedItems] = useState<SavedItem[]>([]);
+  const [savedLoading, setSavedLoading] = useState(true);
+  const [processingSavedId, setProcessingSavedId] = useState<string | null>(null);
+  const [savingItemId, setSavingItemId] = useState<string | null>(null);
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -107,6 +123,39 @@ const Cart = () => {
 
     fetchCart();
   }, [user, toast]);
+
+  const fetchSavedItems = async () => {
+    if (!user) {
+      setSavedLoading(false);
+      return;
+    }
+    try {
+      const { data, error } = await supabase
+        .from("saved_for_later")
+        .select(`
+          id,
+          quantity,
+          product:products(id, name, price, image_url, stock_quantity)
+        `)
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: false });
+
+      if (error) throw error;
+      setSavedItems((data as any) || []);
+    } catch (error) {
+      toast({
+        title: "خطأ",
+        description: "فشل في جلب المنتجات المحفوظة",
+        variant: "destructive",
+      });
+    } finally {
+      setSavedLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchSavedItems();
+  }, [user]);
 
   useEffect(() => {
     const loadDefault = async () => {
@@ -211,6 +260,148 @@ const Cart = () => {
         description: "فشل في حذف المنتج",
         variant: "destructive",
       });
+    }
+  };
+
+  const saveForLater = async (item: CartItem) => {
+    if (!user) return;
+    setSavingItemId(item.id);
+    try {
+      const { data: existing, error: fetchError } = await supabase
+        .from("saved_for_later")
+        .select("id, quantity")
+        .eq("user_id", user.id)
+        .eq("product_id", item.product.id)
+        .maybeSingle();
+
+      if (fetchError) throw fetchError;
+
+      if (existing) {
+        const { error: updateError } = await supabase
+          .from("saved_for_later")
+          .update({ quantity: existing.quantity + item.quantity })
+          .eq("id", existing.id);
+        if (updateError) throw updateError;
+      } else {
+        const { error: insertError } = await supabase.from("saved_for_later").insert({
+          user_id: user.id,
+          product_id: item.product.id,
+          quantity: item.quantity,
+        });
+        if (insertError) throw insertError;
+      }
+
+      const { error: deleteError } = await supabase
+        .from("cart_items")
+        .delete()
+        .eq("id", item.id);
+      if (deleteError) throw deleteError;
+
+      setCartItems(items => items.filter(i => i.id !== item.id));
+      window.dispatchEvent(new Event("cart-updated"));
+      await fetchSavedItems();
+
+      toast({
+        title: "تم الحفظ",
+        description: "تم نقل المنتج إلى المحفوظات لوقت لاحق",
+      });
+    } catch (error) {
+      toast({
+        title: "خطأ",
+        description: "فشل في حفظ المنتج لوقت لاحق",
+        variant: "destructive",
+      });
+    } finally {
+      setSavingItemId(null);
+    }
+  };
+
+  const moveToCart = async (item: SavedItem) => {
+    if (!user) return;
+    setProcessingSavedId(item.id);
+    try {
+      const { data: existingCartItem, error: fetchError } = await supabase
+        .from("cart_items")
+        .select("id, quantity")
+        .eq("user_id", user.id)
+        .eq("product_id", item.product.id)
+        .maybeSingle();
+
+      if (fetchError) throw fetchError;
+
+      if (existingCartItem) {
+        const { error: updateError } = await supabase
+          .from("cart_items")
+          .update({ quantity: existingCartItem.quantity + item.quantity })
+          .eq("id", existingCartItem.id);
+        if (updateError) throw updateError;
+      } else {
+        const { error: insertError } = await supabase.from("cart_items").insert({
+          user_id: user.id,
+          product_id: item.product.id,
+          quantity: item.quantity,
+        });
+        if (insertError) throw insertError;
+      }
+
+      const { error: deleteError } = await supabase
+        .from("saved_for_later")
+        .delete()
+        .eq("id", item.id);
+      if (deleteError) throw deleteError;
+
+      setSavedItems(items => items.filter(i => i.id !== item.id));
+
+      const { data, error } = await supabase
+        .from("cart_items")
+        .select(`
+          id,
+          quantity,
+          product:products(id, name, price, image_url, stock_quantity, category_id, shipping_cost)
+        `)
+        .eq("user_id", user.id);
+      if (error) throw error;
+      setCartItems((data as any) || []);
+      window.dispatchEvent(new Event("cart-updated"));
+
+      toast({
+        title: "تم النقل",
+        description: "تم نقل المنتج إلى عربة التسوق",
+      });
+    } catch (error) {
+      toast({
+        title: "خطأ",
+        description: "فشل في نقل المنتج إلى عربة التسوق",
+        variant: "destructive",
+      });
+    } finally {
+      setProcessingSavedId(null);
+    }
+  };
+
+  const removeSaved = async (itemId: string) => {
+    setProcessingSavedId(itemId);
+    try {
+      const { error } = await supabase
+        .from("saved_for_later")
+        .delete()
+        .eq("id", itemId);
+      if (error) throw error;
+
+      setSavedItems(items => items.filter(i => i.id !== itemId));
+
+      toast({
+        title: "تم الحذف",
+        description: "تم حذف المنتج من المحفوظات",
+      });
+    } catch (error) {
+      toast({
+        title: "خطأ",
+        description: "فشل في حذف المنتج المحفوظ",
+        variant: "destructive",
+      });
+    } finally {
+      setProcessingSavedId(null);
     }
   };
 

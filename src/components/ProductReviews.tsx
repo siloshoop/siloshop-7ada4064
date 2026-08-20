@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Star, MessageCircle, Send, Camera, Image as ImageIcon, X, Loader2 } from "lucide-react";
+import { Star, MessageCircle, Send, Camera, Image as ImageIcon, X, Loader2, ThumbsUp, BadgeCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -11,6 +11,7 @@ import { useToast } from "@/hooks/use-toast";
 import { formatDistanceToNow } from "date-fns";
 import { ar } from "date-fns/locale";
 import ReviewsChart from "@/components/ReviewsChart";
+import { Badge } from "@/components/ui/badge";
 
 interface ReviewReply {
   id: string;

@@ -104,7 +104,100 @@ export const ProductReviews = ({ productId, vendorId }: ProductReviewsProps) => 
           setExistingReview(null);
           setExistingImageUrl(null);
         }
+
+        // Determine if the current user has an actual verified purchase of this product
+        const { data: purchaseData } = await supabase
+          .from("order_items")
+          .select("id, orders!inner(customer_id)")
+          .eq("product_id", productId)
+          .eq("orders.customer_id", user.id)
+          .limit(1);
+        setUserVerifiedPurchase(!!purchaseData && purchaseData.length > 0);
+      } else {
+        setUserVerifiedPurchase(false);
       }
+
+      // Fetch helpful votes for all loaded reviews
+      const reviewIds = data.map((r: any) => r.id);
+      if (reviewIds.length > 0) {
+        const { data: votes } = await supabase
+          .from("review_helpful_votes")
+          .select("review_id, user_id")
+          .in("review_id", reviewIds);
+
+        const counts: Record<string, number> = {};
+        const mine = new Set<string>();
+        (votes || []).forEach((v: any) => {
+          counts[v.review_id] = (counts[v.review_id] || 0) + 1;
+          if (user && v.user_id === user.id) mine.add(v.review_id);
+        });
+        setHelpfulCounts(counts);
+        setMyVotes(mine);
+      } else {
+        setHelpfulCounts({});
+        setMyVotes(new Set());
+      }
+    }
+  };
+
+  const toggleHelpful = async (reviewId: string) => {
+    if (!user) {
+      toast({
+        title: "تسجيل الدخول مطلوب",
+        description: "يجب تسجيل الدخول للتصويت على أن هذا التقييم مفيد",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const alreadyVoted = myVotes.has(reviewId);
+    setVotingId(reviewId);
+
+    // Optimistic update
+    setMyVotes((prev) => {
+      const next = new Set(prev);
+      if (alreadyVoted) next.delete(reviewId);
+      else next.add(reviewId);
+      return next;
+    });
+    setHelpfulCounts((prev) => ({
+      ...prev,
+      [reviewId]: Math.max(0, (prev[reviewId] || 0) + (alreadyVoted ? -1 : 1)),
+    }));
+
+    try {
+      if (alreadyVoted) {
+        const { error } = await supabase
+          .from("review_helpful_votes")
+          .delete()
+          .eq("review_id", reviewId)
+          .eq("user_id", user.id);
+        if (error) throw error;
+      } else {
+        const { error } = await supabase
+          .from("review_helpful_votes")
+          .insert({ review_id: reviewId, user_id: user.id });
+        if (error) throw error;
+      }
+    } catch (error: any) {
+      // Rollback
+      setMyVotes((prev) => {
+        const next = new Set(prev);
+        if (alreadyVoted) next.add(reviewId);
+        else next.delete(reviewId);
+        return next;
+      });
+      setHelpfulCounts((prev) => ({
+        ...prev,
+        [reviewId]: Math.max(0, (prev[reviewId] || 0) + (alreadyVoted ? 1 : -1)),
+      }));
+      toast({
+        title: "خطأ",
+        description: error.message || "تعذر تسجيل تصويتك، حاول مرة أخرى",
+        variant: "destructive",
+      });
+    } finally {
+      setVotingId(null);
     }
   };
 

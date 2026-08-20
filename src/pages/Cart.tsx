@@ -10,7 +10,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Minus, Plus, Trash2, ShoppingCart, Loader2, Percent, Tag, Truck, Receipt, X, CheckCircle2, MapPin, Pencil } from "lucide-react";
+import { Minus, Plus, Trash2, ShoppingCart, Loader2, Percent, Tag, Truck, Receipt, X, CheckCircle2, MapPin, Pencil, Bookmark } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 interface QuantityDiscount {
@@ -796,6 +796,67 @@ const Cart = () => {
                   </p>
                 </CardContent>
               </Card>
+            </div>
+          </div>
+        )}
+
+        {/* Saved for later */}
+        {savedItems.length > 0 && (
+          <div className="mt-10 space-y-4">
+            <h2 className="text-2xl font-bold flex items-center gap-2">
+              <Bookmark className="h-5 w-5 text-primary" />
+              محفوظ لوقت لاحق
+            </h2>
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {savedItems.map((item) => (
+                <Card key={item.id}>
+                  <CardContent className="p-4">
+                    <div className="flex gap-3">
+                      <img
+                        src={item.product.image_url}
+                        alt={item.product.name}
+                        className="w-20 h-20 object-cover rounded-lg shrink-0"
+                      />
+                      <div className="flex-1 min-w-0 space-y-1">
+                        <h3 className="font-bold truncate">{item.product.name}</h3>
+                        <p className="text-sm text-muted-foreground">
+                          {item.product.price} ل.س للقطعة
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          الكمية: {item.quantity}
+                        </p>
+                        {item.product.stock_quantity <= 0 && (
+                          <Badge variant="destructive">غير متوفر</Badge>
+                        )}
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2 mt-3">
+                      <Button
+                        size="sm"
+                        className="flex-1"
+                        onClick={() => moveToCart(item)}
+                        disabled={processingSavedId === item.id || item.product.stock_quantity <= 0}
+                      >
+                        {processingSavedId === item.id ? (
+                          <Loader2 className="h-4 w-4 animate-spin ml-1" />
+                        ) : (
+                          <ShoppingCart className="h-4 w-4 ml-1" />
+                        )}
+                        نقل إلى السلة
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => removeSaved(item.id)}
+                        disabled={processingSavedId === item.id}
+                      >
+                        <Trash2 className="h-4 w-4 text-destructive" />
+                        إزالة
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
             </div>
           </div>
         )}

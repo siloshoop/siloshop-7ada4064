@@ -300,6 +300,38 @@ const SearchPage = () => {
         )
         .eq("is_active", true);
 
+      // Free-text search: match name / description / sku / barcode, plus brands & sellers by name.
+      const term = filters.search.trim();
+      if (term) {
+        const escaped = term.replace(/[%,]/g, "");
+        const orParts = [
+          `name.ilike.%${escaped}%`,
+          `description.ilike.%${escaped}%`,
+          `sku.ilike.%${escaped}%`,
+          `barcode.ilike.%${escaped}%`,
+        ];
+
+        const [matchingBrands, matchingVendors] = await Promise.all([
+          supabase
+            .from("brands")
+            .select("id")
+            .or(`name_ar.ilike.%${escaped}%,name.ilike.%${escaped}%`),
+          supabase
+            .from("profiles")
+            .select("id")
+            .eq("role", "vendor")
+            .ilike("full_name", `%${escaped}%`),
+        ]);
+
+        const brandIds = (matchingBrands.data ?? []).map((b) => b.id);
+        const vendorIds = (matchingVendors.data ?? []).map((v) => v.id);
+
+        if (brandIds.length > 0) orParts.push(`brand_id.in.(${brandIds.join(",")})`);
+        if (vendorIds.length > 0) orParts.push(`vendor_id.in.(${vendorIds.join(",")})`);
+
+        query = query.or(orParts.join(","));
+      }
+
       // Price range
       query = query.gte("price", filters.minPrice).lte("price", filters.maxPrice);
 

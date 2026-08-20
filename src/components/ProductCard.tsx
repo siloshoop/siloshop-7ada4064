@@ -47,6 +47,8 @@ const ProductCard = memo(({
   storeName,
   productType,
   shipsWithinDays,
+  soldCount,
+
 }: ProductCardProps) => {
   const navigate = useNavigate();
   const { user } = useAuth();

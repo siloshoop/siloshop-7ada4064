@@ -46,12 +46,10 @@ const ShowroomStand = memo(({ item, offset, isCenter, isDemo, priority, onSelect
 });
 ShowroomStand.displayName = "ShowroomStand";
 
-interface PremiumShowroomProps { showEmptyState?: boolean; demoItems?: ShowroomItemLive[]; demoFallback?: boolean; }
-const PremiumShowroom = ({ showEmptyState = false, demoItems, demoFallback = false }: PremiumShowroomProps) => {
-  const { items: liveItems, loading: liveLoading } = useShowroom();
-  const usingDemo = Boolean(demoItems) || (demoFallback && !liveLoading && liveItems.length === 0);
-  const items = demoItems ?? (usingDemo ? showroomDemoItems : liveItems);
-  const loading = demoItems ? false : liveLoading;
+interface PremiumShowroomProps { showEmptyState?: boolean; }
+const PremiumShowroom = ({ showEmptyState = false }: PremiumShowroomProps) => {
+  const { items, loading } = useShowroom();
+
   const [index, setIndex] = useState(0);
   const [drag, setDrag] = useState(0);
   const startX = useRef<number | null>(null);

@@ -40,6 +40,8 @@ interface Product {
   images: string[] | null;
   vendor_id: string;
   category_id: string | null;
+  sku?: string | null;
+  barcode?: string | null;
   video_url?: string | null;
   product_type?: string | null;
   ships_within_days?: number | null;

@@ -568,7 +568,7 @@ const Cart = () => {
                             </p>
                           )}
 
-                          <div className="flex items-center justify-between">
+                          <div className="flex items-center justify-between flex-wrap gap-2">
                             <div className="flex items-center gap-2">
                               <Button
                                 size="icon"
@@ -606,6 +606,21 @@ const Cart = () => {
                               )}
                             </div>
                           </div>
+
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="text-muted-foreground"
+                            onClick={() => saveForLater(item)}
+                            disabled={savingItemId === item.id}
+                          >
+                            {savingItemId === item.id ? (
+                              <Loader2 className="h-4 w-4 animate-spin ml-1" />
+                            ) : (
+                              <Bookmark className="h-4 w-4 ml-1" />
+                            )}
+                            حفظ لوقت لاحق
+                          </Button>
                         </div>
                       </div>
                     </CardContent>

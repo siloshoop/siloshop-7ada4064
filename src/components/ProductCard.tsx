@@ -28,7 +28,10 @@ interface ProductCardProps {
   productType?: string | null;
   /** Preparation/shipping window in days */
   shipsWithinDays?: number | null;
+  /** Units sold (aggregated) */
+  soldCount?: number | null;
 }
+
 
 const ProductCard = memo(({
   id,

@@ -246,7 +246,7 @@ const SearchAutocomplete = ({
                   <button
                     type="button"
                     aria-label={`حذف ${term}`}
-                    onClick={() => setRecent(removeRecentSearch(term))}
+                    onClick={() => void removeRecentSearch(term).then(setRecent)}
                     className="p-2 text-muted-foreground hover:text-foreground"
                   >
                     <X className="h-3.5 w-3.5" />

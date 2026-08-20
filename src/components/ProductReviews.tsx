@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Star, MessageCircle, Send, Camera, Image as ImageIcon, X, Loader2 } from "lucide-react";
+import { Star, MessageCircle, Send, Camera, Image as ImageIcon, X, Loader2, ThumbsUp, BadgeCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -11,6 +11,7 @@ import { useToast } from "@/hooks/use-toast";
 import { formatDistanceToNow } from "date-fns";
 import { ar } from "date-fns/locale";
 import ReviewsChart from "@/components/ReviewsChart";
+import { Badge } from "@/components/ui/badge";
 
 interface ReviewReply {
   id: string;
@@ -58,6 +59,10 @@ export const ProductReviews = ({ productId, vendorId }: ProductReviewsProps) => 
   const [uploading, setUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [helpfulCounts, setHelpfulCounts] = useState<Record<string, number>>({});
+  const [myVotes, setMyVotes] = useState<Set<string>>(new Set());
+  const [votingId, setVotingId] = useState<string | null>(null);
+  const [userVerifiedPurchase, setUserVerifiedPurchase] = useState(false);
 
   // Check if current user is the vendor of this product
   const isVendor = user?.id === vendorId;
@@ -99,7 +104,100 @@ export const ProductReviews = ({ productId, vendorId }: ProductReviewsProps) => 
           setExistingReview(null);
           setExistingImageUrl(null);
         }
+
+        // Determine if the current user has an actual verified purchase of this product
+        const { data: purchaseData } = await supabase
+          .from("order_items")
+          .select("id, orders!inner(customer_id)")
+          .eq("product_id", productId)
+          .eq("orders.customer_id", user.id)
+          .limit(1);
+        setUserVerifiedPurchase(!!purchaseData && purchaseData.length > 0);
+      } else {
+        setUserVerifiedPurchase(false);
       }
+
+      // Fetch helpful votes for all loaded reviews
+      const reviewIds = data.map((r: any) => r.id);
+      if (reviewIds.length > 0) {
+        const { data: votes } = await supabase
+          .from("review_helpful_votes")
+          .select("review_id, user_id")
+          .in("review_id", reviewIds);
+
+        const counts: Record<string, number> = {};
+        const mine = new Set<string>();
+        (votes || []).forEach((v: any) => {
+          counts[v.review_id] = (counts[v.review_id] || 0) + 1;
+          if (user && v.user_id === user.id) mine.add(v.review_id);
+        });
+        setHelpfulCounts(counts);
+        setMyVotes(mine);
+      } else {
+        setHelpfulCounts({});
+        setMyVotes(new Set());
+      }
+    }
+  };
+
+  const toggleHelpful = async (reviewId: string) => {
+    if (!user) {
+      toast({
+        title: "تسجيل الدخول مطلوب",
+        description: "يجب تسجيل الدخول للتصويت على أن هذا التقييم مفيد",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const alreadyVoted = myVotes.has(reviewId);
+    setVotingId(reviewId);
+
+    // Optimistic update
+    setMyVotes((prev) => {
+      const next = new Set(prev);
+      if (alreadyVoted) next.delete(reviewId);
+      else next.add(reviewId);
+      return next;
+    });
+    setHelpfulCounts((prev) => ({
+      ...prev,
+      [reviewId]: Math.max(0, (prev[reviewId] || 0) + (alreadyVoted ? -1 : 1)),
+    }));
+
+    try {
+      if (alreadyVoted) {
+        const { error } = await supabase
+          .from("review_helpful_votes")
+          .delete()
+          .eq("review_id", reviewId)
+          .eq("user_id", user.id);
+        if (error) throw error;
+      } else {
+        const { error } = await supabase
+          .from("review_helpful_votes")
+          .insert({ review_id: reviewId, user_id: user.id });
+        if (error) throw error;
+      }
+    } catch (error: any) {
+      // Rollback
+      setMyVotes((prev) => {
+        const next = new Set(prev);
+        if (alreadyVoted) next.add(reviewId);
+        else next.delete(reviewId);
+        return next;
+      });
+      setHelpfulCounts((prev) => ({
+        ...prev,
+        [reviewId]: Math.max(0, (prev[reviewId] || 0) + (alreadyVoted ? 1 : -1)),
+      }));
+      toast({
+        title: "خطأ",
+        description: error.message || "تعذر تسجيل تصويتك، حاول مرة أخرى",
+        variant: "destructive",
+      });
+    } finally {
+      setVotingId(null);
     }
   };
 
@@ -438,9 +536,17 @@ export const ProductReviews = ({ productId, vendorId }: ProductReviewsProps) => 
                     </Avatar>
                     <div className="flex-1">
                       <div className="flex items-center justify-between mb-2">
-                        <span className="font-semibold">
-                          {review.profiles.full_name || "مستخدم"}
-                        </span>
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span className="font-semibold">
+                            {review.profiles.full_name || "مستخدم"}
+                          </span>
+                          {user?.id === review.user_id && userVerifiedPurchase && (
+                            <Badge variant="secondary" className="gap-1">
+                              <BadgeCheck className="h-3 w-3" />
+                              شراء موثّق
+                            </Badge>
+                          )}
+                        </div>
                         <span className="text-xs text-muted-foreground">
                           {formatDistanceToNow(new Date(review.created_at), {
                             addSuffix: true,
@@ -459,6 +565,20 @@ export const ProductReviews = ({ productId, vendorId }: ProductReviewsProps) => 
                           <img src={review.image_url} alt="صورة التقييم" className="h-32 w-32 object-cover rounded-lg border hover:opacity-90 transition-opacity" loading="lazy" />
                         </a>
                       )}
+
+                      <div className="mt-2">
+                        <Button
+                          type="button"
+                          variant={myVotes.has(review.id) ? "secondary" : "ghost"}
+                          size="sm"
+                          onClick={() => toggleHelpful(review.id)}
+                          disabled={votingId === review.id}
+                          className="gap-1"
+                        >
+                          <ThumbsUp className={`h-4 w-4 ${myVotes.has(review.id) ? "fill-current" : ""}`} />
+                          مفيد ({helpfulCounts[review.id] || 0})
+                        </Button>
+                      </div>
 
                       {/* Vendor Reply Section */}
                       {review.review_replies && review.review_replies.length > 0 && (

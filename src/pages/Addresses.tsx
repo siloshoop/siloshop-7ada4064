@@ -31,8 +31,12 @@ export interface DeliveryAddress {
   id: string;
   label: string;
   recipient_name: string;
+  governorate: string | null;
   city: string;
   street: string;
+  building: string | null;
+  apartment: string | null;
+  landmark: string | null;
   phone: string;
   notes: string | null;
   is_default: boolean;
@@ -40,8 +44,13 @@ export interface DeliveryAddress {
 
 const schema = z.object({
   recipient_name: z.string().trim().min(2, "اسم المستلم مطلوب").max(100),
-  city: z.string().trim().refine((v) => (SYRIAN_GOVERNORATES as readonly string[]).includes(v), "يرجى اختيار المحافظة"),
+  governorate: z.string().trim().refine((v) => (SYRIAN_GOVERNORATES as readonly string[]).includes(v), "يرجى اختيار المحافظة"),
+  city: z.string().trim().min(2, "المدينة/المنطقة مطلوبة").max(100),
+  street: z.string().trim().min(2, "الشارع مطلوب").max(100),
   phone: z.string().trim().regex(/^09\d{8}$/, "رقم سوري بصيغة 09xxxxxxxx"),
+  building: z.string().trim().max(100).optional().or(z.literal("")),
+  apartment: z.string().trim().max(100).optional().or(z.literal("")),
+  landmark: z.string().trim().max(100).optional().or(z.literal("")),
   notes: z.string().trim().max(500).optional().or(z.literal("")),
 });
 
@@ -57,7 +66,12 @@ const Addresses = () => {
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [form, setForm] = useState({
     recipient_name: "",
+    governorate: "",
     city: "",
+    street: "",
+    building: "",
+    apartment: "",
+    landmark: "",
     phone: "",
     notes: "",
     is_default: false,
@@ -90,7 +104,18 @@ const Addresses = () => {
   }, [user]);
 
   const resetForm = () => {
-    setForm({ recipient_name: "", city: "", phone: "", notes: "", is_default: false });
+    setForm({
+      recipient_name: "",
+      governorate: "",
+      city: "",
+      street: "",
+      building: "",
+      apartment: "",
+      landmark: "",
+      phone: "",
+      notes: "",
+      is_default: false,
+    });
     setEditingId(null);
   };
 
@@ -98,7 +123,12 @@ const Addresses = () => {
     setEditingId(addr.id);
     setForm({
       recipient_name: addr.recipient_name,
-      city: addr.city,
+      governorate: addr.governorate || "",
+      city: addr.city || "",
+      street: addr.street || "",
+      building: addr.building || "",
+      apartment: addr.apartment || "",
+      landmark: addr.landmark || "",
       phone: addr.phone,
       notes: addr.notes || "",
       is_default: addr.is_default,
@@ -116,16 +146,23 @@ const Addresses = () => {
     }
     setSaving(true);
     try {
+      const payload = {
+        recipient_name: parsed.data.recipient_name,
+        governorate: parsed.data.governorate,
+        city: parsed.data.city,
+        street: parsed.data.street,
+        building: parsed.data.building || null,
+        apartment: parsed.data.apartment || null,
+        landmark: parsed.data.landmark || null,
+        phone: parsed.data.phone,
+        notes: parsed.data.notes || null,
+      };
+
       if (editingId) {
         // Update existing
         const { error } = await supabase
           .from("delivery_addresses")
-          .update({
-            recipient_name: parsed.data.recipient_name,
-            city: parsed.data.city,
-            phone: parsed.data.phone,
-            notes: parsed.data.notes || null,
-          })
+          .update(payload)
           .eq("id", editingId)
           .eq("user_id", user.id);
         if (error) throw error;
@@ -140,13 +177,9 @@ const Addresses = () => {
         const { data: inserted, error } = await supabase
           .from("delivery_addresses")
           .insert({
+            ...payload,
             user_id: user.id,
             label: "عنوان التوصيل",
-            recipient_name: parsed.data.recipient_name,
-            city: parsed.data.city,
-            street: "-",
-            phone: parsed.data.phone,
-            notes: parsed.data.notes || null,
             is_default: false,
           })
           .select()
@@ -160,7 +193,7 @@ const Addresses = () => {
       setOpen(false);
       resetForm();
       void fetchAddresses();
-    } catch (err) {
+    } catch (err: any) {
       toast({ title: "خطأ", description: err.message, variant: "destructive" });
     } finally {
       setSaving(false);
@@ -177,7 +210,6 @@ const Addresses = () => {
       setDeleteId(null);
       return;
     }
-    // If we deleted the default, promote the most recent remaining address as default
     if (wasDefault) {
       const { data: remaining } = await supabase
         .from("delivery_addresses")
@@ -226,19 +258,25 @@ const Addresses = () => {
                 <Plus className="h-4 w-4 ml-1" /> إضافة عنوان
               </Button>
             </DialogTrigger>
-            <DialogContent className="max-w-lg">
+            <DialogContent className="max-w-2xl overflow-y-auto max-h-[90vh]">
               <DialogHeader>
                 <DialogTitle>{editingId ? "تعديل العنوان" : "إضافة عنوان جديد"}</DialogTitle>
               </DialogHeader>
-              <form onSubmit={handleSubmit} className="space-y-3">
+              <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="space-y-1.5">
                   <Label>اسم المستلم</Label>
-                  <Input value={form.recipient_name} onChange={(e) => setForm({ ...form, recipient_name: e.target.value })} required />
+                  <Input 
+                    value={form.recipient_name} 
+                    onChange={(e) => setForm({ ...form, recipient_name: e.target.value })} 
+                    placeholder="الاسم الثلاثي"
+                    required 
+                  />
                 </div>
-                <div className="grid grid-cols-2 gap-3">
+                
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-1.5">
                     <Label>المحافظة</Label>
-                    <Select value={form.city} onValueChange={(v) => setForm({ ...form, city: v })}>
+                    <Select value={form.governorate} onValueChange={(v) => setForm({ ...form, governorate: v })}>
                       <SelectTrigger>
                         <SelectValue placeholder="اختر المحافظة" />
                       </SelectTrigger>
@@ -250,18 +288,86 @@ const Addresses = () => {
                     </Select>
                   </div>
                   <div className="space-y-1.5">
-                    <Label>الهاتف</Label>
-                    <Input dir="ltr" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} placeholder="09xxxxxxxx" required />
+                    <Label>المدينة / المنطقة</Label>
+                    <Input 
+                      value={form.city} 
+                      onChange={(e) => setForm({ ...form, city: e.target.value })} 
+                      placeholder="اسم المدينة أو الحي"
+                      required 
+                    />
                   </div>
                 </div>
-                <div className="space-y-1.5">
-                  <Label>تفاصيل الوصول / ملاحظات (اختياري)</Label>
-                  <Textarea rows={3} value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} placeholder="تفاصيل إضافية أو تعليمات للمندوب" />
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="space-y-1.5">
+                    <Label>الشارع</Label>
+                    <Input 
+                      value={form.street} 
+                      onChange={(e) => setForm({ ...form, street: e.target.value })} 
+                      placeholder="اسم الشارع"
+                      required 
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label>البناء (اختياري)</Label>
+                    <Input 
+                      value={form.building} 
+                      onChange={(e) => setForm({ ...form, building: e.target.value })} 
+                      placeholder="رقم أو اسم البناء"
+                    />
+                  </div>
                 </div>
-                <label className="flex items-center gap-2 text-sm">
-                  <input type="checkbox" checked={form.is_default} onChange={(e) => setForm({ ...form, is_default: e.target.checked })} />
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="space-y-1.5">
+                    <Label>الشقة (اختياري)</Label>
+                    <Input 
+                      value={form.apartment} 
+                      onChange={(e) => setForm({ ...form, apartment: e.target.value })} 
+                      placeholder="رقم الشقة"
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label>علامة مميزة (اختياري)</Label>
+                    <Input 
+                      value={form.landmark} 
+                      onChange={(e) => setForm({ ...form, landmark: e.target.value })} 
+                      placeholder="مثلاً: قرب جامع ..."
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-1.5">
+                  <Label>رقم الهاتف</Label>
+                  <Input 
+                    dir="ltr" 
+                    value={form.phone} 
+                    onChange={(e) => setForm({ ...form, phone: e.target.value })} 
+                    placeholder="09xxxxxxxx" 
+                    required 
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <Label>ملاحظات إضافية (اختياري)</Label>
+                  <Textarea 
+                    rows={2} 
+                    value={form.notes} 
+                    onChange={(e) => setForm({ ...form, notes: e.target.value })} 
+                    placeholder="أي معلومات إضافية للمندوب" 
+                  />
+                </div>
+
+                <label className="flex items-center gap-2 text-sm cursor-pointer py-1">
+                  <input 
+                    type="checkbox" 
+                    className="rounded border-gray-300 text-primary focus:ring-primary"
+                    checked={form.is_default} 
+                    onChange={(e) => setForm({ ...form, is_default: e.target.checked })} 
+                  />
                   تعيين كعنوان افتراضي
                 </label>
+
                 <Button type="submit" className="w-full" disabled={saving}>
                   {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : (editingId ? "حفظ التعديلات" : "حفظ العنوان")}
                 </Button>
@@ -304,7 +410,23 @@ const Addresses = () => {
                     </div>
                   </div>
                   <div className="text-sm space-y-1">
-                    <p className="flex items-start gap-2"><MapPin className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" /><span>{addr.city}</span></p>
+                    <div className="flex items-start gap-2">
+                      <MapPin className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />
+                      <div>
+                        <p>{addr.governorate}، {addr.city}</p>
+                        <p className="text-muted-foreground text-xs">{addr.street}</p>
+                        {(addr.building || addr.apartment) && (
+                          <p className="text-muted-foreground text-xs">
+                            {addr.building && `بناء: ${addr.building}`}
+                            {addr.building && addr.apartment && " - "}
+                            {addr.apartment && `شقة: ${addr.apartment}`}
+                          </p>
+                        )}
+                        {addr.landmark && (
+                          <p className="text-muted-foreground text-xs font-medium">علامة مميزة: {addr.landmark}</p>
+                        )}
+                      </div>
+                    </div>
                     <p className="flex items-center gap-2" dir="ltr"><Phone className="h-4 w-4 text-muted-foreground" />{addr.phone}</p>
                     {addr.notes && <p className="text-xs text-muted-foreground bg-muted/50 p-2 rounded">{addr.notes}</p>}
                   </div>

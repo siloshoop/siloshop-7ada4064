@@ -10,7 +10,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Minus, Plus, Trash2, ShoppingCart, Loader2, Percent, Tag, Truck, Receipt, X, CheckCircle2, MapPin, Pencil } from "lucide-react";
+import { Minus, Plus, Trash2, ShoppingCart, Loader2, Percent, Tag, Truck, Receipt, X, CheckCircle2, MapPin, Pencil, Bookmark } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 interface QuantityDiscount {
@@ -38,6 +38,18 @@ interface CartItemWithDiscount extends CartItem {
   savings: number;
 }
 
+interface SavedItem {
+  id: string;
+  quantity: number;
+  product: {
+    id: string;
+    name: string;
+    price: number;
+    image_url: string;
+    stock_quantity: number;
+  };
+}
+
 const Cart = () => {
   const { user, loading: authLoading } = useAuth();
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
@@ -48,6 +60,10 @@ const Cart = () => {
   const [couponDiscount, setCouponDiscount] = useState(0);
   const [validatingCoupon, setValidatingCoupon] = useState(false);
   const [defaultAddress, setDefaultAddress] = useState<any>(null);
+  const [savedItems, setSavedItems] = useState<SavedItem[]>([]);
+  const [savedLoading, setSavedLoading] = useState(true);
+  const [processingSavedId, setProcessingSavedId] = useState<string | null>(null);
+  const [savingItemId, setSavingItemId] = useState<string | null>(null);
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -107,6 +123,39 @@ const Cart = () => {
 
     fetchCart();
   }, [user, toast]);
+
+  const fetchSavedItems = async () => {
+    if (!user) {
+      setSavedLoading(false);
+      return;
+    }
+    try {
+      const { data, error } = await supabase
+        .from("saved_for_later")
+        .select(`
+          id,
+          quantity,
+          product:products(id, name, price, image_url, stock_quantity)
+        `)
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: false });
+
+      if (error) throw error;
+      setSavedItems((data as any) || []);
+    } catch (error) {
+      toast({
+        title: "خطأ",
+        description: "فشل في جلب المنتجات المحفوظة",
+        variant: "destructive",
+      });
+    } finally {
+      setSavedLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchSavedItems();
+  }, [user]);
 
   useEffect(() => {
     const loadDefault = async () => {
@@ -211,6 +260,148 @@ const Cart = () => {
         description: "فشل في حذف المنتج",
         variant: "destructive",
       });
+    }
+  };
+
+  const saveForLater = async (item: CartItem) => {
+    if (!user) return;
+    setSavingItemId(item.id);
+    try {
+      const { data: existing, error: fetchError } = await supabase
+        .from("saved_for_later")
+        .select("id, quantity")
+        .eq("user_id", user.id)
+        .eq("product_id", item.product.id)
+        .maybeSingle();
+
+      if (fetchError) throw fetchError;
+
+      if (existing) {
+        const { error: updateError } = await supabase
+          .from("saved_for_later")
+          .update({ quantity: existing.quantity + item.quantity })
+          .eq("id", existing.id);
+        if (updateError) throw updateError;
+      } else {
+        const { error: insertError } = await supabase.from("saved_for_later").insert({
+          user_id: user.id,
+          product_id: item.product.id,
+          quantity: item.quantity,
+        });
+        if (insertError) throw insertError;
+      }
+
+      const { error: deleteError } = await supabase
+        .from("cart_items")
+        .delete()
+        .eq("id", item.id);
+      if (deleteError) throw deleteError;
+
+      setCartItems(items => items.filter(i => i.id !== item.id));
+      window.dispatchEvent(new Event("cart-updated"));
+      await fetchSavedItems();
+
+      toast({
+        title: "تم الحفظ",
+        description: "تم نقل المنتج إلى المحفوظات لوقت لاحق",
+      });
+    } catch (error) {
+      toast({
+        title: "خطأ",
+        description: "فشل في حفظ المنتج لوقت لاحق",
+        variant: "destructive",
+      });
+    } finally {
+      setSavingItemId(null);
+    }
+  };
+
+  const moveToCart = async (item: SavedItem) => {
+    if (!user) return;
+    setProcessingSavedId(item.id);
+    try {
+      const { data: existingCartItem, error: fetchError } = await supabase
+        .from("cart_items")
+        .select("id, quantity")
+        .eq("user_id", user.id)
+        .eq("product_id", item.product.id)
+        .maybeSingle();
+
+      if (fetchError) throw fetchError;
+
+      if (existingCartItem) {
+        const { error: updateError } = await supabase
+          .from("cart_items")
+          .update({ quantity: existingCartItem.quantity + item.quantity })
+          .eq("id", existingCartItem.id);
+        if (updateError) throw updateError;
+      } else {
+        const { error: insertError } = await supabase.from("cart_items").insert({
+          user_id: user.id,
+          product_id: item.product.id,
+          quantity: item.quantity,
+        });
+        if (insertError) throw insertError;
+      }
+
+      const { error: deleteError } = await supabase
+        .from("saved_for_later")
+        .delete()
+        .eq("id", item.id);
+      if (deleteError) throw deleteError;
+
+      setSavedItems(items => items.filter(i => i.id !== item.id));
+
+      const { data, error } = await supabase
+        .from("cart_items")
+        .select(`
+          id,
+          quantity,
+          product:products(id, name, price, image_url, stock_quantity, category_id, shipping_cost)
+        `)
+        .eq("user_id", user.id);
+      if (error) throw error;
+      setCartItems((data as any) || []);
+      window.dispatchEvent(new Event("cart-updated"));
+
+      toast({
+        title: "تم النقل",
+        description: "تم نقل المنتج إلى عربة التسوق",
+      });
+    } catch (error) {
+      toast({
+        title: "خطأ",
+        description: "فشل في نقل المنتج إلى عربة التسوق",
+        variant: "destructive",
+      });
+    } finally {
+      setProcessingSavedId(null);
+    }
+  };
+
+  const removeSaved = async (itemId: string) => {
+    setProcessingSavedId(itemId);
+    try {
+      const { error } = await supabase
+        .from("saved_for_later")
+        .delete()
+        .eq("id", itemId);
+      if (error) throw error;
+
+      setSavedItems(items => items.filter(i => i.id !== itemId));
+
+      toast({
+        title: "تم الحذف",
+        description: "تم حذف المنتج من المحفوظات",
+      });
+    } catch (error) {
+      toast({
+        title: "خطأ",
+        description: "فشل في حذف المنتج المحفوظ",
+        variant: "destructive",
+      });
+    } finally {
+      setProcessingSavedId(null);
     }
   };
 
@@ -377,7 +568,7 @@ const Cart = () => {
                             </p>
                           )}
 
-                          <div className="flex items-center justify-between">
+                          <div className="flex items-center justify-between flex-wrap gap-2">
                             <div className="flex items-center gap-2">
                               <Button
                                 size="icon"
@@ -415,6 +606,21 @@ const Cart = () => {
                               )}
                             </div>
                           </div>
+
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="text-muted-foreground"
+                            onClick={() => saveForLater(item)}
+                            disabled={savingItemId === item.id}
+                          >
+                            {savingItemId === item.id ? (
+                              <Loader2 className="h-4 w-4 animate-spin ml-1" />
+                            ) : (
+                              <Bookmark className="h-4 w-4 ml-1" />
+                            )}
+                            حفظ لوقت لاحق
+                          </Button>
                         </div>
                       </div>
                     </CardContent>
@@ -590,6 +796,67 @@ const Cart = () => {
                   </p>
                 </CardContent>
               </Card>
+            </div>
+          </div>
+        )}
+
+        {/* Saved for later */}
+        {savedItems.length > 0 && (
+          <div className="mt-10 space-y-4">
+            <h2 className="text-2xl font-bold flex items-center gap-2">
+              <Bookmark className="h-5 w-5 text-primary" />
+              محفوظ لوقت لاحق
+            </h2>
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {savedItems.map((item) => (
+                <Card key={item.id}>
+                  <CardContent className="p-4">
+                    <div className="flex gap-3">
+                      <img
+                        src={item.product.image_url}
+                        alt={item.product.name}
+                        className="w-20 h-20 object-cover rounded-lg shrink-0"
+                      />
+                      <div className="flex-1 min-w-0 space-y-1">
+                        <h3 className="font-bold truncate">{item.product.name}</h3>
+                        <p className="text-sm text-muted-foreground">
+                          {item.product.price} ل.س للقطعة
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          الكمية: {item.quantity}
+                        </p>
+                        {item.product.stock_quantity <= 0 && (
+                          <Badge variant="destructive">غير متوفر</Badge>
+                        )}
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2 mt-3">
+                      <Button
+                        size="sm"
+                        className="flex-1"
+                        onClick={() => moveToCart(item)}
+                        disabled={processingSavedId === item.id || item.product.stock_quantity <= 0}
+                      >
+                        {processingSavedId === item.id ? (
+                          <Loader2 className="h-4 w-4 animate-spin ml-1" />
+                        ) : (
+                          <ShoppingCart className="h-4 w-4 ml-1" />
+                        )}
+                        نقل إلى السلة
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => removeSaved(item.id)}
+                        disabled={processingSavedId === item.id}
+                      >
+                        <Trash2 className="h-4 w-4 text-destructive" />
+                        إزالة
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
             </div>
           </div>
         )}

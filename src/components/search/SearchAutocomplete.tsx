@@ -4,6 +4,7 @@ import { Clock, Flame, Gem, Layers, Loader2, Search as SearchIcon, TrendingUp, X
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useSearchSuggestions } from "@/hooks/useSearchSuggestions";
+import { supabase } from "@/integrations/supabase/client";
 import {
   addRecentSearch,
   clearRecentSearches,
@@ -30,10 +31,11 @@ const SearchAutocomplete = ({
   const [value, setValue] = useState("");
   const [open, setOpen] = useState(false);
   const [recent, setRecent] = useState<string[]>([]);
+  const [popularTerms, setPopularTerms] = useState<{ term: string; hits: number }[]>([]);
   const containerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const { products, categories, brands, smartSuggestions, popular, loading, prefetch } =
+  const { products, categories, brands, smartSuggestions, loading, prefetch } =
     useSearchSuggestions(value);
 
   useEffect(() => {
@@ -51,6 +53,15 @@ const SearchAutocomplete = ({
     };
   }, []);
 
+  useEffect(() => {
+    let active = true;
+    void supabase.rpc("popular_search_terms", { _limit: 8 }).then(({ data }) => {
+      if (active && data) setPopularTerms(data);
+    });
+    return () => {
+      active = false;
+    };
+  }, []);
 
   // Close on outside click / Escape
   useEffect(() => {
@@ -257,16 +268,17 @@ const SearchAutocomplete = ({
           )}
 
           {/* Popular searches */}
-          {!hasQuery && popular.length > 0 && (
+          {!hasQuery && popularTerms.length > 0 && (
             <section className="border-t pt-1">
               <p className="px-2 py-1.5 text-[11px] font-semibold text-muted-foreground">الأكثر بحثاً</p>
               <div className="flex flex-wrap gap-1.5 px-2 pb-2">
-                {popular.map((term) => (
+                {popularTerms.map(({ term, hits }) => (
                   <button
                     key={term}
                     type="button"
                     onClick={() => submitTerm(term)}
                     className="rounded-full bg-secondary px-2.5 py-1 text-xs transition-colors hover:bg-accent"
+                    title={`${hits} عملية بحث`}
                   >
                     <Flame className="ml-1 inline h-3 w-3 text-accent-foreground" />
                     {term}
@@ -276,7 +288,7 @@ const SearchAutocomplete = ({
             </section>
           )}
 
-          {!hasQuery && recent.length === 0 && popular.length === 0 && (
+          {!hasQuery && recent.length === 0 && popularTerms.length === 0 && (
             <p className="px-2 py-4 text-center text-sm text-muted-foreground">
               اكتب كلمة للبحث عن المنتجات والفئات والعلامات التجارية
             </p>

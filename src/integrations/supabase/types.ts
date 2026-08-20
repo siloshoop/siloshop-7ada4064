@@ -614,11 +614,15 @@ export type Database = {
       }
       delivery_addresses: {
         Row: {
+          apartment: string | null
+          building: string | null
           city: string
           created_at: string
+          governorate: string | null
           id: string
           is_default: boolean
           label: string
+          landmark: string | null
           notes: string | null
           phone: string
           recipient_name: string
@@ -627,11 +631,15 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          apartment?: string | null
+          building?: string | null
           city: string
           created_at?: string
+          governorate?: string | null
           id?: string
           is_default?: boolean
           label: string
+          landmark?: string | null
           notes?: string | null
           phone: string
           recipient_name: string
@@ -640,11 +648,15 @@ export type Database = {
           user_id: string
         }
         Update: {
+          apartment?: string | null
+          building?: string | null
           city?: string
           created_at?: string
+          governorate?: string | null
           id?: string
           is_default?: boolean
           label?: string
+          landmark?: string | null
           notes?: string | null
           phone?: string
           recipient_name?: string
@@ -1617,6 +1629,53 @@ export type Database = {
           },
         ]
       }
+      product_questions: {
+        Row: {
+          answer: string | null
+          answered_at: string | null
+          answered_by: string | null
+          created_at: string
+          id: string
+          is_hidden: boolean
+          product_id: string
+          question: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          answer?: string | null
+          answered_at?: string | null
+          answered_by?: string | null
+          created_at?: string
+          id?: string
+          is_hidden?: boolean
+          product_id: string
+          question: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          answer?: string | null
+          answered_at?: string | null
+          answered_by?: string | null
+          created_at?: string
+          id?: string
+          is_hidden?: boolean
+          product_id?: string
+          question?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_questions_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       products: {
         Row: {
           barcode: string | null
@@ -2099,6 +2158,35 @@ export type Database = {
           },
         ]
       }
+      review_helpful_votes: {
+        Row: {
+          created_at: string
+          id: string
+          review_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          review_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          review_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "review_helpful_votes_review_id_fkey"
+            columns: ["review_id"]
+            isOneToOne: false
+            referencedRelation: "reviews"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       review_replies: {
         Row: {
           created_at: string
@@ -2210,6 +2298,38 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      saved_for_later: {
+        Row: {
+          created_at: string
+          id: string
+          product_id: string
+          quantity: number
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          product_id: string
+          quantity?: number
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          product_id?: string
+          quantity?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "saved_for_later_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       search_history: {
         Row: {
@@ -3280,6 +3400,19 @@ export type Database = {
       }
       is_feature_enabled: { Args: { _key: string }; Returns: boolean }
       is_valid_order_status: { Args: { _status: string }; Returns: boolean }
+      latest_public_reviews: {
+        Args: { _limit?: number }
+        Returns: {
+          comment: string
+          created_at: string
+          id: string
+          product_id: string
+          product_image: string
+          product_name: string
+          rating: number
+          reviewer_name: string
+        }[]
+      }
       log_activity: {
         Args: {
           _action_details?: Json
@@ -3313,7 +3446,21 @@ export type Database = {
         Args: { _from: string; _role: string; _to: string }
         Returns: boolean
       }
+      popular_search_terms: {
+        Args: { _limit?: number }
+        Returns: {
+          hits: number
+          term: string
+        }[]
+      }
       product_can_manage: { Args: { _product_id: string }; Returns: boolean }
+      product_sold_counts: {
+        Args: { _product_ids: string[] }
+        Returns: {
+          product_id: string
+          sold: number
+        }[]
+      }
       reactivate_seller: { Args: { _user_id: string }; Returns: undefined }
       read_email_batch: {
         Args: { batch_size: number; queue_name: string; vt: number }

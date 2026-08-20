@@ -28,7 +28,10 @@ interface ProductCardProps {
   productType?: string | null;
   /** Preparation/shipping window in days */
   shipsWithinDays?: number | null;
+  /** Units sold (aggregated) */
+  soldCount?: number | null;
 }
+
 
 const ProductCard = memo(({
   id,
@@ -44,6 +47,8 @@ const ProductCard = memo(({
   storeName,
   productType,
   shipsWithinDays,
+  soldCount,
+
 }: ProductCardProps) => {
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -285,6 +290,12 @@ const ProductCard = memo(({
           <span className="text-[10px] text-muted-foreground">
             {rating > 0 ? rating.toFixed(1) : "—"} ({reviews} تقييم)
           </span>
+          {typeof soldCount === "number" && soldCount > 0 && (
+            <span className="text-[10px] text-muted-foreground">
+              · تم بيع {soldCount.toLocaleString()}
+            </span>
+          )}
+
         </div>
 
         <div className="flex items-baseline gap-1.5">

@@ -15,6 +15,7 @@ import ReturnRequestDialog from "@/components/ReturnRequestDialog";
 import OrderStatusTimeline from "@/components/OrderStatusTimeline";
 import OrderTimelineLog from "@/components/orders/OrderTimelineLog";
 import OrderHelpActions from "@/components/orders/OrderHelpActions";
+import CustomerInvoice from "@/components/orders/CustomerInvoice";
 
 const statusMap: Record<string, { label: string; variant: "default" | "secondary" | "destructive" | "outline" }> = {
   pending: { label: "قيد المعالجة", variant: "secondary" },
@@ -241,6 +242,7 @@ const OrderDetails = () => {
         <Button variant="outline" className="w-full" onClick={() => navigate(`/orders/track/${order.id}`)}>
           تتبع الطلب
         </Button>
+        {order.status !== "cancelled" && <CustomerInvoice orderId={order.id} />}
         <CancelOrderDialog
           orderId={order.id}
           status={order.status}

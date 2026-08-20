@@ -24,6 +24,10 @@ const BestSellers = lazy(() => import("@/components/BestSellers"));
 const ProductRecommendations = lazy(() => import("@/components/ProductRecommendations"));
 const EnhancedDailyDeals = lazy(() => import("@/components/EnhancedDailyDeals"));
 const RecentlyViewed = lazy(() => import("@/components/RecentlyViewed"));
+const TopRatedProducts = lazy(() => import("@/components/home/TopRatedProducts"));
+const BrandsRail = lazy(() => import("@/components/home/BrandsRail"));
+const StoreAdvantages = lazy(() => import("@/components/home/StoreAdvantages"));
+const LatestReviews = lazy(() => import("@/components/home/LatestReviews"));
 
 interface Product {
   id: string;
@@ -235,6 +239,34 @@ const Index = () => {
         <LazySection>
           <SectionErrorBoundary>
             <BestSellers key={`bestsellers-${refreshKey}`} />
+          </SectionErrorBoundary>
+        </LazySection>
+
+        {/* Top rated products */}
+        <LazySection>
+          <SectionErrorBoundary>
+            <TopRatedProducts key={`top-rated-${refreshKey}`} />
+          </SectionErrorBoundary>
+        </LazySection>
+
+        {/* Brands */}
+        <LazySection>
+          <SectionErrorBoundary>
+            <BrandsRail key={`brands-${refreshKey}`} />
+          </SectionErrorBoundary>
+        </LazySection>
+
+        {/* Store advantages */}
+        <LazySection>
+          <SectionErrorBoundary>
+            <StoreAdvantages />
+          </SectionErrorBoundary>
+        </LazySection>
+
+        {/* Latest reviews */}
+        <LazySection>
+          <SectionErrorBoundary>
+            <LatestReviews key={`latest-reviews-${refreshKey}`} />
           </SectionErrorBoundary>
         </LazySection>
 

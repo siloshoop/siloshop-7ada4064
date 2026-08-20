@@ -2,7 +2,7 @@
   "name": "SiloShop",
   "short_name": "SiloShop",
   "description": "تسوق أحدث صيحات الموضة والإلكترونيات بأفضل الأسعار",
-  "theme_color": "#9333ea",
+  "theme_color": "#ffffff",
   "background_color": "#ffffff",
   "display": "standalone",
   "orientation": "portrait",

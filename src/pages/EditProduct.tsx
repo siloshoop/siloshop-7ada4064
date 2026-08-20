@@ -10,10 +10,27 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Save, Trash2, ChevronLeft } from "lucide-react";
+import { Loader2, Save, Trash2, ChevronLeft, X } from "lucide-react";
 import imageCompression from 'browser-image-compression';
 import { productNumbersSchema, firstIssue, friendlyDbError } from "@/lib/productValidation";
+import ProductVariantsManager from "@/components/seller/ProductVariantsManager";
+
+const SHIPPING_CLASSES = [
+  { value: "عادي", label: "عادي" },
+  { value: "قابل للكسر", label: "قابل للكسر" },
+  { value: "ثقيل", label: "ثقيل" },
+  { value: "سريع التلف", label: "سريع التلف" },
+];
+
+const slugify = (input: string) =>
+  input
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9\u0600-\u06FF]+/g, "-")
+    .replace(/^-+|-+$/g, "");
 
 const EditProduct = () => {
   const { id } = useParams();
@@ -28,17 +45,37 @@ const EditProduct = () => {
 
   const [formData, setFormData] = useState({
     name: "",
+    name_en: "",
     description: "",
+    short_description: "",
     price: "",
     original_price: "",
     stock_quantity: "",
+    min_order_quantity: "1",
+    max_order_quantity: "",
     shipping_cost: "0",
     ships_within_days: "",
     video_url: "",
     category_id: "",
     subcategory_id: "",
     is_active: true,
+    gtin: "",
+    length_cm: "",
+    width_cm: "",
+    height_cm: "",
+    shipping_weight: "",
+    shipping_class: "",
+    warranty: "",
+    return_policy: "",
+    country_of_origin: "",
+    slug: "",
+    seo_title: "",
+    seo_description: "",
+    seo_keywords: "",
   });
+
+  const [tags, setTags] = useState<string[]>([]);
+  const [tagInput, setTagInput] = useState("");
 
   const [existingImages, setExistingImages] = useState<string[]>([]);
   const [newFiles, setNewFiles] = useState<File[]>([]);
@@ -73,19 +110,39 @@ const EditProduct = () => {
           if (error) throw error;
 
           if (product) {
+            const p = product as any;
             setFormData({
               name: product.name,
+              name_en: p.name_en || "",
               description: product.description || "",
+              short_description: p.short_description || "",
               price: product.price.toString(),
               original_price: product.original_price?.toString() || "",
               stock_quantity: product.stock_quantity?.toString() || "0",
-              shipping_cost: (product as any).shipping_cost?.toString() || "0",
-              ships_within_days: (product as any).ships_within_days?.toString() || "",
-              video_url: (product as any).video_url || "",
+              min_order_quantity: p.min_order_quantity?.toString() || "1",
+              max_order_quantity: p.max_order_quantity?.toString() || "",
+              shipping_cost: p.shipping_cost?.toString() || "0",
+              ships_within_days: p.ships_within_days?.toString() || "",
+              video_url: p.video_url || "",
               category_id: product.category_id || "",
               subcategory_id: product.subcategory_id || "",
               is_active: product.is_active ?? true,
+              gtin: p.gtin || "",
+              length_cm: p.length_cm?.toString() || "",
+              width_cm: p.width_cm?.toString() || "",
+              height_cm: p.height_cm?.toString() || "",
+              shipping_weight: p.shipping_weight?.toString() || "",
+              shipping_class: p.shipping_class || "",
+              warranty: p.warranty || "",
+              return_policy: p.return_policy || "",
+              country_of_origin: p.country_of_origin || "",
+              slug: p.slug || "",
+              seo_title: p.seo_title || "",
+              seo_description: p.seo_description || "",
+              seo_keywords: p.seo_keywords || "",
             });
+
+            setTags(Array.isArray(p.tags) ? p.tags : []);
 
             // Set existing images
             const images = product.images || [];
@@ -126,6 +183,28 @@ const EditProduct = () => {
       category_id: value,
       subcategory_id: "" // Reset subcategory when category changes
     }));
+  };
+
+  const addTag = () => {
+    const value = tagInput.trim();
+    if (!value) return;
+    if (tags.includes(value)) {
+      setTagInput("");
+      return;
+    }
+    setTags([...tags, value]);
+    setTagInput("");
+  };
+
+  const handleTagKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter" || e.key === ",") {
+      e.preventDefault();
+      addTag();
+    }
+  };
+
+  const removeTag = (tag: string) => {
+    setTags(tags.filter((t) => t !== tag));
   };
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -249,6 +328,28 @@ const EditProduct = () => {
       }
       const values = parsed.data;
 
+      if (formData.short_description && formData.short_description.length > 300) {
+        toast({ title: "بيانات غير صالحة", description: "الوصف المختصر يجب ألا يتجاوز 300 حرف", variant: "destructive" });
+        setLoading(false);
+        return;
+      }
+
+      const minQty = formData.min_order_quantity ? parseInt(formData.min_order_quantity, 10) : 1;
+      const maxQty = formData.max_order_quantity ? parseInt(formData.max_order_quantity, 10) : null;
+      if (maxQty !== null && minQty !== null && maxQty < minQty) {
+        toast({
+          title: "بيانات غير صالحة",
+          description: "الحد الأقصى للطلب يجب أن يكون أكبر من أو يساوي الحد الأدنى",
+          variant: "destructive",
+        });
+        setLoading(false);
+        return;
+      }
+
+      const finalSlug = formData.slug.trim()
+        ? slugify(formData.slug)
+        : slugify(formData.name_en || formData.name);
+
       // Upload new images
       const newImageUrls = await uploadNewImages();
       
@@ -269,10 +370,14 @@ const EditProduct = () => {
         .from("products")
         .update({
           name: values.name,
+          name_en: formData.name_en.trim() || null,
           description: formData.description,
+          short_description: formData.short_description.trim() || null,
           price: values.price,
           original_price: values.original_price ?? null,
           stock_quantity: values.stock_quantity,
+          min_order_quantity: minQty,
+          max_order_quantity: maxQty,
           shipping_cost: values.shipping_cost ?? 0,
           ships_within_days: values.ships_within_days ?? null,
           video_url: formData.video_url.trim() || null,
@@ -281,6 +386,20 @@ const EditProduct = () => {
           image_url: allImages[0],
           images: allImages,
           is_active: formData.is_active,
+          gtin: formData.gtin.trim() || null,
+          length_cm: formData.length_cm ? Number(formData.length_cm) : null,
+          width_cm: formData.width_cm ? Number(formData.width_cm) : null,
+          height_cm: formData.height_cm ? Number(formData.height_cm) : null,
+          shipping_weight: formData.shipping_weight ? Number(formData.shipping_weight) : null,
+          shipping_class: formData.shipping_class || null,
+          warranty: formData.warranty.trim() || null,
+          return_policy: formData.return_policy.trim() || null,
+          country_of_origin: formData.country_of_origin.trim() || null,
+          tags: tags.length > 0 ? tags : [],
+          slug: finalSlug || null,
+          seo_title: formData.seo_title.trim() || null,
+          seo_description: formData.seo_description.trim() || null,
+          seo_keywords: formData.seo_keywords.trim() || null,
           updated_at: new Date().toISOString(),
         } as any)
         .eq("id", id)
@@ -352,256 +471,502 @@ const EditProduct = () => {
     <div className="min-h-screen flex flex-col">
       <Navbar />
       <main className="flex-1 container px-4 py-8">
-        <Card className="max-w-2xl mx-auto">
+        <Card className="max-w-3xl mx-auto">
           <CardHeader>
             <CardTitle className="text-3xl">تعديل المنتج</CardTitle>
             <CardDescription>تحديث معلومات وصور المنتج</CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-6">
-              <div className="space-y-2">
-                <Label htmlFor="name">اسم المنتج *</Label>
-                <Input
-                  id="name"
-                  value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  required
-                  placeholder="أدخل اسم المنتج"
-                />
-              </div>
+              <Accordion type="multiple" defaultValue={["basic"]} className="w-full">
+                <AccordionItem value="basic">
+                  <AccordionTrigger>معلومات أساسية</AccordionTrigger>
+                  <AccordionContent className="space-y-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="name">اسم المنتج *</Label>
+                      <Input
+                        id="name"
+                        value={formData.name}
+                        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                        required
+                        placeholder="أدخل اسم المنتج"
+                      />
+                    </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="description">الوصف</Label>
-                <Textarea
-                  id="description"
-                  value={formData.description}
-                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  placeholder="وصف تفصيلي للمنتج"
-                  rows={4}
-                />
-              </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="name_en">اسم المنتج بالإنجليزية (اختياري)</Label>
+                      <Input
+                        id="name_en"
+                        value={formData.name_en}
+                        onChange={(e) => setFormData({ ...formData, name_en: e.target.value })}
+                        placeholder="Product name in English"
+                      />
+                    </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="price">السعر *</Label>
-                  <Input
-                    id="price"
-                    type="number"
-                    step="0.01"
-                    value={formData.price}
-                    onChange={(e) => setFormData({ ...formData, price: e.target.value })}
-                    required
-                    placeholder="0.00"
-                  />
-                </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="short_description">وصف مختصر (حتى 300 حرف)</Label>
+                      <Textarea
+                        id="short_description"
+                        value={formData.short_description}
+                        onChange={(e) => setFormData({ ...formData, short_description: e.target.value.slice(0, 300) })}
+                        rows={2}
+                      />
+                      <p className="text-xs text-muted-foreground text-left">
+                        {formData.short_description.length}/300
+                      </p>
+                    </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="original_price">السعر الأصلي (اختياري)</Label>
-                  <Input
-                    id="original_price"
-                    type="number"
-                    step="0.01"
-                    value={formData.original_price}
-                    onChange={(e) => setFormData({ ...formData, original_price: e.target.value })}
-                    placeholder="0.00"
-                  />
-                </div>
-              </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="description">الوصف</Label>
+                      <Textarea
+                        id="description"
+                        value={formData.description}
+                        onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                        placeholder="وصف تفصيلي للمنتج"
+                        rows={4}
+                      />
+                    </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="shipping_cost">تكلفة الشحن (ل.س)</Label>
-                <Input
-                  id="shipping_cost"
-                  type="number"
-                  step="0.01"
-                  min="0"
-                  value={formData.shipping_cost}
-                  onChange={(e) => setFormData({ ...formData, shipping_cost: e.target.value })}
-                  placeholder="0 = شحن مجاني"
-                />
-                <p className="text-xs text-muted-foreground">اتركه 0 للشحن المجاني</p>
-              </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="video_url">رابط فيديو المنتج (اختياري)</Label>
+                      <Input
+                        id="video_url"
+                        type="url"
+                        inputMode="url"
+                        value={formData.video_url}
+                        onChange={(e) => setFormData({ ...formData, video_url: e.target.value })}
+                        placeholder="https://youtube.com/watch?v=... أو رابط mp4"
+                      />
+                      <p className="text-xs text-muted-foreground">
+                        يظهر الفيديو داخل معرض صور المنتج (يوتيوب، فيميو، أو ملف mp4).
+                      </p>
+                    </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="ships_within_days">مدة التجهيز والشحن (أيام)</Label>
-                <Input
-                  id="ships_within_days"
-                  type="number"
-                  min="0"
-                  max="60"
-                  value={formData.ships_within_days}
-                  onChange={(e) => setFormData({ ...formData, ships_within_days: e.target.value })}
-                  placeholder="مثال: 3"
-                />
-                <p className="text-xs text-muted-foreground">تُعرض للمشتري كـ «يشحن خلال X أيام».</p>
-              </div>
+                    {/* Category Selection - Amazon Style */}
+                    <div className="space-y-4 p-4 bg-muted/30 rounded-lg border">
+                      <h3 className="font-semibold text-lg flex items-center gap-2">
+                        <ChevronLeft className="h-5 w-5" />
+                        تصنيف المنتج
+                      </h3>
 
-              <div className="space-y-2">
-                <Label htmlFor="video_url">رابط فيديو المنتج (اختياري)</Label>
-                <Input
-                  id="video_url"
-                  type="url"
-                  inputMode="url"
-                  value={formData.video_url}
-                  onChange={(e) => setFormData({ ...formData, video_url: e.target.value })}
-                  placeholder="https://youtube.com/watch?v=... أو رابط mp4"
-                />
-                <p className="text-xs text-muted-foreground">
-                  يظهر الفيديو داخل معرض صور المنتج (يوتيوب، فيميو، أو ملف mp4).
-                </p>
-              </div>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <Label htmlFor="category">الفئة الرئيسية</Label>
+                          <Select
+                            value={formData.category_id}
+                            onValueChange={handleCategoryChange}
+                          >
+                            <SelectTrigger>
+                              <SelectValue placeholder="اختر الفئة الرئيسية" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {categories.map((category) => (
+                                <SelectItem key={category.id} value={category.id}>
+                                  {category.name_ar}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="stock_quantity">الكمية المتوفرة *</Label>
-                <Input
-                  id="stock_quantity"
-                  type="number"
-                  value={formData.stock_quantity}
-                  onChange={(e) => setFormData({ ...formData, stock_quantity: e.target.value })}
-                  required
-                  placeholder="0"
-                />
-              </div>
-
-              {/* Category Selection - Amazon Style */}
-              <div className="space-y-4 p-4 bg-muted/30 rounded-lg border">
-                <h3 className="font-semibold text-lg flex items-center gap-2">
-                  <ChevronLeft className="h-5 w-5" />
-                  تصنيف المنتج
-                </h3>
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="category">الفئة الرئيسية</Label>
-                    <Select
-                      value={formData.category_id}
-                      onValueChange={handleCategoryChange}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="اختر الفئة الرئيسية" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {categories.map((category) => (
-                          <SelectItem key={category.id} value={category.id}>
-                            {category.name_ar}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="subcategory">التصنيف الفرعي</Label>
-                    <Select
-                      value={formData.subcategory_id}
-                      onValueChange={(value) => setFormData({ ...formData, subcategory_id: value })}
-                      disabled={!formData.category_id || filteredSubcategories.length === 0}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder={
-                          !formData.category_id 
-                            ? "اختر الفئة أولاً" 
-                            : filteredSubcategories.length === 0 
-                              ? "لا توجد تصنيفات فرعية" 
-                              : "اختر التصنيف الفرعي"
-                        } />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {filteredSubcategories.map((sub) => (
-                          <SelectItem key={sub.id} value={sub.id}>
-                            {sub.name_ar}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-
-                {formData.category_id && formData.subcategory_id && (
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground bg-background p-2 rounded">
-                    <span>المسار:</span>
-                    <span className="font-medium text-foreground">
-                      {categories.find(c => c.id === formData.category_id)?.name_ar}
-                    </span>
-                    <ChevronLeft className="h-4 w-4" />
-                    <span className="font-medium text-primary">
-                      {filteredSubcategories.find(s => s.id === formData.subcategory_id)?.name_ar}
-                    </span>
-                  </div>
-                )}
-              </div>
-
-              <div className="space-y-2">
-                <Label>الصور الحالية</Label>
-                {existingImages.length > 0 ? (
-                  <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                    {existingImages.map((img, index) => (
-                      <div key={index} className="relative">
-                        <img
-                          src={img}
-                          alt={`صورة ${index + 1}`}
-                          className="w-full h-32 object-cover rounded-lg"
-                        />
-                        <Button
-                          type="button"
-                          variant="destructive"
-                          size="sm"
-                          className="absolute top-2 left-2"
-                          onClick={() => removeExistingImage(index)}
-                        >
-                          حذف
-                        </Button>
-                        {index === 0 && (
-                          <div className="absolute bottom-2 right-2 bg-primary text-primary-foreground text-xs px-2 py-1 rounded">
-                            صورة رئيسية
-                          </div>
-                        )}
+                        <div className="space-y-2">
+                          <Label htmlFor="subcategory">التصنيف الفرعي</Label>
+                          <Select
+                            value={formData.subcategory_id}
+                            onValueChange={(value) => setFormData({ ...formData, subcategory_id: value })}
+                            disabled={!formData.category_id || filteredSubcategories.length === 0}
+                          >
+                            <SelectTrigger>
+                              <SelectValue placeholder={
+                                !formData.category_id
+                                  ? "اختر الفئة أولاً"
+                                  : filteredSubcategories.length === 0
+                                    ? "لا توجد تصنيفات فرعية"
+                                    : "اختر التصنيف الفرعي"
+                              } />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {filteredSubcategories.map((sub) => (
+                                <SelectItem key={sub.id} value={sub.id}>
+                                  {sub.name_ar}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
                       </div>
-                    ))}
-                  </div>
-                ) : (
-                  <p className="text-sm text-muted-foreground">لا توجد صور حالية</p>
-                )}
-              </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="new-images">إضافة صور جديدة</Label>
-                <Input
-                  id="new-images"
-                  type="file"
-                  accept="image/jpeg,image/jpg,image/png,image/webp,image/gif"
-                  onChange={handleFileChange}
-                  className="cursor-pointer"
-                  multiple
-                  disabled={existingImages.length + newFiles.length >= 5}
-                />
-                <p className="text-sm text-muted-foreground">
-                  يمكنك رفع حتى {5 - existingImages.length - newFiles.length} صور إضافية
-                </p>
+                      {formData.category_id && formData.subcategory_id && (
+                        <div className="flex items-center gap-2 text-sm text-muted-foreground bg-background p-2 rounded">
+                          <span>المسار:</span>
+                          <span className="font-medium text-foreground">
+                            {categories.find(c => c.id === formData.category_id)?.name_ar}
+                          </span>
+                          <ChevronLeft className="h-4 w-4" />
+                          <span className="font-medium text-primary">
+                            {filteredSubcategories.find(s => s.id === formData.subcategory_id)?.name_ar}
+                          </span>
+                        </div>
+                      )}
+                    </div>
 
-                {newPreviews.length > 0 && (
-                  <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mt-4">
-                    {newPreviews.map((preview, index) => (
-                      <div key={index} className="relative">
-                        <img
-                          src={preview}
-                          alt={`صورة جديدة ${index + 1}`}
-                          className="w-full h-32 object-cover rounded-lg"
+                    <div className="space-y-2">
+                      <Label>الصور الحالية</Label>
+                      {existingImages.length > 0 ? (
+                        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                          {existingImages.map((img, index) => (
+                            <div key={index} className="relative">
+                              <img
+                                src={img}
+                                alt={`صورة ${index + 1}`}
+                                className="w-full h-32 object-cover rounded-lg"
+                              />
+                              <Button
+                                type="button"
+                                variant="destructive"
+                                size="sm"
+                                className="absolute top-2 left-2"
+                                onClick={() => removeExistingImage(index)}
+                              >
+                                حذف
+                              </Button>
+                              {index === 0 && (
+                                <div className="absolute bottom-2 right-2 bg-primary text-primary-foreground text-xs px-2 py-1 rounded">
+                                  صورة رئيسية
+                                </div>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <p className="text-sm text-muted-foreground">لا توجد صور حالية</p>
+                      )}
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="new-images">إضافة صور جديدة</Label>
+                      <Input
+                        id="new-images"
+                        type="file"
+                        accept="image/jpeg,image/jpg,image/png,image/webp,image/gif"
+                        onChange={handleFileChange}
+                        className="cursor-pointer"
+                        multiple
+                        disabled={existingImages.length + newFiles.length >= 5}
+                      />
+                      <p className="text-sm text-muted-foreground">
+                        يمكنك رفع حتى {5 - existingImages.length - newFiles.length} صور إضافية
+                      </p>
+
+                      {newPreviews.length > 0 && (
+                        <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mt-4">
+                          {newPreviews.map((preview, index) => (
+                            <div key={index} className="relative">
+                              <img
+                                src={preview}
+                                alt={`صورة جديدة ${index + 1}`}
+                                className="w-full h-32 object-cover rounded-lg"
+                              />
+                              <Button
+                                type="button"
+                                variant="destructive"
+                                size="sm"
+                                className="absolute top-2 left-2"
+                                onClick={() => removeNewImage(index)}
+                              >
+                                حذف
+                              </Button>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </AccordionContent>
+                </AccordionItem>
+
+                <AccordionItem value="pricing">
+                  <AccordionTrigger>السعر والمخزون</AccordionTrigger>
+                  <AccordionContent className="space-y-4">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="price">السعر *</Label>
+                        <Input
+                          id="price"
+                          type="number"
+                          step="0.01"
+                          value={formData.price}
+                          onChange={(e) => setFormData({ ...formData, price: e.target.value })}
+                          required
+                          placeholder="0.00"
                         />
-                        <Button
-                          type="button"
-                          variant="destructive"
-                          size="sm"
-                          className="absolute top-2 left-2"
-                          onClick={() => removeNewImage(index)}
-                        >
-                          حذف
-                        </Button>
                       </div>
-                    ))}
-                  </div>
-                )}
-              </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="original_price">السعر الأصلي (اختياري)</Label>
+                        <Input
+                          id="original_price"
+                          type="number"
+                          step="0.01"
+                          value={formData.original_price}
+                          onChange={(e) => setFormData({ ...formData, original_price: e.target.value })}
+                          placeholder="0.00"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="stock_quantity">الكمية المتوفرة *</Label>
+                      <Input
+                        id="stock_quantity"
+                        type="number"
+                        value={formData.stock_quantity}
+                        onChange={(e) => setFormData({ ...formData, stock_quantity: e.target.value })}
+                        required
+                        placeholder="0"
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="min_order_quantity">الحد الأدنى للطلب</Label>
+                        <Input
+                          id="min_order_quantity"
+                          type="number"
+                          min="1"
+                          value={formData.min_order_quantity}
+                          onChange={(e) => setFormData({ ...formData, min_order_quantity: e.target.value })}
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="max_order_quantity">الحد الأقصى للطلب (اختياري)</Label>
+                        <Input
+                          id="max_order_quantity"
+                          type="number"
+                          min="1"
+                          value={formData.max_order_quantity}
+                          onChange={(e) => setFormData({ ...formData, max_order_quantity: e.target.value })}
+                          placeholder="بدون حد"
+                        />
+                      </div>
+                    </div>
+                  </AccordionContent>
+                </AccordionItem>
+
+                <AccordionItem value="shipping">
+                  <AccordionTrigger>الشحن والأبعاد</AccordionTrigger>
+                  <AccordionContent className="space-y-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="shipping_cost">تكلفة الشحن (ل.س)</Label>
+                      <Input
+                        id="shipping_cost"
+                        type="number"
+                        step="0.01"
+                        min="0"
+                        value={formData.shipping_cost}
+                        onChange={(e) => setFormData({ ...formData, shipping_cost: e.target.value })}
+                        placeholder="0 = شحن مجاني"
+                      />
+                      <p className="text-xs text-muted-foreground">اتركه 0 للشحن المجاني</p>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="ships_within_days">مدة التجهيز والشحن (أيام)</Label>
+                      <Input
+                        id="ships_within_days"
+                        type="number"
+                        min="0"
+                        max="60"
+                        value={formData.ships_within_days}
+                        onChange={(e) => setFormData({ ...formData, ships_within_days: e.target.value })}
+                        placeholder="مثال: 3"
+                      />
+                      <p className="text-xs text-muted-foreground">تُعرض للمشتري كـ «يشحن خلال X أيام».</p>
+                    </div>
+
+                    <div className="grid grid-cols-3 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="length_cm">الطول (سم)</Label>
+                        <Input
+                          id="length_cm"
+                          type="number"
+                          step="0.01"
+                          value={formData.length_cm}
+                          onChange={(e) => setFormData({ ...formData, length_cm: e.target.value })}
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="width_cm">العرض (سم)</Label>
+                        <Input
+                          id="width_cm"
+                          type="number"
+                          step="0.01"
+                          value={formData.width_cm}
+                          onChange={(e) => setFormData({ ...formData, width_cm: e.target.value })}
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="height_cm">الارتفاع (سم)</Label>
+                        <Input
+                          id="height_cm"
+                          type="number"
+                          step="0.01"
+                          value={formData.height_cm}
+                          onChange={(e) => setFormData({ ...formData, height_cm: e.target.value })}
+                        />
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="shipping_weight">وزن الشحن (كغ)</Label>
+                        <Input
+                          id="shipping_weight"
+                          type="number"
+                          step="0.001"
+                          value={formData.shipping_weight}
+                          onChange={(e) => setFormData({ ...formData, shipping_weight: e.target.value })}
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="shipping_class">فئة الشحن</Label>
+                        <Select
+                          value={formData.shipping_class}
+                          onValueChange={(value) => setFormData({ ...formData, shipping_class: value })}
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="اختر فئة الشحن" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {SHIPPING_CLASSES.map((c) => (
+                              <SelectItem key={c.value} value={c.value}>
+                                {c.label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="warranty">الضمان</Label>
+                      <Input
+                        id="warranty"
+                        value={formData.warranty}
+                        onChange={(e) => setFormData({ ...formData, warranty: e.target.value })}
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="return_policy">سياسة الإرجاع</Label>
+                      <Textarea
+                        id="return_policy"
+                        value={formData.return_policy}
+                        onChange={(e) => setFormData({ ...formData, return_policy: e.target.value })}
+                        rows={2}
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="country_of_origin">بلد المنشأ</Label>
+                      <Input
+                        id="country_of_origin"
+                        value={formData.country_of_origin}
+                        onChange={(e) => setFormData({ ...formData, country_of_origin: e.target.value })}
+                      />
+                    </div>
+                  </AccordionContent>
+                </AccordionItem>
+
+                <AccordionItem value="specs">
+                  <AccordionTrigger>المواصفات</AccordionTrigger>
+                  <AccordionContent className="space-y-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="gtin">الرمز الدولي GTIN</Label>
+                      <Input
+                        id="gtin"
+                        value={formData.gtin}
+                        onChange={(e) => setFormData({ ...formData, gtin: e.target.value })}
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="tags">الوسوم (اضغط Enter أو فاصلة للإضافة)</Label>
+                      <Input
+                        id="tags"
+                        value={tagInput}
+                        onChange={(e) => setTagInput(e.target.value)}
+                        onKeyDown={handleTagKeyDown}
+                        onBlur={addTag}
+                        placeholder="اكتب وسماً ثم اضغط Enter"
+                      />
+                      {tags.length > 0 && (
+                        <div className="flex flex-wrap gap-2 pt-2">
+                          {tags.map((tag) => (
+                            <Badge key={tag} variant="secondary" className="gap-1">
+                              {tag}
+                              <button type="button" onClick={() => removeTag(tag)} aria-label="حذف الوسم">
+                                <X className="h-3 w-3" />
+                              </button>
+                            </Badge>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </AccordionContent>
+                </AccordionItem>
+
+                <AccordionItem value="seo">
+                  <AccordionTrigger>SEO</AccordionTrigger>
+                  <AccordionContent className="space-y-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="slug">الرابط المختصر (Slug)</Label>
+                      <Input
+                        id="slug"
+                        value={formData.slug}
+                        onChange={(e) => setFormData({ ...formData, slug: e.target.value })}
+                        placeholder="سيتم اشتقاقه تلقائياً من اسم المنتج إن تُرك فارغاً"
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="seo_title">عنوان SEO</Label>
+                      <Input
+                        id="seo_title"
+                        value={formData.seo_title}
+                        onChange={(e) => setFormData({ ...formData, seo_title: e.target.value.slice(0, 60) })}
+                      />
+                      <p className="text-xs text-muted-foreground text-left">{formData.seo_title.length}/60</p>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="seo_description">وصف SEO</Label>
+                      <Textarea
+                        id="seo_description"
+                        value={formData.seo_description}
+                        onChange={(e) => setFormData({ ...formData, seo_description: e.target.value.slice(0, 160) })}
+                        rows={3}
+                      />
+                      <p className="text-xs text-muted-foreground text-left">{formData.seo_description.length}/160</p>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="seo_keywords">كلمات مفتاحية (مفصولة بفاصلة)</Label>
+                      <Input
+                        id="seo_keywords"
+                        value={formData.seo_keywords}
+                        onChange={(e) => setFormData({ ...formData, seo_keywords: e.target.value })}
+                      />
+                    </div>
+                  </AccordionContent>
+                </AccordionItem>
+
+                <AccordionItem value="variants">
+                  <AccordionTrigger>الخيارات والمتغيرات</AccordionTrigger>
+                  <AccordionContent>
+                    {id && <ProductVariantsManager productId={id} />}
+                  </AccordionContent>
+                </AccordionItem>
+              </Accordion>
 
               <div className="flex gap-4">
                 <Button type="submit" className="flex-1" size="lg" disabled={loading}>

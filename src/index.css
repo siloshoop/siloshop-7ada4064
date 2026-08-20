@@ -134,9 +134,13 @@ All colors MUST be HSL.
     
     --success: 142 76% 36%;
     --success-foreground: 0 0% 100%;
-    
+
+    --warning: 38 92% 55%;
+    --warning-foreground: 222 47% 11%;
+
     --sale: 340 82% 52%;
     --sale-foreground: 0 0% 100%;
+
     --sidebar-background: 222 47% 11%;
     --sidebar-foreground: 210 40% 98%;
     --sidebar-primary: 263 70% 50%;

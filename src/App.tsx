@@ -79,6 +79,7 @@ const AdminUsers = lazy(() => import("./pages/admin/AdminUsers"));
 const ProductModeration = lazy(() => import("./pages/admin/ProductModeration"));
 const ManageCategoriesAdmin = lazy(() => import("./pages/admin/ManageCategories"));
 const ManageBrands = lazy(() => import("./pages/admin/ManageBrands"));
+const AdminAttributes = lazy(() => import("./pages/admin/AdminAttributes"));
 const ManageBanners = lazy(() => import("./pages/admin/ManageBanners"));
 const AdminNotifications = lazy(() => import("./pages/admin/AdminNotifications"));
 const AdminRevenue = lazy(() => import("./pages/admin/Revenue"));
@@ -165,6 +166,7 @@ const App = () => (
             <Route path="/admin/orders" element={<RequireRole role="admin"><AdminOrders /></RequireRole>} />
             <Route path="/admin/categories" element={<RequireRole role="admin"><ManageCategoriesAdmin /></RequireRole>} />
             <Route path="/admin/brands" element={<RequireRole role="admin"><ManageBrands /></RequireRole>} />
+            <Route path="/admin/attributes" element={<RequireRole role="admin"><AdminAttributes /></RequireRole>} />
             <Route path="/admin/homepage" element={<RequireRole role={["admin","super_admin"]}><ShowroomManagement /></RequireRole>} />
             <Route path="/admin/banners" element={<RequireRole role="admin"><ManageBanners /></RequireRole>} />
             <Route path="/admin/reports" element={<RequireRole role="admin"><Reports /></RequireRole>} />

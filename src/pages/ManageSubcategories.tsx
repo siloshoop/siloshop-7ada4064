@@ -42,6 +42,14 @@ const iconOptions = [
   "Shirt", "Circle", "Waves", "Bike", "BookMarked", "Library", "Star", "Link", "Watch"
 ];
 
+const slugify = (text: string) =>
+  text
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9\s-]/g, "")
+    .replace(/\s+/g, "-")
+    .replace(/-+/g, "-");
+
 const ManageSubcategories = () => {
   const { user, loading: authLoading } = useAuth();
   const [profile, setProfile] = useState<any>(null);
@@ -59,6 +67,13 @@ const ManageSubcategories = () => {
     description: "",
     sort_order: 0,
     is_active: true,
+    slug: "",
+    image_url: "",
+    banner_url: "",
+    seo_title: "",
+    seo_description: "",
+    seo_keywords: "",
+    parent_subcategory_id: "" as string | null,
   });
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -129,6 +144,13 @@ const ManageSubcategories = () => {
         description: subcategory.description || "",
         sort_order: subcategory.sort_order || 0,
         is_active: subcategory.is_active,
+        slug: subcategory.slug || "",
+        image_url: subcategory.image_url || "",
+        banner_url: subcategory.banner_url || "",
+        seo_title: subcategory.seo_title || "",
+        seo_description: subcategory.seo_description || "",
+        seo_keywords: subcategory.seo_keywords || "",
+        parent_subcategory_id: subcategory.parent_subcategory_id || "",
       });
     } else {
       setEditingSubcategory(null);
@@ -140,6 +162,13 @@ const ManageSubcategories = () => {
         description: "",
         sort_order: 0,
         is_active: true,
+        slug: "",
+        image_url: "",
+        banner_url: "",
+        seo_title: "",
+        seo_description: "",
+        seo_keywords: "",
+        parent_subcategory_id: "",
       });
     }
     setDialogOpen(true);
@@ -157,17 +186,28 @@ const ManageSubcategories = () => {
       return;
     }
 
+    const payload = {
+      ...formData,
+      slug: formData.slug.trim() || slugify(formData.name_en || formData.name_ar),
+      image_url: formData.image_url.trim() || null,
+      banner_url: formData.banner_url.trim() || null,
+      seo_title: formData.seo_title.trim() || null,
+      seo_description: formData.seo_description.trim() || null,
+      seo_keywords: formData.seo_keywords.trim() || null,
+      parent_subcategory_id: formData.parent_subcategory_id || null,
+    };
+
     try {
       if (editingSubcategory) {
         const { error } = await supabase
           .from("subcategories")
-          .update(formData)
+          .update(payload)
           .eq("id", editingSubcategory.id);
 
         if (error) throw error;
 
         setSubcategories(subcategories.map(s =>
-          s.id === editingSubcategory.id ? { ...s, ...formData } : s
+          s.id === editingSubcategory.id ? { ...s, ...payload } : s
         ));
 
         toast({
@@ -177,7 +217,7 @@ const ManageSubcategories = () => {
       } else {
         const { data, error } = await supabase
           .from("subcategories")
-          .insert(formData)
+          .insert(payload)
           .select("*, categories(name_ar)")
           .single();
 
@@ -298,7 +338,7 @@ const ManageSubcategories = () => {
                     إضافة تصنيف فرعي
                   </Button>
                 </DialogTrigger>
-                <DialogContent className="max-w-md">
+                <DialogContent className="max-h-[85vh] max-w-lg overflow-y-auto">
                   <DialogHeader>
                     <DialogTitle>
                       {editingSubcategory ? "تعديل التصنيف الفرعي" : "إضافة تصنيف فرعي جديد"}
@@ -381,6 +421,88 @@ const ManageSubcategories = () => {
                     </div>
 
                     <div className="space-y-2">
+                      <Label htmlFor="slug">الرابط المختصر (slug)</Label>
+                      <Input
+                        id="slug"
+                        value={formData.slug}
+                        onChange={(e) => setFormData({ ...formData, slug: e.target.value })}
+                        placeholder={formData.name_en ? slugify(formData.name_en) : "يُنشأ تلقائيًا"}
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="parent_subcategory_id">التصنيف الفرعي الأب</Label>
+                      <Select
+                        value={formData.parent_subcategory_id || "none"}
+                        onValueChange={(value) => setFormData({ ...formData, parent_subcategory_id: value === "none" ? "" : value })}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="بدون (تصنيف فرعي رئيسي)" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="none">بدون (تصنيف فرعي رئيسي)</SelectItem>
+                          {subcategories
+                            .filter((s) => s.category_id === formData.category_id && s.id !== editingSubcategory?.id)
+                            .map((s) => (
+                              <SelectItem key={s.id} value={s.id}>
+                                {s.name_ar}
+                              </SelectItem>
+                            ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="image_url">رابط الصورة</Label>
+                      <Input
+                        id="image_url"
+                        value={formData.image_url}
+                        onChange={(e) => setFormData({ ...formData, image_url: e.target.value })}
+                        placeholder="https://..."
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="banner_url">رابط صورة البانر</Label>
+                      <Input
+                        id="banner_url"
+                        value={formData.banner_url}
+                        onChange={(e) => setFormData({ ...formData, banner_url: e.target.value })}
+                        placeholder="https://..."
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="seo_title">عنوان SEO</Label>
+                      <Input
+                        id="seo_title"
+                        value={formData.seo_title}
+                        onChange={(e) => setFormData({ ...formData, seo_title: e.target.value })}
+                        placeholder="عنوان الصفحة لمحركات البحث"
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="seo_description">وصف SEO</Label>
+                      <Input
+                        id="seo_description"
+                        value={formData.seo_description}
+                        onChange={(e) => setFormData({ ...formData, seo_description: e.target.value })}
+                        placeholder="وصف الصفحة لمحركات البحث"
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="seo_keywords">الكلمات المفتاحية</Label>
+                      <Input
+                        id="seo_keywords"
+                        value={formData.seo_keywords}
+                        onChange={(e) => setFormData({ ...formData, seo_keywords: e.target.value })}
+                        placeholder="كلمات مفصولة بفواصل"
+                      />
+                    </div>
+
+                    <div className="space-y-2">
                       <Label htmlFor="sort_order">الترتيب</Label>
                       <Input
                         id="sort_order"
@@ -455,6 +577,14 @@ const ManageSubcategories = () => {
                             <div className="font-medium">{sub.name_ar}</div>
                             {sub.name_en && (
                               <div className="text-sm text-muted-foreground">{sub.name_en}</div>
+                            )}
+                            {sub.slug && (
+                              <div className="text-xs text-muted-foreground">/{sub.slug}</div>
+                            )}
+                            {sub.parent_subcategory_id && (
+                              <div className="text-xs text-muted-foreground">
+                                فرعي من: {subcategories.find((p) => p.id === sub.parent_subcategory_id)?.name_ar || "—"}
+                              </div>
                             )}
                           </div>
                         </TableCell>

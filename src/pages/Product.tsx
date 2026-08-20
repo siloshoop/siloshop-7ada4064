@@ -28,6 +28,11 @@ import ReturnsPolicyNote from "@/components/ReturnsPolicyNote";
 import { useRecentlyViewed } from "@/hooks/useRecentlyViewed";
 import SimilarProducts from "@/components/SimilarProducts";
 import MarketPriceBar from "@/components/MarketPriceBar";
+import SeoHead from "@/components/SeoHead";
+import ProductVariantPicker from "@/components/product/ProductVariantPicker";
+import type { Database } from "@/integrations/supabase/types";
+
+type ProductVariant = Database["public"]["Tables"]["product_variants"]["Row"];
 interface Product {
   id: string;
   name: string;
@@ -53,6 +58,24 @@ interface Product {
   reviews: {
     rating: number;
   }[];
+  name_en?: string | null;
+  short_description?: string | null;
+  gtin?: string | null;
+  min_order_quantity?: number | null;
+  max_order_quantity?: number | null;
+  length_cm?: number | null;
+  width_cm?: number | null;
+  height_cm?: number | null;
+  shipping_weight?: number | null;
+  shipping_class?: string | null;
+  warranty?: string | null;
+  return_policy?: string | null;
+  country_of_origin?: string | null;
+  tags?: string[] | null;
+  slug?: string | null;
+  seo_title?: string | null;
+  seo_description?: string | null;
+  seo_keywords?: string | null;
 }
 
 const Product = () => {
@@ -67,6 +90,9 @@ const Product = () => {
   const { toast } = useToast();
   const { trackProductView } = useRecentlyViewed();
   const [vendorStats, setVendorStats] = useState<{ avg: number; count: number }>({ avg: 0, count: 0 });
+  const [variants, setVariants] = useState<ProductVariant[]>([]);
+  const [selectedVariant, setSelectedVariant] = useState<ProductVariant | null>(null);
+  const viewTrackedRef = useState(() => ({ current: "" }))[0];
 
   const addToCompare = () => {
     const currentCompare = searchParams.get("compare")?.split(",") || [];
@@ -123,6 +149,7 @@ const Product = () => {
           
           const vendorName = vendorInfo?.[0]?.full_name || null;
           setProduct({ ...data, vendor: { full_name: vendorName } } as any);
+          setQuantity((data as any).min_order_quantity && (data as any).min_order_quantity > 1 ? (data as any).min_order_quantity : 1);
 
           // Seller rating summary for the seller information card
           const { data: vendorRatings } = await supabase
@@ -134,6 +161,20 @@ const Product = () => {
               avg: vendorRatings.reduce((s, r) => s + r.rating, 0) / vendorRatings.length,
               count: vendorRatings.length,
             });
+          }
+
+          // Fetch active variants
+          const { data: variantData } = await supabase
+            .from("product_variants")
+            .select("*")
+            .eq("product_id", data.id)
+            .eq("is_active", true);
+          setVariants(variantData || []);
+
+          // Track product view once per product
+          if (viewTrackedRef.current !== data.id) {
+            viewTrackedRef.current = data.id;
+            supabase.rpc("track_product_metric", { _product_id: data.id, _metric: "view" });
           }
         } else {
           setProduct(null);
@@ -184,7 +225,7 @@ const Product = () => {
       } else {
         ({ error } = await supabase
           .from("cart_items")
-          .insert({ user_id: user.id, product_id: id, quantity }));
+          .insert({ user_id: user.id, product_id: id, quantity: Math.max(quantity, minQty) }));
       }
 
       if (error) throw error;
@@ -231,15 +272,21 @@ const Product = () => {
     );
   }
 
-  const discount = product.original_price
-    ? Math.round(((product.original_price - product.price) / product.original_price) * 100)
+  // Prepare images array for gallery
+  const hasVariants = variants.length > 0;
+  const effectivePrice = selectedVariant?.discount_price ?? selectedVariant?.price ?? product.price;
+  const effectiveOriginalPrice = selectedVariant ? (selectedVariant.discount_price ? selectedVariant.price : null) : product.original_price;
+  const effectiveStock = hasVariants ? (selectedVariant?.stock_quantity ?? 0) : product.stock_quantity;
+  const discount = effectiveOriginalPrice
+    ? Math.round(((effectiveOriginalPrice - effectivePrice) / effectiveOriginalPrice) * 100)
     : 0;
 
-  // Prepare images array for gallery
-  const productImages = product.images && product.images.length > 0 
-    ? product.images 
-    : product.image_url 
-    ? [product.image_url] 
+  const productImages = selectedVariant?.image_url
+    ? [selectedVariant.image_url, ...(product.images || [])]
+    : product.images && product.images.length > 0
+    ? product.images
+    : product.image_url
+    ? [product.image_url]
     : [];
 
   // Calculate average rating
@@ -247,16 +294,61 @@ const Product = () => {
     ? product.reviews.reduce((sum, r) => sum + r.rating, 0) / product.reviews.length
     : 0;
 
-  const inStock = product.stock_quantity > 0;
-  const lowStock = inStock && product.stock_quantity <= 5;
+  const inStock = effectiveStock > 0;
+  const lowStock = inStock && effectiveStock <= 5;
+  const minQty = product.min_order_quantity && product.min_order_quantity > 0 ? product.min_order_quantity : 1;
+  const maxQty = Math.min(
+    product.max_order_quantity && product.max_order_quantity > 0 ? product.max_order_quantity : Infinity,
+    effectiveStock || Infinity
+  );
+  const canAddToCart = inStock && (!hasVariants || !!selectedVariant);
 
   const buyNow = async () => {
     await addToCart();
     navigate("/cart");
   };
 
+  const canonicalUrl = typeof window !== "undefined" ? window.location.href : undefined;
+  const seoTitleRaw = product.seo_title || `${product.name} | Silo Shop`;
+  const seoTitle = seoTitleRaw.length > 60 ? seoTitleRaw.slice(0, 57) + "..." : seoTitleRaw;
+  const seoDescRaw = product.seo_description || product.short_description || product.description || "";
+  const seoDescription = seoDescRaw.length > 160 ? seoDescRaw.slice(0, 157) + "..." : seoDescRaw;
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    name: product.name,
+    image: productImages,
+    description: seoDescription || undefined,
+    sku: selectedVariant?.sku || product.sku || undefined,
+    brand: product.brands?.name_ar ? { "@type": "Brand", name: product.brands.name_ar } : undefined,
+    ...(product.reviews && product.reviews.length > 0
+      ? {
+          aggregateRating: {
+            "@type": "AggregateRating",
+            ratingValue: averageRating.toFixed(1),
+            reviewCount: product.reviews.length,
+          },
+        }
+      : {}),
+    offers: {
+      "@type": "Offer",
+      price: effectivePrice,
+      priceCurrency: "SYP",
+      availability: inStock ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
+    },
+  };
+
   return (
     <div className="min-h-screen flex flex-col pb-20 md:pb-0">
+      <SeoHead
+        title={seoTitle}
+        description={seoDescription}
+        keywords={product.seo_keywords}
+        canonicalUrl={canonicalUrl}
+        ogImage={productImages[0] || undefined}
+        ogType="product"
+        jsonLd={jsonLd}
+      />
       <Navbar />
       <main className="flex-1 container max-w-6xl px-4 py-6 md:py-8">
         <div className="grid lg:grid-cols-[minmax(0,1.05fr)_minmax(0,1fr)] gap-6 lg:gap-10 animate-fade-in">
@@ -291,6 +383,22 @@ const Product = () => {
                 {product.name}
               </h1>
 
+              {product.short_description && (
+                <p className="text-sm text-muted-foreground leading-relaxed">
+                  {product.short_description}
+                </p>
+              )}
+
+              {product.tags && product.tags.length > 0 && (
+                <div className="flex flex-wrap gap-1.5 pt-0.5">
+                  {product.tags.map((tag) => (
+                    <Badge key={tag} variant="secondary" className="rounded-full text-[11px] font-normal">
+                      {tag}
+                    </Badge>
+                  ))}
+                </div>
+              )}
+
               <ProductOriginBadge
                 productType={product.product_type}
                 shipsWithinDays={product.ships_within_days}
@@ -323,12 +431,12 @@ const Product = () => {
             <div className="space-y-1.5">
               <div className="flex items-baseline gap-2 flex-wrap">
                 <span className="text-3xl font-bold text-primary">
-                  {product.price.toLocaleString()}
+                  {effectivePrice.toLocaleString()}
                 </span>
                 <span className="text-sm text-foreground/70">ل.س</span>
-                {product.original_price && (
+                {effectiveOriginalPrice && (
                   <span className="text-sm text-muted-foreground line-through">
-                    {product.original_price.toLocaleString()} ل.س
+                    {effectiveOriginalPrice.toLocaleString()} ل.س
                   </span>
                 )}
                 {discount > 0 && (
@@ -339,7 +447,7 @@ const Product = () => {
               </div>
               <MarketPriceBar
                 productId={product.id}
-                price={product.price}
+                price={effectivePrice}
                 categoryId={product.category_id}
               />
             </div>
@@ -359,7 +467,7 @@ const Product = () => {
                 {inStock ? "متوفر الآن" : "غير متوفر"}
               </span>
               {inStock && (
-                <span className="text-muted-foreground">· {product.stock_quantity} قطعة</span>
+                <span className="text-muted-foreground">· {effectiveStock} قطعة</span>
               )}
               {lowStock && (
                 <span className="text-amber-600 dark:text-amber-400 font-medium">
@@ -375,6 +483,16 @@ const Product = () => {
               </span>
             </div>
 
+            {/* Variant picker */}
+            {hasVariants && (
+              <div className="rounded-xl border bg-muted/20 p-4">
+                <ProductVariantPicker variants={variants} onSelect={setSelectedVariant} />
+                {!selectedVariant && (
+                  <p className="text-xs text-muted-foreground pt-2">يرجى اختيار كافة الخيارات لعرض السعر والتوفر</p>
+                )}
+              </div>
+            )}
+
             {/* Quantity + primary actions */}
             <div className="space-y-3">
               <div className="flex items-center gap-4">
@@ -384,7 +502,8 @@ const Product = () => {
                     size="icon"
                     variant="ghost"
                     className="h-9 w-9 rounded-none"
-                    onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                    onClick={() => setQuantity(Math.max(minQty, quantity - 1))}
+                    disabled={quantity <= minQty}
                     aria-label="إنقاص الكمية"
                   >
                     <Minus className="h-4 w-4" />
@@ -395,14 +514,21 @@ const Product = () => {
                     variant="ghost"
                     className="h-9 w-9 rounded-none"
                     onClick={() =>
-                      setQuantity(Math.min(product.stock_quantity, quantity + 1))
+                      setQuantity(Math.min(maxQty, quantity + 1))
                     }
-                    disabled={quantity >= product.stock_quantity}
+                    disabled={quantity >= maxQty}
                     aria-label="زيادة الكمية"
                   >
                     <Plus className="h-4 w-4" />
                   </Button>
                 </div>
+                {(product.min_order_quantity || product.max_order_quantity) && (
+                  <span className="text-xs text-muted-foreground">
+                    {product.min_order_quantity ? `الحد الأدنى: ${product.min_order_quantity}` : ""}
+                    {product.min_order_quantity && product.max_order_quantity ? " · " : ""}
+                    {product.max_order_quantity ? `الحد الأقصى: ${product.max_order_quantity}` : ""}
+                  </span>
+                )}
               </div>
 
               <div className="hidden md:flex gap-2">
@@ -411,7 +537,7 @@ const Product = () => {
                   variant="outline"
                   className="flex-1 rounded-full"
                   onClick={addToCart}
-                  disabled={addingToCart || !inStock}
+                  disabled={addingToCart || !canAddToCart}
                 >
                   {addingToCart ? (
                     <Loader2 className="ml-2 h-4 w-4 animate-spin" />
@@ -424,7 +550,7 @@ const Product = () => {
                   size="lg"
                   className="flex-1 rounded-full"
                   onClick={buyNow}
-                  disabled={addingToCart || !inStock}
+                  disabled={addingToCart || !canAddToCart}
                 >
                   <Zap className="ml-2 h-4 w-4" />
                   اشترِ الآن
@@ -548,8 +674,30 @@ const Product = () => {
                 />
                 {(product.sku || product.barcode) && (
                   <div className="flex flex-wrap gap-4 text-xs text-muted-foreground">
-                    {product.sku && <span>رمز المنتج (SKU): {product.sku}</span>}
+                    {product.sku && <span>رمز المنتج (SKU): {selectedVariant?.sku || product.sku}</span>}
                     {product.barcode && <span>الباركود: {product.barcode}</span>}
+                  </div>
+                )}
+                {(product.warranty || product.return_policy || product.country_of_origin || product.gtin || product.shipping_weight || product.length_cm || product.width_cm || product.height_cm) && (
+                  <div className="rounded-xl border divide-y text-sm">
+                    {product.warranty && (
+                      <div className="flex justify-between px-3 py-2"><span className="text-muted-foreground">الضمان</span><span>{product.warranty}</span></div>
+                    )}
+                    {product.return_policy && (
+                      <div className="flex justify-between px-3 py-2"><span className="text-muted-foreground">سياسة الإرجاع</span><span>{product.return_policy}</span></div>
+                    )}
+                    {product.country_of_origin && (
+                      <div className="flex justify-between px-3 py-2"><span className="text-muted-foreground">بلد المنشأ</span><span>{product.country_of_origin}</span></div>
+                    )}
+                    {product.shipping_weight && (
+                      <div className="flex justify-between px-3 py-2"><span className="text-muted-foreground">الوزن</span><span>{product.shipping_weight} كغ</span></div>
+                    )}
+                    {(product.length_cm || product.width_cm || product.height_cm) && (
+                      <div className="flex justify-between px-3 py-2"><span className="text-muted-foreground">الأبعاد (طول×عرض×ارتفاع)</span><span>{[product.length_cm, product.width_cm, product.height_cm].filter(Boolean).join(" × ")} سم</span></div>
+                    )}
+                    {product.gtin && (
+                      <div className="flex justify-between px-3 py-2"><span className="text-muted-foreground">GTIN</span><span>{product.gtin}</span></div>
+                    )}
                   </div>
                 )}
                 <div className="rounded-xl border bg-muted/30 p-3 text-xs text-muted-foreground">
@@ -620,7 +768,7 @@ const Product = () => {
             variant="outline"
             className="flex-1 rounded-full"
             onClick={addToCart}
-            disabled={addingToCart || !inStock}
+            disabled={addingToCart || !canAddToCart}
           >
             {addingToCart ? (
               <Loader2 className="ml-1 h-4 w-4 animate-spin" />
@@ -632,7 +780,7 @@ const Product = () => {
           <Button
             className="flex-1 rounded-full"
             onClick={buyNow}
-            disabled={addingToCart || !inStock}
+            disabled={addingToCart || !canAddToCart}
           >
             <Zap className="ml-1 h-4 w-4" />
             <span className="text-xs">اشترِ الآن</span>

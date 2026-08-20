@@ -3,7 +3,7 @@ import {
   FolderTree, Tag, LayoutTemplate, Image, Flag, MessagesSquare, Bell,
   BarChart3, DollarSign, Globe, Wallet, ToggleLeft, ScrollText, ShieldAlert,
   CreditCard, RotateCcw, Megaphone, UserCog, FileClock, Star, Ticket, Boxes,
-  FileText, Settings,
+  FileText, Settings, SlidersHorizontal,
 } from "lucide-react";
 import type { FeatureFlagKey } from "@/hooks/useFeatureFlags";
 
@@ -29,6 +29,7 @@ export const ADMIN_MODULES: AdminModule[] = [
   { label: "المتاجر", description: "متاجر البائعين المعتمدة", href: "/admin/stores", icon: Store },
   { label: "الفئات", description: "الفئات والفئات الفرعية", href: "/admin/categories", icon: FolderTree },
   { label: "العلامات التجارية", description: "إدارة الماركات", href: "/admin/brands", icon: Tag },
+  { label: "خصائص المنتجات", description: "الخصائص العالمية (اللون، المقاس، ...)", href: "/admin/attributes", icon: SlidersHorizontal },
   { label: "أقسام الصفحة الرئيسية", description: "واجهة العرض والترتيب", href: "/admin/homepage", icon: LayoutTemplate },
   { label: "البانرات", description: "الإعلانات الترويجية الداخلية", href: "/admin/banners", icon: Image },
   { label: "البلاغات", description: "بلاغات المنتجات والبائعين", href: "/admin/reports", icon: Flag },

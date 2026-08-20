@@ -121,8 +121,6 @@ const defaultFilters: Filters = {
   minDiscount: 0,
 };
 
-const FILTERS_STORAGE_KEY = "search_filters_v2";
-
 const DELIVERY_OPTIONS = [
   { value: 0, label: "أي مدة" },
   { value: 2, label: "خلال يومين" },
@@ -133,15 +131,36 @@ const DELIVERY_OPTIONS = [
 
 const DISCOUNT_OPTIONS = [10, 25, 50, 70];
 
-const loadStoredFilters = (): Partial<Filters> | null => {
+/** Shareable, bookmarkable filter state lives in the URL — no client storage. */
+const FILTER_PARAM = "f";
+
+const readFiltersFromUrl = (params: URLSearchParams): Partial<Filters> | null => {
+  const raw = params.get(FILTER_PARAM);
+  if (!raw) return null;
   try {
-    const raw = localStorage.getItem(FILTERS_STORAGE_KEY);
-    if (!raw) return null;
-    return JSON.parse(raw);
+    const parsed = JSON.parse(decodeURIComponent(escape(atob(raw))));
+    return typeof parsed === "object" && parsed !== null ? (parsed as Partial<Filters>) : null;
   } catch {
     return null;
   }
 };
+
+const encodeFilters = (filters: Filters): string | null => {
+  const diff: Record<string, unknown> = {};
+  (Object.keys(defaultFilters) as (keyof Filters)[]).forEach((key) => {
+    if (key === "search") return;
+    if (JSON.stringify(filters[key]) !== JSON.stringify(defaultFilters[key])) {
+      diff[key] = filters[key];
+    }
+  });
+  if (Object.keys(diff).length === 0) return null;
+  try {
+    return btoa(unescape(encodeURIComponent(JSON.stringify(diff))));
+  } catch {
+    return null;
+  }
+};
+
 
 const SearchPage = () => {
   const [searchParams, setSearchParams] = useSearchParams();

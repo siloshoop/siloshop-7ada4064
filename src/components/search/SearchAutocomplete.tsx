@@ -37,11 +37,20 @@ const SearchAutocomplete = ({
     useSearchSuggestions(value);
 
   useEffect(() => {
-    const sync = () => setRecent(getRecentSearches());
+    let active = true;
+    const sync = () => {
+      void getRecentSearches().then((terms) => {
+        if (active) setRecent(terms);
+      });
+    };
     sync();
     window.addEventListener("recent-searches-updated", sync);
-    return () => window.removeEventListener("recent-searches-updated", sync);
+    return () => {
+      active = false;
+      window.removeEventListener("recent-searches-updated", sync);
+    };
   }, []);
+
 
   // Close on outside click / Escape
   useEffect(() => {
@@ -216,9 +225,10 @@ const SearchAutocomplete = ({
                   size="sm"
                   className="h-6 px-2 text-[11px]"
                   onClick={() => {
-                    clearRecentSearches();
+                    void clearRecentSearches();
                     setRecent([]);
                   }}
+
                 >
                   حذف الكل
                 </Button>
@@ -236,7 +246,7 @@ const SearchAutocomplete = ({
                   <button
                     type="button"
                     aria-label={`حذف ${term}`}
-                    onClick={() => setRecent(removeRecentSearch(term))}
+                    onClick={() => void removeRecentSearch(term).then(setRecent)}
                     className="p-2 text-muted-foreground hover:text-foreground"
                   >
                     <X className="h-3.5 w-3.5" />

@@ -346,6 +346,35 @@ export type Database = {
           },
         ]
       }
+      compare_items: {
+        Row: {
+          created_at: string
+          id: string
+          product_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          product_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          product_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "compare_items_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       contact_messages: {
         Row: {
           created_at: string
@@ -2032,6 +2061,27 @@ export type Database = {
         }
         Relationships: []
       }
+      search_history: {
+        Row: {
+          id: string
+          searched_at: string
+          term: string
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          searched_at?: string
+          term: string
+          user_id: string
+        }
+        Update: {
+          id?: string
+          searched_at?: string
+          term?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       seller_applications: {
         Row: {
           address: string | null
@@ -2864,6 +2914,10 @@ export type Database = {
       }
       archive_product: { Args: { _product_id: string }; Returns: string }
       bootstrap_first_super_admin: { Args: { _email: string }; Returns: Json }
+      can_access_conversation_file: {
+        Args: { _path: string }
+        Returns: boolean
+      }
       cancel_order: {
         Args: { _order_id: string; _reason: string }
         Returns: undefined
@@ -3066,6 +3120,7 @@ export type Database = {
         }
         Returns: string
       }
+      record_search_term: { Args: { _term: string }; Returns: string[] }
       redeem_coupon: {
         Args: { _code: string; _subtotal: number }
         Returns: {

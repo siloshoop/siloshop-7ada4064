@@ -4,7 +4,7 @@ import { ArrowLeft, BadgeCheck, ChevronLeft, ChevronRight, Sparkles, Star, Store
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useShowroom, type ShowroomItem, type ShowroomItemLive } from "@/hooks/useShowroom";
-import { showroomDemoItems } from "@/data/showroomDemo";
+
 
 const formatPrice = (value: number) => `${Number(value).toLocaleString("ar-SY")} ل.س`;
 const targetOf = (item: ShowroomItem) => {
@@ -14,11 +14,11 @@ const targetOf = (item: ShowroomItem) => {
   return null;
 };
 
-interface StandProps { item: ShowroomItemLive; offset: number; isCenter: boolean; isDemo: boolean; priority: boolean; onSelect: () => void; }
+interface StandProps { item: ShowroomItemLive; offset: number; isCenter: boolean; priority: boolean; onSelect: () => void; }
 
-const ShowroomStand = memo(({ item, offset, isCenter, isDemo, priority, onSelect }: StandProps) => {
+const ShowroomStand = memo(({ item, offset, isCenter, priority, onSelect }: StandProps) => {
   const navigate = useNavigate();
-  const target = isDemo ? null : targetOf(item);
+  const target = targetOf(item);
   const abs = Math.abs(offset);
   const style: React.CSSProperties = {
     transform: `translate(-50%, -50%) translateX(${offset * 58}%) translateZ(${isCenter ? 0 : -110}px) rotateY(${offset * -12}deg) scale(${isCenter ? 1 : 0.84})`,
@@ -46,12 +46,10 @@ const ShowroomStand = memo(({ item, offset, isCenter, isDemo, priority, onSelect
 });
 ShowroomStand.displayName = "ShowroomStand";
 
-interface PremiumShowroomProps { showEmptyState?: boolean; demoItems?: ShowroomItemLive[]; demoFallback?: boolean; }
-const PremiumShowroom = ({ showEmptyState = false, demoItems, demoFallback = false }: PremiumShowroomProps) => {
-  const { items: liveItems, loading: liveLoading } = useShowroom();
-  const usingDemo = Boolean(demoItems) || (demoFallback && !liveLoading && liveItems.length === 0);
-  const items = demoItems ?? (usingDemo ? showroomDemoItems : liveItems);
-  const loading = demoItems ? false : liveLoading;
+interface PremiumShowroomProps { showEmptyState?: boolean; }
+const PremiumShowroom = ({ showEmptyState = false }: PremiumShowroomProps) => {
+  const { items, loading } = useShowroom();
+
   const [index, setIndex] = useState(0);
   const [drag, setDrag] = useState(0);
   const startX = useRef<number | null>(null);
@@ -65,9 +63,9 @@ const PremiumShowroom = ({ showEmptyState = false, demoItems, demoFallback = fal
 
   return <section aria-label="معرض العروض المميزة" className="relative overflow-hidden bg-gradient-to-br from-secondary via-background to-accent/5">
     <div className="container relative px-4 py-8 md:py-12">
-      <div className="mb-6 flex items-end justify-between gap-4"><div><span className="inline-flex items-center gap-2 rounded-full bg-primary/10 px-4 py-1.5 text-sm font-semibold text-primary"><Sparkles className="h-4 w-4" />المعرض المميز</span><h1 className="mt-3 text-2xl font-bold leading-tight md:text-4xl">تجربة تسوّق <span className="bg-gradient-to-l from-primary to-accent bg-clip-text text-transparent">فاخرة</span> مختارة بعناية</h1>{usingDemo && <p className="mt-2 text-xs font-medium text-muted-foreground">عرض تجريبي للتصميم فقط — لا توجد عناصر منشورة حالياً</p>}</div><div className="hidden gap-2 md:flex"><Button variant="outline" size="icon" aria-label="السابق" onClick={() => go(-1)} disabled={index === 0}><ChevronRight className="h-4 w-4" /></Button><Button variant="outline" size="icon" aria-label="التالي" onClick={() => go(1)} disabled={index >= count - 1}><ChevronLeft className="h-4 w-4" /></Button></div></div>
+      <div className="mb-6 flex items-end justify-between gap-4"><div><span className="inline-flex items-center gap-2 rounded-full bg-primary/10 px-4 py-1.5 text-sm font-semibold text-primary"><Sparkles className="h-4 w-4" />المعرض المميز</span><h1 className="mt-3 text-2xl font-bold leading-tight md:text-4xl">تجربة تسوّق <span className="bg-gradient-to-l from-primary to-accent bg-clip-text text-transparent">فاخرة</span> مختارة بعناية</h1></div><div className="hidden gap-2 md:flex"><Button variant="outline" size="icon" aria-label="السابق" onClick={() => go(-1)} disabled={index === 0}><ChevronRight className="h-4 w-4" /></Button><Button variant="outline" size="icon" aria-label="التالي" onClick={() => go(1)} disabled={index >= count - 1}><ChevronLeft className="h-4 w-4" /></Button></div></div>
       <div ref={stageRef} tabIndex={0} role="group" aria-label="عناصر المعرض — استخدم الأسهم للتنقل" className="relative h-[380px] touch-pan-y select-none md:h-[460px]" style={{ perspective: "1200px" }} onKeyDown={(event) => { if (event.key === "ArrowRight") go(-1); if (event.key === "ArrowLeft") go(1); }} onPointerDown={(event) => { startX.current = event.clientX; event.currentTarget.setPointerCapture(event.pointerId); }} onPointerMove={(event) => { if (startX.current != null) setDrag(event.clientX - startX.current); }} onPointerUp={() => { if (startX.current != null && Math.abs(drag) > (stageRef.current?.offsetWidth ?? 1) * 0.08) go(drag > 0 ? -1 : 1); startX.current = null; setDrag(0); }} onPointerCancel={() => { startX.current = null; setDrag(0); }}>
-        {items.map((item, itemIndex) => Math.abs(itemIndex - index) <= 1 ? <ShowroomStand key={item.id} item={item} offset={itemIndex - index + dragOffset} isCenter={itemIndex === index} priority={itemIndex === 0} onSelect={() => setIndex(itemIndex)} isDemo={usingDemo} /> : null)}
+        {items.map((item, itemIndex) => Math.abs(itemIndex - index) <= 1 ? <ShowroomStand key={item.id} item={item} offset={itemIndex - index + dragOffset} isCenter={itemIndex === index} priority={itemIndex === 0} onSelect={() => setIndex(itemIndex)} /> : null)}
       </div>
       <div className="mt-4 flex items-center justify-center gap-2">{items.map((item, itemIndex) => <Button key={item.id} variant="ghost" size="icon" aria-label={`الانتقال إلى ${item.title}`} onClick={() => setIndex(itemIndex)} className={cn("h-6 w-6 rounded-full p-0", itemIndex === index ? "bg-primary/15" : "bg-transparent")}><span className={cn("h-1.5 rounded-full transition-[width,background-color]", itemIndex === index ? "w-4 bg-primary" : "w-1.5 bg-border")} /></Button>)}</div>
     </div>

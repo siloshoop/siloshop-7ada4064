@@ -121,8 +121,6 @@ const defaultFilters: Filters = {
   minDiscount: 0,
 };
 
-const FILTERS_STORAGE_KEY = "search_filters_v2";
-
 const DELIVERY_OPTIONS = [
   { value: 0, label: "أي مدة" },
   { value: 2, label: "خلال يومين" },
@@ -133,15 +131,36 @@ const DELIVERY_OPTIONS = [
 
 const DISCOUNT_OPTIONS = [10, 25, 50, 70];
 
-const loadStoredFilters = (): Partial<Filters> | null => {
+/** Shareable, bookmarkable filter state lives in the URL — no client storage. */
+const FILTER_PARAM = "f";
+
+const readFiltersFromUrl = (params: URLSearchParams): Partial<Filters> | null => {
+  const raw = params.get(FILTER_PARAM);
+  if (!raw) return null;
   try {
-    const raw = localStorage.getItem(FILTERS_STORAGE_KEY);
-    if (!raw) return null;
-    return JSON.parse(raw);
+    const parsed = JSON.parse(decodeURIComponent(escape(atob(raw))));
+    return typeof parsed === "object" && parsed !== null ? (parsed as Partial<Filters>) : null;
   } catch {
     return null;
   }
 };
+
+const encodeFilters = (filters: Filters): string | null => {
+  const diff: Record<string, unknown> = {};
+  (Object.keys(defaultFilters) as (keyof Filters)[]).forEach((key) => {
+    if (key === "search") return;
+    if (JSON.stringify(filters[key]) !== JSON.stringify(defaultFilters[key])) {
+      diff[key] = filters[key];
+    }
+  });
+  if (Object.keys(diff).length === 0) return null;
+  try {
+    return btoa(unescape(encodeURIComponent(JSON.stringify(diff))));
+  } catch {
+    return null;
+  }
+};
+
 
 const SearchPage = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -159,12 +178,12 @@ const SearchPage = () => {
   const [availableSizes, setAvailableSizes] = useState<string[]>([]);
 
   const [filters, setFilters] = useState<Filters>(() => {
-    const stored = loadStoredFilters();
+    const stored = readFiltersFromUrl(searchParams);
     return {
       ...defaultFilters,
       ...(stored || {}),
       // URL search query always wins on initial load if provided
-      search: urlSearchQuery || stored?.search || "",
+      search: urlSearchQuery || "",
       brandIds: urlBrandId ? [urlBrandId] : stored?.brandIds ?? [],
     };
   });
@@ -173,18 +192,24 @@ const SearchPage = () => {
   const [searchInput, setSearchInput] = useState(() => urlSearchQuery);
 
   const [priceRange, setPriceRange] = useState<number[]>(() => {
-    const stored = loadStoredFilters();
+    const stored = readFiltersFromUrl(searchParams);
     return [stored?.minPrice ?? 0, stored?.maxPrice ?? 10000000];
   });
 
-  // Persist filters whenever they change
+  // Mirror filter state into the URL so it survives navigation and can be shared
   useEffect(() => {
-    try {
-      localStorage.setItem(FILTERS_STORAGE_KEY, JSON.stringify(filters));
-    } catch {
-      /* ignore quota errors */
-    }
-  }, [filters]);
+    const encoded = encodeFilters(filters);
+    setSearchParams(
+      (prev) => {
+        const next = new URLSearchParams(prev);
+        if (encoded) next.set(FILTER_PARAM, encoded);
+        else next.delete(FILTER_PARAM);
+        return next;
+      },
+      { replace: true },
+    );
+  }, [filters, setSearchParams]);
+
 
   // Fetch categories, subcategories, and vendors on mount
   useEffect(() => {
@@ -449,12 +474,8 @@ const SearchPage = () => {
     setFilters(defaultFilters);
     setPriceRange([0, 10000000]);
     setSearchInput("");
-    try {
-      localStorage.removeItem(FILTERS_STORAGE_KEY);
-    } catch {
-      /* ignore */
-    }
   };
+
 
   const activeFiltersCount = 
     filters.categoryIds.length +

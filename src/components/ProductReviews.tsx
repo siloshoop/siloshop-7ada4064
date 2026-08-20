@@ -536,9 +536,17 @@ export const ProductReviews = ({ productId, vendorId }: ProductReviewsProps) => 
                     </Avatar>
                     <div className="flex-1">
                       <div className="flex items-center justify-between mb-2">
-                        <span className="font-semibold">
-                          {review.profiles.full_name || "مستخدم"}
-                        </span>
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span className="font-semibold">
+                            {review.profiles.full_name || "مستخدم"}
+                          </span>
+                          {user?.id === review.user_id && userVerifiedPurchase && (
+                            <Badge variant="secondary" className="gap-1">
+                              <BadgeCheck className="h-3 w-3" />
+                              شراء موثّق
+                            </Badge>
+                          )}
+                        </div>
                         <span className="text-xs text-muted-foreground">
                           {formatDistanceToNow(new Date(review.created_at), {
                             addSuffix: true,
@@ -557,6 +565,20 @@ export const ProductReviews = ({ productId, vendorId }: ProductReviewsProps) => 
                           <img src={review.image_url} alt="صورة التقييم" className="h-32 w-32 object-cover rounded-lg border hover:opacity-90 transition-opacity" loading="lazy" />
                         </a>
                       )}
+
+                      <div className="mt-2">
+                        <Button
+                          type="button"
+                          variant={myVotes.has(review.id) ? "secondary" : "ghost"}
+                          size="sm"
+                          onClick={() => toggleHelpful(review.id)}
+                          disabled={votingId === review.id}
+                          className="gap-1"
+                        >
+                          <ThumbsUp className={`h-4 w-4 ${myVotes.has(review.id) ? "fill-current" : ""}`} />
+                          مفيد ({helpfulCounts[review.id] || 0})
+                        </Button>
+                      </div>
 
                       {/* Vendor Reply Section */}
                       {review.review_replies && review.review_replies.length > 0 && (

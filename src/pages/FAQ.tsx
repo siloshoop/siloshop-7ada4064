@@ -1,4 +1,5 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
@@ -125,7 +126,7 @@ const FAQ = () => {
         questions: category.questions.filter(
           (qq) => {
             if (!q) return true;
-            const en = qq.translations?.en;
+            const en = "translations" in qq ? qq.translations?.en : undefined;
             return (
               qq.question.toLowerCase().includes(q) ||
               qq.answer.toLowerCase().includes(q) ||

@@ -56,9 +56,7 @@ const MegaMenu = () => {
     return subcategories.filter(sub => sub.category_id === categoryId);
   };
 
-  const getCategoryImage = (categoryName: string) => {
-    return categoryImages[categoryName] || "https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=300&h=200&fit=crop";
-  };
+
 
   if (loading) {
     return (

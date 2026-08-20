@@ -1704,6 +1704,8 @@ export type Database = {
           maintenance_message: string | null
           maintenance_mode: boolean
           min_order_amount: number
+          return_window_days: number
+          returns_replacement_enabled: boolean
           store_name: string
           support_email: string | null
           support_phone: string | null
@@ -1715,6 +1717,8 @@ export type Database = {
           maintenance_message?: string | null
           maintenance_mode?: boolean
           min_order_amount?: number
+          return_window_days?: number
+          returns_replacement_enabled?: boolean
           store_name?: string
           support_email?: string | null
           support_phone?: string | null
@@ -1726,6 +1730,8 @@ export type Database = {
           maintenance_message?: string | null
           maintenance_mode?: boolean
           min_order_amount?: number
+          return_window_days?: number
+          returns_replacement_enabled?: boolean
           store_name?: string
           support_email?: string | null
           support_phone?: string | null
@@ -2387,6 +2393,216 @@ export type Database = {
         }
         Relationships: []
       }
+      return_images: {
+        Row: {
+          created_at: string
+          id: string
+          kind: string
+          return_id: string
+          uploaded_by: string | null
+          uploader_role: string | null
+          url: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          kind?: string
+          return_id: string
+          uploaded_by?: string | null
+          uploader_role?: string | null
+          url: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          kind?: string
+          return_id?: string
+          uploaded_by?: string | null
+          uploader_role?: string | null
+          url?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "return_images_return_id_fkey"
+            columns: ["return_id"]
+            isOneToOne: false
+            referencedRelation: "returns"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      return_items: {
+        Row: {
+          created_at: string
+          id: string
+          item_note: string | null
+          order_item_id: string
+          product_id: string | null
+          product_image: string | null
+          product_name: string | null
+          quantity: number
+          return_id: string
+          unit_price: number
+          variant_label: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          item_note?: string | null
+          order_item_id: string
+          product_id?: string | null
+          product_image?: string | null
+          product_name?: string | null
+          quantity: number
+          return_id: string
+          unit_price?: number
+          variant_label?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          item_note?: string | null
+          order_item_id?: string
+          product_id?: string | null
+          product_image?: string | null
+          product_name?: string | null
+          quantity?: number
+          return_id?: string
+          unit_price?: number
+          variant_label?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "return_items_order_item_id_fkey"
+            columns: ["order_item_id"]
+            isOneToOne: false
+            referencedRelation: "order_items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "return_items_return_id_fkey"
+            columns: ["return_id"]
+            isOneToOne: false
+            referencedRelation: "returns"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      return_messages: {
+        Row: {
+          attachments: string[]
+          body: string | null
+          created_at: string
+          id: string
+          is_read: boolean
+          read_at: string | null
+          return_id: string
+          sender_id: string
+          sender_role: string
+        }
+        Insert: {
+          attachments?: string[]
+          body?: string | null
+          created_at?: string
+          id?: string
+          is_read?: boolean
+          read_at?: string | null
+          return_id: string
+          sender_id: string
+          sender_role: string
+        }
+        Update: {
+          attachments?: string[]
+          body?: string | null
+          created_at?: string
+          id?: string
+          is_read?: boolean
+          read_at?: string | null
+          return_id?: string
+          sender_id?: string
+          sender_role?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "return_messages_return_id_fkey"
+            columns: ["return_id"]
+            isOneToOne: false
+            referencedRelation: "returns"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      return_notes: {
+        Row: {
+          author_id: string | null
+          author_role: string | null
+          created_at: string
+          id: string
+          is_internal: boolean
+          note: string
+          return_id: string
+        }
+        Insert: {
+          author_id?: string | null
+          author_role?: string | null
+          created_at?: string
+          id?: string
+          is_internal?: boolean
+          note: string
+          return_id: string
+        }
+        Update: {
+          author_id?: string | null
+          author_role?: string | null
+          created_at?: string
+          id?: string
+          is_internal?: boolean
+          note?: string
+          return_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "return_notes_return_id_fkey"
+            columns: ["return_id"]
+            isOneToOne: false
+            referencedRelation: "returns"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      return_reasons: {
+        Row: {
+          code: string
+          created_at: string
+          id: string
+          is_active: boolean
+          label_ar: string
+          label_en: string | null
+          requires_images: boolean
+          sort_order: number
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          label_ar: string
+          label_en?: string | null
+          requires_images?: boolean
+          sort_order?: number
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          label_ar?: string
+          label_en?: string | null
+          requires_images?: boolean
+          sort_order?: number
+        }
+        Relationships: []
+      }
       return_status_history: {
         Row: {
           changed_by: string | null
@@ -2430,64 +2646,118 @@ export type Database = {
       }
       returns: {
         Row: {
+          admin_note: string | null
+          arrival_date: string | null
+          assigned_staff_id: string | null
+          carrier: string | null
+          closed_at: string | null
           created_at: string
           customer_id: string
+          description: string | null
           id: string
           images: string[]
+          inspection_at: string | null
+          inspection_note: string | null
+          inspection_result: string | null
+          is_replacement: boolean
+          last_actor_role: string | null
           notes: string | null
           order_id: string
           order_item_id: string | null
           reason: string
           received_at: string | null
+          refund_amount: number | null
+          refund_method: string
           rejection_reason: string | null
+          replacement_order_id: string | null
+          resolution_type: string
           resolved_at: string | null
           return_address: string | null
           return_instructions: string | null
+          return_number: string | null
+          return_window_days: number
           review_note: string | null
           shipped_at: string | null
           status: string
+          tracking_number: string | null
           updated_at: string
           vendor_id: string
           video_url: string | null
         }
         Insert: {
+          admin_note?: string | null
+          arrival_date?: string | null
+          assigned_staff_id?: string | null
+          carrier?: string | null
+          closed_at?: string | null
           created_at?: string
           customer_id: string
+          description?: string | null
           id?: string
           images?: string[]
+          inspection_at?: string | null
+          inspection_note?: string | null
+          inspection_result?: string | null
+          is_replacement?: boolean
+          last_actor_role?: string | null
           notes?: string | null
           order_id: string
           order_item_id?: string | null
           reason: string
           received_at?: string | null
+          refund_amount?: number | null
+          refund_method?: string
           rejection_reason?: string | null
+          replacement_order_id?: string | null
+          resolution_type?: string
           resolved_at?: string | null
           return_address?: string | null
           return_instructions?: string | null
+          return_number?: string | null
+          return_window_days?: number
           review_note?: string | null
           shipped_at?: string | null
           status?: string
+          tracking_number?: string | null
           updated_at?: string
           vendor_id: string
           video_url?: string | null
         }
         Update: {
+          admin_note?: string | null
+          arrival_date?: string | null
+          assigned_staff_id?: string | null
+          carrier?: string | null
+          closed_at?: string | null
           created_at?: string
           customer_id?: string
+          description?: string | null
           id?: string
           images?: string[]
+          inspection_at?: string | null
+          inspection_note?: string | null
+          inspection_result?: string | null
+          is_replacement?: boolean
+          last_actor_role?: string | null
           notes?: string | null
           order_id?: string
           order_item_id?: string | null
           reason?: string
           received_at?: string | null
+          refund_amount?: number | null
+          refund_method?: string
           rejection_reason?: string | null
+          replacement_order_id?: string | null
+          resolution_type?: string
           resolved_at?: string | null
           return_address?: string | null
           return_instructions?: string | null
+          return_number?: string | null
+          return_window_days?: number
           review_note?: string | null
           shipped_at?: string | null
           status?: string
+          tracking_number?: string | null
           updated_at?: string
           vendor_id?: string
           video_url?: string | null
@@ -3374,6 +3644,10 @@ export type Database = {
         Returns: string
       }
       admin_activate_user: { Args: { _user_id: string }; Returns: undefined }
+      admin_assign_return_staff: {
+        Args: { _return_id: string; _staff_id: string }
+        Returns: undefined
+      }
       admin_ban_user: {
         Args: { _reason: string; _user_id: string }
         Returns: undefined
@@ -3761,18 +4035,14 @@ export type Database = {
       }
       create_return_request: {
         Args: {
-          _images: string[]
-          _notes: string
+          _customer_note?: string
+          _description: string
+          _images?: Json
+          _items?: Json
           _order_id: string
-          _order_item_id: string
           _reason: string
-          _video_url: string
         }
-        Returns: string
-      }
-      customer_ship_return: {
-        Args: { _note?: string; _return_id: string }
-        Returns: undefined
+        Returns: Json
       }
       delete_email: {
         Args: { message_id: number; queue_name: string }
@@ -3910,6 +4180,16 @@ export type Database = {
           note: string
         }[]
       }
+      list_returns: {
+        Args: {
+          _limit?: number
+          _offset?: number
+          _scope?: string
+          _search?: string
+          _status?: string
+        }
+        Returns: Json
+      }
       log_activity: {
         Args: {
           _action_details?: Json
@@ -3998,16 +4278,56 @@ export type Database = {
         Returns: undefined
       }
       restore_product: { Args: { _product_id: string }; Returns: string }
-      review_return_request: {
+      return_actor_role: { Args: { _return_id: string }; Returns: string }
+      return_add_images: {
+        Args: { _images: Json; _return_id: string }
+        Returns: undefined
+      }
+      return_add_note: {
+        Args: { _is_internal?: boolean; _note: string; _return_id: string }
+        Returns: string
+      }
+      return_detail: { Args: { _return_id: string }; Returns: Json }
+      return_enqueue_email: {
         Args: {
-          _address?: string
-          _decision: string
-          _instructions?: string
-          _note: string
-          _return_id: string
+          _body: string
+          _heading: string
+          _label: string
+          _subject: string
+          _user_id: string
         }
         Returns: undefined
       }
+      return_mark_read: { Args: { _return_id: string }; Returns: undefined }
+      return_reports: {
+        Args: { _from?: string; _to?: string; _vendor_id?: string }
+        Returns: Json
+      }
+      return_send_message: {
+        Args: { _attachments?: string[]; _body: string; _return_id: string }
+        Returns: string
+      }
+      return_set_logistics: {
+        Args: {
+          _arrival_date?: string
+          _carrier?: string
+          _note?: string
+          _return_id: string
+          _tracking_number?: string
+        }
+        Returns: undefined
+      }
+      return_status_label: { Args: { _status: string }; Returns: string }
+      return_transition: {
+        Args: {
+          _note?: string
+          _payload?: Json
+          _return_id: string
+          _to_status: string
+        }
+        Returns: undefined
+      }
+      returns_run_automation: { Args: never; Returns: Json }
       seller_bulk_update_products: {
         Args: {
           _ids: string[]
@@ -4176,10 +4496,6 @@ export type Database = {
           _status: string
           _user_agent?: string
         }
-        Returns: undefined
-      }
-      update_return_status: {
-        Args: { _new_status: string; _note: string; _return_id: string }
         Returns: undefined
       }
       validate_coupon: {

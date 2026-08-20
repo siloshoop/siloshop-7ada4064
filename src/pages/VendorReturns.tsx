@@ -88,9 +88,9 @@ const ReturnCard = ({ r, onChanged }: { r: ReturnRow; onChanged: () => void }) =
 
   const update = async (status: string) => {
     setSaving(true);
-    const { error } = await supabase.rpc("update_return_status", {
+    const { error } = await supabase.rpc("return_transition", {
       _return_id: r.id,
-      _new_status: status,
+      _to_status: status,
       _note: note || null,
     });
     setSaving(false);

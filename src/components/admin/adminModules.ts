@@ -2,7 +2,8 @@ import {
   LayoutDashboard, Users, Store, FileCheck, PackageSearch, ShoppingBag,
   FolderTree, Tag, LayoutTemplate, Image, Flag, MessagesSquare, Bell,
   BarChart3, DollarSign, Globe, Wallet, ToggleLeft, ScrollText, ShieldAlert,
-  CreditCard, RotateCcw, Megaphone, UserCog, FileClock,
+  CreditCard, RotateCcw, Megaphone, UserCog, FileClock, Star, Ticket, Boxes,
+  FileText, Settings,
 } from "lucide-react";
 import type { FeatureFlagKey } from "@/hooks/useFeatureFlags";
 
@@ -34,6 +35,11 @@ export const ADMIN_MODULES: AdminModule[] = [
   { label: "المخالفات", description: "إنذارات ومخالفات البائعين", href: "/admin/violations", icon: ShieldAlert },
   { label: "المحادثات", description: "الإشراف على الدردشة", href: "/admin/chats", icon: MessagesSquare },
   { label: "الإشعارات", description: "إرسال إشعارات للمستخدمين", href: "/admin/notifications", icon: Bell },
+  { label: "التقييمات", description: "إخفاء التقييمات المخالفة", href: "/admin/reviews", icon: Star },
+  { label: "الكوبونات", description: "أكواد خصم البائعين", href: "/admin/coupons", icon: Ticket },
+  { label: "المخزون", description: "منتجات نفدت أو منخفضة", href: "/admin/inventory", icon: Boxes },
+  { label: "إدارة المحتوى", description: "الأسئلة الشائعة وصفحات السياسات", href: "/admin/content", icon: FileText },
+  { label: "إعدادات النظام", description: "بيانات المنصة ووضع الصيانة", href: "/admin/settings", icon: Settings },
   { label: "الإحصائيات", description: "لوحة التحليلات التفصيلية", href: "/admin/statistics", icon: BarChart3 },
   { label: "الإيرادات", description: "إيرادات الدفع عند الاستلام", href: "/admin/revenue", icon: DollarSign },
   { label: "الإعلانات النصية", description: "الشريط العلوي والتنبيهات", href: "/admin/announcements", icon: Megaphone },

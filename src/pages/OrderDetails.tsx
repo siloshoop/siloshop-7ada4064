@@ -260,6 +260,9 @@ const OrderDetails = () => {
         <Button variant="ghost" size="sm" className="w-full" onClick={() => navigate("/my-returns")}>
           عرض طلبات الإرجاع
         </Button>
+        {order.status !== "cancelled" && !canCancelOrder(order.status, order.tracking_status) && (
+          <OrderHelpActions vendorId={items[0]?.vendor_id} />
+        )}
       </main>
       <Footer />
     </div>

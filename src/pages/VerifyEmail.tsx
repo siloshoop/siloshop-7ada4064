@@ -142,7 +142,7 @@ const VerifyEmail = () => {
         <CardHeader className="space-y-1 text-center">
           <div className="flex justify-center mb-4">
             <div className="w-16 h-16 bg-gradient-to-br from-primary to-accent rounded-2xl flex items-center justify-center">
-              <MailCheck className="w-8 h-8 text-white" />
+              <MailCheck className="w-8 h-8 text-primary-foreground" />
             </div>
           </div>
           <CardTitle className="text-2xl font-bold">تحقق من بريدك الإلكتروني</CardTitle>

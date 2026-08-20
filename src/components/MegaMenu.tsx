@@ -29,19 +29,6 @@ const iconMap: Record<string, any> = {
   UserCircle: Shirt,
 };
 
-const categoryImages: Record<string, string> = {
-  "ملابس نساء": "https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=300&h=200&fit=crop",
-  "ملابس رجال": "https://images.unsplash.com/photo-1617137968427-85924c800a22?w=300&h=200&fit=crop",
-  "أطفال": "https://images.unsplash.com/photo-1503454537195-1dcabb73ffb9?w=300&h=200&fit=crop",
-  "إكسسوارات": "https://images.unsplash.com/photo-1611652022419-a9419f74343d?w=300&h=200&fit=crop",
-  "أحذية": "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=300&h=200&fit=crop",
-  "حقائب": "https://images.unsplash.com/photo-1584917865442-de89df76afd3?w=300&h=200&fit=crop",
-  "أثاث": "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=300&h=200&fit=crop",
-  "ألعاب": "https://images.unsplash.com/photo-1558060370-d644479cb6f7?w=300&h=200&fit=crop",
-  "تجميل": "https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=300&h=200&fit=crop",
-  "كتب": "https://images.unsplash.com/photo-1544947950-fa07a98d237f?w=300&h=200&fit=crop",
-  "رياضة": "https://images.unsplash.com/photo-1461896836934-ffe607ba8211?w=300&h=200&fit=crop",
-};
 
 const MegaMenu = () => {
   const navigate = useNavigate();
@@ -69,9 +56,7 @@ const MegaMenu = () => {
     return subcategories.filter(sub => sub.category_id === categoryId);
   };
 
-  const getCategoryImage = (categoryName: string) => {
-    return categoryImages[categoryName] || "https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=300&h=200&fit=crop";
-  };
+
 
   if (loading) {
     return (
@@ -140,24 +125,21 @@ const MegaMenu = () => {
                     </div>
                   </div>
                   
-                  {/* Category Image */}
-                  <div 
-                    className="relative rounded-lg overflow-hidden cursor-pointer group h-32"
+                  {/* Category highlight tile — design-system gradient, no external imagery */}
+                  <button
+                    type="button"
+                    className="relative rounded-lg overflow-hidden group h-32 text-right"
+                    style={{ background: "var(--gradient-primary)" }}
                     onClick={() => navigate(`/category/${category.id}`)}
+                    aria-label={category.name_ar}
                   >
-                    <img
-                      src={getCategoryImage(category.name_ar)}
-                      alt={category.name_ar}
-                      loading="lazy"
-                      decoding="async"
-                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+                    <IconComponent className="absolute -bottom-3 -left-3 h-24 w-24 text-primary-foreground/20 transition-transform duration-500 group-hover:scale-110" />
                     <div className="absolute bottom-2 right-2 left-2">
-                      <p className="text-white font-bold text-sm">{category.name_ar}</p>
-                      <p className="text-white/80 text-xs">اكتشف المزيد</p>
+                      <p className="text-primary-foreground font-bold text-sm">{category.name_ar}</p>
+                      <p className="text-primary-foreground/80 text-xs">اكتشف المزيد</p>
                     </div>
-                  </div>
+                  </button>
+
                 </div>
               </NavigationMenuContent>
             </NavigationMenuItem>

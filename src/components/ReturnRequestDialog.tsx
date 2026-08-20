@@ -248,7 +248,7 @@ const ReturnRequestDialog = ({
                       <button
                         type="button"
                         onClick={() => removeImage(i)}
-                        className="absolute top-1 right-1 bg-black/60 text-white rounded-full p-0.5"
+                        className="absolute top-1 right-1 bg-foreground/60 text-background rounded-full p-0.5"
                         aria-label="حذف الصورة"
                       >
                         <X className="h-3 w-3" />

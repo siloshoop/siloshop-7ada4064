@@ -610,7 +610,7 @@ const ManageUsers = () => {
                             ) : (
                               <AlertDialog>
                                 <AlertDialogTrigger asChild>
-                                  <Button variant="outline" size="sm" className="text-green-600 border-green-600 hover:bg-green-600 hover:text-white">
+                                  <Button variant="outline" size="sm" className="text-success border-success hover:bg-success hover:text-success-foreground">
                                     <UserCheck className="h-4 w-4 ml-2" />
                                     إلغاء الحظر
                                   </Button>
@@ -629,7 +629,7 @@ const ManageUsers = () => {
                                     <AlertDialogCancel>إلغاء</AlertDialogCancel>
                                     <AlertDialogAction
                                       onClick={() => unbanUser(userProfile.id)}
-                                      className="bg-green-600 text-white hover:bg-green-700"
+                                      className="bg-success text-success-foreground hover:bg-success/90"
                                     >
                                       إلغاء الحظر
                                     </AlertDialogAction>

@@ -17,7 +17,7 @@ import {
 } from "@/components/ui/dialog";
 import {
   Loader2, Search, Download, Eye, Snowflake, Unlock, RotateCcw, Truck, RefreshCw,
-  ExternalLink, ShieldAlert, Wallet, ScrollText,
+  ExternalLink, ShieldAlert, Wallet, ScrollText, MessageSquare, Lock,
 } from "lucide-react";
 import OrderStatusBadge from "@/components/orders/OrderStatusBadge";
 import OrderTimelineLog from "@/components/orders/OrderTimelineLog";
@@ -31,6 +31,11 @@ import { RETURN_STATUS, RETURN_REASONS } from "@/lib/returnStatus";
 
 type OrderRow = {
   id: string;
+  order_number: string | null;
+  invoice_number: string | null;
+  payment_method: string | null;
+  estimated_delivery: string | null;
+  is_frozen: boolean | null;
   created_at: string;
   status: string;
   payment_status: string;
@@ -44,6 +49,15 @@ type OrderRow = {
   items_count: number;
   vendors_count: number;
   total_count: number;
+};
+
+type OrderNote = {
+  id: string;
+  note: string;
+  is_internal: boolean;
+  author_name: string | null;
+  author_role: string | null;
+  created_at: string;
 };
 
 type DetailPayload = {
@@ -71,8 +85,9 @@ const PAY_LABEL: Record<string, string> = {
 };
 const REOPEN_TARGETS: OrderStatus[] = ["pending", "confirmed", "preparing", "ready_for_shipping", "shipped"];
 const DISPUTE_STATUSES = ["pending", "under_review", "info_requested", "rejected", "approved"];
-const PAGE_SIZE = 25;
+const PAGE_SIZE = 50;
 const money = (n: unknown) => `${Number(n ?? 0).toLocaleString("ar-SY")} ل.س`;
+const orderLabel = (r: { order_number?: string | null; id: string }) => r.order_number || `#${r.id.slice(0, 8)}`;
 
 const AdminOrders = () => {
   const { toast } = useToast();

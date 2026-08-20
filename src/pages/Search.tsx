@@ -178,12 +178,12 @@ const SearchPage = () => {
   const [availableSizes, setAvailableSizes] = useState<string[]>([]);
 
   const [filters, setFilters] = useState<Filters>(() => {
-    const stored = loadStoredFilters();
+    const stored = readFiltersFromUrl(searchParams);
     return {
       ...defaultFilters,
       ...(stored || {}),
       // URL search query always wins on initial load if provided
-      search: urlSearchQuery || stored?.search || "",
+      search: urlSearchQuery || "",
       brandIds: urlBrandId ? [urlBrandId] : stored?.brandIds ?? [],
     };
   });
@@ -192,18 +192,24 @@ const SearchPage = () => {
   const [searchInput, setSearchInput] = useState(() => urlSearchQuery);
 
   const [priceRange, setPriceRange] = useState<number[]>(() => {
-    const stored = loadStoredFilters();
+    const stored = readFiltersFromUrl(searchParams);
     return [stored?.minPrice ?? 0, stored?.maxPrice ?? 10000000];
   });
 
-  // Persist filters whenever they change
+  // Mirror filter state into the URL so it survives navigation and can be shared
   useEffect(() => {
-    try {
-      localStorage.setItem(FILTERS_STORAGE_KEY, JSON.stringify(filters));
-    } catch {
-      /* ignore quota errors */
-    }
-  }, [filters]);
+    const encoded = encodeFilters(filters);
+    setSearchParams(
+      (prev) => {
+        const next = new URLSearchParams(prev);
+        if (encoded) next.set(FILTER_PARAM, encoded);
+        else next.delete(FILTER_PARAM);
+        return next;
+      },
+      { replace: true },
+    );
+  }, [filters, setSearchParams]);
+
 
   // Fetch categories, subcategories, and vendors on mount
   useEffect(() => {

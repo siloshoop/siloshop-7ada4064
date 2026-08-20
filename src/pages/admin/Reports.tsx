@@ -455,6 +455,10 @@ const Reports = () => {
           <OrdersReportSection />
         </div>
 
+        <div className="mb-8">
+          <ReturnsReportSection />
+        </div>
+
         <h2 className="text-lg font-bold mb-3">البلاغات والإشراف</h2>
 
 

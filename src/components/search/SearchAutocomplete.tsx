@@ -37,11 +37,20 @@ const SearchAutocomplete = ({
     useSearchSuggestions(value);
 
   useEffect(() => {
-    const sync = () => setRecent(getRecentSearches());
+    let active = true;
+    const sync = () => {
+      void getRecentSearches().then((terms) => {
+        if (active) setRecent(terms);
+      });
+    };
     sync();
     window.addEventListener("recent-searches-updated", sync);
-    return () => window.removeEventListener("recent-searches-updated", sync);
+    return () => {
+      active = false;
+      window.removeEventListener("recent-searches-updated", sync);
+    };
   }, []);
+
 
   // Close on outside click / Escape
   useEffect(() => {

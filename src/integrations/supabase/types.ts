@@ -2914,6 +2914,10 @@ export type Database = {
       }
       archive_product: { Args: { _product_id: string }; Returns: string }
       bootstrap_first_super_admin: { Args: { _email: string }; Returns: Json }
+      can_access_conversation_file: {
+        Args: { _path: string }
+        Returns: boolean
+      }
       cancel_order: {
         Args: { _order_id: string; _reason: string }
         Returns: undefined

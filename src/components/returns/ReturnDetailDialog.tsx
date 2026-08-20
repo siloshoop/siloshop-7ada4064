@@ -131,7 +131,7 @@ const ReturnDetailDialog = ({
       _return_id: returnId,
       _to_status: toStatus,
       _note: note.trim() ? note.trim() : null,
-      _payload: payload,
+      _payload: payload as never,
     });
     setWorking(false);
     if (error) {

@@ -8,6 +8,7 @@ import SellerInfoCard from "@/components/product/SellerInfoCard";
 import ReportDialog from "@/components/ReportDialog";
 import ShippingReturnsInfo from "@/components/product/ShippingReturnsInfo";
 import ProductSpecs from "@/components/product/ProductSpecs";
+import ProductQuestions from "@/components/product/ProductQuestions";
 import FrequentlyBoughtTogether from "@/components/product/FrequentlyBoughtTogether";
 import ProductRecommendations from "@/components/ProductRecommendations";
 import Footer from "@/components/Footer";
@@ -536,12 +537,23 @@ const Product = () => {
             </TabsContent>
 
             <TabsContent value="specs" className="pt-6 animate-fade-in">
-              <ProductSpecs
-                product={product as unknown as Record<string, any>}
-                vendorName={product.vendor.full_name}
-                categoryName={product.categories?.name_ar}
-                brandName={product.brands?.name_ar}
-              />
+              <div className="max-w-3xl space-y-4">
+                <ProductSpecs
+                  product={product as unknown as Record<string, any>}
+                  vendorName={product.vendor.full_name}
+                  categoryName={product.categories?.name_ar}
+                  brandName={product.brands?.name_ar}
+                />
+                {(product.sku || product.barcode) && (
+                  <div className="flex flex-wrap gap-4 text-xs text-muted-foreground">
+                    {product.sku && <span>رمز المنتج (SKU): {product.sku}</span>}
+                    {product.barcode && <span>الباركود: {product.barcode}</span>}
+                  </div>
+                )}
+                <div className="rounded-xl border bg-muted/30 p-3 text-xs text-muted-foreground">
+                  يشمل هذا المنتج ضمان استبدال أو استرجاع وفق سياسة الشحن والإرجاع الخاصة بالمتجر، يرجى مراجعة تبويب "الشحن والإرجاع" لمزيد من التفاصيل.
+                </div>
+              </div>
             </TabsContent>
 
             <TabsContent value="reviews" className="pt-6 animate-fade-in">
@@ -557,11 +569,9 @@ const Product = () => {
             </TabsContent>
 
             <TabsContent value="qa" className="pt-6 animate-fade-in">
-              <div className="rounded-xl border border-dashed p-8 text-center text-sm text-muted-foreground">
-                لا توجد أسئلة بعد. تواصل مع البائع لطرح سؤالك حول هذا المنتج.
-                <div className="mt-4 flex justify-center">
-                  <ChatButton vendorId={product.vendor_id} productId={id} />
-                </div>
+              <ProductQuestions productId={id!} vendorId={product.vendor_id} />
+              <div className="mt-6 max-w-3xl flex justify-center">
+                <ChatButton vendorId={product.vendor_id} productId={id} />
               </div>
             </TabsContent>
           </Tabs>

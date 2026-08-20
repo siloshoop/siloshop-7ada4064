@@ -474,12 +474,8 @@ const SearchPage = () => {
     setFilters(defaultFilters);
     setPriceRange([0, 10000000]);
     setSearchInput("");
-    try {
-      localStorage.removeItem(FILTERS_STORAGE_KEY);
-    } catch {
-      /* ignore */
-    }
   };
+
 
   const activeFiltersCount = 
     filters.categoryIds.length +

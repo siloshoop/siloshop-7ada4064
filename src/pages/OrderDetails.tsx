@@ -10,10 +10,11 @@ import { Button } from "@/components/ui/button";
 import { Loader2, ArrowRight, Package, MapPin, Phone, Calendar, Receipt, XCircle, Truck, History } from "lucide-react";
 import { format } from "date-fns";
 import { ar } from "date-fns/locale";
-import CancelOrderDialog from "@/components/CancelOrderDialog";
+import CancelOrderDialog, { canCancelOrder } from "@/components/CancelOrderDialog";
 import ReturnRequestDialog from "@/components/ReturnRequestDialog";
 import OrderStatusTimeline from "@/components/OrderStatusTimeline";
 import OrderTimelineLog from "@/components/orders/OrderTimelineLog";
+import OrderHelpActions from "@/components/orders/OrderHelpActions";
 
 const statusMap: Record<string, { label: string; variant: "default" | "secondary" | "destructive" | "outline" }> = {
   pending: { label: "قيد المعالجة", variant: "secondary" },

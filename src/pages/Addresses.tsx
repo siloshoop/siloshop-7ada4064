@@ -31,28 +31,42 @@ export interface DeliveryAddress {
   id: string;
   label: string;
   recipient_name: string;
+  governorate: string | null;
   city: string;
   street: string;
+  building: string | null;
+  apartment: string | null;
+  landmark: string | null;
   phone: string;
-  notes: string | null;
-  is_default: boolean;
-}
-
 const schema = z.object({
   recipient_name: z.string().trim().min(2, "اسم المستلم مطلوب").max(100),
+  governorate: z.string().trim().refine((v) => (SYRIAN_GOVERNORATES as readonly string[]).includes(v), "يرجى اختيار المحافظة"),
+  city: z.string().trim().min(2, "المدينة/المنطقة مطلوبة").max(100),
+  street: z.string().trim().min(2, "الشارع مطلوب").max(100),
+  phone: z.string().trim().regex(/^09\d{8}$/, "رقم سوري بصيغة 09xxxxxxxx"),
+  building: z.string().trim().max(100).optional().or(z.literal("")),
+  apartment: z.string().trim().max(100).optional().or(z.literal("")),
+  landmark: z.string().trim().max(100).optional().or(z.literal("")),
+  notes: z.string().trim().max(500).optional().or(z.literal("")),
+});
   city: z.string().trim().refine((v) => (SYRIAN_GOVERNORATES as readonly string[]).includes(v), "يرجى اختيار المحافظة"),
   phone: z.string().trim().regex(/^09\d{8}$/, "رقم سوري بصيغة 09xxxxxxxx"),
   notes: z.string().trim().max(500).optional().or(z.literal("")),
 });
 
 const Addresses = () => {
-  const { user, loading: authLoading } = useAuth();
-  const { toast } = useToast();
-  const navigate = useNavigate();
-  const [addresses, setAddresses] = useState<DeliveryAddress[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [open, setOpen] = useState(false);
-  const [saving, setSaving] = useState(false);
+  const [form, setForm] = useState({
+    recipient_name: "",
+    governorate: "",
+    city: "",
+    street: "",
+    building: "",
+    apartment: "",
+    landmark: "",
+    phone: "",
+    notes: "",
+    is_default: false,
+  });
   const [editingId, setEditingId] = useState<string | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [form, setForm] = useState({
@@ -76,19 +90,24 @@ const Addresses = () => {
       .eq("user_id", user.id)
       .order("is_default", { ascending: false })
       .order("created_at", { ascending: false });
-    if (error) {
+    setForm({ recipient_name: "", governorate: "", city: "", street: "", building: "", apartment: "", landmark: "", phone: "", notes: "", is_default: false });
       toast({ title: "خطأ", description: "تعذر جلب العناوين", variant: "destructive" });
     } else {
       setAddresses((data || []) as DeliveryAddress[]);
     }
     setLoading(false);
-  };
-
-  useEffect(() => {
-    void fetchAddresses();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user]);
-
+    setForm({
+      recipient_name: addr.recipient_name,
+      governorate: addr.governorate || "",
+      city: addr.city,
+      street: addr.street,
+      building: addr.building || "",
+      apartment: addr.apartment || "",
+      landmark: addr.landmark || "",
+      phone: addr.phone,
+      notes: addr.notes || "",
+      is_default: addr.is_default,
+    });
   const resetForm = () => {
     setForm({ recipient_name: "", city: "", phone: "", notes: "", is_default: false });
     setEditingId(null);

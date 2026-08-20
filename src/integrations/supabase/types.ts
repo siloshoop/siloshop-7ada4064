@@ -3506,8 +3506,13 @@ export type Database = {
           customer_name: string
           delivered_at: string
           discount_amount: number
+          estimated_delivery: string
           id: string
+          invoice_number: string
+          is_frozen: boolean
           items_count: number
+          order_number: string
+          payment_method: string
           payment_status: string
           phone: string
           shipping_address: string

@@ -4,7 +4,7 @@ import { ArrowLeft, BadgeCheck, ChevronLeft, ChevronRight, Sparkles, Star, Store
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useShowroom, type ShowroomItem, type ShowroomItemLive } from "@/hooks/useShowroom";
-import { showroomDemoItems } from "@/data/showroomDemo";
+
 
 const formatPrice = (value: number) => `${Number(value).toLocaleString("ar-SY")} ل.س`;
 const targetOf = (item: ShowroomItem) => {

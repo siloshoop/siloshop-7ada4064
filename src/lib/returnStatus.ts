@@ -32,6 +32,15 @@ export const RETURN_STATUS: Record<
   returned: { label: "تم الإرجاع", variant: "default", description: "استلم البائع المنتج" },
   refunded: { label: "تم رد المبلغ", variant: "default", description: "تم رد المبلغ" },
   closed: { label: "مغلق", variant: "secondary", description: "طلب الإرجاع مغلق" },
+  // Canonical enterprise statuses
+  pending_review: { label: "بانتظار المراجعة", variant: "secondary", description: "طلبك بانتظار مراجعة البائع" },
+  seller_reviewing: { label: "البائع يراجع الطلب", variant: "secondary", description: "البائع يراجع طلبك الآن" },
+  waiting_customer: { label: "بانتظار ردك", variant: "outline", description: "البائع طلب معلومات إضافية" },
+  customer_shipping: { label: "المنتج في طريقه للبائع", variant: "outline", description: "تم إرسال المنتج المرتجع" },
+  seller_inspecting: { label: "قيد الفحص", variant: "secondary", description: "البائع يفحص المنتج المرتجع" },
+  inspection_passed: { label: "نجح الفحص", variant: "default", description: "تم قبول المنتج المرتجع" },
+  inspection_failed: { label: "فشل الفحص", variant: "destructive", description: "لم يجتز المنتج الفحص" },
+  cancelled: { label: "ملغي", variant: "secondary", description: "تم إلغاء طلب الإرجاع" },
 };
 
 /** Return window (days after delivery) during which a return can be requested. */
@@ -39,27 +48,27 @@ export const RETURN_WINDOW_DAYS = 7;
 
 /** Ordered lifecycle used for the customer-facing timeline. */
 export const RETURN_TIMELINE = [
-  "pending",
-  "under_review",
+  "pending_review",
+  "seller_reviewing",
   "approved",
-  "awaiting_return",
-  "item_shipped",
-  "item_received",
-  "inspection",
+  "customer_shipping",
+  "seller_inspecting",
+  "inspection_passed",
   "completed",
 ] as const;
 
 /** Statuses a seller/admin can move a return to, in workflow order. */
 export const RETURN_NEXT_STATUSES = [
-  "under_review",
-  "info_requested",
-  "awaiting_return",
-  "item_shipped",
-  "item_received",
-  "inspection",
+  "seller_reviewing",
+  "waiting_customer",
+  "approved",
+  "rejected",
+  "customer_shipping",
+  "seller_inspecting",
+  "inspection_passed",
+  "inspection_failed",
   "completed",
-  "refunded",
-  "closed",
+  "cancelled",
 ] as const;
 
 export const returnStatusLabel = (status: string) => RETURN_STATUS[status]?.label ?? status;

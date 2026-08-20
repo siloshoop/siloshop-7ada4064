@@ -174,7 +174,9 @@ const Product = () => {
           // Track product view once per product
           if (viewTrackedRef.current !== data.id) {
             viewTrackedRef.current = data.id;
-            supabase.rpc("track_product_metric", { _product_id: data.id, _metric: "view" });
+            void supabase
+              .rpc("track_product_metric", { _product_id: data.id, _metric: "view" })
+              .then(() => undefined);
           }
         } else {
           setProduct(null);

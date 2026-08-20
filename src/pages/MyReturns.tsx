@@ -63,9 +63,10 @@ const MyReturns = () => {
 
   const markShipped = async (id: string) => {
     setShipping(id);
-    const { error } = await supabase.rpc("customer_ship_return", {
+    const { error } = await supabase.rpc("return_transition", {
       _return_id: id,
-      _note: null,
+      _to_status: "customer_shipping",
+      _note: "قام المشتري بإرسال المنتج",
     });
     setShipping(null);
     if (error) {

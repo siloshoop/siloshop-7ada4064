@@ -136,13 +136,23 @@ const ReturnRequestDialog = ({
       let videoPath: string | null = null;
       if (video) videoPath = await uploadFile(video, "vid");
 
+      let items: { order_item_id: string; quantity: number }[] = [];
+      if (orderItemId) {
+        items = [{ order_item_id: orderItemId, quantity: 1 }];
+      } else {
+        const { data: oi } = await supabase
+          .from("order_items")
+          .select("id, quantity")
+          .eq("order_id", order.id);
+        items = (oi ?? []).map((x) => ({ order_item_id: x.id, quantity: x.quantity }));
+      }
       const { data, error } = await supabase.rpc("create_return_request", {
         _order_id: order.id,
-        _order_item_id: orderItemId,
         _reason: reason,
-        _notes: notes || null,
-        _images: imagePaths,
-        _video_url: videoPath,
+        _description: notes,
+        _items: items,
+        _images: imagePaths.map((url) => ({ url, kind: "product" })),
+        _customer_note: videoPath ? `فيديو: ${videoPath}` : null,
       });
       if (error) throw error;
       toast({ title: "تم إرسال طلب الإرجاع", description: "سيتم مراجعته من قبل البائع" });

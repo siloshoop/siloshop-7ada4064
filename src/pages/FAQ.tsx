@@ -83,13 +83,42 @@ const faqCategories = [
   },
 ];
 
+interface DbFaq {
+  category: string;
+  question: string;
+  answer: string;
+}
+
 const FAQ = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [activeId, setActiveId] = useState<string | null>(null);
+  const [dbItems, setDbItems] = useState<DbFaq[]>([]);
+
+  useEffect(() => {
+    void (async () => {
+      const { data } = await supabase
+        .from("faq_items")
+        .select("category, question, answer")
+        .eq("is_active", true)
+        .order("sort_order");
+      setDbItems((data as DbFaq[]) ?? []);
+    })();
+  }, []);
+
+  const mergedCategories = useMemo(
+    () =>
+      faqCategories.map((c) => {
+        const extra = dbItems.filter((i) => i.category === c.id);
+        return extra.length > 0
+          ? { ...c, questions: [...extra, ...c.questions] }
+          : c;
+      }),
+    [dbItems],
+  );
 
   const filteredCategories = useMemo(() => {
     const q = searchQuery.trim().toLowerCase();
-    return faqCategories
+    return mergedCategories
       .filter((c) => !activeId || c.id === activeId)
       .map((category) => ({
         ...category,
@@ -106,7 +135,7 @@ const FAQ = () => {
         ),
       }))
       .filter((category) => category.questions.length > 0);
-  }, [searchQuery, activeId]);
+  }, [searchQuery, activeId, mergedCategories]);
 
   return (
     <div className="min-h-screen flex flex-col">

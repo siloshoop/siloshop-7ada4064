@@ -36,7 +36,6 @@ import {
   Loader2, Search as SearchIcon, SlidersHorizontal, Star, X, Tag, 
   DollarSign, User, Layers, ArrowUpDown, RotateCcw, Gem, Globe, Truck, Palette, Ruler, Percent
 } from "lucide-react";
-import { matchesSearchTerm } from "@/lib/search";
 import { addRecentSearch } from "@/lib/searchHistory";
 
 interface Product {
@@ -427,12 +426,6 @@ const SearchPage = () => {
           if (!p.original_price || p.original_price <= p.price) return false;
           return ((p.original_price - p.price) / p.original_price) * 100 >= filters.minDiscount;
         });
-      }
-
-      if (filters.search.trim()) {
-        filteredProducts = filteredProducts.filter((product) =>
-          matchesSearchTerm(product.name, filters.search)
-        );
       }
 
       // Filter by rating client-side (since it's calculated from reviews)

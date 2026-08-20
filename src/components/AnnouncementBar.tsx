@@ -92,7 +92,7 @@ const AnnouncementBar = () => {
 
           <button
             onClick={() => setIsVisible(false)}
-            className="absolute left-4 p-1 rounded-full hover:bg-white/20 transition-colors"
+            className="absolute left-4 p-1 rounded-full hover:bg-primary-foreground/20 transition-colors"
             aria-label="إغلاق الإعلان"
           >
             <X className="h-4 w-4 text-primary-foreground" />
@@ -101,9 +101,9 @@ const AnnouncementBar = () => {
       </div>
 
       {/* Progress indicator */}
-      <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-white/20">
+      <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary-foreground/20">
         <div
-          className="h-full bg-white/60 transition-all duration-300"
+          className="h-full bg-primary-foreground/60 transition-all duration-300"
           style={{ width: `${((currentIndex + 1) / announcements.length) * 100}%` }}
         />
       </div>

@@ -122,7 +122,7 @@ export const ImageGallery = ({ images, productName, videoUrl }: ImageGalleryProp
                 title={`${productName} - فيديو المنتج`}
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; picture-in-picture"
                 allowFullScreen
-                className="absolute inset-0 h-full w-full bg-black"
+                className="absolute inset-0 h-full w-full bg-foreground"
               />
             ) : (
               <video
@@ -130,7 +130,7 @@ export const ImageGallery = ({ images, productName, videoUrl }: ImageGalleryProp
                 controls
                 playsInline
                 preload="metadata"
-                className="absolute inset-0 h-full w-full bg-black object-contain"
+                className="absolute inset-0 h-full w-full bg-foreground object-contain"
               />
             )
           ) : (

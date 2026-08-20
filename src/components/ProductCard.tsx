@@ -180,7 +180,7 @@ const ProductCard = memo(({
         )}
         {!isOutOfStock && isLowStock && (
           <div className="absolute bottom-2 left-2 z-10">
-            <Badge className="bg-amber-500 text-white font-semibold text-[10px] px-1.5 py-0.5 rounded-md shadow-md border-0 animate-pulse">
+            <Badge className="bg-warning text-warning-foreground font-semibold text-[10px] px-1.5 py-0.5 rounded-md shadow-md border-0 animate-pulse">
               متبقي {stockQuantity}
             </Badge>
           </div>

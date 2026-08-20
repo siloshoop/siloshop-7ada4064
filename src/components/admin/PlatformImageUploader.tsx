@@ -116,7 +116,7 @@ const PlatformImageUploader = ({ images, mainImage, onChange }: Props) => {
               }`}
             >
               <img src={url} alt="" className="w-full aspect-square object-cover" />
-              <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-1">
+              <div className="absolute inset-0 bg-foreground/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-1">
                 <Button
                   type="button"
                   size="icon"

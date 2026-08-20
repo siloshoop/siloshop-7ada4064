@@ -59,7 +59,7 @@ const ProductOriginBadge = ({ productType, shipsWithinDays, compact, className }
         </>
       ) : (
         <>
-          <Badge className="gap-1 border-0 bg-gradient-to-r from-emerald-500 to-emerald-600 text-white">
+          <Badge className="gap-1 border-0 bg-success text-success-foreground">
             <MapPin className="h-3.5 w-3.5" /> بائع محلي
           </Badge>
           <Badge variant="secondary" className="gap-1">

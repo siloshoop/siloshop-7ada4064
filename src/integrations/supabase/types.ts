@@ -3369,6 +3369,10 @@ export type Database = {
     }
     Functions: {
       actor_admin_role: { Args: { _user_id: string }; Returns: string }
+      add_order_note: {
+        Args: { _is_internal?: boolean; _note: string; _order_id: string }
+        Returns: string
+      }
       admin_activate_user: { Args: { _user_id: string }; Returns: undefined }
       admin_ban_user: {
         Args: { _reason: string; _user_id: string }
@@ -3890,6 +3894,17 @@ export type Database = {
           reviewer_name: string
         }[]
       }
+      list_order_notes: {
+        Args: { _order_id: string }
+        Returns: {
+          author_name: string
+          author_role: string
+          created_at: string
+          id: string
+          is_internal: boolean
+          note: string
+        }[]
+      }
       log_activity: {
         Args: {
           _action_details?: Json
@@ -3920,6 +3935,7 @@ export type Database = {
       }
       next_order_number: { Args: never; Returns: string }
       normalize_order_status: { Args: { _status: string }; Returns: string }
+      order_reports: { Args: { _from?: string; _to?: string }; Returns: Json }
       order_status_can_transition: {
         Args: { _from: string; _role: string; _to: string }
         Returns: boolean
@@ -3997,6 +4013,37 @@ export type Database = {
         Returns: number
       }
       seller_dashboard_overview: { Args: { _days?: number }; Returns: Json }
+      seller_list_orders: {
+        Args: {
+          _from?: string
+          _limit?: number
+          _offset?: number
+          _search?: string
+          _status?: string
+          _to?: string
+        }
+        Returns: {
+          city: string
+          courier_name: string
+          created_at: string
+          customer_name: string
+          customer_phone: string
+          estimated_delivery: string
+          id: string
+          invoice_number: string
+          is_frozen: boolean
+          items_count: number
+          order_number: string
+          payment_method: string
+          payment_status: string
+          status: string
+          total_amount: number
+          total_count: number
+          tracking_number: string
+          updated_at: string
+          vendor_subtotal: number
+        }[]
+      }
       seller_request_payout: {
         Args: { _amount: number; _details?: string; _method: string }
         Returns: string
@@ -4089,6 +4136,16 @@ export type Database = {
       }
       track_product_metric: {
         Args: { _metric: string; _product_id: string }
+        Returns: undefined
+      }
+      update_order_shipping: {
+        Args: {
+          _estimated_delivery?: string
+          _order_id: string
+          _shipping_company?: string
+          _shipping_notes?: string
+          _tracking_number?: string
+        }
         Returns: undefined
       }
       update_order_status: {

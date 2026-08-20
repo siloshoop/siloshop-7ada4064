@@ -311,14 +311,15 @@ const Compare = () => {
     }
   };
 
-  const handleClearAll = () => {
-    clearProducts();
+  const handleClearAll = async () => {
+    await clearProducts();
     navigate("/");
     toast({
       title: "تم المسح",
       description: "تم مسح قائمة المقارنة بالكامل",
     });
   };
+
 
   const handleCopyLink = async () => {
     const url = window.location.href;

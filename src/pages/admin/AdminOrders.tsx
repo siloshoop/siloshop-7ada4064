@@ -17,7 +17,7 @@ import {
 } from "@/components/ui/dialog";
 import {
   Loader2, Search, Download, Eye, Snowflake, Unlock, RotateCcw, Truck, RefreshCw,
-  ExternalLink, ShieldAlert, Wallet, ScrollText,
+  ExternalLink, ShieldAlert, Wallet, ScrollText, MessageSquare, Lock,
 } from "lucide-react";
 import OrderStatusBadge from "@/components/orders/OrderStatusBadge";
 import OrderTimelineLog from "@/components/orders/OrderTimelineLog";
@@ -31,6 +31,11 @@ import { RETURN_STATUS, RETURN_REASONS } from "@/lib/returnStatus";
 
 type OrderRow = {
   id: string;
+  order_number: string | null;
+  invoice_number: string | null;
+  payment_method: string | null;
+  estimated_delivery: string | null;
+  is_frozen: boolean | null;
   created_at: string;
   status: string;
   payment_status: string;
@@ -44,6 +49,15 @@ type OrderRow = {
   items_count: number;
   vendors_count: number;
   total_count: number;
+};
+
+type OrderNote = {
+  id: string;
+  note: string;
+  is_internal: boolean;
+  author_name: string | null;
+  author_role: string | null;
+  created_at: string;
 };
 
 type DetailPayload = {
@@ -71,8 +85,9 @@ const PAY_LABEL: Record<string, string> = {
 };
 const REOPEN_TARGETS: OrderStatus[] = ["pending", "confirmed", "preparing", "ready_for_shipping", "shipped"];
 const DISPUTE_STATUSES = ["pending", "under_review", "info_requested", "rejected", "approved"];
-const PAGE_SIZE = 25;
+const PAGE_SIZE = 50;
 const money = (n: unknown) => `${Number(n ?? 0).toLocaleString("ar-SY")} ل.س`;
+const orderLabel = (r: { order_number?: string | null; id: string }) => r.order_number || `#${r.id.slice(0, 8)}`;
 
 const AdminOrders = () => {
   const { toast } = useToast();
@@ -105,6 +120,22 @@ const AdminOrders = () => {
   const [refundNote, setRefundNote] = useState("");
   const [history, setHistory] = useState<Array<{ id: string; status: string; total_amount: number; role: string }>>([]);
 
+  // notes thread
+  const [notes, setNotes] = useState<OrderNote[]>([]);
+  const [notesLoading, setNotesLoading] = useState(false);
+  const [newNote, setNewNote] = useState("");
+  const [noteInternal, setNoteInternal] = useState(true);
+  const [savingNote, setSavingNote] = useState(false);
+
+  // quick shipping update (update_order_shipping)
+  const [shipCompany, setShipCompany] = useState("");
+  const [shipTracking, setShipTracking] = useState("");
+  const [shipNotes, setShipNotes] = useState("");
+  const [shipEta, setShipEta] = useState("");
+  const [savingShip, setSavingShip] = useState(false);
+
+  const [exporting, setExporting] = useState(false);
+
   // return disputes
   const [returns, setReturns] = useState<ReturnRow[]>([]);
   const [returnsLoading, setReturnsLoading] = useState(true);
@@ -127,7 +158,7 @@ const AdminOrders = () => {
       _offset: page * PAGE_SIZE,
     });
     if (error) {
-      toast({ title: "تعذر تحميل الطلبات", description: error.message, variant: "destructive" });
+      toast({ title: "تعذر تحميل الطلبات", description: friendlyOrderError(error), variant: "destructive" });
       setRows([]); setTotal(0);
     } else {
       const list = (data as unknown as OrderRow[]) || [];
@@ -147,12 +178,20 @@ const AdminOrders = () => {
       .in("status", DISPUTE_STATUSES)
       .order("created_at", { ascending: false })
       .limit(100);
-    if (error) toast({ title: "تعذر تحميل طلبات الإرجاع", description: error.message, variant: "destructive" });
+    if (error) toast({ title: "تعذر تحميل طلبات الإرجاع", description: friendlyOrderError(error), variant: "destructive" });
     setReturns((data as ReturnRow[]) || []);
     setReturnsLoading(false);
   }, [toast]);
 
   useEffect(() => { void loadReturns(); }, [loadReturns]);
+
+  const loadNotes = useCallback(async (orderId: string) => {
+    setNotesLoading(true);
+    const { data, error } = await supabase.rpc("list_order_notes", { _order_id: orderId });
+    if (error) toast({ title: "تعذر تحميل الملاحظات", description: friendlyOrderError(error), variant: "destructive" });
+    setNotes((data as unknown as OrderNote[]) || []);
+    setNotesLoading(false);
+  }, [toast]);
 
   // Realtime refresh
   useEffect(() => {
@@ -168,21 +207,23 @@ const AdminOrders = () => {
     setOpenId(orderId);
     setDetail(null); setDetailLoading(true);
     setStatusNote(""); setFreezeReason(""); setReopenReason(""); setRefundNote("");
-    setOverride(false); setRefundNext("");
+    setOverride(false); setRefundNext(""); setNewNote(""); setNoteInternal(true);
+    setShipCompany(""); setShipTracking(""); setShipNotes(""); setShipEta("");
     const [{ data: d, error }, { data: h }] = await Promise.all([
       supabase.rpc("admin_get_order_detail", { _order_id: orderId }),
       customerId
         ? supabase.rpc("admin_user_order_history", { _user_id: customerId, _limit: 10 })
         : Promise.resolve({ data: [] as unknown }),
     ]);
-    if (error) toast({ title: "تعذر تحميل تفاصيل الطلب", description: error.message, variant: "destructive" });
+    if (error) toast({ title: "تعذر تحميل تفاصيل الطلب", description: friendlyOrderError(error), variant: "destructive" });
     const payload = (d as unknown as DetailPayload) || null;
     setDetail(payload);
     setHistory((h as any[]) || []);
     setNextStatus(normalizeStatus(payload?.order?.status));
     setReopenStatus("confirmed");
     setDetailLoading(false);
-  }, [toast]);
+    void loadNotes(orderId);
+  }, [toast, loadNotes]);
 
   const refreshDetail = async () => {
     if (!openId) return;
@@ -207,38 +248,68 @@ const AdminOrders = () => {
   const refundStatus = (order?.refund_status || "none") as RefundStatus;
   const isClosed = ["cancelled", "completed", "returned"].includes(normalizeStatus(order?.status));
 
+  const CSV_COLUMNS: Array<{ key: keyof OrderRow; label: string }> = [
+    { key: "order_number", label: "رقم الطلب" },
+    { key: "invoice_number", label: "رقم الفاتورة" },
+    { key: "created_at", label: "التاريخ" },
+    { key: "status", label: "الحالة" },
+    { key: "payment_status", label: "حالة الدفع" },
+    { key: "payment_method", label: "طريقة الدفع" },
+    { key: "total_amount", label: "المبلغ" },
+    { key: "customer_name", label: "اسم العميل" },
+    { key: "customer_email", label: "البريد الإلكتروني" },
+    { key: "phone", label: "الهاتف" },
+    { key: "items_count", label: "عدد المنتجات" },
+    { key: "vendors_count", label: "عدد البائعين" },
+    { key: "tracking_number", label: "رقم التتبع" },
+    { key: "courier_name", label: "شركة الشحن" },
+  ];
+
   const exportCSV = async () => {
-    const { data, error } = await supabase.rpc("admin_list_orders", {
-      _search: debounced || null,
-      _status: status === "all" ? null : status,
-      _payment_status: payStatus === "all" ? null : payStatus,
-      _from: from ? new Date(from).toISOString() : null,
-      _to: to ? new Date(to + "T23:59:59").toISOString() : null,
-      _limit: 1000,
-      _offset: 0,
-    });
-    if (error) return toast({ title: "تعذر تصدير الطلبات", description: error.message, variant: "destructive" });
-    const list = (data as unknown as OrderRow[]) || [];
-    const headers = [
-      "id", "created_at", "status", "payment_status", "total_amount",
-      "customer_name", "customer_email", "phone", "items_count", "vendors_count",
-      "tracking_number", "courier_name",
-    ];
-    const csv = [
-      headers.join(","),
-      ...list.map((r) => headers.map((h) => {
-        const v = (r as any)[h];
-        if (v === null || v === undefined) return "";
-        const s = String(v).replace(/"/g, '""');
-        return /[",\n]/.test(s) ? `"${s}"` : s;
-      }).join(",")),
-    ].join("\n");
-    const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url; a.download = `orders-${new Date().toISOString().slice(0, 10)}.csv`;
-    a.click();
-    URL.revokeObjectURL(url);
+    setExporting(true);
+    try {
+      const all: OrderRow[] = [];
+      let offset = 0;
+      const chunk = 200;
+      let totalCount = Infinity;
+      while (offset < totalCount && offset < 20000) {
+        const { data, error } = await supabase.rpc("admin_list_orders", {
+          _search: debounced || null,
+          _status: status === "all" ? null : status,
+          _payment_status: payStatus === "all" ? null : payStatus,
+          _from: from ? new Date(from).toISOString() : null,
+          _to: to ? new Date(to + "T23:59:59").toISOString() : null,
+          _limit: chunk,
+          _offset: offset,
+        });
+        if (error) throw error;
+        const list = (data as unknown as OrderRow[]) || [];
+        all.push(...list);
+        totalCount = list[0]?.total_count ?? all.length;
+        if (list.length === 0) break;
+        offset += chunk;
+      }
+      const headers = CSV_COLUMNS.map((c) => c.label);
+      const csv = [
+        headers.join(","),
+        ...all.map((r) => CSV_COLUMNS.map(({ key }) => {
+          const v = (r as any)[key];
+          if (v === null || v === undefined) return "";
+          const str = String(v).replace(/"/g, '""');
+          return /[",\n]/.test(str) ? `"${str}"` : str;
+        }).join(",")),
+      ].join("\n");
+      const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url; a.download = `orders-${new Date().toISOString().slice(0, 10)}.csv`;
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch (e) {
+      toast({ title: "تعذر تصدير الطلبات", description: friendlyOrderError(e), variant: "destructive" });
+    } finally {
+      setExporting(false);
+    }
   };
 
   const totalPages = useMemo(() => Math.max(1, Math.ceil(total / PAGE_SIZE)), [total]);
@@ -271,8 +342,8 @@ const AdminOrders = () => {
           <Button variant="outline" onClick={() => void load()} disabled={loading}>
             <RefreshCw className="h-4 w-4 ms-1" /> تحديث
           </Button>
-          <Button onClick={exportCSV} disabled={loading || !rows.length}>
-            <Download className="h-4 w-4 ms-1" /> تصدير CSV
+          <Button onClick={() => void exportCSV()} disabled={exporting || loading || !rows.length}>
+            {exporting ? <Loader2 className="h-4 w-4 ms-1 animate-spin" /> : <Download className="h-4 w-4 ms-1" />} تصدير CSV
           </Button>
         </div>
       }
@@ -342,7 +413,13 @@ const AdminOrders = () => {
                     <tbody>
                       {rows.map((r) => (
                         <tr key={r.id} className="border-t">
-                          <td className="px-3 py-2 font-mono text-xs">{r.id.slice(0, 8)}</td>
+                          <td className="px-3 py-2">
+                            <div className="flex flex-col">
+                              <span className="font-mono text-xs font-semibold">{orderLabel(r)}</span>
+                              {r.invoice_number && <span className="text-[10px] text-muted-foreground">فاتورة: {r.invoice_number}</span>}
+                              {r.is_frozen && <Badge variant="destructive" className="mt-1 w-fit gap-1 text-[10px]"><Snowflake className="h-3 w-3" /> مجمّد</Badge>}
+                            </div>
+                          </td>
                           <td className="px-3 py-2">
                             <div className="flex flex-col">
                               <span>{r.customer_name || "—"}</span>
@@ -350,7 +427,12 @@ const AdminOrders = () => {
                             </div>
                           </td>
                           <td className="px-3 py-2"><OrderStatusBadge status={r.status} /></td>
-                          <td className="px-3 py-2"><Badge variant="outline">{PAY_LABEL[r.payment_status] || r.payment_status}</Badge></td>
+                          <td className="px-3 py-2">
+                            <div className="flex flex-col gap-1">
+                              <Badge variant="outline">{PAY_LABEL[r.payment_status] || r.payment_status}</Badge>
+                              {r.payment_method && <span className="text-[10px] text-muted-foreground">{r.payment_method}</span>}
+                            </div>
+                          </td>
                           <td className="whitespace-nowrap px-3 py-2">{money(r.total_amount)}</td>
                           <td className="whitespace-nowrap px-3 py-2 text-xs text-muted-foreground">
                             {new Date(r.created_at).toLocaleDateString("ar-SY")}
@@ -445,7 +527,8 @@ const AdminOrders = () => {
         <DialogContent className="max-h-[90vh] max-w-3xl overflow-y-auto" dir="rtl">
           <DialogHeader>
             <DialogTitle className="flex flex-wrap items-center gap-2">
-              تفاصيل الطلب {openId?.slice(0, 8)}
+              تفاصيل الطلب {order?.order_number || openId?.slice(0, 8)}
+              {order?.invoice_number && <span className="text-xs text-muted-foreground">فاتورة: {order.invoice_number}</span>}
               {order && <OrderStatusBadge status={order.status} />}
               {isFrozen && (
                 <Badge variant="destructive" className="gap-1">
@@ -529,6 +612,97 @@ const AdminOrders = () => {
                     </li>
                   ))}
                 </ul>
+              </div>
+
+              <div className="rounded border p-3">
+                <p className="mb-2 flex items-center gap-2 text-sm font-semibold">
+                  <MessageSquare className="h-4 w-4" /> ملاحظات الطلب
+                </p>
+                {notesLoading ? (
+                  <div className="flex justify-center py-4"><Loader2 className="h-4 w-4 animate-spin" /></div>
+                ) : notes.length === 0 ? (
+                  <p className="text-xs text-muted-foreground">لا توجد ملاحظات بعد.</p>
+                ) : (
+                  <ul className="mb-2 max-h-48 space-y-2 overflow-y-auto">
+                    {notes.map((n) => (
+                      <li key={n.id} className="rounded border p-2 text-xs">
+                        <div className="mb-1 flex items-center justify-between gap-2">
+                          <span className="font-semibold">{n.author_name || n.author_role || "—"}</span>
+                          <div className="flex items-center gap-1">
+                            {n.is_internal && <Badge variant="secondary" className="gap-1 text-[10px]"><Lock className="h-3 w-3" /> داخلية</Badge>}
+                            <span className="text-muted-foreground">{new Date(n.created_at).toLocaleString("ar-SY")}</span>
+                          </div>
+                        </div>
+                        <p className="whitespace-pre-wrap">{n.note}</p>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+                <Textarea rows={2} value={newNote} onChange={(e) => setNewNote(e.target.value)} placeholder="أضف ملاحظة..." />
+                <div className="mt-2 flex items-center justify-between gap-2">
+                  <div className="flex items-center gap-2">
+                    <Switch id="note-internal" checked={noteInternal} onCheckedChange={setNoteInternal} />
+                    <Label htmlFor="note-internal" className="text-xs">ملاحظة داخلية (غير مرئية للعميل)</Label>
+                  </div>
+                  <Button
+                    size="sm"
+                    disabled={savingNote || !newNote.trim()}
+                    onClick={async () => {
+                      if (!order) return;
+                      setSavingNote(true);
+                      const { error } = await supabase.rpc("add_order_note", {
+                        _order_id: order.id, _note: newNote.trim(), _is_internal: noteInternal,
+                      });
+                      setSavingNote(false);
+                      if (error) {
+                        toast({ title: "تعذر إضافة الملاحظة", description: friendlyOrderError(error), variant: "destructive" });
+                        return;
+                      }
+                      setNewNote("");
+                      void loadNotes(order.id);
+                    }}
+                  >
+                    {savingNote ? <Loader2 className="h-4 w-4 animate-spin" /> : "إضافة ملاحظة"}
+                  </Button>
+                </div>
+              </div>
+
+              <div className="rounded border p-3">
+                <p className="mb-2 flex items-center gap-2 text-sm font-semibold">
+                  <Truck className="h-4 w-4" /> تحديث بيانات الشحن السريع
+                </p>
+                <div className="grid gap-2 md:grid-cols-2">
+                  <Input placeholder="شركة الشحن" value={shipCompany} onChange={(e) => setShipCompany(e.target.value)} />
+                  <Input placeholder="رقم التتبع" value={shipTracking} onChange={(e) => setShipTracking(e.target.value)} />
+                  <Input type="date" value={shipEta} onChange={(e) => setShipEta(e.target.value)} aria-label="موعد التسليم المتوقع" />
+                  <Textarea rows={1} placeholder="ملاحظات الشحن" value={shipNotes} onChange={(e) => setShipNotes(e.target.value)} />
+                </div>
+                <Button
+                  size="sm"
+                  className="mt-2"
+                  variant="outline"
+                  disabled={savingShip}
+                  onClick={async () => {
+                    if (!order) return;
+                    setSavingShip(true);
+                    const { error } = await supabase.rpc("update_order_shipping", {
+                      _order_id: order.id,
+                      _shipping_company: shipCompany.trim() || null,
+                      _tracking_number: shipTracking.trim() || null,
+                      _shipping_notes: shipNotes.trim() || null,
+                      _estimated_delivery: shipEta ? new Date(`${shipEta}T12:00:00`).toISOString() : null,
+                    });
+                    setSavingShip(false);
+                    if (error) {
+                      toast({ title: "تعذر تحديث الشحن", description: friendlyOrderError(error), variant: "destructive" });
+                      return;
+                    }
+                    toast({ title: "تم تحديث بيانات الشحن" });
+                    await refreshDetail();
+                  }}
+                >
+                  {savingShip ? <Loader2 className="h-4 w-4 animate-spin" /> : "حفظ بيانات الشحن"}
+                </Button>
               </div>
 
               {/* Admin actions */}

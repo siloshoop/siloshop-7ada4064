@@ -8,9 +8,14 @@ import OrderStatusTimeline from "@/components/OrderStatusTimeline";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Loader2, Package, MapPin, Clock, Truck, ExternalLink, RefreshCw, Wifi, WifiOff } from "lucide-react";
+import { Separator } from "@/components/ui/separator";
+import {
+  Loader2, Package, MapPin, Clock, Truck, ExternalLink, RefreshCw, Wifi, WifiOff,
+  XCircle, RotateCcw, FileText, CreditCard, StickyNote,
+} from "lucide-react";
 import { format, formatDistanceToNow } from "date-fns";
 import { ar } from "date-fns/locale";
+import { ORDER_STATUS_LABELS, ACTOR_ROLE_LABELS } from "@/lib/orderStatus";
 
 const OrderTrackingMap = lazy(() => import("@/components/orders/OrderTrackingMap"));
 
@@ -43,43 +48,91 @@ const getTrackingUrl = (courierName: string | null, trackingNumber: string): str
   return urlGenerator ? urlGenerator(trackingNumber) : null;
 };
 
+// حالات إضافية لا يغطيها الشريط الأساسي (مسار الإرجاع/الاسترداد)
+const EXTRA_STATUS_LABELS: Record<string, string> = {
+  return_requested: "طلب إرجاع",
+  returning: "جارٍ الإرجاع",
+  refunded: "تم رد المبلغ",
+};
+
+const statusLabel = (status?: string | null): string => {
+  const s = (status || "").trim().toLowerCase();
+  const normalized = s === "processing" ? "preparing" : s;
+  return ORDER_STATUS_LABELS[normalized] ?? EXTRA_STATUS_LABELS[normalized] ?? status ?? "";
+};
+
+const DESTRUCTIVE_STATUSES = new Set(["cancelled", "return_requested", "returning", "returned", "refunded"]);
+
+const getBadgeVariant = (status: string): "default" | "outline" | "destructive" | "secondary" => {
+  if (status === "cancelled") return "destructive";
+  if (["return_requested", "returning", "returned", "refunded"].includes(status)) return "secondary";
+  return "default";
+};
+
+interface OrderItem {
+  quantity: number;
+  price: number;
+  product_name: string | null;
+  product_image: string | null;
+  variant_label: string | null;
+}
+
+interface ShippingDetails {
+  shipping_company: string | null;
+  tracking_number: string | null;
+  estimated_delivery: string | null;
+  shipped_at: string | null;
+  delivered_at: string | null;
+  shipping_notes: string | null;
+}
+
 interface Order {
   id: string;
+  order_number: string | null;
+  invoice_number: string | null;
   created_at: string;
   total_amount: number;
+  subtotal_amount: number | null;
+  shipping_amount: number | null;
+  discount_amount: number | null;
+  tax_amount: number | null;
+  payment_method: string | null;
   status: string;
   tracking_status: string;
   tracking_number: string | null;
   courier_name: string | null;
   estimated_delivery: string | null;
   shipping_address: string | null;
+  shipping_notes: string | null;
   current_location_lat: number | null;
   current_location_lng: number | null;
   delivery_lat: number | null;
   delivery_lng: number | null;
-  order_items: {
-    quantity: number;
-    price: number;
-    products: {
-      name: string;
-      image_url: string;
-    };
-  }[];
+  confirmed_at: string | null;
+  shipped_at: string | null;
+  delivered_at: string | null;
+  completed_at: string | null;
+  cancelled_at: string | null;
+  cancellation_reason: string | null;
+  order_items: OrderItem[];
+  shipping_details: ShippingDetails | ShippingDetails[] | null;
 }
 
-interface StatusUpdate {
+interface TrackingHistoryRow {
   status: string;
-  location_lat: number | null;
-  location_lng: number | null;
-  notes: string | null;
+  description: string | null;
+  actor_role: string | null;
   created_at: string;
 }
+
+const formatMoney = (n: number | null | undefined) =>
+  `${new Intl.NumberFormat("ar-SY", { maximumFractionDigits: 0 }).format(Math.round(Number(n) || 0))} ل.س`;
 
 const TrackOrder = () => {
   const { id } = useParams();
   const { user, loading: authLoading } = useAuth();
   const [order, setOrder] = useState<Order | null>(null);
-  const [statusHistory, setStatusHistory] = useState<StatusUpdate[]>([]);
+  const [statusHistory, setStatusHistory] = useState<TrackingHistoryRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [lastUpdated, setLastUpdated] = useState<Date>(new Date());
   const [isLive, setIsLive] = useState(false);
@@ -116,7 +169,7 @@ const TrackOrder = () => {
       }
     };
 
-    // Subscribe to realtime updates on both tables
+    // Subscribe to realtime updates across order-related tables
     const channel = supabase
       .channel(`order-updates-${id}`)
       .on(
@@ -137,10 +190,49 @@ const TrackOrder = () => {
       .on(
         'postgres_changes',
         {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'tracking_history',
+          filter: `order_id=eq.${id}`,
+        },
+        () => {
+          fetchOrder();
+          fetchStatusHistory();
+          setHighlightedIndex(0);
+          setTimeout(() => setHighlightedIndex(null), 3000);
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
           event: 'UPDATE',
           schema: 'public',
           table: 'orders',
           filter: `id=eq.${id}`,
+        },
+        () => {
+          fetchOrder();
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'shipping_details',
+          filter: `order_id=eq.${id}`,
+        },
+        () => {
+          fetchOrder();
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'shipping_details',
+          filter: `order_id=eq.${id}`,
         },
         () => {
           fetchOrder();
@@ -189,11 +281,8 @@ const TrackOrder = () => {
       .from("orders")
       .select(`
         *,
-        order_items(
-          quantity,
-          price,
-          products(name, image_url)
-        )
+        order_items(quantity, price, product_name, product_image, variant_label),
+        shipping_details(shipping_company, tracking_number, estimated_delivery, shipped_at, delivered_at, shipping_notes)
       `)
       .eq("id", id)
       .eq("customer_id", user.id)
@@ -201,10 +290,11 @@ const TrackOrder = () => {
 
     if (error) {
       console.error(error);
+      setLoading(false);
       return;
     }
 
-    setOrder(data as any);
+    setOrder(data as unknown as Order);
     setLoading(false);
     setLastUpdated(new Date());
   };
@@ -212,53 +302,15 @@ const TrackOrder = () => {
   const fetchStatusHistory = async () => {
     if (!id) return;
 
-    const { data } = await supabase
-      .from("order_status_history")
-      .select("*")
+    const { data, error } = await supabase
+      .from("tracking_history")
+      .select("status, description, actor_role, created_at")
       .eq("order_id", id)
       .order("created_at", { ascending: false });
 
-    if (data) {
-      setStatusHistory(data);
+    if (!error && data) {
+      setStatusHistory(data as TrackingHistoryRow[]);
       setLastUpdated(new Date());
-    }
-  };
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'pending':
-        return 'bg-yellow-100 text-yellow-800';
-      case 'processing':
-        return 'bg-blue-100 text-blue-800';
-      case 'shipped':
-        return 'bg-purple-100 text-purple-800';
-      case 'out_for_delivery':
-        return 'bg-orange-100 text-orange-800';
-      case 'delivered':
-        return 'bg-green-100 text-green-800';
-      case 'cancelled':
-        return 'bg-red-100 text-red-800';
-      default:
-        return 'bg-gray-100 text-gray-800';
-    }
-  };
-
-  const getStatusText = (status: string) => {
-    switch (status) {
-      case 'pending':
-        return 'قيد الانتظار';
-      case 'processing':
-        return 'قيد المعالجة';
-      case 'shipped':
-        return 'تم الشحن';
-      case 'out_for_delivery':
-        return 'في الطريق للتوصيل';
-      case 'delivered':
-        return 'تم التسليم';
-      case 'cancelled':
-        return 'ملغي';
-      default:
-        return status;
     }
   };
 
@@ -266,8 +318,21 @@ const TrackOrder = () => {
     return (
       <div className="min-h-screen flex flex-col">
         <Navbar />
-        <div className="flex-1 flex items-center justify-center">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <div className="flex-1 container px-4 py-8">
+          <div className="max-w-6xl mx-auto space-y-6">
+            <div className="h-8 w-64 bg-muted animate-pulse rounded" />
+            <div className="h-4 w-40 bg-muted animate-pulse rounded" />
+            <div className="grid lg:grid-cols-2 gap-6">
+              <div className="space-y-6">
+                <div className="h-64 bg-muted animate-pulse rounded-lg" />
+                <div className="h-40 bg-muted animate-pulse rounded-lg" />
+              </div>
+              <div className="space-y-6">
+                <div className="h-64 bg-muted animate-pulse rounded-lg" />
+                <div className="h-40 bg-muted animate-pulse rounded-lg" />
+              </div>
+            </div>
+          </div>
         </div>
         <Footer />
       </div>
@@ -281,12 +346,40 @@ const TrackOrder = () => {
         <div className="flex-1 flex items-center justify-center">
           <div className="text-center">
             <h2 className="text-2xl font-bold mb-4">الطلب غير موجود</h2>
+            <p className="text-muted-foreground">تأكد من رابط التتبع أو أنك مسجّل بالحساب الصحيح.</p>
           </div>
         </div>
         <Footer />
       </div>
     );
   }
+
+  const currentStatus = (order.tracking_status || order.status || "pending").trim().toLowerCase();
+  const normalizedStatus = currentStatus === "processing" ? "preparing" : currentStatus;
+  const isDestructiveState = DESTRUCTIVE_STATUSES.has(normalizedStatus);
+
+  const shippingInfo: ShippingDetails | null = Array.isArray(order.shipping_details)
+    ? order.shipping_details[0] ?? null
+    : order.shipping_details ?? null;
+
+  const shippingCompany = shippingInfo?.shipping_company || order.courier_name;
+  const trackingNumber = shippingInfo?.tracking_number || order.tracking_number;
+  const estimatedDelivery = shippingInfo?.estimated_delivery || order.estimated_delivery;
+  const shippingNotes = shippingInfo?.shipping_notes || order.shipping_notes;
+
+  // Build the visible timeline: prefer tracking_history rows, fall back to order milestones.
+  const timelineEntries: TrackingHistoryRow[] = statusHistory.length
+    ? statusHistory
+    : [
+        order.completed_at && { status: "completed", description: null, actor_role: "system", created_at: order.completed_at },
+        order.cancelled_at && { status: "cancelled", description: order.cancellation_reason, actor_role: "system", created_at: order.cancelled_at },
+        order.delivered_at && { status: "delivered", description: null, actor_role: "system", created_at: order.delivered_at },
+        order.shipped_at && { status: "shipped", description: null, actor_role: "system", created_at: order.shipped_at },
+        order.confirmed_at && { status: "confirmed", description: null, actor_role: "system", created_at: order.confirmed_at },
+        { status: "pending", description: null, actor_role: "system", created_at: order.created_at },
+      ].filter(Boolean) as TrackingHistoryRow[];
+
+  const latestNote = timelineEntries[0]?.description ?? null;
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -295,13 +388,16 @@ const TrackOrder = () => {
         <div className="max-w-6xl mx-auto">
           <div className="mb-8">
             <h1 className="text-3xl font-bold mb-2">تتبع الطلب</h1>
-            <p className="text-muted-foreground">رقم الطلب: {order.id.slice(0, 8)}</p>
+            <p className="text-muted-foreground">
+              رقم الطلب: {order.order_number || order.id.slice(0, 8)}
+              {order.invoice_number && <span className="mx-2">· فاتورة: {order.invoice_number}</span>}
+            </p>
             <div className="flex items-center gap-3 mt-2 flex-wrap">
               <Badge variant={isLive ? "default" : "outline"} className="gap-1">
                 {isLive ? <Wifi className="h-3 w-3" /> : <WifiOff className="h-3 w-3" />}
                 {isLive ? "تحديث فوري" : "تحديث دوري"}
               </Badge>
-              <span className="text-xs text-muted-foreground flex items-center gap-1">
+              <span className="text-xs text-muted-foreground flex items-center gap-1 font-medium">
                 <RefreshCw className="h-3 w-3" />
                 آخر تحديث: {formatDistanceToNow(lastUpdated, { addSuffix: true, locale: ar })}
               </span>
@@ -326,17 +422,45 @@ const TrackOrder = () => {
                 <CardHeader>
                   <CardTitle className="flex items-center justify-between">
                     <span>تفاصيل الطلب</span>
-                    <Badge className={getStatusColor(order.tracking_status)}>
-                      {getStatusText(order.tracking_status)}
+                    <Badge variant={getBadgeVariant(normalizedStatus)}>
+                      {statusLabel(normalizedStatus)}
                     </Badge>
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <OrderStatusTimeline
-                    status={order.tracking_status || order.status}
-                    latestNote={statusHistory.length ? statusHistory[0]?.notes : null}
-                    className="pb-2"
-                  />
+                  {isDestructiveState ? (
+                    <div className="flex items-start gap-3 rounded-xl border border-destructive/40 bg-destructive/5 p-4">
+                      {normalizedStatus === "cancelled" ? (
+                        <XCircle className="h-6 w-6 shrink-0 text-destructive" />
+                      ) : (
+                        <RotateCcw className="h-6 w-6 shrink-0 text-destructive" />
+                      )}
+                      <div>
+                        <p className="font-semibold">
+                          {normalizedStatus === "cancelled" && "تم إلغاء هذا الطلب"}
+                          {normalizedStatus === "return_requested" && "تم تقديم طلب إرجاع"}
+                          {normalizedStatus === "returning" && "الطلب قيد الإرجاع"}
+                          {normalizedStatus === "returned" && "تم إرجاع هذا الطلب"}
+                          {normalizedStatus === "refunded" && "تم رد المبلغ إلى العميل"}
+                        </p>
+                        {order.cancellation_reason && (
+                          <p className="text-sm text-muted-foreground mt-1">
+                            السبب: {order.cancellation_reason}
+                          </p>
+                        )}
+                        {!order.cancellation_reason && latestNote && (
+                          <p className="text-sm text-muted-foreground mt-1">{latestNote}</p>
+                        )}
+                      </div>
+                    </div>
+                  ) : (
+                    <OrderStatusTimeline
+                      status={normalizedStatus}
+                      latestNote={latestNote}
+                      className="pb-2"
+                    />
+                  )}
+
                   <div className="flex items-center gap-3 text-sm">
                     <Clock className="h-4 w-4 text-muted-foreground" />
                     <span className="text-muted-foreground">تاريخ الطلب:</span>
@@ -345,55 +469,63 @@ const TrackOrder = () => {
                     </span>
                   </div>
 
-                  {order.tracking_number && (
+                  {order.payment_method && (
                     <div className="flex items-center gap-3 text-sm">
-                      <Package className="h-4 w-4 text-muted-foreground" />
-                      <span className="text-muted-foreground">رقم التتبع:</span>
-                      <span className="font-medium font-mono">{order.tracking_number}</span>
+                      <CreditCard className="h-4 w-4 text-muted-foreground" />
+                      <span className="text-muted-foreground">طريقة الدفع:</span>
+                      <span className="font-medium">{order.payment_method}</span>
                     </div>
                   )}
 
-                  {order.courier_name && (
+                  {trackingNumber && (
+                    <div className="flex items-center gap-3 text-sm">
+                      <Package className="h-4 w-4 text-muted-foreground" />
+                      <span className="text-muted-foreground">رقم التتبع:</span>
+                      <span className="font-medium font-mono">{trackingNumber}</span>
+                    </div>
+                  )}
+
+                  {shippingCompany && (
                     <div className="flex items-center gap-3 text-sm">
                       <Truck className="h-4 w-4 text-muted-foreground" />
                       <span className="text-muted-foreground">شركة الشحن:</span>
-                      <span className="font-medium">{order.courier_name}</span>
+                      <span className="font-medium">{shippingCompany}</span>
                     </div>
                   )}
 
                   {/* زر تتبع الشحنة المباشر */}
-                  {order.tracking_number && order.courier_name && (
+                  {trackingNumber && shippingCompany && (
                     <div className="pt-2">
-                      {getTrackingUrl(order.courier_name, order.tracking_number) ? (
+                      {getTrackingUrl(shippingCompany, trackingNumber) ? (
                         <Button
                           className="w-full"
                           onClick={() => {
-                            const url = getTrackingUrl(order.courier_name, order.tracking_number!);
+                            const url = getTrackingUrl(shippingCompany, trackingNumber);
                             if (url) window.open(url, '_blank');
                           }}
                         >
                           <ExternalLink className="h-4 w-4 ml-2" />
-                          تتبع الشحنة عبر {order.courier_name}
+                          تتبع الشحنة عبر {shippingCompany}
                         </Button>
                       ) : (
                         <div className="p-3 bg-muted rounded-lg">
                           <p className="text-sm text-muted-foreground text-center">
-                            يمكنك تتبع شحنتك باستخدام رقم التتبع: <span className="font-mono font-bold">{order.tracking_number}</span>
+                            يمكنك تتبع شحنتك باستخدام رقم التتبع: <span className="font-mono font-bold">{trackingNumber}</span>
                           </p>
                           <p className="text-xs text-muted-foreground text-center mt-1">
-                            عبر موقع شركة الشحن: {order.courier_name}
+                            عبر موقع شركة الشحن: {shippingCompany}
                           </p>
                         </div>
                       )}
                     </div>
                   )}
 
-                  {order.estimated_delivery && (
+                  {estimatedDelivery && (
                     <div className="flex items-center gap-3 text-sm">
                       <Clock className="h-4 w-4 text-muted-foreground" />
                       <span className="text-muted-foreground">التسليم المتوقع:</span>
                       <span className="font-medium">
-                        {format(new Date(order.estimated_delivery), "dd MMM yyyy", { locale: ar })}
+                        {format(new Date(estimatedDelivery), "dd MMM yyyy", { locale: ar })}
                       </span>
                     </div>
                   )}
@@ -408,10 +540,43 @@ const TrackOrder = () => {
                     </div>
                   )}
 
-                  <div className="pt-4 border-t">
-                    <div className="flex justify-between text-lg font-bold">
-                      <span>المجموع:</span>
-                      <span className="text-primary">{order.total_amount} ل.س</span>
+                  {shippingNotes && (
+                    <div className="flex items-start gap-3 text-sm">
+                      <StickyNote className="h-4 w-4 text-muted-foreground mt-1" />
+                      <div>
+                        <span className="text-muted-foreground">ملاحظات الشحن:</span>
+                        <p className="font-medium mt-1">{shippingNotes}</p>
+                      </div>
+                    </div>
+                  )}
+
+                  <Separator />
+
+                  {/* Totals breakdown */}
+                  <div className="space-y-1.5 text-sm">
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">منتجات:</span>
+                      <span className="font-medium">{formatMoney(order.subtotal_amount ?? order.total_amount)}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">الشحن:</span>
+                      <span className="font-medium">{formatMoney(order.shipping_amount)}</span>
+                    </div>
+                    {!!order.discount_amount && (
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">الخصم:</span>
+                        <span className="font-medium text-primary">- {formatMoney(order.discount_amount)}</span>
+                      </div>
+                    )}
+                    {!!order.tax_amount && (
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">الضريبة:</span>
+                        <span className="font-medium">{formatMoney(order.tax_amount)}</span>
+                      </div>
+                    )}
+                    <div className="flex justify-between text-lg font-bold pt-2 border-t">
+                      <span>الإجمالي:</span>
+                      <span className="text-primary">{formatMoney(order.total_amount)}</span>
                     </div>
                   </div>
                 </CardContent>
@@ -423,48 +588,62 @@ const TrackOrder = () => {
                   <CardTitle>سجل التتبع</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  {statusHistory.length === 0 ? (
+                  {timelineEntries.length === 0 ? (
                     <p className="text-center text-muted-foreground py-8">
                       لا توجد تحديثات بعد
                     </p>
                   ) : (
                     <div className="space-y-4">
-                      {statusHistory.map((update, index) => (
-                        <div
-                          key={index}
-                          className={`flex gap-4 pb-4 border-b last:border-0 transition-colors rounded-md ${
-                            highlightedIndex === index ? "bg-primary/10 animate-pulse" : ""
-                          }`}
-                        >
-                          <div className="flex flex-col items-center">
-                            <div className={`h-3 w-3 rounded-full ${index === 0 ? "bg-primary ring-4 ring-primary/20" : "bg-primary"}`} />
-                            {index < statusHistory.length - 1 && (
-                              <div className="w-px h-full bg-border mt-2" />
-                            )}
-                          </div>
-                          <div className="flex-1 pb-4">
-                            <div className="flex items-center gap-2 flex-wrap">
-                              <Badge className={getStatusColor(update.status)} variant="outline">
-                                {getStatusText(update.status)}
-                              </Badge>
-                              {index === 0 && (
-                                <span className="text-xs text-primary font-medium">أحدث تحديث</span>
+                      {timelineEntries.map((update, index) => {
+                        const uStatus = (update.status || "").trim().toLowerCase();
+                        const uNormalized = uStatus === "processing" ? "preparing" : uStatus;
+                        const isBad = DESTRUCTIVE_STATUSES.has(uNormalized);
+                        return (
+                          <div
+                            key={index}
+                            className={`flex gap-4 pb-4 border-b last:border-0 transition-colors rounded-md ${
+                              highlightedIndex === index ? "bg-primary/10 animate-pulse" : ""
+                            }`}
+                          >
+                            <div className="flex flex-col items-center">
+                              <div
+                                className={`h-3 w-3 rounded-full ${
+                                  isBad ? "bg-destructive" : "bg-primary"
+                                } ${index === 0 ? "ring-4 " + (isBad ? "ring-destructive/20" : "ring-primary/20") : ""}`}
+                              />
+                              {index < timelineEntries.length - 1 && (
+                                <div className="w-px h-full bg-border mt-2" />
                               )}
                             </div>
-                            {update.notes && (
-                              <p className="text-sm mt-2">{update.notes}</p>
-                            )}
-                            <div className="flex items-center gap-2 mt-1 flex-wrap">
-                              <span className="text-xs text-muted-foreground">
-                                {format(new Date(update.created_at), "dd MMM yyyy - HH:mm", { locale: ar })}
-                              </span>
-                              <span className="text-xs text-muted-foreground">
-                                ({formatDistanceToNow(new Date(update.created_at), { addSuffix: true, locale: ar })})
-                              </span>
+                            <div className="flex-1 pb-4">
+                              <div className="flex items-center gap-2 flex-wrap">
+                                <Badge variant={getBadgeVariant(uNormalized)}>
+                                  {statusLabel(uNormalized)}
+                                </Badge>
+                                {update.actor_role && (
+                                  <span className="text-xs text-muted-foreground">
+                                    {ACTOR_ROLE_LABELS[update.actor_role] ?? update.actor_role}
+                                  </span>
+                                )}
+                                {index === 0 && (
+                                  <span className="text-xs text-primary font-medium">أحدث تحديث</span>
+                                )}
+                              </div>
+                              {update.description && (
+                                <p className="text-sm mt-2">{update.description}</p>
+                              )}
+                              <div className="flex items-center gap-2 mt-1 flex-wrap">
+                                <span className="text-xs text-muted-foreground">
+                                  {format(new Date(update.created_at), "dd MMM yyyy - HH:mm", { locale: ar })}
+                                </span>
+                                <span className="text-xs text-muted-foreground">
+                                  ({formatDistanceToNow(new Date(update.created_at), { addSuffix: true, locale: ar })})
+                                </span>
+                              </div>
                             </div>
                           </div>
-                        </div>
-                      ))}
+                        );
+                      })}
                     </div>
                   )}
                 </CardContent>
@@ -497,25 +676,40 @@ const TrackOrder = () => {
               {/* Order Items */}
               <Card>
                 <CardHeader>
-                  <CardTitle>المنتجات</CardTitle>
+                  <CardTitle className="flex items-center gap-2">
+                    <FileText className="h-4 w-4" />
+                    المنتجات ({order.order_items?.length ?? 0})
+                  </CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    {order.order_items.map((item, index) => (
+                    {(order.order_items ?? []).map((item, index) => (
                       <div key={index} className="flex gap-4">
-                        <img
-                          src={item.products.image_url}
-                          alt={item.products.name}
-                          className="w-16 h-16 object-cover rounded"
-                        />
+                        {item.product_image ? (
+                          <img
+                            src={item.product_image}
+                            alt={item.product_name ?? ""}
+                            className="w-16 h-16 object-cover rounded"
+                          />
+                        ) : (
+                          <div className="w-16 h-16 rounded bg-muted flex items-center justify-center">
+                            <Package className="h-6 w-6 text-muted-foreground" />
+                          </div>
+                        )}
                         <div className="flex-1">
-                          <h4 className="font-medium">{item.products.name}</h4>
+                          <h4 className="font-medium">{item.product_name ?? "منتج"}</h4>
+                          {item.variant_label && (
+                            <p className="text-xs text-muted-foreground">{item.variant_label}</p>
+                          )}
                           <p className="text-sm text-muted-foreground">
-                            الكمية: {item.quantity} × {item.price} ل.س
+                            الكمية: {item.quantity} × {formatMoney(item.price)}
                           </p>
                         </div>
                       </div>
                     ))}
+                    {(!order.order_items || order.order_items.length === 0) && (
+                      <p className="text-center text-muted-foreground py-4 text-sm">لا توجد منتجات</p>
+                    )}
                   </div>
                 </CardContent>
               </Card>

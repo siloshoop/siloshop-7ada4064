@@ -1,395 +1,291 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
-import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Loader2, Package, Eye, EyeOff, Truck } from "lucide-react";
+import SellerLayout from "@/components/seller/SellerLayout";
+import SellerOrderDetailSheet from "@/components/seller/SellerOrderDetailSheet";
 import OrderStatusBadge from "@/components/orders/OrderStatusBadge";
-import OrderTimelineLog from "@/components/orders/OrderTimelineLog";
-import ShippingInfoDialog from "@/components/orders/ShippingInfoDialog";
-import PrintOrderDocs from "@/components/seller/PrintOrderDocs";
-
-import { allowedNextStatuses, changeOrderStatus, friendlyOrderError, normalizeStatus, type OrderStatus } from "@/lib/orderStatus";
-import { useToast } from "@/hooks/use-toast";
+import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
+  Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
+} from "@/components/ui/table";
+import {
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
-interface Order {
-  id: string;
-  created_at: string;
-  status: string;
-  total_amount: number;
-  customer_name: string;
-  city: string | null;
+import {
+  Loader2, Search, Package, Clock, Boxes, Truck, Home, XCircle, Wallet, Lock, ChevronRight, ChevronLeft,
+} from "lucide-react";
+import { ORDER_STATUSES, normalizeStatus } from "@/lib/orderStatus";
+import { fetchSellerOrders, type SellerOrderRow } from "@/lib/sellerOrders";
+import { useToast } from "@/hooks/use-toast";
+
+const PAGE_SIZE = 20;
+
+interface Kpis {
+  pending: number;
+  preparing: number;
+  shipped: number;
+  delivered: number;
+  cancelled: number;
+  revenue: number;
 }
-
-interface OrderItem {
-  id: string;
-  quantity: number;
-  price: number;
-  products: {
-    name: string;
-    image_url: string;
-  };
-}
-
-// Utility function to mask sensitive data
-const maskPhone = (phone: string | null): string => {
-  if (!phone) return "غير متوفر";
-  // Show only last 4 digits
-  if (phone.length > 4) {
-    return "****" + phone.slice(-4);
-  }
-  return "****";
-};
-
-// City is now returned directly by the secure RPC, already minimised.
-const getPartialAddress = (city: string | null): string => city || "غير محدد";
 
 const VendorOrders = () => {
   const { user, loading: authLoading } = useAuth();
-  const [orders, setOrders] = useState<Order[]>([]);
-  const [orderItems, setOrderItems] = useState<Record<string, OrderItem[]>>({});
-  const [loading, setLoading] = useState(true);
-  const [updatingStatus, setUpdatingStatus] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState("all");
-  // Sensitive PII (full address, phone, coordinates, coupon) is no longer
-  // available to vendors per security hardening. Reveal toggle is therefore
-  // a no-op kept only to preserve existing UI structure.
-  const [revealedOrders] = useState<Set<string>>(new Set());
-  const [fullAddresses] = useState<Record<string, string>>({});
-  
-  // Shipping dialog state
-  const [shippingDialogOpen, setShippingDialogOpen] = useState(false);
-  const [pendingShipOrderId, setPendingShipOrderId] = useState<string | null>(null);
-  
   const navigate = useNavigate();
   const { toast } = useToast();
 
+  const [rows, setRows] = useState<SellerOrderRow[]>([]);
+  const [total, setTotal] = useState(0);
+  const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState("");
+  const [status, setStatus] = useState("all");
+  const [dateFrom, setDateFrom] = useState("");
+  const [dateTo, setDateTo] = useState("");
+  const [page, setPage] = useState(0);
+  const [selectedOrder, setSelectedOrder] = useState<SellerOrderRow | null>(null);
+  const [sheetOpen, setSheetOpen] = useState(false);
+  const [kpis, setKpis] = useState<Kpis>({ pending: 0, preparing: 0, shipped: 0, delivered: 0, cancelled: 0, revenue: 0 });
+
   useEffect(() => {
-    if (!authLoading && !user) {
-      navigate("/auth");
-    }
+    if (!authLoading && !user) navigate("/auth");
   }, [user, authLoading, navigate]);
 
-  useEffect(() => {
-    const fetchOrders = async () => {
-      if (!user) return;
-
-      try {
-        // 1. Fetch orders via secure RPC (returns empty array when the vendor has none).
-        const { data: ordersData, error: ordersError } = await supabase.rpc("get_vendor_orders");
-
-        if (ordersError) {
-          console.error("get_vendor_orders error:", ordersError);
-          toast({
-            title: "خطأ",
-            description: ordersError.message || "فشل في جلب الطلبات",
-            variant: "destructive",
-          });
-          setOrders([]);
-          setOrderItems({});
-          return;
-        }
-
-        const orders = (ordersData as Order[]) || [];
-        setOrders(orders);
-
-        if (orders.length === 0) {
-          setOrderItems({});
-          return;
-        }
-
-        // 2. Fetch product line items only for this vendor's orders.
-        const { data: vendorOrderItems, error: itemsError } = await supabase
-          .from("order_items")
-          .select(`
-            id,
-            order_id,
-            quantity,
-            price,
-            products (
-              name,
-              image_url
-            )
-          `)
-          .eq("vendor_id", user.id)
-          .in("order_id", orders.map((o) => o.id));
-
-        if (itemsError) {
-          console.error("order_items fetch error:", itemsError);
-          // Non-fatal: still show orders without line items.
-          setOrderItems({});
-          return;
-        }
-
-        const groupedItems: Record<string, OrderItem[]> = {};
-        (vendorOrderItems || []).forEach((item: any) => {
-          if (!groupedItems[item.order_id]) groupedItems[item.order_id] = [];
-          groupedItems[item.order_id].push(item as OrderItem);
-        });
-        setOrderItems(groupedItems);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchOrders();
-  }, [user, toast]);
-
-  const toggleRevealAddress = (_orderId: string) => {
-    // No-op: full address is no longer exposed to vendors.
-  };
-
-  const getStatusBadge = (status: string) => {
-    return <OrderStatusBadge status={status} />;
-  };
-
-  const filterOrders = (status: string) => {
-    if (status === "all") return orders;
-    return orders.filter(order => normalizeStatus(order.status) === status);
-  };
-
-  const handleStatusChange = (orderId: string, newStatus: string) => {
-    updateOrderStatus(orderId, newStatus as OrderStatus);
-  };
-
-  const openShippingDialog = (orderId: string) => {
-    setPendingShipOrderId(orderId);
-    setShippingDialogOpen(true);
-  };
-
-  const updateOrderStatus = async (orderId: string, newStatus: OrderStatus) => {
-    setUpdatingStatus(orderId);
+  const load = useCallback(async () => {
+    if (!user) return;
+    setLoading(true);
     try {
-      // Audited, transition-validated update (records actor, IP and device server side).
-      await changeOrderStatus(orderId, newStatus);
-
-      setOrders(prev =>
-        prev.map(order =>
-          order.id === orderId ? { ...order, status: newStatus } : order
-        )
-      );
-
-      toast({
-        title: "تم التحديث",
-        description: "تم تحديث حالة الطلب بنجاح",
+      const { rows: data, total: count } = await fetchSellerOrders({
+        search: search.trim() || undefined,
+        status,
+        from: dateFrom ? new Date(`${dateFrom}T00:00:00`).toISOString() : null,
+        to: dateTo ? new Date(`${dateTo}T23:59:59`).toISOString() : null,
+        limit: PAGE_SIZE,
+        offset: page * PAGE_SIZE,
       });
-    } catch (error) {
+      setRows(data);
+      setTotal(count);
+    } catch (e) {
       toast({
         title: "خطأ",
-        description: friendlyOrderError(error),
+        description: (e as { message?: string })?.message || "فشل في جلب الطلبات",
         variant: "destructive",
       });
     } finally {
-      setUpdatingStatus(null);
+      setLoading(false);
     }
+  }, [user, search, status, dateFrom, dateTo, page, toast]);
+
+  const loadKpis = useCallback(async () => {
+    if (!user) return;
+    try {
+      const { rows: all } = await fetchSellerOrders({ limit: 1000, offset: 0 });
+      const next: Kpis = { pending: 0, preparing: 0, shipped: 0, delivered: 0, cancelled: 0, revenue: 0 };
+      for (const r of all) {
+        const s = normalizeStatus(r.status);
+        if (s === "pending") next.pending++;
+        else if (s === "preparing" || s === "confirmed") next.preparing++;
+        else if (s === "shipped" || s === "out_for_delivery" || s === "ready_for_shipping") next.shipped++;
+        else if (s === "delivered" || s === "completed") next.delivered++;
+        else if (s === "cancelled" || s === "returned") next.cancelled++;
+        if (s !== "cancelled" && s !== "returned") next.revenue += Number(r.vendor_subtotal || 0);
+      }
+      setKpis(next);
+    } catch {
+      /* non-fatal */
+    }
+  }, [user]);
+
+  useEffect(() => { load(); }, [load]);
+  useEffect(() => { loadKpis(); }, [loadKpis]);
+
+  useEffect(() => {
+    if (!user) return;
+    const channel = supabase
+      .channel(`vendor-orders-${user.id}`)
+      .on("postgres_changes", { event: "*", schema: "public", table: "orders" }, () => {
+        load();
+        loadKpis();
+      })
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, [user, load, loadKpis]);
+
+  useEffect(() => { setPage(0); }, [search, status, dateFrom, dateTo]);
+
+  const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+
+  const kpiCards = useMemo(() => ([
+    { label: "قيد الانتظار", value: kpis.pending, icon: Clock, token: "--status-pending" },
+    { label: "قيد التجهيز", value: kpis.preparing, icon: Boxes, token: "--status-preparing" },
+    { label: "تم الشحن", value: kpis.shipped, icon: Truck, token: "--status-shipped" },
+    { label: "تم التسليم", value: kpis.delivered, icon: Home, token: "--status-delivered" },
+    { label: "ملغي", value: kpis.cancelled, icon: XCircle, token: "--status-cancelled" },
+  ]), [kpis]);
+
+  const openOrder = (order: SellerOrderRow) => {
+    setSelectedOrder(order);
+    setSheetOpen(true);
   };
 
-  if (authLoading || loading) {
+  if (authLoading) {
     return (
-      <div className="min-h-screen flex flex-col">
-        <Navbar />
-        <div className="flex-1 flex items-center justify-center">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
-        </div>
-        <Footer />
+      <div className="flex min-h-screen items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
   }
 
-  const filteredOrders = filterOrders(activeTab);
-
   return (
-    <div className="min-h-screen flex flex-col">
-      <Navbar />
-      <main className="flex-1 container px-4 py-8">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold mb-2">إدارة الطلبات</h1>
-          <p className="text-muted-foreground">تتبع وإدارة طلبات عملائك</p>
+    <SellerLayout title="إدارة الطلبات" description="تتبع طلبات عملائك وحدّث حالتها لحظيًا">
+      <div className="space-y-6">
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
+          {kpiCards.map((k) => (
+            <Card key={k.label}>
+              <CardContent className="flex items-center gap-3 p-4">
+                <div className="rounded-lg p-2" style={{ backgroundColor: `hsl(var(${k.token}) / 0.12)` }}>
+                  <k.icon className="h-4 w-4" style={{ color: `hsl(var(${k.token}))` }} />
+                </div>
+                <div>
+                  <p className="text-lg font-bold">{k.value}</p>
+                  <p className="text-xs text-muted-foreground">{k.label}</p>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+          <Card>
+            <CardContent className="flex items-center gap-3 p-4">
+              <div className="rounded-lg bg-primary/10 p-2">
+                <Wallet className="h-4 w-4 text-primary" />
+              </div>
+              <div className="min-w-0">
+                <p className="truncate text-lg font-bold">{kpis.revenue.toLocaleString("ar-SY")} ل.س</p>
+                <p className="text-xs text-muted-foreground">إيرادات فعّالة</p>
+              </div>
+            </CardContent>
+          </Card>
         </div>
 
         <Card>
-          <CardHeader>
-            <CardTitle>الطلبات</CardTitle>
-            <CardDescription>جميع الطلبات على منتجاتك</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Tabs value={activeTab} onValueChange={setActiveTab}>
-              <TabsList className="grid w-full grid-cols-5">
-                <TabsTrigger value="all">الكل</TabsTrigger>
-                <TabsTrigger value="pending">قيد الانتظار</TabsTrigger>
-                <TabsTrigger value="preparing">قيد التجهيز</TabsTrigger>
-                <TabsTrigger value="shipped">تم الشحن</TabsTrigger>
-                <TabsTrigger value="delivered">تم التوصيل</TabsTrigger>
-              </TabsList>
-
-              <TabsContent value={activeTab} className="mt-6">
-                {filteredOrders.length > 0 ? (
-                  <div className="space-y-4">
-                    {filteredOrders.map((order) => (
-                      <Card key={order.id}>
-                        <CardHeader>
-                          <div className="flex items-start justify-between">
-                            <div>
-                              <CardTitle className="text-lg">
-                                طلب #{order.id.slice(0, 8)}
-                              </CardTitle>
-                              <CardDescription>
-                                {new Date(order.created_at).toLocaleDateString('ar-SY', {
-                                  year: 'numeric',
-                                  month: 'long',
-                                  day: 'numeric'
-                                })}
-                              </CardDescription>
-                            </div>
-                            {getStatusBadge(order.status)}
-                          </div>
-                        </CardHeader>
-                        <CardContent>
-                          <div className="space-y-4">
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                              <div>
-                                <p className="text-sm font-medium">العميل</p>
-                                <p className="text-sm text-muted-foreground">
-                                  {order.customer_name || "غير متوفر"}
-                                </p>
-                              </div>
-                              <div>
-                                <div className="flex items-center gap-2 mb-1">
-                                  <p className="text-sm font-medium">عنوان التوصيل</p>
-                                  <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    className="h-6 w-6 p-0"
-                                    onClick={() => toggleRevealAddress(order.id)}
-                                    title={revealedOrders.has(order.id) ? "إخفاء العنوان الكامل" : "عرض العنوان الكامل"}
-                                  >
-                                    {revealedOrders.has(order.id) ? (
-                                      <EyeOff className="h-4 w-4" />
-                                    ) : (
-                                      <Eye className="h-4 w-4" />
-                                    )}
-                                  </Button>
-                                </div>
-                                <p className="text-sm text-muted-foreground">
-                                  {getPartialAddress(order.city)}
-                                </p>
-                              </div>
-                            </div>
-
-                            {orderItems[order.id] && (
-                              <div>
-                                <p className="text-sm font-medium mb-2">المنتجات</p>
-                                <div className="space-y-2">
-                                  {orderItems[order.id].map((item) => (
-                                    <div key={item.id} className="flex items-center gap-3 p-3 bg-muted/50 rounded-lg">
-                                      <img
-                                        src={item.products.image_url || "/placeholder.svg"}
-                                        alt={item.products.name}
-                                        className="w-12 h-12 object-cover rounded"
-                                      />
-                                      <div className="flex-1">
-                                        <p className="text-sm font-medium">{item.products.name}</p>
-                                        <p className="text-xs text-muted-foreground">
-                                          الكمية: {item.quantity} × {item.price} ل.س
-                                        </p>
-                                      </div>
-                                      <p className="text-sm font-semibold">
-                                        {item.quantity * item.price} ل.س
-                                      </p>
-                                    </div>
-                                  ))}
-                                </div>
-                              </div>
-                            )}
-
-                            {/* Status Update Section */}
-                            <div className="border-t pt-4 mt-4">
-                              <div className="flex flex-wrap items-center gap-3">
-                                <p className="text-sm font-medium">تحديث الحالة:</p>
-                                <Select
-                                  value=""
-                                  onValueChange={(value) => handleStatusChange(order.id, value)}
-                                  disabled={updatingStatus === order.id}
-                                >
-                                  <SelectTrigger className="w-[180px]">
-                                    <SelectValue placeholder="اختر الحالة التالية" />
-                                  </SelectTrigger>
-                                  <SelectContent className="bg-background">
-                                    {allowedNextStatuses(order.status, "seller").map((s) => (
-                                      <SelectItem key={s.key} value={s.key}>{s.label}</SelectItem>
-                                    ))}
-                                  </SelectContent>
-                                </Select>
-                                <Button variant="outline" size="sm" className="gap-2"
-                                  onClick={() => openShippingDialog(order.id)}>
-                                  <Truck className="h-4 w-4" />
-                                  معلومات الشحن
-                                </Button>
-                                <PrintOrderDocs
-                                  order={{
-                                    id: order.id,
-                                    created_at: order.created_at,
-                                    status: order.status,
-                                    customer_name: order.customer_name,
-                                    city: order.city,
-                                    items: (orderItems[order.id] ?? []).map((it) => ({
-                                      name: it.products?.name ?? "منتج",
-                                      quantity: it.quantity,
-                                      price: it.price,
-                                    })),
-                                  }}
-                                />
-
-                                {updatingStatus === order.id && (
-                                  <Loader2 className="h-4 w-4 animate-spin" />
-                                )}
-                              </div>
-                            </div>
-
-                            <div className="border-t pt-4">
-                              <p className="text-sm font-medium mb-3">سجل الطلب</p>
-                              <OrderTimelineLog orderId={order.id} />
-                            </div>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="text-center py-12">
-                    <Package className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
-                    <p className="text-muted-foreground">
-                      {activeTab === "all" 
-                        ? "لا توجد طلبات حالياً" 
-                        : `لا توجد طلبات ${activeTab === "pending" ? "قيد الانتظار" : activeTab === "preparing" ? "قيد التجهيز" : activeTab === "shipped" ? "تم شحنها" : "تم توصيلها"}`
-                      }
-                    </p>
-                  </div>
-                )}
-              </TabsContent>
-            </Tabs>
+          <CardContent className="flex flex-wrap items-end gap-3 p-4">
+            <div className="min-w-[220px] flex-1">
+              <div className="relative">
+                <Search className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                <Input
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  placeholder="بحث برقم الطلب، الهاتف أو اسم المنتج"
+                  className="pr-9"
+                />
+              </div>
+            </div>
+            <Select value={status} onValueChange={setStatus}>
+              <SelectTrigger className="w-[180px]">
+                <SelectValue placeholder="كل الحالات" />
+              </SelectTrigger>
+              <SelectContent className="bg-background">
+                <SelectItem value="all">كل الحالات</SelectItem>
+                {ORDER_STATUSES.map((s) => (
+                  <SelectItem key={s.key} value={s.key}>{s.label}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <div className="flex items-center gap-2">
+              <Input type="date" value={dateFrom} onChange={(e) => setDateFrom(e.target.value)} className="w-[150px]" />
+              <span className="text-sm text-muted-foreground">إلى</span>
+              <Input type="date" value={dateTo} onChange={(e) => setDateTo(e.target.value)} className="w-[150px]" />
+            </div>
           </CardContent>
         </Card>
-      </main>
-      <Footer />
 
-      {/* Shipping Dialog */}
-      <ShippingInfoDialog
-        orderId={pendingShipOrderId}
-        open={shippingDialogOpen}
-        onOpenChange={setShippingDialogOpen}
+        <Card>
+          <CardContent className="p-0">
+            {loading ? (
+              <div className="flex justify-center py-16">
+                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+              </div>
+            ) : rows.length === 0 ? (
+              <div className="flex flex-col items-center gap-2 py-16 text-muted-foreground">
+                <Package className="h-10 w-10" />
+                <p>لا توجد طلبات مطابقة</p>
+              </div>
+            ) : (
+              <div className="overflow-x-auto">
+                <Table dir="rtl">
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>رقم الطلب</TableHead>
+                      <TableHead>التاريخ</TableHead>
+                      <TableHead>العميل</TableHead>
+                      <TableHead>المدينة</TableHead>
+                      <TableHead>المنتجات</TableHead>
+                      <TableHead>الإجمالي</TableHead>
+                      <TableHead>الحالة</TableHead>
+                      <TableHead></TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {rows.map((order) => (
+                      <TableRow key={order.id} className="cursor-pointer" onClick={() => openOrder(order)}>
+                        <TableCell className="font-medium">
+                          <div className="flex items-center gap-2">
+                            #{order.order_number || order.id.slice(0, 8)}
+                            {order.is_frozen && <Lock className="h-3.5 w-3.5 text-destructive" />}
+                          </div>
+                        </TableCell>
+                        <TableCell className="text-sm text-muted-foreground">
+                          {new Date(order.created_at).toLocaleDateString("ar-SY", { year: "numeric", month: "short", day: "numeric" })}
+                        </TableCell>
+                        <TableCell>
+                          <div className="text-sm">{order.customer_name || "غير متوفر"}</div>
+                          <div className="text-xs text-muted-foreground">{order.customer_phone || ""}</div>
+                        </TableCell>
+                        <TableCell className="text-sm">{order.city || "—"}</TableCell>
+                        <TableCell className="text-sm">{order.items_count}</TableCell>
+                        <TableCell className="text-sm font-semibold">
+                          {Number(order.vendor_subtotal || 0).toLocaleString("ar-SY")} ل.س
+                        </TableCell>
+                        <TableCell><OrderStatusBadge status={order.status} /></TableCell>
+                        <TableCell>
+                          <Button size="sm" variant="outline" onClick={(e) => { e.stopPropagation(); openOrder(order); }}>
+                            التفاصيل
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {total > 0 && (
+          <div className="flex items-center justify-between text-sm text-muted-foreground">
+            <span>إجمالي {total} طلب</span>
+            <div className="flex items-center gap-2">
+              <Button variant="outline" size="icon" disabled={page === 0} onClick={() => setPage((p) => Math.max(0, p - 1))}>
+                <ChevronRight className="h-4 w-4" />
+              </Button>
+              <span>صفحة {page + 1} من {totalPages}</span>
+              <Button variant="outline" size="icon" disabled={page + 1 >= totalPages} onClick={() => setPage((p) => p + 1)}>
+                <ChevronLeft className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+        )}
+      </div>
+
+      <SellerOrderDetailSheet
+        order={selectedOrder}
+        open={sheetOpen}
+        onOpenChange={setSheetOpen}
+        onChanged={() => { load(); loadKpis(); }}
       />
-    </div>
+    </SellerLayout>
   );
 };
 

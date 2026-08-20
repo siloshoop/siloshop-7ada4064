@@ -52,7 +52,7 @@ const OrderDetails = () => {
       setOrder(ord);
       const { data: oi } = await supabase
         .from("order_items")
-        .select("quantity, price, product:products(id, name, image_url)")
+        .select("quantity, price, vendor_id, product:products(id, name, image_url)")
         .eq("order_id", id);
       setItems(oi || []);
       setLoading(false);

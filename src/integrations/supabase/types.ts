@@ -2633,6 +2633,7 @@ export type Database = {
         Args: { _order_id: string; _reason: string }
         Returns: undefined
       }
+      admin_dashboard_overview: { Args: { _days?: number }; Returns: Json }
       admin_delete_message:
         | { Args: { _message_id: string }; Returns: undefined }
         | {

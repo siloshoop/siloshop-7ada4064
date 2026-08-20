@@ -448,8 +448,16 @@ const Reports = () => {
       <main className="flex-1 container mx-auto px-4 py-6 max-w-6xl">
         <div className="flex items-center gap-2 mb-6">
           <Flag className="h-6 w-6 text-primary" />
-          <h1 className="text-2xl font-bold">لوحة البلاغات والإشراف</h1>
+          <h1 className="text-2xl font-bold">لوحة البلاغات والتقارير</h1>
         </div>
+
+        <div className="mb-8">
+          <OrdersReportSection />
+        </div>
+
+        <h2 className="text-lg font-bold mb-3">البلاغات والإشراف</h2>
+
+
 
         <Card className="mb-4">
           <CardContent className="pt-6 grid gap-3 md:grid-cols-4">

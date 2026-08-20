@@ -90,6 +90,12 @@ const AdminStores = lazy(() => import("./pages/admin/AdminStores"));
 const AdminRoles = lazy(() => import("./pages/admin/AdminRoles"));
 const AdminAuditLog = lazy(() => import("./pages/admin/AdminAuditLog"));
 const AdminUserDetail = lazy(() => import("./pages/admin/AdminUserDetail"));
+const AdminReviews = lazy(() => import("./pages/admin/AdminReviews"));
+const AdminCoupons = lazy(() => import("./pages/admin/AdminCoupons"));
+const AdminInventory = lazy(() => import("./pages/admin/AdminInventory"));
+const AdminContent = lazy(() => import("./pages/admin/AdminContent"));
+const AdminSettings = lazy(() => import("./pages/admin/AdminSettings"));
+const ContentPage = lazy(() => import("./pages/ContentPage"));
 const Privacy = lazy(() => import("./pages/Privacy"));
 const Terms = lazy(() => import("./pages/Terms"));
 const GuestTrack = lazy(() => import("./pages/GuestTrack"));
@@ -175,6 +181,12 @@ const App = () => (
             <Route path="/admin/announcements" element={<RequireRole role="admin"><ManageAnnouncements /></RequireRole>} />
             <Route path="/admin/audit" element={<RequireRole role="admin"><AdminAuditLog /></RequireRole>} />
             <Route path="/admin/roles" element={<RequireRole role="super_admin"><AdminRoles /></RequireRole>} />
+            <Route path="/admin/reviews" element={<RequireRole role="admin"><AdminReviews /></RequireRole>} />
+            <Route path="/admin/coupons" element={<RequireRole role="admin"><AdminCoupons /></RequireRole>} />
+            <Route path="/admin/inventory" element={<RequireRole role="admin"><AdminInventory /></RequireRole>} />
+            <Route path="/admin/content" element={<RequireRole role="admin"><AdminContent /></RequireRole>} />
+            <Route path="/admin/settings" element={<RequireRole role={["admin","super_admin"]}><AdminSettings /></RequireRole>} />
+            <Route path="/p/:slug" element={<ContentPage />} />
             <Route path="/seller/application" element={<SellerApplication />} />
             {/* Seller console (selling only, approved sellers) */}
             <Route path="/seller" element={<RequireApprovedSeller><SellerHome /></RequireApprovedSeller>} />

@@ -1,4 +1,5 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
@@ -83,20 +84,49 @@ const faqCategories = [
   },
 ];
 
+interface DbFaq {
+  category: string;
+  question: string;
+  answer: string;
+}
+
 const FAQ = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [activeId, setActiveId] = useState<string | null>(null);
+  const [dbItems, setDbItems] = useState<DbFaq[]>([]);
+
+  useEffect(() => {
+    void (async () => {
+      const { data } = await supabase
+        .from("faq_items")
+        .select("category, question, answer")
+        .eq("is_active", true)
+        .order("sort_order");
+      setDbItems((data as DbFaq[]) ?? []);
+    })();
+  }, []);
+
+  const mergedCategories = useMemo(
+    () =>
+      faqCategories.map((c) => {
+        const extra = dbItems.filter((i) => i.category === c.id);
+        return extra.length > 0
+          ? { ...c, questions: [...extra, ...c.questions] }
+          : c;
+      }),
+    [dbItems],
+  );
 
   const filteredCategories = useMemo(() => {
     const q = searchQuery.trim().toLowerCase();
-    return faqCategories
+    return mergedCategories
       .filter((c) => !activeId || c.id === activeId)
       .map((category) => ({
         ...category,
         questions: category.questions.filter(
           (qq) => {
             if (!q) return true;
-            const en = qq.translations?.en;
+            const en = "translations" in qq ? qq.translations?.en : undefined;
             return (
               qq.question.toLowerCase().includes(q) ||
               qq.answer.toLowerCase().includes(q) ||
@@ -106,7 +136,7 @@ const FAQ = () => {
         ),
       }))
       .filter((category) => category.questions.length > 0);
-  }, [searchQuery, activeId]);
+  }, [searchQuery, activeId, mergedCategories]);
 
   return (
     <div className="min-h-screen flex flex-col">

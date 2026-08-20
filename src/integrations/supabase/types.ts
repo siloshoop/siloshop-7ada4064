@@ -429,6 +429,39 @@ export type Database = {
         }
         Relationships: []
       }
+      content_pages: {
+        Row: {
+          body: string
+          created_at: string
+          id: string
+          is_published: boolean
+          slug: string
+          title: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          body?: string
+          created_at?: string
+          id?: string
+          is_published?: boolean
+          slug: string
+          title: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          id?: string
+          is_published?: boolean
+          slug?: string
+          title?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
       conversations: {
         Row: {
           created_at: string
@@ -740,6 +773,42 @@ export type Database = {
           id?: string
           token?: string
           used_at?: string | null
+        }
+        Relationships: []
+      }
+      faq_items: {
+        Row: {
+          answer: string
+          category: string
+          created_at: string
+          created_by: string | null
+          id: string
+          is_active: boolean
+          question: string
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          answer: string
+          category: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_active?: boolean
+          question: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          answer?: string
+          category?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_active?: boolean
+          question?: string
+          sort_order?: number
+          updated_at?: string
         }
         Relationships: []
       }
@@ -1426,6 +1495,42 @@ export type Database = {
           sham_cash_account_name?: string
           sham_cash_account_number?: string
           updated_at?: string
+        }
+        Relationships: []
+      }
+      platform_settings: {
+        Row: {
+          id: number
+          maintenance_message: string | null
+          maintenance_mode: boolean
+          min_order_amount: number
+          store_name: string
+          support_email: string | null
+          support_phone: string | null
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          id?: number
+          maintenance_message?: string | null
+          maintenance_mode?: boolean
+          min_order_amount?: number
+          store_name?: string
+          support_email?: string | null
+          support_phone?: string | null
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          id?: number
+          maintenance_message?: string | null
+          maintenance_mode?: boolean
+          min_order_amount?: number
+          store_name?: string
+          support_email?: string | null
+          support_phone?: string | null
+          updated_at?: string
+          updated_by?: string | null
         }
         Relationships: []
       }
@@ -2664,6 +2769,21 @@ export type Database = {
         Args: { _reason: string; _review_id: string }
         Returns: undefined
       }
+      admin_inventory_overview: {
+        Args: { _limit?: number; _threshold?: number }
+        Returns: {
+          id: string
+          image_url: string
+          is_active: boolean
+          moderation_status: string
+          name: string
+          price: number
+          stock_quantity: number
+          updated_at: string
+          vendor_id: string
+          vendor_name: string
+        }[]
+      }
       admin_issue_violation: {
         Args: {
           _reason?: string
@@ -2696,6 +2816,23 @@ export type Database = {
           product_id: string
           reported_count: number
           suspended_until: string
+          vendor_id: string
+          vendor_name: string
+        }[]
+      }
+      admin_list_coupons: {
+        Args: { _limit?: number; _search?: string }
+        Returns: {
+          code: string
+          created_at: string
+          discount_type: string
+          discount_value: number
+          expires_at: string
+          id: string
+          is_active: boolean
+          max_uses: number
+          min_purchase: number
+          used_count: number
           vendor_id: string
           vendor_name: string
         }[]
@@ -2758,6 +2895,22 @@ export type Database = {
           target_id: string
           total_count: number
           updated_at: string
+        }[]
+      }
+      admin_list_reviews: {
+        Args: { _limit?: number; _search?: string; _status?: string }
+        Returns: {
+          author_name: string
+          comment: string
+          created_at: string
+          hidden_reason: string
+          id: string
+          image_url: string
+          is_hidden: boolean
+          product_id: string
+          product_name: string
+          rating: number
+          user_id: string
         }[]
       }
       admin_list_seller_applications: {
@@ -2847,6 +3000,10 @@ export type Database = {
           rating: number
           vendor_id: string
         }[]
+      }
+      admin_set_coupon_active: {
+        Args: { _coupon_id: string; _is_active: boolean; _reason?: string }
+        Returns: undefined
       }
       admin_set_order_freeze: {
         Args: {

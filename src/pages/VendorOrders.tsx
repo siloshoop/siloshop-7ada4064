@@ -10,6 +10,8 @@ import { Loader2, Package, Eye, EyeOff, Truck } from "lucide-react";
 import OrderStatusBadge from "@/components/orders/OrderStatusBadge";
 import OrderTimelineLog from "@/components/orders/OrderTimelineLog";
 import ShippingInfoDialog from "@/components/orders/ShippingInfoDialog";
+import PrintOrderDocs from "@/components/seller/PrintOrderDocs";
+
 import { allowedNextStatuses, changeOrderStatus, friendlyOrderError, normalizeStatus, type OrderStatus } from "@/lib/orderStatus";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";

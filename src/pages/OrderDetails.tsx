@@ -10,10 +10,11 @@ import { Button } from "@/components/ui/button";
 import { Loader2, ArrowRight, Package, MapPin, Phone, Calendar, Receipt, XCircle, Truck, History } from "lucide-react";
 import { format } from "date-fns";
 import { ar } from "date-fns/locale";
-import CancelOrderDialog from "@/components/CancelOrderDialog";
+import CancelOrderDialog, { canCancelOrder } from "@/components/CancelOrderDialog";
 import ReturnRequestDialog from "@/components/ReturnRequestDialog";
 import OrderStatusTimeline from "@/components/OrderStatusTimeline";
 import OrderTimelineLog from "@/components/orders/OrderTimelineLog";
+import OrderHelpActions from "@/components/orders/OrderHelpActions";
 
 const statusMap: Record<string, { label: string; variant: "default" | "secondary" | "destructive" | "outline" }> = {
   pending: { label: "قيد المعالجة", variant: "secondary" },
@@ -51,7 +52,7 @@ const OrderDetails = () => {
       setOrder(ord);
       const { data: oi } = await supabase
         .from("order_items")
-        .select("quantity, price, product:products(id, name, image_url)")
+        .select("quantity, price, vendor_id, product:products(id, name, image_url)")
         .eq("order_id", id);
       setItems(oi || []);
       setLoading(false);
@@ -259,6 +260,9 @@ const OrderDetails = () => {
         <Button variant="ghost" size="sm" className="w-full" onClick={() => navigate("/my-returns")}>
           عرض طلبات الإرجاع
         </Button>
+        {order.status !== "cancelled" && !canCancelOrder(order.status, order.tracking_status) && (
+          <OrderHelpActions vendorId={items[0]?.vendor_id} />
+        )}
       </main>
       <Footer />
     </div>

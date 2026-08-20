@@ -456,34 +456,12 @@ const ShowroomManagement = () => {
         <Dialog open={previewOpen} onOpenChange={setPreviewOpen}>
           <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-4xl">
             <DialogHeader>
-              <DialogTitle>
-                {previewDemo ? "معاينة تجريبية للمعرض (محتوى للعرض فقط)" : "معاينة المعرض قبل النشر"}
-              </DialogTitle>
+              <DialogTitle>معاينة المعرض قبل النشر</DialogTitle>
             </DialogHeader>
-            <div className="mb-3 flex flex-wrap items-center gap-2">
-              <Button
-                size="sm"
-                variant={previewDemo ? "outline" : "default"}
-                onClick={() => setPreviewDemo(false)}
-              >
-                العناصر الحقيقية
-              </Button>
-              <Button
-                size="sm"
-                variant={previewDemo ? "default" : "outline"}
-                onClick={() => setPreviewDemo(true)}
-              >
-                محتوى تجريبي
-              </Button>
-            </div>
-            {previewDemo && (
-              <p className="mb-3 rounded-lg border border-dashed border-border bg-muted/40 p-3 text-xs text-muted-foreground">
-                محتوى تجريبي للمعاينة البصرية فقط — غير محفوظ في قاعدة البيانات ولا يظهر للزوار في الصفحة الرئيسية.
-              </p>
-            )}
-            <PremiumShowroom showEmptyState demoItems={previewDemo ? showroomDemoItems : undefined} />
+            <PremiumShowroom showEmptyState />
           </DialogContent>
         </Dialog>
+
       </main>
       <Footer />
     </div>

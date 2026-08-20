@@ -73,15 +73,26 @@ export const RETURN_NEXT_STATUSES = [
 
 export const returnStatusLabel = (status: string) => RETURN_STATUS[status]?.label ?? status;
 
+/** Maps legacy statuses onto the canonical enterprise lifecycle. */
+export const RETURN_STATUS_ALIAS: Record<string, string> = {
+  pending: "pending_review",
+  under_review: "seller_reviewing",
+  info_requested: "waiting_customer",
+  awaiting_return: "approved",
+  item_shipped: "customer_shipping",
+  return_in_progress: "customer_shipping",
+  item_received: "seller_inspecting",
+  inspection: "seller_inspecting",
+  returned: "inspection_passed",
+  refunded: "completed",
+  closed: "completed",
+};
+
+export const canonicalReturnStatus = (status: string) => RETURN_STATUS_ALIAS[status] ?? status;
+
 /** Index of a status inside RETURN_TIMELINE; -1 for terminal/off-track statuses. */
 export function returnTimelineIndex(status: string): number {
-  const alias: Record<string, string> = {
-    return_in_progress: "item_shipped",
-    returned: "item_received",
-    refunded: "completed",
-    closed: "completed",
-  };
-  return (RETURN_TIMELINE as readonly string[]).indexOf(alias[status] ?? status);
+  return (RETURN_TIMELINE as readonly string[]).indexOf(canonicalReturnStatus(status));
 }
 
 /** Days left to request a return, or null when not applicable. */

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
@@ -7,92 +7,60 @@ import Footer from "@/components/Footer";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Loader2, RotateCcw, Image as ImageIcon, Video as VideoIcon, Truck, MapPin } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Loader2, RotateCcw, Search, MessageCircle } from "lucide-react";
 import { format } from "date-fns";
 import { ar } from "date-fns/locale";
-import { RETURN_STATUS, RETURN_REASONS } from "@/lib/returnStatus";
+import { RETURN_STATUS } from "@/lib/returnStatus";
 import ReturnTimeline from "@/components/returns/ReturnTimeline";
-import ReturnHistory from "@/components/returns/ReturnHistory";
-import { useToast } from "@/hooks/use-toast";
+import ReturnDetailDialog from "@/components/returns/ReturnDetailDialog";
 
-interface ReturnRow {
+interface ReturnListRow {
   id: string;
-  order_id: string;
-  reason: string;
-  notes: string | null;
-  images: string[];
-  video_url: string | null;
   status: string;
-  review_note: string | null;
-  rejection_reason: string | null;
-  return_instructions: string | null;
-  return_address: string | null;
+  return_number: string | null;
+  order_id: string;
+  order_number: string | null;
+  reason_label: string | null;
+  description: string | null;
+  unread_count: number;
+  items_count: number;
   created_at: string;
-  updated_at: string;
 }
-
-const reasonLabel = (v: string) => RETURN_REASONS.find((r) => r.value === v)?.label || v;
-
-const MediaThumb = ({ path }: { path: string }) => {
-  const [url, setUrl] = useState<string | null>(null);
-  useEffect(() => {
-    let alive = true;
-    (async () => {
-      const { data } = await supabase.storage.from("returns-media").createSignedUrl(path, 3600);
-      if (alive) setUrl(data?.signedUrl ?? null);
-    })();
-    return () => {
-      alive = false;
-    };
-  }, [path]);
-  if (!url) return <div className="w-16 h-16 bg-muted animate-pulse rounded" />;
-  return (
-    <a href={url} target="_blank" rel="noreferrer">
-      <img src={url} alt="" className="w-16 h-16 rounded object-cover" />
-    </a>
-  );
-};
 
 const MyReturns = () => {
   const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
-  const { toast } = useToast();
-  const [returns, setReturns] = useState<ReturnRow[]>([]);
+  const [rows, setRows] = useState<ReturnListRow[]>([]);
   const [loading, setLoading] = useState(true);
-  const [shipping, setShipping] = useState<string | null>(null);
-
-  const markShipped = async (id: string) => {
-    setShipping(id);
-    const { error } = await supabase.rpc("return_transition", {
-      _return_id: id,
-      _to_status: "customer_shipping",
-      _note: "قام المشتري بإرسال المنتج",
-    });
-    setShipping(null);
-    if (error) {
-      toast({ title: "تعذر تحديث الطلب", description: error.message, variant: "destructive" });
-      return;
-    }
-    toast({ title: "تم إبلاغ البائع بإرسال المنتج" });
-  };
+  const [search, setSearch] = useState("");
+  const [openId, setOpenId] = useState<string | null>(null);
 
   useEffect(() => {
     if (!authLoading && !user) navigate("/auth");
   }, [user, authLoading, navigate]);
 
+  const load = useCallback(async () => {
+    if (!user) return;
+    setLoading(true);
+    const { data } = await supabase.rpc("list_returns", {
+      _scope: "customer",
+      _status: null,
+      _search: search.trim() || null,
+      _limit: 50,
+      _offset: 0,
+    });
+    const payload = data as unknown as { rows?: ReturnListRow[] } | null;
+    setRows(payload?.rows ?? []);
+    setLoading(false);
+  }, [user, search]);
+
+  useEffect(() => {
+    void load();
+  }, [load]);
+
   useEffect(() => {
     if (!user) return;
-    const load = async () => {
-      setLoading(true);
-      const { data } = await supabase
-        .from("returns")
-        .select("*")
-        .eq("customer_id", user.id)
-        .order("created_at", { ascending: false });
-      setReturns((data as ReturnRow[] | null) || []);
-      setLoading(false);
-    };
-    void load();
     const channel = supabase
       .channel(`returns-buyer-${user.id}`)
       .on(
@@ -104,11 +72,9 @@ const MyReturns = () => {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [user]);
+  }, [user, load]);
 
-  const grouped = useMemo(() => returns, [returns]);
-
-  if (authLoading || loading) {
+  if (authLoading || (loading && rows.length === 0)) {
     return (
       <div className="min-h-screen flex flex-col">
         <Navbar />
@@ -124,11 +90,22 @@ const MyReturns = () => {
     <div className="min-h-screen flex flex-col">
       <Navbar />
       <main className="flex-1 container px-4 py-6 sm:py-8">
-        <div className="mb-6 flex items-center gap-2">
+        <div className="mb-4 flex items-center gap-2">
           <RotateCcw className="h-6 w-6 text-primary" />
           <h1 className="text-2xl font-bold sm:text-3xl">طلبات الإرجاع</h1>
         </div>
-        {grouped.length === 0 ? (
+
+        <div className="relative mb-4 max-w-md">
+          <Search className="absolute end-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <Input
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="بحث برقم الإرجاع أو رقم الطلب..."
+            className="pe-9"
+          />
+        </div>
+
+        {rows.length === 0 ? (
           <Card>
             <CardContent className="pt-6 text-center space-y-3">
               <p className="text-muted-foreground">لا توجد طلبات إرجاع</p>
@@ -137,88 +114,46 @@ const MyReturns = () => {
           </Card>
         ) : (
           <div className="space-y-4">
-            {grouped.map((r) => {
-              const s = RETURN_STATUS[r.status] || RETURN_STATUS.pending;
+            {rows.map((r) => {
+              const s = RETURN_STATUS[r.status] ?? RETURN_STATUS.pending_review;
               return (
                 <Card key={r.id}>
-                  <CardHeader>
-                    <CardTitle className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 text-base">
-                      <span>إرجاع #{r.id.slice(0, 8)}</span>
-                      <Badge variant={s.variant}>{s.label}</Badge>
+                  <CardHeader className="pb-3">
+                    <CardTitle className="flex flex-col gap-2 text-base sm:flex-row sm:items-center sm:justify-between">
+                      <span>
+                        إرجاع {r.return_number ?? r.id.slice(0, 8)}
+                        {r.order_number && (
+                          <span className="text-sm font-normal text-muted-foreground"> — الطلب {r.order_number}</span>
+                        )}
+                      </span>
+                      <span className="flex items-center gap-2">
+                        {r.unread_count > 0 && (
+                          <Badge variant="destructive" className="gap-1">
+                            <MessageCircle className="h-3 w-3" /> {r.unread_count}
+                          </Badge>
+                        )}
+                        <Badge variant={s.variant}>{s.label}</Badge>
+                      </span>
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-2 text-sm">
-                    <ReturnTimeline status={r.status} className="pb-2" />
+                    <ReturnTimeline status={r.status} className="pb-1" />
                     <p className="text-muted-foreground">{s.description}</p>
                     <p>
                       <span className="text-muted-foreground">السبب: </span>
-                      <span className="font-medium">{reasonLabel(r.reason)}</span>
+                      <span className="font-medium">{r.reason_label}</span>
+                      <span className="text-muted-foreground"> · {r.items_count} منتج</span>
                     </p>
-                    {r.notes && <p className="bg-muted/40 rounded p-2">{r.notes}</p>}
-                    {r.review_note && (
-                      <p className="bg-primary/5 border border-primary/20 rounded p-2">
-                        <span className="font-semibold">رد البائع: </span>
-                        {r.review_note}
-                      </p>
-                    )}
-                    {r.status === "rejected" && r.rejection_reason && (
-                      <p className="rounded border border-destructive/30 bg-destructive/5 p-2">
-                        <span className="font-semibold">سبب الرفض: </span>
-                        {r.rejection_reason}
-                      </p>
-                    )}
-                    {r.return_instructions && (
-                      <div className="rounded border border-primary/20 bg-primary/5 p-2 space-y-1">
-                        <p>
-                          <span className="font-semibold">تعليمات الإرجاع: </span>
-                          {r.return_instructions}
-                        </p>
-                        {r.return_address && (
-                          <p className="flex items-start gap-1">
-                            <MapPin className="h-4 w-4 mt-0.5 text-muted-foreground" />
-                            <span>{r.return_address}</span>
-                          </p>
-                        )}
-                      </div>
-                    )}
-                    {r.images.length > 0 && (
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <ImageIcon className="h-4 w-4 text-muted-foreground" />
-                        {r.images.map((p) => (
-                          <MediaThumb key={p} path={p} />
-                        ))}
-                      </div>
-                    )}
-                    {r.video_url && (
-                      <p className="flex items-center gap-2 text-primary">
-                        <VideoIcon className="h-4 w-4" /> فيديو مرفق
-                      </p>
-                    )}
                     <p className="text-xs text-muted-foreground">
-                      أُنشئ {format(new Date(r.created_at), "dd MMMM yyyy - HH:mm", { locale: ar })}
+                      {format(new Date(r.created_at), "dd MMMM yyyy - HH:mm", { locale: ar })}
                     </p>
-                    <div className="rounded-lg border bg-muted/20 p-3">
-                      <p className="mb-2 text-xs font-semibold">سجل الطلب</p>
-                      <ReturnHistory returnId={r.id} />
-                    </div>
-                    <div className="flex flex-wrap gap-2">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => navigate(`/orders/${r.order_id}`)}
-                      >
+                    <div className="flex flex-wrap gap-2 pt-1">
+                      <Button size="sm" onClick={() => setOpenId(r.id)}>
+                        التفاصيل والمحادثة
+                      </Button>
+                      <Button variant="outline" size="sm" onClick={() => navigate(`/orders/${r.order_id}`)}>
                         عرض الطلب
                       </Button>
-                      {(r.status === "awaiting_return" || r.status === "approved") && (
-                        <Button size="sm" disabled={shipping === r.id} onClick={() => void markShipped(r.id)}>
-                          {shipping === r.id ? (
-                            <Loader2 className="h-4 w-4 animate-spin ml-1" />
-                          ) : (
-                            <Truck className="h-4 w-4 ml-1" />
-                          )}
-                          أرسلت المنتج
-                        </Button>
-                      )}
                     </div>
                   </CardContent>
                 </Card>
@@ -227,6 +162,12 @@ const MyReturns = () => {
           </div>
         )}
       </main>
+      <ReturnDetailDialog
+        returnId={openId}
+        open={!!openId}
+        onOpenChange={(o) => !o && setOpenId(null)}
+        onChanged={load}
+      />
       <Footer />
     </div>
   );

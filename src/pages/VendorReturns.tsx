@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
@@ -7,324 +7,73 @@ import Footer from "@/components/Footer";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Loader2, RotateCcw, CheckCircle2, XCircle, MessageCircle } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Loader2, RotateCcw, Search, MessageCircle } from "lucide-react";
 import { format } from "date-fns";
 import { ar } from "date-fns/locale";
-import { RETURN_STATUS, RETURN_REASONS, RETURN_NEXT_STATUSES } from "@/lib/returnStatus";
+import { RETURN_STATUS } from "@/lib/returnStatus";
 import ReturnTimeline from "@/components/returns/ReturnTimeline";
-import ReturnHistory from "@/components/returns/ReturnHistory";
-import { Input } from "@/components/ui/input";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { useToast } from "@/hooks/use-toast";
+import ReturnDetailDialog from "@/components/returns/ReturnDetailDialog";
 
-interface ReturnRow {
+interface ReturnListRow {
   id: string;
-  order_id: string;
-  order_item_id: string | null;
-  customer_id: string;
-  reason: string;
-  notes: string | null;
-  images: string[];
-  video_url: string | null;
   status: string;
-  review_note: string | null;
-  rejection_reason: string | null;
-  return_instructions: string | null;
-  return_address: string | null;
+  return_number: string | null;
+  order_id: string;
+  order_number: string | null;
+  reason_label: string | null;
+  customer_name: string | null;
+  unread_count: number;
+  items_count: number;
   created_at: string;
 }
 
-const reasonLabel = (v: string) => RETURN_REASONS.find((r) => r.value === v)?.label || v;
-
-const NEXT_STATUSES = [...RETURN_NEXT_STATUSES];
-
-const DECIDABLE = ["pending", "under_review", "info_requested"];
-
-const MediaThumb = ({ path }: { path: string }) => {
-  const [url, setUrl] = useState<string | null>(null);
-  useEffect(() => {
-    let alive = true;
-    (async () => {
-      const { data } = await supabase.storage.from("returns-media").createSignedUrl(path, 3600);
-      if (alive) setUrl(data?.signedUrl ?? null);
-    })();
-    return () => {
-      alive = false;
-    };
-  }, [path]);
-  if (!url) return <div className="w-20 h-20 bg-muted animate-pulse rounded" />;
-  return (
-    <a href={url} target="_blank" rel="noreferrer">
-      <img src={url} alt="" className="w-20 h-20 rounded object-cover" />
-    </a>
-  );
-};
-
-const ReturnCard = ({ r, onChanged }: { r: ReturnRow; onChanged: () => void }) => {
-  const { toast } = useToast();
-  const [note, setNote] = useState("");
-  const [nextStatus, setNextStatus] = useState<string>("");
-  const [saving, setSaving] = useState(false);
-  const [decision, setDecision] = useState<"approve" | "reject" | null>(null);
-  const [instructions, setInstructions] = useState("");
-  const [address, setAddress] = useState("");
-  const [rejectReason, setRejectReason] = useState("");
-  const s = RETURN_STATUS[r.status] || RETURN_STATUS.pending;
-
-  const update = async (status: string) => {
-    setSaving(true);
-    const { error } = await supabase.rpc("return_transition", {
-      _return_id: r.id,
-      _to_status: status,
-      _note: note || null,
-    });
-    setSaving(false);
-    if (error) {
-      toast({ title: "تعذر التحديث", description: error.message, variant: "destructive" });
-      return;
-    }
-    toast({ title: "تم تحديث الحالة" });
-    setNote("");
-    setNextStatus("");
-    onChanged();
-  };
-
-  const submitDecision = async () => {
-    if (!decision) return;
-    if (decision === "reject" && rejectReason.trim().length < 5) {
-      toast({ title: "سبب الرفض مطلوب", variant: "destructive" });
-      return;
-    }
-    if (decision === "approve" && (instructions.trim().length < 5 || address.trim().length < 5)) {
-      toast({ title: "تعليمات الإرجاع وعنوان الإرجاع مطلوبان", variant: "destructive" });
-      return;
-    }
-    setSaving(true);
-    const { error } = await supabase.rpc("return_transition", {
-      _return_id: r.id,
-      _to_status: decision === "approve" ? "approved" : "rejected",
-      _note: decision === "reject" ? rejectReason.trim() : note.trim() || null,
-      _payload:
-        decision === "approve"
-          ? { instructions: instructions.trim(), address: address.trim() }
-          : {},
-    });
-    setSaving(false);
-    if (error) {
-      toast({ title: "تعذر تنفيذ القرار", description: error.message, variant: "destructive" });
-      return;
-    }
-    toast({ title: decision === "approve" ? "تمت الموافقة على الإرجاع" : "تم رفض طلب الإرجاع" });
-    setDecision(null);
-    setInstructions("");
-    setAddress("");
-    setRejectReason("");
-    setNote("");
-    onChanged();
-  };
-
-  return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 text-base">
-          <span>إرجاع #{r.id.slice(0, 8)} — طلب #{r.order_id.slice(0, 8)}</span>
-          <Badge variant={s.variant}>{s.label}</Badge>
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-3 text-sm">
-        <ReturnTimeline status={r.status} />
-        <p>
-          <span className="text-muted-foreground">السبب: </span>
-          <span className="font-medium">{reasonLabel(r.reason)}</span>
-        </p>
-        {r.notes && <p className="bg-muted/40 rounded p-2">{r.notes}</p>}
-        {r.images.length > 0 && (
-          <div className="flex flex-wrap gap-2">
-            {r.images.map((p) => (
-              <MediaThumb key={p} path={p} />
-            ))}
-          </div>
-        )}
-        {r.video_url && (
-          <button
-            type="button"
-            onClick={async () => {
-              const { data } = await supabase.storage
-                .from("returns-media")
-                .createSignedUrl(r.video_url as string, 3600);
-              if (data?.signedUrl) window.open(data.signedUrl, "_blank");
-            }}
-            className="text-primary underline"
-          >
-            عرض الفيديو
-          </button>
-        )}
-        <p className="text-xs text-muted-foreground">
-          {format(new Date(r.created_at), "dd MMMM yyyy - HH:mm", { locale: ar })}
-        </p>
-
-        <div className="border-t pt-3 space-y-2">
-          <Textarea
-            value={note}
-            onChange={(e) => setNote(e.target.value.slice(0, 1000))}
-            placeholder="ملاحظات للمشتري (اختياري)"
-            rows={2}
-          />
-          <div className="flex flex-wrap gap-2">
-            {DECIDABLE.includes(r.status) && (
-              <>
-                <Button size="sm" onClick={() => setDecision("approve")} disabled={saving}>
-                  <CheckCircle2 className="h-4 w-4 ml-1" /> موافقة
-                </Button>
-                <Button
-                  size="sm"
-                  variant="destructive"
-                  onClick={() => setDecision("reject")}
-                  disabled={saving}
-                >
-                  <XCircle className="h-4 w-4 ml-1" /> رفض
-                </Button>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={() => update("info_requested")}
-                  disabled={saving}
-                >
-                  <MessageCircle className="h-4 w-4 ml-1" /> طلب معلومات
-                </Button>
-              </>
-            )}
-            <Select value={nextStatus} onValueChange={setNextStatus}>
-              <SelectTrigger className="w-52">
-                <SelectValue placeholder="تغيير الحالة" />
-              </SelectTrigger>
-              <SelectContent>
-                {NEXT_STATUSES.filter((x) => x !== r.status).map((x) => (
-                  <SelectItem key={x} value={x}>
-                    {RETURN_STATUS[x]?.label || x}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <Button
-              size="sm"
-              variant="secondary"
-              disabled={!nextStatus || saving}
-              onClick={() => update(nextStatus)}
-            >
-              {saving ? <Loader2 className="h-4 w-4 animate-spin ml-1" /> : null}
-              حفظ
-            </Button>
-          </div>
-        </div>
-
-        {r.return_instructions && (
-          <div className="rounded border border-primary/20 bg-primary/5 p-2">
-            <p className="font-semibold">تعليمات الإرجاع المرسلة للمشتري</p>
-            <p>{r.return_instructions}</p>
-            {r.return_address && <p className="text-muted-foreground">العنوان: {r.return_address}</p>}
-          </div>
-        )}
-        {r.rejection_reason && (
-          <p className="rounded border border-destructive/30 bg-destructive/5 p-2">
-            سبب الرفض: {r.rejection_reason}
-          </p>
-        )}
-
-        <div className="rounded-lg border bg-muted/20 p-3">
-          <p className="mb-2 text-xs font-semibold">سجل الطلب</p>
-          <ReturnHistory returnId={r.id} />
-        </div>
-      </CardContent>
-
-      <Dialog open={!!decision} onOpenChange={(o) => !o && !saving && setDecision(null)}>
-        <DialogContent dir="rtl">
-          <DialogHeader>
-            <DialogTitle>
-              {decision === "approve" ? "الموافقة على الإرجاع" : "رفض طلب الإرجاع"}
-            </DialogTitle>
-            <DialogDescription>
-              {decision === "approve"
-                ? "أضف تعليمات الإرجاع وعنوان الاستلام ليتمكن المشتري من إرسال المنتج."
-                : "سبب الرفض إلزامي وسيُرسل للمشتري."}
-            </DialogDescription>
-          </DialogHeader>
-          {decision === "approve" ? (
-            <div className="space-y-3">
-              <Textarea
-                value={instructions}
-                onChange={(e) => setInstructions(e.target.value.slice(0, 800))}
-                placeholder="تعليمات الإرجاع (طريقة التغليف، شركة الشحن، المرفقات المطلوبة...)"
-                rows={3}
-              />
-              <Input
-                value={address}
-                onChange={(e) => setAddress(e.target.value.slice(0, 300))}
-                placeholder="عنوان إرجاع المنتج"
-              />
-            </div>
-          ) : (
-            <Textarea
-              value={rejectReason}
-              onChange={(e) => setRejectReason(e.target.value.slice(0, 500))}
-              placeholder="سبب الرفض (إلزامي)"
-              rows={3}
-            />
-          )}
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setDecision(null)} disabled={saving}>
-              إلغاء
-            </Button>
-            <Button onClick={() => void submitDecision()} disabled={saving}>
-              {saving && <Loader2 className="h-4 w-4 animate-spin ml-1" />}
-              تأكيد
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-    </Card>
-  );
-};
+const FILTERS = [
+  "all",
+  "pending_review",
+  "seller_reviewing",
+  "waiting_customer",
+  "approved",
+  "customer_shipping",
+  "seller_inspecting",
+  "completed",
+  "rejected",
+] as const;
 
 const VendorReturns = () => {
   const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
-  const [rows, setRows] = useState<ReturnRow[]>([]);
+  const [rows, setRows] = useState<ReturnListRow[]>([]);
   const [loading, setLoading] = useState(true);
+  const [filter, setFilter] = useState<(typeof FILTERS)[number]>("all");
+  const [search, setSearch] = useState("");
+  const [openId, setOpenId] = useState<string | null>(null);
 
   useEffect(() => {
     if (!authLoading && !user) navigate("/auth");
   }, [user, authLoading, navigate]);
 
-  const load = async () => {
+  const load = useCallback(async () => {
     if (!user) return;
     setLoading(true);
-    const { data } = await supabase
-      .from("returns")
-      .select("*")
-      .eq("vendor_id", user.id)
-      .order("created_at", { ascending: false });
-    setRows((data as ReturnRow[] | null) || []);
+    const { data } = await supabase.rpc("list_returns", {
+      _scope: "vendor",
+      _status: filter === "all" ? null : filter,
+      _search: search.trim() || null,
+      _limit: 100,
+      _offset: 0,
+    });
+    const payload = data as unknown as { rows?: ReturnListRow[] } | null;
+    setRows(payload?.rows ?? []);
     setLoading(false);
-  };
+  }, [user, filter, search]);
 
   useEffect(() => {
     void load();
+  }, [load]);
+
+  useEffect(() => {
     if (!user) return;
     const channel = supabase
       .channel(`returns-vendor-${user.id}`)
@@ -337,10 +86,14 @@ const VendorReturns = () => {
     return () => {
       supabase.removeChannel(channel);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user]);
+  }, [user, load]);
 
-  if (authLoading || loading) {
+  const pendingCount = useMemo(
+    () => rows.filter((r) => ["pending_review", "seller_reviewing"].includes(r.status)).length,
+    [rows]
+  );
+
+  if (authLoading) {
     return (
       <div className="min-h-screen flex flex-col">
         <Navbar />
@@ -356,24 +109,96 @@ const VendorReturns = () => {
     <div className="min-h-screen flex flex-col">
       <Navbar />
       <main className="flex-1 container px-4 py-6 sm:py-8">
-        <div className="mb-6 flex items-center gap-2">
+        <div className="mb-4 flex flex-wrap items-center gap-2">
           <RotateCcw className="h-6 w-6 text-primary" />
           <h1 className="text-2xl font-bold sm:text-3xl">إدارة طلبات الإرجاع</h1>
+          {pendingCount > 0 && <Badge variant="destructive">{pendingCount} بانتظار المراجعة</Badge>}
         </div>
-        {rows.length === 0 ? (
+
+        <div className="mb-4 space-y-3">
+          <Tabs value={filter} onValueChange={(v) => setFilter(v as typeof filter)}>
+            <TabsList className="flex w-full flex-wrap justify-start">
+              {FILTERS.map((f) => (
+                <TabsTrigger key={f} value={f}>
+                  {f === "all" ? "الكل" : RETURN_STATUS[f]?.label ?? f}
+                </TabsTrigger>
+              ))}
+            </TabsList>
+          </Tabs>
+          <div className="relative max-w-md">
+            <Search className="absolute end-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="بحث برقم الإرجاع أو الطلب أو اسم المشتري..."
+              className="pe-9"
+            />
+          </div>
+        </div>
+
+        {loading && rows.length === 0 ? (
+          <div className="flex justify-center py-16">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          </div>
+        ) : rows.length === 0 ? (
           <Card>
             <CardContent className="pt-6 text-center text-muted-foreground">
-              لا توجد طلبات إرجاع حالياً
+              لا توجد طلبات إرجاع مطابقة
             </CardContent>
           </Card>
         ) : (
           <div className="space-y-4">
-            {rows.map((r) => (
-              <ReturnCard key={r.id} r={r} onChanged={load} />
-            ))}
+            {rows.map((r) => {
+              const s = RETURN_STATUS[r.status] ?? RETURN_STATUS.pending_review;
+              return (
+                <Card key={r.id}>
+                  <CardHeader className="pb-3">
+                    <CardTitle className="flex flex-col gap-2 text-base sm:flex-row sm:items-center sm:justify-between">
+                      <span>
+                        إرجاع {r.return_number ?? r.id.slice(0, 8)}
+                        {r.order_number && (
+                          <span className="text-sm font-normal text-muted-foreground"> — الطلب {r.order_number}</span>
+                        )}
+                      </span>
+                      <span className="flex items-center gap-2">
+                        {r.unread_count > 0 && (
+                          <Badge variant="destructive" className="gap-1">
+                            <MessageCircle className="h-3 w-3" /> {r.unread_count}
+                          </Badge>
+                        )}
+                        <Badge variant={s.variant}>{s.label}</Badge>
+                      </span>
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-2 text-sm">
+                    <ReturnTimeline status={r.status} />
+                    <p>
+                      <span className="text-muted-foreground">السبب: </span>
+                      <span className="font-medium">{r.reason_label}</span>
+                      <span className="text-muted-foreground"> · {r.items_count} منتج</span>
+                    </p>
+                    {r.customer_name && (
+                      <p className="text-muted-foreground">المشتري: {r.customer_name}</p>
+                    )}
+                    <p className="text-xs text-muted-foreground">
+                      {format(new Date(r.created_at), "dd MMMM yyyy - HH:mm", { locale: ar })}
+                    </p>
+                    <Button size="sm" onClick={() => setOpenId(r.id)}>
+                      مراجعة الطلب والمحادثة
+                    </Button>
+                  </CardContent>
+                </Card>
+              );
+            })}
           </div>
         )}
       </main>
+      <ReturnDetailDialog
+        returnId={openId}
+        open={!!openId}
+        onOpenChange={(o) => !o && setOpenId(null)}
+        onChanged={load}
+      />
       <Footer />
     </div>
   );

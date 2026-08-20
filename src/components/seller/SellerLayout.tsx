@@ -8,7 +8,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { SELLER_MODULES, SELLER_GROUP_LABELS, SellerModule } from "@/lib/sellerModules";
 import { cn } from "@/lib/utils";
 
-const groups = ["overview", "catalog", "sales", "growth", "account"] as const;
+const groups = ["overview", "catalog", "sales", "growth", "finance", "account"] as const;
 
 const NavList = ({ onNavigate }: { onNavigate?: () => void }) => {
   const { pathname } = useLocation();

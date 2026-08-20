@@ -1,6 +1,6 @@
 import {
   LayoutDashboard, Package, PlusCircle, Boxes, ShoppingBag, Undo2, Users,
-  MessageSquare, Star, Megaphone, Percent, BarChart3, FileText, Bell, Settings, ShieldAlert, History, Gauge,
+  MessageSquare, Star, Megaphone, Percent, BarChart3, FileText, Bell, Settings, ShieldAlert, History, Gauge, Wallet, Store,
 } from "lucide-react";
 
 export interface SellerModule {
@@ -8,7 +8,7 @@ export interface SellerModule {
   label: string;
   path: string;
   icon: typeof LayoutDashboard;
-  group: "overview" | "catalog" | "sales" | "growth" | "account";
+  group: "overview" | "catalog" | "sales" | "growth" | "finance" | "account";
 }
 
 /** Single source of truth for the seller dashboard navigation (selling only, no buyer features). */
@@ -25,9 +25,12 @@ export const SELLER_MODULES: SellerModule[] = [
   { key: "reviews", label: "التقييمات", path: "/seller/reviews", icon: Star, group: "growth" },
   { key: "marketing", label: "التسويق والعروض", path: "/dashboard/deals", icon: Megaphone, group: "growth" },
   { key: "coupons", label: "كوبونات الخصم", path: "/dashboard/coupons", icon: Percent, group: "growth" },
-  { key: "analytics", label: "الإحصائيات", path: "/dashboard/statistics", icon: BarChart3, group: "growth" },
+  { key: "analytics", label: "تحليلات المتجر", path: "/seller/analytics", icon: BarChart3, group: "growth" },
+  { key: "statistics", label: "الإحصائيات", path: "/dashboard/statistics", icon: BarChart3, group: "growth" },
   { key: "performance", label: "أداء المتجر", path: "/seller/performance", icon: Gauge, group: "growth" },
   { key: "reports", label: "التقارير", path: "/seller/reports", icon: FileText, group: "growth" },
+  { key: "wallet", label: "المحفظة والسحوبات", path: "/seller/wallet", icon: Wallet, group: "finance" },
+  { key: "store", label: "ملف المتجر", path: "/seller/store", icon: Store, group: "account" },
   { key: "notifications", label: "الإشعارات", path: "/notifications", icon: Bell, group: "account" },
   { key: "violations", label: "المخالفات", path: "/seller/violations", icon: ShieldAlert, group: "account" },
   { key: "settings", label: "الإعدادات", path: "/settings", icon: Settings, group: "account" },
@@ -38,5 +41,6 @@ export const SELLER_GROUP_LABELS: Record<SellerModule["group"], string> = {
   catalog: "الكتالوج",
   sales: "البيع",
   growth: "النمو",
+  finance: "المالية",
   account: "الحساب",
 };

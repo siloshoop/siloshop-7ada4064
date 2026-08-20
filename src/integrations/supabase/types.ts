@@ -1471,6 +1471,48 @@ export type Database = {
           },
         ]
       }
+      payout_requests: {
+        Row: {
+          amount: number
+          created_at: string
+          details: string | null
+          id: string
+          method: string
+          review_note: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string
+          updated_at: string
+          vendor_id: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          details?: string | null
+          id?: string
+          method: string
+          review_note?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          updated_at?: string
+          vendor_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          details?: string | null
+          id?: string
+          method?: string
+          review_note?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          updated_at?: string
+          vendor_id?: string
+        }
+        Relationships: []
+      }
       platform_payment_settings: {
         Row: {
           id: number
@@ -2191,6 +2233,7 @@ export type Database = {
         Row: {
           address: string | null
           business_document_url: string | null
+          business_info: string | null
           city: string | null
           contact_email: string | null
           contact_phone: string | null
@@ -2202,18 +2245,22 @@ export type Database = {
           logo_url: string | null
           owner_name: string | null
           rejection_reason: string | null
+          return_policy: string | null
           reviewed_at: string | null
           reviewed_by: string | null
+          shipping_policy: string | null
           status: Database["public"]["Enums"]["seller_status"]
           store_description: string | null
           store_name: string | null
           submitted_at: string | null
           updated_at: string
           user_id: string
+          working_hours: string | null
         }
         Insert: {
           address?: string | null
           business_document_url?: string | null
+          business_info?: string | null
           city?: string | null
           contact_email?: string | null
           contact_phone?: string | null
@@ -2225,18 +2272,22 @@ export type Database = {
           logo_url?: string | null
           owner_name?: string | null
           rejection_reason?: string | null
+          return_policy?: string | null
           reviewed_at?: string | null
           reviewed_by?: string | null
+          shipping_policy?: string | null
           status?: Database["public"]["Enums"]["seller_status"]
           store_description?: string | null
           store_name?: string | null
           submitted_at?: string | null
           updated_at?: string
           user_id: string
+          working_hours?: string | null
         }
         Update: {
           address?: string | null
           business_document_url?: string | null
+          business_info?: string | null
           city?: string | null
           contact_email?: string | null
           contact_phone?: string | null
@@ -2248,14 +2299,17 @@ export type Database = {
           logo_url?: string | null
           owner_name?: string | null
           rejection_reason?: string | null
+          return_policy?: string | null
           reviewed_at?: string | null
           reviewed_by?: string | null
+          shipping_policy?: string | null
           status?: Database["public"]["Enums"]["seller_status"]
           store_description?: string | null
           store_name?: string | null
           submitted_at?: string | null
           updated_at?: string
           user_id?: string
+          working_hours?: string | null
         }
         Relationships: []
       }
@@ -3304,6 +3358,29 @@ export type Database = {
         }
         Returns: undefined
       }
+      seller_dashboard_overview: { Args: { _days?: number }; Returns: Json }
+      seller_request_payout: {
+        Args: { _amount: number; _details?: string; _method: string }
+        Returns: string
+      }
+      seller_update_store_profile: {
+        Args: {
+          _address?: string
+          _business_info?: string
+          _city?: string
+          _contact_email?: string
+          _contact_phone?: string
+          _cover_image_url?: string
+          _logo_url?: string
+          _return_policy?: string
+          _shipping_policy?: string
+          _store_description?: string
+          _store_name?: string
+          _working_hours?: string
+        }
+        Returns: undefined
+      }
+      seller_wallet_summary: { Args: never; Returns: Json }
       send_notification: {
         Args: {
           _message: string

@@ -10,6 +10,8 @@ import { Loader2, Package, Eye, EyeOff, Truck } from "lucide-react";
 import OrderStatusBadge from "@/components/orders/OrderStatusBadge";
 import OrderTimelineLog from "@/components/orders/OrderTimelineLog";
 import ShippingInfoDialog from "@/components/orders/ShippingInfoDialog";
+import PrintOrderDocs from "@/components/seller/PrintOrderDocs";
+
 import { allowedNextStatuses, changeOrderStatus, friendlyOrderError, normalizeStatus, type OrderStatus } from "@/lib/orderStatus";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
@@ -333,6 +335,21 @@ const VendorOrders = () => {
                                   <Truck className="h-4 w-4" />
                                   معلومات الشحن
                                 </Button>
+                                <PrintOrderDocs
+                                  order={{
+                                    id: order.id,
+                                    created_at: order.created_at,
+                                    status: order.status,
+                                    customer_name: order.customer_name,
+                                    city: order.city,
+                                    items: (orderItems[order.id] ?? []).map((it) => ({
+                                      name: it.products?.name ?? "منتج",
+                                      quantity: it.quantity,
+                                      price: it.price,
+                                    })),
+                                  }}
+                                />
+
                                 {updatingStatus === order.id && (
                                   <Loader2 className="h-4 w-4 animate-spin" />
                                 )}

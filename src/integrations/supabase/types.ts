@@ -1619,6 +1619,7 @@ export type Database = {
       }
       products: {
         Row: {
+          barcode: string | null
           brand_id: string | null
           category_id: string | null
           colors: string[]
@@ -1654,6 +1655,7 @@ export type Database = {
           weight: number | null
         }
         Insert: {
+          barcode?: string | null
           brand_id?: string | null
           category_id?: string | null
           colors?: string[]
@@ -1689,6 +1691,7 @@ export type Database = {
           weight?: number | null
         }
         Update: {
+          barcode?: string | null
           brand_id?: string | null
           category_id?: string | null
           colors?: string[]
@@ -3357,6 +3360,15 @@ export type Database = {
           _return_id: string
         }
         Returns: undefined
+      }
+      seller_bulk_update_products: {
+        Args: {
+          _ids: string[]
+          _is_active?: boolean
+          _price_pct?: number
+          _stock?: number
+        }
+        Returns: number
       }
       seller_dashboard_overview: { Args: { _days?: number }; Returns: Json }
       seller_request_payout: {

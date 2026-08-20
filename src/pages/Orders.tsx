@@ -16,6 +16,7 @@ import ReorderButton from "@/components/ReorderButton";
 import CancelOrderDialog from "@/components/CancelOrderDialog";
 import ReturnRequestDialog from "@/components/ReturnRequestDialog";
 import { RETURN_STATUS } from "@/lib/returnStatus";
+import CustomerInvoice from "@/components/orders/CustomerInvoice";
 
 interface OrderItem {
   product_id: string;
@@ -341,6 +342,9 @@ const Orders = () => {
                           fullWidth
                           onCreated={() => void fetchOrders()}
                         />
+                        {order.status !== "cancelled" && (
+                          <CustomerInvoice orderId={order.id} />
+                        )}
                       </div>
                     </div>
                   </div>

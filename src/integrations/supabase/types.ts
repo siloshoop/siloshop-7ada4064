@@ -1152,29 +1152,47 @@ export type Database = {
       order_items: {
         Row: {
           created_at: string | null
+          discount_amount: number
           id: string
           order_id: string
           price: number
           product_id: string
+          product_image: string | null
+          product_name: string | null
           quantity: number
+          subtotal: number | null
+          variant_id: string | null
+          variant_label: string | null
           vendor_id: string
         }
         Insert: {
           created_at?: string | null
+          discount_amount?: number
           id?: string
           order_id: string
           price: number
           product_id: string
+          product_image?: string | null
+          product_name?: string | null
           quantity: number
+          subtotal?: number | null
+          variant_id?: string | null
+          variant_label?: string | null
           vendor_id: string
         }
         Update: {
           created_at?: string | null
+          discount_amount?: number
           id?: string
           order_id?: string
           price?: number
           product_id?: string
+          product_image?: string | null
+          product_name?: string | null
           quantity?: number
+          subtotal?: number | null
+          variant_id?: string | null
+          variant_label?: string | null
           vendor_id?: string
         }
         Relationships: [
@@ -1193,10 +1211,55 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "order_items_variant_id_fkey"
+            columns: ["variant_id"]
+            isOneToOne: false
+            referencedRelation: "product_variants"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "order_items_vendor_id_fkey"
             columns: ["vendor_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      order_notes: {
+        Row: {
+          author_id: string | null
+          author_role: string
+          created_at: string
+          id: string
+          is_internal: boolean
+          note: string
+          order_id: string
+        }
+        Insert: {
+          author_id?: string | null
+          author_role: string
+          created_at?: string
+          id?: string
+          is_internal?: boolean
+          note: string
+          order_id: string
+        }
+        Update: {
+          author_id?: string | null
+          author_role?: string
+          created_at?: string
+          id?: string
+          is_internal?: boolean
+          note?: string
+          order_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "order_notes_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
             referencedColumns: ["id"]
           },
         ]
@@ -1282,6 +1345,7 @@ export type Database = {
           cancelled_by: string | null
           cancelled_by_role: string | null
           completed_at: string | null
+          confirmed_at: string | null
           coupon_code: string | null
           courier_name: string | null
           created_at: string | null
@@ -1300,15 +1364,22 @@ export type Database = {
           frozen_by: string | null
           frozen_reason: string | null
           id: string
+          invoice_number: string | null
           is_frozen: boolean
           notes: string | null
           order_kind: string
+          order_number: string | null
           payment_method: string
           payment_status: string
           phone: string | null
           refund_status: string
+          shipped_at: string | null
           shipping_address: string | null
+          shipping_amount: number
+          shipping_notes: string | null
           status: string | null
+          subtotal_amount: number
+          tax_amount: number
           total_amount: number
           tracking_number: string | null
           tracking_status: string | null
@@ -1320,6 +1391,7 @@ export type Database = {
           cancelled_by?: string | null
           cancelled_by_role?: string | null
           completed_at?: string | null
+          confirmed_at?: string | null
           coupon_code?: string | null
           courier_name?: string | null
           created_at?: string | null
@@ -1338,15 +1410,22 @@ export type Database = {
           frozen_by?: string | null
           frozen_reason?: string | null
           id?: string
+          invoice_number?: string | null
           is_frozen?: boolean
           notes?: string | null
           order_kind?: string
+          order_number?: string | null
           payment_method?: string
           payment_status?: string
           phone?: string | null
           refund_status?: string
+          shipped_at?: string | null
           shipping_address?: string | null
+          shipping_amount?: number
+          shipping_notes?: string | null
           status?: string | null
+          subtotal_amount?: number
+          tax_amount?: number
           total_amount: number
           tracking_number?: string | null
           tracking_status?: string | null
@@ -1358,6 +1437,7 @@ export type Database = {
           cancelled_by?: string | null
           cancelled_by_role?: string | null
           completed_at?: string | null
+          confirmed_at?: string | null
           coupon_code?: string | null
           courier_name?: string | null
           created_at?: string | null
@@ -1376,15 +1456,22 @@ export type Database = {
           frozen_by?: string | null
           frozen_reason?: string | null
           id?: string
+          invoice_number?: string | null
           is_frozen?: boolean
           notes?: string | null
           order_kind?: string
+          order_number?: string | null
           payment_method?: string
           payment_status?: string
           phone?: string | null
           refund_status?: string
+          shipped_at?: string | null
           shipping_address?: string | null
+          shipping_amount?: number
+          shipping_notes?: string | null
           status?: string | null
+          subtotal_amount?: number
+          tax_amount?: number
           total_amount?: number
           tracking_number?: string | null
           tracking_status?: string | null
@@ -2784,6 +2871,56 @@ export type Database = {
         }
         Relationships: []
       }
+      shipping_details: {
+        Row: {
+          created_at: string
+          delivered_at: string | null
+          estimated_delivery: string | null
+          id: string
+          order_id: string
+          shipped_at: string | null
+          shipping_company: string | null
+          shipping_notes: string | null
+          tracking_number: string | null
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          created_at?: string
+          delivered_at?: string | null
+          estimated_delivery?: string | null
+          id?: string
+          order_id: string
+          shipped_at?: string | null
+          shipping_company?: string | null
+          shipping_notes?: string | null
+          tracking_number?: string | null
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          created_at?: string
+          delivered_at?: string | null
+          estimated_delivery?: string | null
+          id?: string
+          order_id?: string
+          shipped_at?: string | null
+          shipping_company?: string | null
+          shipping_notes?: string | null
+          tracking_number?: string | null
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shipping_details_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: true
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       showroom_audit_log: {
         Row: {
           action: string
@@ -3049,6 +3186,44 @@ export type Database = {
           reason?: string
         }
         Relationships: []
+      }
+      tracking_history: {
+        Row: {
+          actor_role: string | null
+          created_at: string
+          description: string | null
+          id: string
+          location: string | null
+          order_id: string
+          status: string
+        }
+        Insert: {
+          actor_role?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          location?: string | null
+          order_id: string
+          status: string
+        }
+        Update: {
+          actor_role?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          location?: string | null
+          order_id?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tracking_history_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_roles: {
         Row: {
@@ -3743,6 +3918,7 @@ export type Database = {
         }
         Returns: number
       }
+      next_order_number: { Args: never; Returns: string }
       normalize_order_status: { Args: { _status: string }; Returns: string }
       order_status_can_transition: {
         Args: { _from: string; _role: string; _to: string }

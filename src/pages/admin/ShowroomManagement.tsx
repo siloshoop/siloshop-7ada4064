@@ -213,23 +213,11 @@ const ShowroomManagement = () => {
             <Button
               variant="outline"
               className="gap-2"
-              onClick={() => {
-                setPreviewDemo(false);
-                setPreviewOpen(true);
-              }}
+              onClick={() => setPreviewOpen(true)}
             >
               <Eye className="h-4 w-4" /> معاينة
             </Button>
-            <Button
-              variant="secondary"
-              className="gap-2"
-              onClick={() => {
-                setPreviewDemo(true);
-                setPreviewOpen(true);
-              }}
-            >
-              <Sparkles className="h-4 w-4" /> معاينة تجريبية
-            </Button>
+
             <Button className="gap-2" onClick={openNew}>
               <Plus className="h-4 w-4" /> إضافة عنصر
             </Button>

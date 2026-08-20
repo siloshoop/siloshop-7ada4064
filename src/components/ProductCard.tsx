@@ -60,14 +60,23 @@ const ProductCard = memo(({
     navigate(`/product/${productId}`);
   };
 
-  const handleCompare = (e: React.MouseEvent) => {
+  const handleCompare = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    
+
     if (!id) return;
-    
-    const result = addProduct(id);
-    
+
+    const result = await addProduct(id);
+
+    if (result.message === "auth") {
+      toast({
+        title: "تسجيل الدخول مطلوب",
+        description: "سجّل الدخول لحفظ قائمة المقارنة في حسابك",
+        variant: "destructive",
+      });
+      return;
+    }
+
     if (result.message === "exists") {
       toast({
         title: "موجود بالفعل",
@@ -75,7 +84,7 @@ const ProductCard = memo(({
       });
       return;
     }
-    
+
     if (result.message === "max") {
       toast({
         title: "الحد الأقصى",
@@ -84,12 +93,22 @@ const ProductCard = memo(({
       });
       return;
     }
-    
+
+    if (!result.success) {
+      toast({
+        title: "تعذر الإضافة",
+        description: "حدث خطأ أثناء إضافة المنتج للمقارنة",
+        variant: "destructive",
+      });
+      return;
+    }
+
     toast({
       title: "تمت الإضافة",
       description: "تم إضافة المنتج لقائمة المقارنة",
     });
   };
+
 
   const isOutOfStock = typeof stockQuantity === "number" && stockQuantity <= 0;
   const isLowStock = typeof stockQuantity === "number" && stockQuantity > 0 && stockQuantity <= 5;

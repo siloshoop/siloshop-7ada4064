@@ -527,7 +527,8 @@ const AdminOrders = () => {
         <DialogContent className="max-h-[90vh] max-w-3xl overflow-y-auto" dir="rtl">
           <DialogHeader>
             <DialogTitle className="flex flex-wrap items-center gap-2">
-              تفاصيل الطلب {openId?.slice(0, 8)}
+              تفاصيل الطلب {order?.order_number || openId?.slice(0, 8)}
+              {order?.invoice_number && <span className="text-xs text-muted-foreground">فاتورة: {order.invoice_number}</span>}
               {order && <OrderStatusBadge status={order.status} />}
               {isFrozen && (
                 <Badge variant="destructive" className="gap-1">
@@ -611,6 +612,97 @@ const AdminOrders = () => {
                     </li>
                   ))}
                 </ul>
+              </div>
+
+              <div className="rounded border p-3">
+                <p className="mb-2 flex items-center gap-2 text-sm font-semibold">
+                  <MessageSquare className="h-4 w-4" /> ملاحظات الطلب
+                </p>
+                {notesLoading ? (
+                  <div className="flex justify-center py-4"><Loader2 className="h-4 w-4 animate-spin" /></div>
+                ) : notes.length === 0 ? (
+                  <p className="text-xs text-muted-foreground">لا توجد ملاحظات بعد.</p>
+                ) : (
+                  <ul className="mb-2 max-h-48 space-y-2 overflow-y-auto">
+                    {notes.map((n) => (
+                      <li key={n.id} className="rounded border p-2 text-xs">
+                        <div className="mb-1 flex items-center justify-between gap-2">
+                          <span className="font-semibold">{n.author_name || n.author_role || "—"}</span>
+                          <div className="flex items-center gap-1">
+                            {n.is_internal && <Badge variant="secondary" className="gap-1 text-[10px]"><Lock className="h-3 w-3" /> داخلية</Badge>}
+                            <span className="text-muted-foreground">{new Date(n.created_at).toLocaleString("ar-SY")}</span>
+                          </div>
+                        </div>
+                        <p className="whitespace-pre-wrap">{n.note}</p>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+                <Textarea rows={2} value={newNote} onChange={(e) => setNewNote(e.target.value)} placeholder="أضف ملاحظة..." />
+                <div className="mt-2 flex items-center justify-between gap-2">
+                  <div className="flex items-center gap-2">
+                    <Switch id="note-internal" checked={noteInternal} onCheckedChange={setNoteInternal} />
+                    <Label htmlFor="note-internal" className="text-xs">ملاحظة داخلية (غير مرئية للعميل)</Label>
+                  </div>
+                  <Button
+                    size="sm"
+                    disabled={savingNote || !newNote.trim()}
+                    onClick={async () => {
+                      if (!order) return;
+                      setSavingNote(true);
+                      const { error } = await supabase.rpc("add_order_note", {
+                        _order_id: order.id, _note: newNote.trim(), _is_internal: noteInternal,
+                      });
+                      setSavingNote(false);
+                      if (error) {
+                        toast({ title: "تعذر إضافة الملاحظة", description: friendlyOrderError(error), variant: "destructive" });
+                        return;
+                      }
+                      setNewNote("");
+                      void loadNotes(order.id);
+                    }}
+                  >
+                    {savingNote ? <Loader2 className="h-4 w-4 animate-spin" /> : "إضافة ملاحظة"}
+                  </Button>
+                </div>
+              </div>
+
+              <div className="rounded border p-3">
+                <p className="mb-2 flex items-center gap-2 text-sm font-semibold">
+                  <Truck className="h-4 w-4" /> تحديث بيانات الشحن السريع
+                </p>
+                <div className="grid gap-2 md:grid-cols-2">
+                  <Input placeholder="شركة الشحن" value={shipCompany} onChange={(e) => setShipCompany(e.target.value)} />
+                  <Input placeholder="رقم التتبع" value={shipTracking} onChange={(e) => setShipTracking(e.target.value)} />
+                  <Input type="date" value={shipEta} onChange={(e) => setShipEta(e.target.value)} aria-label="موعد التسليم المتوقع" />
+                  <Textarea rows={1} placeholder="ملاحظات الشحن" value={shipNotes} onChange={(e) => setShipNotes(e.target.value)} />
+                </div>
+                <Button
+                  size="sm"
+                  className="mt-2"
+                  variant="outline"
+                  disabled={savingShip}
+                  onClick={async () => {
+                    if (!order) return;
+                    setSavingShip(true);
+                    const { error } = await supabase.rpc("update_order_shipping", {
+                      _order_id: order.id,
+                      _shipping_company: shipCompany.trim() || null,
+                      _tracking_number: shipTracking.trim() || null,
+                      _shipping_notes: shipNotes.trim() || null,
+                      _estimated_delivery: shipEta ? new Date(`${shipEta}T12:00:00`).toISOString() : null,
+                    });
+                    setSavingShip(false);
+                    if (error) {
+                      toast({ title: "تعذر تحديث الشحن", description: friendlyOrderError(error), variant: "destructive" });
+                      return;
+                    }
+                    toast({ title: "تم تحديث بيانات الشحن" });
+                    await refreshDetail();
+                  }}
+                >
+                  {savingShip ? <Loader2 className="h-4 w-4 animate-spin" /> : "حفظ بيانات الشحن"}
+                </Button>
               </div>
 
               {/* Admin actions */}

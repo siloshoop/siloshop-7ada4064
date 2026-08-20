@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import AdminLayout from "@/components/admin/AdminLayout";
 import { Card, CardContent } from "@/components/ui/card";
@@ -11,86 +11,82 @@ import {
   Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle,
 } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
-import { RETURN_STATUS, RETURN_REASONS, RETURN_NEXT_STATUSES } from "@/lib/returnStatus";
+import { RETURN_STATUS } from "@/lib/returnStatus";
 import ReturnTimeline from "@/components/returns/ReturnTimeline";
-import ReturnHistory from "@/components/returns/ReturnHistory";
-import {
-  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
-} from "@/components/ui/select";
-import { Loader2, Search, RotateCcw } from "lucide-react";
+import ReturnDetailDialog from "@/components/returns/ReturnDetailDialog";
+import { Loader2, Search, RotateCcw, MessageCircle } from "lucide-react";
 
-interface ReturnRow {
+interface ReturnListRow {
   id: string;
-  order_id: string;
-  customer_id: string;
-  vendor_id: string;
-  reason: string;
-  notes: string | null;
   status: string;
-  review_note: string | null;
-  rejection_reason: string | null;
+  return_number: string | null;
+  order_id: string;
+  order_number: string | null;
+  reason_label: string | null;
+  customer_name: string | null;
+  vendor_name: string | null;
+  unread_count: number;
+  items_count: number;
   created_at: string;
 }
 
 const FILTERS = [
-  "all", "pending", "under_review", "awaiting_return", "item_shipped",
-  "item_received", "inspection", "completed", "rejected",
+  "all",
+  "pending_review",
+  "seller_reviewing",
+  "waiting_customer",
+  "approved",
+  "customer_shipping",
+  "seller_inspecting",
+  "inspection_failed",
+  "completed",
+  "rejected",
 ] as const;
-
-const reasonLabel = (v: string) =>
-  RETURN_REASONS.find((r) => r.value === v)?.label ?? v;
 
 const AdminReturns = () => {
   const { toast } = useToast();
-  const [rows, setRows] = useState<ReturnRow[]>([]);
+  const [rows, setRows] = useState<ReturnListRow[]>([]);
+  const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<(typeof FILTERS)[number]>("all");
   const [search, setSearch] = useState("");
-  const [decision, setDecision] = useState<{ row: ReturnRow; type: "approve" | "reject" } | null>(null);
+  const [openId, setOpenId] = useState<string | null>(null);
+  const [decision, setDecision] = useState<{ row: ReturnListRow; type: "approve" | "reject" } | null>(null);
   const [note, setNote] = useState("");
   const [working, setWorking] = useState(false);
-  const [override, setOverride] = useState<Record<string, string>>({});
 
-  const applyOverride = async (row: ReturnRow) => {
-    const status = override[row.id];
-    if (!status) return;
-    setWorking(true);
-    const { error } = await supabase.rpc("return_transition", {
-      _return_id: row.id,
-      _to_status: status,
-      _note: "تحديث من الإدارة",
+  const load = useCallback(async () => {
+    setLoading(true);
+    const { data, error } = await supabase.rpc("list_returns", {
+      _scope: "admin",
+      _status: filter === "all" ? null : filter,
+      _search: search.trim() || null,
+      _limit: 100,
+      _offset: 0,
     });
-    setWorking(false);
+    setLoading(false);
     if (error) {
-      toast({ title: "تعذر تحديث الحالة", description: error.message, variant: "destructive" });
+      toast({ title: "تعذر تحميل الإرجاعات", description: error.message, variant: "destructive" });
       return;
     }
-    toast({ title: "تم تحديث حالة الإرجاع" });
-    setOverride((prev) => ({ ...prev, [row.id]: "" }));
+    const payload = data as unknown as { rows?: ReturnListRow[]; total?: number } | null;
+    setRows(payload?.rows ?? []);
+    setTotal(payload?.total ?? 0);
+  }, [filter, search, toast]);
+
+  useEffect(() => {
     void load();
-  };
+  }, [load]);
 
-  const load = async () => {
-    setLoading(true);
-    const { data } = await supabase
-      .from("returns")
-      .select("id, order_id, customer_id, vendor_id, reason, notes, status, review_note, rejection_reason, created_at")
-      .order("created_at", { ascending: false })
-      .limit(300);
-    setRows((data as ReturnRow[]) ?? []);
-    setLoading(false);
-  };
-
-  useEffect(() => { void load(); }, []);
-
-  const filtered = useMemo(() => {
-    const q = search.trim().toLowerCase();
-    return rows.filter((r) => {
-      if (filter !== "all" && r.status !== filter) return false;
-      if (!q) return true;
-      return r.order_id.toLowerCase().includes(q) || r.id.toLowerCase().includes(q);
-    });
-  }, [rows, filter, search]);
+  useEffect(() => {
+    const channel = supabase
+      .channel("returns-admin")
+      .on("postgres_changes", { event: "*", schema: "public", table: "returns" }, () => void load())
+      .subscribe();
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [load]);
 
   const resolve = async () => {
     if (!decision) return;
@@ -119,11 +115,11 @@ const AdminReturns = () => {
 
   return (
     <AdminLayout
-      title="الإرجاعات والاستبدال"
-      description="مراجعة طلبات الإرجاع والفصل في الخلافات بين المشتري والبائع."
+      title="إدارة الإرجاعات"
+      description="مراجعة طلبات الإرجاع، متابعة المحادثات، والفصل في الخلافات بين المشتري والبائع."
       actions={
         <Tabs value={filter} onValueChange={(v) => setFilter(v as typeof filter)}>
-          <TabsList>
+          <TabsList className="flex flex-wrap">
             {FILTERS.map((f) => (
               <TabsTrigger key={f} value={f}>
                 {f === "all" ? "الكل" : RETURN_STATUS[f]?.label ?? f}
@@ -140,103 +136,83 @@ const AdminReturns = () => {
             <Input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="بحث برقم الطلب أو رقم الإرجاع..."
+              placeholder="بحث برقم الإرجاع أو الطلب أو الاسم..."
               className="pe-9"
             />
           </div>
-          <Badge variant="secondary">{filtered.length} طلب</Badge>
+          <Badge variant="secondary">{total} طلب</Badge>
         </CardContent>
       </Card>
 
-      {loading ? (
+      {loading && rows.length === 0 ? (
         <div className="flex justify-center py-16">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
         </div>
-      ) : filtered.length === 0 ? (
+      ) : rows.length === 0 ? (
         <Card>
           <CardContent className="p-10 text-center text-muted-foreground">لا توجد طلبات مطابقة</CardContent>
         </Card>
       ) : (
         <div className="space-y-3">
-          {filtered.map((r) => {
+          {rows.map((r) => {
             const meta = RETURN_STATUS[r.status];
             return (
               <Card key={r.id}>
                 <CardContent className="space-y-3 p-4">
-                <div className="flex flex-wrap items-center gap-3">
-                  <RotateCcw className="h-5 w-5 shrink-0 text-muted-foreground" />
-                  <div className="min-w-0 flex-1">
-                    <p className="truncate font-semibold">{reasonLabel(r.reason)}</p>
-                    <p className="truncate text-xs text-muted-foreground">
-                      الطلب: {r.order_id.slice(0, 8)} · {new Date(r.created_at).toLocaleString("ar-SY")}
-                    </p>
-                    {r.notes && <p className="truncate text-xs text-muted-foreground">{r.notes}</p>}
-                    {r.review_note && (
-                      <p className="truncate text-xs text-primary">ملاحظة المراجعة: {r.review_note}</p>
+                  <div className="flex flex-wrap items-center gap-3">
+                    <RotateCcw className="h-5 w-5 shrink-0 text-muted-foreground" />
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate font-semibold">
+                        {r.return_number ?? r.id.slice(0, 8)} · {r.reason_label}
+                      </p>
+                      <p className="truncate text-xs text-muted-foreground">
+                        الطلب: {r.order_number ?? r.order_id.slice(0, 8)} ·{" "}
+                        {new Date(r.created_at).toLocaleString("ar-SY")} · {r.items_count} منتج
+                      </p>
+                      <p className="truncate text-xs text-muted-foreground">
+                        {r.customer_name} ← {r.vendor_name}
+                      </p>
+                    </div>
+                    {r.unread_count > 0 && (
+                      <Badge variant="destructive" className="gap-1">
+                        <MessageCircle className="h-3 w-3" /> {r.unread_count}
+                      </Badge>
                     )}
+                    <Badge variant={meta?.variant ?? "secondary"}>{meta?.label ?? r.status}</Badge>
+                    <Button size="sm" variant="outline" onClick={() => setOpenId(r.id)}>
+                      التفاصيل
+                    </Button>
+                    <Button
+                      size="sm"
+                      onClick={() => { setDecision({ row: r, type: "approve" }); setNote(""); }}
+                      disabled={r.status === "approved"}
+                    >
+                      موافقة
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="destructive"
+                      onClick={() => { setDecision({ row: r, type: "reject" }); setNote(""); }}
+                      disabled={r.status === "rejected"}
+                    >
+                      رفض
+                    </Button>
                   </div>
-                  <Badge variant={meta?.variant ?? "secondary"}>{meta?.label ?? r.status}</Badge>
-                  <Button
-                    size="sm"
-                    onClick={() => { setDecision({ row: r, type: "approve" }); setNote(""); }}
-                    disabled={r.status === "approved"}
-                  >
-                    موافقة
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="destructive"
-                    onClick={() => { setDecision({ row: r, type: "reject" }); setNote(""); }}
-                    disabled={r.status === "rejected"}
-                  >
-                    رفض
-                  </Button>
-                </div>
 
-                <ReturnTimeline status={r.status} />
-
-                <div className="flex flex-wrap items-center gap-2">
-                  <Select
-                    value={override[r.id] ?? ""}
-                    onValueChange={(v) => setOverride((prev) => ({ ...prev, [r.id]: v }))}
-                  >
-                    <SelectTrigger className="w-56">
-                      <SelectValue placeholder="تجاوز الحالة (الإدارة)" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {RETURN_NEXT_STATUSES.filter((x) => x !== r.status).map((x) => (
-                        <SelectItem key={x} value={x}>
-                          {RETURN_STATUS[x]?.label ?? x}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <Button
-                    size="sm"
-                    variant="secondary"
-                    disabled={!override[r.id] || working}
-                    onClick={() => void applyOverride(r)}
-                  >
-                    تطبيق
-                  </Button>
-                </div>
-
-                {r.rejection_reason && (
-                  <p className="rounded border border-destructive/30 bg-destructive/5 p-2 text-xs">
-                    سبب الرفض: {r.rejection_reason}
-                  </p>
-                )}
-
-                <div className="rounded-lg border bg-muted/20 p-3">
-                  <p className="mb-2 text-xs font-semibold">السجل الكامل</p>
-                  <ReturnHistory returnId={r.id} />
-                </div>
+                  <ReturnTimeline status={r.status} />
                 </CardContent>
               </Card>
             );
           })}
         </div>
       )}
+
+      <ReturnDetailDialog
+        returnId={openId}
+        open={!!openId}
+        onOpenChange={(o) => !o && setOpenId(null)}
+        onChanged={load}
+      />
 
       <Dialog open={!!decision} onOpenChange={(o) => !o && setDecision(null)}>
         <DialogContent dir="rtl">

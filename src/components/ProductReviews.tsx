@@ -59,6 +59,10 @@ export const ProductReviews = ({ productId, vendorId }: ProductReviewsProps) => 
   const [uploading, setUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [helpfulCounts, setHelpfulCounts] = useState<Record<string, number>>({});
+  const [myVotes, setMyVotes] = useState<Set<string>>(new Set());
+  const [votingId, setVotingId] = useState<string | null>(null);
+  const [userVerifiedPurchase, setUserVerifiedPurchase] = useState(false);
 
   // Check if current user is the vendor of this product
   const isVendor = user?.id === vendorId;

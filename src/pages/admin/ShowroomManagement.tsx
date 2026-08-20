@@ -17,7 +17,6 @@ import { Link } from "react-router-dom";
 import { useShowroomAdmin, getShowroomStatus, type ShowroomItem } from "@/hooks/useShowroom";
 import PremiumShowroom from "@/components/PremiumShowroom";
 import { VendorPicker, ProductPicker } from "@/components/admin/ShowroomEntityPicker";
-import { showroomDemoItems } from "@/data/showroomDemo";
 
 const emptyForm = {
   item_type: "store",
@@ -53,7 +52,6 @@ const ShowroomManagement = () => {
   const [open, setOpen] = useState(false);
   const [saving, setSaving] = useState(false);
   const [previewOpen, setPreviewOpen] = useState(false);
-  const [previewDemo, setPreviewDemo] = useState(false);
   const [dragId, setDragId] = useState<string | null>(null);
   const [vendorLabel, setVendorLabel] = useState("");
   const [productLabel, setProductLabel] = useState("");

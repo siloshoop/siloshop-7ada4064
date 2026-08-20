@@ -169,7 +169,7 @@ const Index = () => {
       <main className="flex-1 pb-[120px] md:pb-0 page-enter">
         {/* Featured showroom — real items, or the frontend-only demo when empty */}
         <SectionErrorBoundary>
-          <PremiumShowroom demoFallback />
+          <PremiumShowroom />
         </SectionErrorBoundary>
 
         {/* Categories */}

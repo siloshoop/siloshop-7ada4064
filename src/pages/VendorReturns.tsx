@@ -115,12 +115,14 @@ const ReturnCard = ({ r, onChanged }: { r: ReturnRow; onChanged: () => void }) =
       return;
     }
     setSaving(true);
-    const { error } = await supabase.rpc("review_return_request", {
+    const { error } = await supabase.rpc("return_transition", {
       _return_id: r.id,
-      _decision: decision,
+      _to_status: decision === "approve" ? "approved" : "rejected",
       _note: decision === "reject" ? rejectReason.trim() : note.trim() || null,
-      _instructions: decision === "approve" ? instructions.trim() : null,
-      _address: decision === "approve" ? address.trim() : null,
+      _payload:
+        decision === "approve"
+          ? { instructions: instructions.trim(), address: address.trim() }
+          : {},
     });
     setSaving(false);
     if (error) {

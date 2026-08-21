@@ -220,18 +220,21 @@ const ReturnRequestDialog = ({
           <div className="space-y-4">
             <div className="space-y-2">
               <Label>سبب الإرجاع *</Label>
-              <Select value={reason} onValueChange={(v) => setReason(v as ReturnReason)}>
+              <Select value={reason} onValueChange={setReason}>
                 <SelectTrigger>
                   <SelectValue placeholder="اختر السبب" />
                 </SelectTrigger>
                 <SelectContent>
-                  {RETURN_REASONS.map((r) => (
-                    <SelectItem key={r.value} value={r.value}>
-                      {r.label}
+                  {reasons.map((r) => (
+                    <SelectItem key={r.code} value={r.code}>
+                      {r.label_ar}
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
+              {reason && reasons.find((r) => r.code === reason)?.requires_images && images.length === 0 && (
+                <p className="text-xs text-destructive">هذا السبب يتطلب إرفاق صورة واحدة على الأقل.</p>
+              )}
             </div>
             <div className="space-y-2">
               <Label>وصف المشكلة *</Label>

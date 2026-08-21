@@ -128,6 +128,10 @@ const ReturnRequestDialog = ({
     return path;
   };
 
+  const reasonRequiresImages = reason
+    ? reasons.find((r) => r.code === reason)?.requires_images ?? false
+    : false;
+
   const submit = async () => {
     if (!reason) {
       toast({ title: "اختر سبب الإرجاع", variant: "destructive" });
@@ -137,6 +141,14 @@ const ReturnRequestDialog = ({
       toast({
         title: "وصف المشكلة مطلوب",
         description: "اكتب 10 أحرف على الأقل لشرح سبب الإرجاع",
+        variant: "destructive",
+      });
+      return;
+    }
+    if (reasonRequiresImages && images.length === 0) {
+      toast({
+        title: "الصور مطلوبة",
+        description: "هذا السبب يتطلب إرفاق صورة واحدة على الأقل",
         variant: "destructive",
       });
       return;

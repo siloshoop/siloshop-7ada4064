@@ -56,6 +56,7 @@ const ReturnRequestDialog = ({
   const [submitting, setSubmitting] = useState(false);
   const [existing, setExisting] = useState<boolean>(false);
   const [checking, setChecking] = useState(true);
+  const [reasons, setReasons] = useState<{ code: string; label_ar: string; requires_images: boolean }[]>([]);
   useEffect(() => {
     let alive = true;
     (async () => {

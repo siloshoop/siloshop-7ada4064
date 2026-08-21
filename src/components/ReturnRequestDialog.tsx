@@ -22,11 +22,9 @@ import {
 } from "@/components/ui/select";
 import { RotateCcw, Loader2, X, ImagePlus, Video } from "lucide-react";
 import {
-  RETURN_REASONS,
   isReturnEligible,
   returnDaysRemaining,
   RETURN_WINDOW_DAYS,
-  type ReturnReason,
 } from "@/lib/returnStatus";
 
 interface ReturnRequestDialogProps {

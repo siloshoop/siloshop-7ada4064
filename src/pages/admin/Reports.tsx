@@ -17,6 +17,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   ResponsiveContainer, LineChart, Line, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid, Legend,
 } from "recharts";
+import ReturnsReportSection from "@/components/returns/ReturnsReportSection";
 
 type ReportStatus = "pending" | "under_review" | "resolved" | "rejected";
 type ReportType = "product" | "seller" | "buyer" | "message" | "review";

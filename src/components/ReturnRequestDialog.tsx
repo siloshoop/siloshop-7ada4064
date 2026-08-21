@@ -22,11 +22,9 @@ import {
 } from "@/components/ui/select";
 import { RotateCcw, Loader2, X, ImagePlus, Video } from "lucide-react";
 import {
-  RETURN_REASONS,
   isReturnEligible,
   returnDaysRemaining,
   RETURN_WINDOW_DAYS,
-  type ReturnReason,
 } from "@/lib/returnStatus";
 
 interface ReturnRequestDialogProps {
@@ -51,13 +49,28 @@ const ReturnRequestDialog = ({
   const { user } = useAuth();
   const { toast } = useToast();
   const [open, setOpen] = useState(false);
-  const [reason, setReason] = useState<ReturnReason | "">("");
+  const [reason, setReason] = useState<string>("");
   const [notes, setNotes] = useState("");
   const [images, setImages] = useState<File[]>([]);
   const [video, setVideo] = useState<File | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [existing, setExisting] = useState<boolean>(false);
   const [checking, setChecking] = useState(true);
+  const [reasons, setReasons] = useState<{ code: string; label_ar: string; requires_images: boolean }[]>([]);
+  useEffect(() => {
+    let alive = true;
+    (async () => {
+      const { data } = await supabase
+        .from("return_reasons")
+        .select("code, label_ar, requires_images")
+        .eq("is_active", true)
+        .order("sort_order", { ascending: true });
+      if (alive) setReasons(data ?? []);
+    })();
+    return () => {
+      alive = false;
+    };
+  }, []);
 
   const eligibility = isReturnEligible(order);
   const daysLeft = returnDaysRemaining(order.delivered_at);
@@ -115,6 +128,10 @@ const ReturnRequestDialog = ({
     return path;
   };
 
+  const reasonRequiresImages = reason
+    ? reasons.find((r) => r.code === reason)?.requires_images ?? false
+    : false;
+
   const submit = async () => {
     if (!reason) {
       toast({ title: "اختر سبب الإرجاع", variant: "destructive" });
@@ -124,6 +141,14 @@ const ReturnRequestDialog = ({
       toast({
         title: "وصف المشكلة مطلوب",
         description: "اكتب 10 أحرف على الأقل لشرح سبب الإرجاع",
+        variant: "destructive",
+      });
+      return;
+    }
+    if (reasonRequiresImages && images.length === 0) {
+      toast({
+        title: "الصور مطلوبة",
+        description: "هذا السبب يتطلب إرفاق صورة واحدة على الأقل",
         variant: "destructive",
       });
       return;
@@ -207,18 +232,21 @@ const ReturnRequestDialog = ({
           <div className="space-y-4">
             <div className="space-y-2">
               <Label>سبب الإرجاع *</Label>
-              <Select value={reason} onValueChange={(v) => setReason(v as ReturnReason)}>
+              <Select value={reason} onValueChange={setReason}>
                 <SelectTrigger>
                   <SelectValue placeholder="اختر السبب" />
                 </SelectTrigger>
                 <SelectContent>
-                  {RETURN_REASONS.map((r) => (
-                    <SelectItem key={r.value} value={r.value}>
-                      {r.label}
+                  {reasons.map((r) => (
+                    <SelectItem key={r.code} value={r.code}>
+                      {r.label_ar}
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
+              {reason && reasons.find((r) => r.code === reason)?.requires_images && images.length === 0 && (
+                <p className="text-xs text-destructive">هذا السبب يتطلب إرفاق صورة واحدة على الأقل.</p>
+              )}
             </div>
             <div className="space-y-2">
               <Label>وصف المشكلة *</Label>
@@ -231,7 +259,7 @@ const ReturnRequestDialog = ({
               <p className="text-xs text-muted-foreground">{notes.trim().length}/10 حرف كحد أدنى</p>
             </div>
             <div className="space-y-2">
-              <Label>الصور (اختياري — حتى {MAX_IMAGES})</Label>
+              <Label>الصور ({reasonRequiresImages ? "مطلوب" : "اختياري"} — حتى {MAX_IMAGES})</Label>
               <label className="flex items-center gap-2 border border-dashed rounded-md p-3 cursor-pointer hover:bg-muted/40">
                 <ImagePlus className="h-4 w-4" />
                 <span className="text-sm text-muted-foreground">
@@ -288,7 +316,7 @@ const ReturnRequestDialog = ({
             <Button variant="ghost" onClick={() => setOpen(false)} disabled={submitting}>
               إلغاء
             </Button>
-            <Button onClick={submit} disabled={submitting || !reason}>
+            <Button onClick={submit} disabled={submitting || !reason || (reasonRequiresImages && images.length === 0)}>
               {submitting ? <Loader2 className="h-4 w-4 animate-spin ml-1" /> : null}
               إرسال الطلب
             </Button>

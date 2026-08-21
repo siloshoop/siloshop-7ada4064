@@ -56,7 +56,20 @@ const ReturnRequestDialog = ({
   const [submitting, setSubmitting] = useState(false);
   const [existing, setExisting] = useState<boolean>(false);
   const [checking, setChecking] = useState(true);
-  const [reasons, setReasons] = useState<{ code: string; label_ar: string; requires_images: boolean }[]>([]);
+  useEffect(() => {
+    let alive = true;
+    (async () => {
+      const { data } = await supabase
+        .from("return_reasons")
+        .select("code, label_ar, requires_images")
+        .eq("is_active", true)
+        .order("sort_order", { ascending: true });
+      if (alive) setReasons(data ?? []);
+    })();
+    return () => {
+      alive = false;
+    };
+  }, []);
 
   const eligibility = isReturnEligible(order);
   const daysLeft = returnDaysRemaining(order.delivered_at);

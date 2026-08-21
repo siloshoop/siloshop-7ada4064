@@ -316,7 +316,7 @@ const ReturnRequestDialog = ({
             <Button variant="ghost" onClick={() => setOpen(false)} disabled={submitting}>
               إلغاء
             </Button>
-            <Button onClick={submit} disabled={submitting || !reason}>
+            <Button onClick={submit} disabled={submitting || !reason || (reasonRequiresImages && images.length === 0)}>
               {submitting ? <Loader2 className="h-4 w-4 animate-spin ml-1" /> : null}
               إرسال الطلب
             </Button>

@@ -49,13 +49,14 @@ const ReturnRequestDialog = ({
   const { user } = useAuth();
   const { toast } = useToast();
   const [open, setOpen] = useState(false);
-  const [reason, setReason] = useState<ReturnReason | "">("");
+  const [reason, setReason] = useState<string>("");
   const [notes, setNotes] = useState("");
   const [images, setImages] = useState<File[]>([]);
   const [video, setVideo] = useState<File | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [existing, setExisting] = useState<boolean>(false);
   const [checking, setChecking] = useState(true);
+  const [reasons, setReasons] = useState<{ code: string; label_ar: string; requires_images: boolean }[]>([]);
 
   const eligibility = isReturnEligible(order);
   const daysLeft = returnDaysRemaining(order.delivered_at);

@@ -259,7 +259,7 @@ const ReturnRequestDialog = ({
               <p className="text-xs text-muted-foreground">{notes.trim().length}/10 حرف كحد أدنى</p>
             </div>
             <div className="space-y-2">
-              <Label>الصور (اختياري — حتى {MAX_IMAGES})</Label>
+              <Label>الصور ({reasonRequiresImages ? "مطلوب" : "اختياري"} — حتى {MAX_IMAGES})</Label>
               <label className="flex items-center gap-2 border border-dashed rounded-md p-3 cursor-pointer hover:bg-muted/40">
                 <ImagePlus className="h-4 w-4" />
                 <span className="text-sm text-muted-foreground">

@@ -3913,6 +3913,10 @@ export type Database = {
         Args: { _block?: boolean; _conversation_id: string; _reason: string }
         Returns: undefined
       }
+      admin_broadcast_chat_announcement: {
+        Args: { p_conversation_ids?: string[]; p_message: string }
+        Returns: number
+      }
       admin_cancel_order: {
         Args: { _order_id: string; _reason: string }
         Returns: undefined
@@ -3973,6 +3977,10 @@ export type Database = {
           _vendor_id: string
         }
         Returns: string
+      }
+      admin_join_conversation: {
+        Args: { p_conversation_id: string; p_note?: string }
+        Returns: undefined
       }
       admin_list_conversations: {
         Args: {
@@ -4274,6 +4282,7 @@ export type Database = {
         Args: { _order_id: string; _reason: string }
         Returns: undefined
       }
+      chat_unread_total: { Args: never; Returns: number }
       check_contact_rate_limit: {
         Args: { p_email_hash: string }
         Returns: boolean
@@ -4309,11 +4318,23 @@ export type Database = {
         Args: { _product_id: string }
         Returns: string
       }
+      delete_own_chat_message: {
+        Args: { p_message_id: string }
+        Returns: undefined
+      }
       delete_seller_account: { Args: { _user_id: string }; Returns: undefined }
+      edit_chat_message: {
+        Args: { p_content: string; p_message_id: string }
+        Returns: undefined
+      }
       email_queue_dispatch: { Args: never; Returns: undefined }
       enqueue_email: {
         Args: { payload: Json; queue_name: string }
         Returns: number
+      }
+      forward_chat_message: {
+        Args: { p_message_id: string; p_target_conversation_id: string }
+        Returns: string
       }
       get_or_create_conversation: {
         Args: { p_product_id?: string; p_vendor_id: string }
@@ -4430,6 +4451,67 @@ export type Database = {
           reviewer_name: string
         }[]
       }
+      list_chat_messages: {
+        Args: { p_before?: string; p_conversation_id: string; p_limit?: number }
+        Returns: {
+          attachments: Json
+          content: string
+          conversation_id: string
+          created_at: string
+          deleted_by_sender: boolean
+          edited_at: string
+          file_name: string
+          file_url: string
+          forwarded_from_id: string
+          id: string
+          is_deleted: boolean
+          is_pinned: boolean
+          is_read: boolean
+          message_type: string
+          metadata: Json
+          read_at: string
+          reply_preview: string
+          reply_sender_id: string
+          reply_to_id: string
+          sender_avatar: string
+          sender_id: string
+          sender_name: string
+        }[]
+      }
+      list_conversations: {
+        Args: {
+          p_archived?: boolean
+          p_limit?: number
+          p_offset?: number
+          p_search?: string
+        }
+        Returns: {
+          admin_id: string
+          context_type: string
+          customer_id: string
+          id: string
+          is_archived: boolean
+          is_blocked: boolean
+          is_suspended: boolean
+          last_message_at: string
+          last_message_preview: string
+          last_message_sender_id: string
+          my_role: string
+          order_id: string
+          order_number: string
+          peer_avatar: string
+          peer_id: string
+          peer_last_seen: string
+          peer_name: string
+          product_id: string
+          return_id: string
+          return_number: string
+          subject: string
+          suspended_until: string
+          unread_count: number
+          vendor_id: string
+        }[]
+      }
       list_order_notes: {
         Args: { _order_id: string }
         Returns: {
@@ -4470,6 +4552,10 @@ export type Database = {
         }
         Returns: undefined
       }
+      mark_conversation_read: {
+        Args: { p_conversation_id: string }
+        Returns: undefined
+      }
       move_to_dlq: {
         Args: {
           dlq_name: string
@@ -4485,6 +4571,10 @@ export type Database = {
       order_status_can_transition: {
         Args: { _from: string; _role: string; _to: string }
         Returns: boolean
+      }
+      pin_chat_message: {
+        Args: { p_message_id: string; p_pin?: boolean }
+        Returns: undefined
       }
       popular_search_terms: {
         Args: { _limit?: number }
@@ -4589,6 +4679,27 @@ export type Database = {
         Returns: undefined
       }
       returns_run_automation: { Args: never; Returns: Json }
+      search_chat_messages: {
+        Args: {
+          p_conversation_id?: string
+          p_from?: string
+          p_limit?: number
+          p_query: string
+          p_to?: string
+        }
+        Returns: {
+          content: string
+          conversation_id: string
+          created_at: string
+          message_id: string
+          message_type: string
+          order_number: string
+          peer_name: string
+          return_number: string
+          sender_id: string
+          sender_name: string
+        }[]
+      }
       seller_bulk_update_products: {
         Args: {
           _ids: string[]
@@ -4652,6 +4763,16 @@ export type Database = {
         Returns: undefined
       }
       seller_wallet_summary: { Args: never; Returns: Json }
+      send_chat_message: {
+        Args: {
+          p_attachments?: Json
+          p_content?: string
+          p_conversation_id: string
+          p_message_type?: string
+          p_reply_to_id?: string
+        }
+        Returns: string
+      }
       send_notification: {
         Args: {
           _message: string
@@ -4660,6 +4781,10 @@ export type Database = {
           _title: string
           _type?: string
         }
+        Returns: undefined
+      }
+      set_conversation_archived: {
+        Args: { p_archived?: boolean; p_conversation_id: string }
         Returns: undefined
       }
       set_default_address: { Args: { _address_id: string }; Returns: undefined }
@@ -4688,6 +4813,15 @@ export type Database = {
         }
         Returns: Json
       }
+      start_conversation: {
+        Args: {
+          p_order_id?: string
+          p_product_id?: string
+          p_return_id?: string
+          p_vendor_id?: string
+        }
+        Returns: string
+      }
       submit_report: {
         Args: {
           _description?: string
@@ -4714,6 +4848,10 @@ export type Database = {
       }
       suspend_seller: {
         Args: { _reason: string; _user_id: string }
+        Returns: undefined
+      }
+      touch_conversation_presence: {
+        Args: { p_conversation_id: string }
         Returns: undefined
       }
       track_order_public: {

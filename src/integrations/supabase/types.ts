@@ -354,6 +354,36 @@ export type Database = {
           },
         ]
       }
+      chat_audit_log: {
+        Row: {
+          action: string
+          actor_id: string | null
+          conversation_id: string | null
+          created_at: string
+          id: string
+          message_id: string | null
+          metadata: Json
+        }
+        Insert: {
+          action: string
+          actor_id?: string | null
+          conversation_id?: string | null
+          created_at?: string
+          id?: string
+          message_id?: string | null
+          metadata?: Json
+        }
+        Update: {
+          action?: string
+          actor_id?: string | null
+          conversation_id?: string | null
+          created_at?: string
+          id?: string
+          message_id?: string | null
+          metadata?: Json
+        }
+        Relationships: []
+      }
       chat_moderation_log: {
         Row: {
           action: string
@@ -521,46 +551,117 @@ export type Database = {
         }
         Relationships: []
       }
+      conversation_participants: {
+        Row: {
+          conversation_id: string
+          id: string
+          is_archived: boolean
+          is_muted: boolean
+          joined_at: string
+          last_read_at: string | null
+          last_seen_at: string | null
+          role: string
+          unread_count: number
+          user_id: string
+        }
+        Insert: {
+          conversation_id: string
+          id?: string
+          is_archived?: boolean
+          is_muted?: boolean
+          joined_at?: string
+          last_read_at?: string | null
+          last_seen_at?: string | null
+          role?: string
+          unread_count?: number
+          user_id: string
+        }
+        Update: {
+          conversation_id?: string
+          id?: string
+          is_archived?: boolean
+          is_muted?: boolean
+          joined_at?: string
+          last_read_at?: string | null
+          last_seen_at?: string | null
+          role?: string
+          unread_count?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "conversation_participants_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "conversations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       conversations: {
         Row: {
+          admin_id: string | null
+          admin_joined_at: string | null
+          context_type: string
           created_at: string
           customer_id: string
           id: string
           is_blocked: boolean
           is_suspended: boolean
           last_message_at: string | null
+          last_message_preview: string | null
+          last_message_sender_id: string | null
           moderated_at: string | null
           moderated_by: string | null
           moderation_reason: string | null
+          order_id: string | null
           product_id: string | null
+          return_id: string | null
+          subject: string | null
           suspended_until: string | null
           vendor_id: string
         }
         Insert: {
+          admin_id?: string | null
+          admin_joined_at?: string | null
+          context_type?: string
           created_at?: string
           customer_id: string
           id?: string
           is_blocked?: boolean
           is_suspended?: boolean
           last_message_at?: string | null
+          last_message_preview?: string | null
+          last_message_sender_id?: string | null
           moderated_at?: string | null
           moderated_by?: string | null
           moderation_reason?: string | null
+          order_id?: string | null
           product_id?: string | null
+          return_id?: string | null
+          subject?: string | null
           suspended_until?: string | null
           vendor_id: string
         }
         Update: {
+          admin_id?: string | null
+          admin_joined_at?: string | null
+          context_type?: string
           created_at?: string
           customer_id?: string
           id?: string
           is_blocked?: boolean
           is_suspended?: boolean
           last_message_at?: string | null
+          last_message_preview?: string | null
+          last_message_sender_id?: string | null
           moderated_at?: string | null
           moderated_by?: string | null
           moderation_reason?: string | null
+          order_id?: string | null
           product_id?: string | null
+          return_id?: string | null
+          subject?: string | null
           suspended_until?: string | null
           vendor_id?: string
         }
@@ -573,10 +674,24 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "conversations_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "conversations_product_id_fkey"
             columns: ["product_id"]
             isOneToOne: false
             referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "conversations_return_id_fkey"
+            columns: ["return_id"]
+            isOneToOne: false
+            referencedRelation: "returns"
             referencedColumns: ["id"]
           },
           {
@@ -942,6 +1057,108 @@ export type Database = {
         }
         Relationships: []
       }
+      message_attachments: {
+        Row: {
+          conversation_id: string
+          created_at: string
+          file_name: string
+          height: number | null
+          id: string
+          kind: string
+          message_id: string
+          mime_type: string
+          size_bytes: number
+          storage_path: string
+          uploaded_by: string
+          width: number | null
+        }
+        Insert: {
+          conversation_id: string
+          created_at?: string
+          file_name: string
+          height?: number | null
+          id?: string
+          kind?: string
+          message_id: string
+          mime_type: string
+          size_bytes?: number
+          storage_path: string
+          uploaded_by: string
+          width?: number | null
+        }
+        Update: {
+          conversation_id?: string
+          created_at?: string
+          file_name?: string
+          height?: number | null
+          id?: string
+          kind?: string
+          message_id?: string
+          mime_type?: string
+          size_bytes?: number
+          storage_path?: string
+          uploaded_by?: string
+          width?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "message_attachments_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "conversations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "message_attachments_message_id_fkey"
+            columns: ["message_id"]
+            isOneToOne: false
+            referencedRelation: "messages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      message_status: {
+        Row: {
+          conversation_id: string
+          delivered_at: string
+          id: string
+          message_id: string
+          read_at: string | null
+          user_id: string
+        }
+        Insert: {
+          conversation_id: string
+          delivered_at?: string
+          id?: string
+          message_id: string
+          read_at?: string | null
+          user_id: string
+        }
+        Update: {
+          conversation_id?: string
+          delivered_at?: string
+          id?: string
+          message_id?: string
+          read_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "message_status_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "conversations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "message_status_message_id_fkey"
+            columns: ["message_id"]
+            isOneToOne: false
+            referencedRelation: "messages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       messages: {
         Row: {
           content: string | null
@@ -949,12 +1166,23 @@ export type Database = {
           created_at: string
           deleted_at: string | null
           deleted_by: string | null
+          deleted_by_sender: boolean
+          delivered_at: string | null
+          edit_count: number
+          edited_at: string | null
           file_name: string | null
           file_url: string | null
+          forwarded_from_id: string | null
           id: string
           is_deleted: boolean
+          is_pinned: boolean
           is_read: boolean
           message_type: string
+          metadata: Json
+          pinned_at: string | null
+          pinned_by: string | null
+          read_at: string | null
+          reply_to_id: string | null
           sender_id: string
         }
         Insert: {
@@ -963,12 +1191,23 @@ export type Database = {
           created_at?: string
           deleted_at?: string | null
           deleted_by?: string | null
+          deleted_by_sender?: boolean
+          delivered_at?: string | null
+          edit_count?: number
+          edited_at?: string | null
           file_name?: string | null
           file_url?: string | null
+          forwarded_from_id?: string | null
           id?: string
           is_deleted?: boolean
+          is_pinned?: boolean
           is_read?: boolean
           message_type?: string
+          metadata?: Json
+          pinned_at?: string | null
+          pinned_by?: string | null
+          read_at?: string | null
+          reply_to_id?: string | null
           sender_id: string
         }
         Update: {
@@ -977,12 +1216,23 @@ export type Database = {
           created_at?: string
           deleted_at?: string | null
           deleted_by?: string | null
+          deleted_by_sender?: boolean
+          delivered_at?: string | null
+          edit_count?: number
+          edited_at?: string | null
           file_name?: string | null
           file_url?: string | null
+          forwarded_from_id?: string | null
           id?: string
           is_deleted?: boolean
+          is_pinned?: boolean
           is_read?: boolean
           message_type?: string
+          metadata?: Json
+          pinned_at?: string | null
+          pinned_by?: string | null
+          read_at?: string | null
+          reply_to_id?: string | null
           sender_id?: string
         }
         Relationships: [
@@ -991,6 +1241,13 @@ export type Database = {
             columns: ["conversation_id"]
             isOneToOne: false
             referencedRelation: "conversations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "messages_reply_to_id_fkey"
+            columns: ["reply_to_id"]
+            isOneToOne: false
+            referencedRelation: "messages"
             referencedColumns: ["id"]
           },
           {
@@ -3656,6 +3913,10 @@ export type Database = {
         Args: { _block?: boolean; _conversation_id: string; _reason: string }
         Returns: undefined
       }
+      admin_broadcast_chat_announcement: {
+        Args: { p_conversation_ids?: string[]; p_message: string }
+        Returns: number
+      }
       admin_cancel_order: {
         Args: { _order_id: string; _reason: string }
         Returns: undefined
@@ -3716,6 +3977,10 @@ export type Database = {
           _vendor_id: string
         }
         Returns: string
+      }
+      admin_join_conversation: {
+        Args: { p_conversation_id: string; p_note?: string }
+        Returns: undefined
       }
       admin_list_conversations: {
         Args: {
@@ -4017,6 +4282,7 @@ export type Database = {
         Args: { _order_id: string; _reason: string }
         Returns: undefined
       }
+      chat_unread_total: { Args: never; Returns: number }
       check_contact_rate_limit: {
         Args: { p_email_hash: string }
         Returns: boolean
@@ -4052,11 +4318,23 @@ export type Database = {
         Args: { _product_id: string }
         Returns: string
       }
+      delete_own_chat_message: {
+        Args: { p_message_id: string }
+        Returns: undefined
+      }
       delete_seller_account: { Args: { _user_id: string }; Returns: undefined }
+      edit_chat_message: {
+        Args: { p_content: string; p_message_id: string }
+        Returns: undefined
+      }
       email_queue_dispatch: { Args: never; Returns: undefined }
       enqueue_email: {
         Args: { payload: Json; queue_name: string }
         Returns: number
+      }
+      forward_chat_message: {
+        Args: { p_message_id: string; p_target_conversation_id: string }
+        Returns: string
       }
       get_or_create_conversation: {
         Args: { p_product_id?: string; p_vendor_id: string }
@@ -4154,6 +4432,10 @@ export type Database = {
         }
         Returns: boolean
       }
+      is_conversation_member: {
+        Args: { _conversation_id: string; _user_id: string }
+        Returns: boolean
+      }
       is_feature_enabled: { Args: { _key: string }; Returns: boolean }
       is_valid_order_status: { Args: { _status: string }; Returns: boolean }
       latest_public_reviews: {
@@ -4167,6 +4449,67 @@ export type Database = {
           product_name: string
           rating: number
           reviewer_name: string
+        }[]
+      }
+      list_chat_messages: {
+        Args: { p_before?: string; p_conversation_id: string; p_limit?: number }
+        Returns: {
+          attachments: Json
+          content: string
+          conversation_id: string
+          created_at: string
+          deleted_by_sender: boolean
+          edited_at: string
+          file_name: string
+          file_url: string
+          forwarded_from_id: string
+          id: string
+          is_deleted: boolean
+          is_pinned: boolean
+          is_read: boolean
+          message_type: string
+          metadata: Json
+          read_at: string
+          reply_preview: string
+          reply_sender_id: string
+          reply_to_id: string
+          sender_avatar: string
+          sender_id: string
+          sender_name: string
+        }[]
+      }
+      list_conversations: {
+        Args: {
+          p_archived?: boolean
+          p_limit?: number
+          p_offset?: number
+          p_search?: string
+        }
+        Returns: {
+          admin_id: string
+          context_type: string
+          customer_id: string
+          id: string
+          is_archived: boolean
+          is_blocked: boolean
+          is_suspended: boolean
+          last_message_at: string
+          last_message_preview: string
+          last_message_sender_id: string
+          my_role: string
+          order_id: string
+          order_number: string
+          peer_avatar: string
+          peer_id: string
+          peer_last_seen: string
+          peer_name: string
+          product_id: string
+          return_id: string
+          return_number: string
+          subject: string
+          suspended_until: string
+          unread_count: number
+          vendor_id: string
         }[]
       }
       list_order_notes: {
@@ -4209,6 +4552,10 @@ export type Database = {
         }
         Returns: undefined
       }
+      mark_conversation_read: {
+        Args: { p_conversation_id: string }
+        Returns: undefined
+      }
       move_to_dlq: {
         Args: {
           dlq_name: string
@@ -4224,6 +4571,10 @@ export type Database = {
       order_status_can_transition: {
         Args: { _from: string; _role: string; _to: string }
         Returns: boolean
+      }
+      pin_chat_message: {
+        Args: { p_message_id: string; p_pin?: boolean }
+        Returns: undefined
       }
       popular_search_terms: {
         Args: { _limit?: number }
@@ -4328,6 +4679,27 @@ export type Database = {
         Returns: undefined
       }
       returns_run_automation: { Args: never; Returns: Json }
+      search_chat_messages: {
+        Args: {
+          p_conversation_id?: string
+          p_from?: string
+          p_limit?: number
+          p_query: string
+          p_to?: string
+        }
+        Returns: {
+          content: string
+          conversation_id: string
+          created_at: string
+          message_id: string
+          message_type: string
+          order_number: string
+          peer_name: string
+          return_number: string
+          sender_id: string
+          sender_name: string
+        }[]
+      }
       seller_bulk_update_products: {
         Args: {
           _ids: string[]
@@ -4391,6 +4763,16 @@ export type Database = {
         Returns: undefined
       }
       seller_wallet_summary: { Args: never; Returns: Json }
+      send_chat_message: {
+        Args: {
+          p_attachments?: Json
+          p_content?: string
+          p_conversation_id: string
+          p_message_type?: string
+          p_reply_to_id?: string
+        }
+        Returns: string
+      }
       send_notification: {
         Args: {
           _message: string
@@ -4399,6 +4781,10 @@ export type Database = {
           _title: string
           _type?: string
         }
+        Returns: undefined
+      }
+      set_conversation_archived: {
+        Args: { p_archived?: boolean; p_conversation_id: string }
         Returns: undefined
       }
       set_default_address: { Args: { _address_id: string }; Returns: undefined }
@@ -4427,6 +4813,15 @@ export type Database = {
         }
         Returns: Json
       }
+      start_conversation: {
+        Args: {
+          p_order_id?: string
+          p_product_id?: string
+          p_return_id?: string
+          p_vendor_id?: string
+        }
+        Returns: string
+      }
       submit_report: {
         Args: {
           _description?: string
@@ -4453,6 +4848,10 @@ export type Database = {
       }
       suspend_seller: {
         Args: { _reason: string; _user_id: string }
+        Returns: undefined
+      }
+      touch_conversation_presence: {
+        Args: { p_conversation_id: string }
         Returns: undefined
       }
       track_order_public: {

@@ -32,6 +32,7 @@ interface DetailPayload {
   return: Record<string, unknown> & {
     id: string;
     status: string;
+    vendor_id: string | null;
     return_number: string | null;
     order_number: string | null;
     reason_label: string | null;

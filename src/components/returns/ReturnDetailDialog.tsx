@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
@@ -14,7 +15,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, MapPin, Package, ShieldCheck, Truck } from "lucide-react";
+import { Loader2, MapPin, MessageCircle, Package, ShieldCheck, Truck } from "lucide-react";
 import { format } from "date-fns";
 import { ar } from "date-fns/locale";
 import {

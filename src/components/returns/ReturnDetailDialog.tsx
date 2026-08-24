@@ -299,7 +299,19 @@ const ReturnDetailDialog = ({
             <Separator />
 
             <div className="space-y-2">
-              <p className="text-xs font-semibold">المحادثة</p>
+              <div className="flex items-center justify-between gap-2">
+                <p className="text-xs font-semibold">المحادثة</p>
+                {role === "customer" && r.vendor_id && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => navigate(`/chat/${r.vendor_id}?return=${r.id}`)}
+                  >
+                    <MessageCircle className="ml-1 h-4 w-4" />
+                    محادثة البائع
+                  </Button>
+                )}
+              </div>
               <ReturnChat
                 returnId={r.id}
                 messages={data.messages}

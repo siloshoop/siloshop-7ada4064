@@ -85,6 +85,7 @@ const ReturnDetailDialog = ({
   onChanged?: () => void;
 }) => {
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [data, setData] = useState<DetailPayload | null>(null);
   const [loading, setLoading] = useState(false);
   const [working, setWorking] = useState(false);

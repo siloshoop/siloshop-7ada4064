@@ -434,7 +434,7 @@ const OrderDetails = () => {
           عرض طلبات الإرجاع
         </Button>
         {order.status !== "cancelled" && !canCancelOrder(order.status, order.tracking_status) && (
-          <OrderHelpActions vendorId={items[0]?.vendor_id} />
+          <OrderHelpActions orderId={order.id} vendorId={items[0]?.vendor_id} />
         )}
       </main>
       <Footer />

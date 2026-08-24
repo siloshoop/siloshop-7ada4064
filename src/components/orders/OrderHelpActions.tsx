@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import ReportDialog from "@/components/ReportDialog";
 
 interface Props {
+  orderId?: string | null;
   vendorId?: string | null;
   vendorName?: string | null;
 }
@@ -13,7 +14,7 @@ interface Props {
  * Shown once the cancellation window has closed (order is ready for shipping or later).
  * Buyers can only contact the seller, report a delivery issue, or request a return.
  */
-const OrderHelpActions = ({ vendorId, vendorName }: Props) => {
+const OrderHelpActions = ({ orderId, vendorId, vendorName }: Props) => {
   const navigate = useNavigate();
 
   return (
@@ -33,7 +34,7 @@ const OrderHelpActions = ({ vendorId, vendorName }: Props) => {
           <Button
             variant="outline"
             className="w-full"
-            onClick={() => navigate(`/chat/${vendorId}`)}
+            onClick={() => navigate(`/chat/${vendorId}${orderId ? `?order=${orderId}` : ""}`)}
           >
             <MessageCircle className="h-4 w-4 ml-2" />
             التواصل مع البائع

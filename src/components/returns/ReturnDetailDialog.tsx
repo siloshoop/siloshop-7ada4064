@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
@@ -14,7 +15,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, MapPin, Package, ShieldCheck, Truck } from "lucide-react";
+import { Loader2, MapPin, MessageCircle, Package, ShieldCheck, Truck } from "lucide-react";
 import { format } from "date-fns";
 import { ar } from "date-fns/locale";
 import {
@@ -32,6 +33,7 @@ interface DetailPayload {
   return: Record<string, unknown> & {
     id: string;
     status: string;
+    vendor_id: string | null;
     return_number: string | null;
     order_number: string | null;
     reason_label: string | null;
@@ -83,6 +85,7 @@ const ReturnDetailDialog = ({
   onChanged?: () => void;
 }) => {
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [data, setData] = useState<DetailPayload | null>(null);
   const [loading, setLoading] = useState(false);
   const [working, setWorking] = useState(false);
@@ -298,7 +301,19 @@ const ReturnDetailDialog = ({
             <Separator />
 
             <div className="space-y-2">
-              <p className="text-xs font-semibold">المحادثة</p>
+              <div className="flex items-center justify-between gap-2">
+                <p className="text-xs font-semibold">المحادثة</p>
+                {role === "customer" && r.vendor_id && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => navigate(`/chat/${r.vendor_id}?return=${r.id}`)}
+                  >
+                    <MessageCircle className="ml-1 h-4 w-4" />
+                    محادثة البائع
+                  </Button>
+                )}
+              </div>
               <ReturnChat
                 returnId={r.id}
                 messages={data.messages}

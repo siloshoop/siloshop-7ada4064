@@ -5,7 +5,7 @@ import { CategoryCardItem } from "@/components/CategoryCardItem";
 
 const baseProps = {
   category: { id: "c1", name_ar: "هواتف", product_count: 12 },
-  colors: { bg: "from-blue-500/15 to-cyan-500/15", icon: "text-blue-600", ring: "" },
+  colors: { bg: "from-blue-500/15 to-cyan-500/15", icon: "text-blue-500", ring: "" },
   isExpanded: false,
   hasSubs: false,
   index: 0,

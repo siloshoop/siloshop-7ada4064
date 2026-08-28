@@ -161,7 +161,7 @@ const Navbar = () => {
                     <span>عناوين التوصيل</span>
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={signOut} className="text-red-600">
+                  <DropdownMenuItem onClick={signOut} className="text-destructive">
                     <LogOut className="ml-2 h-4 w-4" />
                     <span>تسجيل الخروج</span>
                   </DropdownMenuItem>
@@ -275,7 +275,7 @@ const Navbar = () => {
                     </Button>
                     <Button 
                       variant="ghost" 
-                      className="justify-start text-red-600"
+                      className="justify-start text-destructive"
                       onClick={() => {
                         signOut();
                         setMobileMenuOpen(false);

@@ -398,8 +398,8 @@ const ManageDeals = () => {
                               isExpired
                                 ? "bg-destructive/20 text-destructive"
                                 : deal.is_active
-                                ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100"
-                                : "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-100"
+                                ? "bg-success/15 text-success"
+                                : "bg-warning/15 text-warning"
                             }`}
                           >
                             {isExpired ? "منتهي" : deal.is_active ? "نشط" : "متوقف"}

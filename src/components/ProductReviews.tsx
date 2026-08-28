@@ -374,7 +374,7 @@ export const ProductReviews = ({ productId, vendorId }: ProductReviewsProps) => 
           className={`h-5 w-5 ${
             star <= (interactive ? hoverRating || value : value)
               ? "fill-yellow-400 text-yellow-400"
-              : "text-gray-300"
+              : "text-muted-foreground/40"
           } ${interactive ? "cursor-pointer" : ""}`}
           onMouseEnter={() => interactive && onHover(star)}
           onMouseLeave={() => interactive && onHover(0)}

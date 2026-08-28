@@ -279,7 +279,7 @@ const ProductCard = memo(({
         <ProductOriginBadge productType={productType} compact />
 
         <div className="flex items-center gap-1">
-          <div className="flex text-amber-400">
+          <div className="flex text-warning">
             {[...Array(5)].map((_, i) => (
               <Star
                 key={i}
@@ -314,10 +314,10 @@ const ProductCard = memo(({
             shippingCost > 0 ? (
               <span className="text-muted-foreground">🚚 شحن: {shippingCost.toLocaleString()} ل.س</span>
             ) : (
-              <span className="text-green-600 dark:text-green-400 font-medium">🚚 شحن مجاني</span>
+              <span className="text-success dark:text-success font-medium">🚚 شحن مجاني</span>
             )
           ) : (
-            <span className="text-green-600 dark:text-green-400 font-medium">🚚 شحن مجاني</span>
+            <span className="text-success dark:text-success font-medium">🚚 شحن مجاني</span>
           )}
         </div>
 

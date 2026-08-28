@@ -43,10 +43,10 @@ interface AppRow {
 }
 
 const statusStyles: Record<Status, string> = {
-  pending: "bg-amber-500",
-  approved: "bg-emerald-500",
-  rejected: "bg-red-500",
-  suspended: "bg-slate-500",
+  pending: "bg-warning",
+  approved: "bg-success",
+  rejected: "bg-destructive",
+  suspended: "bg-muted-foreground",
 };
 const statusLabel: Record<Status, string> = {
   pending: "قيد المراجعة",
@@ -282,16 +282,16 @@ const SellerManagement = () => {
               </div>
 
               {selected.rejection_reason && (
-                <div className="rounded-lg border border-red-200 bg-red-50 dark:bg-red-950/20 p-3 text-sm">
-                  <p className="font-semibold text-red-700 dark:text-red-300">سبب الرفض/الإيقاف الحالي</p>
-                  <p className="text-red-700 dark:text-red-200">{selected.rejection_reason}</p>
+                <div className="rounded-lg border border-destructive/30 bg-destructive/10 p-3 text-sm">
+                  <p className="font-semibold text-destructive">سبب الرفض/الإيقاف الحالي</p>
+                  <p className="text-destructive/90">{selected.rejection_reason}</p>
                 </div>
               )}
 
               <DialogFooter className="flex-wrap gap-2">
                 {(selected.status === "pending" || selected.status === "rejected") && (
                   <>
-                    <Button onClick={() => approve(selected)} disabled={busy} className="bg-emerald-600 hover:bg-emerald-700">
+                    <Button onClick={() => approve(selected)} disabled={busy} className="bg-success hover:bg-success/90 text-success-foreground">
                       <CheckCircle2 className="h-4 w-4 ml-1" /> موافقة
                     </Button>
                     <Button variant="destructive" onClick={() => { setRejecting(selected); setReason(""); }}>
@@ -305,7 +305,7 @@ const SellerManagement = () => {
                   </Button>
                 )}
                 {selected.status === "suspended" && (
-                  <Button onClick={() => reactivate(selected)} disabled={busy} className="bg-emerald-600 hover:bg-emerald-700">
+                  <Button onClick={() => reactivate(selected)} disabled={busy} className="bg-success hover:bg-success/90 text-success-foreground">
                     <PlayCircle className="h-4 w-4 ml-1" /> إعادة تفعيل
                   </Button>
                 )}

@@ -361,7 +361,7 @@ const Addresses = () => {
                 <label className="flex items-center gap-2 text-sm cursor-pointer py-1">
                   <input 
                     type="checkbox" 
-                    className="rounded border-gray-300 text-primary focus:ring-primary"
+                    className="rounded border-input text-primary focus:ring-primary"
                     checked={form.is_default} 
                     onChange={(e) => setForm({ ...form, is_default: e.target.checked })} 
                   />
@@ -449,7 +449,7 @@ const Addresses = () => {
             <AlertDialogDescription>
               هل أنت متأكد من حذف هذا العنوان؟ لا يمكن التراجع عن هذا الإجراء.
               {addresses.find((a) => a.id === deleteId)?.is_default && (
-                <span className="block mt-2 text-amber-600 font-medium">
+                <span className="block mt-2 text-warning font-medium">
                   ملاحظة: هذا هو عنوانك الافتراضي. سيتم تعيين عنوان آخر كافتراضي تلقائياً.
                 </span>
               )}

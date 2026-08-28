@@ -412,7 +412,7 @@ const Compare = () => {
       icon: <DollarSign className="h-5 w-5" />,
       getValue: (product) => (
         <div className="text-center">
-          <p className={`text-xl font-bold ${product.price === getLowestPrice() ? "text-green-600" : "text-foreground"}`}>
+          <p className={`text-xl font-bold ${product.price === getLowestPrice() ? "text-success" : "text-foreground"}`}>
             {product.price} ل.س
           </p>
           {product.original_price && (
@@ -440,11 +440,11 @@ const Compare = () => {
           <div className="text-center">
             {discount ? (
               <>
-                <Badge className={`${isHighest ? "bg-red-500" : "bg-muted text-muted-foreground"}`}>
+                <Badge className={`${isHighest ? "bg-destructive" : "bg-muted text-muted-foreground"}`}>
                   {discount}% خصم
                 </Badge>
                 {isHighest && products.length > 1 && (
-                  <p className="text-xs text-red-500 mt-1">أعلى خصم</p>
+                  <p className="text-xs text-destructive mt-1">أعلى خصم</p>
                 )}
               </>
             ) : (
@@ -516,7 +516,7 @@ const Compare = () => {
         const isHighest = stock === getHighestStock() && stock > 0;
         return (
           <div className="text-center">
-            <p className={`font-medium ${stock === 0 ? "text-red-500" : stock < 5 ? "text-orange-500" : "text-green-600"}`}>
+            <p className={`font-medium ${stock === 0 ? "text-destructive" : stock < 5 ? "text-warning" : "text-success"}`}>
               {stock === 0 ? "نفد المخزون" : `${stock} قطعة`}
             </p>
             {isHighest && products.length > 1 && stock > 0 && (
@@ -782,7 +782,7 @@ const Compare = () => {
                   
                   <div className="relative aspect-square overflow-hidden">
                     {product.original_price && (
-                      <Badge className="absolute top-2 right-2 z-10 bg-red-500">
+                      <Badge className="absolute top-2 right-2 z-10 bg-destructive">
                         خصم {calculateDiscount(product.original_price, product.price)}%
                       </Badge>
                     )}

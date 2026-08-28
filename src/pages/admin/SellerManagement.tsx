@@ -43,9 +43,9 @@ interface AppRow {
 }
 
 const statusStyles: Record<Status, string> = {
-  pending: "bg-amber-500",
-  approved: "bg-emerald-500",
-  rejected: "bg-red-500",
+  pending: "bg-warning",
+  approved: "bg-success",
+  rejected: "bg-destructive",
   suspended: "bg-muted-foreground",
 };
 const statusLabel: Record<Status, string> = {

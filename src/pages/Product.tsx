@@ -458,12 +458,12 @@ const Product = () => {
             <div className="flex flex-wrap items-center gap-2 text-sm">
               <span
                 className={`inline-flex items-center gap-1.5 font-medium ${
-                  inStock ? "text-emerald-600 dark:text-emerald-400" : "text-destructive"
+                  inStock ? "text-success dark:text-success" : "text-destructive"
                 }`}
               >
                 <span
                   className={`inline-block h-2 w-2 rounded-full ${
-                    inStock ? "bg-emerald-500 animate-pulse" : "bg-destructive"
+                    inStock ? "bg-success animate-pulse" : "bg-destructive"
                   }`}
                 />
                 {inStock ? "متوفر الآن" : "غير متوفر"}
@@ -472,7 +472,7 @@ const Product = () => {
                 <span className="text-muted-foreground">· {effectiveStock} قطعة</span>
               )}
               {lowStock && (
-                <span className="text-amber-600 dark:text-amber-400 font-medium">
+                <span className="text-warning dark:text-warning font-medium">
                   · الكمية محدودة
                 </span>
               )}

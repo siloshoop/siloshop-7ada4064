@@ -273,7 +273,7 @@ const PlatformProducts = () => {
                     <td className="p-2">
                       {Number(p.price).toLocaleString()} {p.currency === "SYP" ? "ل.س" : p.currency}
                       {p.discount_price && (
-                        <span className="block text-xs text-green-600">
+                        <span className="block text-xs text-success">
                           خصم: {Number(p.discount_price).toLocaleString()}
                         </span>
                       )}

@@ -154,7 +154,7 @@ const VendorRatings = () => {
             </CardHeader>
             <CardContent>
               <div className="flex items-center gap-3">
-                <div className="text-4xl font-bold text-green-500">
+                <div className="text-4xl font-bold text-success">
                   {ratings.length > 0
                     ? Math.round((ratings.filter(r => r.rating >= 4).length / ratings.length) * 100)
                     : 0}%

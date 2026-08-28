@@ -449,7 +449,7 @@ const Addresses = () => {
             <AlertDialogDescription>
               هل أنت متأكد من حذف هذا العنوان؟ لا يمكن التراجع عن هذا الإجراء.
               {addresses.find((a) => a.id === deleteId)?.is_default && (
-                <span className="block mt-2 text-amber-600 font-medium">
+                <span className="block mt-2 text-warning font-medium">
                   ملاحظة: هذا هو عنوانك الافتراضي. سيتم تعيين عنوان آخر كافتراضي تلقائياً.
                 </span>
               )}

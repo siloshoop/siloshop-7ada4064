@@ -41,8 +41,8 @@ const MarketPriceBar = ({ productId, price, categoryId }: Props) => {
   const tone = isEqual
     ? "text-muted-foreground"
     : isLower
-    ? "text-green-600 dark:text-green-400"
-    : "text-orange-600 dark:text-orange-400";
+    ? "text-success dark:text-success"
+    : "text-warning dark:text-warning";
   const label = isEqual
     ? "مماثل لمتوسط السوق"
     : isLower
@@ -66,7 +66,7 @@ const MarketPriceBar = ({ productId, price, categoryId }: Props) => {
         <div className="absolute inset-y-0 left-1/2 w-px bg-foreground/40" />
         <div
           className={`absolute top-1/2 -translate-y-1/2 h-3 w-3 rounded-full border-2 border-background ${
-            isLower ? "bg-green-500" : isEqual ? "bg-muted-foreground" : "bg-orange-500"
+            isLower ? "bg-success" : isEqual ? "bg-muted-foreground" : "bg-warning"
           }`}
           style={{ left: `calc(${ratio}% - 6px)` }}
         />

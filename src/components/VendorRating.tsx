@@ -144,7 +144,7 @@ export const VendorRating = ({ vendorId, vendorName }: VendorRatingProps) => {
             className={`${sizeClass} ${
               star <= (interactive ? hoverRating || value : value)
                 ? "fill-yellow-400 text-yellow-400"
-                : "text-gray-300"
+                : "text-muted-foreground/40"
             } ${interactive ? "cursor-pointer" : ""}`}
             onMouseEnter={() => interactive && onHover?.(star)}
             onMouseLeave={() => interactive && onHover?.(0)}

@@ -110,7 +110,7 @@ const ActivityLogs = () => {
       case "login":
         return <LogIn className="h-4 w-4 text-green-500" />;
       case "logout":
-        return <LogOut className="h-4 w-4 text-gray-500" />;
+        return <LogOut className="h-4 w-4 text-muted-foreground" />;
       case "signup":
         return <UserPlus className="h-4 w-4 text-blue-500" />;
       case "order_created":

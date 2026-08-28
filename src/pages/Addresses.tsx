@@ -361,7 +361,7 @@ const Addresses = () => {
                 <label className="flex items-center gap-2 text-sm cursor-pointer py-1">
                   <input 
                     type="checkbox" 
-                    className="rounded border-gray-300 text-primary focus:ring-primary"
+                    className="rounded border-input text-primary focus:ring-primary"
                     checked={form.is_default} 
                     onChange={(e) => setForm({ ...form, is_default: e.target.checked })} 
                   />

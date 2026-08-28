@@ -39,7 +39,7 @@ const statusMeta: Record<SellerStatus, { label: string; color: string; icon: any
   pending: { label: "قيد المراجعة", color: "bg-amber-500", icon: Clock, description: "طلبك قيد المراجعة من قبل الإدارة. لا يمكنك نشر المنتجات أو استلام الطلبات حتى الموافقة." },
   approved: { label: "مقبول", color: "bg-emerald-500", icon: ShieldCheck, description: "تمت الموافقة على متجرك. يمكنك الآن الوصول إلى لوحة البائع ونشر المنتجات." },
   rejected: { label: "مرفوض", color: "bg-red-500", icon: XCircle, description: "تم رفض طلبك. يمكنك تعديل بياناتك وإعادة التقديم." },
-  suspended: { label: "موقوف", color: "bg-slate-500", icon: PauseCircle, description: "تم إيقاف متجرك مؤقتاً. يرجى التواصل مع الإدارة." },
+  suspended: { label: "موقوف", color: "bg-muted-foreground", icon: PauseCircle, description: "تم إيقاف متجرك مؤقتاً. يرجى التواصل مع الإدارة." },
 };
 
 const SellerApplication = () => {

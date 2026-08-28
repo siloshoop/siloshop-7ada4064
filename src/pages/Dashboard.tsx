@@ -455,7 +455,7 @@ const Dashboard = () => {
 
         {/* Seller application status banner (pending/rejected/suspended) */}
         {sellerApp && sellerApp.status !== "approved" && (
-          <Card className="mb-6 border-amber-400/60 bg-amber-50/40 dark:bg-amber-950/10">
+          <Card className="mb-6 border-warning/50 bg-warning/5">
             <CardContent className="pt-6 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
               <div>
                 <p className="font-semibold">
@@ -604,7 +604,7 @@ const Dashboard = () => {
                                 className={`h-4 w-4 ${
                                   star <= review.rating
                                     ? "fill-yellow-400 text-yellow-400"
-                                    : "text-gray-300"
+                                    : "text-muted-foreground/40"
                                 }`}
                               />
                             ))}
@@ -764,7 +764,7 @@ const Dashboard = () => {
                                 مؤرشف
                               </span>
                             ) : (
-                              <span className={`text-xs px-2 py-1 rounded ${product.is_active ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}`}>
+                              <span className={`text-xs px-2 py-1 rounded ${product.is_active ? 'bg-success/15 text-success' : 'bg-muted text-muted-foreground'}`}>
                                 {product.is_active ? 'نشط' : 'غير نشط'}
                               </span>
                             )}

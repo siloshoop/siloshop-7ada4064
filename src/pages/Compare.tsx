@@ -421,7 +421,7 @@ const Compare = () => {
             </p>
           )}
           {product.price === getLowestPrice() && products.length > 1 && (
-            <Badge className="mt-1 bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300">
+            <Badge className="mt-1 bg-success/15 text-success">
               <TrendingDown className="h-3 w-3 ml-1" />
               الأقل سعراً
             </Badge>
@@ -469,7 +469,7 @@ const Compare = () => {
                   className={`h-4 w-4 ${
                     i < Math.round(rating)
                       ? "fill-yellow-400 text-yellow-400"
-                      : "text-gray-300"
+                      : "text-muted-foreground/40"
                   }`}
                 />
               ))}
@@ -478,7 +478,7 @@ const Compare = () => {
               {rating.toFixed(1)} ({product.reviews?.length || 0} تقييم)
             </p>
             {isHighest && products.length > 1 && (
-              <Badge className="mt-1 bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-300">
+              <Badge className="mt-1 bg-warning/15 text-warning">
                 الأعلى تقييماً
               </Badge>
             )}
@@ -520,7 +520,7 @@ const Compare = () => {
               {stock === 0 ? "نفد المخزون" : `${stock} قطعة`}
             </p>
             {isHighest && products.length > 1 && stock > 0 && (
-              <Badge className="mt-1 bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300">
+              <Badge className="mt-1 bg-info/15 text-info">
                 الأعلى توفراً
               </Badge>
             )}
@@ -534,7 +534,7 @@ const Compare = () => {
       getValue: (product) => (
         <div className="flex justify-center">
           {(product.stock_quantity || 0) > 0 ? (
-            <Badge className="bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300">
+            <Badge className="bg-success/15 text-success">
               <Check className="h-3 w-3 ml-1" />
               متوفر
             </Badge>

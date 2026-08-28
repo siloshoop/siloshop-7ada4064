@@ -21,7 +21,7 @@ const sellerStatusMeta: Record<string, { label: string; color: string; desc: str
   pending: { label: "قيد المراجعة", color: "bg-amber-500", desc: "طلب متجرك قيد مراجعة الإدارة" },
   approved: { label: "متجر مفعّل", color: "bg-emerald-500", desc: "متجرك مفعّل — اذهب إلى لوحة البائع" },
   rejected: { label: "مرفوض", color: "bg-destructive", desc: "تم رفض الطلب — يمكنك التعديل وإعادة التقديم" },
-  suspended: { label: "موقوف", color: "bg-slate-500", desc: "تم إيقاف متجرك مؤقتاً" },
+  suspended: { label: "موقوف", color: "bg-muted-foreground", desc: "تم إيقاف متجرك مؤقتاً" },
 };
 
 const Settings = () => {

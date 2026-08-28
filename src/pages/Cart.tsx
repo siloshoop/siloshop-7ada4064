@@ -669,8 +669,8 @@ const Cart = () => {
                       كود الخصم
                     </Label>
                     {appliedCoupon ? (
-                      <div className="flex items-center justify-between gap-2 rounded-md border border-green-500/40 bg-green-50 dark:bg-green-950/30 px-3 py-2">
-                        <div className="flex items-center gap-2 text-sm font-medium text-green-700 dark:text-green-300">
+                      <div className="flex items-center justify-between gap-2 rounded-md border border-success/40 bg-success/10 px-3 py-2">
+                        <div className="flex items-center gap-2 text-sm font-medium text-success">
                           <CheckCircle2 className="h-4 w-4" />
                           <span dir="ltr">{appliedCoupon.code}</span>
                         </div>
@@ -769,8 +769,8 @@ const Cart = () => {
                   </div>
 
                   {(totalSavings > 0 || couponDiscount > 0) && (
-                    <div className="bg-green-50 dark:bg-green-950/40 p-3 rounded-lg">
-                      <p className="text-sm text-green-800 dark:text-green-200 font-medium">
+                    <div className="bg-success/10 p-3 rounded-lg">
+                      <p className="text-sm text-success font-medium">
                         🎉 لقد وفرت {(totalSavings + couponDiscount).toFixed(0)} ل.س على هذا الطلب!
                       </p>
                     </div>

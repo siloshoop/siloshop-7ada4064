@@ -11,11 +11,11 @@ export const MODERATION_LABELS: Record<string, string> = {
 
 export const MODERATION_BADGE_CLASS: Record<string, string> = {
   draft: "bg-muted text-muted-foreground",
-  pending: "bg-amber-500/15 text-amber-600",
-  approved: "bg-emerald-500/15 text-emerald-600",
+  pending: "bg-warning/15 text-warning",
+  approved: "bg-success/15 text-success",
   rejected: "bg-destructive/15 text-destructive",
-  hidden: "bg-slate-500/15 text-slate-600",
-  archived: "bg-slate-500/15 text-slate-600",
+  hidden: "bg-muted text-muted-foreground",
+  archived: "bg-muted text-muted-foreground",
 };
 
 export const moderationLabel = (s?: string | null) => MODERATION_LABELS[s ?? ""] ?? (s ?? "غير معروف");

@@ -785,7 +785,7 @@ const SearchPage = () => {
                   {[...Array(5)].map((_, i) => (
                     <Star
                       key={i}
-                      className={`h-4 w-4 ${i < rating ? "fill-yellow-400 text-yellow-400" : "text-gray-300"}`}
+                      className={`h-4 w-4 ${i < rating ? "fill-yellow-400 text-yellow-400" : "text-muted-foreground/40"}`}
                     />
                   ))}
                   <span className="text-sm text-muted-foreground mr-1">وأعلى</span>

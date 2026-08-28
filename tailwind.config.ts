@@ -60,6 +60,10 @@ export default {
           DEFAULT: "hsl(var(--sale))",
           foreground: "hsl(var(--sale-foreground))",
         },
+        info: {
+          DEFAULT: "hsl(var(--info))",
+          foreground: "hsl(var(--info-foreground))",
+        },
 
         sidebar: {
           DEFAULT: "hsl(var(--sidebar-background))",

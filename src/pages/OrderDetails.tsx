@@ -273,7 +273,7 @@ const OrderDetails = () => {
                   </p>
                 )}
                 {order.payment_status === "refund_pending" && (
-                  <p className="text-xs text-warning">حالة الاسترداد: قيد المعالجة</p>
+                  <p className="text-xs text-amber-600">حالة الاسترداد: قيد المعالجة</p>
                 )}
               </div>
             )}
@@ -352,7 +352,7 @@ const OrderDetails = () => {
             <div className="flex justify-between"><span className="text-muted-foreground">المنتجات</span><span>{subtotal.toLocaleString()} ل.س</span></div>
             <div className="flex justify-between"><span className="text-muted-foreground">الشحن</span><span>{shippingAmount > 0 ? `${shippingAmount.toLocaleString()} ل.س` : "مجاني"}</span></div>
             {discount > 0 && (
-              <div className="flex justify-between text-success"><span>الخصم {order.coupon_code ? `(${order.coupon_code})` : ""}</span><span>-{discount.toLocaleString()} ل.س</span></div>
+              <div className="flex justify-between text-green-600"><span>الخصم {order.coupon_code ? `(${order.coupon_code})` : ""}</span><span>-{discount.toLocaleString()} ل.س</span></div>
             )}
             {taxAmount > 0 && (
               <div className="flex justify-between"><span className="text-muted-foreground">الضريبة</span><span>{taxAmount.toLocaleString()} ل.س</span></div>

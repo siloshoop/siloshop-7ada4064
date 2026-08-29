@@ -108,28 +108,28 @@ const ActivityLogs = () => {
   const getActionIcon = (actionType: string) => {
     switch (actionType) {
       case "login":
-        return <LogIn className="h-4 w-4 text-success" />;
+        return <LogIn className="h-4 w-4 text-green-500" />;
       case "logout":
-        return <LogOut className="h-4 w-4 text-muted-foreground" />;
+        return <LogOut className="h-4 w-4 text-gray-500" />;
       case "signup":
-        return <UserPlus className="h-4 w-4 text-info" />;
+        return <UserPlus className="h-4 w-4 text-blue-500" />;
       case "order_created":
       case "order_updated":
         return <ShoppingCart className="h-4 w-4 text-purple-500" />;
       case "product_created":
       case "product_updated":
       case "product_deleted":
-        return <Package className="h-4 w-4 text-warning" />;
+        return <Package className="h-4 w-4 text-orange-500" />;
       case "profile_updated":
-        return <UserCog className="h-4 w-4 text-info" />;
+        return <UserCog className="h-4 w-4 text-cyan-500" />;
       case "user_banned":
-        return <Ban className="h-4 w-4 text-destructive" />;
+        return <Ban className="h-4 w-4 text-red-500" />;
       case "user_unbanned":
-        return <UserCheck className="h-4 w-4 text-success" />;
+        return <UserCheck className="h-4 w-4 text-green-500" />;
       case "role_added":
         return <Shield className="h-4 w-4 text-yellow-500" />;
       case "role_removed":
-        return <ShieldX className="h-4 w-4 text-destructive" />;
+        return <ShieldX className="h-4 w-4 text-red-500" />;
       default:
         return <Activity className="h-4 w-4 text-muted-foreground" />;
     }

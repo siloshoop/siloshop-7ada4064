@@ -5,8 +5,8 @@ export const VIOLATION_SEVERITY_LABELS: Record<string, string> = {
 };
 
 export const VIOLATION_SEVERITY_CLASS: Record<string, string> = {
-  warning: "bg-warning/15 text-warning",
-  strike: "bg-sale/15 text-sale",
+  warning: "bg-amber-100 text-amber-800 dark:bg-amber-950/40 dark:text-amber-300",
+  strike: "bg-orange-100 text-orange-800 dark:bg-orange-950/40 dark:text-orange-300",
   suspension: "bg-destructive/10 text-destructive",
 };
 

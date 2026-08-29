@@ -207,7 +207,7 @@ const PlatformProductImport = ({ open, onOpenChange, categories, brands, onImpor
           {rows.length > 0 && (
             <>
               <div className="flex gap-3 text-sm">
-                <span className="text-success">صالح: {validCount}</span>
+                <span className="text-green-600">صالح: {validCount}</span>
                 {errorCount > 0 && <span className="text-destructive">أخطاء: {errorCount}</span>}
                 <span className="text-muted-foreground">من ملف: {fileName}</span>
               </div>
@@ -238,7 +238,7 @@ const PlatformProductImport = ({ open, onOpenChange, categories, brands, onImpor
                               {r.errors.join(" • ")}
                             </span>
                           ) : (
-                            <span className="text-success">جاهز</span>
+                            <span className="text-green-600">جاهز</span>
                           )}
                         </td>
                       </tr>

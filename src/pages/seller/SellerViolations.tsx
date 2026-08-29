@@ -52,7 +52,7 @@ const SellerViolations = () => {
           {activeStrikes > 0 ? (
             <ShieldAlert className="h-5 w-5 text-destructive" />
           ) : (
-            <ShieldCheck className="h-5 w-5 text-success" />
+            <ShieldCheck className="h-5 w-5 text-emerald-600" />
           )}
           <div>
             <p className="font-semibold">

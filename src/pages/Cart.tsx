@@ -555,7 +555,7 @@ const Cart = () => {
 
                           {/* Quantity discount badge */}
                           {item.appliedDiscount > 0 && (
-                            <Badge className="bg-success hover:bg-success">
+                            <Badge className="bg-green-500 hover:bg-green-600">
                               <Percent className="h-3 w-3 ml-1" />
                               خصم {item.appliedDiscount}% على الكمية
                             </Badge>
@@ -600,7 +600,7 @@ const Cart = () => {
                                 {item.discountedPrice.toFixed(0)} ل.س
                               </p>
                               {item.appliedDiscount > 0 && (
-                                <p className="text-xs text-success">
+                                <p className="text-xs text-green-600">
                                   وفرت {item.savings.toFixed(0)} ل.س
                                 </p>
                               )}
@@ -669,8 +669,8 @@ const Cart = () => {
                       كود الخصم
                     </Label>
                     {appliedCoupon ? (
-                      <div className="flex items-center justify-between gap-2 rounded-md border border-success/40 bg-success/10 px-3 py-2">
-                        <div className="flex items-center gap-2 text-sm font-medium text-success">
+                      <div className="flex items-center justify-between gap-2 rounded-md border border-green-500/40 bg-green-50 dark:bg-green-950/30 px-3 py-2">
+                        <div className="flex items-center gap-2 text-sm font-medium text-green-700 dark:text-green-300">
                           <CheckCircle2 className="h-4 w-4" />
                           <span dir="ltr">{appliedCoupon.code}</span>
                         </div>
@@ -720,11 +720,11 @@ const Cart = () => {
 
                     {totalSavings > 0 && (
                       <div className="flex justify-between text-sm">
-                        <span className="text-success flex items-center gap-1">
+                        <span className="text-green-600 flex items-center gap-1">
                           <Percent className="h-3 w-3" />
                           خصم الكمية
                         </span>
-                        <span className="text-success font-medium">
+                        <span className="text-green-600 font-medium">
                           -{totalSavings.toFixed(0)} ل.س
                         </span>
                       </div>
@@ -732,11 +732,11 @@ const Cart = () => {
 
                     {couponDiscount > 0 && (
                       <div className="flex justify-between text-sm">
-                        <span className="text-success flex items-center gap-1">
+                        <span className="text-green-600 flex items-center gap-1">
                           <Tag className="h-3 w-3" />
                           خصم الكوبون
                         </span>
-                        <span className="text-success font-medium">
+                        <span className="text-green-600 font-medium">
                           -{couponDiscount.toFixed(0)} ل.س
                         </span>
                       </div>
@@ -747,7 +747,7 @@ const Cart = () => {
                         <Truck className="h-3.5 w-3.5" />
                         تكلفة التوصيل
                       </span>
-                      <span className={shippingTotal === 0 ? "text-success font-medium" : ""}>
+                      <span className={shippingTotal === 0 ? "text-green-600 font-medium" : ""}>
                         {shippingTotal === 0 ? "مجاني" : `${shippingTotal.toFixed(0)} ل.س`}
                       </span>
                     </div>
@@ -769,8 +769,8 @@ const Cart = () => {
                   </div>
 
                   {(totalSavings > 0 || couponDiscount > 0) && (
-                    <div className="bg-success/10 p-3 rounded-lg">
-                      <p className="text-sm text-success font-medium">
+                    <div className="bg-green-50 dark:bg-green-950/40 p-3 rounded-lg">
+                      <p className="text-sm text-green-800 dark:text-green-200 font-medium">
                         🎉 لقد وفرت {(totalSavings + couponDiscount).toFixed(0)} ل.س على هذا الطلب!
                       </p>
                     </div>

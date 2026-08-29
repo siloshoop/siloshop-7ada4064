@@ -62,7 +62,7 @@ const RequireApprovedSeller = ({ children }: { children: ReactNode }) => {
         <>{children}</>
       ) : status === "pending" ? (
         <StateCard
-          icon={<Clock className="h-7 w-7 text-warning" />}
+          icon={<Clock className="h-7 w-7 text-amber-500" />}
           title="طلبك قيد المراجعة"
           description="لا يمكنك الوصول إلى لوحة البائع أو إضافة منتجات حتى تتم موافقة الإدارة على طلبك. سنخبرك عبر الإشعارات فوراً."
         />

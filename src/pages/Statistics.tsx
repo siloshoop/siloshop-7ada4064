@@ -333,7 +333,7 @@ const Statistics = () => {
                             className={`h-4 w-4 ${
                               star <= review.rating
                                 ? "fill-yellow-400 text-yellow-400"
-                                : "text-muted-foreground/40"
+                                : "text-gray-300"
                             }`}
                           />
                         ))}

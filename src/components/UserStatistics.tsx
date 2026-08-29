@@ -142,10 +142,10 @@ const UserStatistics = () => {
         <Card className="border-r-4 border-r-green-500">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">المستخدمين النشطين</CardTitle>
-            <UserCheck className="h-4 w-4 text-success" />
+            <UserCheck className="h-4 w-4 text-green-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-success">{stats.active}</div>
+            <div className="text-2xl font-bold text-green-600">{stats.active}</div>
             <p className="text-xs text-muted-foreground">
               {stats.total > 0 ? ((stats.active / stats.total) * 100).toFixed(1) : 0}% من الإجمالي
             </p>
@@ -168,10 +168,10 @@ const UserStatistics = () => {
         <Card className="border-r-4 border-r-blue-500">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">التسجيلات الجديدة</CardTitle>
-            <UserPlus className="h-4 w-4 text-info" />
+            <UserPlus className="h-4 w-4 text-blue-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-info">{stats.newThisWeek}</div>
+            <div className="text-2xl font-bold text-blue-600">{stats.newThisWeek}</div>
             <p className="text-xs text-muted-foreground">
               هذا الأسبوع • {stats.newThisMonth} هذا الشهر
             </p>

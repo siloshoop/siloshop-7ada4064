@@ -548,7 +548,7 @@ const Checkout = () => {
                       </Button>
                     </div>
                     {appliedCoupon && (
-                      <p className="text-sm text-success">
+                      <p className="text-sm text-green-600">
                         ✓ تم تطبيق الكوبون: {appliedCoupon.code}
                       </p>
                     )}
@@ -560,7 +560,7 @@ const Checkout = () => {
                       <span>{subtotal} ل.س</span>
                     </div>
                     {discount > 0 && (
-                      <div className="flex justify-between text-success">
+                      <div className="flex justify-between text-green-600">
                         <span>الخصم</span>
                         <span>-{discount} ل.س</span>
                       </div>

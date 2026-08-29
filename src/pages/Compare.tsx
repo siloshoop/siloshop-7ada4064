@@ -412,7 +412,7 @@ const Compare = () => {
       icon: <DollarSign className="h-5 w-5" />,
       getValue: (product) => (
         <div className="text-center">
-          <p className={`text-xl font-bold ${product.price === getLowestPrice() ? "text-success" : "text-foreground"}`}>
+          <p className={`text-xl font-bold ${product.price === getLowestPrice() ? "text-green-600" : "text-foreground"}`}>
             {product.price} ل.س
           </p>
           {product.original_price && (
@@ -421,7 +421,7 @@ const Compare = () => {
             </p>
           )}
           {product.price === getLowestPrice() && products.length > 1 && (
-            <Badge className="mt-1 bg-success/15 text-success">
+            <Badge className="mt-1 bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300">
               <TrendingDown className="h-3 w-3 ml-1" />
               الأقل سعراً
             </Badge>
@@ -440,11 +440,11 @@ const Compare = () => {
           <div className="text-center">
             {discount ? (
               <>
-                <Badge className={`${isHighest ? "bg-destructive" : "bg-muted text-muted-foreground"}`}>
+                <Badge className={`${isHighest ? "bg-red-500" : "bg-muted text-muted-foreground"}`}>
                   {discount}% خصم
                 </Badge>
                 {isHighest && products.length > 1 && (
-                  <p className="text-xs text-destructive mt-1">أعلى خصم</p>
+                  <p className="text-xs text-red-500 mt-1">أعلى خصم</p>
                 )}
               </>
             ) : (
@@ -469,7 +469,7 @@ const Compare = () => {
                   className={`h-4 w-4 ${
                     i < Math.round(rating)
                       ? "fill-yellow-400 text-yellow-400"
-                      : "text-muted-foreground/40"
+                      : "text-gray-300"
                   }`}
                 />
               ))}
@@ -478,7 +478,7 @@ const Compare = () => {
               {rating.toFixed(1)} ({product.reviews?.length || 0} تقييم)
             </p>
             {isHighest && products.length > 1 && (
-              <Badge className="mt-1 bg-warning/15 text-warning">
+              <Badge className="mt-1 bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-300">
                 الأعلى تقييماً
               </Badge>
             )}
@@ -516,11 +516,11 @@ const Compare = () => {
         const isHighest = stock === getHighestStock() && stock > 0;
         return (
           <div className="text-center">
-            <p className={`font-medium ${stock === 0 ? "text-destructive" : stock < 5 ? "text-warning" : "text-success"}`}>
+            <p className={`font-medium ${stock === 0 ? "text-red-500" : stock < 5 ? "text-orange-500" : "text-green-600"}`}>
               {stock === 0 ? "نفد المخزون" : `${stock} قطعة`}
             </p>
             {isHighest && products.length > 1 && stock > 0 && (
-              <Badge className="mt-1 bg-info/15 text-info">
+              <Badge className="mt-1 bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300">
                 الأعلى توفراً
               </Badge>
             )}
@@ -534,7 +534,7 @@ const Compare = () => {
       getValue: (product) => (
         <div className="flex justify-center">
           {(product.stock_quantity || 0) > 0 ? (
-            <Badge className="bg-success/15 text-success">
+            <Badge className="bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300">
               <Check className="h-3 w-3 ml-1" />
               متوفر
             </Badge>
@@ -782,7 +782,7 @@ const Compare = () => {
                   
                   <div className="relative aspect-square overflow-hidden">
                     {product.original_price && (
-                      <Badge className="absolute top-2 right-2 z-10 bg-destructive">
+                      <Badge className="absolute top-2 right-2 z-10 bg-red-500">
                         خصم {calculateDiscount(product.original_price, product.price)}%
                       </Badge>
                     )}

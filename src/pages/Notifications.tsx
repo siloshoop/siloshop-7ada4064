@@ -36,13 +36,13 @@ interface Notification {
   related_id: string | null;
 }
 
-const BLUE = "bg-info/15 text-info";
-const GREEN = "bg-success/15 text-success";
-const RED = "bg-destructive/15 text-destructive";
-const ORANGE = "bg-warning/15 text-warning";
-const PURPLE = "bg-primary/15 text-primary";
-const GRAY = "bg-muted text-muted-foreground";
-const YELLOW = "bg-warning/15 text-warning";
+const BLUE = "bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300";
+const GREEN = "bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300";
+const RED = "bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300";
+const ORANGE = "bg-orange-100 text-orange-700 dark:bg-orange-900 dark:text-orange-300";
+const PURPLE = "bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-300";
+const GRAY = "bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300";
+const YELLOW = "bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-300";
 
 const NotificationTypeConfig: Record<string, { label: string; icon: React.ReactNode; color: string }> = {
   // Orders & shipments

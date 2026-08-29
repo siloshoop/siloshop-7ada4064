@@ -292,7 +292,7 @@ const ManageCoupons = () => {
                         <div className="flex items-center gap-3 mb-2">
                           <h3 className="text-2xl font-bold font-mono">{coupon.code}</h3>
                           <span className={`text-xs px-2 py-1 rounded ${
-                            coupon.is_active ? 'bg-success/15 text-success' : 'bg-muted text-muted-foreground'
+                            coupon.is_active ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
                           }`}>
                             {coupon.is_active ? 'نشط' : 'غير نشط'}
                           </span>

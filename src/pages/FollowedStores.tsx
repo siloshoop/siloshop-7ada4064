@@ -170,7 +170,7 @@ const FollowedStores = () => {
                         </Badge>
                         {store.rating > 0 && (
                           <Badge variant="secondary" className="gap-1 text-xs">
-                            <Star className="h-3 w-3 fill-amber-400 text-warning" />
+                            <Star className="h-3 w-3 fill-amber-400 text-amber-400" />
                             {store.rating.toFixed(1)}
                           </Badge>
                         )}

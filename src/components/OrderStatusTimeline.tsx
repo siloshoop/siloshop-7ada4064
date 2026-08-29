@@ -21,12 +21,12 @@ const OrderStatusTimeline = ({ status, latestNote, className }: Props) => {
       <div
         className={cn(
           "flex items-start gap-3 rounded-xl border p-4",
-          isCancelled ? "border-destructive/40 bg-destructive/5" : "border-amber-500/40 bg-warning/5",
+          isCancelled ? "border-destructive/40 bg-destructive/5" : "border-amber-500/40 bg-amber-500/5",
           className
         )}
         dir="rtl"
       >
-        <Icon className={cn("h-6 w-6 shrink-0", isCancelled ? "text-destructive" : "text-warning")} />
+        <Icon className={cn("h-6 w-6 shrink-0", isCancelled ? "text-destructive" : "text-amber-600")} />
         <div>
           <p className="font-semibold">{isCancelled ? "تم إلغاء هذا الطلب" : "تم إرجاع هذا الطلب"}</p>
           {latestNote && <p className="text-sm text-muted-foreground mt-1">{latestNote}</p>}

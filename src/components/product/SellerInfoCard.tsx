@@ -42,7 +42,7 @@ const SellerInfoCard = ({
           </div>
           {typeof rating === "number" && rating > 0 ? (
             <p className="flex items-center gap-1 text-xs text-muted-foreground">
-              <Star className="h-3.5 w-3.5 fill-amber-400 text-warning" />
+              <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />
               {rating.toFixed(1)} من 5
               {ratingCount ? ` · ${ratingCount} تقييم للبائع` : ""}
             </p>

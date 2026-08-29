@@ -57,7 +57,7 @@ const InstallPWA = () => {
 
           {isInstalled ? (
             <Card className="p-8 text-center">
-              <CheckCircle className="h-16 w-16 text-success mx-auto mb-4" />
+              <CheckCircle className="h-16 w-16 text-green-500 mx-auto mb-4" />
               <h2 className="text-2xl font-bold mb-2">التطبيق مثبت بنجاح!</h2>
               <p className="text-muted-foreground">
                 يمكنك الآن استخدام التطبيق من شاشتك الرئيسية
@@ -78,19 +78,19 @@ const InstallPWA = () => {
 
                 <ul className="space-y-3 mb-6">
                   <li className="flex items-start gap-3">
-                    <CheckCircle className="h-5 w-5 text-success mt-0.5" />
+                    <CheckCircle className="h-5 w-5 text-green-500 mt-0.5" />
                     <span>الوصول السريع من الشاشة الرئيسية</span>
                   </li>
                   <li className="flex items-start gap-3">
-                    <CheckCircle className="h-5 w-5 text-success mt-0.5" />
+                    <CheckCircle className="h-5 w-5 text-green-500 mt-0.5" />
                     <span>يعمل بدون اتصال بالإنترنت</span>
                   </li>
                   <li className="flex items-start gap-3">
-                    <CheckCircle className="h-5 w-5 text-success mt-0.5" />
+                    <CheckCircle className="h-5 w-5 text-green-500 mt-0.5" />
                     <span>إشعارات فورية للعروض والطلبات</span>
                   </li>
                   <li className="flex items-start gap-3">
-                    <CheckCircle className="h-5 w-5 text-success mt-0.5" />
+                    <CheckCircle className="h-5 w-5 text-green-500 mt-0.5" />
                     <span>تحميل أسرع وأداء محسّن</span>
                   </li>
                 </ul>

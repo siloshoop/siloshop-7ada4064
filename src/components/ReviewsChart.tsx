@@ -18,9 +18,9 @@ const ReviewsChart = ({ reviews, averageRating, totalReviews }: ReviewsChartProp
   }));
 
   const getRatingColor = (rating: number) => {
-    if (rating >= 4) return "bg-success";
+    if (rating >= 4) return "bg-green-500";
     if (rating === 3) return "bg-yellow-500";
-    return "bg-destructive";
+    return "bg-red-500";
   };
 
   return (

@@ -309,7 +309,7 @@ const Store = () => {
                           key={star}
                           className={`h-4 w-4 ${
                             star <= Math.round(profile.rating)
-                              ? "fill-amber-400 text-warning"
+                              ? "fill-amber-400 text-amber-400"
                               : "text-muted-foreground"
                           }`}
                         />
@@ -348,7 +348,7 @@ const Store = () => {
                               <Star
                                 key={star}
                                 className={`h-3.5 w-3.5 ${
-                                  star <= review.rating ? "fill-amber-400 text-warning" : "text-muted-foreground"
+                                  star <= review.rating ? "fill-amber-400 text-amber-400" : "text-muted-foreground"
                                 }`}
                               />
                             ))}

@@ -43,6 +43,7 @@ const Store = lazy(() => import("./pages/Store"));
 const Subcategory = lazy(() => import("./pages/Subcategory"));
 const ManageDeals = lazy(() => import("./pages/ManageDeals"));
 const SearchPage = lazy(() => import("./pages/Search"));
+const TurkishProducts = lazy(() => import("./pages/TurkishProducts"));
 const Wishlist = lazy(() => import("./pages/Wishlist"));
 const SharedWishlist = lazy(() => import("./pages/SharedWishlist"));
 const Notifications = lazy(() => import("./pages/Notifications"));
@@ -132,6 +133,7 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/search" element={<SearchPage />} />
+            <Route path="/turkish-products" element={<TurkishProducts />} />
             <Route path="/auth" element={<Auth />} />
             <Route path="/verify-email" element={<VerifyEmail />} />
             <Route path="/dashboard" element={<Dashboard />} />

@@ -14,6 +14,7 @@ import PlatformProductForm, { PlatformProduct } from "@/components/admin/Platfor
 import PlatformProductImport from "@/components/admin/PlatformProductImport";
 import CategoriesBrandsManager from "@/components/admin/CategoriesBrandsManager";
 import PlatformShamCashSettings from "@/components/admin/PlatformShamCashSettings";
+import TurkishProductsSettings from "@/components/admin/TurkishProductsSettings";
 import FeatureFlagsManager from "@/components/admin/FeatureFlagsManager";
 import ShamCashMerchantConfig from "@/components/admin/ShamCashMerchantConfig";
 
@@ -178,7 +179,8 @@ const PlatformProducts = () => {
 
         <div className="grid gap-4 lg:grid-cols-2 mb-4">
           <FeatureFlagsManager />
-          <PlatformShamCashSettings />
+          <TurkishProductsSettings />
+      <PlatformShamCashSettings />
         </div>
 
         <div className="mb-4">

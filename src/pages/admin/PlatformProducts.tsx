@@ -180,7 +180,7 @@ const PlatformProducts = () => {
         <div className="grid gap-4 lg:grid-cols-2 mb-4">
           <FeatureFlagsManager />
           <TurkishProductsSettings />
-      <PlatformShamCashSettings />
+          <PlatformShamCashSettings />
         </div>
 
         <div className="mb-4">

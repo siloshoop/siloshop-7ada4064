@@ -251,9 +251,12 @@ const OrderDetails = () => {
                   {(order as any).pickup_center_address && (
                     <span className="block text-muted-foreground">{(order as any).pickup_center_address}</span>
                   )}
-                  {(order as any).pickup_center_phone && (
-                    <span className="block text-muted-foreground" dir="ltr">{(order as any).pickup_center_phone}</span>
+                  {(order as any).pickup_center_city && (
+                    <span className="block text-muted-foreground">
+                      {(order as any).pickup_center_governorate} - {(order as any).pickup_center_city}
+                    </span>
                   )}
+
                 </span>
               </div>
             ) : order.shipping_address ? (

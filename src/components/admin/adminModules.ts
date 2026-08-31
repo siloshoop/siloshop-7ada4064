@@ -3,7 +3,7 @@ import {
   FolderTree, Tag, LayoutTemplate, Image, Flag, MessagesSquare, Bell,
   BarChart3, DollarSign, Globe, Wallet, ToggleLeft, ScrollText, ShieldAlert,
   CreditCard, RotateCcw, Megaphone, UserCog, FileClock, Star, Ticket, Boxes,
-  FileText, Settings, SlidersHorizontal,
+  FileText, Settings, SlidersHorizontal, MapPin,
 } from "lucide-react";
 import type { FeatureFlagKey } from "@/hooks/useFeatureFlags";
 

@@ -506,8 +506,8 @@ const Checkout = () => {
                   <div className="space-y-2">
                     <Label htmlFor="address">المحافظة *</Label>
                     <Select
-                      value={formData.shipping_address}
-                      onValueChange={(v) => setFormData({ ...formData, shipping_address: v })}
+                      value={formData.governorate}
+                      onValueChange={(v) => setFormData({ ...formData, governorate: v })}
                     >
                       <SelectTrigger id="address">
                         <SelectValue placeholder="اختر المحافظة" />
@@ -519,6 +519,29 @@ const Checkout = () => {
                       </SelectContent>
                     </Select>
                   </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="area">المدينة / المنطقة *</Label>
+                    <Input
+                      id="area"
+                      value={formData.area}
+                      onChange={(e) => setFormData({ ...formData, area: e.target.value })}
+                      required
+                      placeholder="مثال: حماة - حي الأربعين"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="street">الشارع وأقرب علامة مميزة *</Label>
+                    <Input
+                      id="street"
+                      value={formData.street}
+                      onChange={(e) => setFormData({ ...formData, street: e.target.value })}
+                      required
+                      placeholder="مثال: شارع القوتلي، بناء رقم 5، بجانب صيدلية النور"
+                    />
+                  </div>
+
 
                   <div className="space-y-2">
                     <Label htmlFor="notes">ملاحظات إضافية (اختياري)</Label>

@@ -10,7 +10,6 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
   Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle,
@@ -289,12 +288,7 @@ const AdminOrders = () => {
         </div>
       }
     >
-      <Tabs defaultValue="orders" dir="rtl">
-        <TabsList>
-          <TabsTrigger value="orders">الطلبات</TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="orders" className="space-y-4">
+      <div className="space-y-4" dir="rtl">
           <Card>
             <CardContent className="grid gap-3 pt-6 md:grid-cols-6">
               <div className="relative md:col-span-2">
@@ -401,8 +395,7 @@ const AdminOrders = () => {
               <Button size="sm" variant="outline" disabled={page + 1 >= totalPages || loading} onClick={() => setPage((p) => p + 1)}>التالي</Button>
             </div>
           </div>
-        </TabsContent>
-
+      </div>
 
       <Dialog open={!!openId} onOpenChange={(o) => { if (!o) { setOpenId(null); setDetail(null); setHistory([]); } }}>
         <DialogContent className="max-h-[90vh] max-w-3xl overflow-y-auto" dir="rtl">

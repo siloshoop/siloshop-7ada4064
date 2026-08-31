@@ -59,7 +59,7 @@ const Dashboard = () => {
 
   const fetchCustomerStats = useCallback(async (uid: string) => {
     const [ordersRes, favRes, reviewsRes] = await Promise.all([
-      supabase.from("orders").select("total_amount, status").eq("customer_id", uid),
+      supabase.from("orders").select("total_amount, status").eq("customer_id", uid).is("parent_order_id", null),
       supabase.from("favorites").select("id", { count: "exact", head: true }).eq("user_id", uid),
       supabase.from("reviews").select("id", { count: "exact", head: true }).eq("user_id", uid),
     ]);

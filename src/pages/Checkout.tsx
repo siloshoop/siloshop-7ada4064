@@ -15,7 +15,6 @@ import { Loader2, ShoppingCart, Tag, MapPin, Plus, Truck, Wallet, Banknote, Aler
 import { Link } from "react-router-dom";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { SYRIAN_GOVERNORATES } from "@/lib/syrianGovernorates";
-import ReturnsPolicyNote from "@/components/ReturnsPolicyNote";
 import { useFeatureFlags } from "@/hooks/useFeatureFlags";
 
 const checkoutSchema = z.object({
@@ -751,7 +750,6 @@ const Checkout = () => {
                     </div>
                   )}
 
-                  <ReturnsPolicyNote />
 
                   <Button
                     type="submit"

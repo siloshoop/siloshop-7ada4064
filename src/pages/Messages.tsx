@@ -101,10 +101,10 @@ const Messages = () => {
                       <p className="truncate text-sm text-muted-foreground">
                         {c.last_message_preview || "ابدأ المحادثة"}
                       </p>
-                      {(c.order_number || c.return_number) && (
+                      {c.order_number && (
                         <span className="mt-1 inline-flex items-center gap-1 text-[11px] text-muted-foreground">
-                          {c.return_number ? <RotateCcw className="h-3 w-3" /> : <Package className="h-3 w-3" />}
-                          {c.return_number || c.order_number}
+                          <Package className="h-3 w-3" />
+                          {c.order_number}
                         </span>
                       )}
                     </div>

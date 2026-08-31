@@ -1952,33 +1952,48 @@ export type Database = {
       }
       platform_payment_settings: {
         Row: {
+          apply_to_all_products: boolean
           cod_enabled: boolean
+          electronic_payment_enabled: boolean
+          electronic_payment_instructions: string
+          free_shipping: boolean
           id: number
           instructions: string
           is_active: boolean
           sham_cash_account_name: string
           sham_cash_account_number: string
           sham_cash_enabled: boolean
+          shipping_fee: number
           updated_at: string
         }
         Insert: {
+          apply_to_all_products?: boolean
           cod_enabled?: boolean
+          electronic_payment_enabled?: boolean
+          electronic_payment_instructions?: string
+          free_shipping?: boolean
           id?: number
           instructions?: string
           is_active?: boolean
           sham_cash_account_name?: string
           sham_cash_account_number?: string
           sham_cash_enabled?: boolean
+          shipping_fee?: number
           updated_at?: string
         }
         Update: {
+          apply_to_all_products?: boolean
           cod_enabled?: boolean
+          electronic_payment_enabled?: boolean
+          electronic_payment_instructions?: string
+          free_shipping?: boolean
           id?: number
           instructions?: string
           is_active?: boolean
           sham_cash_account_name?: string
           sham_cash_account_number?: string
           sham_cash_enabled?: boolean
+          shipping_fee?: number
           updated_at?: string
         }
         Relationships: []
@@ -4403,9 +4418,14 @@ export type Database = {
       get_platform_payment_options: {
         Args: never
         Returns: {
+          apply_to_all_products: boolean
           cod_enabled: boolean
+          electronic_payment_enabled: boolean
+          electronic_payment_instructions: string
+          free_shipping: boolean
           instructions: string
           sham_cash_enabled: boolean
+          shipping_fee: number
         }[]
       }
       get_seller_performance: {

@@ -711,77 +711,78 @@ const Checkout = () => {
                         إتمام كل نوع في طلب منفصل.
                       </p>
                     </div>
-                  ) : hasPlatformItems && platformShamAvailable && platformCodAvailable ? (
+                  ) : (
                     <div className="rounded-lg border border-primary/20 bg-primary/5 p-3 text-sm space-y-2">
-                      <p className="font-semibold">اختر طريقة الدفع</p>
-                      <div className="grid gap-2">
-                        <button
-                          type="button"
-                          onClick={() => setSelectedPlatformMethod("sham_cash")}
-                          className={`text-right p-2.5 rounded-lg border transition-colors ${paymentMethod === "sham_cash" ? "border-primary bg-primary/10" : "border-border hover:bg-muted/50"}`}
-                        >
-                          <span className="font-semibold inline-flex items-center gap-1.5">
-                            <Wallet className="h-4 w-4" /> شام كاش
-                          </span>
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => setSelectedPlatformMethod("cod")}
-                          className={`text-right p-2.5 rounded-lg border transition-colors ${paymentMethod === "cod" ? "border-primary bg-primary/10" : "border-border hover:bg-muted/50"}`}
-                        >
-                          <span className="font-semibold inline-flex items-center gap-1.5">
-                            <Banknote className="h-4 w-4" /> الدفع عند الاستلام
-                          </span>
-                        </button>
-                      </div>
-                      {paymentMethod === "sham_cash" && shamSettings?.sham_cash_account_number && (
-                        <div className="pt-1 space-y-0.5">
-                          {shamSettings.sham_cash_account_name && (
-                            <p>اسم الحساب: <span className="font-semibold">{shamSettings.sham_cash_account_name}</span></p>
-                          )}
-                          <p>
-                            رقم المحفظة:{" "}
-                            <span className="font-semibold" dir="ltr">{shamSettings.sham_cash_account_number}</span>
-                          </p>
-                          {shamSettings.instructions && (
-                            <p className="text-muted-foreground">{shamSettings.instructions}</p>
-                          )}
-                        </div>
-                      )}
-                    </div>
-                  ) : paymentMethod === "sham_cash" ? (
-                    <div className="rounded-lg border border-primary/20 bg-primary/5 p-3 text-sm space-y-1">
-                      <p className="font-semibold flex items-center gap-1.5">
-                        <Wallet className="h-4 w-4" /> طريقة الدفع: شام كاش
+                      <p className="font-semibold">
+                        {availableMethods.length > 1
+                          ? "اختر طريقة الدفع"
+                          : `طريقة الدفع: ${METHOD_LABELS[paymentMethod]}`}
                       </p>
-                      <p className="text-muted-foreground">
-                        منتجات المنصة تُدفع عبر شام كاش إلى حساب المنصة فقط.
-                      </p>
-                      {shamSettings?.sham_cash_account_number ? (
-                        <div className="pt-1 space-y-0.5">
-                          {shamSettings.sham_cash_account_name && (
-                            <p>اسم الحساب: <span className="font-semibold">{shamSettings.sham_cash_account_name}</span></p>
-                          )}
-                          <p>
-                            رقم المحفظة:{" "}
-                            <span className="font-semibold" dir="ltr">{shamSettings.sham_cash_account_number}</span>
-                          </p>
-                          {shamSettings.instructions && (
-                            <p className="text-muted-foreground">{shamSettings.instructions}</p>
-                          )}
+
+                      {availableMethods.length > 1 ? (
+                        <div className="grid gap-2">
+                          {availableMethods.map((m) => (
+                            <button
+                              key={m}
+                              type="button"
+                              onClick={() => setSelectedPlatformMethod(m)}
+                              className={`text-right p-2.5 rounded-lg border transition-colors ${paymentMethod === m ? "border-primary bg-primary/10" : "border-border hover:bg-muted/50"}`}
+                            >
+                              <span className="font-semibold inline-flex items-center gap-1.5">
+                                {m === "cod" ? (
+                                  <Banknote className="h-4 w-4" />
+                                ) : m === "sham_cash" ? (
+                                  <Wallet className="h-4 w-4" />
+                                ) : (
+                                  <CreditCard className="h-4 w-4" />
+                                )}
+                                {METHOD_LABELS[m]}
+                              </span>
+                            </button>
+                          ))}
                         </div>
-                      ) : (
+                      ) : null}
+
+                      {paymentMethod === "cod" && (
                         <p className="text-muted-foreground">
-                          سيتم تزويدك بتفاصيل حساب شام كاش بعد تأكيد الطلب.
+                          تدفع المبلغ نقداً عند استلام الطلب.
                         </p>
                       )}
-                    </div>
-                  ) : (
-                    <div className="rounded-lg border border-primary/20 bg-primary/5 p-3 text-sm">
-                      <p className="font-semibold flex items-center gap-1.5">
-                        <Banknote className="h-4 w-4" /> طريقة الدفع: الدفع عند الاستلام (COD)
+
+                      {paymentMethod === "sham_cash" && (
+                        shamSettings?.sham_cash_account_number ? (
+                          <div className="space-y-0.5">
+                            {shamSettings.sham_cash_account_name && (
+                              <p>اسم الحساب: <span className="font-semibold">{shamSettings.sham_cash_account_name}</span></p>
+                            )}
+                            <p>
+                              رقم المحفظة:{" "}
+                              <span className="font-semibold" dir="ltr">{shamSettings.sham_cash_account_number}</span>
+                            </p>
+                            {shamSettings.instructions && (
+                              <p className="text-muted-foreground">{shamSettings.instructions}</p>
+                            )}
+                          </div>
+                        ) : (
+                          <p className="text-muted-foreground">
+                            سيتم تزويدك بتفاصيل حساب شام كاش بعد تأكيد الطلب.
+                          </p>
+                        )
+                      )}
+
+                      {paymentMethod === "electronic" && (
+                        <p className="text-muted-foreground">
+                          {platformOptions?.electronic_payment_instructions ||
+                            "سيتم تزويدك بتفاصيل الدفع الإلكتروني بعد تأكيد الطلب."}
+                        </p>
+                      )}
+
+                      <p className="text-xs text-muted-foreground border-t pt-2">
+                        الشحن:{" "}
+                        {shippingTotal > 0
+                          ? `${shippingTotal.toLocaleString()} ل.س`
+                          : "شحن مجاني"}
                       </p>
-                      <p className="text-muted-foreground">منتجات البائعين تُدفع نقداً عند الاستلام.</p>
                     </div>
                   )}
 

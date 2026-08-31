@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Loader2, Save, Store } from "lucide-react";
+import { resolveStoreAssetUrl } from "@/lib/storeAssets";
 
 interface StoreProfile {
   store_name: string | null;

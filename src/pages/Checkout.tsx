@@ -77,9 +77,12 @@ const Checkout = () => {
 
   const [formData, setFormData] = useState({
     phone: "",
-    shipping_address: "",
+    governorate: "",
+    area: "",
+    street: "",
     notes: "",
   });
+
 
   useEffect(() => {
     if (!authLoading && !user) {

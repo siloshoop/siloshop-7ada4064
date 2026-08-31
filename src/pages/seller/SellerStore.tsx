@@ -38,6 +38,24 @@ const SellerStore = () => {
   const [form, setForm] = useState<StoreProfile>(EMPTY);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [logoPreview, setLogoPreview] = useState<string | null>(null);
+  const [coverPreview, setCoverPreview] = useState<string | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    void (async () => {
+      const [l, c] = await Promise.all([
+        resolveStoreAssetUrl(form.logo_url),
+        resolveStoreAssetUrl(form.cover_image_url),
+      ]);
+      if (cancelled) return;
+      setLogoPreview(l);
+      setCoverPreview(c);
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [form.logo_url, form.cover_image_url]);
 
   const load = useCallback(async () => {
     if (!user) return;

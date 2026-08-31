@@ -79,7 +79,6 @@ const ProductAnalyticsDialog = ({ productId, productName, onOpenChange }: Produc
         { label: "عدد الطلبات", value: fmtNum(data.orders), icon: ClipboardList },
         { label: "قائمة الأمنيات", value: fmtNum(data.wishlist_count), icon: Heart },
         { label: "في سلة الشراء", value: fmtNum(data.cart_count), icon: ShoppingBag },
-        { label: "المرتجعات", value: fmtNum(data.returns), icon: Undo2 },
         { label: "عدد التقييمات", value: fmtNum(data.review_count), icon: ClipboardList },
         { label: "متوسط التقييم", value: Number(data.review_score ?? 0).toFixed(1), icon: Star },
         { label: "معدل التحويل", value: fmtPct(data.conversion_rate), icon: Percent },

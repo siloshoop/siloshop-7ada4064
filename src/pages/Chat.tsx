@@ -15,7 +15,7 @@ interface PeerProfile {
   avatar_url: string | null;
 }
 
-/** Context-aware chat entry: /chat/:vendorId?product=&order=&return= */
+/** Context-aware chat entry: /chat/:vendorId?product=&order= */
 const Chat = () => {
   const { vendorId } = useParams();
   const [searchParams] = useSearchParams();
@@ -24,7 +24,6 @@ const Chat = () => {
 
   const productId = searchParams.get("product");
   const orderId = searchParams.get("order");
-  const returnId = searchParams.get("return");
 
   const [conversationId, setConversationId] = useState<string | null>(null);
   const [peer, setPeer] = useState<PeerProfile | null>(null);
@@ -43,7 +42,6 @@ const Chat = () => {
           p_vendor_id: vendorId,
           p_product_id: productId ?? undefined,
           p_order_id: orderId ?? undefined,
-          p_return_id: returnId ?? undefined,
         }),
       ]);
       if (!active) return;
@@ -58,7 +56,7 @@ const Chat = () => {
     return () => {
       active = false;
     };
-  }, [user, vendorId, productId, orderId, returnId]);
+  }, [user, vendorId, productId, orderId]);
 
   if (authLoading) {
     return (

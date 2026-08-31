@@ -54,7 +54,6 @@ const SellerPerformance = () => {
         { label: "متوسط زمن التجهيز", value: formatHours(perf.avg_prep_hours), icon: Timer, tone: "" },
         { label: "متوسط زمن التوصيل", value: formatHours(perf.avg_delivery_hours), icon: Truck, tone: "" },
         { label: "نسبة الإلغاء", value: `${perf.cancellation_rate}%`, icon: XCircle, tone: rateTone(perf.cancellation_rate) },
-        { label: "نسبة الإرجاع", value: `${perf.return_rate}%`, icon: Undo2, tone: rateTone(perf.return_rate) },
       ]
     : [];
 
@@ -131,18 +130,8 @@ const SellerPerformance = () => {
                     {perf.cancelled_orders.toLocaleString("ar-SY")} طلب ملغي من {perf.total_orders.toLocaleString("ar-SY")}
                   </p>
                 </div>
-                <div>
-                  <div className="mb-1 flex justify-between">
-                    <span className="text-muted-foreground">نسبة الإرجاع</span>
-                    <span className={rateTone(perf.return_rate)}>{perf.return_rate}%</span>
-                  </div>
-                  <Progress value={Math.min(100, perf.return_rate)} />
-                  <p className="mt-1 text-xs text-muted-foreground">
-                    {perf.returned_orders.toLocaleString("ar-SY")} طلب مرتجع
-                  </p>
-                </div>
                 <p className="rounded-md bg-muted/50 p-2 text-xs text-muted-foreground">
-                  حافظ على نسبة إلغاء وإرجاع أقل من 5% وزمن تجهيز أقل من 24 ساعة لتحسين ظهور متجرك.
+                  حافظ على نسبة إلغاء أقل من 5% وزمن تجهيز أقل من 24 ساعة لتحسين ظهور متجرك.
                 </p>
               </>
             )}

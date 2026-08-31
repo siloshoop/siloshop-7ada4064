@@ -1,4 +1,4 @@
-import { Truck, Wallet, RotateCcw, ShieldCheck } from "lucide-react";
+import { Truck, Wallet, MessageCircle, ShieldCheck } from "lucide-react";
 
 const advantages = [
   {
@@ -12,9 +12,9 @@ const advantages = [
     description: "ادفع بأمان عند استلام طلبك",
   },
   {
-    icon: RotateCcw,
+    icon: MessageCircle,
     title: "تواصل مباشر مع البائع",
-    description: "استبدال أو استرجاع سهل وسريع",
+    description: "راسل بائع طلبك مباشرة لأي استفسار",
   },
   {
     icon: ShieldCheck,

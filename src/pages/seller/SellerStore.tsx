@@ -195,10 +195,6 @@ const SellerStore = () => {
               <Label htmlFor="shipping_policy">سياسة الشحن</Label>
               <Textarea id="shipping_policy" rows={5} value={form.shipping_policy ?? ""} onChange={set("shipping_policy")} />
             </div>
-            <div className="space-y-1.5">
-              <Label htmlFor="return_policy">سياسة الإرجاع</Label>
-              <Textarea id="return_policy" rows={5} value={form.return_policy ?? ""} onChange={set("return_policy")} />
-            </div>
           </CardContent>
         </Card>
       </div>

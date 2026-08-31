@@ -27,7 +27,6 @@ const SellerAnalytics = () => {
   const ordersPeriod = Number(o.period ?? 0);
   const conversion = views > 0 ? ((ordersPeriod / views) * 100).toFixed(1) : "0.0";
   const totalOrders = Number(o.total ?? 0);
-  const returnRate = totalOrders > 0 ? ((Number(o.returns_total ?? 0) / totalOrders) * 100).toFixed(1) : "0.0";
   const cancelRate = totalOrders > 0 ? ((Number(o.cancelled ?? 0) / totalOrders) * 100).toFixed(1) : "0.0";
 
   const kpis = [
@@ -35,7 +34,6 @@ const SellerAnalytics = () => {
     { label: "طلبات الفترة", value: num(ordersPeriod) },
     { label: "زوّار (مشاهدات)", value: num(views) },
     { label: "معدل التحويل", value: `${conversion}%` },
-    { label: "معدل الإرجاع", value: `${returnRate}%` },
     { label: "معدل الإلغاء", value: `${cancelRate}%` },
     { label: "متوسط التقييم", value: `${Number(e.avg_rating ?? 0)} / 5` },
     { label: "عملاء", value: num(Number(e.customers ?? 0)) },

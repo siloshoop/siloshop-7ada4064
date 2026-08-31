@@ -780,7 +780,7 @@ const Compare = () => {
                     <X className="h-4 w-4" />
                   </Button>
                   
-                  <div className="relative aspect-square overflow-hidden">
+                  <div className="relative h-48 sm:h-56 md:h-64 w-full overflow-hidden bg-muted/30">
                     {product.original_price && (
                       <Badge className="absolute top-2 right-2 z-10 bg-red-500">
                         خصم {calculateDiscount(product.original_price, product.price)}%
@@ -789,8 +789,12 @@ const Compare = () => {
                     <img
                       src={product.image_url}
                       alt={product.name}
-                      className="w-full h-full object-cover cursor-pointer hover:scale-105 transition-transform"
+                      loading="lazy"
+                      className="w-full h-full object-contain cursor-pointer hover:scale-105 transition-transform"
                       onClick={() => navigate(`/product/${product.id}`)}
+                      onError={(e) => {
+                        (e.currentTarget as HTMLImageElement).src = "/placeholder.svg";
+                      }}
                     />
                   </div>
 

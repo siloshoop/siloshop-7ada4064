@@ -73,6 +73,9 @@ const Store = () => {
   const [products, setProducts] = useState<StoreProduct[]>([]);
   const [reviews, setReviews] = useState<StoreReview[]>([]);
   const [loading, setLoading] = useState(true);
+  const [logoUrl, setLogoUrl] = useState<string | null>(null);
+  const [coverUrl, setCoverUrl] = useState<string | null>(null);
+
 
   useEffect(() => {
     if (!vendorId) return;

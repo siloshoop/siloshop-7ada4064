@@ -154,7 +154,6 @@ const ERROR_MESSAGES: Record<string, string> = {
   not_authenticated: "يجب تسجيل الدخول",
   not_authorized: "لا تملك صلاحية تنفيذ هذا الإجراء",
   order_not_found: "الطلب غير موجود",
-  return_not_found: "طلب الإرجاع غير موجود",
   invalid_status: "حالة غير صحيحة",
   invalid_transition: "لا يمكن الانتقال إلى هذه الحالة من الحالة الحالية",
   duplicate_status: "الطلب موجود بهذه الحالة بالفعل",
@@ -243,6 +242,40 @@ export const reopenOrder = async (orderId: string, status: OrderStatus, reason: 
     _user_agent: userAgent,
   });
   if (error) throw error;
+};
+
+/* ------------------------------------------------------------------ */
+/* Order timeline (audit trail)                                        */
+/* ------------------------------------------------------------------ */
+
+export interface TimelineEntry {
+  id: string;
+  status: string;
+  from_status: string | null;
+  changed_by_role: string;
+  actor_name: string | null;
+  notes: string | null;
+  is_override: boolean;
+  ip_address: string | null;
+  user_agent: string | null;
+  created_at: string;
+}
+
+export const fetchOrderTimeline = async (orderId: string): Promise<TimelineEntry[]> => {
+  const { data, error } = await supabase.rpc("get_order_timeline", { _order_id: orderId });
+  if (error) throw error;
+  return ((data as unknown as any[]) || []).map((r) => ({
+    id: String(r.id),
+    status: r.status,
+    from_status: r.from_status ?? null,
+    changed_by_role: r.changed_by_role ?? "system",
+    actor_name: r.actor_name ?? null,
+    notes: r.notes ?? null,
+    is_override: !!r.is_override,
+    ip_address: r.ip_address ? String(r.ip_address) : null,
+    user_agent: r.user_agent ?? null,
+    created_at: r.created_at,
+  }));
 };
 
 /* ------------------------------------------------------------------ */

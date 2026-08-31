@@ -110,9 +110,12 @@ const Checkout = () => {
         setFormData((f) => ({
           ...f,
           phone: def.phone || f.phone,
-          shipping_address: def.city,
+          governorate: def.governorate || def.city || f.governorate,
+          area: def.city || f.area,
+          street: [def.street, def.building, def.apartment, def.landmark].filter(Boolean).join(" - ") || f.street,
         }));
       }
+
     };
     void loadAddresses();
   }, [user]);

@@ -472,7 +472,13 @@ const Checkout = () => {
                             key={a.id}
                             onClick={() => {
                               setSelectedAddressId(a.id);
-                              setFormData({ ...formData, phone: a.phone, shipping_address: a.city });
+                              setFormData({
+                                ...formData,
+                                phone: a.phone,
+                                governorate: a.governorate || a.city || "",
+                                area: a.city || "",
+                                street: [a.street, a.building, a.apartment, a.landmark].filter(Boolean).join(" - "),
+                              });
                             }}
                             className={`text-right p-3 rounded-lg border text-sm transition-colors ${selectedAddressId === a.id ? "border-primary bg-primary/5" : "border-border hover:bg-muted/50"}`}
                           >

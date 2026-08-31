@@ -292,13 +292,14 @@ const Checkout = () => {
       // Create order server-side via SECURITY DEFINER RPC.
       // Total, prices, shipping, and coupon redemption are computed from
       // the database — the client cannot tamper with total_amount.
+      const fullAddress = composeAddress(formData);
       const { data: newOrderId, error: orderError } = await supabase.rpc("create_order", {
         _items: cartItems.map((item) => ({
           product_id: item.product.id,
           quantity: item.quantity,
         })),
         _phone: formData.phone,
-        _shipping_address: formData.shipping_address,
+        _shipping_address: fullAddress,
         _notes: formData.notes || null,
         _coupon_code: appliedCoupon?.code || null,
         _payment_method: paymentMethod,

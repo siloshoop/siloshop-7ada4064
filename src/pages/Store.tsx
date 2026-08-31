@@ -173,9 +173,9 @@ const Store = () => {
       <main className="flex-1 pb-10">
         {/* Cover */}
         <div className="relative h-40 w-full overflow-hidden bg-gradient-to-br from-primary/25 via-primary/10 to-accent/25 md:h-60">
-          {profile.cover_image_url && (
+          {coverUrl && (
             <img
-              src={profile.cover_image_url}
+              src={coverUrl}
               alt={`غلاف متجر ${profile.store_name}`}
               loading="eager"
               decoding="async"

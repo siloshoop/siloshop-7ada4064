@@ -23,6 +23,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Progress } from "@/components/ui/progress";
 import { supabase } from "@/integrations/supabase/client";
+import { resolveStoreAssetUrl } from "@/lib/storeAssets";
 import { format } from "date-fns";
 import { ar } from "date-fns/locale";
 

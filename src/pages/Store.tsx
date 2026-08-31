@@ -158,7 +158,7 @@ const Store = () => {
   }
 
   const location = [profile.city, profile.governorate].filter(Boolean).join(" · ");
-  const logo = profile.logo_url || profile.avatar_url;
+  const logo = logoUrl;
 
   const stats = [
     { icon: Users, label: "متابع", value: followers.toLocaleString() },

@@ -17,7 +17,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   ResponsiveContainer, LineChart, Line, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid, Legend,
 } from "recharts";
-import ReturnsReportSection from "@/components/returns/ReturnsReportSection";
 
 type ReportStatus = "pending" | "under_review" | "resolved" | "rejected";
 type ReportType = "product" | "seller" | "buyer" | "message" | "review";
@@ -457,7 +456,6 @@ const Reports = () => {
         </div>
 
         <div className="mb-8">
-          <ReturnsReportSection />
         </div>
 
         <h2 className="text-lg font-bold mb-3">البلاغات والإشراف</h2>

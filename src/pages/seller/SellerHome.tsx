@@ -59,7 +59,6 @@ const SellerHome = () => {
         { label: "تم التسليم", value: num(Number(o.delivered ?? 0)), icon: ShoppingBag },
         { label: "مكتملة", value: num(Number(o.completed ?? 0)), icon: ShoppingBag },
         { label: "ملغاة", value: num(Number(o.cancelled ?? 0)), icon: AlertTriangle },
-        { label: "طلبات إرجاع قيد المراجعة", value: num(Number(o.returns_pending ?? 0)), icon: Undo2 },
       ],
     },
     {

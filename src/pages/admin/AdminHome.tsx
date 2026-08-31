@@ -82,7 +82,7 @@ const AdminHome = () => {
 
   const kpis = useMemo<Kpi[]>(() => {
     if (!data) return [];
-    const { orders, revenue, users, products, returns } = data;
+    const { orders, revenue, users, products } = data;
     return [
       { label: "إجمالي الإيرادات", value: money(revenue.total), hint: `متوسط الطلب ${money(revenue.avg_order_value)}`, icon: DollarSign, tone: "primary", href: "/admin/revenue" },
       { label: "إيرادات اليوم", value: money(revenue.today), hint: `${fmt(orders.today)} طلب اليوم`, icon: DollarSign, tone: "success", href: "/admin/revenue" },
@@ -95,7 +95,6 @@ const AdminHome = () => {
       { label: "تم التوصيل", value: fmt(orders.delivered), hint: "بانتظار الإكمال", icon: CheckCircle2, tone: "success", href: "/admin/orders?status=delivered" },
       { label: "مكتملة", value: fmt(orders.completed), hint: "مغلقة نهائياً", icon: BadgeCheck, tone: "success", href: "/admin/orders?status=completed" },
       { label: "ملغاة", value: fmt(orders.cancelled), hint: `${fmt(orders.frozen)} طلب مجمّد`, icon: XCircle, tone: "danger", href: "/admin/orders?status=cancelled" },
-      { label: "طلبات الإرجاع", value: fmt(returns.total), hint: `${fmt(returns.pending)} بانتظار المراجعة`, icon: Undo2, tone: "warning", href: "/admin/returns" },
       { label: "بائعون نشطون", value: fmt(users.sellers_approved), hint: `${fmt(users.sellers_suspended)} موقوف`, icon: Store, tone: "primary", href: "/admin/sellers" },
       { label: "طلبات بائعين معلّقة", value: fmt(users.sellers_pending), hint: "بحاجة إلى مراجعة", icon: Hourglass, tone: "warning", href: "/admin/seller-applications" },
       { label: "عملاء نشطون", value: fmt(users.active_customers), hint: `${fmt(users.new_period)} مستخدم جديد`, icon: Users, tone: "primary", href: "/admin/buyers" },
@@ -123,7 +122,7 @@ const AdminHome = () => {
   return (
     <AdminLayout
       title="لوحة تحكم الإدارة"
-      description="مؤشرات مباشرة لكل عمليات المنصة: الطلبات، الإيرادات، البائعون، المنتجات والإرجاع."
+      description="مؤشرات مباشرة لكل عمليات المنصة: الطلبات، الإيرادات، البائعون والمنتجات."
       actions={
         <div className="flex flex-wrap items-center gap-2">
           {PERIODS.map((period) => (

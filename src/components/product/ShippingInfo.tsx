@@ -7,7 +7,7 @@ interface Props {
 }
 
 /** Shipping details + return policy summary for the product page. */
-const ShippingReturnsInfo = ({ shippingCost, shipsWithinDays, isPlatform }: Props) => {
+const ShippingInfo = ({ shippingCost, shipsWithinDays, isPlatform }: Props) => {
   const freeShipping = shippingCost === 0 || shippingCost === null || shippingCost === undefined;
 
   const rows = [
@@ -56,20 +56,8 @@ const ShippingReturnsInfo = ({ shippingCost, shipsWithinDays, isPlatform }: Prop
         </dl>
       </div>
 
-      <div className="rounded-2xl border bg-card p-4">
-        <h3 className="mb-3 flex items-center gap-2 font-semibold">
-          <RotateCcw className="h-4 w-4 text-primary" /> سياسة الإرجاع
-        </h3>
-        <ul className="space-y-2 text-sm text-muted-foreground">
-          <li>يمكنك طلب الإرجاع خلال 7 أيام من تاريخ الاستلام.</li>
-          <li>يجب أن يكون المنتج بحالته الأصلية مع العلبة والملحقات.</li>
-          <li>ترسل طلب الإرجاع من صفحة «طلباتي» مع ذكر السبب وإرفاق صور.</li>
-          <li>بعد موافقة البائع يزوّدك بتعليمات الإرجاع، ويكتمل الطلب بعد فحص المنتج.</li>
-          <li>تتابع حالة طلب الإرجاع في أي وقت من صفحة «طلباتي».</li>
-        </ul>
-      </div>
     </div>
   );
 };
 
-export default ShippingReturnsInfo;
+export default ShippingInfo;

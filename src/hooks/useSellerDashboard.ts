@@ -107,7 +107,6 @@ export const useSellerDashboard = (days = 30) => {
       .channel("seller-dashboard-live")
       .on("postgres_changes", { event: "*", schema: "public", table: "orders" }, scheduleRefresh)
       .on("postgres_changes", { event: "*", schema: "public", table: "order_items" }, scheduleRefresh)
-      .on("postgres_changes", { event: "*", schema: "public", table: "returns" }, scheduleRefresh)
       .on("postgres_changes", { event: "*", schema: "public", table: "products" }, scheduleRefresh)
       .on("postgres_changes", { event: "*", schema: "public", table: "reviews" }, scheduleRefresh)
       .on("postgres_changes", { event: "*", schema: "public", table: "messages" }, scheduleRefresh)

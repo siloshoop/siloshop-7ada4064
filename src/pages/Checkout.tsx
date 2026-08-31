@@ -87,6 +87,7 @@ const Checkout = () => {
   const [shamSettings, setShamSettings] = useState<PlatformPaymentSettings | null>(null);
   const [platformOptions, setPlatformOptions] = useState<PlatformOptions | null>(null);
   const [selectedPlatformMethod, setSelectedPlatformMethod] = useState<PlatformMethod | null>(null);
+  const [selectedCenterId, setSelectedCenterId] = useState<string>("");
   const navigate = useNavigate();
   const { toast } = useToast();
   const { isEnabled } = useFeatureFlags();
@@ -98,6 +99,36 @@ const Checkout = () => {
     street: "",
     notes: "",
   });
+
+  // Deliveries in Syria are pickup-center only (no door-to-door).
+  const { centers, loading: centersLoading } = usePickupCenters(formData.governorate || undefined);
+  const centersInArea = formData.area
+    ? centers.filter((c) => c.city === formData.area)
+    : centers;
+  const selectedCenter = centers.find((c) => c.id === selectedCenterId) || null;
+  const areaOptions = Array.from(new Set(centers.map((c) => c.city)));
+
+  const composeAddress = () =>
+    selectedCenter
+      ? [
+          "استلام من المركز",
+          selectedCenter.name,
+          selectedCenter.governorate,
+          selectedCenter.city,
+          selectedCenter.address,
+        ]
+          .filter(Boolean)
+          .join("، ")
+      : "";
+
+  // Reset the chosen center whenever the governorate/area changes.
+  useEffect(() => {
+    if (selectedCenterId && !centersInArea.some((c) => c.id === selectedCenterId)) {
+      setSelectedCenterId("");
+    }
+  }, [centersInArea, selectedCenterId]);
+
+
 
 
   useEffect(() => {

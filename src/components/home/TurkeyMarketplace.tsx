@@ -42,7 +42,7 @@ const TurkeyMarketplace = () => {
             ))}
           </div>
           <div className="relative mt-4">
-            <Button asChild variant="accent" size="sm">
+            <Button asChild size="sm">
               <Link to="/turkish-products">تصفح المنتجات التركية</Link>
             </Button>
           </div>

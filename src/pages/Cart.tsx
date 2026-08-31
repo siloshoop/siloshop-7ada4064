@@ -29,6 +29,7 @@ interface CartItem {
     stock_quantity: number;
     category_id: string;
     shipping_cost?: number;
+    shipping_duration_text?: string | null;
   };
 }
 
@@ -80,7 +81,7 @@ const Cart = () => {
           .select(`
             id,
             quantity,
-            product:products(id, name, price, image_url, stock_quantity, category_id, shipping_cost)
+            product:products(id, name, price, image_url, stock_quantity, category_id, shipping_cost, shipping_duration_text)
           `)
           .eq("user_id", user.id);
 
@@ -357,7 +358,7 @@ const Cart = () => {
         .select(`
           id,
           quantity,
-          product:products(id, name, price, image_url, stock_quantity, category_id, shipping_cost)
+          product:products(id, name, price, image_url, stock_quantity, category_id, shipping_cost, shipping_duration_text)
         `)
         .eq("user_id", user.id);
       if (error) throw error;
@@ -543,6 +544,11 @@ const Cart = () => {
                                   ? "شحن مجاني"
                                   : `الشحن: ${Number(item.product.shipping_cost || 0).toLocaleString()} ل.س`}
                               </p>
+                              {item.product.shipping_duration_text && (
+                                <p className="text-xs text-muted-foreground mt-0.5">
+                                  مدة الشحن: {item.product.shipping_duration_text}
+                                </p>
+                              )}
                             </div>
                             <Button
                               variant="ghost"

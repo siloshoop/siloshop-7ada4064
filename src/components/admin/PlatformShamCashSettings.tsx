@@ -23,13 +23,15 @@ const PlatformShamCashSettings = () => {
     sham_cash_account_number: "",
     instructions: "",
     is_active: true,
+    sham_cash_enabled: true,
+    cod_enabled: false,
   });
 
   useEffect(() => {
     void (async () => {
       const { data } = await supabase
         .from("platform_payment_settings")
-        .select("sham_cash_account_name, sham_cash_account_number, instructions, is_active")
+        .select("sham_cash_account_name, sham_cash_account_number, instructions, is_active, sham_cash_enabled, cod_enabled")
         .eq("id", 1)
         .maybeSingle();
       if (data) {
@@ -38,6 +40,8 @@ const PlatformShamCashSettings = () => {
           sham_cash_account_number: data.sham_cash_account_number ?? "",
           instructions: data.instructions ?? "",
           is_active: data.is_active ?? true,
+          sham_cash_enabled: data.sham_cash_enabled ?? true,
+          cod_enabled: data.cod_enabled ?? false,
         });
       }
       setLoading(false);
@@ -115,6 +119,26 @@ const PlatformShamCashSettings = () => {
               <Switch
                 checked={form.is_active}
                 onCheckedChange={(v) => setForm({ ...form, is_active: v })}
+              />
+            </div>
+            <div className="flex items-center justify-between rounded-lg border p-3">
+              <div>
+                <p className="text-sm font-medium">شام كاش لمنتجات المنصة</p>
+                <p className="text-xs text-muted-foreground">إظهار شام كاش كطريقة دفع للعميل عند شراء منتجات المنصة</p>
+              </div>
+              <Switch
+                checked={form.sham_cash_enabled}
+                onCheckedChange={(v) => setForm({ ...form, sham_cash_enabled: v })}
+              />
+            </div>
+            <div className="flex items-center justify-between rounded-lg border p-3">
+              <div>
+                <p className="text-sm font-medium">الدفع عند الاستلام لمنتجات المنصة</p>
+                <p className="text-xs text-muted-foreground">السماح للعميل بالدفع نقداً عند الاستلام لمنتجات المنصة فقط</p>
+              </div>
+              <Switch
+                checked={form.cod_enabled}
+                onCheckedChange={(v) => setForm({ ...form, cod_enabled: v })}
               />
             </div>
             <Button onClick={save} disabled={saving}>

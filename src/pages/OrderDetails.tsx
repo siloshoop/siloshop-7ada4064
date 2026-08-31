@@ -213,7 +213,10 @@ const OrderDetails = () => {
   const shippedAt = shipping?.shipped_at || order.shipped_at || null;
   const deliveredAt = shipping?.delivered_at || order.delivered_at || null;
   const shippingNotes = shipping?.shipping_notes || order.shipping_notes || null;
-  const hasShippingInfo = !!(shippingCompany || trackingNumber || estimatedDelivery || shippedAt || deliveredAt || shippingNotes);
+  const shippingDuration = (order as any).shipping_duration_text as string | null;
+  const paymentMethodLabel =
+    order.payment_method === "sham_cash" ? "شام كاش" : "الدفع عند الاستلام";
+  const hasShippingInfo = !!(shippingDuration || shippingCompany || trackingNumber || estimatedDelivery || shippedAt || deliveredAt || shippingNotes);
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -317,6 +320,8 @@ const OrderDetails = () => {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-1 text-sm">
+              {shippingDuration && <p>مدة الشحن: <span className="font-semibold">{shippingDuration}</span></p>}
+              <p>طريقة الدفع: <span className="font-semibold">{paymentMethodLabel}</span></p>
               {shippingCompany && <p>شركة الشحن: <span className="font-semibold">{shippingCompany}</span></p>}
               {trackingNumber && (
                 <p dir="ltr" className="text-start">رقم التتبع: <span className="font-mono font-semibold">{trackingNumber}</span></p>

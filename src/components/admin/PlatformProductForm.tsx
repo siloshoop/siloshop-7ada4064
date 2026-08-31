@@ -27,6 +27,7 @@ export interface PlatformProduct {
   sizes: string[];
   colors: string[];
   weight: number | null;
+  shipping_duration_text: string | null;
   image_url: string | null;
   images: string[];
   is_active: boolean;
@@ -45,6 +46,7 @@ const empty: PlatformProduct = {
   sizes: [],
   colors: [],
   weight: null,
+  shipping_duration_text: "",
   image_url: null,
   images: [],
   is_active: true,
@@ -156,6 +158,7 @@ const PlatformProductForm = ({ open, onOpenChange, product, onSaved, categories,
       sizes: form.sizes,
       colors: form.colors,
       weight: values.weight ?? null,
+      shipping_duration_text: form.shipping_duration_text?.trim() || null,
       image_url: form.image_url,
       images: form.images,
       is_active: form.is_active,
@@ -284,6 +287,16 @@ const PlatformProductForm = ({ open, onOpenChange, product, onSaved, categories,
                 value={form.weight ?? ""}
                 onChange={(e) => set("weight", e.target.value ? Number(e.target.value) : null)}
               />
+            </div>
+            <div className="space-y-2">
+              <Label>مدة الشحن (نص حر)</Label>
+              <Input
+                value={form.shipping_duration_text || ""}
+                maxLength={80}
+                placeholder="مثال: 3 أيام / 7–10 أيام / خلال 48 ساعة"
+                onChange={(e) => set("shipping_duration_text", e.target.value)}
+              />
+              <p className="text-xs text-muted-foreground">تظهر للعميل كما تكتبها في صفحة المنتج والسلة والدفع.</p>
             </div>
             <div className="flex items-center gap-3 pt-6">
               <Switch checked={form.is_active} onCheckedChange={(c) => set("is_active", c)} />

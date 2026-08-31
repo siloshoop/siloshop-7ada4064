@@ -41,6 +41,7 @@ interface CartItem {
     vendor_id: string;
     shipping_cost?: number;
     product_type?: string;
+    shipping_duration_text?: string | null;
   };
 }
 
@@ -62,6 +63,8 @@ const Checkout = () => {
   const [savedAddresses, setSavedAddresses] = useState<any[]>([]);
   const [selectedAddressId, setSelectedAddressId] = useState<string>("");
   const [shamSettings, setShamSettings] = useState<PlatformPaymentSettings | null>(null);
+  const [platformOptions, setPlatformOptions] = useState<{ sham_cash_enabled: boolean; cod_enabled: boolean } | null>(null);
+  const [selectedPlatformMethod, setSelectedPlatformMethod] = useState<"sham_cash" | "cod" | null>(null);
   const navigate = useNavigate();
   const { toast } = useToast();
   const { isEnabled } = useFeatureFlags();
@@ -115,7 +118,7 @@ const Checkout = () => {
           id,
           quantity,
           product_id,
-          product:products(id, name, price, image_url, vendor_id, shipping_cost, product_type)
+          product:products(id, name, price, image_url, vendor_id, shipping_cost, product_type, shipping_duration_text)
         `)
         .eq("user_id", user.id);
 
@@ -145,20 +148,43 @@ const Checkout = () => {
   const total = subtotal + shippingTotal - discount;
 
   // Payment model (enforced server-side in create_order):
-  //  - Seller products  -> Cash on Delivery ONLY (Phase 1).
-  //  - Platform products -> Sham Cash ONLY, and only once both Phase 2 feature
-  //    flags are enabled. While disabled, platform items cannot be checked out.
+  //  - Seller products  -> Cash on Delivery ONLY.
+  //  - Platform products -> only the methods the platform owner enabled
+  //    (Sham Cash / Cash on Delivery), validated again inside create_order.
   const hasPlatformItems = cartItems.some((i) => i.product.product_type === "platform");
   const hasSellerItems = cartItems.some((i) => i.product.product_type !== "platform");
   const isMixedCart = hasPlatformItems && hasSellerItems;
   const platformEnabled = isEnabled("platform_marketplace");
-  const shamCashEnabled = isEnabled("sham_cash_payments");
-  const platformBlocked = hasPlatformItems && (!platformEnabled || !shamCashEnabled);
+  const platformShamAvailable = !!platformOptions?.sham_cash_enabled;
+  const platformCodAvailable = !!platformOptions?.cod_enabled;
+  const platformHasMethod = platformShamAvailable || platformCodAvailable;
+  const platformBlocked = hasPlatformItems && (!platformEnabled || !platformHasMethod);
   const paymentMethod: "sham_cash" | "cod" =
-    hasPlatformItems && !isMixedCart && platformEnabled && shamCashEnabled ? "sham_cash" : "cod";
+    hasPlatformItems && !isMixedCart && platformEnabled
+      ? (selectedPlatformMethod ?? (platformShamAvailable ? "sham_cash" : "cod"))
+      : "cod";
 
   useEffect(() => {
-    if (!hasPlatformItems || !shamCashEnabled) return;
+    if (!hasPlatformItems) return;
+    void (async () => {
+      const { data } = await supabase.rpc("get_platform_payment_options");
+      const opts = Array.isArray(data) ? data[0] : (data as any);
+      if (opts) {
+        setPlatformOptions({
+          sham_cash_enabled: !!opts.sham_cash_enabled,
+          cod_enabled: !!opts.cod_enabled,
+        });
+        setSelectedPlatformMethod((cur) => {
+          if (cur === "sham_cash" && opts.sham_cash_enabled) return cur;
+          if (cur === "cod" && opts.cod_enabled) return cur;
+          return opts.sham_cash_enabled ? "sham_cash" : opts.cod_enabled ? "cod" : null;
+        });
+      }
+    })();
+  }, [hasPlatformItems]);
+
+  useEffect(() => {
+    if (!hasPlatformItems || !platformShamAvailable) return;
     void (async () => {
       const { data } = await supabase
         .from("platform_payment_settings")
@@ -167,7 +193,7 @@ const Checkout = () => {
         .maybeSingle();
       if (data) setShamSettings(data as PlatformPaymentSettings);
     })();
-  }, [hasPlatformItems, shamCashEnabled]);
+  }, [hasPlatformItems, platformShamAvailable]);
 
   const applyCoupon = async () => {
     if (!couponCode.trim()) {
@@ -263,6 +289,7 @@ const Checkout = () => {
         _shipping_address: formData.shipping_address,
         _notes: formData.notes || null,
         _coupon_code: appliedCoupon?.code || null,
+        _payment_method: paymentMethod,
       });
 
       if (orderError) throw orderError;
@@ -329,6 +356,14 @@ const Checkout = () => {
         toast({
           title: "غير متاح حالياً",
           description: "منتجات المنصة المستوردة غير متاحة للشراء بعد. يرجى إزالتها من السلة.",
+          variant: "destructive",
+        });
+        return;
+      }
+      if (message.includes("PAYMENT_METHOD_UNAVAILABLE")) {
+        toast({
+          title: "طريقة الدفع غير متاحة",
+          description: "طريقة الدفع المختارة غير مفعّلة لمنتجات المنصة. يرجى اختيار طريقة أخرى.",
           variant: "destructive",
         });
         return;
@@ -510,6 +545,11 @@ const Checkout = () => {
                               ? "شحن مجاني"
                               : `الشحن: ${Number(item.product.shipping_cost || 0).toLocaleString()} ل.س`}
                           </p>
+                          {item.product.shipping_duration_text && (
+                            <p className="text-xs text-muted-foreground mt-0.5">
+                              مدة الشحن: {item.product.shipping_duration_text}
+                            </p>
+                          )}
                         </div>
                         <div className="text-left">
                           <p className="font-bold">
@@ -594,6 +634,44 @@ const Checkout = () => {
                         سلتك تحتوي منتجات المنصة (شام كاش) ومنتجات بائعين (الدفع عند الاستلام). يرجى
                         إتمام كل نوع في طلب منفصل.
                       </p>
+                    </div>
+                  ) : hasPlatformItems && platformShamAvailable && platformCodAvailable ? (
+                    <div className="rounded-lg border border-primary/20 bg-primary/5 p-3 text-sm space-y-2">
+                      <p className="font-semibold">اختر طريقة الدفع</p>
+                      <div className="grid gap-2">
+                        <button
+                          type="button"
+                          onClick={() => setSelectedPlatformMethod("sham_cash")}
+                          className={`text-right p-2.5 rounded-lg border transition-colors ${paymentMethod === "sham_cash" ? "border-primary bg-primary/10" : "border-border hover:bg-muted/50"}`}
+                        >
+                          <span className="font-semibold inline-flex items-center gap-1.5">
+                            <Wallet className="h-4 w-4" /> شام كاش
+                          </span>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setSelectedPlatformMethod("cod")}
+                          className={`text-right p-2.5 rounded-lg border transition-colors ${paymentMethod === "cod" ? "border-primary bg-primary/10" : "border-border hover:bg-muted/50"}`}
+                        >
+                          <span className="font-semibold inline-flex items-center gap-1.5">
+                            <Banknote className="h-4 w-4" /> الدفع عند الاستلام
+                          </span>
+                        </button>
+                      </div>
+                      {paymentMethod === "sham_cash" && shamSettings?.sham_cash_account_number && (
+                        <div className="pt-1 space-y-0.5">
+                          {shamSettings.sham_cash_account_name && (
+                            <p>اسم الحساب: <span className="font-semibold">{shamSettings.sham_cash_account_name}</span></p>
+                          )}
+                          <p>
+                            رقم المحفظة:{" "}
+                            <span className="font-semibold" dir="ltr">{shamSettings.sham_cash_account_number}</span>
+                          </p>
+                          {shamSettings.instructions && (
+                            <p className="text-muted-foreground">{shamSettings.instructions}</p>
+                          )}
+                        </div>
+                      )}
                     </div>
                   ) : paymentMethod === "sham_cash" ? (
                     <div className="rounded-lg border border-primary/20 bg-primary/5 p-3 text-sm space-y-1">

@@ -50,6 +50,7 @@ interface Product {
   video_url?: string | null;
   product_type?: string | null;
   ships_within_days?: number | null;
+  shipping_duration_text?: string | null;
   categories?: { name_ar: string } | null;
   brands?: { name_ar: string } | null;
   vendor: {
@@ -483,6 +484,14 @@ const Product = () => {
                   ? "شحن مجاني"
                   : `الشحن: ${Number(product.shipping_cost).toLocaleString()} ل.س`}
               </span>
+              {product.shipping_duration_text && (
+                <>
+                  <span className="text-muted-foreground">·</span>
+                  <span className="inline-flex items-center gap-1.5 font-medium">
+                    مدة الشحن: {product.shipping_duration_text}
+                  </span>
+                </>
+              )}
             </div>
 
             {/* Variant picker */}

@@ -138,6 +138,7 @@ const PlatformProducts = () => {
       sizes: p.sizes || [],
       colors: p.colors || [],
       weight: p.weight != null ? Number(p.weight) : null,
+      shipping_duration_text: p.shipping_duration_text ?? "",
       image_url: p.image_url,
       images: p.images || [],
       is_active: !!p.is_active,

@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Loader2, Save, Store } from "lucide-react";
+import { resolveStoreAssetUrl } from "@/lib/storeAssets";
 
 interface StoreProfile {
   store_name: string | null;
@@ -37,6 +38,24 @@ const SellerStore = () => {
   const [form, setForm] = useState<StoreProfile>(EMPTY);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [logoPreview, setLogoPreview] = useState<string | null>(null);
+  const [coverPreview, setCoverPreview] = useState<string | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    void (async () => {
+      const [l, c] = await Promise.all([
+        resolveStoreAssetUrl(form.logo_url),
+        resolveStoreAssetUrl(form.cover_image_url),
+      ]);
+      if (cancelled) return;
+      setLogoPreview(l);
+      setCoverPreview(c);
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [form.logo_url, form.cover_image_url]);
 
   const load = useCallback(async () => {
     if (!user) return;
@@ -126,10 +145,10 @@ const SellerStore = () => {
                 <Input id="cover_image_url" value={form.cover_image_url ?? ""} onChange={set("cover_image_url")} dir="ltr" />
               </div>
             </div>
-            {(form.logo_url || form.cover_image_url) && (
+            {(logoPreview || coverPreview) && (
               <div className="flex items-center gap-3">
-                {form.logo_url && <img src={form.logo_url} alt="شعار المتجر" className="h-12 w-12 rounded-md object-cover" />}
-                {form.cover_image_url && <img src={form.cover_image_url} alt="غلاف المتجر" className="h-12 flex-1 rounded-md object-cover" />}
+                {logoPreview && <img src={logoPreview} alt="شعار المتجر" className="h-12 w-12 rounded-md object-cover" />}
+                {coverPreview && <img src={coverPreview} alt="غلاف المتجر" className="h-12 flex-1 rounded-md object-cover" />}
               </div>
             )}
           </CardContent>

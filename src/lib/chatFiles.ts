@@ -109,7 +109,10 @@ export const uploadChatFiles = async (
       .from(CHAT_BUCKET)
       .upload(path, file, { contentType: file.type, upsert: false });
     if (error) {
-      errors.push(`${raw.name}: تعذر الرفع`);
+      const msg = /row-level security|Unauthorized|AccessDenied/i.test(error.message)
+        ? "لا تملك صلاحية الرفع في هذه المحادثة"
+        : error.message || "تعذر الرفع";
+      errors.push(`${raw.name}: ${msg}`);
       continue;
     }
     attachments.push({

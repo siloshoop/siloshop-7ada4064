@@ -23,6 +23,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Progress } from "@/components/ui/progress";
 import { supabase } from "@/integrations/supabase/client";
+import { resolveStoreAssetUrl } from "@/lib/storeAssets";
 import { format } from "date-fns";
 import { ar } from "date-fns/locale";
 
@@ -72,6 +73,9 @@ const Store = () => {
   const [products, setProducts] = useState<StoreProduct[]>([]);
   const [reviews, setReviews] = useState<StoreReview[]>([]);
   const [loading, setLoading] = useState(true);
+  const [logoUrl, setLogoUrl] = useState<string | null>(null);
+  const [coverUrl, setCoverUrl] = useState<string | null>(null);
+
 
   useEffect(() => {
     if (!vendorId) return;
@@ -105,6 +109,14 @@ const Store = () => {
       setProducts((productsRes.data ?? []) as StoreProduct[]);
       setReviews((reviewsRes.data ?? []) as StoreReview[]);
       setLoading(false);
+
+      const [resolvedLogo, resolvedCover] = await Promise.all([
+        resolveStoreAssetUrl(store?.logo_url ?? store?.avatar_url ?? null),
+        resolveStoreAssetUrl(store?.cover_image_url ?? null),
+      ]);
+      if (cancelled) return;
+      setLogoUrl(resolvedLogo);
+      setCoverUrl(resolvedCover);
     })();
 
     return () => {
@@ -146,7 +158,7 @@ const Store = () => {
   }
 
   const location = [profile.city, profile.governorate].filter(Boolean).join(" · ");
-  const logo = profile.logo_url || profile.avatar_url;
+  const logo = logoUrl;
 
   const stats = [
     { icon: Users, label: "متابع", value: followers.toLocaleString() },
@@ -161,9 +173,9 @@ const Store = () => {
       <main className="flex-1 pb-10">
         {/* Cover */}
         <div className="relative h-40 w-full overflow-hidden bg-gradient-to-br from-primary/25 via-primary/10 to-accent/25 md:h-60">
-          {profile.cover_image_url && (
+          {coverUrl && (
             <img
-              src={profile.cover_image_url}
+              src={coverUrl}
               alt={`غلاف متجر ${profile.store_name}`}
               loading="eager"
               decoding="async"

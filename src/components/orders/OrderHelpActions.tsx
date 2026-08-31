@@ -11,8 +11,8 @@ interface Props {
 }
 
 /**
- * Shown once the cancellation window has closed (order is ready for shipping or later).
- * Buyers can only contact the seller, report a delivery issue, or request a return.
+ * Post-purchase support: buyers can only contact the seller of this order
+ * or report a delivery issue. No seller selection is possible.
  */
 const OrderHelpActions = ({ orderId, vendorId, vendorName }: Props) => {
   const navigate = useNavigate();
@@ -27,8 +27,7 @@ const OrderHelpActions = ({ orderId, vendorId, vendorName }: Props) => {
       </CardHeader>
       <CardContent className="space-y-3">
         <p className="text-sm text-muted-foreground">
-          لم يعد إلغاء الطلب متاحًا بعد بدء تجهيزه للشحن. يمكنك التواصل مع البائع أو
-          الإبلاغ عن مشكلة في التوصيل، أو طلب إرجاع بعد استلام الطلب حسب سياسة الإرجاع.
+          يمكنك التواصل مع بائع هذا الطلب مباشرة أو الإبلاغ عن مشكلة في التوصيل.
         </p>
         {vendorId && (
           <Button

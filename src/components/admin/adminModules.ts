@@ -25,7 +25,6 @@ export const ADMIN_MODULES: AdminModule[] = [
   { label: "منتجات البائعين", description: "الموافقة على المنتجات ورفضها", href: "/admin/products", icon: PackageSearch },
   { label: "الطلبات", description: "متابعة الطلبات وحالاتها", href: "/admin/orders", icon: ShoppingBag },
   { label: "المدفوعات", description: "سجل عمليات الدفع للعرض فقط", href: "/admin/payments", icon: CreditCard },
-  { label: "الإرجاعات", description: "مراجعة طلبات الإرجاع والخلافات", href: "/admin/returns", icon: RotateCcw },
   { label: "المتاجر", description: "متاجر البائعين المعتمدة", href: "/admin/stores", icon: Store },
   { label: "الفئات", description: "الفئات والفئات الفرعية", href: "/admin/categories", icon: FolderTree },
   { label: "العلامات التجارية", description: "إدارة الماركات", href: "/admin/brands", icon: Tag },

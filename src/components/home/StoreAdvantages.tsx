@@ -13,7 +13,7 @@ const advantages = [
   },
   {
     icon: RotateCcw,
-    title: "إرجاع خلال 7 أيام",
+    title: "تواصل مباشر مع البائع",
     description: "استبدال أو استرجاع سهل وسريع",
   },
   {

@@ -434,7 +434,7 @@ const Dashboard = () => {
             <CardContent className="pt-6 flex items-center justify-between gap-4">
               <div>
                 <p className="font-semibold">إدارة الطلبات</p>
-                <p className="text-sm text-muted-foreground">عرض كل الطلبات، البحث والفلترة، التتبع، الإلغاء، والاسترداد وتصدير CSV.</p>
+                <p className="text-sm text-muted-foreground">عرض كل الطلبات، البحث والفلترة، التتبع، الإلغاء وتصدير CSV.</p>
               </div>
               <Button onClick={() => navigate("/dashboard/admin-orders")}>فتح إدارة الطلبات</Button>
             </CardContent>
@@ -484,7 +484,7 @@ const Dashboard = () => {
                       <Store className="h-4 w-4 text-primary" /> بائع موثّق — لوحة البائع الاحترافية جاهزة
                     </p>
                     <p className="text-sm text-muted-foreground">
-                      أدر منتجاتك ومخزونك وطلباتك ومرتجعاتك وتقييماتك وتقاريرك من مكان واحد.
+                      أدر منتجاتك ومخزونك وطلباتك وتقييماتك وتقاريرك من مكان واحد.
                     </p>
                   </div>
                   <Button onClick={() => navigate("/seller")}>فتح لوحة البائع</Button>
@@ -904,10 +904,6 @@ const Dashboard = () => {
                   <Button variant="outline" className="h-20 flex-col gap-1" onClick={() => navigate("/notifications")}>
                     <Bell className="h-5 w-5" />
                     <span>الإشعارات</span>
-                  </Button>
-                  <Button variant="outline" className="h-20 flex-col gap-1" onClick={() => navigate("/my-returns")}>
-                    <RotateCcw className="h-5 w-5" />
-                    <span>طلبات الإرجاع</span>
                   </Button>
                   <Button variant="outline" className="h-20 flex-col gap-1" onClick={() => navigate("/messages")}>
                     <MessageSquare className="h-5 w-5" />

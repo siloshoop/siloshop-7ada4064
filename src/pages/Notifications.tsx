@@ -49,8 +49,6 @@ const NotificationTypeConfig: Record<string, { label: string; icon: React.ReactN
   order: { label: "طلب جديد", icon: <Package className="h-4 w-4" />, color: BLUE },
   order_status: { label: "حالة الطلب", icon: <Truck className="h-4 w-4" />, color: GREEN },
   order_cancelled: { label: "إلغاء طلب", icon: <Ban className="h-4 w-4" />, color: RED },
-  order_refunded: { label: "استرداد مبلغ", icon: RotateCcw && <RotateCcw className="h-4 w-4" />, color: BLUE },
-  return_status: { label: "حالة إرجاع", icon: <RotateCcw className="h-4 w-4" />, color: ORANGE },
   // Seller lifecycle
   seller_approved: { label: "اعتماد بائع", icon: <ShieldCheck className="h-4 w-4" />, color: GREEN },
   seller_rejected: { label: "رفض طلب بائع", icon: <ShieldAlert className="h-4 w-4" />, color: RED },

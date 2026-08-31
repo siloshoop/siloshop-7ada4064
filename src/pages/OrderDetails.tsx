@@ -12,7 +12,6 @@ import { Loader2, ArrowRight, Package, MapPin, Phone, Calendar, Receipt, XCircle
 import { format } from "date-fns";
 import { ar } from "date-fns/locale";
 import CancelOrderDialog, { canCancelOrder } from "@/components/CancelOrderDialog";
-import ReturnRequestDialog from "@/components/ReturnRequestDialog";
 import OrderStatusTimeline from "@/components/OrderStatusTimeline";
 import OrderTimelineLog from "@/components/orders/OrderTimelineLog";
 import OrderHelpActions from "@/components/orders/OrderHelpActions";
@@ -30,8 +29,6 @@ const statusMap: Record<string, { label: string; variant: "default" | "secondary
   delivered: { label: "تم التوصيل", variant: "default" },
   completed: { label: "مكتمل", variant: "default" },
   cancelled: { label: "ملغي", variant: "destructive" },
-  return_requested: { label: "طلب إرجاع", variant: "outline" },
-  returning: { label: "قيد الإرجاع", variant: "outline" },
   returned: { label: "مرتجع", variant: "outline" },
   refunded: { label: "تم رد المبلغ", variant: "outline" },
 };
@@ -275,9 +272,6 @@ const OrderDetails = () => {
                     }` : ""}
                   </p>
                 )}
-                {order.payment_status === "refund_pending" && (
-                  <p className="text-xs text-amber-600">حالة الاسترداد: قيد المعالجة</p>
-                )}
               </div>
             )}
           </CardContent>
@@ -429,16 +423,7 @@ const OrderDetails = () => {
             setOrder((prev: any) => prev ? { ...prev, status: "cancelled" } : prev);
           }}
         />
-        <ReturnRequestDialog
-          order={{ id: order.id, status: order.status, delivered_at: order.delivered_at }}
-          variant="default"
-          size="default"
-          fullWidth
-        />
-        <Button variant="ghost" size="sm" className="w-full" onClick={() => navigate("/my-returns")}>
-          عرض طلبات الإرجاع
-        </Button>
-        {order.status !== "cancelled" && !canCancelOrder(order.status, order.tracking_status) && (
+        {order.status !== "cancelled" && (
           <OrderHelpActions orderId={order.id} vendorId={items[0]?.vendor_id} />
         )}
       </main>

@@ -4333,28 +4333,17 @@ export type Database = {
       }
       check_email_registered: { Args: { p_email: string }; Returns: Json }
       cleanup_old_rate_limits: { Args: never; Returns: undefined }
-      create_order:
-        | {
-            Args: {
-              _coupon_code?: string
-              _items: Json
-              _notes?: string
-              _phone: string
-              _shipping_address: string
-            }
-            Returns: string
-          }
-        | {
-            Args: {
-              _coupon_code?: string
-              _items: Json
-              _notes?: string
-              _payment_method?: string
-              _phone: string
-              _shipping_address: string
-            }
-            Returns: string
-          }
+      create_order: {
+        Args: {
+          _coupon_code?: string
+          _items: Json
+          _notes?: string
+          _payment_method?: string
+          _phone: string
+          _shipping_address: string
+        }
+        Returns: string
+      }
       create_return_request: {
         Args: {
           _customer_note?: string

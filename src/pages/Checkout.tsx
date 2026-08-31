@@ -360,6 +360,14 @@ const Checkout = () => {
         });
         return;
       }
+      if (message.includes("PAYMENT_METHOD_UNAVAILABLE")) {
+        toast({
+          title: "طريقة الدفع غير متاحة",
+          description: "طريقة الدفع المختارة غير مفعّلة لمنتجات المنصة. يرجى اختيار طريقة أخرى.",
+          variant: "destructive",
+        });
+        return;
+      }
       if (message.includes("MIXED_CART")) {
         toast({
           title: "لا يمكن إتمام الطلب",

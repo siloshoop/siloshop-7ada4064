@@ -84,11 +84,6 @@ const Footer = () => {
                 </Link>
               </li>
               <li>
-                <Link to="/returns" className="hover:text-foreground transition-colors story-link">
-                  سياسة الإرجاع
-                </Link>
-              </li>
-              <li>
                 <Link to="/shipping" className="hover:text-foreground transition-colors story-link">
                   الشحن والتوصيل
                 </Link>

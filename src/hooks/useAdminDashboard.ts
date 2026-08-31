@@ -49,7 +49,7 @@ export interface AdminDashboardData {
 
 /**
  * Live admin dashboard data. Reads a single admin-only RPC and refreshes it
- * when orders / returns / products change, debounced so a burst of realtime
+ * when orders / products change, debounced so a burst of realtime
  * events results in one refetch.
  */
 export const useAdminDashboard = (days = 30) => {
@@ -96,7 +96,6 @@ export const useAdminDashboard = (days = 30) => {
     const channel = supabase
       .channel("admin-dashboard-live")
       .on("postgres_changes", { event: "*", schema: "public", table: "orders" }, scheduleRefresh)
-      .on("postgres_changes", { event: "*", schema: "public", table: "returns" }, scheduleRefresh)
       .on("postgres_changes", { event: "*", schema: "public", table: "products" }, scheduleRefresh)
       .subscribe();
 

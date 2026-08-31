@@ -22,8 +22,6 @@ import { ar } from "date-fns/locale";
 import DeliveryRating from "@/components/DeliveryRating";
 import ReorderButton from "@/components/ReorderButton";
 import CancelOrderDialog from "@/components/CancelOrderDialog";
-import ReturnRequestDialog from "@/components/ReturnRequestDialog";
-import { RETURN_STATUS } from "@/lib/returnStatus";
 import CustomerInvoice from "@/components/orders/CustomerInvoice";
 import { normalizeStatus } from "@/lib/orderStatus";
 
@@ -39,10 +37,6 @@ const STATUS_LABELS: Record<string, string> = {
   delivered: "تم التوصيل",
   completed: "مكتمل",
   cancelled: "ملغي",
-  return_requested: "طلب إرجاع",
-  returning: "قيد الإرجاع",
-  returned: "مرتجع",
-  refunded: "تم رد المبلغ",
 };
 
 const STATUS_FILTERS = [
@@ -94,12 +88,6 @@ interface DeliveryRatingData {
   rating: number;
 }
 
-interface ReturnData {
-  order_id: string;
-  status: string;
-  created_at: string;
-}
-
 interface Order {
   id: string;
   order_number: string | null;
@@ -110,7 +98,6 @@ interface Order {
   delivered_at: string | null;
   order_items: OrderItem[];
   delivery_rating?: DeliveryRatingData | null;
-  return?: ReturnData | null;
 }
 
 const displayOrderNumber = (order: { order_number: string | null; id: string }) =>
@@ -212,7 +199,7 @@ const Orders = () => {
 
       const orderIds = ordersData.map((order) => order.id);
 
-      const [itemsRes, ratingsRes, returnsRes] = await Promise.allSettled([
+      const [itemsRes, ratingsRes] = await Promise.allSettled([
         supabase
           .from("order_items")
           .select(`
@@ -230,12 +217,6 @@ const Orders = () => {
           .from("delivery_ratings")
           .select("order_id, rating")
           .in("order_id", orderIds),
-        supabase
-          .from("returns")
-          .select("order_id, status, created_at")
-          .in("order_id", orderIds)
-          .eq("customer_id", user.id)
-          .order("created_at", { ascending: false }),
       ]);
 
       const orderItemsData =
@@ -247,11 +228,6 @@ const Orders = () => {
         ratingsRes.status === "fulfilled" ? ratingsRes.value.data : null;
       if (ratingsRes.status === "fulfilled" && ratingsRes.value.error) {
         console.error("Delivery ratings fetch error:", ratingsRes.value.error);
-      }
-      const returnsData =
-        returnsRes.status === "fulfilled" ? returnsRes.value.data : null;
-      if (returnsRes.status === "fulfilled" && returnsRes.value.error) {
-        console.error("Returns fetch error:", returnsRes.value.error);
       }
 
       const orderItemsMap = new Map<string, OrderItem[]>();
@@ -275,11 +251,6 @@ const Orders = () => {
       });
 
       const ratingsMap = new Map(ratingsData?.map((rating) => [rating.order_id, rating]) || []);
-      const returnsMap = new Map<string, ReturnData>();
-      (returnsData as ReturnData[] | null)?.forEach((r) => {
-        // Most recent per order (already sorted desc)
-        if (!returnsMap.has(r.order_id)) returnsMap.set(r.order_id, r);
-      });
 
       const ordersWithDetails: Order[] = (ordersData as OrderRecord[]).map((order) => ({
         id: order.id,
@@ -291,7 +262,6 @@ const Orders = () => {
         delivered_at: order.delivered_at,
         order_items: orderItemsMap.get(order.id) || [],
         delivery_rating: ratingsMap.get(order.id) || null,
-        return: returnsMap.get(order.id) || null,
       }));
 
       setOrders(ordersWithDetails);
@@ -315,11 +285,6 @@ const Orders = () => {
       .on(
         "postgres_changes",
         { event: "*", schema: "public", table: "orders", filter: `customer_id=eq.${user.id}` },
-        () => { void fetchOrders(); }
-      )
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "returns", filter: `customer_id=eq.${user.id}` },
         () => { void fetchOrders(); }
       )
       .subscribe();
@@ -408,11 +373,6 @@ const Orders = () => {
                       <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center lg:justify-end">
                         <div className="flex flex-wrap items-center gap-2">
                           {getStatusBadge(order.status)}
-                          {order.return && (
-                            <Badge variant={RETURN_STATUS[order.return.status]?.variant || "outline"}>
-                              إرجاع: {RETURN_STATUS[order.return.status]?.label || order.return.status}
-                            </Badge>
-                          )}
                           <p className="text-lg font-bold text-primary">
                             {order.total_amount.toLocaleString()} ل.س
                           </p>
@@ -459,11 +419,6 @@ const Orders = () => {
                             trackingStatus={order.tracking_status}
                             fullWidth
                             onCancelled={() => void fetchOrders()}
-                          />
-                          <ReturnRequestDialog
-                            order={{ id: order.id, status: order.status, delivered_at: order.delivered_at }}
-                            fullWidth
-                            onCreated={() => void fetchOrders()}
                           />
                           {order.status !== "cancelled" && (
                             <CustomerInvoice orderId={order.id} />

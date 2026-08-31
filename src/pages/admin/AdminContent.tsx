@@ -39,7 +39,6 @@ interface ContentPage {
 export const FAQ_CATEGORIES = [
   { value: "orders", label: "الطلبات والشراء" },
   { value: "shipping", label: "الشحن والتوصيل" },
-  { value: "returns", label: "الإرجاع والاستبدال" },
   { value: "account", label: "الحساب والأمان" },
   { value: "products", label: "المنتجات والأسعار" },
 ];

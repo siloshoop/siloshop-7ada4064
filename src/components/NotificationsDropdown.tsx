@@ -183,8 +183,6 @@ export const NotificationsDropdown = () => {
       order: "طلب جديد",
       order_status: "حالة الطلب",
       order_cancelled: "إلغاء طلب",
-      order_refunded: "استرداد مبلغ",
-      return_status: "حالة إرجاع",
       seller_approved: "اعتماد بائع",
       seller_rejected: "رفض طلب بائع",
       seller_suspended: "إيقاف بائع",

@@ -6,7 +6,7 @@ import Navbar from "@/components/Navbar";
 import ProductOriginBadge from "@/components/product/ProductOriginBadge";
 import SellerInfoCard from "@/components/product/SellerInfoCard";
 import ReportDialog from "@/components/ReportDialog";
-import ShippingReturnsInfo from "@/components/product/ShippingReturnsInfo";
+import ShippingInfo from "@/components/product/ShippingInfo";
 import ProductSpecs from "@/components/product/ProductSpecs";
 import ProductQuestions from "@/components/product/ProductQuestions";
 import FrequentlyBoughtTogether from "@/components/product/FrequentlyBoughtTogether";
@@ -24,7 +24,6 @@ import { useToast } from "@/hooks/use-toast";
 import { FavoriteButton } from "@/components/FavoriteButton";
 import AddToWishlistButton from "@/components/AddToWishlistButton";
 import ChatButton from "@/components/ChatButton";
-import ReturnsPolicyNote from "@/components/ReturnsPolicyNote";
 import { useRecentlyViewed } from "@/hooks/useRecentlyViewed";
 import SimilarProducts from "@/components/SimilarProducts";
 import MarketPriceBar from "@/components/MarketPriceBar";
@@ -600,12 +599,6 @@ const Product = () => {
                   دفع آمن عند الاستلام
                 </span>
               </div>
-              <div className="flex flex-col items-center text-center gap-1 rounded-xl border bg-muted/30 p-3">
-                <RotateCcw className="h-4 w-4 text-primary" />
-                <span className="text-[11px] text-muted-foreground leading-tight">
-                  إرجاع خلال 7 أيام
-                </span>
-              </div>
             </div>
 
             <SellerInfoCard
@@ -617,7 +610,6 @@ const Product = () => {
               ratingCount={vendorStats.count}
             />
 
-            <ReturnsPolicyNote className="mt-2" />
 
             <div className="flex justify-end">
               <ReportDialog
@@ -657,7 +649,7 @@ const Product = () => {
                 value="shipping"
                 className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none px-4 py-2.5"
               >
-                الشحن والإرجاع
+                الشحن
               </TabsTrigger>
               <TabsTrigger
                 value="qa"
@@ -689,13 +681,10 @@ const Product = () => {
                     {product.barcode && <span>الباركود: {product.barcode}</span>}
                   </div>
                 )}
-                {(product.warranty || product.return_policy || product.country_of_origin || product.gtin || product.shipping_weight || product.length_cm || product.width_cm || product.height_cm) && (
+                {(product.warranty || product.country_of_origin || product.gtin || product.shipping_weight || product.length_cm || product.width_cm || product.height_cm) && (
                   <div className="rounded-xl border divide-y text-sm">
                     {product.warranty && (
                       <div className="flex justify-between px-3 py-2"><span className="text-muted-foreground">الضمان</span><span>{product.warranty}</span></div>
-                    )}
-                    {product.return_policy && (
-                      <div className="flex justify-between px-3 py-2"><span className="text-muted-foreground">سياسة الإرجاع</span><span>{product.return_policy}</span></div>
                     )}
                     {product.country_of_origin && (
                       <div className="flex justify-between px-3 py-2"><span className="text-muted-foreground">بلد المنشأ</span><span>{product.country_of_origin}</span></div>
@@ -711,9 +700,6 @@ const Product = () => {
                     )}
                   </div>
                 )}
-                <div className="rounded-xl border bg-muted/30 p-3 text-xs text-muted-foreground">
-                  يشمل هذا المنتج ضمان استبدال أو استرجاع وفق سياسة الشحن والإرجاع الخاصة بالمتجر، يرجى مراجعة تبويب "الشحن والإرجاع" لمزيد من التفاصيل.
-                </div>
               </div>
             </TabsContent>
 
@@ -722,7 +708,7 @@ const Product = () => {
             </TabsContent>
 
             <TabsContent value="shipping" className="pt-6 animate-fade-in">
-              <ShippingReturnsInfo
+              <ShippingInfo
                 shippingCost={product.shipping_cost}
                 shipsWithinDays={product.ships_within_days}
                 isPlatform={product.product_type === "platform"}

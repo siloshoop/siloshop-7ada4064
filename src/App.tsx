@@ -31,7 +31,6 @@ const InstallPWA = lazy(() => import("./pages/InstallPWA"));
 const Compare = lazy(() => import("./pages/Compare"));
 const Contact = lazy(() => import("./pages/Contact"));
 const FAQ = lazy(() => import("./pages/FAQ"));
-const Returns = lazy(() => import("./pages/Returns"));
 const Shipping = lazy(() => import("./pages/Shipping"));
 const About = lazy(() => import("./pages/About"));
 const Blog = lazy(() => import("./pages/Blog"));
@@ -65,8 +64,6 @@ const VerifyEmail = lazy(() => import("./pages/VerifyEmail"));
 const Messages = lazy(() => import("./pages/Messages"));
 const Settings = lazy(() => import("./pages/Settings"));
 const Profile = lazy(() => import("./pages/Profile"));
-const MyReturns = lazy(() => import("./pages/MyReturns"));
-const VendorReturns = lazy(() => import("./pages/VendorReturns"));
 const SellerApplication = lazy(() => import("./pages/SellerApplication"));
 const SellerManagement = lazy(() => import("./pages/admin/SellerManagement"));
 const PlatformProducts = lazy(() => import("./pages/admin/PlatformProducts"));
@@ -86,7 +83,6 @@ const AdminRevenue = lazy(() => import("./pages/admin/Revenue"));
 const FeatureFlagsPage = lazy(() => import("./pages/admin/FeatureFlagsPage"));
 const ShamCashSettings = lazy(() => import("./pages/admin/ShamCashSettings"));
 const AdminPayments = lazy(() => import("./pages/admin/AdminPayments"));
-const AdminReturns = lazy(() => import("./pages/admin/AdminReturns"));
 const AdminStores = lazy(() => import("./pages/admin/AdminStores"));
 const AdminRoles = lazy(() => import("./pages/admin/AdminRoles"));
 const AdminAuditLog = lazy(() => import("./pages/admin/AdminAuditLog"));
@@ -182,7 +178,6 @@ const App = () => (
             <Route path="/admin/users/:id" element={<RequireRole role="admin"><AdminUserDetail /></RequireRole>} />
             <Route path="/admin/stores" element={<RequireRole role="admin"><AdminStores /></RequireRole>} />
             <Route path="/admin/payments" element={<RequireRole role="admin"><AdminPayments /></RequireRole>} />
-            <Route path="/admin/returns" element={<RequireRole role="admin"><AdminReturns /></RequireRole>} />
             <Route path="/admin/announcements" element={<RequireRole role="admin"><ManageAnnouncements /></RequireRole>} />
             <Route path="/admin/audit" element={<RequireRole role="admin"><AdminAuditLog /></RequireRole>} />
             <Route path="/admin/roles" element={<RequireRole role="super_admin"><AdminRoles /></RequireRole>} />
@@ -218,15 +213,12 @@ const App = () => (
             <Route path="/orders/track/:id" element={<TrackOrder />} />
             <Route path="/track" element={<GuestTrack />} />
             <Route path="/orders/:id" element={<OrderDetails />} />
-            <Route path="/my-returns" element={<MyReturns />} />
-            <Route path="/dashboard/returns" element={<RequireRole role={["vendor","admin"]}><VendorReturns /></RequireRole>} />
             <Route path="/account/addresses" element={<Addresses />} />
             <Route path="/product/:id" element={<Product />} />
             <Route path="/compare" element={<Compare />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/faq" element={<FAQ />} />
             <Route path="/pricing" element={<Pricing />} />
-            <Route path="/returns" element={<Returns />} />
             <Route path="/privacy" element={<Privacy />} />
             <Route path="/terms" element={<Terms />} />
             <Route path="/shipping" element={<Shipping />} />

@@ -129,7 +129,7 @@ const ChatWindow = ({
       </div>
 
       {/* Context strip */}
-      {header && (header.order_id || header.return_id || header.product_id) && (
+      {header && (header.order_id || header.product_id) && (
         <div className="flex flex-wrap items-center gap-2 border-b bg-muted/40 px-3 py-2 text-xs">
           <Package className="h-3.5 w-3.5" />
           {header.order_id && (
@@ -137,13 +137,7 @@ const ChatWindow = ({
               {header.subject || "تفاصيل الطلب"}
             </Link>
           )}
-          {header.return_id && (
-            <Link to="/my-returns" className="flex items-center gap-1 underline">
-              <RotateCcw className="h-3.5 w-3.5" />
-              {header.subject || "طلب الإرجاع"}
-            </Link>
-          )}
-          {!header.order_id && !header.return_id && header.product_id && (
+          {!header.order_id && header.product_id && (
             <Link to={`/product/${header.product_id}`} className="underline">
               المنتج المرتبط
             </Link>

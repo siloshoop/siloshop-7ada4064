@@ -400,10 +400,6 @@ const Store = () => {
                       <dt className="text-muted-foreground">طريقة الدفع</dt>
                       <dd className="font-medium">الدفع عند الاستلام</dd>
                     </div>
-                    <div className="flex justify-between rounded-lg border p-3">
-                      <dt className="text-muted-foreground">سياسة الإرجاع</dt>
-                      <dd className="font-medium">7 أيام</dd>
-                    </div>
                   </dl>
                 </CardContent>
               </Card>

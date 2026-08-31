@@ -63,7 +63,6 @@ const AddProduct = () => {
     shipping_weight: "",
     shipping_class: "",
     warranty: "",
-    return_policy: "",
     country_of_origin: "",
     slug: "",
     seo_title: "",
@@ -314,7 +313,6 @@ const AddProduct = () => {
         shipping_weight: formData.shipping_weight ? Number(formData.shipping_weight) : null,
         shipping_class: formData.shipping_class || null,
         warranty: formData.warranty.trim() || null,
-        return_policy: formData.return_policy.trim() || null,
         country_of_origin: formData.country_of_origin.trim() || null,
         tags: tags.length > 0 ? tags : [],
         slug: finalSlug || null,
@@ -737,15 +735,6 @@ const AddProduct = () => {
                       />
                     </div>
 
-                    <div className="space-y-2">
-                      <Label htmlFor="return_policy">سياسة الإرجاع</Label>
-                      <Textarea
-                        id="return_policy"
-                        value={formData.return_policy}
-                        onChange={(e) => setFormData({ ...formData, return_policy: e.target.value })}
-                        rows={2}
-                      />
-                    </div>
 
                     <div className="space-y-2">
                       <Label htmlFor="country_of_origin">بلد المنشأ</Label>

@@ -66,7 +66,6 @@ const EditProduct = () => {
     shipping_weight: "",
     shipping_class: "",
     warranty: "",
-    return_policy: "",
     country_of_origin: "",
     slug: "",
     seo_title: "",
@@ -134,7 +133,6 @@ const EditProduct = () => {
               shipping_weight: p.shipping_weight?.toString() || "",
               shipping_class: p.shipping_class || "",
               warranty: p.warranty || "",
-              return_policy: p.return_policy || "",
               country_of_origin: p.country_of_origin || "",
               slug: p.slug || "",
               seo_title: p.seo_title || "",
@@ -393,8 +391,7 @@ const EditProduct = () => {
           shipping_weight: formData.shipping_weight ? Number(formData.shipping_weight) : null,
           shipping_class: formData.shipping_class || null,
           warranty: formData.warranty.trim() || null,
-          return_policy: formData.return_policy.trim() || null,
-          country_of_origin: formData.country_of_origin.trim() || null,
+            country_of_origin: formData.country_of_origin.trim() || null,
           tags: tags.length > 0 ? tags : [],
           slug: finalSlug || null,
           seo_title: formData.seo_title.trim() || null,
@@ -856,15 +853,6 @@ const EditProduct = () => {
                       />
                     </div>
 
-                    <div className="space-y-2">
-                      <Label htmlFor="return_policy">سياسة الإرجاع</Label>
-                      <Textarea
-                        id="return_policy"
-                        value={formData.return_policy}
-                        onChange={(e) => setFormData({ ...formData, return_policy: e.target.value })}
-                        rows={2}
-                      />
-                    </div>
 
                     <div className="space-y-2">
                       <Label htmlFor="country_of_origin">بلد المنشأ</Label>

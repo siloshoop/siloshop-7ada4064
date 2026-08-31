@@ -19,7 +19,6 @@ export const SELLER_MODULES: SellerModule[] = [
   { key: "inventory", label: "المخزون", path: "/seller/inventory", icon: Boxes, group: "catalog" },
   { key: "stock-log", label: "سجل حركات المخزون", path: "/seller/stock-log", icon: History, group: "catalog" },
   { key: "orders", label: "الطلبات", path: "/dashboard/orders", icon: ShoppingBag, group: "sales" },
-  { key: "returns", label: "المرتجعات", path: "/dashboard/returns", icon: Undo2, group: "sales" },
   { key: "customers", label: "العملاء", path: "/seller/customers", icon: Users, group: "sales" },
   { key: "messages", label: "الرسائل", path: "/messages", icon: MessageSquare, group: "sales" },
   { key: "reviews", label: "التقييمات", path: "/seller/reviews", icon: Star, group: "growth" },

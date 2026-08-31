@@ -1636,6 +1636,12 @@ export type Database = {
           payment_method: string
           payment_status: string
           phone: string | null
+          pickup_center_address: string | null
+          pickup_center_city: string | null
+          pickup_center_governorate: string | null
+          pickup_center_id: string | null
+          pickup_center_name: string | null
+          pickup_center_phone: string | null
           refund_status: string
           shipped_at: string | null
           shipping_address: string | null
@@ -1685,6 +1691,12 @@ export type Database = {
           payment_method?: string
           payment_status?: string
           phone?: string | null
+          pickup_center_address?: string | null
+          pickup_center_city?: string | null
+          pickup_center_governorate?: string | null
+          pickup_center_id?: string | null
+          pickup_center_name?: string | null
+          pickup_center_phone?: string | null
           refund_status?: string
           shipped_at?: string | null
           shipping_address?: string | null
@@ -1734,6 +1746,12 @@ export type Database = {
           payment_method?: string
           payment_status?: string
           phone?: string | null
+          pickup_center_address?: string | null
+          pickup_center_city?: string | null
+          pickup_center_governorate?: string | null
+          pickup_center_id?: string | null
+          pickup_center_name?: string | null
+          pickup_center_phone?: string | null
           refund_status?: string
           shipped_at?: string | null
           shipping_address?: string | null
@@ -1762,6 +1780,13 @@ export type Database = {
             columns: ["parent_order_id"]
             isOneToOne: false
             referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "orders_pickup_center_id_fkey"
+            columns: ["pickup_center_id"]
+            isOneToOne: false
+            referencedRelation: "pickup_centers"
             referencedColumns: ["id"]
           },
         ]
@@ -1947,6 +1972,48 @@ export type Database = {
           status?: string
           updated_at?: string
           vendor_id?: string
+        }
+        Relationships: []
+      }
+      pickup_centers: {
+        Row: {
+          address: string
+          city: string
+          created_at: string
+          governorate: string
+          id: string
+          is_active: boolean
+          name: string
+          phone: string | null
+          sort_order: number
+          updated_at: string
+          working_hours: string | null
+        }
+        Insert: {
+          address: string
+          city: string
+          created_at?: string
+          governorate: string
+          id?: string
+          is_active?: boolean
+          name: string
+          phone?: string | null
+          sort_order?: number
+          updated_at?: string
+          working_hours?: string | null
+        }
+        Update: {
+          address?: string
+          city?: string
+          created_at?: string
+          governorate?: string
+          id?: string
+          is_active?: boolean
+          name?: string
+          phone?: string | null
+          sort_order?: number
+          updated_at?: string
+          working_hours?: string | null
         }
         Relationships: []
       }
@@ -4355,6 +4422,7 @@ export type Database = {
           _notes?: string
           _payment_method?: string
           _phone: string
+          _pickup_center_id?: string
           _shipping_address: string
         }
         Returns: string

@@ -97,7 +97,7 @@ const Compare = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { user } = useAuth();
-  const { clearProducts } = useCompareProducts();
+  const { clearProducts, compareProducts, loading: compareLoading } = useCompareProducts();
 
   const handleExportAsImage = async () => {
     if (!comparisonRef.current) return;
@@ -174,8 +174,16 @@ const Compare = () => {
   };
 
   useEffect(() => {
-    fetchProducts();
-  }, [searchParams]);
+    // The saved comparison list is the source of truth. When the page is opened
+    // without ?products=, fall back to the products saved in the account.
+    if (compareLoading) return;
+    const urlIds = searchParams.get("products")?.split(",").filter(Boolean) || [];
+    if (urlIds.length === 0 && compareProducts.length > 0) {
+      setSearchParams({ products: compareProducts.join(",") }, { replace: true });
+      return;
+    }
+    void fetchProducts(urlIds.length > 0 ? urlIds : compareProducts);
+  }, [searchParams, compareProducts, compareLoading]);
 
   useEffect(() => {
     if (user) {
@@ -183,13 +191,15 @@ const Compare = () => {
     }
   }, [user]);
 
-  const fetchProducts = async () => {
-    const productIds = searchParams.get("products")?.split(",") || [];
-    
+  const fetchProducts = async (ids?: string[]) => {
+    const productIds = ids ?? (searchParams.get("products")?.split(",").filter(Boolean) || []);
+
     if (productIds.length === 0) {
+      setProducts([]);
       setLoading(false);
       return;
     }
+
 
     try {
       const { data, error } = await supabase

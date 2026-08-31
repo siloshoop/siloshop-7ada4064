@@ -180,12 +180,20 @@ const ProductCard = memo(({
   const filledStars = Math.floor(rating);
 
   return (
-    <div
-      className="group relative cursor-pointer rounded-xl overflow-hidden bg-card border border-border/40 hover:border-primary/40 transition-all duration-400 ease-[cubic-bezier(0.22,1,0.36,1)] hover:shadow-[0_8px_40px_-12px_hsl(var(--primary)/0.25)] active:scale-[0.98]"
-      onClick={goToProduct}
+    <a
+      href={productId ? `/product/${productId}` : undefined}
+      className="group relative block cursor-pointer rounded-xl overflow-hidden bg-card border border-border/40 hover:border-primary/40 transition-all duration-400 ease-[cubic-bezier(0.22,1,0.36,1)] hover:shadow-[0_8px_40px_-12px_hsl(var(--primary)/0.25)] active:scale-[0.98]"
+      onClick={(e) => {
+        // Let the browser handle ctrl/cmd/middle-click so the product can be
+        // opened in a new tab, and keep SPA navigation for plain clicks.
+        if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return;
+        e.preventDefault();
+        goToProduct();
+      }}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
+
       <div className="relative aspect-square overflow-hidden bg-muted/30">
         {discount && (
           <div className="absolute top-2 left-2 z-10">
@@ -339,7 +347,8 @@ const ProductCard = memo(({
           {isOutOfStock ? "نفذت الكمية" : "أضف للسلة"}
         </Button>
       </div>
-    </div>
+    </a>
+
   );
 });
 

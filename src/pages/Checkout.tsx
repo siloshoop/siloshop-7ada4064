@@ -607,25 +607,71 @@ const Checkout = () => {
 
                   <div className="space-y-2">
                     <Label htmlFor="area">المدينة / المنطقة *</Label>
-                    <Input
-                      id="area"
+                    <Select
                       value={formData.area}
-                      onChange={(e) => setFormData({ ...formData, area: e.target.value })}
-                      required
-                      placeholder="مثال: حماة - حي الأربعين"
-                    />
+                      onValueChange={(v) => setFormData({ ...formData, area: v })}
+                      disabled={!formData.governorate || centersLoading || areaOptions.length === 0}
+                    >
+                      <SelectTrigger id="area">
+                        <SelectValue
+                          placeholder={
+                            !formData.governorate
+                              ? "اختر المحافظة أولاً"
+                              : centersLoading
+                                ? "جارٍ التحميل..."
+                                : areaOptions.length === 0
+                                  ? "لا توجد مراكز استلام في هذه المحافظة"
+                                  : "اختر المدينة / المنطقة"
+                          }
+                        />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {areaOptions.map((c) => (
+                          <SelectItem key={c} value={c}>{c}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="street">الشارع وأقرب علامة مميزة *</Label>
-                    <Input
-                      id="street"
-                      value={formData.street}
-                      onChange={(e) => setFormData({ ...formData, street: e.target.value })}
-                      required
-                      placeholder="مثال: شارع القوتلي، بناء رقم 5، بجانب صيدلية النور"
-                    />
+                    <Label htmlFor="pickup-center">مركز الاستلام *</Label>
+                    <Select
+                      value={selectedCenterId}
+                      onValueChange={setSelectedCenterId}
+                      disabled={centersInArea.length === 0}
+                    >
+                      <SelectTrigger id="pickup-center">
+                        <SelectValue
+                          placeholder={
+                            centersInArea.length === 0
+                              ? "لا توجد مراكز متاحة"
+                              : "اختر مركز الاستلام"
+                          }
+                        />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {centersInArea.map((c) => (
+                          <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    {selectedCenter && (
+                      <div className="rounded-lg border border-border/60 bg-muted/40 p-3 text-xs leading-relaxed">
+                        <p className="font-semibold">{selectedCenter.name}</p>
+                        <p className="text-muted-foreground">{selectedCenter.address}</p>
+                        {selectedCenter.phone && (
+                          <p className="text-muted-foreground" dir="ltr">{selectedCenter.phone}</p>
+                        )}
+                        {selectedCenter.working_hours && (
+                          <p className="text-muted-foreground">أوقات العمل: {selectedCenter.working_hours}</p>
+                        )}
+                      </div>
+                    )}
+                    <p className="text-xs text-muted-foreground">
+                      التوصيل داخل سوريا يتم عبر مراكز الاستلام فقط، ولا يوجد توصيل إلى المنازل.
+                    </p>
                   </div>
+
 
 
                   <div className="space-y-2">

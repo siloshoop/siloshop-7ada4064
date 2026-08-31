@@ -190,6 +190,8 @@ const App = () => (
             <Route path="/admin/inventory" element={<RequireRole role="admin"><AdminInventory /></RequireRole>} />
             <Route path="/admin/content" element={<RequireRole role="admin"><AdminContent /></RequireRole>} />
             <Route path="/admin/settings" element={<RequireRole role={["admin","super_admin"]}><AdminSettings /></RequireRole>} />
+            <Route path="/admin/pickup-centers" element={<RequireRole role={["admin","super_admin"]}><AdminPickupCenters /></RequireRole>} />
+
             <Route path="/p/:slug" element={<ContentPage />} />
             <Route path="/seller/application" element={<SellerApplication />} />
             {/* Seller console (selling only, approved sellers) */}

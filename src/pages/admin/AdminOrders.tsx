@@ -669,8 +669,9 @@ const AdminOrders = () => {
                   </div>
                 </div>
               </div>
-
+            </div>
           )}
+
 
           <DialogFooter>
             <Button variant="outline" onClick={() => { setOpenId(null); setDetail(null); }}>إغلاق</Button>

@@ -16,6 +16,8 @@ import { Link } from "react-router-dom";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { SYRIAN_GOVERNORATES } from "@/lib/syrianGovernorates";
 import { useFeatureFlags } from "@/hooks/useFeatureFlags";
+import { usePickupCenters } from "@/hooks/usePickupCenters";
+
 
 const checkoutSchema = z.object({
   phone: z.string()

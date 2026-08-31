@@ -352,12 +352,21 @@ const Checkout = () => {
       return;
     }
 
+    if (!selectedCenter) {
+      toast({
+        title: "مركز الاستلام مطلوب",
+        description: "التوصيل داخل سوريا يتم عبر مراكز الاستلام فقط. يرجى اختيار مركز.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setSubmitting(true);
     try {
       // Create order server-side via SECURITY DEFINER RPC.
       // Total, prices, shipping, and coupon redemption are computed from
       // the database — the client cannot tamper with total_amount.
-      const fullAddress = composeAddress(formData);
+      const fullAddress = composeAddress();
       const { data: newOrderId, error: orderError } = await supabase.rpc("create_order", {
         _items: cartItems.map((item) => ({
           product_id: item.product.id,
@@ -368,7 +377,9 @@ const Checkout = () => {
         _notes: formData.notes || null,
         _coupon_code: appliedCoupon?.code || null,
         _payment_method: paymentMethod,
+        _pickup_center_id: selectedCenter.id,
       });
+
 
       if (orderError) throw orderError;
       const order = { id: newOrderId as string };

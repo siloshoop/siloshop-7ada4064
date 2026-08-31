@@ -347,7 +347,8 @@ const ProductCard = memo(({
           {isOutOfStock ? "نفذت الكمية" : "أضف للسلة"}
         </Button>
       </div>
-    </div>
+    </a>
+
   );
 });
 

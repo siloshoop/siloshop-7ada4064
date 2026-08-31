@@ -342,7 +342,7 @@ const Checkout = () => {
               customer_name: customerName,
               items: vendorItems,
               total_amount: vendorTotal,
-              shipping_address: formData.shipping_address,
+              shipping_address: fullAddress,
             },
           });
         } catch (notifyError) {

@@ -145,7 +145,7 @@ const SellerStore = () => {
                 <Input id="cover_image_url" value={form.cover_image_url ?? ""} onChange={set("cover_image_url")} dir="ltr" />
               </div>
             </div>
-            {(form.logo_url || form.cover_image_url) && (
+            {(logoPreview || coverPreview) && (
               <div className="flex items-center gap-3">
                 {form.logo_url && <img src={form.logo_url} alt="شعار المتجر" className="h-12 w-12 rounded-md object-cover" />}
                 {form.cover_image_url && <img src={form.cover_image_url} alt="غلاف المتجر" className="h-12 flex-1 rounded-md object-cover" />}

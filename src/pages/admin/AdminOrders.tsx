@@ -16,7 +16,7 @@ import {
   Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle,
 } from "@/components/ui/dialog";
 import {
-  Loader2, Search, Download, Eye, Snowflake, Unlock, Truck, RefreshCw,
+  Loader2, Search, Download, Eye, Snowflake, Unlock, RotateCcw, Truck, RefreshCw,
   ExternalLink, ShieldAlert, ScrollText, MessageSquare, Lock,
 } from "lucide-react";
 import OrderStatusBadge from "@/components/orders/OrderStatusBadge";

@@ -23,11 +23,17 @@ const checkoutSchema = z.object({
     .min(1, "رقم الهاتف مطلوب")
     .transform((v) => v.replace(/[\s-]/g, ""))
     .pipe(z.string().regex(/^09\d{8}$/, "رقم الهاتف يجب أن يكون بصيغة 09xxxxxxxx")),
-  shipping_address: z.string()
+  governorate: z.string()
     .min(1, "يرجى اختيار المحافظة")
     .refine((v) => (SYRIAN_GOVERNORATES as readonly string[]).includes(v), "يرجى اختيار محافظة صحيحة"),
+  area: z.string().trim().min(2, "يرجى إدخال المدينة أو المنطقة").max(100, "المنطقة طويلة جداً"),
+  street: z.string().trim().min(5, "يرجى إدخال الشارع وأقرب علامة مميزة").max(200, "العنوان طويل جداً"),
   notes: z.string().max(1000, "الملاحظات طويلة جداً").optional(),
 });
+
+const composeAddress = (f: { governorate: string; area: string; street: string }) =>
+  [f.governorate, f.area.trim(), f.street.trim()].filter(Boolean).join("، ");
+
 
 interface CartItem {
   id: string;
@@ -71,9 +77,12 @@ const Checkout = () => {
 
   const [formData, setFormData] = useState({
     phone: "",
-    shipping_address: "",
+    governorate: "",
+    area: "",
+    street: "",
     notes: "",
   });
+
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -101,9 +110,12 @@ const Checkout = () => {
         setFormData((f) => ({
           ...f,
           phone: def.phone || f.phone,
-          shipping_address: def.city,
+          governorate: def.governorate || def.city || f.governorate,
+          area: def.city || f.area,
+          street: [def.street, def.building, def.apartment, def.landmark].filter(Boolean).join(" - ") || f.street,
         }));
       }
+
     };
     void loadAddresses();
   }, [user]);
@@ -251,7 +263,7 @@ const Checkout = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!user || cartItems.length === 0) return;
+    if (!user || cartItems.length === 0 || submitting) return;
 
     if (isMixedCart) {
       toast({
@@ -280,13 +292,14 @@ const Checkout = () => {
       // Create order server-side via SECURITY DEFINER RPC.
       // Total, prices, shipping, and coupon redemption are computed from
       // the database — the client cannot tamper with total_amount.
+      const fullAddress = composeAddress(formData);
       const { data: newOrderId, error: orderError } = await supabase.rpc("create_order", {
         _items: cartItems.map((item) => ({
           product_id: item.product.id,
           quantity: item.quantity,
         })),
         _phone: formData.phone,
-        _shipping_address: formData.shipping_address,
+        _shipping_address: fullAddress,
         _notes: formData.notes || null,
         _coupon_code: appliedCoupon?.code || null,
         _payment_method: paymentMethod,
@@ -329,7 +342,7 @@ const Checkout = () => {
               customer_name: customerName,
               items: vendorItems,
               total_amount: vendorTotal,
-              shipping_address: formData.shipping_address,
+              shipping_address: fullAddress,
             },
           });
         } catch (notifyError) {
@@ -460,7 +473,13 @@ const Checkout = () => {
                             key={a.id}
                             onClick={() => {
                               setSelectedAddressId(a.id);
-                              setFormData({ ...formData, phone: a.phone, shipping_address: a.city });
+                              setFormData({
+                                ...formData,
+                                phone: a.phone,
+                                governorate: a.governorate || a.city || "",
+                                area: a.city || "",
+                                street: [a.street, a.building, a.apartment, a.landmark].filter(Boolean).join(" - "),
+                              });
                             }}
                             className={`text-right p-3 rounded-lg border text-sm transition-colors ${selectedAddressId === a.id ? "border-primary bg-primary/5" : "border-border hover:bg-muted/50"}`}
                           >
@@ -494,8 +513,8 @@ const Checkout = () => {
                   <div className="space-y-2">
                     <Label htmlFor="address">المحافظة *</Label>
                     <Select
-                      value={formData.shipping_address}
-                      onValueChange={(v) => setFormData({ ...formData, shipping_address: v })}
+                      value={formData.governorate}
+                      onValueChange={(v) => setFormData({ ...formData, governorate: v })}
                     >
                       <SelectTrigger id="address">
                         <SelectValue placeholder="اختر المحافظة" />
@@ -507,6 +526,29 @@ const Checkout = () => {
                       </SelectContent>
                     </Select>
                   </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="area">المدينة / المنطقة *</Label>
+                    <Input
+                      id="area"
+                      value={formData.area}
+                      onChange={(e) => setFormData({ ...formData, area: e.target.value })}
+                      required
+                      placeholder="مثال: حماة - حي الأربعين"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="street">الشارع وأقرب علامة مميزة *</Label>
+                    <Input
+                      id="street"
+                      value={formData.street}
+                      onChange={(e) => setFormData({ ...formData, street: e.target.value })}
+                      required
+                      placeholder="مثال: شارع القوتلي، بناء رقم 5، بجانب صيدلية النور"
+                    />
+                  </div>
+
 
                   <div className="space-y-2">
                     <Label htmlFor="notes">ملاحظات إضافية (اختياري)</Label>

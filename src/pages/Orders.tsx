@@ -171,7 +171,8 @@ const Orders = () => {
       let query = supabase
         .from("orders")
         .select("id, order_number, created_at, total_amount, status, tracking_status, delivered_at", { count: "exact" })
-        .eq("customer_id", user.id);
+        .eq("customer_id", user.id)
+        .is("parent_order_id", null);
 
       if (statusFilter !== "all") {
         if (statusFilter === "preparing") {

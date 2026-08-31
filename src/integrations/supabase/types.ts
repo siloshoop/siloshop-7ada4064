@@ -1632,6 +1632,7 @@ export type Database = {
           notes: string | null
           order_kind: string
           order_number: string | null
+          parent_order_id: string | null
           payment_method: string
           payment_status: string
           phone: string | null
@@ -1648,6 +1649,7 @@ export type Database = {
           tracking_number: string | null
           tracking_status: string | null
           updated_at: string | null
+          vendor_id: string | null
         }
         Insert: {
           cancellation_reason?: string | null
@@ -1679,6 +1681,7 @@ export type Database = {
           notes?: string | null
           order_kind?: string
           order_number?: string | null
+          parent_order_id?: string | null
           payment_method?: string
           payment_status?: string
           phone?: string | null
@@ -1695,6 +1698,7 @@ export type Database = {
           tracking_number?: string | null
           tracking_status?: string | null
           updated_at?: string | null
+          vendor_id?: string | null
         }
         Update: {
           cancellation_reason?: string | null
@@ -1726,6 +1730,7 @@ export type Database = {
           notes?: string | null
           order_kind?: string
           order_number?: string | null
+          parent_order_id?: string | null
           payment_method?: string
           payment_status?: string
           phone?: string | null
@@ -1742,6 +1747,7 @@ export type Database = {
           tracking_number?: string | null
           tracking_status?: string | null
           updated_at?: string | null
+          vendor_id?: string | null
         }
         Relationships: [
           {
@@ -1749,6 +1755,13 @@ export type Database = {
             columns: ["customer_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "orders_parent_order_id_fkey"
+            columns: ["parent_order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
             referencedColumns: ["id"]
           },
         ]
@@ -4159,6 +4172,19 @@ export type Database = {
         }
         Returns: undefined
       }
+      admin_order_sub_orders: {
+        Args: { _order_id: string }
+        Returns: {
+          created_at: string
+          id: string
+          items_count: number
+          order_number: string
+          status: string
+          total_amount: number
+          vendor_id: string
+          vendor_name: string
+        }[]
+      }
       admin_refund_order: {
         Args: { _order_id: string; _reason: string }
         Returns: undefined
@@ -4307,28 +4333,17 @@ export type Database = {
       }
       check_email_registered: { Args: { p_email: string }; Returns: Json }
       cleanup_old_rate_limits: { Args: never; Returns: undefined }
-      create_order:
-        | {
-            Args: {
-              _coupon_code?: string
-              _items: Json
-              _notes?: string
-              _phone: string
-              _shipping_address: string
-            }
-            Returns: string
-          }
-        | {
-            Args: {
-              _coupon_code?: string
-              _items: Json
-              _notes?: string
-              _payment_method?: string
-              _phone: string
-              _shipping_address: string
-            }
-            Returns: string
-          }
+      create_order: {
+        Args: {
+          _coupon_code?: string
+          _items: Json
+          _notes?: string
+          _payment_method?: string
+          _phone: string
+          _shipping_address: string
+        }
+        Returns: string
+      }
       create_return_request: {
         Args: {
           _customer_note?: string
@@ -4475,6 +4490,10 @@ export type Database = {
         Returns: boolean
       }
       is_feature_enabled: { Args: { _key: string }; Returns: boolean }
+      is_order_vendor: {
+        Args: { _order_id: string; _uid: string }
+        Returns: boolean
+      }
       is_valid_order_status: { Args: { _status: string }; Returns: boolean }
       latest_public_reviews: {
         Args: { _limit?: number }
@@ -4777,6 +4796,18 @@ export type Database = {
           tracking_number: string
           updated_at: string
           vendor_subtotal: number
+        }[]
+      }
+      seller_order_items: {
+        Args: { _order_id: string }
+        Returns: {
+          id: string
+          price: number
+          product_image: string
+          product_name: string
+          quantity: number
+          subtotal: number
+          variant_label: string
         }[]
       }
       seller_request_payout: {

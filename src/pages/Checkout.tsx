@@ -16,6 +16,8 @@ import { Link } from "react-router-dom";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { SYRIAN_GOVERNORATES } from "@/lib/syrianGovernorates";
 import { useFeatureFlags } from "@/hooks/useFeatureFlags";
+import { usePickupCenters } from "@/hooks/usePickupCenters";
+
 
 const checkoutSchema = z.object({
   phone: z.string()
@@ -25,13 +27,11 @@ const checkoutSchema = z.object({
   governorate: z.string()
     .min(1, "يرجى اختيار المحافظة")
     .refine((v) => (SYRIAN_GOVERNORATES as readonly string[]).includes(v), "يرجى اختيار محافظة صحيحة"),
-  area: z.string().trim().min(2, "يرجى إدخال المدينة أو المنطقة").max(100, "المنطقة طويلة جداً"),
-  street: z.string().trim().min(5, "يرجى إدخال الشارع وأقرب علامة مميزة").max(200, "العنوان طويل جداً"),
+  area: z.string().trim().min(2, "يرجى اختيار المدينة أو المنطقة").max(100, "المنطقة طويلة جداً"),
+  street: z.string().max(200, "العنوان طويل جداً").optional(),
   notes: z.string().max(1000, "الملاحظات طويلة جداً").optional(),
 });
 
-const composeAddress = (f: { governorate: string; area: string; street: string }) =>
-  [f.governorate, f.area.trim(), f.street.trim()].filter(Boolean).join("، ");
 
 
 interface CartItem {
@@ -89,6 +89,7 @@ const Checkout = () => {
   const [shamSettings, setShamSettings] = useState<PlatformPaymentSettings | null>(null);
   const [platformOptions, setPlatformOptions] = useState<PlatformOptions | null>(null);
   const [selectedPlatformMethod, setSelectedPlatformMethod] = useState<PlatformMethod | null>(null);
+  const [selectedCenterId, setSelectedCenterId] = useState<string>("");
   const navigate = useNavigate();
   const { toast } = useToast();
   const { isEnabled } = useFeatureFlags();
@@ -100,6 +101,36 @@ const Checkout = () => {
     street: "",
     notes: "",
   });
+
+  // Deliveries in Syria are pickup-center only (no door-to-door).
+  const { centers, loading: centersLoading } = usePickupCenters(formData.governorate || undefined);
+  const centersInArea = formData.area
+    ? centers.filter((c) => c.city === formData.area)
+    : centers;
+  const selectedCenter = centers.find((c) => c.id === selectedCenterId) || null;
+  const areaOptions = Array.from(new Set(centers.map((c) => c.city)));
+
+  const composeAddress = () =>
+    selectedCenter
+      ? [
+          "استلام من المركز",
+          selectedCenter.name,
+          selectedCenter.governorate,
+          selectedCenter.city,
+          selectedCenter.address,
+        ]
+          .filter(Boolean)
+          .join("، ")
+      : "";
+
+  // Reset the chosen center whenever the governorate/area changes.
+  useEffect(() => {
+    if (selectedCenterId && !centersInArea.some((c) => c.id === selectedCenterId)) {
+      setSelectedCenterId("");
+    }
+  }, [centersInArea, selectedCenterId]);
+
+
 
 
   useEffect(() => {
@@ -321,12 +352,21 @@ const Checkout = () => {
       return;
     }
 
+    if (!selectedCenter) {
+      toast({
+        title: "مركز الاستلام مطلوب",
+        description: "التوصيل داخل سوريا يتم عبر مراكز الاستلام فقط. يرجى اختيار مركز.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setSubmitting(true);
     try {
       // Create order server-side via SECURITY DEFINER RPC.
       // Total, prices, shipping, and coupon redemption are computed from
       // the database — the client cannot tamper with total_amount.
-      const fullAddress = composeAddress(formData);
+      const fullAddress = composeAddress();
       const { data: newOrderId, error: orderError } = await supabase.rpc("create_order", {
         _items: cartItems.map((item) => ({
           product_id: item.product.id,
@@ -337,7 +377,9 @@ const Checkout = () => {
         _notes: formData.notes || null,
         _coupon_code: appliedCoupon?.code || null,
         _payment_method: paymentMethod,
+        _pickup_center_id: selectedCenter.id,
       });
+
 
       if (orderError) throw orderError;
       const order = { id: newOrderId as string };
@@ -417,6 +459,15 @@ const Checkout = () => {
         });
         return;
       }
+      if (message.includes("PICKUP_CENTER")) {
+        toast({
+          title: "مركز الاستلام غير متاح",
+          description: "مركز الاستلام المختار غير متاح حالياً. يرجى اختيار مركز آخر.",
+          variant: "destructive",
+        });
+        return;
+      }
+
       if (message.includes("MIXED_CART")) {
         toast({
           title: "لا يمكن إتمام الطلب",
@@ -565,25 +616,71 @@ const Checkout = () => {
 
                   <div className="space-y-2">
                     <Label htmlFor="area">المدينة / المنطقة *</Label>
-                    <Input
-                      id="area"
+                    <Select
                       value={formData.area}
-                      onChange={(e) => setFormData({ ...formData, area: e.target.value })}
-                      required
-                      placeholder="مثال: حماة - حي الأربعين"
-                    />
+                      onValueChange={(v) => setFormData({ ...formData, area: v })}
+                      disabled={!formData.governorate || centersLoading || areaOptions.length === 0}
+                    >
+                      <SelectTrigger id="area">
+                        <SelectValue
+                          placeholder={
+                            !formData.governorate
+                              ? "اختر المحافظة أولاً"
+                              : centersLoading
+                                ? "جارٍ التحميل..."
+                                : areaOptions.length === 0
+                                  ? "لا توجد مراكز استلام في هذه المحافظة"
+                                  : "اختر المدينة / المنطقة"
+                          }
+                        />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {areaOptions.map((c) => (
+                          <SelectItem key={c} value={c}>{c}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="street">الشارع وأقرب علامة مميزة *</Label>
-                    <Input
-                      id="street"
-                      value={formData.street}
-                      onChange={(e) => setFormData({ ...formData, street: e.target.value })}
-                      required
-                      placeholder="مثال: شارع القوتلي، بناء رقم 5، بجانب صيدلية النور"
-                    />
+                    <Label htmlFor="pickup-center">مركز الاستلام *</Label>
+                    <Select
+                      value={selectedCenterId}
+                      onValueChange={setSelectedCenterId}
+                      disabled={centersInArea.length === 0}
+                    >
+                      <SelectTrigger id="pickup-center">
+                        <SelectValue
+                          placeholder={
+                            centersInArea.length === 0
+                              ? "لا توجد مراكز متاحة"
+                              : "اختر مركز الاستلام"
+                          }
+                        />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {centersInArea.map((c) => (
+                          <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    {selectedCenter && (
+                      <div className="rounded-lg border border-border/60 bg-muted/40 p-3 text-xs leading-relaxed">
+                        <p className="font-semibold">{selectedCenter.name}</p>
+                        <p className="text-muted-foreground">{selectedCenter.address}</p>
+                        {selectedCenter.phone && (
+                          <p className="text-muted-foreground" dir="ltr">{selectedCenter.phone}</p>
+                        )}
+                        {selectedCenter.working_hours && (
+                          <p className="text-muted-foreground">أوقات العمل: {selectedCenter.working_hours}</p>
+                        )}
+                      </div>
+                    )}
+                    <p className="text-xs text-muted-foreground">
+                      التوصيل داخل سوريا يتم عبر مراكز الاستلام فقط، ولا يوجد توصيل إلى المنازل.
+                    </p>
                   </div>
+
 
 
                   <div className="space-y-2">

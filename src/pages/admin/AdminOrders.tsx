@@ -274,7 +274,9 @@ const AdminOrders = () => {
 
   const totalPages = useMemo(() => Math.max(1, Math.ceil(total / PAGE_SIZE)), [total]);
 
+  return (
     <AdminLayout
+
       title="إدارة الطلبات"
       description="متابعة الطلبات، تجاوز الحالات، التجميد وإعادة الفتح."
       actions={

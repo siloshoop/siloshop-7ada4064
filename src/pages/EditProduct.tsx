@@ -133,7 +133,6 @@ const EditProduct = () => {
               shipping_weight: p.shipping_weight?.toString() || "",
               shipping_class: p.shipping_class || "",
               warranty: p.warranty || "",
-              return_policy: p.return_policy || "",
               country_of_origin: p.country_of_origin || "",
               slug: p.slug || "",
               seo_title: p.seo_title || "",

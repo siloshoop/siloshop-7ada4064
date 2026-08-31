@@ -93,6 +93,8 @@ const AdminCoupons = lazy(() => import("./pages/admin/AdminCoupons"));
 const AdminInventory = lazy(() => import("./pages/admin/AdminInventory"));
 const AdminContent = lazy(() => import("./pages/admin/AdminContent"));
 const AdminSettings = lazy(() => import("./pages/admin/AdminSettings"));
+const AdminPickupCenters = lazy(() => import("./pages/admin/PickupCenters"));
+
 const ContentPage = lazy(() => import("./pages/ContentPage"));
 const Privacy = lazy(() => import("./pages/Privacy"));
 const Terms = lazy(() => import("./pages/Terms"));

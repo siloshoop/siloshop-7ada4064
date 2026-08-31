@@ -50,6 +50,25 @@ interface CartItem {
   };
 }
 
+interface PlatformOptions {
+  sham_cash_enabled: boolean;
+  cod_enabled: boolean;
+  electronic_payment_enabled: boolean;
+  free_shipping: boolean;
+  shipping_fee: number;
+  apply_to_all_products: boolean;
+  instructions: string | null;
+  electronic_payment_instructions: string | null;
+}
+
+type PlatformMethod = "sham_cash" | "cod" | "electronic";
+
+const METHOD_LABELS: Record<PlatformMethod, string> = {
+  cod: "الدفع عند الاستلام",
+  sham_cash: "شام كاش",
+  electronic: "الدفع الإلكتروني في سوريا",
+};
+
 interface PlatformPaymentSettings {
   sham_cash_account_name: string;
   sham_cash_account_number: string;
@@ -68,8 +87,8 @@ const Checkout = () => {
   const [savedAddresses, setSavedAddresses] = useState<any[]>([]);
   const [selectedAddressId, setSelectedAddressId] = useState<string>("");
   const [shamSettings, setShamSettings] = useState<PlatformPaymentSettings | null>(null);
-  const [platformOptions, setPlatformOptions] = useState<{ sham_cash_enabled: boolean; cod_enabled: boolean } | null>(null);
-  const [selectedPlatformMethod, setSelectedPlatformMethod] = useState<"sham_cash" | "cod" | null>(null);
+  const [platformOptions, setPlatformOptions] = useState<PlatformOptions | null>(null);
+  const [selectedPlatformMethod, setSelectedPlatformMethod] = useState<PlatformMethod | null>(null);
   const navigate = useNavigate();
   const { toast } = useToast();
   const { isEnabled } = useFeatureFlags();
@@ -151,51 +170,67 @@ const Checkout = () => {
     0
   );
 
-  const shippingTotal = cartItems.reduce(
-    (sum, item) => sum + Number((item.product as any).shipping_cost || 0),
-    0
-  );
-
-  const total = subtotal + shippingTotal - discount;
-
-  // Payment model (enforced server-side in create_order):
-  //  - Seller products  -> Cash on Delivery ONLY.
-  //  - Platform products -> only the methods the platform owner enabled
-  //    (Sham Cash / Cash on Delivery), validated again inside create_order.
+  // Payment + shipping model (enforced server-side in create_order):
+  //  - Seller products   -> per-product shipping, Cash on Delivery only.
+  //  - Turkish (platform) products -> shipping and payment methods come from
+  //    the admin "Turkish Products" settings. The admin can also choose to
+  //    apply those settings to all products.
   const hasPlatformItems = cartItems.some((i) => i.product.product_type === "platform");
   const hasSellerItems = cartItems.some((i) => i.product.product_type !== "platform");
   const isMixedCart = hasPlatformItems && hasSellerItems;
   const platformEnabled = isEnabled("platform_marketplace");
-  const platformShamAvailable = !!platformOptions?.sham_cash_enabled;
-  const platformCodAvailable = !!platformOptions?.cod_enabled;
-  const platformHasMethod = platformShamAvailable || platformCodAvailable;
-  const platformBlocked = hasPlatformItems && (!platformEnabled || !platformHasMethod);
-  const paymentMethod: "sham_cash" | "cod" =
-    hasPlatformItems && !isMixedCart && platformEnabled
-      ? (selectedPlatformMethod ?? (platformShamAvailable ? "sham_cash" : "cod"))
-      : "cod";
+  const applyToAll = !!platformOptions?.apply_to_all_products;
+  const usePlatformRules = (hasPlatformItems && !isMixedCart && platformEnabled) || applyToAll;
+
+  const availableMethods: PlatformMethod[] = usePlatformRules
+    ? ([
+        platformOptions?.cod_enabled ? "cod" : null,
+        platformOptions?.sham_cash_enabled ? "sham_cash" : null,
+        platformOptions?.electronic_payment_enabled ? "electronic" : null,
+      ].filter(Boolean) as PlatformMethod[])
+    : ["cod"];
+
+  const platformBlocked =
+    hasPlatformItems && (!platformEnabled || availableMethods.length === 0);
+
+  const paymentMethod: PlatformMethod = usePlatformRules
+    ? ((selectedPlatformMethod && availableMethods.includes(selectedPlatformMethod)
+        ? selectedPlatformMethod
+        : availableMethods[0]) ?? "cod")
+    : "cod";
+
+  const productShipping = cartItems.reduce(
+    (sum, item) => sum + Number((item.product as any).shipping_cost || 0),
+    0
+  );
+  const shippingTotal = usePlatformRules
+    ? platformOptions?.free_shipping
+      ? 0
+      : Number(platformOptions?.shipping_fee || 0)
+    : productShipping;
+
+  const total = Math.max(subtotal + shippingTotal - discount, 0);
 
   useEffect(() => {
-    if (!hasPlatformItems) return;
     void (async () => {
       const { data } = await supabase.rpc("get_platform_payment_options");
       const opts = Array.isArray(data) ? data[0] : (data as any);
-      if (opts) {
-        setPlatformOptions({
-          sham_cash_enabled: !!opts.sham_cash_enabled,
-          cod_enabled: !!opts.cod_enabled,
-        });
-        setSelectedPlatformMethod((cur) => {
-          if (cur === "sham_cash" && opts.sham_cash_enabled) return cur;
-          if (cur === "cod" && opts.cod_enabled) return cur;
-          return opts.sham_cash_enabled ? "sham_cash" : opts.cod_enabled ? "cod" : null;
-        });
-      }
+      if (!opts) return;
+      setPlatformOptions({
+        sham_cash_enabled: !!opts.sham_cash_enabled,
+        cod_enabled: !!opts.cod_enabled,
+        electronic_payment_enabled: !!opts.electronic_payment_enabled,
+        free_shipping: !!opts.free_shipping,
+        shipping_fee: Number(opts.shipping_fee || 0),
+        apply_to_all_products: !!opts.apply_to_all_products,
+        instructions: opts.instructions ?? null,
+        electronic_payment_instructions: opts.electronic_payment_instructions ?? null,
+      });
     })();
-  }, [hasPlatformItems]);
+  }, []);
 
   useEffect(() => {
-    if (!hasPlatformItems || !platformShamAvailable) return;
+    if (!platformOptions?.sham_cash_enabled) return;
     void (async () => {
       const { data } = await supabase
         .from("platform_payment_settings")
@@ -204,7 +239,7 @@ const Checkout = () => {
         .maybeSingle();
       if (data) setShamSettings(data as PlatformPaymentSettings);
     })();
-  }, [hasPlatformItems, platformShamAvailable]);
+  }, [platformOptions?.sham_cash_enabled]);
 
   const applyCoupon = async () => {
     if (!couponCode.trim()) {

@@ -24,11 +24,14 @@ async function sendWebPush(
     sub: "mailto:notifications@example.com",
   };
 
-  // Base64URL encode
+  // Base64URL encode (binary safe — decoding bytes as text corrupts signatures)
   const base64url = (data: Uint8Array | string): string => {
-    const str = typeof data === "string" ? data : new TextDecoder().decode(data);
-    return btoa(str).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+    const bytes = typeof data === "string" ? encoder.encode(data) : data;
+    let binary = "";
+    for (const b of bytes) binary += String.fromCharCode(b);
+    return btoa(binary).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
   };
+
 
   const base64urlEncode = (obj: object): string => {
     return base64url(JSON.stringify(obj));

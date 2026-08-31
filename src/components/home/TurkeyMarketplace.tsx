@@ -1,4 +1,6 @@
 import { Clock, Package, ShieldCheck } from "lucide-react";
+import { Link } from "react-router-dom";
+import { Button } from "@/components/ui/button";
 import { useFeatureFlags } from "@/hooks/useFeatureFlags";
 import SectionHeader from "@/components/home/SectionHeader";
 
@@ -17,7 +19,8 @@ const TurkeyMarketplace = () => {
         <SectionHeader
           eyebrow="🇹🇷 التسوق من تركيا"
           title="منتجات مستوردة من تركيا"
-          subtitle="منتجات أصلية مختارة من المنصة، تُشترى بالدفع الإلكتروني."
+          subtitle="منتجات أصلية مختارة من المنصة، بشحن وطرق دفع محددة من الإدارة."
+          href="/turkish-products"
           tone="accent"
         />
 
@@ -37,6 +40,11 @@ const TurkeyMarketplace = () => {
                 <p className="mt-1 text-xs leading-relaxed text-muted-foreground">{body}</p>
               </div>
             ))}
+          </div>
+          <div className="relative mt-4">
+            <Button asChild variant="accent" size="sm">
+              <Link to="/turkish-products">تصفح المنتجات التركية</Link>
+            </Button>
           </div>
         </div>
       </div>

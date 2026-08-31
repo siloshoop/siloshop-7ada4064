@@ -243,9 +243,23 @@ const OrderDetails = () => {
             <p className="flex items-center gap-2"><Calendar className="h-4 w-4 text-muted-foreground" />
               {format(new Date(order.created_at), "dd MMMM yyyy - HH:mm", { locale: ar })}
             </p>
-            {order.shipping_address && (
+            {(order as any).pickup_center_name ? (
+              <div className="flex items-start gap-2">
+                <MapPin className="mt-0.5 h-4 w-4 text-muted-foreground" />
+                <span>
+                  <span className="font-semibold">الاستلام من: {(order as any).pickup_center_name}</span>
+                  {(order as any).pickup_center_address && (
+                    <span className="block text-muted-foreground">{(order as any).pickup_center_address}</span>
+                  )}
+                  {(order as any).pickup_center_phone && (
+                    <span className="block text-muted-foreground" dir="ltr">{(order as any).pickup_center_phone}</span>
+                  )}
+                </span>
+              </div>
+            ) : order.shipping_address ? (
               <p className="flex items-start gap-2"><MapPin className="h-4 w-4 text-muted-foreground mt-0.5" />{order.shipping_address}</p>
-            )}
+            ) : null}
+
             {order.phone && <p className="flex items-center gap-2" dir="ltr"><Phone className="h-4 w-4 text-muted-foreground" />{order.phone}</p>}
             {order.notes && <p className="text-muted-foreground bg-muted/50 p-2 rounded">{order.notes}</p>}
             <p className="flex items-center gap-2"><Receipt className="h-4 w-4 text-muted-foreground" />طريقة الدفع: <span className="font-semibold">الدفع عند الاستلام</span></p>

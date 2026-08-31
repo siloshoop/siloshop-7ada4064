@@ -23,11 +23,17 @@ const checkoutSchema = z.object({
     .min(1, "رقم الهاتف مطلوب")
     .transform((v) => v.replace(/[\s-]/g, ""))
     .pipe(z.string().regex(/^09\d{8}$/, "رقم الهاتف يجب أن يكون بصيغة 09xxxxxxxx")),
-  shipping_address: z.string()
+  governorate: z.string()
     .min(1, "يرجى اختيار المحافظة")
     .refine((v) => (SYRIAN_GOVERNORATES as readonly string[]).includes(v), "يرجى اختيار محافظة صحيحة"),
+  area: z.string().trim().min(2, "يرجى إدخال المدينة أو المنطقة").max(100, "المنطقة طويلة جداً"),
+  street: z.string().trim().min(5, "يرجى إدخال الشارع وأقرب علامة مميزة").max(200, "العنوان طويل جداً"),
   notes: z.string().max(1000, "الملاحظات طويلة جداً").optional(),
 });
+
+const composeAddress = (f: { governorate: string; area: string; street: string }) =>
+  [f.governorate, f.area.trim(), f.street.trim()].filter(Boolean).join("، ");
+
 
 interface CartItem {
   id: string;

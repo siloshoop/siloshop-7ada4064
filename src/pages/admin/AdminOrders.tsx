@@ -16,18 +16,16 @@ import {
   Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle,
 } from "@/components/ui/dialog";
 import {
-  Loader2, Search, Download, Eye, Snowflake, Unlock, RotateCcw, Truck, RefreshCw,
-  ExternalLink, ShieldAlert, Wallet, ScrollText, MessageSquare, Lock,
+  Loader2, Search, Download, Eye, Snowflake, Unlock, Truck, RefreshCw,
+  ExternalLink, ShieldAlert, ScrollText, MessageSquare, Lock,
 } from "lucide-react";
 import OrderStatusBadge from "@/components/orders/OrderStatusBadge";
 import OrderTimelineLog from "@/components/orders/OrderTimelineLog";
 import ShippingInfoDialog from "@/components/orders/ShippingInfoDialog";
 import {
   ORDER_STATUSES, ORDER_STATUS_LABELS, changeOrderStatus, setOrderFreeze, reopenOrder,
-  changeRefundStatus, nextRefundStatuses, REFUND_LABELS, resolveReturnDispute,
-  friendlyOrderError, normalizeStatus, type OrderStatus, type RefundStatus,
+  friendlyOrderError, normalizeStatus, type OrderStatus,
 } from "@/lib/orderStatus";
-import { RETURN_STATUS, RETURN_REASONS } from "@/lib/returnStatus";
 
 type OrderRow = {
   id: string;
@@ -67,24 +65,11 @@ type DetailPayload = {
   customer: Record<string, any> | null;
 };
 
-type ReturnRow = {
-  id: string;
-  order_id: string;
-  customer_id: string;
-  vendor_id: string;
-  reason: string;
-  notes: string | null;
-  status: string;
-  review_note: string | null;
-  created_at: string;
-};
-
 const PAY_STATUSES = ["pending", "completed", "failed", "refunded"];
 const PAY_LABEL: Record<string, string> = {
   pending: "بانتظار الدفع", completed: "مدفوع", failed: "فشل", refunded: "مسترد",
 };
 const REOPEN_TARGETS: OrderStatus[] = ["pending", "confirmed", "preparing", "ready_for_shipping", "shipped"];
-const DISPUTE_STATUSES = ["pending", "under_review", "info_requested", "rejected", "approved"];
 const PAGE_SIZE = 50;
 const money = (n: unknown) => `${Number(n ?? 0).toLocaleString("ar-SY")} ل.س`;
 const orderLabel = (r: { order_number?: string | null; id: string }) => r.order_number || `#${r.id.slice(0, 8)}`;
@@ -116,8 +101,6 @@ const AdminOrders = () => {
   const [freezeReason, setFreezeReason] = useState("");
   const [reopenStatus, setReopenStatus] = useState<OrderStatus>("confirmed");
   const [reopenReason, setReopenReason] = useState("");
-  const [refundNext, setRefundNext] = useState<RefundStatus | "">("");
-  const [refundNote, setRefundNote] = useState("");
   const [history, setHistory] = useState<Array<{ id: string; status: string; total_amount: number; role: string }>>([]);
 
   // notes thread
@@ -135,11 +118,6 @@ const AdminOrders = () => {
   const [savingShip, setSavingShip] = useState(false);
 
   const [exporting, setExporting] = useState(false);
-
-  // return disputes
-  const [returns, setReturns] = useState<ReturnRow[]>([]);
-  const [returnsLoading, setReturnsLoading] = useState(true);
-  const [disputeNotes, setDisputeNotes] = useState<Record<string, string>>({});
 
   useEffect(() => {
     const t = setTimeout(() => { setDebounced(search); setPage(0); }, 350);
@@ -170,21 +148,6 @@ const AdminOrders = () => {
 
   useEffect(() => { void load(); }, [load]);
 
-  const loadReturns = useCallback(async () => {
-    setReturnsLoading(true);
-    const { data, error } = await supabase
-      .from("returns")
-      .select("id,order_id,customer_id,vendor_id,reason,notes,status,review_note,created_at")
-      .in("status", DISPUTE_STATUSES)
-      .order("created_at", { ascending: false })
-      .limit(100);
-    if (error) toast({ title: "تعذر تحميل طلبات الإرجاع", description: friendlyOrderError(error), variant: "destructive" });
-    setReturns((data as ReturnRow[]) || []);
-    setReturnsLoading(false);
-  }, [toast]);
-
-  useEffect(() => { void loadReturns(); }, [loadReturns]);
-
   const loadNotes = useCallback(async (orderId: string) => {
     setNotesLoading(true);
     const { data, error } = await supabase.rpc("list_order_notes", { _order_id: orderId });
@@ -198,16 +161,15 @@ const AdminOrders = () => {
     const ch = supabase
       .channel("admin-orders-live")
       .on("postgres_changes", { event: "*", schema: "public", table: "orders" }, () => void load())
-      .on("postgres_changes", { event: "*", schema: "public", table: "returns" }, () => void loadReturns())
       .subscribe();
     return () => { supabase.removeChannel(ch); };
-  }, [load, loadReturns]);
+  }, [load]);
 
   const openOrder = useCallback(async (orderId: string, customerId?: string) => {
     setOpenId(orderId);
     setDetail(null); setDetailLoading(true);
-    setStatusNote(""); setFreezeReason(""); setReopenReason(""); setRefundNote("");
-    setOverride(false); setRefundNext(""); setNewNote(""); setNoteInternal(true);
+    setStatusNote(""); setFreezeReason(""); setReopenReason("");
+    setOverride(false); setNewNote(""); setNoteInternal(true);
     setShipCompany(""); setShipTracking(""); setShipNotes(""); setShipEta("");
     const [{ data: d, error }, { data: h }] = await Promise.all([
       supabase.rpc("admin_get_order_detail", { _order_id: orderId }),
@@ -245,7 +207,6 @@ const AdminOrders = () => {
 
   const order = detail?.order;
   const isFrozen = !!order?.is_frozen;
-  const refundStatus = (order?.refund_status || "none") as RefundStatus;
   const isClosed = ["cancelled", "completed", "returned"].includes(normalizeStatus(order?.status));
 
   const CSV_COLUMNS: Array<{ key: keyof OrderRow; label: string }> = [
@@ -314,29 +275,9 @@ const AdminOrders = () => {
 
   const totalPages = useMemo(() => Math.max(1, Math.ceil(total / PAGE_SIZE)), [total]);
 
-  const decideDispute = async (r: ReturnRow, decision: "approve" | "reject") => {
-    const note = (disputeNotes[r.id] || "").trim();
-    if (!note) {
-      toast({ title: "السبب مطلوب", description: "اكتب قرار الإدارة قبل الحفظ", variant: "destructive" });
-      return;
-    }
-    setBusy(true);
-    try {
-      await resolveReturnDispute(r.id, decision, note);
-      toast({ title: decision === "approve" ? "تمت الموافقة على الإرجاع" : "تم رفض الإرجاع" });
-      setDisputeNotes((p) => ({ ...p, [r.id]: "" }));
-      await loadReturns();
-    } catch (e) {
-      toast({ title: "تعذر حفظ القرار", description: friendlyOrderError(e), variant: "destructive" });
-    } finally {
-      setBusy(false);
-    }
-  };
-
-  return (
     <AdminLayout
       title="إدارة الطلبات"
-      description="متابعة الطلبات، تجاوز الحالات، التجميد وإعادة الفتح، الاسترداد، ونزاعات الإرجاع."
+      description="متابعة الطلبات، تجاوز الحالات، التجميد وإعادة الفتح."
       actions={
         <div className="flex gap-2">
           <Button variant="outline" onClick={() => void load()} disabled={loading}>
@@ -351,9 +292,6 @@ const AdminOrders = () => {
       <Tabs defaultValue="orders" dir="rtl">
         <TabsList>
           <TabsTrigger value="orders">الطلبات</TabsTrigger>
-          <TabsTrigger value="disputes">
-            نزاعات الإرجاع {returns.length > 0 && `(${returns.length})`}
-          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="orders" className="space-y-4">
@@ -465,63 +403,6 @@ const AdminOrders = () => {
           </div>
         </TabsContent>
 
-        <TabsContent value="disputes">
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="flex items-center gap-2 text-base">
-                <RotateCcw className="h-4 w-4" /> نزاعات الإرجاع والاستبدال
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              {returnsLoading ? (
-                <div className="flex justify-center py-10"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>
-              ) : returns.length === 0 ? (
-                <p className="py-8 text-center text-sm text-muted-foreground">لا توجد نزاعات إرجاع بحاجة لقرار.</p>
-              ) : (
-                returns.map((r) => {
-                  const s = RETURN_STATUS[r.status] || RETURN_STATUS.pending;
-                  const reason = RETURN_REASONS.find((x) => x.value === r.reason)?.label || r.reason;
-                  return (
-                    <div key={r.id} className="space-y-2 rounded-lg border p-3 text-sm">
-                      <div className="flex flex-wrap items-center gap-2">
-                        <span className="font-mono text-xs">إرجاع #{r.id.slice(0, 8)}</span>
-                        <Badge variant={s.variant}>{s.label}</Badge>
-                        <span className="text-muted-foreground">السبب: {reason}</span>
-                        <Button asChild size="sm" variant="ghost" className="ms-auto">
-                          <Link to={`/orders/track/${r.order_id}`}>الطلب {r.order_id.slice(0, 8)}</Link>
-                        </Button>
-                        <Button size="sm" variant="outline" onClick={() => void openOrder(r.order_id, r.customer_id)}>
-                          فتح الطلب
-                        </Button>
-                      </div>
-                      {r.notes && <p className="rounded bg-muted/40 p-2 text-xs">{r.notes}</p>}
-                      {r.review_note && (
-                        <p className="rounded border border-primary/20 bg-primary/5 p-2 text-xs">
-                          <b>ملاحظة سابقة: </b>{r.review_note}
-                        </p>
-                      )}
-                      <Textarea
-                        rows={2}
-                        placeholder="قرار الإدارة النهائي وسببه (إلزامي)"
-                        value={disputeNotes[r.id] || ""}
-                        onChange={(e) => setDisputeNotes((p) => ({ ...p, [r.id]: e.target.value }))}
-                      />
-                      <div className="flex gap-2">
-                        <Button size="sm" disabled={busy} onClick={() => void decideDispute(r, "approve")}>
-                          موافقة نهائية
-                        </Button>
-                        <Button size="sm" variant="destructive" disabled={busy} onClick={() => void decideDispute(r, "reject")}>
-                          رفض نهائي
-                        </Button>
-                      </div>
-                    </div>
-                  );
-                })
-              )}
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
 
       <Dialog open={!!openId} onOpenChange={(o) => { if (!o) { setOpenId(null); setDetail(null); setHistory([]); } }}>
         <DialogContent className="max-h-[90vh] max-w-3xl overflow-y-auto" dir="rtl">
@@ -789,38 +670,6 @@ const AdminOrders = () => {
                 </div>
               </div>
 
-              <div className="space-y-2 rounded border p-3">
-                <p className="flex items-center gap-1 text-sm font-semibold">
-                  <Wallet className="h-4 w-4" /> مسار الاسترداد — الحالة الحالية: {REFUND_LABELS[refundStatus]}
-                </p>
-                {nextRefundStatuses(refundStatus).length === 0 ? (
-                  <p className="text-xs text-muted-foreground">لا توجد خطوة تالية في مسار الاسترداد.</p>
-                ) : (
-                  <>
-                    <Select value={refundNext} onValueChange={(v) => setRefundNext(v as RefundStatus)}>
-                      <SelectTrigger><SelectValue placeholder="الخطوة التالية" /></SelectTrigger>
-                      <SelectContent>
-                        {nextRefundStatuses(refundStatus).map((s) => (
-                          <SelectItem key={s} value={s}>{REFUND_LABELS[s]}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <Textarea rows={2} value={refundNote} onChange={(e) => setRefundNote(e.target.value)} placeholder="ملاحظة الاسترداد (اختياري)" />
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      disabled={busy || !refundNext}
-                      onClick={() => void run(
-                        () => changeRefundStatus(order.id, refundNext as RefundStatus, refundNote || null),
-                        "تم تحديث مسار الاسترداد",
-                      )}
-                    >
-                      حفظ خطوة الاسترداد
-                    </Button>
-                  </>
-                )}
-              </div>
-            </div>
           )}
 
           <DialogFooter>

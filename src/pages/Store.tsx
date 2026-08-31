@@ -109,6 +109,14 @@ const Store = () => {
       setProducts((productsRes.data ?? []) as StoreProduct[]);
       setReviews((reviewsRes.data ?? []) as StoreReview[]);
       setLoading(false);
+
+      const [resolvedLogo, resolvedCover] = await Promise.all([
+        resolveStoreAssetUrl(store?.logo_url ?? store?.avatar_url ?? null),
+        resolveStoreAssetUrl(store?.cover_image_url ?? null),
+      ]);
+      if (cancelled) return;
+      setLogoUrl(resolvedLogo);
+      setCoverUrl(resolvedCover);
     })();
 
     return () => {

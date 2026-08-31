@@ -263,7 +263,7 @@ const Checkout = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!user || cartItems.length === 0) return;
+    if (!user || cartItems.length === 0 || submitting) return;
 
     if (isMixedCart) {
       toast({

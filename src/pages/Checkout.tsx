@@ -25,13 +25,11 @@ const checkoutSchema = z.object({
   governorate: z.string()
     .min(1, "يرجى اختيار المحافظة")
     .refine((v) => (SYRIAN_GOVERNORATES as readonly string[]).includes(v), "يرجى اختيار محافظة صحيحة"),
-  area: z.string().trim().min(2, "يرجى إدخال المدينة أو المنطقة").max(100, "المنطقة طويلة جداً"),
-  street: z.string().trim().min(5, "يرجى إدخال الشارع وأقرب علامة مميزة").max(200, "العنوان طويل جداً"),
+  area: z.string().trim().min(2, "يرجى اختيار المدينة أو المنطقة").max(100, "المنطقة طويلة جداً"),
+  street: z.string().max(200, "العنوان طويل جداً").optional(),
   notes: z.string().max(1000, "الملاحظات طويلة جداً").optional(),
 });
 
-const composeAddress = (f: { governorate: string; area: string; street: string }) =>
-  [f.governorate, f.area.trim(), f.street.trim()].filter(Boolean).join("، ");
 
 
 interface CartItem {

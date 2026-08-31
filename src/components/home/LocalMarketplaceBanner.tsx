@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { ArrowLeft, BadgeCheck, Banknote, RotateCcw, Store } from "lucide-react";
+import { ArrowLeft, BadgeCheck, Banknote, MessageCircle, Store } from "lucide-react";
 
 const PERKS = [
   { icon: BadgeCheck, title: "بائعون موثّقون", body: "كل متجر يخضع لمراجعة الإدارة قبل النشر." },

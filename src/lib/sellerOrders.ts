@@ -59,10 +59,9 @@ export interface SellerOrderItem {
 }
 
 export const fetchSellerOrderItems = async (orderId: string): Promise<SellerOrderItem[]> => {
-  const { data, error } = await supabase
-    .from("order_items")
-    .select("id, product_name, product_image, variant_label, quantity, price, subtotal")
-    .eq("order_id", orderId);
+  // Sub-orders keep their items on the parent order; this RPC returns only
+  // the items that belong to the current seller (or all of them for admins).
+  const { data, error } = await supabase.rpc("seller_order_items", { _order_id: orderId });
   if (error) throw error;
   return (data || []) as SellerOrderItem[];
 };

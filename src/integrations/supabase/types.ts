@@ -1420,6 +1420,7 @@ export type Database = {
           product_image: string | null
           product_name: string | null
           quantity: number
+          shipping_duration_text: string | null
           subtotal: number | null
           variant_id: string | null
           variant_label: string | null
@@ -1435,6 +1436,7 @@ export type Database = {
           product_image?: string | null
           product_name?: string | null
           quantity: number
+          shipping_duration_text?: string | null
           subtotal?: number | null
           variant_id?: string | null
           variant_label?: string | null
@@ -1450,6 +1452,7 @@ export type Database = {
           product_image?: string | null
           product_name?: string | null
           quantity?: number
+          shipping_duration_text?: string | null
           subtotal?: number | null
           variant_id?: string | null
           variant_label?: string | null
@@ -1636,6 +1639,7 @@ export type Database = {
           shipped_at: string | null
           shipping_address: string | null
           shipping_amount: number
+          shipping_duration_text: string | null
           shipping_notes: string | null
           status: string | null
           subtotal_amount: number
@@ -1682,6 +1686,7 @@ export type Database = {
           shipped_at?: string | null
           shipping_address?: string | null
           shipping_amount?: number
+          shipping_duration_text?: string | null
           shipping_notes?: string | null
           status?: string | null
           subtotal_amount?: number
@@ -1728,6 +1733,7 @@ export type Database = {
           shipped_at?: string | null
           shipping_address?: string | null
           shipping_amount?: number
+          shipping_duration_text?: string | null
           shipping_notes?: string | null
           status?: string | null
           subtotal_amount?: number
@@ -1933,27 +1939,33 @@ export type Database = {
       }
       platform_payment_settings: {
         Row: {
+          cod_enabled: boolean
           id: number
           instructions: string
           is_active: boolean
           sham_cash_account_name: string
           sham_cash_account_number: string
+          sham_cash_enabled: boolean
           updated_at: string
         }
         Insert: {
+          cod_enabled?: boolean
           id?: number
           instructions?: string
           is_active?: boolean
           sham_cash_account_name?: string
           sham_cash_account_number?: string
+          sham_cash_enabled?: boolean
           updated_at?: string
         }
         Update: {
+          cod_enabled?: boolean
           id?: number
           instructions?: string
           is_active?: boolean
           sham_cash_account_name?: string
           sham_cash_account_number?: string
+          sham_cash_enabled?: boolean
           updated_at?: string
         }
         Relationships: []
@@ -2265,6 +2277,7 @@ export type Database = {
           seo_title: string | null
           shipping_class: string | null
           shipping_cost: number
+          shipping_duration_text: string | null
           shipping_weight: number | null
           ships_within_days: number | null
           short_description: string | null
@@ -2324,6 +2337,7 @@ export type Database = {
           seo_title?: string | null
           shipping_class?: string | null
           shipping_cost?: number
+          shipping_duration_text?: string | null
           shipping_weight?: number | null
           ships_within_days?: number | null
           short_description?: string | null
@@ -2383,6 +2397,7 @@ export type Database = {
           seo_title?: string | null
           shipping_class?: string | null
           shipping_cost?: number
+          shipping_duration_text?: string | null
           shipping_weight?: number | null
           ships_within_days?: number | null
           short_description?: string | null
@@ -4292,16 +4307,28 @@ export type Database = {
       }
       check_email_registered: { Args: { p_email: string }; Returns: Json }
       cleanup_old_rate_limits: { Args: never; Returns: undefined }
-      create_order: {
-        Args: {
-          _coupon_code?: string
-          _items: Json
-          _notes?: string
-          _phone: string
-          _shipping_address: string
-        }
-        Returns: string
-      }
+      create_order:
+        | {
+            Args: {
+              _coupon_code?: string
+              _items: Json
+              _notes?: string
+              _phone: string
+              _shipping_address: string
+            }
+            Returns: string
+          }
+        | {
+            Args: {
+              _coupon_code?: string
+              _items: Json
+              _notes?: string
+              _payment_method?: string
+              _phone: string
+              _shipping_address: string
+            }
+            Returns: string
+          }
       create_return_request: {
         Args: {
           _customer_note?: string
@@ -4356,6 +4383,14 @@ export type Database = {
           notes: string
           status: string
           user_agent: string
+        }[]
+      }
+      get_platform_payment_options: {
+        Args: never
+        Returns: {
+          cod_enabled: boolean
+          instructions: string
+          sham_cash_enabled: boolean
         }[]
       }
       get_seller_performance: {

@@ -38,7 +38,9 @@ export const ADMIN_MODULES: AdminModule[] = [
   { label: "التقييمات", description: "إخفاء التقييمات المخالفة", href: "/admin/reviews", icon: Star },
   { label: "الكوبونات", description: "أكواد خصم البائعين", href: "/admin/coupons", icon: Ticket },
   { label: "المخزون", description: "منتجات نفدت أو منخفضة", href: "/admin/inventory", icon: Boxes },
+  { label: "مراكز الاستلام", description: "مراكز استلام الطلبات في كل محافظة", href: "/admin/pickup-centers", icon: MapPin },
   { label: "إدارة المحتوى", description: "الأسئلة الشائعة وصفحات السياسات", href: "/admin/content", icon: FileText },
+
   { label: "إعدادات النظام", description: "بيانات المنصة ووضع الصيانة", href: "/admin/settings", icon: Settings },
   { label: "الإحصائيات", description: "لوحة التحليلات التفصيلية", href: "/admin/statistics", icon: BarChart3 },
   { label: "الإيرادات", description: "إيرادات الدفع عند الاستلام", href: "/admin/revenue", icon: DollarSign },

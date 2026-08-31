@@ -459,6 +459,15 @@ const Checkout = () => {
         });
         return;
       }
+      if (message.includes("PICKUP_CENTER")) {
+        toast({
+          title: "مركز الاستلام غير متاح",
+          description: "مركز الاستلام المختار غير متاح حالياً. يرجى اختيار مركز آخر.",
+          variant: "destructive",
+        });
+        return;
+      }
+
       if (message.includes("MIXED_CART")) {
         toast({
           title: "لا يمكن إتمام الطلب",

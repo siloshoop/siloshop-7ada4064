@@ -97,7 +97,7 @@ const Compare = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { user } = useAuth();
-  const { clearProducts } = useCompareProducts();
+  const { clearProducts, compareProducts, loading: compareLoading } = useCompareProducts();
 
   const handleExportAsImage = async () => {
     if (!comparisonRef.current) return;

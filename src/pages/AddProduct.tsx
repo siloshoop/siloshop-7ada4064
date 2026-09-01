@@ -16,6 +16,8 @@ import { useToast } from "@/hooks/use-toast";
 import { Loader2, Upload, ChevronLeft, X } from "lucide-react";
 import imageCompression from 'browser-image-compression';
 import { productNumbersSchema, firstIssue, friendlyDbError } from "@/lib/productValidation";
+import ProductColorsSizesEditor, { type ColorsSizesValue } from "@/components/seller/ProductColorsSizesEditor";
+import { syncColorSizeVariants } from "@/lib/productVariantsSync";
 
 const SHIPPING_CLASSES = [
   { value: "عادي", label: "عادي" },
@@ -56,7 +58,6 @@ const AddProduct = () => {
     category_id: "",
     subcategory_id: "",
     image_url: "",
-    gtin: "",
     length_cm: "",
     width_cm: "",
     height_cm: "",
@@ -70,8 +71,7 @@ const AddProduct = () => {
     seo_keywords: "",
   });
 
-  const [tags, setTags] = useState<string[]>([]);
-  const [tagInput, setTagInput] = useState("");
+  const [csz, setCsz] = useState<ColorsSizesValue>({ colors: [], sizes: [], variants: [] });
 
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [imagePreviews, setImagePreviews] = useState<string[]>([]);
@@ -108,28 +108,6 @@ const AddProduct = () => {
       setFormData(prev => ({ ...prev, subcategory_id: "" }));
     }
   }, [formData.category_id, subcategories]);
-
-  const addTag = () => {
-    const value = tagInput.trim();
-    if (!value) return;
-    if (tags.includes(value)) {
-      setTagInput("");
-      return;
-    }
-    setTags([...tags, value]);
-    setTagInput("");
-  };
-
-  const handleTagKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Enter" || e.key === ",") {
-      e.preventDefault();
-      addTag();
-    }
-  };
-
-  const removeTag = (tag: string) => {
-    setTags(tags.filter((t) => t !== tag));
-  };
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
@@ -288,7 +266,7 @@ const AddProduct = () => {
         return;
       }
 
-      const { error } = await supabase.from("products").insert({
+      const { data: inserted, error } = await supabase.from("products").insert({
         vendor_id: user.id,
         name: values.name,
         name_en: formData.name_en.trim() || null,
@@ -306,7 +284,6 @@ const AddProduct = () => {
         subcategory_id: formData.subcategory_id || null,
         image_url: mainImageUrl,
         images: imageUrls.length > 0 ? imageUrls : null,
-        gtin: formData.gtin.trim() || null,
         length_cm: formData.length_cm ? Number(formData.length_cm) : null,
         width_cm: formData.width_cm ? Number(formData.width_cm) : null,
         height_cm: formData.height_cm ? Number(formData.height_cm) : null,
@@ -314,16 +291,29 @@ const AddProduct = () => {
         shipping_class: formData.shipping_class || null,
         warranty: formData.warranty.trim() || null,
         country_of_origin: formData.country_of_origin.trim() || null,
-        tags: tags.length > 0 ? tags : [],
+        colors: csz.colors,
+        sizes: csz.sizes,
         slug: finalSlug || null,
         seo_title: formData.seo_title.trim() || null,
         seo_description: formData.seo_description.trim() || null,
         seo_keywords: formData.seo_keywords.trim() || null,
         is_active: !asDraft,
         moderation_status: asDraft ? "draft" : "pending",
-      } as any);
+      } as any).select("id").single();
 
       if (error) throw error;
+
+      if (inserted?.id && csz.variants.length > 0) {
+        try {
+          await syncColorSizeVariants(inserted.id, csz.variants);
+        } catch (vErr) {
+          toast({
+            title: "تم حفظ المنتج",
+            description: "تعذّر حفظ بعض تركيبات الألوان/المقاسات، يمكنك تعديلها من صفحة تعديل المنتج.",
+            variant: "destructive",
+          });
+        }
+      }
 
       toast({
         title: "تم بنجاح",
@@ -749,41 +739,9 @@ const AddProduct = () => {
                 </AccordionItem>
 
                 <AccordionItem value="specs">
-                  <AccordionTrigger>المواصفات</AccordionTrigger>
+                  <AccordionTrigger>الألوان والمقاسات</AccordionTrigger>
                   <AccordionContent className="space-y-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="gtin">الرمز الدولي GTIN</Label>
-                      <Input
-                        id="gtin"
-                        value={formData.gtin}
-                        onChange={(e) => setFormData({ ...formData, gtin: e.target.value })}
-                        placeholder="مثال: 0123456789012"
-                      />
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="tags">الوسوم (اضغط Enter أو فاصلة للإضافة)</Label>
-                      <Input
-                        id="tags"
-                        value={tagInput}
-                        onChange={(e) => setTagInput(e.target.value)}
-                        onKeyDown={handleTagKeyDown}
-                        onBlur={addTag}
-                        placeholder="اكتب وسماً ثم اضغط Enter"
-                      />
-                      {tags.length > 0 && (
-                        <div className="flex flex-wrap gap-2 pt-2">
-                          {tags.map((tag) => (
-                            <Badge key={tag} variant="secondary" className="gap-1">
-                              {tag}
-                              <button type="button" onClick={() => removeTag(tag)} aria-label="حذف الوسم">
-                                <X className="h-3 w-3" />
-                              </button>
-                            </Badge>
-                          ))}
-                        </div>
-                      )}
-                    </div>
+                    <ProductColorsSizesEditor value={csz} onChange={setCsz} />
                   </AccordionContent>
                 </AccordionItem>
 

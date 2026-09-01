@@ -184,7 +184,7 @@ const Checkout = () => {
           id,
           quantity,
           product_id,
-          product:products(id, name, price, image_url, vendor_id, shipping_cost, product_type, shipping_duration_text)
+          product:products(id, name, price, image_url, vendor_id, shipping_cost, product_type, shipping_duration_text, platform_free_shipping, platform_shipping_fee, platform_cod_enabled, platform_sham_cash_enabled, platform_electronic_payment_enabled)
         `)
         .eq("user_id", user.id);
 

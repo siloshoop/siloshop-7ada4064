@@ -1,0 +1,1 @@
+REVOKE ALL ON FUNCTION public.guard_platform_product_settings() FROM anon, authenticated, public;

@@ -321,6 +321,13 @@ const Navbar = () => {
             >
               الرئيسية
             </NavLink>
+            <NavLink
+              to="/turkish-products"
+              className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors whitespace-nowrap"
+              activeClassName="text-foreground font-semibold"
+            >
+              منتجات تركية
+            </NavLink>
             <NavLink 
               to="/about" 
               className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors whitespace-nowrap hidden sm:block"

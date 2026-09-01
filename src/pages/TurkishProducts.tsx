@@ -23,6 +23,8 @@ interface ProductRow {
   product_type: string | null;
   ships_within_days: number | null;
   shipping_duration_text: string | null;
+  platform_free_shipping: boolean | null;
+  platform_shipping_fee: number | null;
   reviews: { rating: number }[] | null;
 }
 
@@ -35,7 +37,7 @@ interface PlatformOptions {
 }
 
 const SELECT =
-  "id, name, price, original_price, discount_price, image_url, stock_quantity, product_type, ships_within_days, shipping_duration_text, reviews(rating)";
+  "id, name, price, original_price, discount_price, image_url, stock_quantity, product_type, ships_within_days, shipping_duration_text, platform_free_shipping, platform_shipping_fee, reviews(rating)";
 
 /** Dedicated marketplace section for Turkish (platform) products. */
 const TurkishProducts = () => {
@@ -184,7 +186,13 @@ const TurkishProducts = () => {
                   image={product.image_url}
                   rating={avg}
                   reviews={ratings.length}
-                  shippingCost={options?.free_shipping ? 0 : options?.shipping_fee}
+                  shippingCost={
+                    (product.platform_free_shipping ?? options?.free_shipping)
+                      ? 0
+                      : product.platform_free_shipping == null
+                        ? options?.shipping_fee
+                        : Number(product.platform_shipping_fee || 0)
+                  }
                   stockQuantity={product.stock_quantity}
                   productType={product.product_type}
                   shipsWithinDays={product.ships_within_days}

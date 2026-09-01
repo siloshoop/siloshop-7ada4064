@@ -93,6 +93,15 @@ const MobileBottomNav = () => {
             <SheetTitle className="text-center">تصفح الفئات</SheetTitle>
           </SheetHeader>
           <ScrollArea className="h-full pb-8">
+            <button
+              onClick={() => {
+                navigate("/turkish-products");
+                setShowCategories(false);
+              }}
+              className="mb-3 flex w-[calc(100%-1rem)] items-center justify-center gap-2 rounded-xl bg-primary/10 p-3 mx-2 text-sm font-semibold text-primary transition-all active:scale-95"
+            >
+              منتجات تركية
+            </button>
             <div className="grid grid-cols-3 gap-3 px-2">
               {categories.map((category) => {
                 const IconComponent = iconMap[category.icon || "Smartphone"] || Grid3X3;

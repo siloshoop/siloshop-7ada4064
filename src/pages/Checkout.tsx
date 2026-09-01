@@ -47,6 +47,11 @@ interface CartItem {
     shipping_cost?: number;
     product_type?: string;
     shipping_duration_text?: string | null;
+    platform_free_shipping?: boolean | null;
+    platform_shipping_fee?: number | null;
+    platform_cod_enabled?: boolean | null;
+    platform_sham_cash_enabled?: boolean | null;
+    platform_electronic_payment_enabled?: boolean | null;
   };
 }
 
@@ -179,7 +184,7 @@ const Checkout = () => {
           id,
           quantity,
           product_id,
-          product:products(id, name, price, image_url, vendor_id, shipping_cost, product_type, shipping_duration_text)
+          product:products(id, name, price, image_url, vendor_id, shipping_cost, product_type, shipping_duration_text, platform_free_shipping, platform_shipping_fee, platform_cod_enabled, platform_sham_cash_enabled, platform_electronic_payment_enabled)
         `)
         .eq("user_id", user.id);
 
@@ -213,11 +218,51 @@ const Checkout = () => {
   const applyToAll = !!platformOptions?.apply_to_all_products;
   const usePlatformRules = (hasPlatformItems && !isMixedCart && platformEnabled) || applyToAll;
 
+  // Per-platform-product settings: a method is offered only when it is enabled
+  // for every platform product in the cart (falls back to the global platform
+  // settings when a product leaves a field empty). Mirrors create_order.
+  const platformItems = cartItems.filter((i) => i.product.product_type === "platform");
+  const perProduct = (() => {
+    if (platformItems.length === 0) return null;
+    let cod = true;
+    let sham = true;
+    let elec = true;
+    let free = true;
+    let fee = 0;
+    for (const { product: p } of platformItems) {
+      cod = cod && (p.platform_cod_enabled ?? !!platformOptions?.cod_enabled);
+      sham = sham && (p.platform_sham_cash_enabled ?? !!platformOptions?.sham_cash_enabled);
+      elec = elec && (p.platform_electronic_payment_enabled ?? !!platformOptions?.electronic_payment_enabled);
+      const isFree = p.platform_free_shipping ?? !!platformOptions?.free_shipping;
+      if (!isFree) {
+        free = false;
+        fee = Math.max(
+          fee,
+          p.platform_free_shipping == null
+            ? Number(platformOptions?.shipping_fee || 0)
+            : Number(p.platform_shipping_fee || 0)
+        );
+      }
+    }
+    return { cod, sham, elec, free, fee };
+  })();
+
+  const platformRulesSource =
+    hasPlatformItems && !isMixedCart && platformEnabled && perProduct
+      ? perProduct
+      : {
+          cod: !!platformOptions?.cod_enabled,
+          sham: !!platformOptions?.sham_cash_enabled,
+          elec: !!platformOptions?.electronic_payment_enabled,
+          free: !!platformOptions?.free_shipping,
+          fee: Number(platformOptions?.shipping_fee || 0),
+        };
+
   const availableMethods: PlatformMethod[] = usePlatformRules
     ? ([
-        platformOptions?.cod_enabled ? "cod" : null,
-        platformOptions?.sham_cash_enabled ? "sham_cash" : null,
-        platformOptions?.electronic_payment_enabled ? "electronic" : null,
+        platformRulesSource.cod ? "cod" : null,
+        platformRulesSource.sham ? "sham_cash" : null,
+        platformRulesSource.elec ? "electronic" : null,
       ].filter(Boolean) as PlatformMethod[])
     : ["cod"];
 
@@ -235,9 +280,9 @@ const Checkout = () => {
     0
   );
   const shippingTotal = usePlatformRules
-    ? platformOptions?.free_shipping
+    ? platformRulesSource.free
       ? 0
-      : Number(platformOptions?.shipping_fee || 0)
+      : platformRulesSource.fee
     : productShipping;
 
   const total = Math.max(subtotal + shippingTotal - discount, 0);

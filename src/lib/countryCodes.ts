@@ -6,7 +6,7 @@ export interface CountryCode {
 }
 
 export const COUNTRY_CODES: CountryCode[] = [
-  { code: "SY", dial: "+963", nameAr: "سوريا", flag: "🇸🇾" },
+  { code: "SY", dial: "+963", nameAr: "سوريا", flag: "" },
   { code: "TR", dial: "+90", nameAr: "تركيا", flag: "🇹🇷" },
   { code: "SA", dial: "+966", nameAr: "السعودية", flag: "🇸🇦" },
   { code: "AE", dial: "+971", nameAr: "الإمارات", flag: "🇦🇪" },

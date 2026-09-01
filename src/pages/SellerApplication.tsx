@@ -13,7 +13,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { SYRIAN_GOVERNORATES } from "@/lib/syrianGovernorates";
-import { Loader2, ShieldCheck, Clock, XCircle, PauseCircle, Upload, ImageIcon } from "lucide-react";
+import { Loader2, ShieldCheck, Clock, XCircle, PauseCircle, Upload, ImageIcon, CheckCircle } from "lucide-react";
 
 type SellerStatus = "pending" | "approved" | "rejected" | "suspended";
 
@@ -49,6 +49,7 @@ const SellerApplication = () => {
   const [loading, setLoading] = useState(true);
   const [app, setApp] = useState<Application | null>(null);
   const [saving, setSaving] = useState(false);
+  const [submitSuccess, setSubmitSuccess] = useState(false);
 
   const [storeName, setStoreName] = useState("");
   const [ownerName, setOwnerName] = useState("");
@@ -171,7 +172,8 @@ const SellerApplication = () => {
       toast({ title: "خطأ", description: error.message, variant: "destructive" });
       return;
     }
-    toast({ title: "تم إرسال الطلب", description: "طلبك الآن قيد المراجعة، سنعلمك بالنتيجة قريباً." });
+    setSubmitSuccess(true);
+    toast({ title: "تم إرسال الطلب بنجاح", description: "طلبك قيد المراجعة، سنعلمك بالنتيجة قريباً." });
     await loadApplication();
   };
 
@@ -187,6 +189,8 @@ const SellerApplication = () => {
   const isEditable = !status || status === "pending" || status === "rejected";
   const meta = status ? statusMeta[status] : null;
   const StatusIcon = meta?.icon;
+  const showSuccessState = submitSuccess || status === "pending";
+  const hideForm = showSuccessState || status === "approved" || status === "suspended";
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary/5 via-background to-accent/5">
@@ -227,103 +231,119 @@ const SellerApplication = () => {
           </Card>
         )}
 
-        <Card>
-          <CardHeader>
-            <CardTitle>معلومات المتجر</CardTitle>
-            <CardDescription>
-              {isEditable ? "الحقول المعلّمة بـ * إجبارية." : "لا يمكن تعديل الطلب في الوضع الحالي."}
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label>اسم المتجر *</Label>
-                  <Input value={storeName} onChange={(e) => setStoreName(e.target.value)} disabled={!isEditable} maxLength={100} />
-                </div>
-                <div className="space-y-2">
-                  <Label>اسم المالك *</Label>
-                  <Input value={ownerName} onChange={(e) => setOwnerName(e.target.value)} disabled={!isEditable} maxLength={100} />
-                </div>
-                <div className="space-y-2">
-                  <Label>رقم الهاتف *</Label>
-                  <Input value={phone} onChange={(e) => setPhone(e.target.value)} disabled={!isEditable} dir="ltr" placeholder="09XXXXXXXX" maxLength={20} />
-                </div>
-                <div className="space-y-2">
-                  <Label>البريد الإلكتروني *</Label>
-                  <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} disabled={!isEditable} dir="ltr" maxLength={255} />
-                </div>
-                <div className="space-y-2">
-                  <Label>المحافظة *</Label>
-                  <Select value={governorate} onValueChange={setGovernorate} disabled={!isEditable}>
-                    <SelectTrigger><SelectValue placeholder="اختر المحافظة" /></SelectTrigger>
-                    <SelectContent>
-                      {SYRIAN_GOVERNORATES.map(g => <SelectItem key={g} value={g}>{g}</SelectItem>)}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-2">
-                  <Label>المدينة *</Label>
-                  <Input value={city} onChange={(e) => setCity(e.target.value)} disabled={!isEditable} maxLength={100} />
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label>العنوان (اختياري)</Label>
-                <Input value={address} onChange={(e) => setAddress(e.target.value)} disabled={!isEditable} maxLength={255} />
-              </div>
-
-              <div className="space-y-2">
-                <Label>وصف المتجر (اختياري)</Label>
-                <Textarea rows={3} value={description} onChange={(e) => setDescription(e.target.value)} disabled={!isEditable} maxLength={1000} />
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label>شعار المتجر (اختياري)</Label>
-                  <div className="flex items-center gap-3">
-                    {logoPreview ? (
-                      <img src={logoPreview} alt="شعار المتجر" className="h-14 w-14 rounded-lg object-cover border" loading="lazy" />
-                    ) : (
-                      <div className="h-14 w-14 rounded-lg border flex items-center justify-center text-muted-foreground">
-                        <ImageIcon className="h-5 w-5" />
-                      </div>
-                    )}
-                    <Input type="file" accept="image/*" disabled={!isEditable || uploadingLogo} onChange={(e) => handleUpload(e, "logo")} />
-                    {uploadingLogo && <Loader2 className="h-4 w-4 animate-spin" />}
+        {!hideForm && (
+          <Card>
+            <CardHeader>
+              <CardTitle>معلومات المتجر</CardTitle>
+              <CardDescription>
+                {isEditable ? "الحقول المعلّمة بـ * إجبارية." : "لا يمكن تعديل الطلب في الوضع الحالي."}
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label>اسم المتجر *</Label>
+                    <Input value={storeName} onChange={(e) => setStoreName(e.target.value)} disabled={!isEditable} maxLength={100} />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>اسم المالك *</Label>
+                    <Input value={ownerName} onChange={(e) => setOwnerName(e.target.value)} disabled={!isEditable} maxLength={100} />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>رقم الهاتف *</Label>
+                    <Input value={phone} onChange={(e) => setPhone(e.target.value)} disabled={!isEditable} dir="ltr" placeholder="09XXXXXXXX" maxLength={20} />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>البريد الإلكتروني *</Label>
+                    <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} disabled={!isEditable} dir="ltr" maxLength={255} />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>المحافظة *</Label>
+                    <Select value={governorate} onValueChange={setGovernorate} disabled={!isEditable}>
+                      <SelectTrigger><SelectValue placeholder="اختر المحافظة" /></SelectTrigger>
+                      <SelectContent>
+                        {SYRIAN_GOVERNORATES.map(g => <SelectItem key={g} value={g}>{g}</SelectItem>)}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>المدينة *</Label>
+                    <Input value={city} onChange={(e) => setCity(e.target.value)} disabled={!isEditable} maxLength={100} />
                   </div>
                 </div>
+
                 <div className="space-y-2">
-                  <Label>صورة الغلاف (اختياري)</Label>
-                  <div className="flex items-center gap-3">
-                    {coverPreview ? (
-                      <img src={coverPreview} alt="غلاف المتجر" className="h-14 w-24 rounded-lg object-cover border" loading="lazy" />
-                    ) : (
-                      <div className="h-14 w-24 rounded-lg border flex items-center justify-center text-muted-foreground">
-                        <ImageIcon className="h-5 w-5" />
-                      </div>
-                    )}
-                    <Input type="file" accept="image/*" disabled={!isEditable || uploadingCover} onChange={(e) => handleUpload(e, "cover")} />
-                    {uploadingCover && <Loader2 className="h-4 w-4 animate-spin" />}
+                  <Label>العنوان (اختياري)</Label>
+                  <Input value={address} onChange={(e) => setAddress(e.target.value)} disabled={!isEditable} maxLength={255} />
+                </div>
+
+                <div className="space-y-2">
+                  <Label>وصف المتجر (اختياري)</Label>
+                  <Textarea rows={3} value={description} onChange={(e) => setDescription(e.target.value)} disabled={!isEditable} maxLength={1000} />
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label>شعار المتجر (اختياري)</Label>
+                    <div className="flex items-center gap-3">
+                      {logoPreview ? (
+                        <img src={logoPreview} alt="شعار المتجر" className="h-14 w-14 rounded-lg object-cover border" loading="lazy" />
+                      ) : (
+                        <div className="h-14 w-14 rounded-lg border flex items-center justify-center text-muted-foreground">
+                          <ImageIcon className="h-5 w-5" />
+                        </div>
+                      )}
+                      <Input type="file" accept="image/*" disabled={!isEditable || uploadingLogo} onChange={(e) => handleUpload(e, "logo")} />
+                      {uploadingLogo && <Loader2 className="h-4 w-4 animate-spin" />}
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>صورة الغلاف (اختياري)</Label>
+                    <div className="flex items-center gap-3">
+                      {coverPreview ? (
+                        <img src={coverPreview} alt="غلاف المتجر" className="h-14 w-24 rounded-lg object-cover border" loading="lazy" />
+                      ) : (
+                        <div className="h-14 w-24 rounded-lg border flex items-center justify-center text-muted-foreground">
+                          <ImageIcon className="h-5 w-5" />
+                        </div>
+                      )}
+                      <Input type="file" accept="image/*" disabled={!isEditable || uploadingCover} onChange={(e) => handleUpload(e, "cover")} />
+                      {uploadingCover && <Loader2 className="h-4 w-4 animate-spin" />}
+                    </div>
                   </div>
                 </div>
-              </div>
 
-              {isEditable && (
-                <Button type="submit" size="lg" disabled={saving} className="w-full md:w-auto">
-                  {saving ? <Loader2 className="ml-2 h-4 w-4 animate-spin" /> : <Upload className="ml-2 h-4 w-4" />}
-                  {status === "rejected" ? "إعادة تقديم الطلب" : "إرسال الطلب للمراجعة"}
-                </Button>
-              )}
-              <p className="text-xs text-muted-foreground">
-                بإرسال الطلب فإنك توافق على{" "}
-                <a href="/terms" className="text-primary hover:underline">الشروط والأحكام</a>
-                {" "}و{" "}
-                <a href="/privacy" className="text-primary hover:underline">سياسة الخصوصية</a>
-              </p>
-            </form>
-          </CardContent>
-        </Card>
+                {isEditable && (
+                  <Button type="submit" size="lg" disabled={saving} className="w-full md:w-auto">
+                    {saving ? <Loader2 className="ml-2 h-4 w-4 animate-spin" /> : <Upload className="ml-2 h-4 w-4" />}
+                    {status === "rejected" ? "إعادة تقديم الطلب" : "إرسال الطلب للمراجعة"}
+                  </Button>
+                )}
+                <p className="text-xs text-muted-foreground">
+                  بإرسال الطلب فإنك توافق على{" "}
+                  <a href="/terms" className="text-primary hover:underline">الشروط والأحكام</a>
+                  {" "}و{" "}
+                  <a href="/privacy" className="text-primary hover:underline">سياسة الخصوصية</a>
+                </p>
+              </form>
+            </CardContent>
+          </Card>
+        )}
+
+        {showSuccessState && (
+          <Card className="text-center py-12" role="status" aria-live="polite">
+            <CardContent className="flex flex-col items-center justify-center gap-6">
+              <div className="rounded-full bg-emerald-500/10 p-6">
+                <CheckCircle className="h-20 w-20 text-emerald-500" />
+              </div>
+              <div>
+                <h2 className="text-2xl font-bold text-emerald-500 mb-2">تم إرسال الطلب بنجاح</h2>
+                <p className="text-muted-foreground">طلبك قيد المراجعة، سنعلمك بالنتيجة قريباً.</p>
+              </div>
+            </CardContent>
+          </Card>
+        )}
       </main>
       <Footer />
     </div>

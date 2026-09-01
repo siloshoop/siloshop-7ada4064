@@ -183,7 +183,7 @@ const Index = () => {
           </Suspense>
         </SectionErrorBoundary>
 
-        {/* 🇸🇾 Local Marketplace (Phase 1) */}
+        {/* Local Marketplace (Phase 1) */}
         <SectionErrorBoundary>
           <LocalMarketplaceBanner />
         </SectionErrorBoundary>

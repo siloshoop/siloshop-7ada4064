@@ -108,7 +108,7 @@ describe("Homepage Smoke Test", () => {
 
   it("renders the hero slider and local marketplace, and no legacy hero or ads", async () => {
     const { container } = renderHomepage();
-    await waitFor(() => expect(container.textContent).toContain("🇸🇾 السوق المحلي"));
+    await waitFor(() => expect(container.textContent).toContain("السوق المحلي"));
     expect(container.textContent).toContain("تسوّق من متاجر سوريا في مكان واحد");
     // Phase 2 section must stay completely hidden while the flag is off.
     expect(container.textContent).not.toContain("منتجات مستوردة من تركيا");

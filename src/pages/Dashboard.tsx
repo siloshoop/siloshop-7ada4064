@@ -741,7 +741,7 @@ const Dashboard = () => {
                   <div className="space-y-4">
                     {filteredProducts.map((product) => (
                       <div key={product.id} className="flex items-center gap-4 p-4 border rounded-lg">
-                        <img
+                        <img loading="lazy" decoding="async"
                           src={product.image_url || "/placeholder.svg"}
                           alt={product.name}
                           className="w-20 h-20 object-cover rounded-md"

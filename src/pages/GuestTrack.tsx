@@ -399,7 +399,7 @@ const GuestTrack = () => {
                       {result.items.map((item, i) => (
                         <div key={i} className="flex items-center gap-3">
                           {item.product_image ? (
-                            <img
+                            <img loading="lazy" decoding="async"
                               src={item.product_image}
                               alt={item.product_name ?? ""}
                               className="h-12 w-12 rounded-md object-cover border shrink-0"

@@ -526,7 +526,7 @@ const Cart = () => {
                   <Card key={item.id}>
                     <CardContent className="p-6">
                       <div className="flex gap-4">
-                        <img
+                        <img loading="lazy" decoding="async"
                           src={item.product.image_url}
                           alt={item.product.name}
                           className="w-24 h-24 object-cover rounded-lg"
@@ -818,7 +818,7 @@ const Cart = () => {
                 <Card key={item.id}>
                   <CardContent className="p-4">
                     <div className="flex gap-3">
-                      <img
+                      <img loading="lazy" decoding="async"
                         src={item.product.image_url}
                         alt={item.product.name}
                         className="w-20 h-20 object-cover rounded-lg shrink-0"

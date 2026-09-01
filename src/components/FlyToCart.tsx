@@ -80,7 +80,7 @@ const FlyingItem = ({
           animation: "flyScale 0.7s cubic-bezier(0.2, 0, 0.2, 1) forwards",
         }}
       >
-        <img src={item.image} alt="" className="w-full h-full object-cover" />
+        <img loading="lazy" decoding="async" src={item.image} alt="" className="w-full h-full object-cover" />
       </div>
     </div>
   );

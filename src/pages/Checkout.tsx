@@ -704,7 +704,7 @@ const Checkout = () => {
                   <div className="space-y-4">
                     {cartItems.map((item) => (
                       <div key={item.id} className="flex gap-4">
-                        <img
+                        <img loading="lazy" decoding="async"
                           src={item.product.image_url}
                           alt={item.product.name}
                           className="w-16 h-16 object-cover rounded"

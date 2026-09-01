@@ -264,7 +264,7 @@ const PlatformProducts = () => {
                     </td>
                     <td className="p-2">
                       {p.image_url ? (
-                        <img src={p.image_url} alt="" className="w-12 h-12 rounded object-cover" />
+                        <img loading="lazy" decoding="async" src={p.image_url} alt="" className="w-12 h-12 rounded object-cover" />
                       ) : (
                         <div className="w-12 h-12 bg-muted rounded" />
                       )}

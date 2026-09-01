@@ -369,7 +369,7 @@ const Lightbox = ({
         <X className="h-5 w-5" />
       </Button>
 
-      <img
+      <img loading="lazy" decoding="async"
         src={images[index]}
         alt={`${productName} - ${index + 1}`}
         draggable={false}

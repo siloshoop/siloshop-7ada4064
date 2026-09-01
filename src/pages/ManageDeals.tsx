@@ -385,7 +385,7 @@ const ManageDeals = () => {
                         isExpired ? "opacity-60 bg-muted/30" : ""
                       }`}
                     >
-                      <img
+                      <img loading="lazy" decoding="async"
                         src={deal.product.image_url || "/placeholder.svg"}
                         alt={deal.product.name}
                         className="w-16 h-16 object-cover rounded-md"

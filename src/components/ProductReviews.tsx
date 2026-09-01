@@ -465,7 +465,7 @@ export const ProductReviews = ({ productId, vendorId }: ProductReviewsProps) => 
                 />
                 {imagePreview ? (
                   <div className="relative inline-block">
-                    <img src={imagePreview} alt="معاينة" className="h-24 w-24 object-cover rounded-lg border" />
+                    <img loading="lazy" decoding="async" src={imagePreview} alt="معاينة" className="h-24 w-24 object-cover rounded-lg border" />
                     <button
                       type="button"
                       onClick={() => { setImageFile(null); setImagePreview(null); if (fileInputRef.current) fileInputRef.current.value = ""; }}
@@ -479,7 +479,7 @@ export const ProductReviews = ({ productId, vendorId }: ProductReviewsProps) => 
                 ) : existingImageUrl && !removeExistingImage ? (
                   <div className="flex items-center gap-2">
                     <div className="relative inline-block">
-                      <img src={existingImageUrl} alt="الصورة الحالية" className="h-24 w-24 object-cover rounded-lg border" />
+                      <img loading="lazy" decoding="async" src={existingImageUrl} alt="الصورة الحالية" className="h-24 w-24 object-cover rounded-lg border" />
                       <button
                         type="button"
                         onClick={() => setRemoveExistingImage(true)}

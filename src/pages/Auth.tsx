@@ -14,8 +14,8 @@ import { logActivity } from "@/hooks/useActivityLog";
 import { Eye, EyeOff, Loader2, ShoppingBag } from "lucide-react";
 import { z } from "zod";
 import { COUNTRY_CODES, DEFAULT_COUNTRY, findCountry } from "@/lib/countryCodes";
-import {
 import SyrianFlag from "@/components/SyrianFlag";
+import {
   CAPTCHA_AFTER,
   checkEmail,
   clearAttempts,

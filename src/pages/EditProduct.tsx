@@ -858,42 +858,12 @@ const EditProduct = () => {
                 </AccordionItem>
 
                 <AccordionItem value="specs">
-                  <AccordionTrigger>المواصفات</AccordionTrigger>
+                  <AccordionTrigger>الألوان والمقاسات</AccordionTrigger>
                   <AccordionContent className="space-y-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="gtin">الرمز الدولي GTIN</Label>
-                      <Input
-                        id="gtin"
-                        value={formData.gtin}
-                        onChange={(e) => setFormData({ ...formData, gtin: e.target.value })}
-                      />
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="tags">الوسوم (اضغط Enter أو فاصلة للإضافة)</Label>
-                      <Input
-                        id="tags"
-                        value={tagInput}
-                        onChange={(e) => setTagInput(e.target.value)}
-                        onKeyDown={handleTagKeyDown}
-                        onBlur={addTag}
-                        placeholder="اكتب وسماً ثم اضغط Enter"
-                      />
-                      {tags.length > 0 && (
-                        <div className="flex flex-wrap gap-2 pt-2">
-                          {tags.map((tag) => (
-                            <Badge key={tag} variant="secondary" className="gap-1">
-                              {tag}
-                              <button type="button" onClick={() => removeTag(tag)} aria-label="حذف الوسم">
-                                <X className="h-3 w-3" />
-                              </button>
-                            </Badge>
-                          ))}
-                        </div>
-                      )}
-                    </div>
+                    <ProductColorsSizesEditor value={csz} onChange={setCsz} />
                   </AccordionContent>
                 </AccordionItem>
+
 
                 <AccordionItem value="seo">
                   <AccordionTrigger>SEO</AccordionTrigger>

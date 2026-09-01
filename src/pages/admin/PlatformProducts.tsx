@@ -143,6 +143,11 @@ const PlatformProducts = () => {
       image_url: p.image_url,
       images: p.images || [],
       is_active: !!p.is_active,
+      platform_free_shipping: p.platform_free_shipping ?? true,
+      platform_shipping_fee: Number(p.platform_shipping_fee ?? 0),
+      platform_cod_enabled: p.platform_cod_enabled ?? true,
+      platform_sham_cash_enabled: p.platform_sham_cash_enabled ?? false,
+      platform_electronic_payment_enabled: p.platform_electronic_payment_enabled ?? false,
     });
     setFormOpen(true);
   };

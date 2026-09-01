@@ -31,6 +31,11 @@ export interface PlatformProduct {
   image_url: string | null;
   images: string[];
   is_active: boolean;
+  platform_free_shipping: boolean;
+  platform_shipping_fee: number;
+  platform_cod_enabled: boolean;
+  platform_sham_cash_enabled: boolean;
+  platform_electronic_payment_enabled: boolean;
 }
 
 const empty: PlatformProduct = {
@@ -50,6 +55,11 @@ const empty: PlatformProduct = {
   image_url: null,
   images: [],
   is_active: true,
+  platform_free_shipping: true,
+  platform_shipping_fee: 0,
+  platform_cod_enabled: true,
+  platform_sham_cash_enabled: false,
+  platform_electronic_payment_enabled: false,
 };
 
 interface Props {

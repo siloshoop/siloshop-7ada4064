@@ -16,7 +16,6 @@ import { Link } from "react-router-dom";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { SYRIAN_GOVERNORATES } from "@/lib/syrianGovernorates";
 import { useFeatureFlags } from "@/hooks/useFeatureFlags";
-import { usePickupCenters } from "@/hooks/usePickupCenters";
 
 
 const checkoutSchema = z.object({
@@ -94,7 +93,6 @@ const Checkout = () => {
   const [shamSettings, setShamSettings] = useState<PlatformPaymentSettings | null>(null);
   const [platformOptions, setPlatformOptions] = useState<PlatformOptions | null>(null);
   const [selectedPlatformMethod, setSelectedPlatformMethod] = useState<PlatformMethod | null>(null);
-  const [selectedCenterId, setSelectedCenterId] = useState<string>("");
   const navigate = useNavigate();
   const { toast } = useToast();
   const { isEnabled } = useFeatureFlags();
@@ -107,44 +105,12 @@ const Checkout = () => {
     notes: "",
   });
 
-  // Deliveries in Syria are pickup-center only (no door-to-door).
-  const { centers, loading: centersLoading } = usePickupCenters(formData.governorate || undefined);
-  const centersInArea = formData.area
-    ? centers.filter((c) => c.city === formData.area)
-    : centers;
-  const selectedCenter = centers.find((c) => c.id === selectedCenterId) || null;
-  const areaOptions = Array.from(new Set(centers.map((c) => c.city)));
 
   const composeAddress = () =>
-    selectedCenter
-      ? [
-          "استلام من المركز",
-          selectedCenter.name,
-          selectedCenter.governorate,
-          selectedCenter.city,
-          selectedCenter.address,
-        ]
-          .filter(Boolean)
-          .join("، ")
-      : ["عنوان التوصيل", formData.governorate, formData.area, formData.street]
-          .filter((v) => v && v.trim())
-          .join("، ");
+    ["عنوان التوصيل", formData.governorate, formData.street]
+      .filter((v) => v && v.trim())
+      .join("، ");
 
-  // A saved address city may not match any pickup-center city; clear it so the
-  // city select isn't stuck on a value that filters every center out.
-  useEffect(() => {
-    if (centersLoading) return;
-    if (formData.area && !areaOptions.includes(formData.area)) {
-      setFormData((f) => ({ ...f, area: "" }));
-    }
-  }, [centersLoading, areaOptions, formData.area]);
-
-  // Reset the chosen center whenever the governorate/area changes.
-  useEffect(() => {
-    if (selectedCenterId && !centersInArea.some((c) => c.id === selectedCenterId)) {
-      setSelectedCenterId("");
-    }
-  }, [centersInArea, selectedCenterId]);
 
 
 
@@ -424,7 +390,6 @@ const Checkout = () => {
         _notes: formData.notes || null,
         _coupon_code: appliedCoupon?.code || null,
         _payment_method: paymentMethod,
-        _pickup_center_id: selectedCenter?.id ?? null,
       });
 
 
@@ -661,70 +626,6 @@ const Checkout = () => {
                     </Select>
                   </div>
 
-                  <div className="space-y-2">
-                    <Label htmlFor="area">المدينة / المنطقة</Label>
-                    <Select
-                      value={formData.area}
-                      onValueChange={(v) => setFormData({ ...formData, area: v })}
-                    >
-                      <SelectTrigger id="area">
-                        <SelectValue
-                          placeholder={
-                            !formData.governorate
-                              ? "اختر المحافظة أولاً"
-                              : centersLoading
-                                ? "جارٍ التحميل..."
-                                : areaOptions.length === 0
-                                  ? "لا توجد مراكز استلام في هذه المحافظة"
-                                  : "اختر المدينة / المنطقة"
-                          }
-                        />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {areaOptions.map((c) => (
-                          <SelectItem key={c} value={c}>{c}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="pickup-center">مركز الاستلام</Label>
-                    <Select
-                      value={selectedCenterId}
-                      onValueChange={setSelectedCenterId}
-                    >
-                      <SelectTrigger id="pickup-center">
-                        <SelectValue
-                          placeholder={
-                            centersInArea.length === 0
-                              ? "لا توجد مراكز متاحة"
-                              : "اختر مركز الاستلام"
-                          }
-                        />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {centersInArea.map((c) => (
-                          <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    {selectedCenter && (
-                      <div className="rounded-lg border border-border/60 bg-muted/40 p-3 text-xs leading-relaxed">
-                        <p className="font-semibold">{selectedCenter.name}</p>
-                        <p className="text-muted-foreground">{selectedCenter.address}</p>
-                        {selectedCenter.phone && (
-                          <p className="text-muted-foreground" dir="ltr">{selectedCenter.phone}</p>
-                        )}
-                        {selectedCenter.working_hours && (
-                          <p className="text-muted-foreground">أوقات العمل: {selectedCenter.working_hours}</p>
-                        )}
-                      </div>
-                    )}
-                    <p className="text-xs text-muted-foreground">
-                      التوصيل داخل سوريا يتم عبر مراكز الاستلام فقط، ولا يوجد توصيل إلى المنازل.
-                    </p>
-                  </div>
 
 
 

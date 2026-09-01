@@ -396,6 +396,20 @@ const EditProduct = () => {
 
       if (error) throw error;
 
+      if (id) {
+        try {
+          await syncColorSizeVariants(id, csz.variants);
+        } catch {
+          toast({
+            title: "تم تحديث المنتج",
+            description: "تعذّر حفظ بعض تركيبات الألوان/المقاسات، يرجى المحاولة مرة أخرى.",
+            variant: "destructive",
+          });
+        }
+      }
+
+
+
       toast({
         title: "تم بنجاح",
         description: "تم تحديث المنتج بنجاح",

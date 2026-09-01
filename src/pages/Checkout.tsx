@@ -27,7 +27,7 @@ const checkoutSchema = z.object({
   governorate: z.string()
     .min(1, "يرجى اختيار المحافظة")
     .refine((v) => (SYRIAN_GOVERNORATES as readonly string[]).includes(v), "يرجى اختيار محافظة صحيحة"),
-  area: z.string().trim().min(2, "يرجى اختيار المدينة أو المنطقة").max(100, "المنطقة طويلة جداً"),
+  area: z.string().trim().max(100, "المنطقة طويلة جداً").optional(),
   street: z.string().max(200, "العنوان طويل جداً").optional(),
   notes: z.string().max(1000, "الملاحظات طويلة جداً").optional(),
 });
@@ -126,7 +126,9 @@ const Checkout = () => {
         ]
           .filter(Boolean)
           .join("، ")
-      : "";
+      : ["عنوان التوصيل", formData.governorate, formData.area, formData.street]
+          .filter((v) => v && v.trim())
+          .join("، ");
 
   // A saved address city may not match any pickup-center city; clear it so the
   // city select isn't stuck on a value that filters every center out.
@@ -406,15 +408,6 @@ const Checkout = () => {
       return;
     }
 
-    if (!selectedCenter) {
-      toast({
-        title: "مركز الاستلام مطلوب",
-        description: "التوصيل داخل سوريا يتم عبر مراكز الاستلام فقط. يرجى اختيار مركز.",
-        variant: "destructive",
-      });
-      return;
-    }
-
     setSubmitting(true);
     try {
       // Create order server-side via SECURITY DEFINER RPC.
@@ -431,7 +424,7 @@ const Checkout = () => {
         _notes: formData.notes || null,
         _coupon_code: appliedCoupon?.code || null,
         _payment_method: paymentMethod,
-        _pickup_center_id: selectedCenter.id,
+        _pickup_center_id: selectedCenter?.id ?? null,
       });
 
 
@@ -669,11 +662,10 @@ const Checkout = () => {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="area">المدينة / المنطقة *</Label>
+                    <Label htmlFor="area">المدينة / المنطقة</Label>
                     <Select
                       value={formData.area}
                       onValueChange={(v) => setFormData({ ...formData, area: v })}
-                      disabled={!formData.governorate || centersLoading || areaOptions.length === 0}
                     >
                       <SelectTrigger id="area">
                         <SelectValue
@@ -697,11 +689,10 @@ const Checkout = () => {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="pickup-center">مركز الاستلام *</Label>
+                    <Label htmlFor="pickup-center">مركز الاستلام</Label>
                     <Select
                       value={selectedCenterId}
                       onValueChange={setSelectedCenterId}
-                      disabled={centersInArea.length === 0}
                     >
                       <SelectTrigger id="pickup-center">
                         <SelectValue

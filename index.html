@@ -64,21 +64,33 @@
       #app-splash {
         position: fixed; inset: 0; z-index: 2147483647;
         display: flex; flex-direction: column; align-items: center; justify-content: center;
-        gap: 28px; background-color: #ffffff;
+        gap: 28px;
+        background-color: #2a0a4a;
+        background-image:
+          url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140' viewBox='0 0 140 140'%3E%3Cg fill='none' stroke='%23ffffff' stroke-opacity='0.09' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M14 26h6l4 18h20l4-12H24'/%3E%3Ccircle cx='28' cy='50' r='2.5'/%3E%3Ccircle cx='42' cy='50' r='2.5'/%3E%3Cpath d='M86 22h20v22H86z'/%3E%3Cpath d='M92 22c0-5 8-5 8 0'/%3E%3Cpath d='M20 92h22l-3 24H23z'/%3E%3Cpath d='M26 92c0-5 10-5 10 0'/%3E%3Cpath d='M92 96l14-6 5 6h6v10h-6v16H92v-16h-6V96h6z'/%3E%3Cpath d='M120 60l12 6-12 6z'/%3E%3Cpath d='M62 66c0-5 7-6 9-1 2-5 9-4 9 1 0 6-9 12-9 12s-9-6-9-12z'/%3E%3Cpath d='M50 118l12-12 12 12-12 12z'/%3E%3C/g%3E%3C/svg%3E"),
+          radial-gradient(120% 90% at 15% 10%, rgba(147,51,234,0.55) 0%, rgba(147,51,234,0) 60%),
+          radial-gradient(110% 90% at 90% 90%, rgba(236,72,153,0.45) 0%, rgba(236,72,153,0) 60%),
+          linear-gradient(160deg, #35105c 0%, #1d0733 55%, #2b0a3f 100%);
+        background-size: 140px 140px, cover, cover, cover;
+        background-repeat: repeat, no-repeat, no-repeat, no-repeat;
         opacity: 1;
         transition: opacity .45s ease;
         padding-bottom: env(safe-area-inset-bottom);
       }
+      @media (max-width: 640px) {
+        #app-splash { background-size: 108px 108px, cover, cover, cover; }
+      }
       #app-splash.is-hidden { opacity: 0; pointer-events: none; }
       #app-splash img {
-        width: clamp(104px, 34vmin, 176px);
-        height: clamp(104px, 34vmin, 176px);
+        width: clamp(132px, 44vmin, 260px);
+        height: auto;
         object-fit: contain;
         display: block;
         animation: splash-pop .6s cubic-bezier(.22,1,.36,1) both;
+        filter: drop-shadow(0 18px 40px rgba(0,0,0,.35));
       }
-      #app-splash .splash-bar { width: clamp(96px, 28vmin, 144px); height: 3px; border-radius: 999px; background: #ede9fe; overflow: hidden; }
-      #app-splash .splash-bar span { display: block; width: 40%; height: 100%; border-radius: 999px; background: linear-gradient(90deg, #9333ea, #ec4899); animation: splash-slide 1.1s ease-in-out infinite; }
+      #app-splash .splash-bar { width: clamp(96px, 28vmin, 144px); height: 3px; border-radius: 999px; background: rgba(255,255,255,.18); overflow: hidden; }
+      #app-splash .splash-bar span { display: block; width: 40%; height: 100%; border-radius: 999px; background: linear-gradient(90deg, #a855f7, #ec4899); animation: splash-slide 1.1s ease-in-out infinite; }
       @keyframes splash-pop { from { opacity: 0; transform: scale(.92); } to { opacity: 1; transform: scale(1); } }
       @keyframes splash-slide { 0% { transform: translateX(-120%); } 100% { transform: translateX(320%); } }
       @media (prefers-reduced-motion: reduce) {
@@ -87,9 +99,10 @@
       }
     </style>
     <div id="app-splash" aria-hidden="true">
-      <img src="/pwa-512x512.png" alt="" fetchpriority="high" width="512" height="512" />
+      <img src="/splash-logo.png" alt="" fetchpriority="high" width="512" height="478" />
       <div class="splash-bar"><span></span></div>
     </div>
+
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
     <script>

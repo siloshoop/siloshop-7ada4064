@@ -1,4 +1,5 @@
-import { lazy, Suspense } from "react";
+import { Suspense } from "react";
+import { lazyWithRetry as lazy } from "@/lib/lazyWithRetry";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -115,7 +116,18 @@ const SellerStore = lazy(() => import("./pages/seller/SellerStore"));
 const SellerAnalytics = lazy(() => import("./pages/seller/SellerAnalytics"));
 const AdminSellerViolations = lazy(() => import("./pages/admin/SellerViolations"));
 
-const queryClient = new QueryClient(); // App query client
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      // Fewer duplicate backend requests while navigating; data still refetches
+      // on mount after it goes stale.
+      staleTime: 60_000,
+      gcTime: 5 * 60_000,
+      refetchOnWindowFocus: false,
+      retry: 1,
+    },
+  },
+});
 
 const RouteFallback = () => (
   <div className="flex min-h-[60vh] items-center justify-center" role="status" aria-busy="true">

@@ -331,6 +331,61 @@ const PlatformProductForm = ({ open, onOpenChange, product, onSaved, categories,
             </div>
           </div>
 
+          {/* Per-product platform shipping & payment (Super Admin only, enforced server-side) */}
+          <div className="space-y-3 rounded-lg border p-3">
+            <p className="text-sm font-semibold">الشحن والدفع لهذا المنتج</p>
+            <div className="flex items-center justify-between gap-3">
+              <div>
+                <Label>شحن مجاني</Label>
+                <p className="text-xs text-muted-foreground">عند الإيقاف يتم إدخال قيمة الشحن</p>
+              </div>
+              <Switch
+                checked={form.platform_free_shipping}
+                onCheckedChange={(c) => set("platform_free_shipping", c)}
+              />
+            </div>
+            {!form.platform_free_shipping && (
+              <div className="space-y-1.5">
+                <Label>قيمة الشحن (ل.س)</Label>
+                <Input
+                  type="number"
+                  min={0}
+                  dir="ltr"
+                  value={form.platform_shipping_fee}
+                  onChange={(e) =>
+                    set("platform_shipping_fee", Math.max(0, Number(e.target.value) || 0))
+                  }
+                />
+              </div>
+            )}
+            <div className="space-y-2 pt-1">
+              <Label>طرق الدفع المتاحة لهذا المنتج</Label>
+              <div className="flex items-center justify-between gap-3">
+                <span className="text-sm">الدفع عند الاستلام</span>
+                <Switch
+                  checked={form.platform_cod_enabled}
+                  onCheckedChange={(c) => set("platform_cod_enabled", c)}
+                />
+              </div>
+              <div className="flex items-center justify-between gap-3">
+                <span className="text-sm">شام كاش</span>
+                <Switch
+                  checked={form.platform_sham_cash_enabled}
+                  onCheckedChange={(c) => set("platform_sham_cash_enabled", c)}
+                />
+              </div>
+              <div className="flex items-center justify-between gap-3">
+                <span className="text-sm">الدفع الإلكتروني</span>
+                <Switch
+                  checked={form.platform_electronic_payment_enabled}
+                  onCheckedChange={(c) => set("platform_electronic_payment_enabled", c)}
+                />
+              </div>
+            </div>
+          </div>
+
+
+
           <PlatformImageUploader
             images={form.images}
             mainImage={form.image_url}

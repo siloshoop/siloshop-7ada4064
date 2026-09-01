@@ -2364,6 +2364,11 @@ export type Database = {
           name: string
           name_en: string | null
           original_price: number | null
+          platform_cod_enabled: boolean | null
+          platform_electronic_payment_enabled: boolean | null
+          platform_free_shipping: boolean | null
+          platform_sham_cash_enabled: boolean | null
+          platform_shipping_fee: number
           price: number
           product_type: string
           return_policy: string | null
@@ -2424,6 +2429,11 @@ export type Database = {
           name: string
           name_en?: string | null
           original_price?: number | null
+          platform_cod_enabled?: boolean | null
+          platform_electronic_payment_enabled?: boolean | null
+          platform_free_shipping?: boolean | null
+          platform_sham_cash_enabled?: boolean | null
+          platform_shipping_fee?: number
           price: number
           product_type?: string
           return_policy?: string | null
@@ -2484,6 +2494,11 @@ export type Database = {
           name?: string
           name_en?: string | null
           original_price?: number | null
+          platform_cod_enabled?: boolean | null
+          platform_electronic_payment_enabled?: boolean | null
+          platform_free_shipping?: boolean | null
+          platform_sham_cash_enabled?: boolean | null
+          platform_shipping_fee?: number
           price?: number
           product_type?: string
           return_policy?: string | null

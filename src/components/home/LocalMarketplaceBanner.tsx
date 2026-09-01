@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { ArrowLeft, BadgeCheck, Banknote, MessageCircle, Store } from "lucide-react";
+import SyrianFlag from "@/components/SyrianFlag";
 
 const PERKS = [
   { icon: BadgeCheck, title: "بائعون موثّقون", body: "كل متجر يخضع لمراجعة الإدارة قبل النشر." },
@@ -17,7 +18,7 @@ const LocalMarketplaceBanner = () => (
         <div className="relative grid gap-6 lg:grid-cols-[1.1fr_1.4fr] lg:items-center">
           <div className="space-y-3">
             <span className="inline-flex items-center gap-2 rounded-full bg-background/70 px-3.5 py-1.5 text-xs font-bold backdrop-blur-sm">
-              🇸🇾 السوق المحلي
+              <SyrianFlag /> السوق المحلي
             </span>
             <h2 className="text-2xl font-extrabold tracking-tight md:text-3xl">
               تسوّق من متاجر سوريا في مكان واحد

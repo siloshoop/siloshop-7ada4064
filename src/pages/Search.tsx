@@ -37,6 +37,7 @@ import {
   DollarSign, User, Layers, ArrowUpDown, RotateCcw, Gem, Globe, Truck, Palette, Ruler, Percent
 } from "lucide-react";
 import { addRecentSearch } from "@/lib/searchHistory";
+import SyrianFlag from "@/components/SyrianFlag";
 
 interface Product {
   id: string;
@@ -593,7 +594,7 @@ const SearchPage = () => {
             )}
             {filters.country && (
               <Badge variant="secondary" className="gap-1">
-                {filters.country === "local" ? "🇸🇾 سوريا" : "🇹🇷 تركيا"}
+                {filters.country === "local" ? (<><SyrianFlag /> سوريا</>) : "🇹🇷 تركيا"}
                 <X className="h-3 w-3 cursor-pointer" onClick={() => updateFilter("country", "")} />
               </Badge>
             )}
@@ -848,7 +849,7 @@ const SearchPage = () => {
           <AccordionContent className="space-y-2 pt-2">
             {[
               { value: "", label: "كل البلدان" },
-              { value: "local", label: "🇸🇾 منتجات محلية (سوريا)" },
+              { value: "local", label: (<><SyrianFlag /> منتجات محلية (سوريا)</>) },
               { value: "turkey", label: "🇹🇷 مستورد من تركيا" },
             ].map((option) => (
               <div key={option.value || "all"} className="flex items-center gap-2">

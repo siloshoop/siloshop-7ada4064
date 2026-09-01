@@ -15,6 +15,7 @@ import { Eye, EyeOff, Loader2, ShoppingBag } from "lucide-react";
 import { z } from "zod";
 import { COUNTRY_CODES, DEFAULT_COUNTRY, findCountry } from "@/lib/countryCodes";
 import {
+import SyrianFlag from "@/components/SyrianFlag";
   CAPTCHA_AFTER,
   checkEmail,
   clearAttempts,
@@ -501,7 +502,7 @@ const Auth = () => {
                         {COUNTRY_CODES.map((c) => (
                           <SelectItem key={c.code} value={c.code}>
                             <span className="flex items-center gap-2">
-                              <span>{c.flag}</span>
+                              <span>{c.code === "SY" ? <SyrianFlag /> : c.flag}</span>
                               <span className="font-mono">{c.dial}</span>
                               <span className="text-muted-foreground text-xs">{c.nameAr}</span>
                             </span>

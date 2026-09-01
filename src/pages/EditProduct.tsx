@@ -17,6 +17,8 @@ import { Loader2, Save, Trash2, ChevronLeft, X } from "lucide-react";
 import imageCompression from 'browser-image-compression';
 import { productNumbersSchema, firstIssue, friendlyDbError } from "@/lib/productValidation";
 import ProductVariantsManager from "@/components/seller/ProductVariantsManager";
+import ProductColorsSizesEditor, { type ColorsSizesValue, buildVariantRows } from "@/components/seller/ProductColorsSizesEditor";
+import { syncColorSizeVariants, COLOR_ATTR, SIZE_ATTR } from "@/lib/productVariantsSync";
 
 const SHIPPING_CLASSES = [
   { value: "عادي", label: "عادي" },
@@ -59,7 +61,6 @@ const EditProduct = () => {
     category_id: "",
     subcategory_id: "",
     is_active: true,
-    gtin: "",
     length_cm: "",
     width_cm: "",
     height_cm: "",
@@ -73,8 +74,7 @@ const EditProduct = () => {
     seo_keywords: "",
   });
 
-  const [tags, setTags] = useState<string[]>([]);
-  const [tagInput, setTagInput] = useState("");
+  const [csz, setCsz] = useState<ColorsSizesValue>({ colors: [], sizes: [], variants: [] });
 
   const [existingImages, setExistingImages] = useState<string[]>([]);
   const [newFiles, setNewFiles] = useState<File[]>([]);
@@ -126,7 +126,6 @@ const EditProduct = () => {
               category_id: product.category_id || "",
               subcategory_id: product.subcategory_id || "",
               is_active: product.is_active ?? true,
-              gtin: p.gtin || "",
               length_cm: p.length_cm?.toString() || "",
               width_cm: p.width_cm?.toString() || "",
               height_cm: p.height_cm?.toString() || "",
@@ -140,7 +139,22 @@ const EditProduct = () => {
               seo_keywords: p.seo_keywords || "",
             });
 
-            setTags(Array.isArray(p.tags) ? p.tags : []);
+            const colors: string[] = Array.isArray(p.colors) ? p.colors : [];
+            const sizes: string[] = Array.isArray(p.sizes) ? p.sizes : [];
+            const { data: vRows } = await supabase
+              .from("product_variants")
+              .select("attributes, stock_quantity, price")
+              .eq("product_id", id)
+              .order("sort_order");
+            const existingRows = (vRows ?? [])
+              .map((v: any) => ({
+                color: (v.attributes || {})[COLOR_ATTR] || "",
+                size: (v.attributes || {})[SIZE_ATTR] || "",
+                stock_quantity: String(v.stock_quantity ?? 0),
+                price: v.price != null ? String(v.price) : "",
+              }))
+              .filter((r) => r.color || r.size);
+            setCsz({ colors, sizes, variants: buildVariantRows(colors, sizes, existingRows) });
 
             // Set existing images
             const images = product.images || [];
@@ -181,28 +195,6 @@ const EditProduct = () => {
       category_id: value,
       subcategory_id: "" // Reset subcategory when category changes
     }));
-  };
-
-  const addTag = () => {
-    const value = tagInput.trim();
-    if (!value) return;
-    if (tags.includes(value)) {
-      setTagInput("");
-      return;
-    }
-    setTags([...tags, value]);
-    setTagInput("");
-  };
-
-  const handleTagKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Enter" || e.key === ",") {
-      e.preventDefault();
-      addTag();
-    }
-  };
-
-  const removeTag = (tag: string) => {
-    setTags(tags.filter((t) => t !== tag));
   };
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -384,15 +376,15 @@ const EditProduct = () => {
           image_url: allImages[0],
           images: allImages,
           is_active: formData.is_active,
-          gtin: formData.gtin.trim() || null,
-          length_cm: formData.length_cm ? Number(formData.length_cm) : null,
+            length_cm: formData.length_cm ? Number(formData.length_cm) : null,
           width_cm: formData.width_cm ? Number(formData.width_cm) : null,
           height_cm: formData.height_cm ? Number(formData.height_cm) : null,
           shipping_weight: formData.shipping_weight ? Number(formData.shipping_weight) : null,
           shipping_class: formData.shipping_class || null,
           warranty: formData.warranty.trim() || null,
             country_of_origin: formData.country_of_origin.trim() || null,
-          tags: tags.length > 0 ? tags : [],
+          colors: csz.colors,
+          sizes: csz.sizes,
           slug: finalSlug || null,
           seo_title: formData.seo_title.trim() || null,
           seo_description: formData.seo_description.trim() || null,

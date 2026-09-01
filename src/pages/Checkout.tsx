@@ -128,6 +128,15 @@ const Checkout = () => {
           .join("، ")
       : "";
 
+  // A saved address city may not match any pickup-center city; clear it so the
+  // city select isn't stuck on a value that filters every center out.
+  useEffect(() => {
+    if (centersLoading) return;
+    if (formData.area && !areaOptions.includes(formData.area)) {
+      setFormData((f) => ({ ...f, area: "" }));
+    }
+  }, [centersLoading, areaOptions, formData.area]);
+
   // Reset the chosen center whenever the governorate/area changes.
   useEffect(() => {
     if (selectedCenterId && !centersInArea.some((c) => c.id === selectedCenterId)) {

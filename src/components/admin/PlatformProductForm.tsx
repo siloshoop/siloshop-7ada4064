@@ -154,6 +154,18 @@ const PlatformProductForm = ({ open, onOpenChange, product, onSaved, categories,
       return;
     }
     const values = parsed.data;
+    if (
+      !form.platform_cod_enabled &&
+      !form.platform_sham_cash_enabled &&
+      !form.platform_electronic_payment_enabled
+    ) {
+      toast({ title: "يجب تفعيل طريقة دفع واحدة على الأقل لهذا المنتج", variant: "destructive" });
+      return;
+    }
+    if (!form.platform_free_shipping && Number(form.platform_shipping_fee) <= 0) {
+      toast({ title: "يرجى إدخال قيمة الشحن للمنتج", variant: "destructive" });
+      return;
+    }
     setSaving(true);
     const payload: any = {
       name: values.name,
@@ -175,6 +187,11 @@ const PlatformProductForm = ({ open, onOpenChange, product, onSaved, categories,
       product_type: "platform",
       source: "manual",
       vendor_id: user.id,
+      platform_free_shipping: form.platform_free_shipping,
+      platform_shipping_fee: form.platform_free_shipping ? 0 : Number(form.platform_shipping_fee),
+      platform_cod_enabled: form.platform_cod_enabled,
+      platform_sham_cash_enabled: form.platform_sham_cash_enabled,
+      platform_electronic_payment_enabled: form.platform_electronic_payment_enabled,
     };
 
     const q = form.id

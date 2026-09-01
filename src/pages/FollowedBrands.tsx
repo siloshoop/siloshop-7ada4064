@@ -212,7 +212,7 @@ const FollowedBrands = () => {
                       className="w-16 h-16 rounded-full bg-muted border border-border flex items-center justify-center overflow-hidden cursor-pointer hover:border-primary/50 transition-colors flex-shrink-0"
                     >
                       {item.brand.logo_url ? (
-                        <img
+                        <img loading="lazy" decoding="async"
                           src={item.brand.logo_url}
                           alt={item.brand.name_ar}
                           className="w-12 h-12 object-contain"

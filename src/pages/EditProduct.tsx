@@ -613,7 +613,7 @@ const EditProduct = () => {
                         <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                           {existingImages.map((img, index) => (
                             <div key={index} className="relative">
-                              <img
+                              <img loading="lazy" decoding="async"
                                 src={img}
                                 alt={`صورة ${index + 1}`}
                                 className="w-full h-32 object-cover rounded-lg"
@@ -659,7 +659,7 @@ const EditProduct = () => {
                         <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mt-4">
                           {newPreviews.map((preview, index) => (
                             <div key={index} className="relative">
-                              <img
+                              <img loading="lazy" decoding="async"
                                 src={preview}
                                 alt={`صورة جديدة ${index + 1}`}
                                 className="w-full h-32 object-cover rounded-lg"

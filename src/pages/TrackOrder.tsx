@@ -686,7 +686,7 @@ const TrackOrder = () => {
                     {(order.order_items ?? []).map((item, index) => (
                       <div key={index} className="flex gap-4">
                         {item.product_image ? (
-                          <img
+                          <img loading="lazy" decoding="async"
                             src={item.product_image}
                             alt={item.product_name ?? ""}
                             className="w-16 h-16 object-cover rounded"

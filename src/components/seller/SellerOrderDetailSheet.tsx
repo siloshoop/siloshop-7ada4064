@@ -202,7 +202,7 @@ const SellerOrderDetailSheet = ({ order, open, onOpenChange, onChanged }: Props)
               ) : (
                 items.map((it) => (
                   <div key={it.id} className="flex items-center gap-3 rounded-lg bg-muted/50 p-3">
-                    <img src={it.product_image || "/placeholder.svg"} alt={it.product_name || ""} className="h-12 w-12 rounded object-cover" />
+                    <img loading="lazy" decoding="async" src={it.product_image || "/placeholder.svg"} alt={it.product_name || ""} className="h-12 w-12 rounded object-cover" />
                     <div className="min-w-0 flex-1">
                       <p className="truncate text-sm font-medium">{it.product_name || "منتج"}</p>
                       {it.variant_label && <p className="text-xs text-muted-foreground">{it.variant_label}</p>}

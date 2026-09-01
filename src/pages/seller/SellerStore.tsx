@@ -147,8 +147,8 @@ const SellerStore = () => {
             </div>
             {(logoPreview || coverPreview) && (
               <div className="flex items-center gap-3">
-                {logoPreview && <img src={logoPreview} alt="شعار المتجر" className="h-12 w-12 rounded-md object-cover" />}
-                {coverPreview && <img src={coverPreview} alt="غلاف المتجر" className="h-12 flex-1 rounded-md object-cover" />}
+                {logoPreview && <img loading="lazy" decoding="async" src={logoPreview} alt="شعار المتجر" className="h-12 w-12 rounded-md object-cover" />}
+                {coverPreview && <img loading="lazy" decoding="async" src={coverPreview} alt="غلاف المتجر" className="h-12 flex-1 rounded-md object-cover" />}
               </div>
             )}
           </CardContent>

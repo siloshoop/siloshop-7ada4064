@@ -33,7 +33,7 @@ const BlogPost = () => {
       <main className="flex-1">
         <article>
           <div className="relative w-full h-[40vh] md:h-[55vh] overflow-hidden">
-            <img
+            <img loading="lazy" decoding="async"
               src={post.image}
               alt={post.title}
               width={1920}

@@ -47,6 +47,11 @@ interface CartItem {
     shipping_cost?: number;
     product_type?: string;
     shipping_duration_text?: string | null;
+    platform_free_shipping?: boolean | null;
+    platform_shipping_fee?: number | null;
+    platform_cod_enabled?: boolean | null;
+    platform_sham_cash_enabled?: boolean | null;
+    platform_electronic_payment_enabled?: boolean | null;
   };
 }
 

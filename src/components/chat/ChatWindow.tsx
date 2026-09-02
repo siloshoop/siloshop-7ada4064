@@ -190,7 +190,16 @@ const ChatWindow = ({
           <>
             {thread.hasMore && !query && (
               <div className="flex justify-center">
-                <Button variant="outline" size="sm" onClick={() => void thread.loadMore()} disabled={thread.loadingMore}>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    prevScrollHeight.current = scrollRef.current?.scrollHeight ?? 0;
+                    void thread.loadMore();
+                  }}
+                  disabled={thread.loadingMore}
+                >
+
                   {thread.loadingMore ? <Loader2 className="h-4 w-4 animate-spin" /> : "تحميل رسائل أقدم"}
                 </Button>
               </div>

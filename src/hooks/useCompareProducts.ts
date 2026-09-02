@@ -3,13 +3,32 @@ import { supabase } from "@/integrations/supabase/client";
 
 const MAX_PRODUCTS = 4;
 const UPDATED_EVENT = "compare-products-updated";
+const GUEST_KEY = "siloshop_compare_guest";
+
+const readGuest = (): string[] => {
+  try {
+    const raw = localStorage.getItem(GUEST_KEY);
+    const parsed = raw ? (JSON.parse(raw) as unknown) : [];
+    return Array.isArray(parsed) ? (parsed as string[]).slice(0, MAX_PRODUCTS) : [];
+  } catch {
+    return [];
+  }
+};
+
+const writeGuest = (ids: string[]) => {
+  try {
+    localStorage.setItem(GUEST_KEY, JSON.stringify(ids.slice(0, MAX_PRODUCTS)));
+  } catch {
+    /* storage unavailable */
+  }
+};
 
 /**
  * Product comparison list.
  *
- * Persisted in the `compare_items` table so the list follows the account across
- * devices. The 4-product cap is enforced by a database trigger as well; guests
- * are prompted to sign in via the `requiresAuth` flag.
+ * Signed-in users persist the list in `compare_items` so it follows the account
+ * across devices; guests keep it in localStorage and it is merged into their
+ * account on sign-in. The 4-product cap is enforced by a database trigger too.
  */
 export const useCompareProducts = () => {
   const [compareProducts, setCompareProducts] = useState<string[]>([]);
@@ -18,9 +37,20 @@ export const useCompareProducts = () => {
 
   const load = useCallback(async (uid: string | null) => {
     if (!uid) {
-      setCompareProducts([]);
+      setCompareProducts(readGuest());
       setLoading(false);
       return;
+    }
+    // Merge any list the visitor built before signing in.
+    const pending = readGuest();
+    if (pending.length) {
+      await supabase
+        .from("compare_items")
+        .upsert(
+          pending.map((product_id) => ({ user_id: uid, product_id })),
+          { onConflict: "user_id,product_id", ignoreDuplicates: true },
+        );
+      writeGuest([]);
     }
     const { data } = await supabase
       .from("compare_items")
@@ -29,6 +59,7 @@ export const useCompareProducts = () => {
     setCompareProducts(data?.map((row) => row.product_id) ?? []);
     setLoading(false);
   }, []);
+
 
   useEffect(() => {
     let active = true;
@@ -60,9 +91,16 @@ export const useCompareProducts = () => {
 
   const addProduct = useCallback(
     async (productId: string): Promise<{ success: boolean; message: string }> => {
-      if (!userId) return { success: false, message: "auth" };
       if (compareProducts.includes(productId)) return { success: false, message: "exists" };
       if (compareProducts.length >= MAX_PRODUCTS) return { success: false, message: "max" };
+
+      if (!userId) {
+        const next = [...compareProducts, productId];
+        writeGuest(next);
+        setCompareProducts(next);
+        window.dispatchEvent(new CustomEvent(UPDATED_EVENT));
+        return { success: true, message: "added" };
+      }
 
       const { error } = await supabase
         .from("compare_items")
@@ -84,18 +122,26 @@ export const useCompareProducts = () => {
 
   const removeProduct = useCallback(
     async (productId: string) => {
-      if (!userId) return;
-      setCompareProducts((prev) => prev.filter((id) => id !== productId));
-      await supabase.from("compare_items").delete().eq("user_id", userId).eq("product_id", productId);
+      setCompareProducts((prev) => {
+        const next = prev.filter((id) => id !== productId);
+        if (!userId) writeGuest(next);
+        return next;
+      });
+      if (userId) {
+        await supabase.from("compare_items").delete().eq("user_id", userId).eq("product_id", productId);
+      }
       window.dispatchEvent(new CustomEvent(UPDATED_EVENT));
     },
     [userId],
   );
 
   const clearProducts = useCallback(async () => {
-    if (!userId) return;
     setCompareProducts([]);
-    await supabase.from("compare_items").delete().eq("user_id", userId);
+    if (!userId) {
+      writeGuest([]);
+    } else {
+      await supabase.from("compare_items").delete().eq("user_id", userId);
+    }
     window.dispatchEvent(new CustomEvent(UPDATED_EVENT));
   }, [userId]);
 
@@ -108,7 +154,8 @@ export const useCompareProducts = () => {
     compareProducts,
     compareCount: compareProducts.length,
     loading,
-    requiresAuth: !userId,
+    requiresAuth: false,
+
     addProduct,
     removeProduct,
     clearProducts,

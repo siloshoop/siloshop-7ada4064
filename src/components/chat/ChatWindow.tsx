@@ -52,13 +52,29 @@ const ChatWindow = ({
   const endRef = useRef<HTMLDivElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const lastCount = useRef(0);
+  const firstId = useRef<string | null>(null);
+  const prevScrollHeight = useRef(0);
 
   useEffect(() => {
-    if (thread.messages.length !== lastCount.current) {
-      lastCount.current = thread.messages.length;
-      endRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
+    const msgs = thread.messages;
+    if (msgs.length === lastCount.current) return;
+    const newFirstId = msgs[0]?.id ?? null;
+    const prepended = firstId.current !== null && newFirstId !== firstId.current;
+    lastCount.current = msgs.length;
+    firstId.current = newFirstId;
+
+    if (prepended) {
+      // Older history loaded: keep the reader anchored where they were.
+      const el = scrollRef.current;
+      if (el) {
+        const delta = el.scrollHeight - prevScrollHeight.current;
+        if (delta > 0) el.scrollTop = el.scrollTop + delta;
+      }
+      return;
     }
+    endRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
   }, [thread.messages, thread.peerTyping]);
+
 
   const pinned = thread.messages.filter((m) => m.is_pinned);
   const visible = query.trim()
@@ -174,7 +190,16 @@ const ChatWindow = ({
           <>
             {thread.hasMore && !query && (
               <div className="flex justify-center">
-                <Button variant="outline" size="sm" onClick={() => void thread.loadMore()} disabled={thread.loadingMore}>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    prevScrollHeight.current = scrollRef.current?.scrollHeight ?? 0;
+                    void thread.loadMore();
+                  }}
+                  disabled={thread.loadingMore}
+                >
+
                   {thread.loadingMore ? <Loader2 className="h-4 w-4 animate-spin" /> : "تحميل رسائل أقدم"}
                 </Button>
               </div>

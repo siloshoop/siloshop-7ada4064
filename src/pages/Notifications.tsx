@@ -253,8 +253,9 @@ const Notifications = () => {
       return;
     }
     if (type === "return_status") {
-      navigate("/my-returns");
+      navigate(related_id ? `/orders/track/${related_id}` : "/orders");
       return;
+
     }
     if (type.startsWith("product_") && type !== "product_deleted") {
       navigate(`/product/${related_id}`);

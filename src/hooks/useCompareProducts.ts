@@ -3,13 +3,32 @@ import { supabase } from "@/integrations/supabase/client";
 
 const MAX_PRODUCTS = 4;
 const UPDATED_EVENT = "compare-products-updated";
+const GUEST_KEY = "siloshop_compare_guest";
+
+const readGuest = (): string[] => {
+  try {
+    const raw = localStorage.getItem(GUEST_KEY);
+    const parsed = raw ? (JSON.parse(raw) as unknown) : [];
+    return Array.isArray(parsed) ? (parsed as string[]).slice(0, MAX_PRODUCTS) : [];
+  } catch {
+    return [];
+  }
+};
+
+const writeGuest = (ids: string[]) => {
+  try {
+    localStorage.setItem(GUEST_KEY, JSON.stringify(ids.slice(0, MAX_PRODUCTS)));
+  } catch {
+    /* storage unavailable */
+  }
+};
 
 /**
  * Product comparison list.
  *
- * Persisted in the `compare_items` table so the list follows the account across
- * devices. The 4-product cap is enforced by a database trigger as well; guests
- * are prompted to sign in via the `requiresAuth` flag.
+ * Signed-in users persist the list in `compare_items` so it follows the account
+ * across devices; guests keep it in localStorage and it is merged into their
+ * account on sign-in. The 4-product cap is enforced by a database trigger too.
  */
 export const useCompareProducts = () => {
   const [compareProducts, setCompareProducts] = useState<string[]>([]);
@@ -18,9 +37,20 @@ export const useCompareProducts = () => {
 
   const load = useCallback(async (uid: string | null) => {
     if (!uid) {
-      setCompareProducts([]);
+      setCompareProducts(readGuest());
       setLoading(false);
       return;
+    }
+    // Merge any list the visitor built before signing in.
+    const pending = readGuest();
+    if (pending.length) {
+      await supabase
+        .from("compare_items")
+        .upsert(
+          pending.map((product_id) => ({ user_id: uid, product_id })),
+          { onConflict: "user_id,product_id", ignoreDuplicates: true },
+        );
+      writeGuest([]);
     }
     const { data } = await supabase
       .from("compare_items")
@@ -29,6 +59,7 @@ export const useCompareProducts = () => {
     setCompareProducts(data?.map((row) => row.product_id) ?? []);
     setLoading(false);
   }, []);
+
 
   useEffect(() => {
     let active = true;

@@ -91,9 +91,16 @@ export const useCompareProducts = () => {
 
   const addProduct = useCallback(
     async (productId: string): Promise<{ success: boolean; message: string }> => {
-      if (!userId) return { success: false, message: "auth" };
       if (compareProducts.includes(productId)) return { success: false, message: "exists" };
       if (compareProducts.length >= MAX_PRODUCTS) return { success: false, message: "max" };
+
+      if (!userId) {
+        const next = [...compareProducts, productId];
+        writeGuest(next);
+        setCompareProducts(next);
+        window.dispatchEvent(new CustomEvent(UPDATED_EVENT));
+        return { success: true, message: "added" };
+      }
 
       const { error } = await supabase
         .from("compare_items")
@@ -115,18 +122,26 @@ export const useCompareProducts = () => {
 
   const removeProduct = useCallback(
     async (productId: string) => {
-      if (!userId) return;
-      setCompareProducts((prev) => prev.filter((id) => id !== productId));
-      await supabase.from("compare_items").delete().eq("user_id", userId).eq("product_id", productId);
+      setCompareProducts((prev) => {
+        const next = prev.filter((id) => id !== productId);
+        if (!userId) writeGuest(next);
+        return next;
+      });
+      if (userId) {
+        await supabase.from("compare_items").delete().eq("user_id", userId).eq("product_id", productId);
+      }
       window.dispatchEvent(new CustomEvent(UPDATED_EVENT));
     },
     [userId],
   );
 
   const clearProducts = useCallback(async () => {
-    if (!userId) return;
     setCompareProducts([]);
-    await supabase.from("compare_items").delete().eq("user_id", userId);
+    if (!userId) {
+      writeGuest([]);
+    } else {
+      await supabase.from("compare_items").delete().eq("user_id", userId);
+    }
     window.dispatchEvent(new CustomEvent(UPDATED_EVENT));
   }, [userId]);
 
@@ -139,7 +154,8 @@ export const useCompareProducts = () => {
     compareProducts,
     compareCount: compareProducts.length,
     loading,
-    requiresAuth: !userId,
+    requiresAuth: false,
+
     addProduct,
     removeProduct,
     clearProducts,

@@ -433,13 +433,19 @@ export const ProductReviews = ({ productId, vendorId }: ProductReviewsProps) => 
               totalReviews={reviews.length}
             />
           )}
-          {user && !isVendor && (
+          {user && !isVendor && !userVerifiedPurchase && !hasUserReview && (
+            <p className="text-sm text-muted-foreground border-b pb-4">
+              يمكنك إضافة تقييم لهذا المنتج بعد استلام طلبك.
+            </p>
+          )}
+          {user && !isVendor && hasUserReview && (
+            <p className="text-sm text-muted-foreground border-b pb-4">
+              لقد قيّمت هذا المنتج بالفعل، ويمكن إضافة تقييم واحد فقط لكل منتج.
+            </p>
+          )}
+          {user && !isVendor && userVerifiedPurchase && !hasUserReview && (
             <form onSubmit={handleSubmit} className="space-y-4 mb-6 pb-6 border-b">
-              {hasUserReview && (
-                <div className="text-xs text-muted-foreground">
-                  يمكنك تعديل تقييمك السابق.
-                </div>
-              )}
+
               <div>
                 <label className="text-sm font-medium mb-2 block">تقييمك</label>
                 <StarRating

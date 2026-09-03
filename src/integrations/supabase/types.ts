@@ -4511,6 +4511,18 @@ export type Database = {
           shipping_fee: number
         }[]
       }
+      get_product_reviews: {
+        Args: { _product_id: string }
+        Returns: {
+          comment: string
+          created_at: string
+          id: string
+          image_url: string
+          rating: number
+          reviewer_name: string
+          user_id: string
+        }[]
+      }
       get_seller_performance: {
         Args: { _vendor_id?: string }
         Returns: {

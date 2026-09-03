@@ -72,26 +72,53 @@ export const ProductReviews = ({ productId, vendorId }: ProductReviewsProps) => 
   }, [productId, user]);
 
   const fetchReviews = async () => {
-    const { data } = await supabase
-      .from("reviews")
-      .select(`
-        *,
-        profiles:user_id (full_name),
-        review_replies (*)
-      `)
-      .eq("product_id", productId)
-      .order("created_at", { ascending: false });
+    // profiles are not directly readable (RLS), so reviewer names come from a safe RPC
+    const { data: rows, error } = await supabase.rpc("get_product_reviews", {
+      _product_id: productId,
+    });
 
-    if (data) {
-      setReviews(data as any);
-      
+    if (error) {
+      console.error("fetchReviews", error);
+      return;
+    }
+
+    const base = (rows as any[]) || [];
+    let repliesByReview: Record<string, ReviewReply[]> = {};
+    const ids = base.map((r) => r.id);
+    if (ids.length > 0) {
+      const { data: replies } = await supabase
+        .from("review_replies")
+        .select("id, review_id, reply, created_at, vendor_id")
+        .in("review_id", ids)
+        .order("created_at", { ascending: true });
+      (replies || []).forEach((rep: any) => {
+        repliesByReview[rep.review_id] = [...(repliesByReview[rep.review_id] || []), rep];
+      });
+    }
+
+    const data: Review[] = base.map((r) => ({
+      id: r.id,
+      rating: r.rating,
+      comment: r.comment || "",
+      created_at: r.created_at,
+      user_id: r.user_id,
+      image_url: r.image_url,
+      profiles: { full_name: r.reviewer_name || "مستخدم سيلو شوب" },
+      review_replies: repliesByReview[r.id] || [],
+    }));
+
+    {
+      setReviews(data);
+
       if (data.length > 0) {
         const avg = data.reduce((sum, r) => sum + r.rating, 0) / data.length;
         setAverageRating(Math.round(avg * 10) / 10);
+      } else {
+        setAverageRating(0);
       }
 
       if (user) {
-        const mine = data.find((r: any) => r.user_id === user.id) as any;
+        const mine = data.find((r) => r.user_id === user.id) || null;
         if (mine) {
           setHasUserReview(true);
           setExistingReview(mine);
@@ -105,17 +132,19 @@ export const ProductReviews = ({ productId, vendorId }: ProductReviewsProps) => 
           setExistingImageUrl(null);
         }
 
-        // Determine if the current user has an actual verified purchase of this product
+        // Reviews are allowed only after the product was actually delivered/completed
         const { data: purchaseData } = await supabase
           .from("order_items")
-          .select("id, orders!inner(customer_id)")
+          .select("id, orders!inner(customer_id,status)")
           .eq("product_id", productId)
           .eq("orders.customer_id", user.id)
+          .in("orders.status", ["delivered", "completed"])
           .limit(1);
         setUserVerifiedPurchase(!!purchaseData && purchaseData.length > 0);
       } else {
         setUserVerifiedPurchase(false);
       }
+
 
       // Fetch helpful votes for all loaded reviews
       const reviewIds = data.map((r: any) => r.id);

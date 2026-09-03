@@ -354,7 +354,7 @@ const TrackOrder = () => {
     );
   }
 
-  const currentStatus = (order.tracking_status || order.status || "pending").trim().toLowerCase();
+  const currentStatus = (order.status || order.tracking_status || "pending").trim().toLowerCase();
   const normalizedStatus = currentStatus === "processing" ? "preparing" : currentStatus;
   const isDestructiveState = DESTRUCTIVE_STATUSES.has(normalizedStatus);
 

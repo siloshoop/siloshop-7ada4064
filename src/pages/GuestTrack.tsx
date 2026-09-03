@@ -146,7 +146,7 @@ const GuestTrack = () => {
     setResult({ history: [], events: [], items: [], ...payload });
   };
 
-  const currentStatus = (result?.tracking_status || result?.status || "pending").trim().toLowerCase();
+  const currentStatus = (result?.status || result?.tracking_status || "pending").trim().toLowerCase();
   const normalizedStatus = currentStatus === "processing" ? "preparing" : currentStatus;
   const isDestructiveState = DESTRUCTIVE_STATUSES.has(normalizedStatus);
 

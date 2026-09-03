@@ -232,7 +232,7 @@ const OrderDetails = () => {
           </CardHeader>
           <CardContent className="space-y-3 text-sm">
             <OrderStatusTimeline
-              status={order.tracking_status || order.status || "pending"}
+              status={order.status || order.tracking_status || "pending"}
               className="pb-3"
             />
             {order.invoice_number && (

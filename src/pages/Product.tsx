@@ -287,7 +287,11 @@ const Product = () => {
   const hasVariants = variants.length > 0;
   const effectivePrice = selectedVariant?.discount_price ?? selectedVariant?.price ?? product.price;
   const effectiveOriginalPrice = selectedVariant ? (selectedVariant.discount_price ? selectedVariant.price : null) : product.original_price;
-  const effectiveStock = hasVariants ? (selectedVariant?.stock_quantity ?? 0) : product.stock_quantity;
+  // Total stock across all variants — used before the shopper picks a combination
+  const totalVariantStock = variants.reduce((sum, v) => sum + (v.stock_quantity || 0), 0);
+  const effectiveStock = hasVariants
+    ? (selectedVariant ? selectedVariant.stock_quantity : totalVariantStock)
+    : product.stock_quantity;
   const discount = effectiveOriginalPrice
     ? Math.round(((effectiveOriginalPrice - effectivePrice) / effectiveOriginalPrice) * 100)
     : 0;
@@ -507,7 +511,7 @@ const Product = () => {
               <div className="rounded-xl border bg-muted/20 p-4">
                 <ProductVariantPicker variants={variants} onSelect={setSelectedVariant} />
                 {!selectedVariant && (
-                  <p className="text-xs text-muted-foreground pt-2">يرجى اختيار كافة الخيارات لعرض السعر والتوفر</p>
+                  <p className="text-xs text-muted-foreground pt-2">يرجى اختيار اللون والمقاس لعرض السعر والكمية المتوفرة</p>
                 )}
               </div>
             )}

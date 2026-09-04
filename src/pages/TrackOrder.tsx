@@ -19,35 +19,6 @@ import { ORDER_STATUS_LABELS, ACTOR_ROLE_LABELS } from "@/lib/orderStatus";
 
 const OrderTrackingMap = lazy(() => import("@/components/orders/OrderTrackingMap"));
 
-// روابط تتبع شركات الشحن
-const courierTrackingUrls: Record<string, (trackingNumber: string) => string> = {
-  'aramex': (tn) => `https://www.aramex.com/track/results?ShipmentNumber=${tn}`,
-  'أرامكس': (tn) => `https://www.aramex.com/track/results?ShipmentNumber=${tn}`,
-  'dhl': (tn) => `https://www.dhl.com/global-en/home/tracking/tracking-express.html?submit=1&tracking-id=${tn}`,
-  'دي اتش ال': (tn) => `https://www.dhl.com/global-en/home/tracking/tracking-express.html?submit=1&tracking-id=${tn}`,
-  'fedex': (tn) => `https://www.fedex.com/fedextrack/?trknbr=${tn}`,
-  'فيديكس': (tn) => `https://www.fedex.com/fedextrack/?trknbr=${tn}`,
-  'ups': (tn) => `https://www.ups.com/track?tracknum=${tn}`,
-  'يو بي اس': (tn) => `https://www.ups.com/track?tracknum=${tn}`,
-  'smsa': (tn) => `https://www.smsaexpress.com/trackshipment?tracknumbers=${tn}`,
-  'سمسا': (tn) => `https://www.smsaexpress.com/trackshipment?tracknumbers=${tn}`,
-  'zajil': (tn) => `https://www.zajil.com/track?id=${tn}`,
-  'زاجل': (tn) => `https://www.zajil.com/track?id=${tn}`,
-  'saudi post': (tn) => `https://www.splonline.com.sa/track/${tn}`,
-  'البريد السعودي': (tn) => `https://www.splonline.com.sa/track/${tn}`,
-  'j&t': (tn) => `https://www.jtexpress.sa/track?id=${tn}`,
-  'جي اند تي': (tn) => `https://www.jtexpress.sa/track?id=${tn}`,
-  'naqel': (tn) => `https://naqelexpress.com/en/track/${tn}`,
-  'ناقل': (tn) => `https://naqelexpress.com/en/track/${tn}`,
-};
-
-const getTrackingUrl = (courierName: string | null, trackingNumber: string): string | null => {
-  if (!courierName || !trackingNumber) return null;
-  const normalizedName = courierName.toLowerCase().trim();
-  const urlGenerator = courierTrackingUrls[normalizedName];
-  return urlGenerator ? urlGenerator(trackingNumber) : null;
-};
-
 // حالات إضافية لا يغطيها الشريط الأساسي (مسار الإرجاع/الاسترداد)
 const EXTRA_STATUS_LABELS: Record<string, string> = {
   return_requested: "طلب إرجاع",
@@ -79,7 +50,6 @@ interface OrderItem {
 
 interface ShippingDetails {
   shipping_company: string | null;
-  tracking_number: string | null;
   estimated_delivery: string | null;
   shipped_at: string | null;
   delivered_at: string | null;
@@ -99,7 +69,6 @@ interface Order {
   payment_method: string | null;
   status: string;
   tracking_status: string;
-  tracking_number: string | null;
   courier_name: string | null;
   estimated_delivery: string | null;
   shipping_address: string | null;
@@ -282,7 +251,7 @@ const TrackOrder = () => {
       .select(`
         *,
         order_items(quantity, price, product_name, product_image, variant_label),
-        shipping_details(shipping_company, tracking_number, estimated_delivery, shipped_at, delivered_at, shipping_notes)
+        shipping_details(shipping_company, estimated_delivery, shipped_at, delivered_at, shipping_notes)
       `)
       .eq("id", id)
       .eq("customer_id", user.id)
@@ -363,7 +332,6 @@ const TrackOrder = () => {
     : order.shipping_details ?? null;
 
   const shippingCompany = shippingInfo?.shipping_company || order.courier_name;
-  const trackingNumber = shippingInfo?.tracking_number || order.tracking_number;
   const estimatedDelivery = shippingInfo?.estimated_delivery || order.estimated_delivery;
   const shippingNotes = shippingInfo?.shipping_notes || order.shipping_notes;
 
@@ -477,14 +445,6 @@ const TrackOrder = () => {
                     </div>
                   )}
 
-                  {trackingNumber && (
-                    <div className="flex items-center gap-3 text-sm">
-                      <Package className="h-4 w-4 text-muted-foreground" />
-                      <span className="text-muted-foreground">رقم التتبع:</span>
-                      <span className="font-medium font-mono">{trackingNumber}</span>
-                    </div>
-                  )}
-
                   {shippingCompany && (
                     <div className="flex items-center gap-3 text-sm">
                       <Truck className="h-4 w-4 text-muted-foreground" />
@@ -493,32 +453,6 @@ const TrackOrder = () => {
                     </div>
                   )}
 
-                  {/* زر تتبع الشحنة المباشر */}
-                  {trackingNumber && shippingCompany && (
-                    <div className="pt-2">
-                      {getTrackingUrl(shippingCompany, trackingNumber) ? (
-                        <Button
-                          className="w-full"
-                          onClick={() => {
-                            const url = getTrackingUrl(shippingCompany, trackingNumber);
-                            if (url) window.open(url, '_blank');
-                          }}
-                        >
-                          <ExternalLink className="h-4 w-4 ml-2" />
-                          تتبع الشحنة عبر {shippingCompany}
-                        </Button>
-                      ) : (
-                        <div className="p-3 bg-muted rounded-lg">
-                          <p className="text-sm text-muted-foreground text-center">
-                            يمكنك تتبع شحنتك باستخدام رقم التتبع: <span className="font-mono font-bold">{trackingNumber}</span>
-                          </p>
-                          <p className="text-xs text-muted-foreground text-center mt-1">
-                            عبر موقع شركة الشحن: {shippingCompany}
-                          </p>
-                        </div>
-                      )}
-                    </div>
-                  )}
 
                   {estimatedDelivery && (
                     <div className="flex items-center gap-3 text-sm">

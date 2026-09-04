@@ -32,7 +32,7 @@ export const ORDER_STATUSES: OrderStatusMeta[] = [
   { key: "preparing", label: "قيد التجهيز", token: "--status-preparing", icon: Package, isStep: true },
   { key: "ready_for_shipping", label: "جاهز للشحن", token: "--status-ready", icon: Boxes, isStep: true },
   { key: "shipped", label: "تم الشحن", token: "--status-shipped", icon: Truck, isStep: true },
-  { key: "out_for_delivery", label: "خارج للتوصيل", token: "--status-out", icon: Bike, isStep: true },
+  { key: "out_for_delivery", label: "تم تسليم الطلب إلى مركز الشحن", token: "--status-out", icon: Bike, isStep: true },
   { key: "delivered", label: "تم التوصيل", token: "--status-delivered", icon: Home, isStep: true },
   { key: "completed", label: "مكتمل", token: "--status-completed", icon: CheckCircle2, isStep: true },
   { key: "cancelled", label: "ملغي", token: "--status-cancelled", icon: XCircle, isStep: false },

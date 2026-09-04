@@ -29,7 +29,7 @@ const getStatusLabel = (status: string): string => {
     confirmed: "تم التأكيد",
     processing: "قيد المعالجة",
     shipped: "تم الشحن",
-    out_for_delivery: "في الطريق للتوصيل",
+    out_for_delivery: "تم تسليم الطلب إلى مركز الشحن",
     delivered: "تم التوصيل",
     cancelled: "ملغى",
   };

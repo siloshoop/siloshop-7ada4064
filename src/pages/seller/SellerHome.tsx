@@ -55,7 +55,7 @@ const SellerHome = () => {
         { label: "قيد التجهيز", value: num(Number(o.preparing ?? 0)), icon: ShoppingBag },
         { label: "جاهز للشحن", value: num(Number(o.ready_for_shipping ?? 0)), icon: ShoppingBag },
         { label: "تم الشحن", value: num(Number(o.shipped ?? 0)), icon: ShoppingBag },
-        { label: "قيد التوصيل", value: num(Number(o.out_for_delivery ?? 0)), icon: ShoppingBag },
+        { label: "في مركز الشحن", value: num(Number(o.out_for_delivery ?? 0)), icon: ShoppingBag },
         { label: "تم التسليم", value: num(Number(o.delivered ?? 0)), icon: ShoppingBag },
         { label: "مكتملة", value: num(Number(o.completed ?? 0)), icon: ShoppingBag },
         { label: "ملغاة", value: num(Number(o.cancelled ?? 0)), icon: AlertTriangle },

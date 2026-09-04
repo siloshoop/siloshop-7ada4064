@@ -22,12 +22,11 @@ interface Props {
 
 const toDateInput = (iso?: string | null) => (iso ? new Date(iso).toISOString().slice(0, 10) : "");
 
-/** Seller/admin form for shipping company, tracking number, driver, notes and ETA. */
+/** Seller/admin form for shipping company, driver, notes and ETA. */
 const ShippingInfoDialog = ({ orderId, open, onOpenChange, initial, onSaved }: Props) => {
   const { toast } = useToast();
   const [saving, setSaving] = useState(false);
   const [courierName, setCourierName] = useState("");
-  const [trackingNumber, setTrackingNumber] = useState("");
   const [driverName, setDriverName] = useState("");
   const [driverPhone, setDriverPhone] = useState("");
   const [deliveryNotes, setDeliveryNotes] = useState("");
@@ -36,7 +35,6 @@ const ShippingInfoDialog = ({ orderId, open, onOpenChange, initial, onSaved }: P
   useEffect(() => {
     if (!open) return;
     setCourierName(initial?.courierName || "");
-    setTrackingNumber(initial?.trackingNumber || "");
     setDriverName(initial?.driverName || "");
     setDriverPhone(initial?.driverPhone || "");
     setDeliveryNotes(initial?.deliveryNotes || "");
@@ -51,7 +49,6 @@ const ShippingInfoDialog = ({ orderId, open, onOpenChange, initial, onSaved }: P
     }
     const values: ShippingInfoValues = {
       courierName: courierName.trim() || null,
-      trackingNumber: trackingNumber.trim() || null,
       driverName: driverName.trim() || null,
       driverPhone: driverPhone.trim() || null,
       deliveryNotes: deliveryNotes.trim().slice(0, 500) || null,
@@ -88,12 +85,6 @@ const ShippingInfoDialog = ({ orderId, open, onOpenChange, initial, onSaved }: P
             <Input id="courier" value={courierName} maxLength={80}
               placeholder="مثال: أرامكس، الفؤاد، البريد السوري"
               onChange={(e) => setCourierName(e.target.value)} />
-          </div>
-          <div className="grid gap-2">
-            <Label htmlFor="tracking">رقم التتبع</Label>
-            <Input id="tracking" value={trackingNumber} maxLength={60}
-              placeholder="أدخل رقم تتبع الشحنة"
-              onChange={(e) => setTrackingNumber(e.target.value)} />
           </div>
           <div className="grid gap-2 sm:grid-cols-2 sm:gap-3">
             <div className="grid gap-2">

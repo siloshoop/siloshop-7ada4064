@@ -205,7 +205,6 @@ const OrderDetails = () => {
   const total = Number(order.total_amount || 0) || (subtotal - discount + shippingAmount + taxAmount);
 
   const shippingCompany = shipping?.shipping_company || order.courier_name || null;
-  const trackingNumber = shipping?.tracking_number || order.tracking_number || null;
   const estimatedDelivery = shipping?.estimated_delivery || order.estimated_delivery || null;
   const shippedAt = shipping?.shipped_at || order.shipped_at || null;
   const deliveredAt = shipping?.delivered_at || order.delivered_at || null;
@@ -213,7 +212,7 @@ const OrderDetails = () => {
   const shippingDuration = (order as any).shipping_duration_text as string | null;
   const paymentMethodLabel =
     order.payment_method === "sham_cash" ? "شام كاش" : "الدفع عند الاستلام";
-  const hasShippingInfo = !!(shippingDuration || shippingCompany || trackingNumber || estimatedDelivery || shippedAt || deliveredAt || shippingNotes);
+  const hasShippingInfo = !!(shippingDuration || shippingCompany || estimatedDelivery || shippedAt || deliveredAt || shippingNotes);
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -334,9 +333,6 @@ const OrderDetails = () => {
               {shippingDuration && <p>مدة الشحن: <span className="font-semibold">{shippingDuration}</span></p>}
               <p>طريقة الدفع: <span className="font-semibold">{paymentMethodLabel}</span></p>
               {shippingCompany && <p>شركة الشحن: <span className="font-semibold">{shippingCompany}</span></p>}
-              {trackingNumber && (
-                <p dir="ltr" className="text-start">رقم التتبع: <span className="font-mono font-semibold">{trackingNumber}</span></p>
-              )}
               {estimatedDelivery && (
                 <p>موعد التسليم المتوقع: <span className="font-semibold">{format(new Date(estimatedDelivery), "dd MMMM yyyy", { locale: ar })}</span></p>
               )}

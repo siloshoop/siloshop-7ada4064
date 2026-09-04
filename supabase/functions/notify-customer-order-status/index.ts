@@ -139,7 +139,6 @@ const handler = async (req: Request): Promise<Response> => {
         total_amount,
         shipping_address,
         customer_id,
-        tracking_number,
         courier_name
       `)
       .eq("id", order_id)
@@ -187,12 +186,11 @@ const handler = async (req: Request): Promise<Response> => {
 
     // Build tracking info section if available
     let trackingHtml = '';
-    if (order.tracking_number || order.courier_name) {
+    if (order.courier_name) {
       trackingHtml = `
         <div style="background-color: #f0f9ff; border-radius: 8px; padding: 15px; margin: 20px 0; border-right: 4px solid #0ea5e9;">
           <h4 style="margin: 0 0 10px 0; color: #0369a1;">معلومات الشحن</h4>
           ${order.courier_name ? `<p style="margin: 5px 0;"><strong>شركة الشحن:</strong> ${esc(order.courier_name)}</p>` : ''}
-          ${order.tracking_number ? `<p style="margin: 5px 0;"><strong>رقم التتبع:</strong> ${esc(order.tracking_number)}</p>` : ''}
         </div>
       `;
     }

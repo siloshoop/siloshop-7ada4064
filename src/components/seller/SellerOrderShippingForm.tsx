@@ -19,24 +19,21 @@ const toDateInput = (iso?: string | null) => (iso ? new Date(iso).toISOString().
 const SellerOrderShippingForm = ({ order, disabled, onSaved }: Props) => {
   const { toast } = useToast();
   const [company, setCompany] = useState("");
-  const [tracking, setTracking] = useState("");
   const [eta, setEta] = useState("");
   const [notes, setNotes] = useState("");
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     setCompany(order.courier_name || "");
-    setTracking(order.tracking_number || "");
     setEta(toDateInput(order.estimated_delivery));
     setNotes("");
-  }, [order.id, order.courier_name, order.tracking_number, order.estimated_delivery]);
+  }, [order.id, order.courier_name, order.estimated_delivery]);
 
   const handleSave = async () => {
     setSaving(true);
     try {
       await updateSellerOrderShipping(order.id, {
         shippingCompany: company.trim() || null,
-        trackingNumber: tracking.trim() || null,
         estimatedDelivery: eta ? new Date(`${eta}T12:00:00`).toISOString() : null,
         shippingNotes: notes.trim() || null,
       });
@@ -51,17 +48,10 @@ const SellerOrderShippingForm = ({ order, disabled, onSaved }: Props) => {
 
   return (
     <div className="space-y-3" dir="rtl">
-      <div className="grid gap-3 sm:grid-cols-2">
-        <div className="grid gap-1.5">
-          <Label htmlFor="ship-company">شركة الشحن</Label>
-          <Input id="ship-company" value={company} disabled={disabled} maxLength={80}
-            onChange={(e) => setCompany(e.target.value)} placeholder="مثال: أرامكس" />
-        </div>
-        <div className="grid gap-1.5">
-          <Label htmlFor="ship-tracking">رقم التتبع</Label>
-          <Input id="ship-tracking" value={tracking} disabled={disabled} maxLength={60}
-            onChange={(e) => setTracking(e.target.value)} placeholder="رقم بوليصة الشحن" />
-        </div>
+      <div className="grid gap-1.5">
+        <Label htmlFor="ship-company">شركة الشحن</Label>
+        <Input id="ship-company" value={company} disabled={disabled} maxLength={80}
+          onChange={(e) => setCompany(e.target.value)} placeholder="مثال: أرامكس" />
       </div>
       <div className="grid gap-1.5">
         <Label htmlFor="ship-eta">موعد التسليم المتوقع</Label>

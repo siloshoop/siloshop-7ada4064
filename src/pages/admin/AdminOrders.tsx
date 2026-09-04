@@ -38,7 +38,6 @@ type OrderRow = {
   payment_status: string;
   total_amount: number;
   phone: string | null;
-  tracking_number: string | null;
   courier_name: string | null;
   customer_id: string;
   customer_name: string | null;
@@ -111,7 +110,6 @@ const AdminOrders = () => {
 
   // quick shipping update (update_order_shipping)
   const [shipCompany, setShipCompany] = useState("");
-  const [shipTracking, setShipTracking] = useState("");
   const [shipNotes, setShipNotes] = useState("");
   const [shipEta, setShipEta] = useState("");
   const [savingShip, setSavingShip] = useState(false);
@@ -169,7 +167,7 @@ const AdminOrders = () => {
     setDetail(null); setDetailLoading(true);
     setStatusNote(""); setFreezeReason(""); setReopenReason("");
     setOverride(false); setNewNote(""); setNoteInternal(true);
-    setShipCompany(""); setShipTracking(""); setShipNotes(""); setShipEta("");
+    setShipCompany(""); setShipNotes(""); setShipEta("");
     const [{ data: d, error }, { data: h }] = await Promise.all([
       supabase.rpc("admin_get_order_detail", { _order_id: orderId }),
       customerId
@@ -221,7 +219,6 @@ const AdminOrders = () => {
     { key: "phone", label: "الهاتف" },
     { key: "items_count", label: "عدد المنتجات" },
     { key: "vendors_count", label: "عدد البائعين" },
-    { key: "tracking_number", label: "رقم التتبع" },
     { key: "courier_name", label: "شركة الشحن" },
   ];
 
@@ -298,7 +295,7 @@ const AdminOrders = () => {
                 <Input
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
-                  placeholder="بحث برقم الطلب، الهاتف، الاسم، البريد، رقم التتبع..."
+                  placeholder="بحث برقم الطلب، الهاتف، الاسم، البريد..."
                   className="pr-9"
                 />
               </div>
@@ -438,7 +435,6 @@ const AdminOrders = () => {
                   </div>
                   <p className="text-xs text-muted-foreground">{order.shipping_address || "—"}</p>
                   <p className="mt-1 text-xs">شركة الشحن: {order.courier_name || "—"}</p>
-                  <p className="text-xs">رقم التتبع: {order.tracking_number || "—"}</p>
                   <p className="text-xs">السائق: {order.driver_name || "—"} {order.driver_phone ? `(${order.driver_phone})` : ""}</p>
                   <p className="text-xs">
                     موعد التسليم المتوقع:{" "}
@@ -549,7 +545,6 @@ const AdminOrders = () => {
                 </p>
                 <div className="grid gap-2 md:grid-cols-2">
                   <Input placeholder="شركة الشحن" value={shipCompany} onChange={(e) => setShipCompany(e.target.value)} />
-                  <Input placeholder="رقم التتبع" value={shipTracking} onChange={(e) => setShipTracking(e.target.value)} />
                   <Input type="date" value={shipEta} onChange={(e) => setShipEta(e.target.value)} aria-label="موعد التسليم المتوقع" />
                   <Textarea rows={1} placeholder="ملاحظات الشحن" value={shipNotes} onChange={(e) => setShipNotes(e.target.value)} />
                 </div>
@@ -564,7 +559,6 @@ const AdminOrders = () => {
                     const { error } = await supabase.rpc("update_order_shipping", {
                       _order_id: order.id,
                       _shipping_company: shipCompany.trim() || null,
-                      _tracking_number: shipTracking.trim() || null,
                       _shipping_notes: shipNotes.trim() || null,
                       _estimated_delivery: shipEta ? new Date(`${shipEta}T12:00:00`).toISOString() : null,
                     });
@@ -680,7 +674,6 @@ const AdminOrders = () => {
         onOpenChange={setShippingOpen}
         initial={{
           courierName: order?.courier_name,
-          trackingNumber: order?.tracking_number,
           driverName: order?.driver_name,
           driverPhone: order?.driver_phone,
           deliveryNotes: order?.delivery_notes,

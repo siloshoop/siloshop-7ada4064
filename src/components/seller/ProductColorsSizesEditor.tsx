@@ -23,6 +23,18 @@ const NUMERIC_SIZES = ["36", "38", "40", "42", "44", "46"];
 
 export const variantKey = (color: string, size: string) => `${color}__${size}`;
 
+/** Arabic-Indic digits -> latin, and strip anything that is not a number. */
+export const toLatinDigits = (s: string) =>
+  s.replace(/[\u0660-\u0669]/g, (d) => String(d.charCodeAt(0) - 0x0660))
+    .replace(/[\u06f0-\u06f9]/g, (d) => String(d.charCodeAt(0) - 0x06f0));
+
+const cleanInt = (s: string) => toLatinDigits(s).replace(/[^\d]/g, "");
+const cleanDecimal = (s: string) => {
+  const v = toLatinDigits(s).replace(/[^\d.]/g, "");
+  const [head, ...rest] = v.split(".");
+  return rest.length ? `${head}.${rest.join("").slice(0, 2)}` : head;
+};
+
 /** Builds the color x size grid, keeping quantities/prices already entered. */
 export const buildVariantRows = (
   colors: string[],
@@ -36,11 +48,12 @@ export const buildVariantRows = (
   const rows: VariantRow[] = [];
   for (const c of cs) {
     for (const s of ss) {
-      rows.push(map.get(variantKey(c, s)) ?? { color: c, size: s, stock_quantity: "0", price: "" });
+      rows.push(map.get(variantKey(c, s)) ?? { color: c, size: s, stock_quantity: "", price: "" });
     }
   }
   return rows;
 };
+
 
 interface Props {
   value: ColorsSizesValue;
@@ -232,23 +245,28 @@ const ProductColorsSizesEditor = ({ value, onChange }: Props) => {
                     {[r.color, r.size].filter(Boolean).join(" / ")}
                   </p>
                   <Input
-                    type="number"
-                    min={0}
+                    type="text"
+                    inputMode="numeric"
+                    autoComplete="off"
                     dir="ltr"
-                    aria-label="الكمية"
+                    className="text-left"
+                    aria-label={`الكمية ${[r.color, r.size].filter(Boolean).join(" / ")}`}
                     placeholder="الكمية"
                     value={r.stock_quantity}
-                    onChange={(e) => updateRow(key, "stock_quantity", e.target.value)}
+                    onChange={(e) => updateRow(key, "stock_quantity", cleanInt(e.target.value))}
                   />
                   <Input
-                    type="number"
-                    min={0}
+                    type="text"
+                    inputMode="decimal"
+                    autoComplete="off"
                     dir="ltr"
-                    aria-label="السعر (اختياري)"
+                    className="text-left"
+                    aria-label={`السعر ${[r.color, r.size].filter(Boolean).join(" / ")}`}
                     placeholder="السعر (اختياري)"
                     value={r.price}
-                    onChange={(e) => updateRow(key, "price", e.target.value)}
+                    onChange={(e) => updateRow(key, "price", cleanDecimal(e.target.value))}
                   />
+
                 </div>
               );
             })}

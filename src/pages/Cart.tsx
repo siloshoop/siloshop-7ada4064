@@ -21,6 +21,8 @@ interface QuantityDiscount {
 interface CartItem {
   id: string;
   quantity: number;
+  variant_id?: string | null;
+  variantLabel?: string;
   product: {
     id: string;
     name: string;
@@ -32,6 +34,33 @@ interface CartItem {
     shipping_duration_text?: string | null;
   };
 }
+
+const CART_SELECT = `
+  id,
+  quantity,
+  variant_id,
+  variant:product_variants(id, attributes, price, discount_price, stock_quantity),
+  product:products(id, name, price, image_url, stock_quantity, category_id, shipping_cost, shipping_duration_text)
+`;
+
+/** Applies the chosen variant's own price and stock to the cart row. */
+const withVariant = (rows: any[]): CartItem[] =>
+  (rows || []).map((row: any) => {
+    const v = row.variant;
+    if (!v) return { ...row, variantLabel: undefined } as CartItem;
+    const attrs = (v.attributes || {}) as Record<string, string>;
+    const price = v.discount_price ?? v.price ?? row.product?.price;
+    return {
+      ...row,
+      variantLabel: Object.values(attrs).filter(Boolean).join(" / "),
+      product: {
+        ...row.product,
+        price: Number(price),
+        stock_quantity: v.stock_quantity ?? 0,
+      },
+    } as CartItem;
+  });
+
 
 interface CartItemWithDiscount extends CartItem {
   appliedDiscount: number;
@@ -78,15 +107,12 @@ const Cart = () => {
       try {
         const { data, error } = await supabase
           .from("cart_items")
-          .select(`
-            id,
-            quantity,
-            product:products(id, name, price, image_url, stock_quantity, category_id, shipping_cost, shipping_duration_text)
-          `)
+          .select(CART_SELECT)
           .eq("user_id", user.id);
 
         if (error) throw error;
-        setCartItems(data as any || []);
+        setCartItems(withVariant(data as any));
+
 
         // Fetch quantity discounts for all products
         if (data && data.length > 0) {
@@ -326,7 +352,9 @@ const Cart = () => {
         .select("id, quantity")
         .eq("user_id", user.id)
         .eq("product_id", item.product.id)
+        .is("variant_id", null)
         .maybeSingle();
+
 
       if (fetchError) throw fetchError;
 
@@ -355,14 +383,11 @@ const Cart = () => {
 
       const { data, error } = await supabase
         .from("cart_items")
-        .select(`
-          id,
-          quantity,
-          product:products(id, name, price, image_url, stock_quantity, category_id, shipping_cost, shipping_duration_text)
-        `)
+        .select(CART_SELECT)
         .eq("user_id", user.id);
       if (error) throw error;
-      setCartItems((data as any) || []);
+      setCartItems(withVariant(data as any));
+
       window.dispatchEvent(new Event("cart-updated"));
 
       toast({
@@ -535,9 +560,13 @@ const Cart = () => {
                           <div className="flex items-start justify-between">
                             <div>
                               <h3 className="font-bold text-lg">{item.product.name}</h3>
+                              {item.variantLabel && (
+                                <p className="text-xs text-muted-foreground">{item.variantLabel}</p>
+                              )}
                               <p className="text-sm text-muted-foreground">
                                 {item.product.price} ل.س للقطعة
                               </p>
+
                               <p className="text-sm inline-flex items-center gap-1 mt-0.5">
                                 <Truck className="h-3.5 w-3.5 text-primary" />
                                 {Number(item.product.shipping_cost || 0) === 0

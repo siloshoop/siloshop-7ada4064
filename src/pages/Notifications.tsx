@@ -227,52 +227,9 @@ const Notifications = () => {
   const handleNotificationClick = (notification: Notification) => {
     if (!notification.is_read) markAsRead(notification.id);
 
-    const { type, related_id } = notification;
+    const target = notificationTarget(notification.type, notification.related_id);
+    if (target) navigate(target);
 
-    // Types that don't need related_id
-    if (type === "seller_approved" || type === "seller_reactivated") {
-      navigate("/dashboard");
-      return;
-    }
-    if (type === "seller_rejected" || type === "seller_suspended") {
-      navigate("/seller/application");
-      return;
-    }
-    if (type === "account_activated" || type === "account_suspended" || type === "account_banned") {
-      navigate("/profile");
-      return;
-    }
-
-    if (!related_id) return;
-
-    if (
-      type === "order" || type === "order_status" ||
-      type === "order_cancelled" || type === "order_refunded"
-    ) {
-      navigate(`/orders/track/${related_id}`);
-      return;
-    }
-    if (type === "return_status") {
-      navigate(related_id ? `/orders/track/${related_id}` : "/orders");
-      return;
-
-    }
-    if (type.startsWith("product_") && type !== "product_deleted") {
-      navigate(`/product/${related_id}`);
-      return;
-    }
-    if (
-      type === "price_change" || type === "price_drop" ||
-      type === "daily_deal" || type === "deal" || type === "deal_ended" ||
-      type === "new_product" || type === "push_new_product"
-    ) {
-      navigate(`/product/${related_id}`);
-      return;
-    }
-    if (type === "rating" || type === "review_reply") {
-      navigate(`/product/${related_id}`);
-      return;
-    }
   };
 
   if (authLoading || loading) {

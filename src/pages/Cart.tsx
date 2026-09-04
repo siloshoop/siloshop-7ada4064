@@ -21,6 +21,8 @@ interface QuantityDiscount {
 interface CartItem {
   id: string;
   quantity: number;
+  variant_id?: string | null;
+  variantLabel?: string;
   product: {
     id: string;
     name: string;
@@ -32,6 +34,33 @@ interface CartItem {
     shipping_duration_text?: string | null;
   };
 }
+
+const CART_SELECT = `
+  id,
+  quantity,
+  variant_id,
+  variant:product_variants(id, attributes, price, discount_price, stock_quantity),
+  product:products(id, name, price, image_url, stock_quantity, category_id, shipping_cost, shipping_duration_text)
+`;
+
+/** Applies the chosen variant's own price and stock to the cart row. */
+const withVariant = (rows: any[]): CartItem[] =>
+  (rows || []).map((row: any) => {
+    const v = row.variant;
+    if (!v) return { ...row, variantLabel: undefined } as CartItem;
+    const attrs = (v.attributes || {}) as Record<string, string>;
+    const price = v.discount_price ?? v.price ?? row.product?.price;
+    return {
+      ...row,
+      variantLabel: Object.values(attrs).filter(Boolean).join(" / "),
+      product: {
+        ...row.product,
+        price: Number(price),
+        stock_quantity: v.stock_quantity ?? 0,
+      },
+    } as CartItem;
+  });
+
 
 interface CartItemWithDiscount extends CartItem {
   appliedDiscount: number;

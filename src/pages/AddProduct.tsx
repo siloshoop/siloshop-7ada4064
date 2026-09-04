@@ -449,22 +449,23 @@ const AddProduct = () => {
                         </div>
 
                         <div className="space-y-2">
-                          <Label htmlFor="subcategory">التصنيف الفرعي</Label>
+                          <Label htmlFor="subcategory">التصنيف الفرعي (اختياري)</Label>
                           <Select
-                            value={formData.subcategory_id}
-                            onValueChange={(value) => setFormData({ ...formData, subcategory_id: value })}
-                            disabled={!formData.category_id || filteredSubcategories.length === 0}
+                            value={formData.subcategory_id || "__none__"}
+                            onValueChange={(value) =>
+                              setFormData({ ...formData, subcategory_id: value === "__none__" ? "" : value })
+                            }
+                            disabled={!formData.category_id}
                           >
                             <SelectTrigger>
                               <SelectValue placeholder={
                                 !formData.category_id
                                   ? "اختر الفئة أولاً"
-                                  : filteredSubcategories.length === 0
-                                    ? "لا توجد تصنيفات فرعية"
-                                    : "اختر التصنيف الفرعي"
+                                  : "بدون تصنيف فرعي"
                               } />
                             </SelectTrigger>
                             <SelectContent>
+                              <SelectItem value="__none__">بدون تصنيف فرعي</SelectItem>
                               {filteredSubcategories.map((sub) => (
                                 <SelectItem key={sub.id} value={sub.id}>
                                   {sub.name_ar}

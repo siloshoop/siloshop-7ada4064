@@ -1421,6 +1421,8 @@ export type Database = {
           product_name: string | null
           quantity: number
           shipping_duration_text: string | null
+          stock_applied: boolean
+          stock_restored: boolean
           subtotal: number | null
           variant_id: string | null
           variant_label: string | null
@@ -1437,6 +1439,8 @@ export type Database = {
           product_name?: string | null
           quantity: number
           shipping_duration_text?: string | null
+          stock_applied?: boolean
+          stock_restored?: boolean
           subtotal?: number | null
           variant_id?: string | null
           variant_label?: string | null
@@ -1453,6 +1457,8 @@ export type Database = {
           product_name?: string | null
           quantity?: number
           shipping_duration_text?: string | null
+          stock_applied?: boolean
+          stock_restored?: boolean
           subtotal?: number | null
           variant_id?: string | null
           variant_label?: string | null
@@ -4798,6 +4804,10 @@ export type Database = {
       }
       reject_seller_application: {
         Args: { _app_id: string; _reason: string }
+        Returns: undefined
+      }
+      restore_order_stock: {
+        Args: { _order_id: string; _vendor_id?: string }
         Returns: undefined
       }
       restore_product: { Args: { _product_id: string }; Returns: string }

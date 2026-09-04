@@ -16,7 +16,7 @@ const statusLabels: Record<string, string> = {
   confirmed: "مؤكد",
   processing: "قيد التحضير",
   shipped: "تم الشحن",
-  out_for_delivery: "في الطريق للتوصيل",
+  out_for_delivery: "تم تسليم الطلب إلى مركز الشحن",
   delivered: "تم التوصيل",
   cancelled: "ملغي",
 };

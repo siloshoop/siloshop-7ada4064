@@ -33,7 +33,7 @@ const STATUS_LABELS: Record<string, string> = {
   preparing: "قيد التجهيز",
   ready_for_shipping: "جاهز للشحن",
   shipped: "تم الشحن",
-  out_for_delivery: "خارج للتوصيل",
+  out_for_delivery: "تم تسليم الطلب إلى مركز الشحن",
   delivered: "تم التوصيل",
   completed: "مكتمل",
   cancelled: "ملغي",

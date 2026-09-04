@@ -25,7 +25,7 @@ const statusMap: Record<string, { label: string; variant: "default" | "secondary
   processing: { label: "قيد التجهيز", variant: "secondary" },
   ready_for_shipping: { label: "جاهز للشحن", variant: "outline" },
   shipped: { label: "تم الشحن", variant: "outline" },
-  out_for_delivery: { label: "خارج للتوصيل", variant: "outline" },
+  out_for_delivery: { label: "تم تسليم الطلب إلى مركز الشحن", variant: "outline" },
   delivered: { label: "تم التوصيل", variant: "default" },
   completed: { label: "مكتمل", variant: "default" },
   cancelled: { label: "ملغي", variant: "destructive" },

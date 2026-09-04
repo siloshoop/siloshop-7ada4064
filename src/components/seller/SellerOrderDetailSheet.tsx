@@ -42,7 +42,7 @@ const ACTIONS_BY_STATUS: Record<string, SellerAction[]> = {
   confirmed: [{ key: "prepare", label: "بدء التحضير", target: "preparing" }],
   preparing: [{ key: "ready", label: "جاهز للشحن", target: "ready_for_shipping" }],
   ready_for_shipping: [{ key: "ship", label: "تم الشحن", target: "shipped" }],
-  shipped: [{ key: "out", label: "خرج للتوصيل", target: "out_for_delivery" }],
+  shipped: [{ key: "out", label: "تم تسليم الطلب إلى مركز الشحن", target: "out_for_delivery" }],
   out_for_delivery: [{ key: "delivered", label: "تم التسليم", target: "delivered" }],
 };
 

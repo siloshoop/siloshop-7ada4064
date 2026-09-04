@@ -1,3 +1,4 @@
+import { notificationTarget } from "@/lib/notificationRoutes";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Bell, Search, Trash2, Filter, X, Settings } from "lucide-react";
@@ -318,7 +319,11 @@ export const NotificationsDropdown = () => {
               <DropdownMenuItem
                 key={notification.id}
                 className="flex flex-col items-start p-3 cursor-pointer group"
-                onClick={() => !notification.is_read && markAsRead(notification.id)}
+                onClick={() => {
+                  if (!notification.is_read) markAsRead(notification.id);
+                  const target = notificationTarget(notification.type, notification.related_id);
+                  if (target) navigate(target);
+                }}
               >
                 <div className="flex items-start justify-between w-full gap-2">
                   <div className="flex-1">

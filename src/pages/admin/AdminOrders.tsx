@@ -110,7 +110,6 @@ const AdminOrders = () => {
 
   // quick shipping update (update_order_shipping)
   const [shipCompany, setShipCompany] = useState("");
-  const [shipTracking, setShipTracking] = useState("");
   const [shipNotes, setShipNotes] = useState("");
   const [shipEta, setShipEta] = useState("");
   const [savingShip, setSavingShip] = useState(false);
@@ -168,7 +167,7 @@ const AdminOrders = () => {
     setDetail(null); setDetailLoading(true);
     setStatusNote(""); setFreezeReason(""); setReopenReason("");
     setOverride(false); setNewNote(""); setNoteInternal(true);
-    setShipCompany(""); setShipTracking(""); setShipNotes(""); setShipEta("");
+    setShipCompany(""); setShipNotes(""); setShipEta("");
     const [{ data: d, error }, { data: h }] = await Promise.all([
       supabase.rpc("admin_get_order_detail", { _order_id: orderId }),
       customerId

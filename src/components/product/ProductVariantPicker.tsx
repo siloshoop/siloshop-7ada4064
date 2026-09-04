@@ -82,8 +82,10 @@ const ProductVariantPicker = ({ variants, onSelect }: ProductVariantPickerProps)
                   type="button"
                   variant={isSelected ? "default" : "outline"}
                   size="sm"
-                  className="rounded-full"
+                  className={`rounded-full ${!available ? "line-through opacity-60" : ""}`}
                   disabled={!available}
+                  title={!available ? "غير متوفر" : undefined}
+                  aria-label={!available ? `${value} — غير متوفر` : value}
                   onClick={() =>
                     setSelected((prev) => ({
                       ...prev,

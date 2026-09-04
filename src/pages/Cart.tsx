@@ -352,7 +352,9 @@ const Cart = () => {
         .select("id, quantity")
         .eq("user_id", user.id)
         .eq("product_id", item.product.id)
+        .is("variant_id", null)
         .maybeSingle();
+
 
       if (fetchError) throw fetchError;
 

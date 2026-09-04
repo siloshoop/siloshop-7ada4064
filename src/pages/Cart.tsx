@@ -560,9 +560,13 @@ const Cart = () => {
                           <div className="flex items-start justify-between">
                             <div>
                               <h3 className="font-bold text-lg">{item.product.name}</h3>
+                              {item.variantLabel && (
+                                <p className="text-xs text-muted-foreground">{item.variantLabel}</p>
+                              )}
                               <p className="text-sm text-muted-foreground">
                                 {item.product.price} ل.س للقطعة
                               </p>
+
                               <p className="text-sm inline-flex items-center gap-1 mt-0.5">
                                 <Truck className="h-3.5 w-3.5 text-primary" />
                                 {Number(item.product.shipping_cost || 0) === 0

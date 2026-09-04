@@ -39,7 +39,7 @@ const Shipping = () => {
                 <CardTitle>تتبع الطلب</CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-muted-foreground">تتبع طلبك لحظة بلحظة من خلال رقم التتبع</p>
+                <p className="text-muted-foreground">تتبع طلبك لحظة بلحظة من صفحة الطلب</p>
               </CardContent>
             </Card>
 

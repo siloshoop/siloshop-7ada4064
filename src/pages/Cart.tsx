@@ -107,15 +107,12 @@ const Cart = () => {
       try {
         const { data, error } = await supabase
           .from("cart_items")
-          .select(`
-            id,
-            quantity,
-            product:products(id, name, price, image_url, stock_quantity, category_id, shipping_cost, shipping_duration_text)
-          `)
+          .select(CART_SELECT)
           .eq("user_id", user.id);
 
         if (error) throw error;
-        setCartItems(data as any || []);
+        setCartItems(withVariant(data as any));
+
 
         // Fetch quantity discounts for all products
         if (data && data.length > 0) {

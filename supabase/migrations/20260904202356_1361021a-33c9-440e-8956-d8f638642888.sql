@@ -1,0 +1,1 @@
+CREATE POLICY "store_assets_public_read" ON storage.objects FOR SELECT TO anon, authenticated USING (bucket_id = 'store-assets');

@@ -1,4 +1,4 @@
-import { useEffect, useState, lazy, Suspense } from "react";
+import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
@@ -17,7 +17,6 @@ import { format, formatDistanceToNow } from "date-fns";
 import { ar } from "date-fns/locale";
 import { ORDER_STATUS_LABELS, ACTOR_ROLE_LABELS } from "@/lib/orderStatus";
 
-const OrderTrackingMap = lazy(() => import("@/components/orders/OrderTrackingMap"));
 
 // حالات إضافية لا يغطيها الشريط الأساسي (مسار الإرجاع/الاسترداد)
 const EXTRA_STATUS_LABELS: Record<string, string> = {
@@ -584,29 +583,7 @@ const TrackOrder = () => {
               </Card>
             </div>
 
-            {/* Map */}
             <div className="space-y-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle>موقع التتبع</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <Suspense
-                    fallback={<div className="w-full h-96 rounded-lg animate-pulse bg-muted" />}
-                  >
-                    <OrderTrackingMap
-                      currentLat={order.current_location_lat}
-                      currentLng={order.current_location_lng}
-                      deliveryLat={order.delivery_lat}
-                      deliveryLng={order.delivery_lng}
-                    />
-                  </Suspense>
-                  <p className="text-xs text-muted-foreground mt-4 text-center">
-                    📍 الأخضر: وجهة التسليم | 🔵 الأزرق: الموقع الحالي
-                  </p>
-                </CardContent>
-              </Card>
-
               {/* Order Items */}
               <Card>
                 <CardHeader>

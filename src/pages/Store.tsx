@@ -188,7 +188,7 @@ const Store = () => {
 
         <div className="container px-4">
           {/* Store header */}
-          <div className="-mt-12 flex flex-col gap-4 rounded-2xl border bg-card p-4 shadow-[var(--shadow-card)] md:-mt-16 md:flex-row md:items-center md:p-6">
+          <div className="relative z-10 -mt-8 flex flex-col gap-4 rounded-2xl border bg-card p-4 shadow-[var(--shadow-card)] md:-mt-10 md:flex-row md:items-center md:p-6">
             <div className="flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-2xl border bg-background md:h-24 md:w-24">
               {logo ? (
                 <img

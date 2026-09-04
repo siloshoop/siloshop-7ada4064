@@ -1,6 +1,7 @@
 import { ElementType, HTMLAttributes } from "react";
 import { useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
+import logoAsset from "@/assets/siloshop-logo-full.png.asset.json";
 
 type BrandLogoProps = HTMLAttributes<HTMLElement> & {
   as?: ElementType;
@@ -33,16 +34,13 @@ const BrandLogo = ({ as: Tag = "span", className, onClick, linkToHome = true, ..
       {...rest}
     >
       <img
-        src="/splash-logo.png"
+        src={logoAsset.url}
         alt="SiloShop"
         loading="eager"
         decoding="async"
-        className="h-[1.9em] w-auto select-none object-contain"
+        className="h-[2.1em] w-auto select-none object-contain"
         draggable={false}
       />
-      <span className="ms-2 bg-gradient-to-r from-primary to-accent bg-clip-text font-extrabold tracking-tight text-transparent">
-        SiloShop
-      </span>
     </Tag>
   );
 };

@@ -42,8 +42,6 @@ const SellerHome = () => {
         { label: "مبيعات الأسبوع", value: currency(Number(s.week ?? 0)), icon: Wallet },
         { label: "مبيعات الشهر", value: currency(Number(s.month ?? 0)), icon: Wallet },
         { label: "إجمالي الإيراد", value: currency(Number(s.total ?? 0)), icon: Wallet },
-        { label: "الرصيد القابل للسحب", value: currency(Number(w?.withdrawable ?? 0)), icon: Wallet, tone: "text-primary" },
-        { label: "رصيد معلّق", value: currency(Number(w?.pending_revenue ?? 0)), icon: Clock },
         { label: "قطع مبيعة", value: num(Number(s.units_sold ?? 0)), icon: Boxes },
       ],
     },

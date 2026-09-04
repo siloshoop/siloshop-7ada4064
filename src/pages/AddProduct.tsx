@@ -566,17 +566,6 @@ const AddProduct = () => {
                         />
                       </div>
 
-                      <div className="space-y-2">
-                        <Label htmlFor="original_price">السعر الأصلي (اختياري)</Label>
-                        <Input
-                          id="original_price"
-                          type="number"
-                          step="0.01"
-                          value={formData.original_price}
-                          onChange={(e) => setFormData({ ...formData, original_price: e.target.value })}
-                          placeholder="0.00"
-                        />
-                      </div>
                     </div>
 
                     <div className="space-y-2">
@@ -726,15 +715,6 @@ const AddProduct = () => {
                     </div>
 
 
-                    <div className="space-y-2">
-                      <Label htmlFor="country_of_origin">بلد المنشأ</Label>
-                      <Input
-                        id="country_of_origin"
-                        value={formData.country_of_origin}
-                        onChange={(e) => setFormData({ ...formData, country_of_origin: e.target.value })}
-                        placeholder="مثال: سوريا"
-                      />
-                    </div>
                   </AccordionContent>
                 </AccordionItem>
 

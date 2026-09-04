@@ -584,29 +584,7 @@ const TrackOrder = () => {
               </Card>
             </div>
 
-            {/* Map */}
             <div className="space-y-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle>موقع التتبع</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <Suspense
-                    fallback={<div className="w-full h-96 rounded-lg animate-pulse bg-muted" />}
-                  >
-                    <OrderTrackingMap
-                      currentLat={order.current_location_lat}
-                      currentLng={order.current_location_lng}
-                      deliveryLat={order.delivery_lat}
-                      deliveryLng={order.delivery_lng}
-                    />
-                  </Suspense>
-                  <p className="text-xs text-muted-foreground mt-4 text-center">
-                    📍 الأخضر: وجهة التسليم | 🔵 الأزرق: الموقع الحالي
-                  </p>
-                </CardContent>
-              </Card>
-
               {/* Order Items */}
               <Card>
                 <CardHeader>

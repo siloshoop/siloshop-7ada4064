@@ -694,13 +694,10 @@ const Product = () => {
                     {product.barcode && <span>الباركود: {product.barcode}</span>}
                   </div>
                 )}
-                {(product.warranty || product.country_of_origin || product.gtin || product.shipping_weight || product.length_cm || product.width_cm || product.height_cm) && (
+                {(product.warranty || product.gtin || product.shipping_weight || product.length_cm || product.width_cm || product.height_cm) && (
                   <div className="rounded-xl border divide-y text-sm">
                     {product.warranty && (
                       <div className="flex justify-between px-3 py-2"><span className="text-muted-foreground">الضمان</span><span>{product.warranty}</span></div>
-                    )}
-                    {product.country_of_origin && (
-                      <div className="flex justify-between px-3 py-2"><span className="text-muted-foreground">بلد المنشأ</span><span>{product.country_of_origin}</span></div>
                     )}
                     {product.shipping_weight && (
                       <div className="flex justify-between px-3 py-2"><span className="text-muted-foreground">الوزن</span><span>{product.shipping_weight} كغ</span></div>

@@ -287,7 +287,11 @@ const Product = () => {
   const hasVariants = variants.length > 0;
   const effectivePrice = selectedVariant?.discount_price ?? selectedVariant?.price ?? product.price;
   const effectiveOriginalPrice = selectedVariant ? (selectedVariant.discount_price ? selectedVariant.price : null) : product.original_price;
-  const effectiveStock = hasVariants ? (selectedVariant?.stock_quantity ?? 0) : product.stock_quantity;
+  // Total stock across all variants — used before the shopper picks a combination
+  const totalVariantStock = variants.reduce((sum, v) => sum + (v.stock_quantity || 0), 0);
+  const effectiveStock = hasVariants
+    ? (selectedVariant ? selectedVariant.stock_quantity : totalVariantStock)
+    : product.stock_quantity;
   const discount = effectiveOriginalPrice
     ? Math.round(((effectiveOriginalPrice - effectivePrice) / effectiveOriginalPrice) * 100)
     : 0;

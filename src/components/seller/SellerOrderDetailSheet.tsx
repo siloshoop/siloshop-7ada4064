@@ -35,14 +35,13 @@ interface SellerAction {
   label: string;
   target: OrderStatus;
   variant?: "default" | "outline" | "destructive";
-  requiresTracking?: boolean;
 }
 
 const ACTIONS_BY_STATUS: Record<string, SellerAction[]> = {
   pending: [{ key: "confirm", label: "تأكيد الطلب", target: "confirmed" }],
   confirmed: [{ key: "prepare", label: "بدء التحضير", target: "preparing" }],
   preparing: [{ key: "ready", label: "جاهز للشحن", target: "ready_for_shipping" }],
-  ready_for_shipping: [{ key: "ship", label: "تم الشحن", target: "shipped", requiresTracking: true }],
+  ready_for_shipping: [{ key: "ship", label: "تم الشحن", target: "shipped" }],
   shipped: [{ key: "out", label: "خرج للتوصيل", target: "out_for_delivery" }],
   out_for_delivery: [{ key: "delivered", label: "تم التسليم", target: "delivered" }],
 };
@@ -90,14 +89,6 @@ const SellerOrderDetailSheet = ({ order, open, onOpenChange, onChanged }: Props)
 
   const runAction = async (action: SellerAction) => {
     if (!localOrder) return;
-    if (action.requiresTracking && !localOrder.tracking_number) {
-      toast({
-        title: "بيانات الشحن ناقصة",
-        description: "يرجى إدخال شركة الشحن ورقم التتبع قبل تأكيد الشحن.",
-        variant: "destructive",
-      });
-      return;
-    }
     setActing(action.key);
     try {
       await changeOrderStatus(localOrder.id, action.target);

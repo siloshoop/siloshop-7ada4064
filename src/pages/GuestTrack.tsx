@@ -45,7 +45,6 @@ interface TrackResult {
   status: string;
   tracking_status: string | null;
   courier_name: string | null;
-  tracking_number: string | null;
   estimated_delivery: string | null;
   delivered_at: string | null;
   shipped_at: string | null;
@@ -83,35 +82,6 @@ const statusLabel = (status?: string | null): string => {
   const s = (status || "").trim().toLowerCase();
   const normalized = s === "processing" ? "preparing" : s;
   return ORDER_STATUS_LABELS[normalized] ?? EXTRA_STATUS_LABELS[normalized] ?? status ?? "";
-};
-
-// روابط تتبع شركات الشحن
-const courierTrackingUrls: Record<string, (trackingNumber: string) => string> = {
-  'aramex': (tn) => `https://www.aramex.com/track/results?ShipmentNumber=${tn}`,
-  'أرامكس': (tn) => `https://www.aramex.com/track/results?ShipmentNumber=${tn}`,
-  'dhl': (tn) => `https://www.dhl.com/global-en/home/tracking/tracking-express.html?submit=1&tracking-id=${tn}`,
-  'دي اتش ال': (tn) => `https://www.dhl.com/global-en/home/tracking/tracking-express.html?submit=1&tracking-id=${tn}`,
-  'fedex': (tn) => `https://www.fedex.com/fedextrack/?trknbr=${tn}`,
-  'فيديكس': (tn) => `https://www.fedex.com/fedextrack/?trknbr=${tn}`,
-  'ups': (tn) => `https://www.ups.com/track?tracknum=${tn}`,
-  'يو بي اس': (tn) => `https://www.ups.com/track?tracknum=${tn}`,
-  'smsa': (tn) => `https://www.smsaexpress.com/trackshipment?tracknumbers=${tn}`,
-  'سمسا': (tn) => `https://www.smsaexpress.com/trackshipment?tracknumbers=${tn}`,
-  'zajil': (tn) => `https://www.zajil.com/track?id=${tn}`,
-  'زاجل': (tn) => `https://www.zajil.com/track?id=${tn}`,
-  'saudi post': (tn) => `https://www.splonline.com.sa/track/${tn}`,
-  'البريد السعودي': (tn) => `https://www.splonline.com.sa/track/${tn}`,
-  'j&t': (tn) => `https://www.jtexpress.sa/track?id=${tn}`,
-  'جي اند تي': (tn) => `https://www.jtexpress.sa/track?id=${tn}`,
-  'naqel': (tn) => `https://naqelexpress.com/en/track/${tn}`,
-  'ناقل': (tn) => `https://naqelexpress.com/en/track/${tn}`,
-};
-
-const getTrackingUrl = (courierName: string | null, trackingNumber: string): string | null => {
-  if (!courierName || !trackingNumber) return null;
-  const normalizedName = courierName.toLowerCase().trim();
-  const urlGenerator = courierTrackingUrls[normalizedName];
-  return urlGenerator ? urlGenerator(trackingNumber) : null;
 };
 
 const formatCurrency = (n: number | null | undefined) =>
@@ -166,7 +136,7 @@ const GuestTrack = () => {
 
   const hasShippingInfo =
     result &&
-    (result.courier_name || result.tracking_number || result.estimated_delivery || result.shipped_at || result.delivered_at || result.shipping_notes);
+    (result.courier_name || result.estimated_delivery || result.shipped_at || result.delivered_at || result.shipping_notes);
 
   const hasAmountBreakdown =
     result && ((result.subtotal_amount ?? 0) > 0 || (result.shipping_amount ?? 0) > 0 || (result.tax_amount ?? 0) > 0 || (result.discount_amount ?? 0) > 0);
@@ -318,37 +288,6 @@ const GuestTrack = () => {
                       <span className="font-medium">{result.courier_name}</span>
                     </div>
                   )}
-                  {result.tracking_number && (
-                    <div className="flex items-center gap-2">
-                      <span className="text-muted-foreground">رقم التتبع:</span>
-                      <span className="font-medium font-mono">{result.tracking_number}</span>
-                    </div>
-                  )}
-
-                  {result.tracking_number && result.courier_name && (
-                    <div className="pt-1">
-                      {getTrackingUrl(result.courier_name, result.tracking_number) ? (
-                        <Button
-                          className="w-full"
-                          onClick={() => {
-                            const url = getTrackingUrl(result.courier_name, result.tracking_number!);
-                            if (url) window.open(url, "_blank");
-                          }}
-                        >
-                          <ExternalLink className="h-4 w-4 ml-2" />
-                          تتبع الشحنة عبر {result.courier_name}
-                        </Button>
-                      ) : (
-                        <div className="p-3 bg-muted rounded-lg">
-                          <p className="text-sm text-muted-foreground text-center">
-                            يمكنك تتبع شحنتك باستخدام رقم التتبع:{" "}
-                            <span className="font-mono font-bold">{result.tracking_number}</span>
-                          </p>
-                        </div>
-                      )}
-                    </div>
-                  )}
-
                   {result.estimated_delivery && (
                     <div className="flex items-center gap-2">
                       <Clock className="h-4 w-4 text-muted-foreground" />

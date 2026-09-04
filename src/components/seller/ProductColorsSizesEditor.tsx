@@ -245,23 +245,28 @@ const ProductColorsSizesEditor = ({ value, onChange }: Props) => {
                     {[r.color, r.size].filter(Boolean).join(" / ")}
                   </p>
                   <Input
-                    type="number"
-                    min={0}
+                    type="text"
+                    inputMode="numeric"
+                    autoComplete="off"
                     dir="ltr"
-                    aria-label="الكمية"
+                    className="text-left"
+                    aria-label={`الكمية ${[r.color, r.size].filter(Boolean).join(" / ")}`}
                     placeholder="الكمية"
                     value={r.stock_quantity}
-                    onChange={(e) => updateRow(key, "stock_quantity", e.target.value)}
+                    onChange={(e) => updateRow(key, "stock_quantity", cleanInt(e.target.value))}
                   />
                   <Input
-                    type="number"
-                    min={0}
+                    type="text"
+                    inputMode="decimal"
+                    autoComplete="off"
                     dir="ltr"
-                    aria-label="السعر (اختياري)"
+                    className="text-left"
+                    aria-label={`السعر ${[r.color, r.size].filter(Boolean).join(" / ")}`}
                     placeholder="السعر (اختياري)"
                     value={r.price}
-                    onChange={(e) => updateRow(key, "price", e.target.value)}
+                    onChange={(e) => updateRow(key, "price", cleanDecimal(e.target.value))}
                   />
+
                 </div>
               );
             })}

@@ -1,4 +1,4 @@
-import { useEffect, useState, lazy, Suspense } from "react";
+import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
@@ -17,7 +17,6 @@ import { format, formatDistanceToNow } from "date-fns";
 import { ar } from "date-fns/locale";
 import { ORDER_STATUS_LABELS, ACTOR_ROLE_LABELS } from "@/lib/orderStatus";
 
-const OrderTrackingMap = lazy(() => import("@/components/orders/OrderTrackingMap"));
 
 // حالات إضافية لا يغطيها الشريط الأساسي (مسار الإرجاع/الاسترداد)
 const EXTRA_STATUS_LABELS: Record<string, string> = {

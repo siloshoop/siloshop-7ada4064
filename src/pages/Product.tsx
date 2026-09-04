@@ -511,7 +511,7 @@ const Product = () => {
               <div className="rounded-xl border bg-muted/20 p-4">
                 <ProductVariantPicker variants={variants} onSelect={setSelectedVariant} />
                 {!selectedVariant && (
-                  <p className="text-xs text-muted-foreground pt-2">يرجى اختيار كافة الخيارات لعرض السعر والتوفر</p>
+                  <p className="text-xs text-muted-foreground pt-2">يرجى اختيار اللون والمقاس لعرض السعر والكمية المتوفرة</p>
                 )}
               </div>
             )}

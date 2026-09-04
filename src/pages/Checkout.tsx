@@ -404,7 +404,9 @@ const Checkout = () => {
       const { data: newOrderId, error: orderError } = await supabase.rpc("create_order", {
         _items: cartItems.map((item) => ({
           product_id: item.product.id,
+          variant_id: item.variant_id ?? null,
           quantity: item.quantity,
+
         })),
         _phone: formData.phone,
         _shipping_address: fullAddress,

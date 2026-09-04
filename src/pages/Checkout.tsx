@@ -37,6 +37,8 @@ interface CartItem {
   id: string;
   quantity: number;
   product_id: string;
+  variant_id?: string | null;
+  variantLabel?: string;
   product: {
     id: string;
     name: string;
@@ -53,6 +55,7 @@ interface CartItem {
     platform_electronic_payment_enabled?: boolean | null;
   };
 }
+
 
 interface PlatformOptions {
   sham_cash_enabled: boolean;

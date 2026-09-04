@@ -210,13 +210,16 @@ const Product = () => {
 
     setAddingToCart(true);
     try {
-      // Check if item already exists in cart
-      const { data: existingItem } = await supabase
+      // Check if the same product + variant already exists in cart
+      const existingQuery = supabase
         .from("cart_items")
         .select("id, quantity")
         .eq("user_id", user.id)
-        .eq("product_id", id!)
-        .maybeSingle();
+        .eq("product_id", id!);
+      const { data: existingItem } = await (selectedVariant
+        ? existingQuery.eq("variant_id", selectedVariant.id)
+        : existingQuery.is("variant_id", null)
+      ).maybeSingle();
 
       let error;
       if (existingItem) {
@@ -227,8 +230,14 @@ const Product = () => {
       } else {
         ({ error } = await supabase
           .from("cart_items")
-          .insert({ user_id: user.id, product_id: id, quantity: Math.max(quantity, minQty) }));
+          .insert({
+            user_id: user.id,
+            product_id: id,
+            variant_id: selectedVariant?.id ?? null,
+            quantity: Math.max(quantity, minQty),
+          }));
       }
+
 
       if (error) throw error;
 

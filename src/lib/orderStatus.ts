@@ -197,7 +197,6 @@ export const changeOrderStatus = async (
 
 export interface ShippingInfoInput {
   courierName?: string | null;
-  trackingNumber?: string | null;
   driverName?: string | null;
   driverPhone?: string | null;
   deliveryNotes?: string | null;
@@ -209,7 +208,6 @@ export const saveShippingInfo = async (orderId: string, info: ShippingInfoInput)
   const { error } = await supabase.rpc("set_order_shipping_info", {
     _order_id: orderId,
     _courier_name: info.courierName || null,
-    _tracking_number: info.trackingNumber || null,
     _driver_name: info.driverName || null,
     _driver_phone: info.driverPhone || null,
     _delivery_notes: info.deliveryNotes || null,

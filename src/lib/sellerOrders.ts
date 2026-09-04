@@ -15,7 +15,6 @@ export interface SellerOrderRow {
   customer_name: string | null;
   customer_phone: string | null;
   city: string | null;
-  tracking_number: string | null;
   courier_name: string | null;
   estimated_delivery: string | null;
   is_frozen: boolean;
@@ -92,7 +91,6 @@ export const addOrderNote = async (orderId: string, note: string, isInternal: bo
 
 export interface ShippingUpdateInput {
   shippingCompany?: string | null;
-  trackingNumber?: string | null;
   estimatedDelivery?: string | null;
   shippingNotes?: string | null;
 }
@@ -101,7 +99,6 @@ export const updateSellerOrderShipping = async (orderId: string, input: Shipping
   const { error } = await supabase.rpc("update_order_shipping", {
     _order_id: orderId,
     _shipping_company: input.shippingCompany || null,
-    _tracking_number: input.trackingNumber || null,
     _estimated_delivery: input.estimatedDelivery || null,
     _shipping_notes: input.shippingNotes || null,
   });

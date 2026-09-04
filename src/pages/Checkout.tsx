@@ -164,12 +164,30 @@ const Checkout = () => {
           id,
           quantity,
           product_id,
+          variant_id,
+          variant:product_variants(id, attributes, price, discount_price, stock_quantity),
           product:products(id, name, price, image_url, vendor_id, shipping_cost, product_type, shipping_duration_text, platform_free_shipping, platform_shipping_fee, platform_cod_enabled, platform_sham_cash_enabled, platform_electronic_payment_enabled)
         `)
         .eq("user_id", user.id);
 
       if (error) throw error;
-      setCartItems(data as any || []);
+      // Each chosen size/color keeps its own price — mirror it into the row so
+      // the displayed totals match what create_order computes server-side.
+      const rows = ((data as any[]) || []).map((row: any) => {
+        const v = row.variant;
+        if (!v) return row;
+        const attrs = (v.attributes || {}) as Record<string, string>;
+        return {
+          ...row,
+          variantLabel: Object.values(attrs).filter(Boolean).join(" / "),
+          product: {
+            ...row.product,
+            price: Number(v.discount_price ?? v.price ?? row.product?.price),
+          },
+        };
+      });
+      setCartItems(rows as any);
+
     } catch (error) {
       toast({
         title: "خطأ",

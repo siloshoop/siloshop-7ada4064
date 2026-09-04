@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import {
-  Loader2, Search, PackageSearch, Truck, ExternalLink, XCircle, RotateCcw, CreditCard, StickyNote, Clock,
+  Loader2, Search, PackageSearch, Truck, XCircle, RotateCcw, CreditCard, StickyNote, Clock,
 } from "lucide-react";
 import OrderStatusTimeline, { ORDER_STATUS_LABELS } from "@/components/OrderStatusTimeline";
 import { ACTOR_ROLE_LABELS } from "@/lib/orderStatus";

@@ -1,7 +1,6 @@
 import { ElementType, HTMLAttributes } from "react";
 import { useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
-import logoAsset from "@/assets/siloshop-logo.png.asset.json";
 
 type BrandLogoProps = HTMLAttributes<HTMLElement> & {
   as?: ElementType;

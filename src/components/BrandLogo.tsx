@@ -33,13 +33,16 @@ const BrandLogo = ({ as: Tag = "span", className, onClick, linkToHome = true, ..
       {...rest}
     >
       <img
-        src={logoAsset.url}
+        src="/splash-logo.png"
         alt="SiloShop"
         loading="eager"
         decoding="async"
         className="h-[1.9em] w-auto select-none object-contain"
         draggable={false}
       />
+      <span className="ms-2 bg-gradient-to-r from-primary to-accent bg-clip-text font-extrabold tracking-tight text-transparent">
+        SiloShop
+      </span>
     </Tag>
   );
 };

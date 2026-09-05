@@ -6,6 +6,15 @@ import { uploadChatFiles, type ChatAttachment } from "@/lib/chatFiles";
 
 const PAGE_SIZE = 40;
 
+/** Merges freshly fetched rows into the current list, de-duplicated by id. */
+const mergeMessages = (prev: ChatMessage[], rows: ChatMessage[]): ChatMessage[] => {
+  const map = new Map(prev.map((m) => [m.id, m]));
+  rows.forEach((r) => map.set(r.id, r));
+  return Array.from(map.values()).sort(
+    (a, b) => +new Date(a.created_at) - +new Date(b.created_at),
+  );
+};
+
 export interface ChatMessage {
   id: string;
   conversation_id: string;
@@ -161,13 +170,7 @@ export const useChatThread = (conversationId: string | null) => {
         async () => {
           const rows = await fetchPage();
           if (!active) return;
-          setMessages((prev) => {
-            const map = new Map(prev.map((m) => [m.id, m]));
-            rows.forEach((r) => map.set(r.id, r));
-            return Array.from(map.values()).sort(
-              (a, b) => +new Date(a.created_at) - +new Date(b.created_at),
-            );
-          });
+          setMessages((prev) => mergeMessages(prev, rows));
           await supabase.rpc("mark_conversation_read", { p_conversation_id: conversationId });
         },
       )
@@ -300,12 +303,17 @@ export const useChatThread = (conversationId: string | null) => {
           toast({ title: "تعذر الإرسال", description: chatErrorText(error.message), variant: "destructive" });
           return false;
         }
+
+        // Render the sent message right away instead of waiting for the
+        // realtime broadcast; the merge de-duplicates when both arrive.
+        const rows = await fetchPage();
+        setMessages((prev) => mergeMessages(prev, rows));
         return true;
       } finally {
         setSending(false);
       }
     },
-    [conversationId, toast],
+    [conversationId, fetchPage, toast],
   );
 
   const editMessage = useCallback(

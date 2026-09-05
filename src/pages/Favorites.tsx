@@ -89,7 +89,13 @@ const Favorites = () => {
       )
       .subscribe();
 
+    const onBus = () => {
+      void fetchFavorites();
+    };
+    window.addEventListener("favorites-updated", onBus);
+
     return () => {
+      window.removeEventListener("favorites-updated", onBus);
       supabase.removeChannel(channel);
     };
   }, [user]);

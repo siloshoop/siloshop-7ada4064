@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
@@ -12,6 +12,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Minus, Plus, Trash2, ShoppingCart, Loader2, Percent, Tag, Truck, Receipt, X, CheckCircle2, MapPin, Pencil, Bookmark } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { notifySync, useSyncListener } from "@/lib/uiSync";
 
 interface QuantityDiscount {
   min_quantity: number;
@@ -94,8 +95,12 @@ const Cart = () => {
   const [savedLoading, setSavedLoading] = useState(true);
   const [processingSavedId, setProcessingSavedId] = useState<string | null>(null);
   const [savingItemId, setSavingItemId] = useState<string | null>(null);
+  const [cartVersion, setCartVersion] = useState(0);
   const navigate = useNavigate();
   const { toast } = useToast();
+
+  const refreshCart = useCallback(() => setCartVersion((v) => v + 1), []);
+  useSyncListener(["cart"], refreshCart);
 
   useEffect(() => {
     const fetchCart = async () => {
@@ -255,7 +260,7 @@ const Cart = () => {
           item.id === itemId ? { ...item, quantity: newQuantity } : item
         )
       );
-      window.dispatchEvent(new Event("cart-updated"));
+      notifySync("cart");
     } catch (error) {
       toast({
         title: "خطأ",
@@ -275,7 +280,7 @@ const Cart = () => {
       if (error) throw error;
 
       setCartItems(items => items.filter(item => item.id !== itemId));
-      window.dispatchEvent(new Event("cart-updated"));
+      notifySync("cart");
 
       toast({
         title: "تم الحذف",
@@ -325,7 +330,7 @@ const Cart = () => {
       if (deleteError) throw deleteError;
 
       setCartItems(items => items.filter(i => i.id !== item.id));
-      window.dispatchEvent(new Event("cart-updated"));
+      notifySync("cart");
       await fetchSavedItems();
 
       toast({
@@ -388,7 +393,7 @@ const Cart = () => {
       if (error) throw error;
       setCartItems(withVariant(data as any));
 
-      window.dispatchEvent(new Event("cart-updated"));
+      notifySync("cart");
 
       toast({
         title: "تم النقل",

@@ -42,6 +42,7 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { FavoriteButton } from "@/components/FavoriteButton";
 import { useCompareProducts } from "@/hooks/useCompareProducts";
+import { notifySync, useSyncListener } from "@/lib/uiSync";
 // html2canvas (~200 kB) and jspdf (~350 kB) are loaded on demand inside the
 // export handlers so opening the comparison page stays lightweight.
 
@@ -386,6 +387,7 @@ const Compare = () => {
 
       if (error) throw error;
 
+      notifySync("cart");
       toast({
         title: "تمت الإضافة",
         description: "تم إضافة المنتج إلى السلة",

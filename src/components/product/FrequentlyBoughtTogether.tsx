@@ -6,6 +6,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
+import { notifySync, useSyncListener } from "@/lib/uiSync";
 
 interface Item {
   id: string;
@@ -94,6 +95,7 @@ const FrequentlyBoughtTogether = ({ product, categoryId, vendorId }: Props) => {
             .insert({ user_id: user.id, product_id: item.id, quantity: 1 });
         }
       }
+      notifySync("cart");
       toast({
         title: "تمت الإضافة",
         description: `تم إضافة ${chosen.length + 1} منتجات إلى السلة`,

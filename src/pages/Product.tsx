@@ -30,6 +30,7 @@ import MarketPriceBar from "@/components/MarketPriceBar";
 import SeoHead from "@/components/SeoHead";
 import ProductVariantPicker from "@/components/product/ProductVariantPicker";
 import type { Database } from "@/integrations/supabase/types";
+import { notifySync, useSyncListener } from "@/lib/uiSync";
 
 type ProductVariant = Database["public"]["Tables"]["product_variants"]["Row"];
 interface Product {
@@ -241,6 +242,7 @@ const Product = () => {
 
       if (error) throw error;
 
+      notifySync("cart");
       toast({
         title: "تمت الإضافة",
         description: "تم إضافة المنتج إلى السلة",

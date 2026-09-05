@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Loader2, Heart, ShoppingCart, Share2, Wallet, Package } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { notifySync, useSyncListener } from "@/lib/uiSync";
 
 interface Product {
   id: string;
@@ -88,7 +89,13 @@ const Favorites = () => {
       )
       .subscribe();
 
+    const onBus = () => {
+      void fetchFavorites();
+    };
+    window.addEventListener("favorites-updated", onBus);
+
     return () => {
+      window.removeEventListener("favorites-updated", onBus);
       supabase.removeChannel(channel);
     };
   }, [user]);
@@ -129,7 +136,7 @@ const Favorites = () => {
           .eq("product_id", p.id);
       }
       toast({ title: "تمت الإضافة", description: `أُضيف ${inStock.length} منتج إلى السلة` });
-      window.dispatchEvent(new Event("cart:updated"));
+      notifySync("cart");
     } catch (e) {
       toast({ title: "خطأ", description: e.message, variant: "destructive" });
     } finally {

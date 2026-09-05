@@ -61,22 +61,40 @@ const Footer = () => {
             </p>
             <div className="flex gap-2">
               <Button size="icon" variant="ghost" className="hover-scale glow-on-hover" asChild>
-                <a href="https://www.facebook.com/profile.php?id=61591855201582" target="_blank" rel="noreferrer" aria-label="فيسبوك">
+                <a
+                  href="https://www.facebook.com/profile.php?id=61591855201582"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="فيسبوك"
+                  onClick={(e) => { e.preventDefault(); window.open("https://www.facebook.com/profile.php?id=61591855201582", "_blank", "noopener,noreferrer"); }}
+                >
                   <Facebook className="h-5 w-5" style={{ color: "#1877F2" }} />
                 </a>
               </Button>
               <Button size="icon" variant="ghost" className="hover-scale glow-on-hover" asChild>
-                <a href="https://www.instagram.com/siloshoop/" target="_blank" rel="noreferrer" aria-label="انستغرام">
+                <a
+                  href="https://www.instagram.com/siloshoop/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="انستغرام"
+                  onClick={(e) => { e.preventDefault(); window.open("https://www.instagram.com/siloshoop/", "_blank", "noopener,noreferrer"); }}
+                >
                   <Instagram className="h-5 w-5" stroke="url(#instagram-gradient)" />
                 </a>
               </Button>
               <Button size="icon" variant="ghost" className="hover-scale glow-on-hover" asChild>
-                <a href="https://twitter.com" target="_blank" rel="noreferrer" aria-label="تويتر">
+                <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" aria-label="تويتر">
                   <Twitter className="h-5 w-5" />
                 </a>
               </Button>
               <Button size="icon" variant="ghost" className="hover-scale glow-on-hover" asChild>
-                <a href="https://www.youtube.com/@siloshoop" target="_blank" rel="noopener noreferrer" aria-label="يوتيوب">
+                <a
+                  href="https://www.youtube.com/@siloshoop"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="يوتيوب"
+                  onClick={(e) => { e.preventDefault(); window.open("https://www.youtube.com/@siloshoop", "_blank", "noopener,noreferrer"); }}
+                >
                   <Youtube className="h-5 w-5" style={{ color: "#FF0000" }} />
                 </a>
               </Button>

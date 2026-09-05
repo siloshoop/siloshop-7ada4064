@@ -76,7 +76,7 @@ const Footer = () => {
                 </a>
               </Button>
               <Button size="icon" variant="ghost" className="hover-scale glow-on-hover" asChild>
-                <a href="https://www.youtube.com/@siloshoop/" target="_blank" rel="noreferrer" aria-label="يوتيوب">
+                <a href="https://www.youtube.com/@siloshoop" target="_blank" rel="noopener noreferrer" aria-label="يوتيوب">
                   <Youtube className="h-5 w-5" style={{ color: "#FF0000" }} />
                 </a>
               </Button>

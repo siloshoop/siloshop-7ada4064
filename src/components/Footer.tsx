@@ -48,12 +48,12 @@ const Footer = () => {
             </p>
             <div className="flex gap-2">
               <Button size="icon" variant="ghost" className="hover-scale glow-on-hover" asChild>
-                <a href="https://facebook.com" target="_blank" rel="noreferrer" aria-label="فيسبوك">
+                <a href="https://www.facebook.com/profile.php?id=61591855201582" target="_blank" rel="noreferrer" aria-label="فيسبوك">
                   <Facebook className="h-5 w-5" />
                 </a>
               </Button>
               <Button size="icon" variant="ghost" className="hover-scale glow-on-hover" asChild>
-                <a href="https://instagram.com" target="_blank" rel="noreferrer" aria-label="انستغرام">
+                <a href="https://www.instagram.com/siloshoop/" target="_blank" rel="noreferrer" aria-label="انستغرام">
                   <Instagram className="h-5 w-5" />
                 </a>
               </Button>
@@ -63,9 +63,19 @@ const Footer = () => {
                 </a>
               </Button>
               <Button size="icon" variant="ghost" className="hover-scale glow-on-hover" asChild>
-                <a href="https://youtube.com" target="_blank" rel="noreferrer" aria-label="يوتيوب">
+                <a href="https://www.youtube.com/@siloshoop/" target="_blank" rel="noreferrer" aria-label="يوتيوب">
                   <Youtube className="h-5 w-5" />
                 </a>
+              </Button>
+              <Button size="icon" variant="ghost" className="hover-scale glow-on-hover" asChild>
+                <span aria-label="واتساب">
+                  <MessageCircle className="h-5 w-5" />
+                </span>
+              </Button>
+              <Button size="icon" variant="ghost" className="hover-scale glow-on-hover" asChild>
+                <span aria-label="تيليجرام">
+                  <Send className="h-5 w-5" />
+                </span>
               </Button>
             </div>
           </div>

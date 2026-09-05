@@ -154,7 +154,7 @@ const Cart = () => {
     };
 
     fetchCart();
-  }, [user, toast]);
+  }, [user, toast, cartVersion]);
 
   const fetchSavedItems = async () => {
     if (!user) {

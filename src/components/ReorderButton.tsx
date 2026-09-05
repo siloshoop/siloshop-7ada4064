@@ -4,6 +4,7 @@ import { RefreshCw, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
+import { notifySync, useSyncListener } from "@/lib/uiSync";
 
 interface OrderItem {
   product_id: string;
@@ -52,6 +53,7 @@ const ReorderButton = ({ orderId, userId, orderItems }: ReorderButtonProps) => {
 
       if (error) throw error;
 
+      notifySync("cart");
       toast({
         title: "تمت الإضافة",
         description: "تمت إضافة جميع المنتجات إلى سلة التسوق",

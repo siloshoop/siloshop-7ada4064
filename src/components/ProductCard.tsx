@@ -10,6 +10,7 @@ import { useFlyToCart } from "@/components/FlyToCart";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import React, { useState, memo } from "react";
+import { notifySync, useSyncListener } from "@/lib/uiSync";
 
 interface ProductCardProps {
   id?: string;
@@ -161,6 +162,7 @@ const ProductCard = memo(({
         });
       }
 
+      notifySync("cart");
       triggerFly(buttonRect.left + buttonRect.width / 2, buttonRect.top, image);
 
       toast({

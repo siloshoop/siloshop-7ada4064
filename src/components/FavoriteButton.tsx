@@ -1,10 +1,11 @@
-import { useState, useEffect } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Heart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
+import { notifySync, useSyncListener } from "@/lib/uiSync";
 
 interface FavoriteButtonProps {
   productId: string;
@@ -20,22 +21,27 @@ export const FavoriteButton = ({ productId, variant = "outline", size = "lg" }: 
   const [loading, setLoading] = useState(false);
   const [bouncing, setBouncing] = useState(false);
 
-  useEffect(() => {
-    if (!user) return;
+  const checkFavorite = useCallback(async () => {
+    if (!user) {
+      setIsFavorite(false);
+      return;
+    }
+    const { data } = await supabase
+      .from("favorites")
+      .select("id")
+      .eq("user_id", user.id)
+      .eq("product_id", productId)
+      .maybeSingle();
 
-    const checkFavorite = async () => {
-      const { data } = await supabase
-        .from("favorites")
-        .select("id")
-        .eq("user_id", user.id)
-        .eq("product_id", productId)
-        .maybeSingle();
-
-      setIsFavorite(!!data);
-    };
-
-    checkFavorite();
+    setIsFavorite(!!data);
   }, [user, productId]);
+
+  useEffect(() => {
+    void checkFavorite();
+  }, [checkFavorite]);
+
+  // Any favorite change anywhere in the app refreshes this button instantly.
+  useSyncListener(["favorites"], checkFavorite);
 
   const toggleFavorite = async (e: React.MouseEvent) => {
     e.preventDefault();
@@ -51,26 +57,31 @@ export const FavoriteButton = ({ productId, variant = "outline", size = "lg" }: 
     setLoading(true);
     try {
       if (isFavorite) {
-        await supabase
+        const { error } = await supabase
           .from("favorites")
           .delete()
           .eq("user_id", user.id)
           .eq("product_id", productId);
+        if (error) throw error;
 
         setIsFavorite(false);
+        notifySync("favorites");
         toast({
           title: "تمت الإزالة",
           description: "تم إزالة المنتج من المفضلة",
         });
       } else {
-        await supabase
+        const { error } = await supabase
           .from("favorites")
           .insert({
             user_id: user.id,
             product_id: productId,
           });
+        // A duplicate row means it is already a favorite - treat as success.
+        if (error && (error as { code?: string }).code !== "23505") throw error;
 
         setIsFavorite(true);
+        notifySync("favorites");
         toast({
           title: "تمت الإضافة",
           description: "تم إضافة المنتج إلى المفضلة",

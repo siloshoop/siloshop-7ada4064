@@ -33,6 +33,19 @@ const Footer = () => {
     }
   };
   return <footer className="bg-muted/50 border-t relative overflow-hidden">
+      {/* Instagram gradient definition */}
+      <svg width="0" height="0" className="absolute" aria-hidden="true">
+        <defs>
+          <linearGradient id="instagram-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor="#f09433" />
+            <stop offset="25%" stopColor="#e6683c" />
+            <stop offset="50%" stopColor="#dc2743" />
+            <stop offset="75%" stopColor="#cc2366" />
+            <stop offset="100%" stopColor="#bc1888" />
+          </linearGradient>
+        </defs>
+      </svg>
+
       {/* Background decoration */}
       <div className="absolute inset-0 pointer-events-none">
         <div className="absolute bottom-0 left-0 w-64 h-64 bg-primary/5 rounded-full blur-3xl" />
@@ -49,12 +62,12 @@ const Footer = () => {
             <div className="flex gap-2">
               <Button size="icon" variant="ghost" className="hover-scale glow-on-hover" asChild>
                 <a href="https://www.facebook.com/profile.php?id=61591855201582" target="_blank" rel="noreferrer" aria-label="فيسبوك">
-                  <Facebook className="h-5 w-5" />
+                  <Facebook className="h-5 w-5" style={{ color: "#1877F2" }} />
                 </a>
               </Button>
               <Button size="icon" variant="ghost" className="hover-scale glow-on-hover" asChild>
                 <a href="https://www.instagram.com/siloshoop/" target="_blank" rel="noreferrer" aria-label="انستغرام">
-                  <Instagram className="h-5 w-5" />
+                  <Instagram className="h-5 w-5" stroke="url(#instagram-gradient)" />
                 </a>
               </Button>
               <Button size="icon" variant="ghost" className="hover-scale glow-on-hover" asChild>
@@ -64,17 +77,17 @@ const Footer = () => {
               </Button>
               <Button size="icon" variant="ghost" className="hover-scale glow-on-hover" asChild>
                 <a href="https://www.youtube.com/@siloshoop/" target="_blank" rel="noreferrer" aria-label="يوتيوب">
-                  <Youtube className="h-5 w-5" />
+                  <Youtube className="h-5 w-5" style={{ color: "#FF0000" }} />
                 </a>
               </Button>
               <Button size="icon" variant="ghost" className="hover-scale glow-on-hover" asChild>
                 <span aria-label="واتساب">
-                  <MessageCircle className="h-5 w-5" />
+                  <MessageCircle className="h-5 w-5" style={{ color: "#25D366" }} />
                 </span>
               </Button>
               <Button size="icon" variant="ghost" className="hover-scale glow-on-hover" asChild>
                 <span aria-label="تيليجرام">
-                  <Send className="h-5 w-5" />
+                  <Send className="h-5 w-5" style={{ color: "#0088cc" }} />
                 </span>
               </Button>
             </div>

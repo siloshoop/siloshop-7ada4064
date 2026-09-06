@@ -1,7 +1,7 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
-const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
+const RESEND_API_KEY = (Deno.env.get("RESEND_API_KEY") ?? "").trim().replace(/^["']|["']$/g, "");
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -246,8 +246,17 @@ const handler = async (req: Request): Promise<Response> => {
       }),
     });
 
-    const emailResult = await emailResponse.json();
-    console.log("Vendor notification email sent successfully:", emailResult);
+    const emailResult = await emailResponse.json().catch(() => null);
+    const emailSent = emailResponse.ok;
+    if (emailSent) {
+      console.log("Vendor notification email sent successfully:", emailResult);
+    } else {
+      // Never report a failed send as success — surface it so it can be diagnosed.
+      console.error(
+        `Vendor notification email FAILED (status ${emailResponse.status}):`,
+        emailResult,
+      );
+    }
 
     // Also create in-app notification for vendor
     await supabase.from("notifications").insert({
@@ -259,7 +268,7 @@ const handler = async (req: Request): Promise<Response> => {
     });
 
     return new Response(
-      JSON.stringify({ success: true }),
+      JSON.stringify({ success: true, emailSent }),
       { status: 200, headers: { "Content-Type": "application/json", ...corsHeaders } }
     );
   } catch (error: any) {

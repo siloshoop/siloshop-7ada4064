@@ -107,11 +107,18 @@ const ManageUsers = () => {
 
   const addRole = async (userId: string, role: "admin" | "vendor" | "customer") => {
     try {
-      const { error } = await supabase
-        .from("user_roles")
-        .insert({ user_id: userId, role });
+      // Role writes are privileged: they go through a SECURITY DEFINER RPC that
+      // re-checks the caller's role server-side (the table itself is read-only
+      // for authenticated clients).
+      const { error } = await supabase.rpc("admin_set_user_role", {
+        _user_id: userId,
+        _role: role,
+        _grant: true,
+      });
 
       if (error) throw error;
+
+
 
       toast({
         title: "تم بنجاح",
@@ -147,11 +154,11 @@ const ManageUsers = () => {
     }
 
     try {
-      const { error } = await supabase
-        .from("user_roles")
-        .delete()
-        .eq("user_id", userId)
-        .eq("role", role);
+      const { error } = await supabase.rpc("admin_set_user_role", {
+        _user_id: userId,
+        _role: role,
+        _grant: false,
+      });
 
       if (error) throw error;
 

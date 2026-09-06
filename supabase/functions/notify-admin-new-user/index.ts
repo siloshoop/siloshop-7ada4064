@@ -1,7 +1,7 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
-const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
+const RESEND_API_KEY = (Deno.env.get("RESEND_API_KEY") ?? "").trim().replace(/^["']|["']$/g, "");
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -181,9 +181,16 @@ const handler = async (req: Request): Promise<Response> => {
       }),
     });
 
-    const emailResult = await emailResponse.json();
-
-    console.log("Admin notification emails sent successfully:", emailResult);
+    const emailResult = await emailResponse.json().catch(() => null);
+    const emailSent = emailResponse.ok;
+    if (emailSent) {
+      console.log("Admin notification emails sent successfully:", emailResult);
+    } else {
+      console.error(
+        `Admin notification email FAILED (status ${emailResponse.status}):`,
+        emailResult,
+      );
+    }
 
     // Also create in-app notifications for admins
     for (const admin of adminRoles) {
@@ -197,7 +204,7 @@ const handler = async (req: Request): Promise<Response> => {
     }
 
     return new Response(
-      JSON.stringify({ success: true, emailsSent: adminEmails.length }),
+      JSON.stringify({ success: true, emailSent, emailsSent: adminEmails.length }),
       { status: 200, headers: { "Content-Type": "application/json", ...corsHeaders } }
     );
   } catch (error: any) {

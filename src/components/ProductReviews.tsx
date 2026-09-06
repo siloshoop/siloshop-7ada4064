@@ -440,10 +440,10 @@ export const ProductReviews = ({ productId, vendorId }: ProductReviewsProps) => 
           )}
           {user && !isVendor && hasUserReview && (
             <p className="text-sm text-muted-foreground border-b pb-4">
-              لقد قيّمت هذا المنتج بالفعل، ويمكن إضافة تقييم واحد فقط لكل منتج.
+              يمكنك تعديل تقييمك السابق أو حذفه.
             </p>
           )}
-          {user && !isVendor && userVerifiedPurchase && !hasUserReview && (
+          {user && !isVendor && (userVerifiedPurchase || hasUserReview) && (
             <form onSubmit={handleSubmit} className="space-y-4 mb-6 pb-6 border-b">
 
               <div>

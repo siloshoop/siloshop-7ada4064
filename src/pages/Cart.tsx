@@ -72,6 +72,7 @@ interface CartItemWithDiscount extends CartItem {
 interface SavedItem {
   id: string;
   quantity: number;
+  variant_id?: string | null;
   product: {
     id: string;
     name: string;
@@ -167,6 +168,7 @@ const Cart = () => {
         .select(`
           id,
           quantity,
+          variant_id,
           product:products(id, name, price, image_url, stock_quantity)
         `)
         .eq("user_id", user.id)
@@ -299,12 +301,14 @@ const Cart = () => {
     if (!user) return;
     setSavingItemId(item.id);
     try {
-      const { data: existing, error: fetchError } = await supabase
+      const variantId = item.variant_id ?? null;
+      const { data: existingRows, error: fetchError } = await supabase
         .from("saved_for_later")
-        .select("id, quantity")
+        .select("id, quantity, variant_id")
         .eq("user_id", user.id)
-        .eq("product_id", item.product.id)
-        .maybeSingle();
+        .eq("product_id", item.product.id);
+      const existing =
+        (existingRows || []).find((r: any) => (r.variant_id ?? null) === variantId) || null;
 
       if (fetchError) throw fetchError;
 
@@ -319,9 +323,11 @@ const Cart = () => {
           user_id: user.id,
           product_id: item.product.id,
           quantity: item.quantity,
+          variant_id: variantId,
         });
         if (insertError) throw insertError;
       }
+
 
       const { error: deleteError } = await supabase
         .from("cart_items")
@@ -352,16 +358,17 @@ const Cart = () => {
     if (!user) return;
     setProcessingSavedId(item.id);
     try {
-      const { data: existingCartItem, error: fetchError } = await supabase
+      const variantId = item.variant_id ?? null;
+      const { data: cartRows, error: fetchError } = await supabase
         .from("cart_items")
-        .select("id, quantity")
+        .select("id, quantity, variant_id")
         .eq("user_id", user.id)
-        .eq("product_id", item.product.id)
-        .is("variant_id", null)
-        .maybeSingle();
-
+        .eq("product_id", item.product.id);
 
       if (fetchError) throw fetchError;
+
+      const existingCartItem =
+        (cartRows || []).find((r) => (r.variant_id ?? null) === variantId) || null;
 
       if (existingCartItem) {
         const { error: updateError } = await supabase
@@ -374,9 +381,11 @@ const Cart = () => {
           user_id: user.id,
           product_id: item.product.id,
           quantity: item.quantity,
+          variant_id: variantId,
         });
         if (insertError) throw insertError;
       }
+
 
       const { error: deleteError } = await supabase
         .from("saved_for_later")

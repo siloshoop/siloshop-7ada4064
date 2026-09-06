@@ -299,12 +299,16 @@ const Cart = () => {
     if (!user) return;
     setSavingItemId(item.id);
     try {
-      const { data: existing, error: fetchError } = await supabase
+      const variantId = item.variant_id ?? null;
+      let existingQuery = supabase
         .from("saved_for_later")
         .select("id, quantity")
         .eq("user_id", user.id)
-        .eq("product_id", item.product.id)
-        .maybeSingle();
+        .eq("product_id", item.product.id);
+      existingQuery = variantId
+        ? existingQuery.eq("variant_id", variantId)
+        : existingQuery.is("variant_id", null);
+      const { data: existing, error: fetchError } = await existingQuery.maybeSingle();
 
       if (fetchError) throw fetchError;
 
@@ -319,9 +323,11 @@ const Cart = () => {
           user_id: user.id,
           product_id: item.product.id,
           quantity: item.quantity,
+          variant_id: variantId,
         });
         if (insertError) throw insertError;
       }
+
 
       const { error: deleteError } = await supabase
         .from("cart_items")

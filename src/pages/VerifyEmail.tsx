@@ -15,6 +15,7 @@ const EXPIRY_SECONDS = 600;
 const VerifyEmail = () => {
   const [params] = useSearchParams();
   const emailParam = params.get("email") || "";
+  const justSignedUp = params.get("sent") === "1";
   const [email, setEmail] = useState(emailParam);
   const [code, setCode] = useState("");
   const [loading, setLoading] = useState(false);

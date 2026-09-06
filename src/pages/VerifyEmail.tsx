@@ -93,10 +93,19 @@ const VerifyEmail = () => {
   };
 
   useEffect(() => {
-    if (emailParam && !autoResentRef.current) {
-      autoResentRef.current = true;
-      triggerResend(true);
+    if (!emailParam || autoResentRef.current) return;
+    autoResentRef.current = true;
+    if (justSignedUp) {
+      // Sign-up already delivered the code; a second send would only hit the
+      // provider rate limit and show a false error.
+      setResendCooldown(RESEND_COOLDOWN);
+      setSendState("sent");
+      setSendMessage(
+        `تم إرسال رمز مكوّن من 6 أرقام إلى ${emailParam}. تحقق من صندوق الوارد وأيضاً مجلد الرسائل غير المرغوب فيها.`,
+      );
+      return;
     }
+    triggerResend(true);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [emailParam]);
 
@@ -114,6 +123,19 @@ const VerifyEmail = () => {
       // If this account has a pending seller application, route to it.
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
+        // Admins are notified here (not at sign-up): only now does the caller
+        // hold a session, which the edge function requires.
+        try {
+          await supabase.functions.invoke("notify-admin-new-user", {
+            body: {
+              user_id: user.id,
+              user_email: user.email,
+              user_name: (user.user_metadata?.full_name as string) || user.email,
+            },
+          });
+        } catch {
+          /* best-effort */
+        }
         const { data: app } = await supabase
           .from("seller_applications")
           .select("status")

@@ -301,27 +301,15 @@ const Auth = () => {
         return;
       }
 
-      // Notify admins about new user registration (best-effort)
-      if (newUser) {
-        try {
-          await supabase.functions.invoke("notify-admin-new-user", {
-            body: {
-              user_id: newUser.id,
-              user_email: signUpEmail,
-              user_name: signUpFullName,
-            },
-          });
-        } catch (notifyError) {
-          console.error("Failed to notify admins:", notifyError);
-        }
-      }
+      // Admins are notified after the account is verified (see VerifyEmail),
+      // where a session exists for the edge function to authorize the caller.
 
       toast({
         title: "تم إنشاء الحساب",
         description: "أدخل رمز التحقق المرسل إلى بريدك لتفعيل حسابك",
       });
 
-      navigate(`/verify-email?email=${encodeURIComponent(signUpEmail)}`);
+      navigate(`/verify-email?email=${encodeURIComponent(signUpEmail)}&sent=1`);
     } catch (error) {
       const rawMsg = (error as Error)?.message || "";
       if (/already registered|already been registered|user already exists/i.test(rawMsg)) {

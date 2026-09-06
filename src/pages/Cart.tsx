@@ -300,15 +300,13 @@ const Cart = () => {
     setSavingItemId(item.id);
     try {
       const variantId = item.variant_id ?? null;
-      let existingQuery = supabase
+      const { data: existingRows, error: fetchError } = await supabase
         .from("saved_for_later")
-        .select("id, quantity")
+        .select("id, quantity, variant_id")
         .eq("user_id", user.id)
         .eq("product_id", item.product.id);
-      existingQuery = variantId
-        ? existingQuery.eq("variant_id", variantId)
-        : existingQuery.is("variant_id", null);
-      const { data: existing, error: fetchError } = await existingQuery.maybeSingle();
+      const existing =
+        (existingRows || []).find((r: any) => (r.variant_id ?? null) === variantId) || null;
 
       if (fetchError) throw fetchError;
 

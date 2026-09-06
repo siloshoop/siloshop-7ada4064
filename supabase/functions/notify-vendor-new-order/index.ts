@@ -246,8 +246,17 @@ const handler = async (req: Request): Promise<Response> => {
       }),
     });
 
-    const emailResult = await emailResponse.json();
-    console.log("Vendor notification email sent successfully:", emailResult);
+    const emailResult = await emailResponse.json().catch(() => null);
+    const emailSent = emailResponse.ok;
+    if (emailSent) {
+      console.log("Vendor notification email sent successfully:", emailResult);
+    } else {
+      // Never report a failed send as success — surface it so it can be diagnosed.
+      console.error(
+        `Vendor notification email FAILED (status ${emailResponse.status}):`,
+        emailResult,
+      );
+    }
 
     // Also create in-app notification for vendor
     await supabase.from("notifications").insert({

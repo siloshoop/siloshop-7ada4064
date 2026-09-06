@@ -181,9 +181,16 @@ const handler = async (req: Request): Promise<Response> => {
       }),
     });
 
-    const emailResult = await emailResponse.json();
-
-    console.log("Admin notification emails sent successfully:", emailResult);
+    const emailResult = await emailResponse.json().catch(() => null);
+    const emailSent = emailResponse.ok;
+    if (emailSent) {
+      console.log("Admin notification emails sent successfully:", emailResult);
+    } else {
+      console.error(
+        `Admin notification email FAILED (status ${emailResponse.status}):`,
+        emailResult,
+      );
+    }
 
     // Also create in-app notifications for admins
     for (const admin of adminRoles) {

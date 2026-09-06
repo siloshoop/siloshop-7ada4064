@@ -298,11 +298,19 @@ const handler = async (req: Request): Promise<Response> => {
       }),
     });
 
-    const emailResult = await emailResponse.json();
-    console.log("Customer notification email sent successfully:", emailResult);
+    const emailResult = await emailResponse.json().catch(() => null);
+    const emailSent = emailResponse.ok;
+    if (emailSent) {
+      console.log("Customer notification email sent successfully:", emailResult);
+    } else {
+      console.error(
+        `Customer notification email FAILED (status ${emailResponse.status}):`,
+        emailResult,
+      );
+    }
 
     return new Response(
-      JSON.stringify({ success: true }),
+      JSON.stringify({ success: true, emailSent }),
       { status: 200, headers: { "Content-Type": "application/json", ...corsHeaders } }
     );
   } catch (error: any) {

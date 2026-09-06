@@ -72,6 +72,7 @@ interface CartItemWithDiscount extends CartItem {
 interface SavedItem {
   id: string;
   quantity: number;
+  variant_id?: string | null;
   product: {
     id: string;
     name: string;
@@ -167,6 +168,7 @@ const Cart = () => {
         .select(`
           id,
           quantity,
+          variant_id,
           product:products(id, name, price, image_url, stock_quantity)
         `)
         .eq("user_id", user.id)

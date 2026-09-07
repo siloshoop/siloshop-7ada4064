@@ -30,6 +30,15 @@ async function hashCode(value: string): Promise<string> {
     .join('')
 }
 
+// Length-independent comparison so response timing never leaks how much of the
+// code matched.
+function timingSafeEqual(a: string, b: string): boolean {
+  if (a.length !== b.length) return false
+  let diff = 0
+  for (let i = 0; i < a.length; i++) diff |= a.charCodeAt(i) ^ b.charCodeAt(i)
+  return diff === 0
+}
+
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders })
   if (req.method !== 'POST') return json({ error: 'method_not_allowed' }, 405)
@@ -73,7 +82,7 @@ Deno.serve(async (req) => {
   if (record.attempts >= 10) return json({ error: 'too_many_attempts' }, 429)
 
   const expected = await hashCode(`${email}:${code}`)
-  if (expected !== record.code_hash) {
+  if (!timingSafeEqual(expected, record.code_hash || '')) {
     await supabase
       .from('email_verification_codes')
       .update({ attempts: record.attempts + 1 })

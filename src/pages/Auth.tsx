@@ -33,8 +33,13 @@ const authErrorMessageAr = (raw: string): string => {
   if (/invalid login credentials/i.test(raw)) return "البريد الإلكتروني أو كلمة المرور غير صحيحة";
   if (/email not confirmed/i.test(raw)) return "الحساب غير مفعّل، تحقق من بريدك الإلكتروني";
   if (/password should be at least/i.test(raw)) return "كلمة المرور قصيرة جداً";
-  if (/rate limit|too many requests|over_email_send_rate_limit/i.test(raw))
-    return "عدد المحاولات كبير، يرجى الانتظار قليلاً ثم المحاولة مجدداً";
+  if (/rate limit|too many requests|over_email_send_rate_limit/i.test(raw)) {
+    const wait = Number(raw.match(/after (\d+) second/)?.[1] ?? 0);
+    return wait > 0
+      ? `عدد المحاولات كبير، يمكنك المحاولة مجدداً بعد ${wait} ثانية`
+      : "عدد المحاولات كبير، يرجى الانتظار قليلاً ثم المحاولة مجدداً";
+  }
+
   if (/invalid email/i.test(raw)) return "البريد الإلكتروني غير صالح";
   if (/signups not allowed|signup is disabled/i.test(raw)) return "التسجيل معطّل حالياً";
   return raw || "حدث خطأ، يرجى المحاولة مرة أخرى";
@@ -104,6 +109,16 @@ const Auth = () => {
     const t = setInterval(() => setLockSeconds((s) => (s > 1 ? s - 1 : 0)), 1000);
     return () => clearInterval(t);
   }, [lockSeconds]);
+
+  // Sign-up cooldown after a provider rate limit (counts down visibly)
+  const [signUpCooldown, setSignUpCooldown] = useState(0);
+  useEffect(() => {
+    if (signUpCooldown <= 0) return;
+    const t = setInterval(() => setSignUpCooldown((s) => (s > 1 ? s - 1 : 0)), 1000);
+    return () => clearInterval(t);
+  }, [signUpCooldown]);
+
+
 
   // Sign Up State
   const [signUpEmail, setSignUpEmail] = useState("");
@@ -255,6 +270,9 @@ const Auth = () => {
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
+    // Prevent duplicate submissions (double click / Enter while sending)
+    if (isLoading || signUpCooldown > 0) return;
+
     setSignUpErrors({});
 
     const fullPhone = `${findCountry(phoneCountry).dial}${phoneLocal.replace(/\D/g, "").replace(/^0+/, "")}`;
@@ -340,6 +358,10 @@ const Auth = () => {
       if (/already registered|already been registered|user already exists/i.test(rawMsg)) {
         setSignUpErrors((prev) => ({ ...prev, email: "هذا البريد الإلكتروني مسجّل مسبقاً" }));
       }
+      if (/rate limit|too many requests|over_email_send_rate_limit/i.test(rawMsg)) {
+        setSignUpCooldown(Number(rawMsg.match(/after (\d+) second/)?.[1] ?? 60));
+      }
+
       toast({
         title: "خطأ في التسجيل",
         description: authErrorMessageAr(rawMsg),
@@ -606,12 +628,14 @@ const Auth = () => {
                   )}
                 </div>
 
-                <Button type="submit" className="w-full" size="lg" disabled={isLoading}>
+                <Button type="submit" className="w-full" size="lg" disabled={isLoading || signUpCooldown > 0}>
                   {isLoading ? (
                     <>
                       <Loader2 className="ml-2 h-4 w-4 animate-spin" />
                       جاري إنشاء الحساب...
                     </>
+                  ) : signUpCooldown > 0 ? (
+                    `يمكنك المحاولة مجدداً بعد ${signUpCooldown} ثانية`
                   ) : (
                     "إنشاء حساب"
                   )}

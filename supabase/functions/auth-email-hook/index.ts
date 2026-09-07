@@ -244,18 +244,16 @@ async function handleWebhook(req: Request): Promise<Response> {
     crypto.getRandomValues(digits)
     emailToken = String(digits[0] % 1000000).padStart(6, '0')
     const codeHash = await sha256Hex(`${payload.data.email.trim().toLowerCase()}:${emailToken}`)
-    const { error: codeError } = await supabase
-      .from('email_verification_codes')
-      .upsert(
-        {
-          email: payload.data.email.trim().toLowerCase(),
-          code_hash: codeHash,
-          expires_at: new Date(Date.now() + 10 * 60 * 1000).toISOString(),
-          used_at: null,
-          attempts: 0,
-        },
-        { onConflict: 'email' }
-      )
+    const normalizedEmail = payload.data.email.trim().toLowerCase()
+    // Issuing a new code invalidates any previous one for this address.
+    await supabase.from('email_verification_codes').delete().eq('email', normalizedEmail)
+    const { error: codeError } = await supabase.from('email_verification_codes').insert({
+      email: normalizedEmail,
+      code_hash: codeHash,
+      expires_at: new Date(Date.now() + 10 * 60 * 1000).toISOString(),
+      used_at: null,
+      attempts: 0,
+    })
     if (codeError) {
       console.error('Failed to store verification code', { error: codeError, run_id })
       return new Response(JSON.stringify({ error: 'Failed to issue verification code' }), {

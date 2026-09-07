@@ -358,6 +358,10 @@ const Auth = () => {
       if (/already registered|already been registered|user already exists/i.test(rawMsg)) {
         setSignUpErrors((prev) => ({ ...prev, email: "هذا البريد الإلكتروني مسجّل مسبقاً" }));
       }
+      if (/rate limit|too many requests|over_email_send_rate_limit/i.test(rawMsg)) {
+        setSignUpCooldown(Number(rawMsg.match(/after (\d+) second/)?.[1] ?? 60));
+      }
+
       toast({
         title: "خطأ في التسجيل",
         description: authErrorMessageAr(rawMsg),

@@ -16,7 +16,8 @@ const json = (body: unknown, status = 200) =>
 // a leaked database row cannot be brute-forced back to the 6-digit code
 // without the server-side secret.
 async function hashCode(value: string): Promise<string> {
-  const secret = Deno.env.get('OTP_HASH_SECRET') || ''
+  const secret = Deno.env.get('OTP_HASH_SECRET')
+  if (!secret) throw new Error('OTP_HASH_SECRET is not configured')
   const key = await crypto.subtle.importKey(
     'raw',
     new TextEncoder().encode(secret),
@@ -38,6 +39,11 @@ function timingSafeEqual(a: string, b: string): boolean {
   for (let i = 0; i < a.length; i++) diff |= a.charCodeAt(i) ^ b.charCodeAt(i)
   return diff === 0
 }
+
+// Brute-force limits
+const MAX_CODE_ATTEMPTS = 5
+const RATE_MAX_ATTEMPTS = 20
+const RATE_WINDOW_MS = 15 * 60 * 1000
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders })
@@ -66,6 +72,25 @@ Deno.serve(async (req) => {
     { auth: { persistSession: false } }
   )
 
+  // Per-network rate limit: caps guessing across many addresses, on top of the
+  // per-code attempt counter below.
+  const ip =
+    (req.headers.get('x-forwarded-for') || '').split(',')[0].trim() ||
+    req.headers.get('cf-connecting-ip') ||
+    'unknown'
+  const windowStart = new Date(Date.now() - RATE_WINDOW_MS).toISOString()
+  const { count: recentAttempts } = await supabase
+    .from('otp_verify_attempts')
+    .select('id', { count: 'exact', head: true })
+    .eq('ip', ip)
+    .gte('created_at', windowStart)
+  if ((recentAttempts ?? 0) >= RATE_MAX_ATTEMPTS) {
+    return json({ error: 'too_many_attempts' }, 429)
+  }
+  await supabase.from('otp_verify_attempts').insert({ ip })
+  // Opportunistic cleanup of rows outside the window.
+  await supabase.from('otp_verify_attempts').delete().lt('created_at', windowStart)
+
   const { data: record, error: readError } = await supabase
     .from('email_verification_codes')
     .select('id, code_hash, expires_at, used_at, attempts')
@@ -79,7 +104,7 @@ Deno.serve(async (req) => {
   if (!record) return json({ error: 'no_code' }, 400)
   if (record.used_at) return json({ error: 'code_used' }, 400)
   if (new Date(record.expires_at).getTime() < Date.now()) return json({ error: 'code_expired' }, 400)
-  if (record.attempts >= 10) return json({ error: 'too_many_attempts' }, 429)
+  if (record.attempts >= MAX_CODE_ATTEMPTS) return json({ error: 'too_many_attempts' }, 429)
 
   const expected = await hashCode(`${email}:${code}`)
   if (!timingSafeEqual(expected, record.code_hash || '')) {

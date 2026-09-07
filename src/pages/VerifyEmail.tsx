@@ -142,8 +142,9 @@ const VerifyEmail = () => {
       // Sign-up already delivered the code; a second send would only hit the
       // provider rate limit and show a false error.
       setResendCooldown(RESEND_COOLDOWN);
-      writeIssuedAt(emailParam, Date.now());
-      setExpiresIn(EXPIRY_SECONDS);
+      const issuedAt = readIssuedAt(emailParam);
+      if (!issuedAt) writeIssuedAt(emailParam, Date.now());
+      setExpiresIn(remainingFrom(issuedAt ?? Date.now()));
       setSendState("sent");
       setSendMessage(
         `تم إرسال رمز مكوّن من 6 أرقام إلى ${emailParam}. تحقق من صندوق الوارد وأيضاً مجلد الرسائل غير المرغوب فيها.`,

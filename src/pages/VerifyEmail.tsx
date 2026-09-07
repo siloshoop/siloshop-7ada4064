@@ -49,7 +49,7 @@ const VerifyEmail = () => {
   const [code, setCode] = useState("");
   const [loading, setLoading] = useState(false);
   const [resendCooldown, setResendCooldown] = useState(0);
-  const [expiresIn, setExpiresIn] = useState(EXPIRY_SECONDS);
+  const [expiresIn, setExpiresIn] = useState(() => remainingFrom(readIssuedAt(emailParam)));
   const [sendState, setSendState] = useState<"idle" | "checking" | "sending" | "sent" | "error">("idle");
   const [sendMessage, setSendMessage] = useState("");
   const autoResentRef = useRef(false);
@@ -101,7 +101,9 @@ const VerifyEmail = () => {
       const { error } = await supabase.auth.resend({ type: "signup", email });
       if (error) throw error;
       setResendCooldown(RESEND_COOLDOWN);
+      writeIssuedAt(email, Date.now());
       setExpiresIn(EXPIRY_SECONDS);
+      setCode("");
       setSendState("sent");
       setSendMessage(`تم إرسال رمز مكوّن من 6 أرقام إلى ${email}. تحقق من صندوق الوارد وأيضاً مجلد الرسائل غير المرغوب فيها.`);
       if (!silent) toast({ title: "تم إرسال رمز جديد", description: "تحقق من بريدك الإلكتروني" });
@@ -140,6 +142,8 @@ const VerifyEmail = () => {
       // Sign-up already delivered the code; a second send would only hit the
       // provider rate limit and show a false error.
       setResendCooldown(RESEND_COOLDOWN);
+      writeIssuedAt(emailParam, Date.now());
+      setExpiresIn(EXPIRY_SECONDS);
       setSendState("sent");
       setSendMessage(
         `تم إرسال رمز مكوّن من 6 أرقام إلى ${emailParam}. تحقق من صندوق الوارد وأيضاً مجلد الرسائل غير المرغوب فيها.`,

@@ -37,6 +37,7 @@ export const EmailChangeEmail = ({
     <Preview>Confirm your email change for {siteName}</Preview>
     <Body style={main}>
       <Container style={container}>
+        <Text style={brand}>SiloShop</Text>
         <Heading style={h1}>Confirm your email change</Heading>
         <Text style={text}>
           You requested to change your email address for {siteName} from{' '}
@@ -68,6 +69,13 @@ export default EmailChangeEmail
 
 const main = { backgroundColor: '#ffffff', fontFamily: 'Arial, sans-serif' }
 const container = { padding: '20px 25px' }
+const brand = {
+  fontSize: '18px',
+  fontWeight: 'bold' as const,
+  color: '#7c3aed',
+  margin: '0 0 16px',
+}
+
 const h1 = {
   fontSize: '22px',
   fontWeight: 'bold' as const,

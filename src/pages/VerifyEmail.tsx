@@ -11,6 +11,35 @@ import { checkEmail } from "@/lib/authGuard";
 
 const RESEND_COOLDOWN = 60;
 const EXPIRY_SECONDS = 600;
+const ISSUED_KEY = "siloshop_otp_issued_at";
+
+// The provider keeps only the most recent code per email: remember when the
+// newest one was issued so the countdown survives a page refresh and always
+// describes the code the user actually has.
+const readIssuedAt = (email: string): number | null => {
+  try {
+    const raw = sessionStorage.getItem(ISSUED_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as { email?: string; at?: number };
+    if (!parsed?.at || (parsed.email || "") !== email) return null;
+    return parsed.at;
+  } catch {
+    return null;
+  }
+};
+
+const writeIssuedAt = (email: string, at: number) => {
+  try {
+    sessionStorage.setItem(ISSUED_KEY, JSON.stringify({ email, at }));
+  } catch {
+    /* storage unavailable */
+  }
+};
+
+const remainingFrom = (at: number | null) => {
+  if (!at) return EXPIRY_SECONDS;
+  return Math.max(0, EXPIRY_SECONDS - Math.floor((Date.now() - at) / 1000));
+};
 
 const VerifyEmail = () => {
   const [params] = useSearchParams();
@@ -20,7 +49,7 @@ const VerifyEmail = () => {
   const [code, setCode] = useState("");
   const [loading, setLoading] = useState(false);
   const [resendCooldown, setResendCooldown] = useState(0);
-  const [expiresIn, setExpiresIn] = useState(EXPIRY_SECONDS);
+  const [expiresIn, setExpiresIn] = useState(() => remainingFrom(readIssuedAt(emailParam)));
   const [sendState, setSendState] = useState<"idle" | "checking" | "sending" | "sent" | "error">("idle");
   const [sendMessage, setSendMessage] = useState("");
   const autoResentRef = useRef(false);
@@ -72,7 +101,9 @@ const VerifyEmail = () => {
       const { error } = await supabase.auth.resend({ type: "signup", email });
       if (error) throw error;
       setResendCooldown(RESEND_COOLDOWN);
+      writeIssuedAt(email, Date.now());
       setExpiresIn(EXPIRY_SECONDS);
+      setCode("");
       setSendState("sent");
       setSendMessage(`تم إرسال رمز مكوّن من 6 أرقام إلى ${email}. تحقق من صندوق الوارد وأيضاً مجلد الرسائل غير المرغوب فيها.`);
       if (!silent) toast({ title: "تم إرسال رمز جديد", description: "تحقق من بريدك الإلكتروني" });
@@ -111,6 +142,9 @@ const VerifyEmail = () => {
       // Sign-up already delivered the code; a second send would only hit the
       // provider rate limit and show a false error.
       setResendCooldown(RESEND_COOLDOWN);
+      const issuedAt = readIssuedAt(emailParam);
+      if (!issuedAt) writeIssuedAt(emailParam, Date.now());
+      setExpiresIn(remainingFrom(issuedAt ?? Date.now()));
       setSendState("sent");
       setSendMessage(
         `تم إرسال رمز مكوّن من 6 أرقام إلى ${emailParam}. تحقق من صندوق الوارد وأيضاً مجلد الرسائل غير المرغوب فيها.`,
@@ -129,8 +163,15 @@ const VerifyEmail = () => {
     }
     setLoading(true);
     try {
-      const { error } = await supabase.auth.verifyOtp({ email, token: code, type: "email" });
+      // Sign-up confirmation codes are accepted under both `email` and `signup`
+      // depending on how the account was created; try the second before failing.
+      let { error } = await supabase.auth.verifyOtp({ email: email.trim(), token: code, type: "email" });
+      if (error) {
+        const retry = await supabase.auth.verifyOtp({ email: email.trim(), token: code, type: "signup" });
+        if (!retry.error) error = null;
+      }
       if (error) throw error;
+      writeIssuedAt(email, 0);
       toast({ title: "تم تفعيل الحساب بنجاح", description: "مرحباً بك!" });
       // If this account has a pending seller application, route to it.
       const { data: { user } } = await supabase.auth.getUser();
@@ -158,8 +199,15 @@ const VerifyEmail = () => {
       navigate("/");
     } catch (err) {
       const msg = (err as Error)?.message || "";
-      let description = "الرمز غير صحيح أو منتهي الصلاحية";
-      if (/expired/i.test(msg)) description = "انتهت صلاحية الرمز، أعد الإرسال";
+      let description = "الرمز غير صحيح. تأكد من إدخال الرمز الموجود في آخر رسالة وصلتك";
+      if (/expired|invalid/i.test(msg)) {
+        description = expiresIn > 0
+          ? "الرمز غير صحيح أو تم استبداله. الرمز الصالح هو الموجود في أحدث رسالة وصلتك فقط"
+          : "انتهت صلاحية الرمز، اضغط إعادة إرسال الرمز للحصول على رمز جديد";
+      }
+      setCode("");
+      setSendState(expiresIn > 0 ? "sent" : "error");
+      setSendMessage(description);
       toast({ title: "فشل التحقق", description, variant: "destructive" });
     } finally {
       setLoading(false);

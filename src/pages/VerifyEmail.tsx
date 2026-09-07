@@ -217,8 +217,9 @@ const VerifyEmail = () => {
       navigate("/");
     } catch (err) {
       const msg = (err as Error)?.message || "";
-      let description = "الرمز غير صحيح. تأكد من إدخال الرمز الموجود في آخر رسالة وصلتك";
-      if (/expired|invalid/i.test(msg)) {
+      const handled = (err as Error & { handled?: boolean })?.handled === true;
+      let description = handled ? msg : "الرمز غير صحيح. تأكد من إدخال الرمز الموجود في آخر رسالة وصلتك";
+      if (!handled && /expired|invalid/i.test(msg)) {
         description = expiresIn > 0
           ? "الرمز غير صحيح أو تم استبداله. الرمز الصالح هو الموجود في أحدث رسالة وصلتك فقط"
           : "انتهت صلاحية الرمز، اضغط إعادة إرسال الرمز للحصول على رمز جديد";

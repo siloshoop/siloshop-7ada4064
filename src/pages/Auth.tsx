@@ -286,6 +286,21 @@ const Auth = () => {
     setIsLoading(true);
 
     try {
+      // Server-side check: a phone number may only belong to one account
+      const { data: phoneAvailable, error: phoneCheckError } = await supabase.rpc("is_phone_available", {
+        p_phone: fullPhone,
+      });
+      if (!phoneCheckError && phoneAvailable === false) {
+        setSignUpErrors((prev) => ({ ...prev, phone: "رقم الهاتف مستخدم مسبقًا" }));
+        toast({
+          title: "رقم الهاتف مستخدم مسبقًا",
+          description: "هذا الرقم مرتبط بحساب آخر، استخدم رقماً مختلفاً",
+          variant: "destructive",
+        });
+        setIsLoading(false);
+        return;
+      }
+
       const { user: newUser, error } = await signUp(signUpEmail, signUpPassword, signUpFullName, fullPhone);
 
       if (error) throw error;

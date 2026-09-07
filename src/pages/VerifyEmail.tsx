@@ -163,13 +163,31 @@ const VerifyEmail = () => {
     }
     setLoading(true);
     try {
-      // Sign-up confirmation codes are accepted under both `email` and `signup`
-      // depending on how the account was created; try the second before failing.
-      let { error } = await supabase.auth.verifyOtp({ email: email.trim(), token: code, type: "email" });
-      if (error) {
-        const retry = await supabase.auth.verifyOtp({ email: email.trim(), token: code, type: "signup" });
-        if (!retry.error) error = null;
+      // The 6-digit code is issued, stored and validated by our own backend
+      // (single use, 10-minute expiry). It returns a one-time token we exchange
+      // for a session, exactly like the provider's own confirmation flow.
+      const { data, error: fnError } = await supabase.functions.invoke("verify-email-otp", {
+        body: { email: email.trim().toLowerCase(), code },
+      });
+      const result = (data ?? {}) as { success?: boolean; token_hash?: string; error?: string };
+      if (fnError || !result.success || !result.token_hash) {
+        const reason = result.error || "code_invalid";
+        const messages: Record<string, string> = {
+          code_expired: "انتهت صلاحية الرمز، اضغط إعادة إرسال الرمز للحصول على رمز جديد",
+          code_used: "تم استخدام هذا الرمز مسبقاً، اضغط إعادة إرسال الرمز",
+          no_code: "لا يوجد رمز صالح لهذا البريد، اضغط إعادة إرسال الرمز",
+          too_many_attempts: "عدد المحاولات كبير، اضغط إعادة إرسال الرمز للحصول على رمز جديد",
+          code_invalid: "الرمز غير صحيح. الرمز الصالح هو الموجود في أحدث رسالة وصلتك فقط",
+          invalid_code_format: "الرمز يجب أن يتكون من 6 أرقام",
+        };
+        const err = new Error(messages[reason] || messages.code_invalid);
+        (err as Error & { handled?: boolean }).handled = true;
+        throw err;
       }
+      const { error } = await supabase.auth.verifyOtp({
+        token_hash: result.token_hash,
+        type: "magiclink",
+      });
       if (error) throw error;
       writeIssuedAt(email, 0);
       toast({ title: "تم تفعيل الحساب بنجاح", description: "مرحباً بك!" });

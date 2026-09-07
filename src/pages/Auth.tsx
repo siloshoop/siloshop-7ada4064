@@ -640,8 +640,6 @@ const Auth = () => {
                     "إنشاء حساب"
                   )}
                 </Button>
-
-                </Button>
                 <p className="text-xs text-muted-foreground text-center">
                   جميع الحسابات الجديدة تُنشأ كحساب مشتري. يمكنك فتح متجر لاحقاً من إعدادات حسابك.
                 </p>

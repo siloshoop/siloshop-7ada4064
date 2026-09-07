@@ -83,13 +83,6 @@ Deno.serve(async (req) => {
 
   // Confirm the account, then hand back a one-time link the client can exchange
   // for a session (same as the provider's own confirmation flow).
-  const { data: list, error: listError } = await supabase.auth.admin.listUsers({ page: 1, perPage: 1 })
-  if (listError) {
-    console.error('Failed to list users', listError)
-    return json({ error: 'server_error' }, 500)
-  }
-  void list
-
   const { data: linkData, error: linkError } = await supabase.auth.admin.generateLink({
     type: 'magiclink',
     email,

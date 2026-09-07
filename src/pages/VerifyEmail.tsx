@@ -163,8 +163,15 @@ const VerifyEmail = () => {
     }
     setLoading(true);
     try {
-      const { error } = await supabase.auth.verifyOtp({ email, token: code, type: "email" });
+      // Sign-up confirmation codes are accepted under both `email` and `signup`
+      // depending on how the account was created; try the second before failing.
+      let { error } = await supabase.auth.verifyOtp({ email: email.trim(), token: code, type: "email" });
+      if (error) {
+        const retry = await supabase.auth.verifyOtp({ email: email.trim(), token: code, type: "signup" });
+        if (!retry.error) error = null;
+      }
       if (error) throw error;
+      writeIssuedAt(email, 0);
       toast({ title: "تم تفعيل الحساب بنجاح", description: "مرحباً بك!" });
       // If this account has a pending seller application, route to it.
       const { data: { user } } = await supabase.auth.getUser();

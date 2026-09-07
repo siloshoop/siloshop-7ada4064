@@ -33,8 +33,13 @@ const authErrorMessageAr = (raw: string): string => {
   if (/invalid login credentials/i.test(raw)) return "البريد الإلكتروني أو كلمة المرور غير صحيحة";
   if (/email not confirmed/i.test(raw)) return "الحساب غير مفعّل، تحقق من بريدك الإلكتروني";
   if (/password should be at least/i.test(raw)) return "كلمة المرور قصيرة جداً";
-  if (/rate limit|too many requests|over_email_send_rate_limit/i.test(raw))
-    return "عدد المحاولات كبير، يرجى الانتظار قليلاً ثم المحاولة مجدداً";
+  if (/rate limit|too many requests|over_email_send_rate_limit/i.test(raw)) {
+    const wait = Number(raw.match(/after (\d+) second/)?.[1] ?? 0);
+    return wait > 0
+      ? `عدد المحاولات كبير، يمكنك المحاولة مجدداً بعد ${wait} ثانية`
+      : "عدد المحاولات كبير، يرجى الانتظار قليلاً ثم المحاولة مجدداً";
+  }
+
   if (/invalid email/i.test(raw)) return "البريد الإلكتروني غير صالح";
   if (/signups not allowed|signup is disabled/i.test(raw)) return "التسجيل معطّل حالياً";
   return raw || "حدث خطأ، يرجى المحاولة مرة أخرى";

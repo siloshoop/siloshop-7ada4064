@@ -35,9 +35,20 @@ const EMAIL_TEMPLATES: Record<string, React.ComponentType<any>> = {
   reauthentication: ReauthenticationEmail,
 }
 
-async function sha256Hex(value: string): Promise<string> {
-  const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(value))
-  return Array.from(new Uint8Array(digest))
+// Codes are stored as a keyed HMAC (never plain text, never a bare hash):
+// a leaked database row cannot be brute-forced back to the 6-digit code
+// without the server-side secret.
+async function hashCode(value: string): Promise<string> {
+  const secret = Deno.env.get('OTP_HASH_SECRET') || ''
+  const key = await crypto.subtle.importKey(
+    'raw',
+    new TextEncoder().encode(secret),
+    { name: 'HMAC', hash: 'SHA-256' },
+    false,
+    ['sign']
+  )
+  const signature = await crypto.subtle.sign('HMAC', key, new TextEncoder().encode(value))
+  return Array.from(new Uint8Array(signature))
     .map((b) => b.toString(16).padStart(2, '0'))
     .join('')
 }
@@ -243,7 +254,7 @@ async function handleWebhook(req: Request): Promise<Response> {
     const digits = new Uint32Array(1)
     crypto.getRandomValues(digits)
     emailToken = String(digits[0] % 1000000).padStart(6, '0')
-    const codeHash = await sha256Hex(`${payload.data.email.trim().toLowerCase()}:${emailToken}`)
+    const codeHash = await hashCode(`${payload.data.email.trim().toLowerCase()}:${emailToken}`)
     const normalizedEmail = payload.data.email.trim().toLowerCase()
     // Issuing a new code invalidates any previous one for this address.
     await supabase.from('email_verification_codes').delete().eq('email', normalizedEmail)

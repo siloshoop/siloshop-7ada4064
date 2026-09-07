@@ -11,6 +11,35 @@ import { checkEmail } from "@/lib/authGuard";
 
 const RESEND_COOLDOWN = 60;
 const EXPIRY_SECONDS = 600;
+const ISSUED_KEY = "siloshop_otp_issued_at";
+
+// The provider keeps only the most recent code per email: remember when the
+// newest one was issued so the countdown survives a page refresh and always
+// describes the code the user actually has.
+const readIssuedAt = (email: string): number | null => {
+  try {
+    const raw = sessionStorage.getItem(ISSUED_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as { email?: string; at?: number };
+    if (!parsed?.at || (parsed.email || "") !== email) return null;
+    return parsed.at;
+  } catch {
+    return null;
+  }
+};
+
+const writeIssuedAt = (email: string, at: number) => {
+  try {
+    sessionStorage.setItem(ISSUED_KEY, JSON.stringify({ email, at }));
+  } catch {
+    /* storage unavailable */
+  }
+};
+
+const remainingFrom = (at: number | null) => {
+  if (!at) return EXPIRY_SECONDS;
+  return Math.max(0, EXPIRY_SECONDS - Math.floor((Date.now() - at) / 1000));
+};
 
 const VerifyEmail = () => {
   const [params] = useSearchParams();

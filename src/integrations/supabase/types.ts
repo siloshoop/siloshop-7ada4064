@@ -2585,6 +2585,7 @@ export type Database = {
           id: string
           is_banned: boolean
           phone: string | null
+          phone_normalized: string | null
           role: Database["public"]["Enums"]["user_role"]
           status_changed_at: string | null
           status_changed_by: string | null
@@ -2601,6 +2602,7 @@ export type Database = {
           id: string
           is_banned?: boolean
           phone?: string | null
+          phone_normalized?: string | null
           role?: Database["public"]["Enums"]["user_role"]
           status_changed_at?: string | null
           status_changed_by?: string | null
@@ -2617,6 +2619,7 @@ export type Database = {
           id?: string
           is_banned?: boolean
           phone?: string | null
+          phone_normalized?: string | null
           role?: Database["public"]["Enums"]["user_role"]
           status_changed_at?: string | null
           status_changed_by?: string | null
@@ -4635,6 +4638,7 @@ export type Database = {
         Args: { _order_id: string; _uid: string }
         Returns: boolean
       }
+      is_phone_available: { Args: { p_phone: string }; Returns: boolean }
       is_valid_order_status: { Args: { _status: string }; Returns: boolean }
       latest_public_reviews: {
         Args: { _limit?: number }

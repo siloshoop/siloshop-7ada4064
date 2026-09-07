@@ -19,6 +19,7 @@ interface SignupEmailProps {
   siteUrl: string
   recipient: string
   confirmationUrl: string
+  token?: string
 }
 
 export const SignupEmail = ({
@@ -26,32 +27,29 @@ export const SignupEmail = ({
   siteUrl,
   recipient,
   confirmationUrl,
+  token,
 }: SignupEmailProps) => (
-  <Html lang="en" dir="ltr">
+  <Html lang="ar" dir="rtl">
     <Head />
-    <Preview>Confirm your email for {siteName}</Preview>
+    <Preview>{`${siteName} — رمز تأكيد بريدك الإلكتروني`}</Preview>
     <Body style={main}>
       <Container style={container}>
-        <Heading style={h1}>Confirm your email</Heading>
+        <Text style={brand}>{siteName}</Text>
+        <Heading style={h1}>تأكيد بريدك الإلكتروني</Heading>
         <Text style={text}>
-          Thanks for signing up for{' '}
+          شكراً لتسجيلك في{' '}
           <Link href={siteUrl} style={link}>
             <strong>{siteName}</strong>
           </Link>
-          !
+          . لتفعيل حسابك ({recipient}) أدخل الرمز التالي في الموقع:
         </Text>
-        <Text style={text}>
-          Please confirm your email address (
-          <Link href={`mailto:${recipient}`} style={link}>
-            {recipient}
-          </Link>
-          ) by clicking the button below:
-        </Text>
+        {token ? <Text style={code}>{token}</Text> : null}
+        <Text style={text}>أو اضغط الزر التالي لتأكيد بريدك مباشرة:</Text>
         <Button style={button} href={confirmationUrl}>
-          Verify Email
+          تأكيد البريد الإلكتروني
         </Button>
         <Text style={footer}>
-          If you didn't create an account, you can safely ignore this email.
+          إذا لم تقم بإنشاء حساب في {siteName} يمكنك تجاهل هذه الرسالة.
         </Text>
       </Container>
     </Body>
@@ -62,6 +60,12 @@ export default SignupEmail
 
 const main = { backgroundColor: '#ffffff', fontFamily: 'Arial, sans-serif' }
 const container = { padding: '20px 25px' }
+const brand = {
+  fontSize: '18px',
+  fontWeight: 'bold' as const,
+  color: '#7c3aed',
+  margin: '0 0 16px',
+}
 const h1 = {
   fontSize: '22px',
   fontWeight: 'bold' as const,
@@ -74,9 +78,16 @@ const text = {
   lineHeight: '1.5',
   margin: '0 0 25px',
 }
+const code = {
+  fontSize: '30px',
+  fontWeight: 'bold' as const,
+  letterSpacing: '8px',
+  color: '#111111',
+  margin: '0 0 25px',
+}
 const link = { color: 'inherit', textDecoration: 'underline' }
 const button = {
-  backgroundColor: '#000000',
+  backgroundColor: '#7c3aed',
   color: '#ffffff',
   fontSize: '14px',
   borderRadius: '8px',

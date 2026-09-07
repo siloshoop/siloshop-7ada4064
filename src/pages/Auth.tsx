@@ -286,6 +286,21 @@ const Auth = () => {
     setIsLoading(true);
 
     try {
+      // Server-side check: a phone number may only belong to one account
+      const { data: phoneAvailable, error: phoneCheckError } = await supabase.rpc("is_phone_available", {
+        p_phone: fullPhone,
+      });
+      if (!phoneCheckError && phoneAvailable === false) {
+        setSignUpErrors((prev) => ({ ...prev, phone: "رقم الهاتف مستخدم مسبقًا" }));
+        toast({
+          title: "رقم الهاتف مستخدم مسبقًا",
+          description: "هذا الرقم مرتبط بحساب آخر، استخدم رقماً مختلفاً",
+          variant: "destructive",
+        });
+        setIsLoading(false);
+        return;
+      }
+
       const { user: newUser, error } = await signUp(signUpEmail, signUpPassword, signUpFullName, fullPhone);
 
       if (error) throw error;
@@ -312,6 +327,16 @@ const Auth = () => {
       navigate(`/verify-email?email=${encodeURIComponent(signUpEmail)}&sent=1`);
     } catch (error) {
       const rawMsg = (error as Error)?.message || "";
+      if (/PHONE_ALREADY_REGISTERED|profiles_phone_normalized_key/i.test(rawMsg)) {
+        setSignUpErrors((prev) => ({ ...prev, phone: "رقم الهاتف مستخدم مسبقًا" }));
+        toast({
+          title: "رقم الهاتف مستخدم مسبقًا",
+          description: "هذا الرقم مرتبط بحساب آخر، استخدم رقماً مختلفاً",
+          variant: "destructive",
+        });
+        setIsLoading(false);
+        return;
+      }
       if (/already registered|already been registered|user already exists/i.test(rawMsg)) {
         setSignUpErrors((prev) => ({ ...prev, email: "هذا البريد الإلكتروني مسجّل مسبقاً" }));
       }

@@ -110,6 +110,16 @@ const Auth = () => {
     return () => clearInterval(t);
   }, [lockSeconds]);
 
+  // Sign-up cooldown after a provider rate limit (counts down visibly)
+  const [signUpCooldown, setSignUpCooldown] = useState(0);
+  useEffect(() => {
+    if (signUpCooldown <= 0) return;
+    const t = setInterval(() => setSignUpCooldown((s) => (s > 1 ? s - 1 : 0)), 1000);
+    return () => clearInterval(t);
+  }, [signUpCooldown]);
+
+
+
   // Sign Up State
   const [signUpEmail, setSignUpEmail] = useState("");
   const [signUpPassword, setSignUpPassword] = useState("");

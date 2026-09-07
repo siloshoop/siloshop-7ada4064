@@ -17,12 +17,12 @@ const corsHeaders = {
 }
 
 const EMAIL_SUBJECTS: Record<string, string> = {
-  signup: 'Confirm your email',
-  invite: "You've been invited",
-  magiclink: 'Your login link',
-  recovery: 'Reset your password',
-  email_change: 'Confirm your new email',
-  reauthentication: 'Your verification code',
+  signup: 'SiloShop — تأكيد بريدك الإلكتروني',
+  invite: 'SiloShop — دعوة للانضمام',
+  magiclink: 'SiloShop — رابط الدخول',
+  recovery: 'SiloShop — إعادة تعيين كلمة المرور',
+  email_change: 'SiloShop — تأكيد البريد الجديد',
+  reauthentication: 'SiloShop — رمز التحقق',
 }
 
 // Template mapping
@@ -36,7 +36,7 @@ const EMAIL_TEMPLATES: Record<string, React.ComponentType<any>> = {
 }
 
 // Configuration
-const SITE_NAME = "siloshop"
+const SITE_NAME = "SiloShop"
 const SENDER_DOMAIN = "notify.siloshop.net"
 const ROOT_DOMAIN = "siloshop.net"
 const FROM_DOMAIN = "notify.siloshop.net" // Domain shown in From address (may be root or sender subdomain)

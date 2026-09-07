@@ -78,17 +78,28 @@ const VerifyEmail = () => {
       if (!silent) toast({ title: "تم إرسال رمز جديد", description: "تحقق من بريدك الإلكتروني" });
     } catch (err) {
       const msg = (err as Error)?.message || "";
-      setSendState("error");
-      setSendMessage(
-        /rate limit|too many/i.test(msg)
-          ? "عدد المحاولات كبير، انتظر دقيقة ثم أعد الإرسال"
-          : "تعذّر إرسال رمز التحقق، حاول مرة أخرى"
-      );
-      if (/already/i.test(msg)) {
+      if (/already/i.test(msg) && !/rate limit|only request this/i.test(msg)) {
+        setSendState("error");
+        setSendMessage("هذا الحساب مفعّل مسبقاً، يمكنك تسجيل الدخول مباشرة");
         toast({ title: "الحساب مفعّل مسبقاً", description: "يمكنك تسجيل الدخول" });
         navigate("/auth");
         return;
       }
+      // A provider rate limit means a code was just sent — that is not a failure.
+      if (/rate limit|too many|only request this/i.test(msg)) {
+        const wait = Number(msg.match(/after (\d+) second/)?.[1] ?? RESEND_COOLDOWN);
+        setResendCooldown(wait);
+        setSendState("sent");
+        setSendMessage(
+          `تم إرسال رمز التحقق إلى ${email} مسبقاً. تحقق من صندوق الوارد ومجلد الرسائل غير المرغوب فيها، ويمكنك إعادة الإرسال بعد ${wait} ثانية.`,
+        );
+        if (!silent) {
+          toast({ title: "الرمز مُرسل بالفعل", description: "تحقق من بريدك الإلكتروني" });
+        }
+        return;
+      }
+      setSendState("error");
+      setSendMessage("تعذّر إرسال رمز التحقق، حاول مرة أخرى");
       if (!silent) toast({ title: "تعذّر إرسال الرمز", description: msg, variant: "destructive" });
     }
   };

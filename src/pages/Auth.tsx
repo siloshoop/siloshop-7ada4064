@@ -628,15 +628,19 @@ const Auth = () => {
                   )}
                 </div>
 
-                <Button type="submit" className="w-full" size="lg" disabled={isLoading}>
+                <Button type="submit" className="w-full" size="lg" disabled={isLoading || signUpCooldown > 0}>
                   {isLoading ? (
                     <>
                       <Loader2 className="ml-2 h-4 w-4 animate-spin" />
                       جاري إنشاء الحساب...
                     </>
+                  ) : signUpCooldown > 0 ? (
+                    `يمكنك المحاولة مجدداً بعد ${signUpCooldown} ثانية`
                   ) : (
                     "إنشاء حساب"
                   )}
+                </Button>
+
                 </Button>
                 <p className="text-xs text-muted-foreground text-center">
                   جميع الحسابات الجديدة تُنشأ كحساب مشتري. يمكنك فتح متجر لاحقاً من إعدادات حسابك.

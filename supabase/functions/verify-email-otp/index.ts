@@ -12,11 +12,31 @@ const json = (body: unknown, status = 200) =>
     headers: { ...corsHeaders, 'Content-Type': 'application/json' },
   })
 
-async function sha256Hex(value: string): Promise<string> {
-  const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(value))
-  return Array.from(new Uint8Array(digest))
+// Codes are stored as a keyed HMAC (never plain text, never a bare hash):
+// a leaked database row cannot be brute-forced back to the 6-digit code
+// without the server-side secret.
+async function hashCode(value: string): Promise<string> {
+  const secret = Deno.env.get('OTP_HASH_SECRET') || ''
+  const key = await crypto.subtle.importKey(
+    'raw',
+    new TextEncoder().encode(secret),
+    { name: 'HMAC', hash: 'SHA-256' },
+    false,
+    ['sign']
+  )
+  const signature = await crypto.subtle.sign('HMAC', key, new TextEncoder().encode(value))
+  return Array.from(new Uint8Array(signature))
     .map((b) => b.toString(16).padStart(2, '0'))
     .join('')
+}
+
+// Length-independent comparison so response timing never leaks how much of the
+// code matched.
+function timingSafeEqual(a: string, b: string): boolean {
+  if (a.length !== b.length) return false
+  let diff = 0
+  for (let i = 0; i < a.length; i++) diff |= a.charCodeAt(i) ^ b.charCodeAt(i)
+  return diff === 0
 }
 
 Deno.serve(async (req) => {
@@ -61,8 +81,8 @@ Deno.serve(async (req) => {
   if (new Date(record.expires_at).getTime() < Date.now()) return json({ error: 'code_expired' }, 400)
   if (record.attempts >= 10) return json({ error: 'too_many_attempts' }, 429)
 
-  const expected = await sha256Hex(`${email}:${code}`)
-  if (expected !== record.code_hash) {
+  const expected = await hashCode(`${email}:${code}`)
+  if (!timingSafeEqual(expected, record.code_hash || '')) {
     await supabase
       .from('email_verification_codes')
       .update({ attempts: record.attempts + 1 })

@@ -5,3 +5,5 @@ project_id = "cflrdbkvpzzilazdufmh"
     verify_jwt = false
   [functions.process-email-queue]
     verify_jwt = true
+  [functions.verify-email-otp]
+    verify_jwt = false

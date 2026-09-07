@@ -199,8 +199,15 @@ const VerifyEmail = () => {
       navigate("/");
     } catch (err) {
       const msg = (err as Error)?.message || "";
-      let description = "الرمز غير صحيح أو منتهي الصلاحية";
-      if (/expired/i.test(msg)) description = "انتهت صلاحية الرمز، أعد الإرسال";
+      let description = "الرمز غير صحيح. تأكد من إدخال الرمز الموجود في آخر رسالة وصلتك";
+      if (/expired|invalid/i.test(msg)) {
+        description = expiresIn > 0
+          ? "الرمز غير صحيح أو تم استبداله. الرمز الصالح هو الموجود في أحدث رسالة وصلتك فقط"
+          : "انتهت صلاحية الرمز، اضغط إعادة إرسال الرمز للحصول على رمز جديد";
+      }
+      setCode("");
+      setSendState(expiresIn > 0 ? "sent" : "error");
+      setSendMessage(description);
       toast({ title: "فشل التحقق", description, variant: "destructive" });
     } finally {
       setLoading(false);

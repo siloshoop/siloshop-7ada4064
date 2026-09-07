@@ -223,13 +223,48 @@ async function handleWebhook(req: Request): Promise<Response> {
     )
   }
 
+  const supabase = createClient(
+    Deno.env.get('SUPABASE_URL')!,
+    Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
+  )
+
+  // The auth provider issues an 8-digit token; the app's verification screen uses
+  // a 6-digit code. Issue our own 6-digit code for sign-up confirmation, store its
+  // hash, and invalidate any previous code for the same address.
+  let emailToken: string | undefined = payload.data.token
+  if (emailType === 'signup') {
+    const digits = new Uint32Array(1)
+    crypto.getRandomValues(digits)
+    emailToken = String(digits[0] % 1000000).padStart(6, '0')
+    const codeHash = await sha256Hex(`${payload.data.email.trim().toLowerCase()}:${emailToken}`)
+    const { error: codeError } = await supabase
+      .from('email_verification_codes')
+      .upsert(
+        {
+          email: payload.data.email.trim().toLowerCase(),
+          code_hash: codeHash,
+          expires_at: new Date(Date.now() + 10 * 60 * 1000).toISOString(),
+          used_at: null,
+          attempts: 0,
+        },
+        { onConflict: 'email' }
+      )
+    if (codeError) {
+      console.error('Failed to store verification code', { error: codeError, run_id })
+      return new Response(JSON.stringify({ error: 'Failed to issue verification code' }), {
+        status: 500,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      })
+    }
+  }
+
   // Build template props from payload.data (HookData structure)
   const templateProps = {
     siteName: SITE_NAME,
     siteUrl: `https://${ROOT_DOMAIN}`,
     recipient: payload.data.email,
     confirmationUrl: payload.data.url,
-    token: payload.data.token,
+    token: emailToken,
     email: payload.data.email,
     oldEmail: payload.data.old_email,
     newEmail: payload.data.new_email,
@@ -241,11 +276,6 @@ async function handleWebhook(req: Request): Promise<Response> {
     plainText: true,
   })
 
-  // Enqueue email for async processing by the dispatcher (process-email-queue).
-  const supabase = createClient(
-    Deno.env.get('SUPABASE_URL')!,
-    Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
-  )
 
   const messageId = crypto.randomUUID()
 

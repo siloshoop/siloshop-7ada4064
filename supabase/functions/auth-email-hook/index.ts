@@ -39,7 +39,8 @@ const EMAIL_TEMPLATES: Record<string, React.ComponentType<any>> = {
 // a leaked database row cannot be brute-forced back to the 6-digit code
 // without the server-side secret.
 async function hashCode(value: string): Promise<string> {
-  const secret = Deno.env.get('OTP_HASH_SECRET') || ''
+  const secret = Deno.env.get('OTP_HASH_SECRET')
+  if (!secret) throw new Error('OTP_HASH_SECRET is not configured')
   const key = await crypto.subtle.importKey(
     'raw',
     new TextEncoder().encode(secret),

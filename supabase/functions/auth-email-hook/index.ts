@@ -35,6 +35,13 @@ const EMAIL_TEMPLATES: Record<string, React.ComponentType<any>> = {
   reauthentication: ReauthenticationEmail,
 }
 
+async function sha256Hex(value: string): Promise<string> {
+  const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(value))
+  return Array.from(new Uint8Array(digest))
+    .map((b) => b.toString(16).padStart(2, '0'))
+    .join('')
+}
+
 // Configuration
 const SITE_NAME = "SiloShop"
 const SENDER_DOMAIN = "notify.siloshop.net"
@@ -207,7 +214,12 @@ async function handleWebhook(req: Request): Promise<Response> {
   // The email action type is in payload.data.action_type (e.g., "signup", "recovery")
   // payload.type is the hook event type ("auth")
   const emailType = payload.data.action_type
-  console.log('Received auth event', { emailType, email: payload.data.email, run_id })
+  console.log('Received auth event', {
+    emailType,
+    email: payload.data.email,
+    run_id,
+    token_length: (payload.data.token || '').length,
+  })
 
   const EmailTemplate = EMAIL_TEMPLATES[emailType]
   if (!EmailTemplate) {
@@ -218,13 +230,46 @@ async function handleWebhook(req: Request): Promise<Response> {
     )
   }
 
+  const supabase = createClient(
+    Deno.env.get('SUPABASE_URL')!,
+    Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
+  )
+
+  // The auth provider issues an 8-digit token; the app's verification screen uses
+  // a 6-digit code. Issue our own 6-digit code for sign-up confirmation, store its
+  // hash, and invalidate any previous code for the same address.
+  let emailToken: string | undefined = payload.data.token
+  if (emailType === 'signup') {
+    const digits = new Uint32Array(1)
+    crypto.getRandomValues(digits)
+    emailToken = String(digits[0] % 1000000).padStart(6, '0')
+    const codeHash = await sha256Hex(`${payload.data.email.trim().toLowerCase()}:${emailToken}`)
+    const normalizedEmail = payload.data.email.trim().toLowerCase()
+    // Issuing a new code invalidates any previous one for this address.
+    await supabase.from('email_verification_codes').delete().eq('email', normalizedEmail)
+    const { error: codeError } = await supabase.from('email_verification_codes').insert({
+      email: normalizedEmail,
+      code_hash: codeHash,
+      expires_at: new Date(Date.now() + 10 * 60 * 1000).toISOString(),
+      used_at: null,
+      attempts: 0,
+    })
+    if (codeError) {
+      console.error('Failed to store verification code', { error: codeError, run_id })
+      return new Response(JSON.stringify({ error: 'Failed to issue verification code' }), {
+        status: 500,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      })
+    }
+  }
+
   // Build template props from payload.data (HookData structure)
   const templateProps = {
     siteName: SITE_NAME,
     siteUrl: `https://${ROOT_DOMAIN}`,
     recipient: payload.data.email,
     confirmationUrl: payload.data.url,
-    token: payload.data.token,
+    token: emailToken,
     email: payload.data.email,
     oldEmail: payload.data.old_email,
     newEmail: payload.data.new_email,
@@ -236,11 +281,6 @@ async function handleWebhook(req: Request): Promise<Response> {
     plainText: true,
   })
 
-  // Enqueue email for async processing by the dispatcher (process-email-queue).
-  const supabase = createClient(
-    Deno.env.get('SUPABASE_URL')!,
-    Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
-  )
 
   const messageId = crypto.randomUUID()
 

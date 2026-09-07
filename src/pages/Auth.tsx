@@ -270,6 +270,9 @@ const Auth = () => {
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
+    // Prevent duplicate submissions (double click / Enter while sending)
+    if (isLoading || signUpCooldown > 0) return;
+
     setSignUpErrors({});
 
     const fullPhone = `${findCountry(phoneCountry).dial}${phoneLocal.replace(/\D/g, "").replace(/^0+/, "")}`;

@@ -83,25 +83,29 @@ Deno.serve(async (req) => {
 
   // Confirm the account, then hand back a one-time link the client can exchange
   // for a session (same as the provider's own confirmation flow).
+  const lookup = await supabase.auth.admin.generateLink({ type: 'magiclink', email })
+  const userId = lookup.data?.user?.id
+  if (lookup.error || !userId) {
+    console.error('Failed to look up account', lookup.error)
+    return json({ error: 'server_error' }, 500)
+  }
+
+  const { error: confirmError } = await supabase.auth.admin.updateUserById(userId, {
+    email_confirm: true,
+  })
+  if (confirmError) {
+    console.error('Failed to confirm email', confirmError)
+    return json({ error: 'server_error' }, 500)
+  }
+
+  // Issue the sign-in token after confirmation so it is still valid.
   const { data: linkData, error: linkError } = await supabase.auth.admin.generateLink({
     type: 'magiclink',
     email,
   })
-
   if (linkError || !linkData?.properties?.hashed_token) {
     console.error('Failed to generate session link', linkError)
     return json({ error: 'server_error' }, 500)
-  }
-
-  const userId = linkData.user?.id
-  if (userId) {
-    const { error: confirmError } = await supabase.auth.admin.updateUserById(userId, {
-      email_confirm: true,
-    })
-    if (confirmError) {
-      console.error('Failed to confirm email', confirmError)
-      return json({ error: 'server_error' }, 500)
-    }
   }
 
   return json({ success: true, token_hash: linkData.properties.hashed_token })

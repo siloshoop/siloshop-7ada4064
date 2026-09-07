@@ -43,11 +43,8 @@ export const SignupEmail = ({
           </Link>
           . لتفعيل حسابك ({recipient}) أدخل الرمز التالي في الموقع:
         </Text>
-        {token ? <Text style={code}>{token}</Text> : null}
-        <Text style={text}>أو اضغط الزر التالي لتأكيد بريدك مباشرة:</Text>
-        <Button style={button} href={confirmationUrl}>
-          تأكيد البريد الإلكتروني
-        </Button>
+        {token ? <Text style={code}>{`رمز التحقق الخاص بك هو: ${token}`}</Text> : null}
+        <Text style={text}>رمز التحقق مكون من 6 أرقام وصالح لمدة 10 دقائق.</Text>
         <Text style={footer}>
           إذا لم تقم بإنشاء حساب في {siteName} يمكنك تجاهل هذه الرسالة.
         </Text>

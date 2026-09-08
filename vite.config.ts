@@ -44,7 +44,8 @@ export default defineConfig(({ mode }) => ({
       strategies: "generateSW",
       devOptions: { enabled: false },
       workbox: {
-        globPatterns: ["**/*.{js,css,html,ico,png,svg,webmanifest,woff2}"],
+        globPatterns: ["**/*.{js,css,html,svg,webmanifest}", "pwa-*.png", "favicon.png", "apple-touch-icon.png"],
+        globIgnores: ["**/splash/**", "og-image.png", "push-notifications-sw.js"],
         maximumFileSizeToCacheInBytes: 5 * 1024 * 1024,
         cleanupOutdatedCaches: true,
         clientsClaim: true,

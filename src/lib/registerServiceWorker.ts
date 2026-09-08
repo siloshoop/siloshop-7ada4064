@@ -33,7 +33,10 @@ export const registerServiceWorker = () => {
 
   const swOff = new URLSearchParams(window.location.search).get("sw") === "off";
   const inIframe = window.self !== window.top;
-  const refused = !import.meta.env.PROD || inIframe || swOff || isPreviewHost(window.location.hostname);
+  // Inside the Capacitor shell the native layer owns caching; the web SW is not needed.
+  const nativeShell = window.location.protocol === "capacitor:" || window.location.hostname === "localhost";
+  const refused =
+    !import.meta.env.PROD || inIframe || swOff || nativeShell || isPreviewHost(window.location.hostname);
 
   if (refused) {
     void unregisterAppWorkers();

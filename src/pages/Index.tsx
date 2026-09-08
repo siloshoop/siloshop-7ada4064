@@ -25,7 +25,7 @@ const ProductRecommendations = lazy(() => import("@/components/ProductRecommenda
 const EnhancedDailyDeals = lazy(() => import("@/components/EnhancedDailyDeals"));
 const RecentlyViewed = lazy(() => import("@/components/RecentlyViewed"));
 const TopRatedProducts = lazy(() => import("@/components/home/TopRatedProducts"));
-const BrandsRail = lazy(() => import("@/components/home/BrandsRail"));
+
 const StoreAdvantages = lazy(() => import("@/components/home/StoreAdvantages"));
 const LatestReviews = lazy(() => import("@/components/home/LatestReviews"));
 
@@ -249,12 +249,6 @@ const Index = () => {
           </SectionErrorBoundary>
         </LazySection>
 
-        {/* Brands */}
-        <LazySection>
-          <SectionErrorBoundary>
-            <BrandsRail key={`brands-${refreshKey}`} />
-          </SectionErrorBoundary>
-        </LazySection>
 
         {/* Store advantages */}
         <LazySection>

@@ -5,7 +5,8 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.4";
 const BUCKETS = ["product-images", "review-images", "chat-files"];
 
 Deno.serve(async (req) => {
-  if (req.headers.get("x-cleanup-key") !== Deno.env.get("SUPABASE_DB_URL")?.slice(-16)) {
+  const expected = Deno.env.get("CLEANUP_KEY");
+  if (!expected || req.headers.get("x-cleanup-key") !== expected) {
     return new Response("forbidden", { status: 403 });
   }
   const admin = createClient(

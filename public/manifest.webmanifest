@@ -1,19 +1,13 @@
 {
-  "id": "/",
   "name": "SiloShop",
   "short_name": "SiloShop",
   "description": "تسوق أحدث صيحات الموضة والإلكترونيات بأفضل الأسعار",
-  "lang": "ar",
-  "dir": "rtl",
-  "categories": ["shopping", "lifestyle"],
   "theme_color": "#ffffff",
-  "background_color": "#2a0a4a",
+  "background_color": "#ffffff",
   "display": "standalone",
-  "display_override": ["standalone", "minimal-ui", "browser"],
   "orientation": "portrait",
   "scope": "/",
-  "start_url": "/?source=pwa",
-  "prefer_related_applications": false,
+  "start_url": "/",
   "icons": [
     {
       "src": "/pwa-192x192.png",
@@ -45,10 +39,5 @@
       "type": "image/png",
       "purpose": "maskable"
     }
-  ],
-  "shortcuts": [
-    { "name": "طلباتي", "url": "/orders" },
-    { "name": "السلة", "url": "/cart" },
-    { "name": "المفضلة", "url": "/favorites" }
   ]
 }

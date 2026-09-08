@@ -29,4 +29,4 @@ so the app ships the bundled `dist/` and talks to the same backend. Then:
 App icons/splash: run `npx @capacitor/assets generate --iconBackgroundColor '#ffffff' --splashBackgroundColor '#ffffff'`
 using `public/pwa-512x512.png` as the source (`assets/icon.png`, `assets/splash.png`).
 
-Read: https://lovable.dev/blogs/TODO
+Guide: https://docs.lovable.dev/tips-tricks/mobile-apps

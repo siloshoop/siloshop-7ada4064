@@ -4689,9 +4689,10 @@ export type Database = {
         Args: { _order_id: string; _uid: string }
         Returns: boolean
       }
-      is_phone_available:
-        | { Args: { p_phone: string }; Returns: boolean }
-        | { Args: { p_email?: string; p_phone: string }; Returns: boolean }
+      is_phone_available: {
+        Args: { p_email?: string; p_phone: string }
+        Returns: boolean
+      }
       is_valid_order_status: { Args: { _status: string }; Returns: boolean }
       latest_public_reviews: {
         Args: { _limit?: number }

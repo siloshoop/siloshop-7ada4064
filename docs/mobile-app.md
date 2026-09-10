@@ -26,24 +26,17 @@ Repeat step 5 after every `git pull`.
   `CAP_SERVER_URL="https://456c8c16-1d24-407c-a1f5-c7b374b1fe4d.lovableproject.com?forceHideBadge=true" npx cap run android`
 
 ## Google Play release (AAB)
-1. `npm run build && npx cap sync android` (no `CAP_SERVER_URL` — the app must ship bundled `dist/`).
-2. Create an upload keystore once:
-   ```
-   keytool -genkey -v -keystore siloshop-upload.keystore -alias siloshop \
-     -keyalg RSA -keysize 2048 -validity 10000
-   ```
-3. In `android/`, create `keystore.properties` (never commit it):
-   ```
-   storeFile=../siloshop-upload.keystore
-   storePassword=****
-   keyAlias=siloshop
-   keyPassword=****
-   ```
-   and reference it from `android/app/build.gradle` `signingConfigs.release`.
-4. Set `versionCode` / `versionName` in `android/app/build.gradle` for each upload.
-5. Build the bundle: `cd android && ./gradlew bundleRelease`
+Signing needs your private keystore, so the bundle must be built on your machine.
+Full copy/paste reference: [`docs/android-signing.md`](./android-signing.md).
+
+Short version:
+1. `keytool -genkey -v -keystore siloshop-upload.keystore -alias siloshop -keyalg RSA -keysize 2048 -validity 10000`
+2. Create `android/keystore.properties` (never commit) and add the `signingConfigs.release`
+   block from `docs/android-signing.md` to `android/app/build.gradle`.
+3. Set `versionCode` / `versionName` for each upload.
+4. `bash scripts/android-release.sh`
    → `android/app/build/outputs/bundle/release/app-release.aab`
-6. Upload the AAB in Google Play Console → Production, and fill in store listing,
+5. Upload the AAB in Google Play Console → Production, and fill in store listing,
    privacy policy URL (`https://www.siloshop.net/privacy`), data safety and content rating.
 
 ## iOS

@@ -1,0 +1,1 @@
+DROP FUNCTION IF EXISTS public.is_phone_available(text);

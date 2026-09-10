@@ -304,9 +304,11 @@ const Auth = () => {
     setIsLoading(true);
 
     try {
-      // Server-side check: a phone number may only belong to one account
+      // Server-side check: a phone number may only belong to one account.
+      // Passing the email lets an unverified signup attempt re-register with the same phone.
       const { data: phoneAvailable, error: phoneCheckError } = await supabase.rpc("is_phone_available", {
         p_phone: fullPhone,
+        p_email: signUpEmail,
       });
       if (!phoneCheckError && phoneAvailable === false) {
         setSignUpErrors((prev) => ({ ...prev, phone: "رقم الهاتف مستخدم مسبقًا" }));

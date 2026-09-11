@@ -1,0 +1,1699 @@
+{
+  "meta": {
+    "name": "siloshop",
+    "package": "@ws-qxm2zykovh8ikugellxc/456c8c16-1d24-407c-a1f5-c7b374b1fe4d",
+    "version": "1.0.0",
+    "framework": "react",
+    "css_framework": "tailwind",
+    "starter_template": "custom_design_system_tailwind",
+    "theme_files": [
+      "src/index.css"
+    ],
+    "source_type": "local",
+    "source_manifest": {
+      "#enrichment": "80bd502ebadc3d5930a28d4f582910a0b373c54c3e2e3c906c4f4dffa87b3bd6",
+      ".github/workflows/security-postdeploy.yml": "965d43863119470ec877ec6ef9b45ef8",
+      ".github/workflows/security.yml": "83c07984fd523ebff07eca4e137d42f2",
+      ".gitignore": "0867b940e0dd628b4d98e2b3dfef0bc0",
+      ".lovable/plan.md": "d5ceb22f85e7e57bef3687a75895048b",
+      "GUIDE.md": "ffb6b2e24fa6a20877ec47f257b2c53f",
+      "README.md": "241ab32491c77f92e8afa3db51c00960",
+      "assets/icon.png": "01d17c9b16a75e32b38c4fdf8dc722a5",
+      "assets/splash-dark.png": "7ae96ac55a4bcdd541f133c4809853c9",
+      "assets/splash.png": "657ef8b23a815230a288a80e815c7b81",
+      "capacitor.config.ts": "c57614f12dec0bf9e770b51b87eb19db",
+      "components.json": "a547944ace00dc5d5373aaca70a40bc4",
+      "docs/SRS.md": "049f7508f6200c51bf3cd77e4b924282",
+      "docs/android-signing.md": "49d9d310f07b42fa58a7afea6728b1c1",
+      "docs/mobile-app.md": "fac198bbe22b77ce1b0dd116f8f8426b",
+      "docs/phases-8-14.md": "408685e5e2db8f6b9adaae24b590c201",
+      "docs/rls-policies.md": "fb4a6e1eaeb083a1b6710dc33f219af7",
+      "eslint.config.js": "e63c991b45cb346c13edb5e3561f43b2",
+      "index.html": "2483908a314ccbef50b54addb759ac7c",
+      "package.json": "3fce2471a7c6a5599dee8ed3f81fef18",
+      "postcss.config.js": "c735540bb63936a123bc867d950c9f69",
+      "public/apple-touch-icon.png": "fc1d83c8e6818a4e1eca280c8d716ee8",
+      "public/favicon.png": "451c5311ac5ec833aff07cab3eb04755",
+      "public/manifest.webmanifest": "4978d216401d76f4a4925bb632c121f5",
+      "public/og-image.png": "33c03dd4ba8bb0aea2c8c2d784d703f6",
+      "public/placeholder.svg": "35707bd9960ba5281c72af927b79291f",
+      "public/push-notifications-sw.js": "f55d78c613381e30184b525b4498c8ce",
+      "public/pwa-1024x1024.png": "01d17c9b16a75e32b38c4fdf8dc722a5",
+      "public/pwa-192x192.png": "f8aa1213c11eb62ddb274c3936a7751f",
+      "public/pwa-512x512.png": "cf5b2207ca9b0a2d5a6db3159c785c39",
+      "public/pwa-maskable-192x192.png": "05494cd1a5a1a4b2b53104551d67493b",
+      "public/pwa-maskable-512x512.png": "0037f7b66742fb06e3ad282f7198260b",
+      "public/robots.txt": "fc93c7669af2f34628c9381c0ce65eec",
+      "public/sitemap.xml": "2ce2cbc09ea692820be7d575f8271c43",
+      "public/splash-logo.png": "25c8fe885c055517207c3a370dbc1390",
+      "public/splash/splash-1125x2436.png": "9949b0b1cefa611290b31541ed0895a0",
+      "public/splash/splash-1170x2532.png": "e5b461853e8098fec45423aa346b80e7",
+      "public/splash/splash-1179x2556.png": "fd15cecc5eb0646bde4558491513f361",
+      "public/splash/splash-1242x2208.png": "b8f2bc3925fb383d60e99b84cc11c465",
+      "public/splash/splash-1242x2688.png": "9cf1de75f81e5db2b1237cc4458e17eb",
+      "public/splash/splash-1284x2778.png": "d736c7a8d330a779b4c33b48679f7d20",
+      "public/splash/splash-1290x2796.png": "24f023e70d33e2c246877409682aa490",
+      "public/splash/splash-1536x2048.png": "75d52f254ec82845916bba00043cf249",
+      "public/splash/splash-1620x2160.png": "54668503717c53813b1486a05431c629",
+      "public/splash/splash-1668x2224.png": "f38b84c173cbabd55e40c666fd9deb9f",
+      "public/splash/splash-1668x2388.png": "9be075c2d9e59a97a3ed68bc1503e198",
+      "public/splash/splash-2048x2732.png": "5cdbc05627ce2310a64a74e419aa73e2",
+      "public/splash/splash-750x1334.png": "60babeace85a2eefd2dcd0728960a711",
+      "public/splash/splash-828x1792.png": "3d6321232aa5ef87f10ca5edf7bc450f",
+      "scripts/android-release.sh": "d7847c323b7a58d8b3fb3fe39467e464",
+      "scripts/security-diff.mjs": "2365dfe15cc68ae9b5ed8d95b6abe100",
+      "scripts/security-gate.mjs": "430b89c059fd4c7c01a2a9012f54c341",
+      "src/App.tsx": "c8b5e8e6e891a872ea3ac467639706bf",
+      "src/assets/blog-choose-product.jpg": "b98866c9c9d63425feb2a23858394277",
+      "src/assets/blog-fashion-trends.jpg": "6caf5d2c3c3e1d2fbb3b3be61f31f238",
+      "src/assets/blog-safe-shopping.jpg": "8c4763e0f651c1c982ac4f433dc6ddac",
+      "src/assets/blog-sellers-guide.jpg": "4330befd2d767a294e7ed05311da71b1",
+      "src/assets/faq-account.jpg": "404239fa7f2186e33a1b7e920a4e6890",
+      "src/assets/faq-orders.jpg": "e17e5d23817a1939c36fb74622b0d3be",
+      "src/assets/faq-products.jpg": "d73b81e7ffe84fdff366aac1b0754ea1",
+      "src/assets/faq-shipping.jpg": "e2a59aef7c81536ecd48d48ce56087bf",
+      "src/assets/showroom-demo/featured-shoes.jpg": "a0256743f0feeab278f0ec2b873447a0",
+      "src/assets/showroom-demo/featured-store.jpg": "aa30efa446ec0cdfdbf56b83b30bf9d9",
+      "src/assets/showroom-demo/logo-gold.png": "abf0b9fe57b9522595fa6d899e5cba88",
+      "src/assets/showroom-demo/logo-violet.png": "683873748273366e2cf5e58a17a481fd",
+      "src/assets/showroom-demo/luxury-fashion-product.jpg": "58b155273bb0361e62a824534ce73ea4",
+      "src/assets/showroom-demo/modern-clothing-store.jpg": "f621d86e8251bc94d0394377985c885e",
+      "src/assets/showroom-demo/premium-product.jpg": "76615af8ac2575785ffd462b6d3a6267",
+      "src/assets/siloshop-logo-full.png.asset.json": "fdace7257235041adb27deb489698b3e",
+      "src/assets/siloshop-logo.png.asset.json": "3337c69372565147f95c290c65fb1f03",
+      "src/assets/syria-flag.png.asset.json": "4f3230c70f68ca85286010135761f916",
+      "src/components/AddToWishlistButton.tsx": "4e3e83483fca2c0ec5afb0e62108c223",
+      "src/components/AnnouncementBar.tsx": "23f327a9691ffaf4807e35169e66b3c3",
+      "src/components/BestSellers.tsx": "44ee933e41a444c7d4138a44cdd4ac59",
+      "src/components/BrandLogo.tsx": "8b673fb4ed098d0a9449f2a5fdd395f4",
+      "src/components/CancelOrderDialog.tsx": "0ca639c02e253df6254e491934ae321b",
+      "src/components/CartRecommendations.tsx": "d7585f8d02df5bc5bc3ab373440d6011",
+      "src/components/CategoryCardItem.tsx": "2ee9f17ff7a480bf942ae38e2a9d777f",
+      "src/components/ChatButton.tsx": "862bf3676fc11f08c083c744ccb351b1",
+      "src/components/DeliveryRating.tsx": "0b8f99852cfbbeabdea54a89b1fe9c38",
+      "src/components/EnhancedDailyDeals.tsx": "807c947100c2c44a2c4ad7a944691f70",
+      "src/components/FavoriteButton.tsx": "52d0fbe0089038432c6896f3b335df9e",
+      "src/components/FlyToCart.tsx": "966e1ffb88142981aa430a63feb78545",
+      "src/components/Footer.tsx": "ecb25ef22f99aae75930af40e3b2185f",
+      "src/components/ImageGallery.tsx": "90c679dfc4cbd2a637cfa02d9bbb306a",
+      "src/components/LazySection.tsx": "dcb31560a820336f6fd8df36c866a529",
+      "src/components/MarketPriceBar.tsx": "aed4c3da0e9b08ce63390fdce6f0574e",
+      "src/components/MegaMenu.tsx": "6f8d7c687eeee74abb5fd7ecd5787ba0",
+      "src/components/MobileBottomNav.tsx": "6b46bd8f196ca576326a0e3938215af0",
+      "src/components/NavLink.tsx": "8f7c178b4776787e58e1011855ca28f6",
+      "src/components/Navbar.tsx": "1bbe16e030ab45ac440158f1665e3e0f",
+      "src/components/NotificationsDropdown.tsx": "7a28a9c6b54245df24312fe7c97b968a",
+      "src/components/OrderStatusTimeline.tsx": "5406f12a462fa0ce2c1bb1579b3c3cb9",
+      "src/components/PopularCategories.tsx": "4f6586d36af1072d6ba079b48785c1d8",
+      "src/components/PremiumShowroom.tsx": "7ee90f7d7a1e3c2b63361d74d4803b0f",
+      "src/components/ProductCard.tsx": "7072e4795605c38bffd92757e897e168",
+      "src/components/ProductRecommendations.tsx": "81b1f311bb1ba712db1566e9bb01b2ab",
+      "src/components/ProductReviews.tsx": "de3a778a6abbe0fd567839f195360387",
+      "src/components/PullToRefresh.tsx": "d294322199222f67abe1f45df2c3f750",
+      "src/components/PushNotificationManager.tsx": "bc564d8b6d53e91d694ddcd8fd58e3a4",
+      "src/components/RecentlyViewed.tsx": "f2e30738baee9573c46c2863ade52368",
+      "src/components/ReorderButton.tsx": "b21a722e339a0bedf96972db2e7df274",
+      "src/components/ReportDialog.tsx": "d35a4d7cb0733986dc7e2c32580cd46d",
+      "src/components/RequireRole.tsx": "b717eb9084a8e70a6ffa6e54c4c22f62",
+      "src/components/ReviewsChart.tsx": "13a0d405eb49ec2e372b19971277e775",
+      "src/components/SearchFilters.tsx": "73f89d8165c06045116ee68529028b44",
+      "src/components/SectionErrorBoundary.tsx": "0ae864677f26b61d59b154046d6797ff",
+      "src/components/SeoHead.tsx": "438188228f18062366f08fca147320dc",
+      "src/components/SimilarProducts.tsx": "724b902986054d63b1906a2ae75b8367",
+      "src/components/SyrianFlag.tsx": "1fa766612bc625ecf3d0ee4e7dfbfa9e",
+      "src/components/ThemeToggle.tsx": "91eed9092eb567777ac3317d67aa3e2a",
+      "src/components/UserStatistics.tsx": "f60b5678fd39fe9ccd79451a7fde4cfa",
+      "src/components/VendorRating.tsx": "c8bd6836c755236cb627bfe65ca43303",
+      "src/components/__tests__/CategoryCardItem.test.tsx": "47338ac0eadce1fc099670be7d217d37",
+      "src/components/admin/AdminLayout.tsx": "13e5ed7380cd1ca48e3ad519e08fb89f",
+      "src/components/admin/CategoriesBrandsManager.tsx": "d5050981f46a79f81c6421faa0ee6643",
+      "src/components/admin/DashboardKpiGrid.tsx": "209d1f9093060dabd1a1f88e603ca120",
+      "src/components/admin/FeatureFlagsManager.tsx": "287ecf3addf64c27bc02d726a2104577",
+      "src/components/admin/PlatformImageUploader.tsx": "5bb67e6016af78e0756344fa2df77f74",
+      "src/components/admin/PlatformProductForm.tsx": "8306dcdc1b834a1470b6bf739ed07e4d",
+      "src/components/admin/PlatformProductImport.tsx": "8091a95670a6170342dbb9c272e8883b",
+      "src/components/admin/PlatformShamCashSettings.tsx": "665911c458fe54264353e218affa1835",
+      "src/components/admin/ShamCashMerchantConfig.tsx": "34f80385e63e652263b422975ec7eacc",
+      "src/components/admin/ShowroomEntityPicker.tsx": "95de8c218bf75b51434f496b1b86b0fb",
+      "src/components/admin/TurkishProductsSettings.tsx": "2eea1dfa462b79cc42271dd56f9e222c",
+      "src/components/admin/adminModules.ts": "f340d0f085cdd88491f727c04ea2de65",
+      "src/components/chat/ChatAttachmentView.tsx": "93c4f5a080f078d30e0e1a862d1c179c",
+      "src/components/chat/ChatComposer.tsx": "f77443ff5d971169b92133e4f43ae1d6",
+      "src/components/chat/ChatMessageItem.tsx": "3cf82cba342b03460c6899c2492bc5a2",
+      "src/components/chat/ChatWindow.tsx": "0a5d5af9d42c02e8069ed658ce33086e",
+      "src/components/chat/ForwardMessageDialog.tsx": "7404bc2ea11fb65f7631e354467876eb",
+      "src/components/home/BrandsRail.tsx": "a499feba2346b5855ff2b1e3a8e883ec",
+      "src/components/home/FeaturedStores.tsx": "b24e42017f32bf0d7371f3f8b8afddda",
+      "src/components/home/LatestReviews.tsx": "3ed03a2d339ba1f43e23232a6555d05b",
+      "src/components/home/LocalMarketplaceBanner.tsx": "e1017ba4ceb00bce96d9a6f0ba1a128d",
+      "src/components/home/ProductRail.tsx": "d4ad99b61f0af438794b731efb293c8a",
+      "src/components/home/SectionHeader.tsx": "63798cae9953f43be1b5691ec7e1fc28",
+      "src/components/home/StoreAdvantages.tsx": "978e2bd2a96cb2af3c735d9c88ba6a8b",
+      "src/components/home/TopRatedProducts.tsx": "c4cd638c65eb5dba446d72d5e4c4be58",
+      "src/components/home/TurkeyMarketplace.tsx": "6afe08756e0f55373070c1f092f9cbab",
+      "src/components/orders/CustomerInvoice.tsx": "93ba2c947bc41d72d43d10d99927d0f8",
+      "src/components/orders/OrderHelpActions.tsx": "0f3b5702273ad47521ff91ed6891b41a",
+      "src/components/orders/OrderStatusBadge.tsx": "8fcb429887418aec0fae369ae8e5c43c",
+      "src/components/orders/OrderTimelineLog.tsx": "9752165867a4907fe6c049edf907f3bd",
+      "src/components/orders/OrderTrackingMap.tsx": "00ce7709dc0d995fa68e60391ee0bf5b",
+      "src/components/orders/ShippingInfoDialog.tsx": "15e0835b1c77f2c9299a0e20277e7aa4",
+      "src/components/product/FrequentlyBoughtTogether.tsx": "5c012dcb0f56ec37cf71cda8d87a014d",
+      "src/components/product/ProductOriginBadge.tsx": "b319d124d1257a55e7e6e5f409161b86",
+      "src/components/product/ProductQuestions.tsx": "0ec1eef2da068f6eba94101d55d64f7f",
+      "src/components/product/ProductSpecs.tsx": "e04e9c5989a2b5a5270cacb0ce5cc33e",
+      "src/components/product/ProductVariantPicker.tsx": "b585528c75d8a46bda7418d40d938d65",
+      "src/components/product/SellerInfoCard.tsx": "527f7236ba462255b47e9817ca3b8d66",
+      "src/components/product/ShippingInfo.tsx": "a3352fae7435fd567e58a3ac997d8e2a",
+      "src/components/search/SearchAutocomplete.tsx": "4f613dc3b1b7be5155c895f9c4f0aee6",
+      "src/components/seller/PrintOrderDocs.tsx": "3ab08a53395b236508d52eb4f7047954",
+      "src/components/seller/ProductAnalyticsDialog.tsx": "e7db59f5981a1944d31e5e42039b17c3",
+      "src/components/seller/ProductColorsSizesEditor.tsx": "e9e0874c28a669575edf295cb70a991f",
+      "src/components/seller/ProductVariantsManager.tsx": "82f42dac123d28deeca8c0b1fc28600f",
+      "src/components/seller/RequireApprovedSeller.tsx": "493eb73e2b36c0c786aa157ac2696db8",
+      "src/components/seller/SellerLayout.tsx": "cbbb6f53f346ce845e213f3a951660d6",
+      "src/components/seller/SellerOrderDetailSheet.tsx": "24d6b8b0c5fec75ef486a6419a1bceb6",
+      "src/components/seller/SellerOrderNotes.tsx": "bcc86fa4a7e27340ac216a536d543023",
+      "src/components/seller/SellerOrderShippingForm.tsx": "8b51a4f375df38321d3395ec097b447d",
+      "src/components/skeletons/ProductSkeletons.tsx": "6537ecc1c02b5717b5cc50287932fd5a",
+      "src/components/store/FollowStoreButton.tsx": "25e0e2c52011277a84110ba3aeac928a",
+      "src/components/ui/accordion.tsx": "f9ebb6ee913b44e5f3e06fe1d9679784",
+      "src/components/ui/alert-dialog.tsx": "2ee6c5e5e070315114319bc060d17a52",
+      "src/components/ui/avatar.tsx": "53921dca0903c74cd72fada89388d9f8",
+      "src/components/ui/badge.tsx": "8db4e6d330f88f4041f81e7cde43782b",
+      "src/components/ui/button.tsx": "c1752f4c58c8b616232e883239bc09b1",
+      "src/components/ui/card.tsx": "202402023747c80d975f48b906e6eb1b",
+      "src/components/ui/checkbox.tsx": "cb12d2f3410761f7a678add95c90ac5d",
+      "src/components/ui/dialog.tsx": "fc3a9626ba52435552c93ac3a74374ec",
+      "src/components/ui/dropdown-menu.tsx": "f308eb98a2e21bf8bd1e30dbcb741dc0",
+      "src/components/ui/input.tsx": "16cfc72bdedcaa8e4bac4704b863c645",
+      "src/components/ui/label.tsx": "cd2b2255bbe519cb0865dfeaa6615797",
+      "src/components/ui/navigation-menu.tsx": "1fd8c98873fac934d3e073647c79c783",
+      "src/components/ui/progress.tsx": "9a8b05beca19e008a562a10e489f5968",
+      "src/components/ui/radio-group.tsx": "3773798b5b2f334a5db0dc9c8d06f1b8",
+      "src/components/ui/scroll-area.tsx": "cfbc224001af0e6daba676de225a2a47",
+      "src/components/ui/select.tsx": "25de64d0126624cbd8efa50cfb64bd21",
+      "src/components/ui/separator.tsx": "ed1101f185e9dc801712593e3330a75d",
+      "src/components/ui/sheet.tsx": "3660be09e2e40467a22fd46b354c1b50",
+      "src/components/ui/skeleton.tsx": "c55f76f4faa1d6e888dbc51d41eaa586",
+      "src/components/ui/slider.tsx": "e3bf7b6116ddbdbe8c7b3597d07daee0",
+      "src/components/ui/sonner.tsx": "88644703cc00886c56e0e3b7df0e21d8",
+      "src/components/ui/switch.tsx": "0c98bc22600cc6aaaac294f84f58c990",
+      "src/components/ui/table.tsx": "d0ff87c4734c23839337811378ad07df",
+      "src/components/ui/tabs.tsx": "26b15e1ffce0f831be4da95b8f8a43df",
+      "src/components/ui/textarea.tsx": "497a6ff07a577eb952f51d775c99c2da",
+      "src/components/ui/toast.tsx": "7c08b5cb6026058514672a4ebc53847e",
+      "src/components/ui/toaster.tsx": "1903846ab268620de6356ef667e3fa21",
+      "src/components/ui/tooltip.tsx": "d7e923341b9e91d77db45ba5f2fa0cf9",
+      "src/data/blogPosts.ts": "ddd41ed5b01d790b009da483cc81ce49",
+      "src/hooks/use-toast.ts": "e706bc004c87e17db559a113637eddea",
+      "src/hooks/useActivityLog.ts": "3ef00bcc4fd94400649181cd169065fb",
+      "src/hooks/useAdminCheck.ts": "49f875f97bf92df241e98d2aad4cb11f",
+      "src/hooks/useAdminDashboard.ts": "47b2aa21d83e4bb4a35213f17b75f3d2",
+      "src/hooks/useAuth.tsx": "c564c14f5857c833022ccec5597c7c60",
+      "src/hooks/useCategoryCardPress.ts": "a864668c9a46570b4e754118ad7b5778",
+      "src/hooks/useChatConversations.ts": "b2745ed0667e9c130e57c9499d1cbba5",
+      "src/hooks/useChatThread.ts": "c48edbf652def92f47fbb047f55f10cd",
+      "src/hooks/useCompareProducts.ts": "12f597d2df28bf5c122d2c8c0c5928da",
+      "src/hooks/useFeatureFlags.ts": "bb9e726f9ebaa24443d9b0d0d7cb159e",
+      "src/hooks/usePickupCenters.ts": "8e86b8d186e9b2c18f58412d21c54f4b",
+      "src/hooks/usePullToRefresh.ts": "dc0379a445062d24a4550d499683012b",
+      "src/hooks/useRateLimit.ts": "cdda56dc9d2d158cd2c580e23de3dd15",
+      "src/hooks/useRecentlyViewed.ts": "2d83a352226c838189eb561307146e00",
+      "src/hooks/useScrollAnimation.ts": "1062da1b8b34ed943c16494236a5e59f",
+      "src/hooks/useSearchSuggestions.ts": "99a36f82cef14770ddf1f962dabe92b2",
+      "src/hooks/useSellerDashboard.ts": "8cd612d3a16d7bec1308721abaa71ac6",
+      "src/hooks/useSellerStatus.ts": "f22185be824678cc9463363b8dd4dfaa",
+      "src/hooks/useShowroom.ts": "06c6c7e4b220bfaf92ec8517746d0e48",
+      "src/hooks/useVendorNames.ts": "700b9868334a86985f7ec3fc1ce77637",
+      "src/index.css": "1d53612dc1b28f9fea66584ca1a54f69",
+      "src/integrations/supabase/client.ts": "ea731aa7f857b1b89542717c662d05c0",
+      "src/integrations/supabase/previewAuthStorage.ts": "bc45a76c9242c4b85d6d4345625c46e9",
+      "src/integrations/supabase/types.ts": "09393e9fb0642216bb069334e7e795b8",
+      "src/lib/__tests__/perfMonitor.test.ts": "419d7e8a7b42212b22ac7f1f80150ae1",
+      "src/lib/__tests__/productValidation.test.ts": "f114c385b9fce85eaf3cefed212b6212",
+      "src/lib/__tests__/variantGrid.test.ts": "fd108fb3147cd1258a3f9f8000040e81",
+      "src/lib/auditLog.ts": "ebcf97142069325df14bd1f2d666c0a1",
+      "src/lib/auth.ts": "d00def3ab72ca8b86977d6d0f7d8205c",
+      "src/lib/authGuard.ts": "209a10ae7f63e038e427fef561a2f498",
+      "src/lib/chatFiles.ts": "0da1d8a231aa6dfa705eda5fa6fdffa6",
+      "src/lib/countryCodes.ts": "9f9f31f637349d09ed8159f447ac1e00",
+      "src/lib/favoritesSync.ts": "e392fbb2fc7c05db4b8ec8b80843e632",
+      "src/lib/lazyWithRetry.ts": "03668f4c74ff48579522aef2e695979b",
+      "src/lib/native.ts": "301511974fc1b6db6b40e4d680950fb5",
+      "src/lib/notificationRoutes.ts": "8675af3dbcf6d0b6c014f1a0573dee2a",
+      "src/lib/orderStatus.ts": "c9e106666da5dd9168664021931b4ce7",
+      "src/lib/perfMonitor.ts": "bea9d178c64a8bf0408b453ba89f840f",
+      "src/lib/productCsv.ts": "6c08db50c8194fe9c6575b222b32999f",
+      "src/lib/productModeration.ts": "85507dac5745d93ebf42b29cb4489c11",
+      "src/lib/productValidation.ts": "ab6193feaae53e8d2dcc336e17f9d830",
+      "src/lib/productVariantsSync.ts": "33f93484cee85adbe1bdf785b0e6ffcc",
+      "src/lib/pushWorker.ts": "4a674af754aa254d0321b642ae251394",
+      "src/lib/registerServiceWorker.ts": "0318d7df6325dea2b1a2cbcaf30304d3",
+      "src/lib/search.ts": "466889505967a9e6ec134704a39ffed9",
+      "src/lib/searchHistory.ts": "41e4b83f33371048c5493af9c0943613",
+      "src/lib/sellerModules.ts": "63d991ef592194fdef84a311bc90374b",
+      "src/lib/sellerOrders.ts": "b4b961e9b6d21e933378c9f79c4829f0",
+      "src/lib/stockMovements.ts": "044e6ddbbb4e3a6d9c303e43c5fd7b17",
+      "src/lib/storeAssets.ts": "b94cb79da9b9c22645b26367f0b4c9d6",
+      "src/lib/syrianGovernorates.ts": "ddc018038d526917dbde81fc9d521e44",
+      "src/lib/uiSync.ts": "a0ada086e874280ae4e5f5f2814ffefd",
+      "src/lib/utils.ts": "d9837f38cc05303254571985e3164050",
+      "src/lib/violations.ts": "b6d109d89490933be50367404e88bff9",
+      "src/main.tsx": "7ce2727f349e1d89af261608c0da0f6f",
+      "src/pages/About.tsx": "e2da8258ca2ab15b1e1057f2bec44905",
+      "src/pages/AccessDenied.tsx": "6ccb3fda01186a8f49c35b013271ebe8",
+      "src/pages/ActivityLogs.tsx": "c4244f667ede209027b285d314fb3ef1",
+      "src/pages/AddProduct.tsx": "e0edb24044880e012c350f8c478c6ca3",
+      "src/pages/Addresses.tsx": "502789cb1790b72dbc6c2d2bff8b5f96",
+      "src/pages/Auth.tsx": "c1180c1e3f518588713b98794537417b",
+      "src/pages/Blog.tsx": "41038f01d222fc8020d4b8bc2e59cbaf",
+      "src/pages/BlogPost.tsx": "538ec84961b1336e962928e960e1af22",
+      "src/pages/Careers.tsx": "1ee8e55dee57b46056c329c8a37f5c34",
+      "src/pages/Cart.tsx": "222cbfdab592e8333c788f313259bc26",
+      "src/pages/Categories.tsx": "66fbca8b4f0273119efe86b5987d7333",
+      "src/pages/Category.tsx": "cc6a500256ff1e90a3d1dcce00b06aef",
+      "src/pages/Chat.tsx": "d23c890a02cf742b94012ef02faf2496",
+      "src/pages/Checkout.tsx": "4d9783c3a0ffc316edefb487e822d85a",
+      "src/pages/Compare.tsx": "467bb3aad7fab341952e15f271273dcc",
+      "src/pages/Contact.tsx": "81830f9f445efa120895302d721bb9f2",
+      "src/pages/ContentPage.tsx": "adfd221d2094964f12cb7e3d9e3c42fe",
+      "src/pages/Dashboard.tsx": "cf33daa6c5cd74e6c027ac8893b6e14b",
+      "src/pages/EditProduct.tsx": "3aa89485c0c7a66c2985b0f5c4e34643",
+      "src/pages/FAQ.tsx": "6cb1bd055d374207431649a9da90d7ae",
+      "src/pages/Favorites.tsx": "8e22ce8ff9ff94f5ac4140e15c482603",
+      "src/pages/FollowedBrands.tsx": "32bab52977962a2faabadd314b836ac0",
+      "src/pages/FollowedStores.tsx": "ff5c10ef4df0c91ed9cb15bea77babbf",
+      "src/pages/ForgotPassword.tsx": "5f5c063bde7a5cbccfa1e2d88df26be6",
+      "src/pages/GuestTrack.tsx": "d82d8d48ce413a22d6f916d65226d12a",
+      "src/pages/Index.tsx": "a1509213620a2b19c378d450381b697e",
+      "src/pages/InstallPWA.tsx": "aab012b42fda3ee71694f7b5d14d2bab",
+      "src/pages/ManageAnnouncements.tsx": "c8adf8c1929681d089aadbc0695568eb",
+      "src/pages/ManageCoupons.tsx": "85e6bb1299bcaafc15768bb1e2f56382",
+      "src/pages/ManageDeals.tsx": "88d412e96bb4f4b03908febc1c61c625",
+      "src/pages/ManageSubcategories.tsx": "9f51628e7d6fb0e813da7c605adc962f",
+      "src/pages/ManageUsers.tsx": "4c6a6487f61170584c68f3bae010dd07",
+      "src/pages/Messages.tsx": "72fce6d8561a9ef60ab9f7fc448ae0ff",
+      "src/pages/NotFound.tsx": "233617e24ded7876ea905f003f0f2889",
+      "src/pages/NotificationSettings.tsx": "fad9c25262b82e6972514efc2b6e4370",
+      "src/pages/Notifications.tsx": "0a1de15ed5ea2eefc4fa0fcc4e62d31c",
+      "src/pages/OrderDetails.tsx": "94d6a36ea0188f35c4ecd40c7a383b69",
+      "src/pages/Orders.tsx": "bd7a4c241b3cb759b99f07d1e9aa41fc",
+      "src/pages/Partners.tsx": "730efc8399f411bef7a455ac1d705f5d",
+      "src/pages/PasswordChanged.tsx": "656fbc0a5e8fd470d61b354f7d958eff",
+      "src/pages/Pricing.tsx": "6e5feae37ba9a62f0240654febc4f682",
+      "src/pages/Privacy.tsx": "8a3243af5f402dcf8f3140fb1fa55c24",
+      "src/pages/Product.tsx": "6a0d518ae8bcf203b046c948f1b51ff4",
+      "src/pages/Profile.tsx": "a2678fc3fadc2820d65a35451246bab0",
+      "src/pages/ResetPassword.tsx": "bff79c313a865219330a17b190f52ca1",
+      "src/pages/Search.tsx": "f61e7891abce8033c49665e9f169dd15",
+      "src/pages/SellerApplication.tsx": "75e329c3613b11d58b21a19531b92703",
+      "src/pages/Settings.tsx": "5e00f488b8ac1fd1cb4c171508e436be",
+      "src/pages/SharedWishlist.tsx": "044c7357301bd0d5c69597374433e34b",
+      "src/pages/Shipping.tsx": "0f2ecc60a5029577682998f14569b099",
+      "src/pages/Statistics.tsx": "f39c0410f201c30e4b835bff8ce1112f",
+      "src/pages/Store.tsx": "ae20f0160f9768a7a8469cb9dfb96155",
+      "src/pages/Subcategory.tsx": "f3fdfb0bc44f4c8853216a8997e175f0",
+      "src/pages/Terms.tsx": "f77216bfab503d10ac6772c2bc810696",
+      "src/pages/TrackOrder.tsx": "27e9de89713a59d9b9918eb26189e057",
+      "src/pages/TurkishProducts.tsx": "5a49184a52ca829d9fd3d0211a61925d",
+      "src/pages/VendorOrders.tsx": "18b0d50cddf401403b6226978e4cb40b",
+      "src/pages/VendorRatings.tsx": "f4d5dad0c5e735c81a08c843cdfeeda4",
+      "src/pages/VerifyEmail.tsx": "33e803a95482c40310096de2833e1ce4",
+      "src/pages/Wishlist.tsx": "0d887cdb08d74e35aaa463937d817094",
+      "src/pages/admin/AdminAttributes.tsx": "591722039ae40f457e3930be0f757d00",
+      "src/pages/admin/AdminAuditLog.tsx": "040998f14a8ccbf54430528b759e6c23",
+      "src/pages/admin/AdminContent.tsx": "982bec1afa602f96a323e6b1deea5838",
+      "src/pages/admin/AdminCoupons.tsx": "3c3085f95a45f8f0f3a7b5a4db0b1c9d",
+      "src/pages/admin/AdminHome.tsx": "94e4c2f537f3aacc09544c71a04bd87a",
+      "src/pages/admin/AdminInventory.tsx": "8237b53146f92de51ff400d1f0944891",
+      "src/pages/admin/AdminNotifications.tsx": "ba6cb43e1917c5e6708a4b3ccbb16eeb",
+      "src/pages/admin/AdminOrders.tsx": "b1b78cbc27cc9b5940a90c8bcbb33ba5",
+      "src/pages/admin/AdminPayments.tsx": "57e38d5f0f3c8fe6b8cdbb116ee7f069",
+      "src/pages/admin/AdminReviews.tsx": "af5baae9921b86d102827b5bf774cab3",
+      "src/pages/admin/AdminRoles.tsx": "be5f222350b690c18dcfc61953e0cab2",
+      "src/pages/admin/AdminSettings.tsx": "484ef8f59be7fee050f4c3f1bd4ecb5a",
+      "src/pages/admin/AdminStores.tsx": "8f9709e4ace99fb1892f78ab9032f2e9",
+      "src/pages/admin/AdminUserDetail.tsx": "6d0e883c8bd591c88336ff774bbd818d",
+      "src/pages/admin/AdminUsers.tsx": "6cd21ab58fe1f2ce7a57e9993df1aa71",
+      "src/pages/admin/Analytics.tsx": "0b6de0cc1c249ea669edcf81619a0052",
+      "src/pages/admin/ChatModeration.tsx": "42f16cfbf85067cde221283848e32b62",
+      "src/pages/admin/FeatureFlagsPage.tsx": "347a9a6c33751f3daa4f969382bf05e9",
+      "src/pages/admin/ManageBanners.tsx": "404290a61c6bb65dbb2ed2d6bf273312",
+      "src/pages/admin/ManageBrands.tsx": "94b0f0256e0384cac20fb93ad603322e",
+      "src/pages/admin/ManageCategories.tsx": "0381b9cf18a6e31389bf435eea5efd6b",
+      "src/pages/admin/PickupCenters.tsx": "9b4db880a5c9fc04d8b4de44b8f1db6c",
+      "src/pages/admin/PlatformProducts.tsx": "8e4f43ec336b291072cdb8180a0c37e9",
+      "src/pages/admin/ProductModeration.tsx": "5542f67689d90bc842d8c12d762730ea",
+      "src/pages/admin/Reports.tsx": "f207e0d76e15de7af187ee8cead5e1f0",
+      "src/pages/admin/Revenue.tsx": "ef1dd748dc5331438960ef548cfc441f",
+      "src/pages/admin/SellerManagement.tsx": "a1b86804ba89516bf0e648f2a3e43b64",
+      "src/pages/admin/SellerViolations.tsx": "9324d8035605f4e57520d47996244a02",
+      "src/pages/admin/ShamCashSettings.tsx": "74c5b3a0ceae5dbb5310aca989e272b5",
+      "src/pages/admin/ShowroomAuditLog.tsx": "a56763d9096ba3dafe78172877d97659",
+      "src/pages/admin/ShowroomManagement.tsx": "e97b403341db215d34dabdac2efa8215",
+      "src/pages/seller/SellerAnalytics.tsx": "97a066c59149d2a284f49b751eb4f46a",
+      "src/pages/seller/SellerCustomers.tsx": "d414b2505e035646df7e65c10679f713",
+      "src/pages/seller/SellerHome.tsx": "6ecc849ea8a28b45acca2acd1b080779",
+      "src/pages/seller/SellerInventory.tsx": "b734e9a6775ee4f360499d3206157eca",
+      "src/pages/seller/SellerPerformance.tsx": "db1169fcad7c35df2cee9a208d40c437",
+      "src/pages/seller/SellerProducts.tsx": "a8d7eb59805851cbb2aaf2a1ea242a7c",
+      "src/pages/seller/SellerReports.tsx": "9aa50026e1c462864bcfa6ab6c033f0e",
+      "src/pages/seller/SellerReviews.tsx": "3ef7e2a359087df72886bf651aec67c6",
+      "src/pages/seller/SellerStockLog.tsx": "87ed70c54f5109cc858fea5f7c83898e",
+      "src/pages/seller/SellerStore.tsx": "3c22342db01093f31afb6f572ead07d0",
+      "src/pages/seller/SellerViolations.tsx": "6fa121195346492f7c1ef68ecab3dc9d",
+      "src/pages/seller/SellerWallet.tsx": "859dadfc1945e950a43272b6b52d97d0",
+      "src/test/favorites-order-sync.test.ts": "decbe473126635020c73da38ff053615",
+      "src/test/homepage-smoke.test.tsx": "d3b51618a406188e58ea4da9aaf4360d",
+      "src/test/search-utils.test.ts": "2f0033fbc26ae43f5b86ca359cb26647",
+      "src/test/security-rls.test.ts": "0683672e929b864d6d8e980957653524",
+      "src/test/setup.ts": "d2e4a1ded119362d7443682de1131caa",
+      "src/vite-env.d.ts": "11ecfcbd6f7344db8ce9e9ae76e70a6c",
+      "supabase/config.toml": "6d902029ac8bf32dd8f91d29553809f5",
+      "supabase/functions/_shared/email-templates/email-change.tsx": "a4990dd9fdf374491e22bc5437b602f3",
+      "supabase/functions/_shared/email-templates/invite.tsx": "e74da968f07be39b1c674c29865acc18",
+      "supabase/functions/_shared/email-templates/magic-link.tsx": "5372e0f0322e8319762c026df4d454dc",
+      "supabase/functions/_shared/email-templates/reauthentication.tsx": "f2037fb4bdad1c3cc3d39c6425559792",
+      "supabase/functions/_shared/email-templates/recovery.tsx": "b2afd300801bb6efd44de25a2269d97e",
+      "supabase/functions/_shared/email-templates/signup.tsx": "b119287c6bb73051af97066897b6eeac",
+      "supabase/functions/admin-force-logout/index.ts": "341279da2644842245d646207d041803",
+      "supabase/functions/auth-email-hook/deno.json": "49c76feeb30a2d17f086296c45c282d4",
+      "supabase/functions/auth-email-hook/index.ts": "afc8a98afefaf7e3ed7012f85ff930e2",
+      "supabase/functions/get-mapbox-token/index.ts": "f6b4f4d779f64adf92f67d2c78921c6a",
+      "supabase/functions/get-vapid-key/index.ts": "60b183df76a4eb2af4e007ac943af335",
+      "supabase/functions/notify-admin-new-user/index.ts": "881f6e542e9097dfeccea8caf55ff453",
+      "supabase/functions/notify-customer-order-status/index.ts": "18b1bd6a66e0d33c9076bf213351174d",
+      "supabase/functions/notify-vendor-new-order/index.ts": "2da85fd33436307528007d0f99ddf94c",
+      "supabase/functions/process-email-queue/deno.json": "99914b932bd37a50b983c5e7c90ae93b",
+      "supabase/functions/process-email-queue/index.ts": "b9d0857feed97d1229d43f12004cc4fe",
+      "supabase/functions/send-push-notification/index.ts": "de15646a0837ac8d8c2c4d7b55bc1b11",
+      "supabase/functions/sham-cash-initiate/index.ts": "db2893d34288c084ee2b3e775110e1b5",
+      "supabase/functions/sham-cash-webhook/index.ts": "0d602ff3bebbf2e83445061e604f0bcc",
+      "supabase/functions/verify-email-otp/index.ts": "ce9c6b93604f94bb855c82c795e2eb28",
+      "supabase/migrations/20251122102006_a3ea0011-2220-4cef-888d-e49e9f68cddd.sql": "99a6bd8a090d4ff57aa8377a9c1911c3",
+      "supabase/migrations/20251122103251_f5f04ae7-6515-4a3b-9435-008ee2291f2a.sql": "8f5524f5160cb6156eb437bd01f172da",
+      "supabase/migrations/20251122111308_c16bef89-497d-43db-903b-690a7a209791.sql": "e7fc7a2fe839ff3f4ab111d3ca3a2f3d",
+      "supabase/migrations/20251126120352_28718d22-a852-4f12-a20e-f6053bc10131.sql": "790882ed84885bfb57aa42c165d39bf0",
+      "supabase/migrations/20251126120911_b61520a1-444a-4b97-8956-1f9a99ffd174.sql": "29207d927f44c9b21b8c8defea28aec9",
+      "supabase/migrations/20251126124307_4cfa2d11-e09c-4222-8106-54bc0a526a42.sql": "824ebdbdc46febf7a2fcc048d4339082",
+      "supabase/migrations/20251126141916_1a7567fe-2152-4a94-8262-73b3578d8bef.sql": "e95cca26b66a2ee30dbef17640c1dd38",
+      "supabase/migrations/20251126142556_b138dd53-5e94-448b-bb84-25eba8ce9750.sql": "c63e164ca01a450a3b868ff97f94c5ca",
+      "supabase/migrations/20251126150225_3221afb7-960d-4854-a8f8-034316fa0d85.sql": "ff23d479853ff93fd4d87c00597e35e3",
+      "supabase/migrations/20251127120113_28a2a3d7-5523-4875-8ce9-163525854de9.sql": "a234477906dbdae09be4113b5b5a89d7",
+      "supabase/migrations/20251201100454_1ade31d6-b1d4-4ba1-902c-51d50aaff620.sql": "1a3f93f85d948a8150236f0258dcfe33",
+      "supabase/migrations/20251202074210_3929087b-2be0-4c0c-a54e-fd30883ecafc.sql": "037a1cbce67d2b9e1b76a9545c8c7bba",
+      "supabase/migrations/20251202082114_e42814ca-2b8d-4cdc-8d12-97faae08c68f.sql": "dfd19732e21a77f96f9c02317850c2a5",
+      "supabase/migrations/20251203101809_11db8703-3401-4bd3-8589-6e1527c46fe7.sql": "0691c017950bbb17a9a06a5af4736621",
+      "supabase/migrations/20251205111140_0f650904-6ec0-44b6-8180-0f1ad557f42a.sql": "19cc33b5a3b7b3bc1dffb6e43436c571",
+      "supabase/migrations/20251205111921_ddf0e219-3141-46c2-86c8-fba65542b938.sql": "6b051748d49fd173201f9f7f8857d2f8",
+      "supabase/migrations/20251205112320_517adda9-d16c-499e-8b06-37a4cc4b2787.sql": "005b01c7da6adfc43c5baa743f3b1ab4",
+      "supabase/migrations/20251205112723_8d000825-d0ce-490e-8714-72beb95e4b4a.sql": "140264fe65c4bba7894b186f2243c1c4",
+      "supabase/migrations/20251205113259_8b23b1c7-b5cd-4871-9af1-99ab8691ceee.sql": "3e3a5a1b1f65a87a7cc32bc983e7fa8b",
+      "supabase/migrations/20251205113319_7f432b48-d357-460e-8775-f3707571dcef.sql": "3aaaa5e2c4a3a5b85c7d91aef8712fd5",
+      "supabase/migrations/20251205113345_a059f684-4bf2-4025-b4c3-afb9afc210ee.sql": "42ab2ffb6f19fb2a40187c1aa9a44235",
+      "supabase/migrations/20251205114408_78e5c81e-1eb1-41a2-802f-5d2c30ffb4da.sql": "619d2e8bb90df01edff15b5cca30ccd9",
+      "supabase/migrations/20251206111328_16e37488-dad7-41e0-a092-275763e8a863.sql": "0a029117150fba7ddf872d6b64a72faf",
+      "supabase/migrations/20251207093944_79a83cce-0fdc-4587-a3c2-8c67985e58c8.sql": "6a337f7eaf40b9b1d72933f8e373cf38",
+      "supabase/migrations/20260101184108_a09afbe4-9cb5-4945-ad01-bc77835fa661.sql": "39049f9f171dfe87ea4dd2eecd80f9e4",
+      "supabase/migrations/20260103080224_07c2bc3a-bd4f-4efa-9360-fa54c5e5f233.sql": "addcf353b2ad19094f38ce6882880515",
+      "supabase/migrations/20260104115031_dc56cefe-ea41-4668-ad18-36cc4dfce079.sql": "e54d8bf9c915e4ec3a4d7d3cf54a2e82",
+      "supabase/migrations/20260106195827_529914ab-fb49-4456-b708-67a69211652b.sql": "988d7541aded9efe3df3d16e12bd9ded",
+      "supabase/migrations/20260107202006_006134e8-7e0e-4291-82c6-a6a3df0ce163.sql": "031399a4399383ca1e6df466489ee397",
+      "supabase/migrations/20260107202154_eead2bf9-1dea-4c33-bd3a-f8752a60d88c.sql": "d998f870faafc6331bf5e6003bd93ed7",
+      "supabase/migrations/20260109203238_6f039979-5274-4f02-9804-b0e784d32803.sql": "66ba26c4765f64ef4ca40760e35124cc",
+      "supabase/migrations/20260109203507_ffab02fa-f826-4536-bd7d-796e9819a5bd.sql": "5cad36f6423af3ffada5cc89cae436f8",
+      "supabase/migrations/20260109204448_fcf79026-ffc0-47c8-89ee-162292007787.sql": "a12ee178d7028ded9b7f886bd434f898",
+      "supabase/migrations/20260111141240_c417224c-8f26-425b-a916-a735682bc4ee.sql": "998571db238ba2f5ead2a9a84e588fc0",
+      "supabase/migrations/20260114194549_e0406dca-e0ec-45ae-b330-ad8068f0a407.sql": "cb90dade6ccef863bce991f57be0d1b7",
+      "supabase/migrations/20260114194840_45294aaa-6848-443b-aafc-b701da3f1f21.sql": "1351c7a0dfe0bca4d6db42cb9f3f362c",
+      "supabase/migrations/20260117081837_df2e7b8d-3c08-45ec-a346-9eb90ad39297.sql": "f5b89476845b30a4a5a471d81a059458",
+      "supabase/migrations/20260117082032_17d69e62-544c-4436-95d9-45b95da166d9.sql": "0929afa80b69972607f7a93da292e8b8",
+      "supabase/migrations/20260203180647_670c82ba-49af-484c-ba72-d196b1ae42f2.sql": "8a1d7e2c5bdf1a3bb14d10def3cfab91",
+      "supabase/migrations/20260308224519_ed5176b6-a89c-4d98-8f63-8a2b413237bd.sql": "f001389f8a8326cd123117246c07c2e8",
+      "supabase/migrations/20260308224554_d99f5f99-1252-406c-8771-f888379f4f22.sql": "070743f9085d2ca395ed29df0bada046",
+      "supabase/migrations/20260308225205_13c67af8-65e4-49f2-8782-141c2ddd6371.sql": "0156b4de2c7eee7c611f3afd7031ce06",
+      "supabase/migrations/20260311213349_a855db77-519f-4970-b700-462759fa655a.sql": "3f40f4aa87e274759d92da96dde88e0b",
+      "supabase/migrations/20260311213547_0e733c6b-1311-41f5-91d5-2ff397592395.sql": "f16168de74c9f9f334b12a3883c3e534",
+      "supabase/migrations/20260404212339_146ed6c8-d925-4d7a-9080-c39a092d2964.sql": "388e9fabbb051a3ee444c720322c9060",
+      "supabase/migrations/20260406190651_0bddf0a3-25d1-4885-a0b1-27667bef662c.sql": "017825b8bf99c2ceffb114bd5af217fa",
+      "supabase/migrations/20260504055322_b9e9cc32-c83f-4402-a170-d9a4d3733cea.sql": "b2dbf3a72383530a28317aa7d8de5713",
+      "supabase/migrations/20260504055656_9fe9610b-4f7c-45e3-ad98-34b989ae5f9c.sql": "2214dbd16385e7c0fc355a1f72134632",
+      "supabase/migrations/20260504060244_94c224ff-cbed-42da-9369-c0b4931646c0.sql": "2bae0fedc7b1f582a14d8f6bb2d3c425",
+      "supabase/migrations/20260504062427_1189571d-8094-4123-aadb-832e25c814cd.sql": "b2288f3917172b541a2cf73f137be632",
+      "supabase/migrations/20260504073419_0f65aa91-1843-4787-8ad4-0a64add53dd5.sql": "1208c712e7e8e6d62cef54727a675e62",
+      "supabase/migrations/20260505201852_4fb2c2ed-4608-45ca-81b4-b80ec8fafb7b.sql": "1284aa0a58b1135dccfcd95f894ce4bf",
+      "supabase/migrations/20260506193324_bacd5a33-6ea1-4043-b614-1a2e7f52d9d4.sql": "98f3a81adf223eedea4b6c8163e8007b",
+      "supabase/migrations/20260604180118_f6f06885-4fba-4974-9e6f-19ad1d5de7f8.sql": "13e5faaa5505889abf449b3c0c82beb9",
+      "supabase/migrations/20260604180157_14ac1f19-91de-4c38-8229-6d1fed3dfa2a.sql": "3ac67dbc76e695f669377a1e5b992dc2",
+      "supabase/migrations/20260607202901_6edb6cba-e7eb-40be-8d5a-a03b5b3a9d6c.sql": "4c29c090582e4e549bd9e6b0e52d8f14",
+      "supabase/migrations/20260607203730_1461ea99-ecd4-4107-803a-042a25e47383.sql": "76ad7621afb75017708e98bd53e624f6",
+      "supabase/migrations/20260607203928_2f90b8d4-446f-421b-92b8-7b16c4b3fdf8.sql": "db95c2cd8a0f43654db8104680b0e42a",
+      "supabase/migrations/20260701213822_7d350757-cbac-480a-9ea4-058b8460a908.sql": "30de5ca480798ea91de77c609662b100",
+      "supabase/migrations/20260706185424_8827a745-2e96-4db3-94eb-920025403894.sql": "ac35baee7df5f01d0dc672b2c96e7bf9",
+      "supabase/migrations/20260706190013_596a4da2-6293-4c0e-b583-3fb41f6bea83.sql": "a46b6fcbaac7c82e189475d3a890c110",
+      "supabase/migrations/20260706190720_b42181fb-21f4-48c0-99fa-b9c45666c131.sql": "d4f1716ac178ee38598f0f3fedd33d5e",
+      "supabase/migrations/20260721185713_0f35d694-3229-4805-b695-f5911d64f98d.sql": "51c33f22b8347a876abb485d8b8082e1",
+      "supabase/migrations/20260721190727_email_infra.sql": "5ce1ca4ea4c5b2e918f0edc06322beba",
+      "supabase/migrations/20260721191441_1f21fc8d-bb86-432b-8b59-0eff47657c53.sql": "daeb8672f3f59e4f19100b0c77e7fd0b",
+      "supabase/migrations/20260721192055_310c2e43-275c-4ed2-a2b2-29e4485e0958.sql": "1035e05d2054e5a62043277a23723664",
+      "supabase/migrations/20260721192650_99e4d416-2d13-48e7-a83a-4639bbef5879.sql": "844fba27eef30c3f69866377bdd1b8ca",
+      "supabase/migrations/20260721193250_f65d886d-3a07-41d0-b6b4-48f7255f2eb9.sql": "5c0f62ed02d02b82e4c4a63810524ba3",
+      "supabase/migrations/20260721193842_f7c25cc2-b9ae-4ca9-b960-1f433796303e.sql": "f4cb72b8cb18c3dbaa3ac74ca4b1dc18",
+      "supabase/migrations/20260721195221_8843df53-1afe-48af-a261-71720c5d34b3.sql": "e350a601d6004d270f66c03ce70c52d7",
+      "supabase/migrations/20260721195830_31253461-20eb-46e5-895f-c01670faf0e6.sql": "c2e1746158a055b2d51c8421b0fc3375",
+      "supabase/migrations/20260721200944_a77c5eba-b75b-448f-83c8-b2376e2b2e9d.sql": "627eb1a5726c163d8cbbde4f40b06dba",
+      "supabase/migrations/20260721201717_fcf40f02-e91c-46c8-b1e3-346ea922e9d9.sql": "5865c80a64a5f7734f463dafc188d027",
+      "supabase/migrations/20260721203431_bb9dc2a1-483f-45a2-ad58-6d3918fc9eba.sql": "3e4b43172f6f2742e246d9ef873bfe9e",
+      "supabase/migrations/20260721203650_b4f6cafb-2c21-4910-b5c1-cc4233d9ebb4.sql": "81f9fd63857d62359091ed102302c10b",
+      "supabase/migrations/20260723074454_7ddf75d9-8d0e-4c9d-913a-08bfe824a69a.sql": "8089f17260bf474df1608a38a184df32",
+      "supabase/migrations/20260723075321_9142cfd6-02c0-4a85-b4a4-d844e4d05642.sql": "453eb589741541f16e508df584ac482f",
+      "supabase/migrations/20260724072920_1c6d5524-3c25-4e5f-b35d-71bd2bc0c3f5.sql": "64430a042ea6048eaad46d4865957d9c",
+      "supabase/migrations/20260726061046_d0f9bf12-e53e-4a15-9f72-98792aa5293f.sql": "bf386deb8e02232463652532782e9087",
+      "supabase/migrations/20260727095841_2dafc3c5-f937-454d-a1a3-876fe7a919ed.sql": "d40b2c38197e5abbb6086caeb57b8da1",
+      "supabase/migrations/20260728052319_225673c3-8c29-42f0-ae80-5d930165c0fe.sql": "f8f4331b7698d49449c66eced06e4319",
+      "supabase/migrations/20260728053026_09e10d73-5cd9-41fa-b159-35fb99d4606c.sql": "662f5dbec65ce0c99502fb062c2b4927",
+      "supabase/migrations/20260730114350_922b8b0c-53db-4570-8c6e-8a3b70c3dfcb.sql": "6b41aaa9353d04fd57dff91c55a2a99d",
+      "supabase/migrations/20260730114706_6fb20052-8fa4-4e90-b504-c0128dc7e4f1.sql": "c99c3e2eb97eccc92540bb2ce809a184",
+      "supabase/migrations/20260730114729_2ecc4aae-0e9f-4d2b-b56c-5ee378e81f3d.sql": "4a9ce8f0c2dca3738929d1365628432b",
+      "supabase/migrations/20260731071131_b0a18cef-a5e8-46c0-a0bb-ee2d64155675.sql": "82240f54216bc3e9f4138e68638c859b",
+      "supabase/migrations/20260801083426_eba08630-ea0a-4ac7-89c0-1cc11cb68cd2.sql": "463254b00bdd896e15dd7c7f85e8a816",
+      "supabase/migrations/20260804094837_9ca791c9-9d85-4f04-88c6-5dfb26e20161.sql": "0d307e08a78b7ccc5d07737e775e5afa",
+      "supabase/migrations/20260807175351_d284e2b6-bdfb-49e2-b641-97b992f03ef9.sql": "846f396ab0649597fda9bee06f11bb92",
+      "supabase/migrations/20260807175541_92516382-b78f-4556-bdcb-1cd218b074c3.sql": "12511969c801887640da6de90d23cc39",
+      "supabase/migrations/20260808053444_f457f9f1-be28-4d48-a41a-bfdb74637ea0.sql": "dea623706a5875c2c437cdb9e7a6d1e9",
+      "supabase/migrations/20260808053516_0767c398-a3fb-42b1-bac9-e6c9aae4515a.sql": "e9d25830d75a02966b47db0e98a0511d",
+      "supabase/migrations/20260809121120_93c5b970-6866-4938-921b-5559f21cd994.sql": "32a38297e273492dfe0c1c8393c9ab0c",
+      "supabase/migrations/20260809201248_0fbdd647-1b1c-4185-9376-d648a7437875.sql": "4c093ebeb25295f842ee26c43d45e91c",
+      "supabase/migrations/20260809202538_7debf11c-f115-4aa9-8f18-c1b837fa3b75.sql": "9d37e86f7f572babf2a4bf1eedc97970",
+      "supabase/migrations/20260809203745_c73d5720-8f73-49a6-9a8a-a075f347f411.sql": "5549078a67d3e222b2deed3e65dc13ff",
+      "supabase/migrations/20260809204444_102aa4d1-f26c-4cef-8535-b8766518b8ee.sql": "717246f58b7bfea142fa2efe206a0a3f",
+      "supabase/migrations/20260809211702_45565c14-aeea-4d68-af5f-85a09940c3ea.sql": "87099ef09b271ab85b0365c19b1896e2",
+      "supabase/migrations/20260809211749_13181273-cb77-4fe8-9945-c826b8516bb5.sql": "7a9a4c6596ed8f07896ac62c526324a6",
+      "supabase/migrations/20260809212120_5c20ba9a-3930-4589-9ce4-d474bbe5ec66.sql": "184691961c181c7c509fbdb35a678b96",
+      "supabase/migrations/20260809212445_5bc3b189-4f20-4bfd-9843-638cc5b368cf.sql": "06071151a2ee2452e8a1265806d40f6a",
+      "supabase/migrations/20260809212534_eddcad3e-26ed-4b2b-9344-2337f8041fa9.sql": "ea7a5cca28f0a0db5200c104988d603c",
+      "supabase/migrations/20260809212551_70c849a6-5dcf-4725-be89-149df9361322.sql": "698bc3f0dc0de9a234dee9f504653786",
+      "supabase/migrations/20260809212841_ae28baa5-4f53-4f17-9c0e-57589015b300.sql": "a8b493d1938297b1579e0adb8908f5c8",
+      "supabase/migrations/20260809213427_706fbab4-ceb9-40d7-a645-b6f67b0f0871.sql": "60ef4b8e3e0f28638774a533d4b5f5bf",
+      "supabase/migrations/20260810055341_9c401a15-7c43-437a-b471-8f476d9ca6d7.sql": "229276c177b062b5ef54de27efb85924",
+      "supabase/migrations/20260814055339_751d1ba5-4bd2-4b53-8b0a-af3cac2f312c.sql": "dd8d6a08f8f9b54e14599510a79a4fb4",
+      "supabase/migrations/20260814055355_5dc3fe44-b9d2-4482-a6b8-46e4e190baba.sql": "0f0720b4ee22ef321a6fd48c751f455c",
+      "supabase/migrations/20260814055433_40ed21f9-a577-42eb-b6af-1ba89062fdcb.sql": "d653542e3a3fa44831ea4ff64e3a7fa5",
+      "supabase/migrations/20260816075756_0100f28c-a7b3-47a3-989f-b6dca218bd41.sql": "289183d37efff9a7ec7c8f2212547daf",
+      "supabase/migrations/20260818062924_bcba3dfa-229b-42fc-8a96-e7b8161a0b2f.sql": "1550f202cca28a43a8b8a01a7604b43f",
+      "supabase/migrations/20260818183620_7346dde9-5ee8-4417-9b01-91a5ed75153a.sql": "159709ebec35d694bfe39538048da986",
+      "supabase/migrations/20260818183819_d6445b99-6f38-47f7-9b0e-fbfeffe08045.sql": "17e5789c4fcabd9597b49282045705b1",
+      "supabase/migrations/20260818184017_8e9e6dbb-9bde-483e-ae0e-3f96a5b67176.sql": "cde6364c2d26a65e1f4c550a92717a02",
+      "supabase/migrations/20260818185005_048d35ad-3ec4-4d23-ad80-c76c600d445b.sql": "f7fc217fa6748a412092f8aa33567e56",
+      "supabase/migrations/20260818190629_1f9fe712-8201-4564-a032-2a5f3ac5714a.sql": "62c4cc1b29ce929a0bccceff6f1d5e7b",
+      "supabase/migrations/20260818190714_4c8299c5-a6b1-4a4b-94a2-afe0333fea25.sql": "b33d0deb6ab9b0de358258674b5e53f2",
+      "supabase/migrations/20260818190741_3569ccde-dff9-4252-a4f0-43dfb0a54877.sql": "39087afa8bed71ea64f1d42407fe7c90",
+      "supabase/migrations/20260818191055_4c58b1bb-e26c-4326-87b5-eb1881038f85.sql": "3d2feaa5f805f397907e8f80f41c7de0",
+      "supabase/migrations/20260818191308_2f1c32f0-b6de-4518-b2c3-a59bb2bd373b.sql": "a63662ebafba6be56a6bed6bc05c0665",
+      "supabase/migrations/20260818192453_73cfb878-6186-41a4-addd-a017c04d3595.sql": "7143c0b91a4a3938d9d13b8c3dee44bb",
+      "supabase/migrations/20260818192535_140d3123-6fe9-4ae8-9942-217f31cbdde6.sql": "13f12fd7ee1396f506f119d6c0093748",
+      "supabase/migrations/20260818193212_be3711fb-038a-4856-a64b-edb05226f27a.sql": "228bb09a17a77697b97c02090489a50e",
+      "supabase/migrations/20260818195632_80479862-f152-4790-945f-543ebc440da0.sql": "4a09cf2956064c8071e79128ffecc901",
+      "supabase/migrations/20260818195726_109a56d1-cc6f-4aeb-8ca4-fb1b487f8949.sql": "818f9d25eb507c434b90da3bce8806ef",
+      "supabase/migrations/20260818200058_9e3b8e03-e723-4df3-8aad-42b28b17a43d.sql": "2dfec0105c66010b465d719f09f9863d",
+      "supabase/migrations/20260818202201_0628a26b-cb51-40f1-8ae8-231c5fbebab7.sql": "1b3a14a1dc2614fea188255315bcdabb",
+      "supabase/migrations/20260818202439_2844a373-6b25-4842-a849-f93e8a7056f3.sql": "5fc7b90900e7031797993c0eecb1029e",
+      "supabase/migrations/20260819105938_e0efaaa9-f7c8-49a2-a3e5-dff87e534dd2.sql": "e860ca3e874d36183663e0c5a299154c",
+      "supabase/migrations/20260819115937_dd1f9db1-956b-43fa-838a-0bbf9bc92e3c.sql": "3ab423d135fe88c5ae947ea71f2e6659",
+      "supabase/migrations/20260820185917_3114b728-b1c2-4c9a-b4af-ff099fa2e0c0.sql": "8d2ed58a5cf0d2c8ec462db119a7ab99",
+      "supabase/migrations/20260820190115_a0e92702-8a2a-467f-882a-b297a6092273.sql": "d906be8334ce147dc16aab438da069d3",
+      "supabase/migrations/20260820201107_1770bf00-4aff-466e-b776-9c866426baa9.sql": "a07db8b201b719eac48b40da7b008e45",
+      "supabase/migrations/20260820201143_5ffc4f1e-dffb-4878-b626-02458b41cc52.sql": "118ef0ace79828d50404813678c7fd56",
+      "supabase/migrations/20260820201240_9538dd6c-bc39-4ccc-ab4f-4ec1eaa066fe.sql": "05a67506cd26a8819381f330f6c5087c",
+      "supabase/migrations/20260820201913_3251e84e-f44e-426d-a9b4-71b2ccd6959b.sql": "ee4db498a8a5bbc82d5e8ed8820677cd",
+      "supabase/migrations/20260820202838_af9fb912-f9bf-4b87-b94e-8cf5c048f6ee.sql": "093b59b03b7c65b0e7f2a9ec3051e0e6",
+      "supabase/migrations/20260820204139_40622159-898c-4d57-87b1-08b83b32bb38.sql": "af71b834156277cd47c7cb3fe1369e67",
+      "supabase/migrations/20260820204959_00bab46b-2fa4-4376-99d0-2a1bb82c9b05.sql": "48b1a5ca11f1db50fa255b055c7e4a9f",
+      "supabase/migrations/20260820205310_4eb8711e-a9df-4add-b9de-a314557759ab.sql": "2ebf9e9a53b88618ba6d6bb6b0a44033",
+      "supabase/migrations/20260820205608_9dd366b8-8aae-43af-8cc3-5b2981d175f5.sql": "9504b06dd033440134161fd3cebb856a",
+      "supabase/migrations/20260820210532_f53ced56-75dd-46ae-9615-62ee84726dc1.sql": "1eac91637d1c7a560e9b8adce92b5890",
+      "supabase/migrations/20260820210749_fc9aaf8f-cbd6-4cc6-951b-661d5ade88b2.sql": "b3fa77598161ff86d20b4a2d15c4c1c0",
+      "supabase/migrations/20260820211634_7e3f2cc4-78cf-493c-9e65-51a14fdb7f22.sql": "6aecfc6e628763e0cea7b6e6b44aa223",
+      "supabase/migrations/20260820212158_a5b5686f-d783-4f8b-854f-66a79918d1c0.sql": "1b8e32afbebf456d306843b79ac5017a",
+      "supabase/migrations/20260820212353_7d8ec752-2cc3-4dad-90e5-15b1e7e8c048.sql": "2f048e758407eeec88c78e997eac8899",
+      "supabase/migrations/20260820212416_2b0a2c6a-86c3-40e1-879a-33d8063468f2.sql": "f7e26e9bc415db15a433c0da5549a993",
+      "supabase/migrations/20260820212504_2162850d-3ad8-4534-b44e-41eba9c79862.sql": "e1cb9768dbaa21ef23f4791ed5bcdf56",
+      "supabase/migrations/20260820212535_97650696-fddb-4a2f-9af3-775508f7e0ee.sql": "4fe49ba3be56426ec8d73b4d31f7cea2",
+      "supabase/migrations/20260820213130_e5f73cd3-22a0-4885-a3d7-3a9c6cd442f5.sql": "9a9cfb425255ac4a44ca8ff85b49a5b8",
+      "supabase/migrations/20260820213726_08ae1d11-9870-4986-b9e5-021cba1dc83d.sql": "4757f3caa64c21c5877d33191a06a062",
+      "supabase/migrations/20260820214131_88e094c9-ef25-470e-9206-46d1dcd73270.sql": "08dbd570798c2f9dd30fff02847adb81",
+      "supabase/migrations/20260820215035_c061bb3f-ae08-4917-bf78-044999e0b3f6.sql": "0db65621d34489f7dabb333a62c80923",
+      "supabase/migrations/20260822060103_dbd51c01-4519-4c62-88dd-f18cb549f99b.sql": "42593141fade20bb81c231a9f17104ba",
+      "supabase/migrations/20260822060306_e030cec2-f532-4550-b8fd-5343eae7c709.sql": "27084868497d2be3d6cdc5d61805de6e",
+      "supabase/migrations/20260822060339_6dd1143c-ade5-49db-ba48-d70809ed0882.sql": "9f3e95a0b70620b444a700401e855738",
+      "supabase/migrations/20260826080841_b3c10591-ddb5-4ab0-852f-bf8431293edd.sql": "4a311ea2f90f9120ba8a379f10f5d70a",
+      "supabase/migrations/20260831081454_749ac3f7-2507-42e0-9b66-675c2e544ed2.sql": "2e0a0651325e4b3ca4105388b416aaf0",
+      "supabase/migrations/20260831093108_49cba1d1-ccce-4f87-8188-86f4b3ba5599.sql": "367f4e1ffda0ea4d8565b8c0d45729d4",
+      "supabase/migrations/20260831093505_1a11cd81-0e81-41cf-bf6d-dbb56892fd20.sql": "012f51413f31f12af2cb0495267ff243",
+      "supabase/migrations/20260831093620_9c7430c9-0f3f-4649-9566-5421b39c212a.sql": "ca4e66db51ab877e15317de4431d0fd5",
+      "supabase/migrations/20260831181911_eab9fc18-124c-4782-87ad-2ab079588481.sql": "940025469d95cad7057f7fcd667a7883",
+      "supabase/migrations/20260831182245_8acaaff4-4395-4e96-90c8-eb8380e52556.sql": "9d01a34da8fcddd80216b3c2e9988285",
+      "supabase/migrations/20260831184332_bfe86da5-38e7-473f-ad73-1f99bcb99de8.sql": "2114ed9db44debacc2aa6670e38f8855",
+      "supabase/migrations/20260831184745_755620df-5b3a-4592-aaea-673f2d26dd30.sql": "9bf35852d7519e7ee58d73bef63cedb3",
+      "supabase/migrations/20260831190325_34d8cfb3-0eeb-4b1c-97cb-b39d6ed5342d.sql": "6458a8fd474b1c047f87b200fe1cbbfe",
+      "supabase/migrations/20260901172846_85efb88a-be28-4234-a19d-b76c116d04b5.sql": "b48f4d0c5948d4b33b0feb5d1c59304e",
+      "supabase/migrations/20260901173143_8c66c906-6a2b-4865-873d-3253d308ec0a.sql": "e78bd2e3fb66906fbe690597e8663662",
+      "supabase/migrations/20260901181315_46d42d58-a568-4596-9f51-4f0c39a65b6b.sql": "49b83a9360fe96502129b05730d81b99",
+      "supabase/migrations/20260901185706_470c8e23-7977-46ad-9cb1-f66fda9501b0.sql": "99b2825f43d4c6f89d62a126e6f724dc",
+      "supabase/migrations/20260901185856_f6ba58ea-a38f-4e07-bff3-998d7b6bb8ec.sql": "becb53b2483c60551401dd97c0aa881e",
+      "supabase/migrations/20260902073839_358970ff-e8cd-4ea7-872c-469c45187d4d.sql": "dbb9a6e033f88c3b88c9c71a89bc201d",
+      "supabase/migrations/20260903174501_af406413-f41b-43ae-886b-35dc010c0162.sql": "b476c71c1e49c65bc08b0b4db14f8720",
+      "supabase/migrations/20260904193305_b82cf81c-4394-4dee-bcf5-d68ae18d2a9c.sql": "5c8c869dabe8a364d8445bfb0250c69f",
+      "supabase/migrations/20260904194328_1c2505df-a51f-4c36-a5d2-a26193753a6f.sql": "5212bdadaf9f8ab52a4cf09b9b97df02",
+      "supabase/migrations/20260904195118_84b93dc4-fdad-41ce-831b-4eae0538a097.sql": "42ac03f9160f049c0b9095b1a075549d",
+      "supabase/migrations/20260904201742_ee4448db-bc7a-460b-8ff9-315b8197cde7.sql": "665683c1dad6a994a56ea2f4d4dd7d5d",
+      "supabase/migrations/20260904202356_1361021a-33c9-440e-8956-d8f638642888.sql": "de2c85a9863bdcdbc30e112546e17e57",
+      "supabase/migrations/20260905180329_ea6093c7-e701-4a2e-8838-8660e3dec378.sql": "4138fb713749d521cd3e0c3ba5f3b09d",
+      "supabase/migrations/20260906092450_89ea18d1-c1c0-49f3-841e-9733c59325ff.sql": "b9cbb2ea2aee47fdb3d91214df127f35",
+      "supabase/migrations/20260907184305_09db6095-c51d-4b03-9ba4-3296cf87c533.sql": "dd3adac1d3ad568e9e77a43487334fc3",
+      "supabase/migrations/20260907202312_bcf83786-fb69-4fb1-ae1f-3b9cc0cd4ddd.sql": "da820dccc942792b9fa43fbdacbfc08a",
+      "supabase/migrations/20260907203955_10d7155f-8d51-4a9f-b6a0-9ff8cfaf3c02.sql": "e11e65baf6eca073b48558c8285f6c04",
+      "supabase/migrations/20260907204631_b7ea5dd6-2281-4d84-a05a-844b0022d4e5.sql": "f0638221e78c59195a4282b541ae5d6b",
+      "supabase/migrations/20260910070824_9ab6fe6a-edc0-4f21-9d89-8b90bbe8100b.sql": "686bdcd12cd779b38233936aa744ad70",
+      "supabase/migrations/20260910070900_00fdb818-a3e1-4198-8c30-5d95bd027033.sql": "d2de982f7df2e08c542d999a45f7fd3d",
+      "tailwind.config.ts": "13fecdb96be4906c7b62b9b323e09ca2",
+      "tsconfig.app.json": "e5fae7689bf95a05093a1fe4dc84fdff",
+      "tsconfig.json": "bb72695c901d34a52a46196ba258371d",
+      "tsconfig.node.json": "1417fb05378a1d1102f085e60b20db0e",
+      "vite.config.ts": "1369be18861c20ae7c5f38fc6e55fac1",
+      "vitest.config.ts": "9285ab80c07d5cd1a71aa20c1687352a"
+    },
+    "pipeline_version": 8
+  },
+  "tokens": {
+    "color": [
+      {
+        "name": "--background",
+        "raw": "0 0% 100%",
+        "source": "src/index.css"
+      },
+      {
+        "name": "--foreground",
+        "raw": "222 47% 11%",
+        "source": "src/index.css"
+      },
+      {
+        "name": "--card",
+        "raw": "0 0% 100%",
+        "source": "src/index.css"
+      },
+      {
+        "name": "--card-foreground",
+        "raw": "222 47% 11%",
+        "source": "src/index.css"
+      },
+      {
+        "name": "--popover",
+        "raw": "0 0% 100%",
+        "source": "src/index.css"
+      },
+      {
+        "name": "--popover-foreground",
+        "raw": "222 47% 11%",
+        "source": "src/index.css"
+      },
+      {
+        "name": "--primary",
+        "raw": "263 70% 50%",
+        "source": "src/index.css"
+      },
+      {
+        "name": "--primary-foreground",
+        "raw": "0 0% 100%",
+        "source": "src/index.css"
+      },
+      {
+        "name": "--secondary",
+        "raw": "280 40% 97%",
+        "source": "src/index.css"
+      },
+      {
+        "name": "--secondary-foreground",
+        "raw": "222 47% 11%",
+        "source": "src/index.css"
+      },
+      {
+        "name": "--muted",
+        "raw": "220 14% 96%",
+        "source": "src/index.css"
+      },
+      {
+        "name": "--muted-foreground",
+        "raw": "220 9% 46%",
+        "source": "src/index.css"
+      },
+      {
+        "name": "--accent",
+        "raw": "340 82% 52%",
+        "source": "src/index.css"
+      },
+      {
+        "name": "--accent-foreground",
+        "raw": "0 0% 100%",
+        "source": "src/index.css"
+      },
+      {
+        "name": "--destructive",
+        "raw": "0 84% 60%",
+        "source": "src/index.css"
+      },
+      {
+        "name": "--destructive-foreground",
+        "raw": "0 0% 100%",
+        "source": "src/index.css"
+      },
+      {
+        "name": "--border",
+        "raw": "220 13% 91%",
+        "source": "src/index.css"
+      },
+      {
+        "name": "--input",
+        "raw": "220 13% 91%",
+        "source": "src/index.css"
+      },
+      {
+        "name": "--ring",
+        "raw": "263 70% 50%",
+        "source": "src/index.css"
+      },
+      {
+        "name": "--success",
+        "raw": "142 76% 36%",
+        "source": "src/index.css"
+      },
+      {
+        "name": "--success-foreground",
+        "raw": "0 0% 100%",
+        "source": "src/index.css"
+      },
+      {
+        "name": "--warning",
+        "raw": "38 92% 45%",
+        "source": "src/index.css"
+      },
+      {
+        "name": "--warning-foreground",
+        "raw": "0 0% 100%",
+        "source": "src/index.css"
+      },
+      {
+        "name": "--sale",
+        "raw": "340 82% 52%",
+        "source": "src/index.css"
+      },
+      {
+        "name": "--sale-foreground",
+        "raw": "0 0% 100%",
+        "source": "src/index.css"
+      },
+      {
+        "name": "--info",
+        "raw": "217 91% 50%",
+        "source": "src/index.css"
+      },
+      {
+        "name": "--info-foreground",
+        "raw": "0 0% 100%",
+        "source": "src/index.css"
+      },
+      {
+        "name": "--gradient-primary",
+        "raw": "linear-gradient(135deg, hsl(263 70% 50%) 0%, hsl(290 70% 60%) 100%)",
+        "source": "src/index.css"
+      },
+      {
+        "name": "--sidebar-background",
+        "raw": "0 0% 98%",
+        "source": "src/index.css"
+      },
+      {
+        "name": "--sidebar-foreground",
+        "raw": "222 47% 11%",
+        "source": "src/index.css"
+      },
+      {
+        "name": "--sidebar-primary",
+        "raw": "263 70% 50%",
+        "source": "src/index.css"
+      },
+      {
+        "name": "--sidebar-primary-foreground",
+        "raw": "0 0% 100%",
+        "source": "src/index.css"
+      },
+      {
+        "name": "--sidebar-accent",
+        "raw": "280 40% 97%",
+        "source": "src/index.css"
+      },
+      {
+        "name": "--sidebar-accent-foreground",
+        "raw": "222 47% 11%",
+        "source": "src/index.css"
+      },
+      {
+        "name": "--sidebar-border",
+        "raw": "220 13% 91%",
+        "source": "src/index.css"
+      },
+      {
+        "name": "--sidebar-ring",
+        "raw": "263 70% 50%",
+        "source": "src/index.css"
+      },
+      {
+        "name": "--status-pending",
+        "raw": "45 93% 47%",
+        "source": "src/index.css"
+      },
+      {
+        "name": "--status-confirmed",
+        "raw": "217 91% 55%",
+        "source": "src/index.css"
+      },
+      {
+        "name": "--status-preparing",
+        "raw": "263 70% 50%",
+        "source": "src/index.css"
+      },
+      {
+        "name": "--status-ready",
+        "raw": "25 95% 50%",
+        "source": "src/index.css"
+      },
+      {
+        "name": "--status-shipped",
+        "raw": "189 94% 40%",
+        "source": "src/index.css"
+      },
+      {
+        "name": "--status-out",
+        "raw": "239 84% 60%",
+        "source": "src/index.css"
+      },
+      {
+        "name": "--status-delivered",
+        "raw": "142 71% 40%",
+        "source": "src/index.css"
+      },
+      {
+        "name": "--status-completed",
+        "raw": "150 75% 26%",
+        "source": "src/index.css"
+      },
+      {
+        "name": "--status-cancelled",
+        "raw": "0 84% 52%",
+        "source": "src/index.css"
+      },
+      {
+        "name": "--status-returned",
+        "raw": "215 16% 47%",
+        "source": "src/index.css"
+      }
+    ],
+    "radius": [
+      {
+        "name": "--radius",
+        "raw": "0.75rem",
+        "source": "src/index.css"
+      }
+    ],
+    "shadow": [
+      {
+        "name": "--shadow-elegant",
+        "raw": "0 4px 20px -2px hsl(263 70% 50% / 0.15)",
+        "source": "src/index.css"
+      },
+      {
+        "name": "--shadow-card",
+        "raw": "0 2px 8px -1px hsl(0 0% 0% / 0.08)",
+        "source": "src/index.css"
+      }
+    ],
+    "other": [
+      {
+        "name": "--gradient-hero",
+        "raw": "linear-gradient(135deg, hsl(263 70% 50% / 0.1) 0%, hsl(340 82% 52% / 0.1) 100%)",
+        "source": "src/index.css"
+      },
+      {
+        "name": "--transition-smooth",
+        "raw": "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+        "source": "src/index.css"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "CategoryCardItem",
+      "file": "src/components/CategoryCardItem",
+      "import_path": "",
+      "props": [
+        {
+          "name": "category",
+          "type": "any",
+          "required": true
+        },
+        {
+          "name": "colors",
+          "type": "any",
+          "required": true
+        },
+        {
+          "name": "isExpanded",
+          "type": "boolean",
+          "required": true
+        },
+        {
+          "name": "hasSubs",
+          "type": "boolean",
+          "required": true
+        },
+        {
+          "name": "index",
+          "type": "number",
+          "required": true
+        },
+        {
+          "name": "IconComponent",
+          "type": "any",
+          "required": true
+        },
+        {
+          "name": "onActivate",
+          "type": "function",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "FavoriteButton",
+      "file": "src/components/FavoriteButton",
+      "import_path": "",
+      "props": [
+        {
+          "name": "productId",
+          "type": "string",
+          "required": true
+        },
+        {
+          "name": "variant",
+          "type": "enum",
+          "values": [
+            "default",
+            "ghost",
+            "outline"
+          ],
+          "default": "outline"
+        },
+        {
+          "name": "size",
+          "type": "enum",
+          "values": [
+            "default",
+            "sm",
+            "lg",
+            "icon"
+          ],
+          "default": "lg"
+        }
+      ]
+    },
+    {
+      "name": "FlyToCartProvider",
+      "file": "src/components/FlyToCart",
+      "import_path": ""
+    },
+    {
+      "name": "ImageGallery",
+      "file": "src/components/ImageGallery",
+      "import_path": "",
+      "props": [
+        {
+          "name": "images",
+          "type": "any",
+          "required": true
+        },
+        {
+          "name": "productName",
+          "type": "string",
+          "required": true
+        },
+        {
+          "name": "videoUrl",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "name": "NotificationsDropdown",
+      "file": "src/components/NotificationsDropdown",
+      "import_path": ""
+    },
+    {
+      "name": "ProductReviews",
+      "file": "src/components/ProductReviews",
+      "import_path": "",
+      "props": [
+        {
+          "name": "productId",
+          "type": "string",
+          "required": true
+        },
+        {
+          "name": "vendorId",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "name": "SearchFilters",
+      "file": "src/components/SearchFilters",
+      "import_path": "",
+      "props": [
+        {
+          "name": "onFilterChange",
+          "type": "function",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "ThemeToggle",
+      "file": "src/components/ThemeToggle",
+      "import_path": ""
+    },
+    {
+      "name": "VendorRating",
+      "file": "src/components/VendorRating",
+      "import_path": "",
+      "props": [
+        {
+          "name": "vendorId",
+          "type": "string",
+          "required": true
+        },
+        {
+          "name": "vendorName",
+          "type": "string",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "VendorPicker",
+      "file": "src/components/admin/ShowroomEntityPicker",
+      "import_path": ""
+    },
+    {
+      "name": "ProductPicker",
+      "file": "src/components/admin/ShowroomEntityPicker",
+      "import_path": ""
+    },
+    {
+      "name": "ProductCardSkeleton",
+      "file": "src/components/skeletons/ProductSkeletons",
+      "import_path": ""
+    },
+    {
+      "name": "ProductRailSkeleton",
+      "file": "src/components/skeletons/ProductSkeletons",
+      "import_path": ""
+    },
+    {
+      "name": "ProductGridSkeleton",
+      "file": "src/components/skeletons/ProductSkeletons",
+      "import_path": ""
+    },
+    {
+      "name": "AlertDialog",
+      "file": "src/components/ui/alert-dialog",
+      "import_path": ""
+    },
+    {
+      "name": "AlertDialogPortal",
+      "file": "src/components/ui/alert-dialog",
+      "import_path": ""
+    },
+    {
+      "name": "AlertDialogOverlay",
+      "file": "src/components/ui/alert-dialog",
+      "import_path": ""
+    },
+    {
+      "name": "AlertDialogTrigger",
+      "file": "src/components/ui/alert-dialog",
+      "import_path": ""
+    },
+    {
+      "name": "AlertDialogContent",
+      "file": "src/components/ui/alert-dialog",
+      "import_path": ""
+    },
+    {
+      "name": "AlertDialogHeader",
+      "file": "src/components/ui/alert-dialog",
+      "import_path": ""
+    },
+    {
+      "name": "AlertDialogFooter",
+      "file": "src/components/ui/alert-dialog",
+      "import_path": ""
+    },
+    {
+      "name": "AlertDialogTitle",
+      "file": "src/components/ui/alert-dialog",
+      "import_path": ""
+    },
+    {
+      "name": "AlertDialogDescription",
+      "file": "src/components/ui/alert-dialog",
+      "import_path": ""
+    },
+    {
+      "name": "AlertDialogAction",
+      "file": "src/components/ui/alert-dialog",
+      "import_path": ""
+    },
+    {
+      "name": "AlertDialogCancel",
+      "file": "src/components/ui/alert-dialog",
+      "import_path": ""
+    },
+    {
+      "name": "Avatar",
+      "file": "src/components/ui/avatar",
+      "import_path": ""
+    },
+    {
+      "name": "AvatarImage",
+      "file": "src/components/ui/avatar",
+      "import_path": ""
+    },
+    {
+      "name": "AvatarFallback",
+      "file": "src/components/ui/avatar",
+      "import_path": ""
+    },
+    {
+      "name": "Badge",
+      "file": "src/components/ui/badge",
+      "import_path": "",
+      "props": [
+        {
+          "name": "variant",
+          "type": "enum",
+          "values": [
+            "default",
+            "secondary",
+            "destructive",
+            "outline"
+          ],
+          "default": "default"
+        }
+      ]
+    },
+    {
+      "name": "Button",
+      "file": "src/components/ui/button",
+      "import_path": "",
+      "props": [
+        {
+          "name": "variant",
+          "type": "enum",
+          "values": [
+            "default",
+            "destructive",
+            "outline",
+            "secondary",
+            "ghost",
+            "link"
+          ],
+          "default": "default"
+        },
+        {
+          "name": "size",
+          "type": "enum",
+          "values": [
+            "default",
+            "sm",
+            "lg",
+            "icon"
+          ],
+          "default": "default"
+        },
+        {
+          "name": "asChild",
+          "type": "boolean",
+          "default": "false"
+        }
+      ]
+    },
+    {
+      "name": "Card",
+      "file": "src/components/ui/card",
+      "import_path": ""
+    },
+    {
+      "name": "CardHeader",
+      "file": "src/components/ui/card",
+      "import_path": ""
+    },
+    {
+      "name": "CardFooter",
+      "file": "src/components/ui/card",
+      "import_path": ""
+    },
+    {
+      "name": "CardTitle",
+      "file": "src/components/ui/card",
+      "import_path": ""
+    },
+    {
+      "name": "CardDescription",
+      "file": "src/components/ui/card",
+      "import_path": ""
+    },
+    {
+      "name": "CardContent",
+      "file": "src/components/ui/card",
+      "import_path": ""
+    },
+    {
+      "name": "Checkbox",
+      "file": "src/components/ui/checkbox",
+      "import_path": ""
+    },
+    {
+      "name": "Dialog",
+      "file": "src/components/ui/dialog",
+      "import_path": ""
+    },
+    {
+      "name": "DialogPortal",
+      "file": "src/components/ui/dialog",
+      "import_path": ""
+    },
+    {
+      "name": "DialogOverlay",
+      "file": "src/components/ui/dialog",
+      "import_path": ""
+    },
+    {
+      "name": "DialogClose",
+      "file": "src/components/ui/dialog",
+      "import_path": ""
+    },
+    {
+      "name": "DialogTrigger",
+      "file": "src/components/ui/dialog",
+      "import_path": ""
+    },
+    {
+      "name": "DialogContent",
+      "file": "src/components/ui/dialog",
+      "import_path": ""
+    },
+    {
+      "name": "DialogHeader",
+      "file": "src/components/ui/dialog",
+      "import_path": ""
+    },
+    {
+      "name": "DialogFooter",
+      "file": "src/components/ui/dialog",
+      "import_path": ""
+    },
+    {
+      "name": "DialogTitle",
+      "file": "src/components/ui/dialog",
+      "import_path": ""
+    },
+    {
+      "name": "DialogDescription",
+      "file": "src/components/ui/dialog",
+      "import_path": ""
+    },
+    {
+      "name": "DropdownMenu",
+      "file": "src/components/ui/dropdown-menu",
+      "import_path": ""
+    },
+    {
+      "name": "DropdownMenuTrigger",
+      "file": "src/components/ui/dropdown-menu",
+      "import_path": ""
+    },
+    {
+      "name": "DropdownMenuContent",
+      "file": "src/components/ui/dropdown-menu",
+      "import_path": ""
+    },
+    {
+      "name": "DropdownMenuItem",
+      "file": "src/components/ui/dropdown-menu",
+      "import_path": ""
+    },
+    {
+      "name": "DropdownMenuCheckboxItem",
+      "file": "src/components/ui/dropdown-menu",
+      "import_path": ""
+    },
+    {
+      "name": "DropdownMenuRadioItem",
+      "file": "src/components/ui/dropdown-menu",
+      "import_path": ""
+    },
+    {
+      "name": "DropdownMenuLabel",
+      "file": "src/components/ui/dropdown-menu",
+      "import_path": ""
+    },
+    {
+      "name": "DropdownMenuSeparator",
+      "file": "src/components/ui/dropdown-menu",
+      "import_path": ""
+    },
+    {
+      "name": "DropdownMenuShortcut",
+      "file": "src/components/ui/dropdown-menu",
+      "import_path": ""
+    },
+    {
+      "name": "DropdownMenuGroup",
+      "file": "src/components/ui/dropdown-menu",
+      "import_path": ""
+    },
+    {
+      "name": "DropdownMenuPortal",
+      "file": "src/components/ui/dropdown-menu",
+      "import_path": ""
+    },
+    {
+      "name": "DropdownMenuSub",
+      "file": "src/components/ui/dropdown-menu",
+      "import_path": ""
+    },
+    {
+      "name": "DropdownMenuSubContent",
+      "file": "src/components/ui/dropdown-menu",
+      "import_path": ""
+    },
+    {
+      "name": "DropdownMenuSubTrigger",
+      "file": "src/components/ui/dropdown-menu",
+      "import_path": ""
+    },
+    {
+      "name": "DropdownMenuRadioGroup",
+      "file": "src/components/ui/dropdown-menu",
+      "import_path": ""
+    },
+    {
+      "name": "Input",
+      "file": "src/components/ui/input",
+      "import_path": ""
+    },
+    {
+      "name": "Label",
+      "file": "src/components/ui/label",
+      "import_path": ""
+    },
+    {
+      "name": "NavigationMenu",
+      "file": "src/components/ui/navigation-menu",
+      "import_path": ""
+    },
+    {
+      "name": "NavigationMenuList",
+      "file": "src/components/ui/navigation-menu",
+      "import_path": ""
+    },
+    {
+      "name": "NavigationMenuItem",
+      "file": "src/components/ui/navigation-menu",
+      "import_path": ""
+    },
+    {
+      "name": "NavigationMenuContent",
+      "file": "src/components/ui/navigation-menu",
+      "import_path": ""
+    },
+    {
+      "name": "NavigationMenuTrigger",
+      "file": "src/components/ui/navigation-menu",
+      "import_path": ""
+    },
+    {
+      "name": "NavigationMenuLink",
+      "file": "src/components/ui/navigation-menu",
+      "import_path": ""
+    },
+    {
+      "name": "NavigationMenuIndicator",
+      "file": "src/components/ui/navigation-menu",
+      "import_path": ""
+    },
+    {
+      "name": "NavigationMenuViewport",
+      "file": "src/components/ui/navigation-menu",
+      "import_path": ""
+    },
+    {
+      "name": "Progress",
+      "file": "src/components/ui/progress",
+      "import_path": ""
+    },
+    {
+      "name": "RadioGroup",
+      "file": "src/components/ui/radio-group",
+      "import_path": ""
+    },
+    {
+      "name": "RadioGroupItem",
+      "file": "src/components/ui/radio-group",
+      "import_path": ""
+    },
+    {
+      "name": "ScrollArea",
+      "file": "src/components/ui/scroll-area",
+      "import_path": ""
+    },
+    {
+      "name": "ScrollBar",
+      "file": "src/components/ui/scroll-area",
+      "import_path": ""
+    },
+    {
+      "name": "Select",
+      "file": "src/components/ui/select",
+      "import_path": ""
+    },
+    {
+      "name": "SelectGroup",
+      "file": "src/components/ui/select",
+      "import_path": ""
+    },
+    {
+      "name": "SelectValue",
+      "file": "src/components/ui/select",
+      "import_path": ""
+    },
+    {
+      "name": "SelectTrigger",
+      "file": "src/components/ui/select",
+      "import_path": ""
+    },
+    {
+      "name": "SelectContent",
+      "file": "src/components/ui/select",
+      "import_path": ""
+    },
+    {
+      "name": "SelectLabel",
+      "file": "src/components/ui/select",
+      "import_path": ""
+    },
+    {
+      "name": "SelectItem",
+      "file": "src/components/ui/select",
+      "import_path": ""
+    },
+    {
+      "name": "SelectSeparator",
+      "file": "src/components/ui/select",
+      "import_path": ""
+    },
+    {
+      "name": "SelectScrollUpButton",
+      "file": "src/components/ui/select",
+      "import_path": ""
+    },
+    {
+      "name": "SelectScrollDownButton",
+      "file": "src/components/ui/select",
+      "import_path": ""
+    },
+    {
+      "name": "Separator",
+      "file": "src/components/ui/separator",
+      "import_path": ""
+    },
+    {
+      "name": "Sheet",
+      "file": "src/components/ui/sheet",
+      "import_path": "",
+      "props": [
+        {
+          "name": "side",
+          "type": "enum",
+          "values": [
+            "top",
+            "bottom",
+            "left",
+            "right"
+          ],
+          "default": "right"
+        }
+      ]
+    },
+    {
+      "name": "SheetClose",
+      "file": "src/components/ui/sheet",
+      "import_path": ""
+    },
+    {
+      "name": "SheetContent",
+      "file": "src/components/ui/sheet",
+      "import_path": ""
+    },
+    {
+      "name": "SheetDescription",
+      "file": "src/components/ui/sheet",
+      "import_path": ""
+    },
+    {
+      "name": "SheetFooter",
+      "file": "src/components/ui/sheet",
+      "import_path": ""
+    },
+    {
+      "name": "SheetHeader",
+      "file": "src/components/ui/sheet",
+      "import_path": ""
+    },
+    {
+      "name": "SheetOverlay",
+      "file": "src/components/ui/sheet",
+      "import_path": ""
+    },
+    {
+      "name": "SheetPortal",
+      "file": "src/components/ui/sheet",
+      "import_path": ""
+    },
+    {
+      "name": "SheetTitle",
+      "file": "src/components/ui/sheet",
+      "import_path": ""
+    },
+    {
+      "name": "SheetTrigger",
+      "file": "src/components/ui/sheet",
+      "import_path": ""
+    },
+    {
+      "name": "Skeleton",
+      "file": "src/components/ui/skeleton",
+      "import_path": ""
+    },
+    {
+      "name": "Slider",
+      "file": "src/components/ui/slider",
+      "import_path": ""
+    },
+    {
+      "name": "Switch",
+      "file": "src/components/ui/switch",
+      "import_path": ""
+    },
+    {
+      "name": "Tabs",
+      "file": "src/components/ui/tabs",
+      "import_path": ""
+    },
+    {
+      "name": "TabsList",
+      "file": "src/components/ui/tabs",
+      "import_path": ""
+    },
+    {
+      "name": "TabsTrigger",
+      "file": "src/components/ui/tabs",
+      "import_path": ""
+    },
+    {
+      "name": "TabsContent",
+      "file": "src/components/ui/tabs",
+      "import_path": ""
+    },
+    {
+      "name": "Textarea",
+      "file": "src/components/ui/textarea",
+      "import_path": ""
+    },
+    {
+      "name": "ToastProvider",
+      "file": "src/components/ui/toast",
+      "import_path": ""
+    },
+    {
+      "name": "ToastViewport",
+      "file": "src/components/ui/toast",
+      "import_path": ""
+    },
+    {
+      "name": "Toast",
+      "file": "src/components/ui/toast",
+      "import_path": "",
+      "props": [
+        {
+          "name": "variant",
+          "type": "enum",
+          "values": [
+            "default",
+            "destructive"
+          ],
+          "default": "default"
+        }
+      ]
+    },
+    {
+      "name": "ToastTitle",
+      "file": "src/components/ui/toast",
+      "import_path": ""
+    },
+    {
+      "name": "ToastDescription",
+      "file": "src/components/ui/toast",
+      "import_path": ""
+    },
+    {
+      "name": "ToastClose",
+      "file": "src/components/ui/toast",
+      "import_path": ""
+    },
+    {
+      "name": "ToastAction",
+      "file": "src/components/ui/toast",
+      "import_path": ""
+    },
+    {
+      "name": "Constants",
+      "file": "src/integrations/supabase/types",
+      "import_path": ""
+    }
+  ],
+  "assets": [
+    {
+      "file": "src/assets/blog-choose-product.jpg",
+      "kind": "image",
+      "format": "jpg"
+    },
+    {
+      "file": "src/assets/blog-fashion-trends.jpg",
+      "kind": "image",
+      "format": "jpg"
+    },
+    {
+      "file": "src/assets/blog-safe-shopping.jpg",
+      "kind": "image",
+      "format": "jpg"
+    },
+    {
+      "file": "src/assets/blog-sellers-guide.jpg",
+      "kind": "image",
+      "format": "jpg"
+    },
+    {
+      "file": "src/assets/faq-account.jpg",
+      "kind": "image",
+      "format": "jpg"
+    },
+    {
+      "file": "src/assets/faq-orders.jpg",
+      "kind": "image",
+      "format": "jpg"
+    },
+    {
+      "file": "src/assets/faq-products.jpg",
+      "kind": "image",
+      "format": "jpg"
+    },
+    {
+      "file": "src/assets/faq-shipping.jpg",
+      "kind": "image",
+      "format": "jpg"
+    },
+    {
+      "file": "src/assets/showroom-demo/featured-shoes.jpg",
+      "kind": "image",
+      "format": "jpg"
+    },
+    {
+      "file": "src/assets/showroom-demo/featured-store.jpg",
+      "kind": "image",
+      "format": "jpg"
+    },
+    {
+      "file": "src/assets/showroom-demo/logo-gold.png",
+      "kind": "logo",
+      "format": "png"
+    },
+    {
+      "file": "src/assets/showroom-demo/logo-violet.png",
+      "kind": "logo",
+      "format": "png"
+    },
+    {
+      "file": "src/assets/showroom-demo/luxury-fashion-product.jpg",
+      "kind": "image",
+      "format": "jpg"
+    },
+    {
+      "file": "src/assets/showroom-demo/modern-clothing-store.jpg",
+      "kind": "image",
+      "format": "jpg"
+    },
+    {
+      "file": "src/assets/showroom-demo/premium-product.jpg",
+      "kind": "image",
+      "format": "jpg"
+    },
+    {
+      "file": "src/assets/siloshop-logo-full.png.asset.json",
+      "kind": "logo",
+      "format": "png",
+      "pointer": true
+    },
+    {
+      "file": "src/assets/siloshop-logo.png.asset.json",
+      "kind": "logo",
+      "format": "png",
+      "pointer": true
+    },
+    {
+      "file": "src/assets/syria-flag.png.asset.json",
+      "kind": "image",
+      "format": "png",
+      "pointer": true
+    }
+  ]
+}

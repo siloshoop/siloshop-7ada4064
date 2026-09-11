@@ -2,7 +2,7 @@
   "meta": {
     "name": "siloshop",
     "package": "@ws-qxm2zykovh8ikugellxc/456c8c16-1d24-407c-a1f5-c7b374b1fe4d",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "framework": "react",
     "css_framework": "tailwind",
     "starter_template": "custom_design_system_tailwind",
@@ -15,7 +15,9 @@
       ".github/workflows/security-postdeploy.yml": "965d43863119470ec877ec6ef9b45ef8",
       ".github/workflows/security.yml": "83c07984fd523ebff07eca4e137d42f2",
       ".gitignore": "0867b940e0dd628b4d98e2b3dfef0bc0",
+      ".lovable/meta.yaml": "954a981e8847ec1692669dbb04ae9ae9",
       ".lovable/plan.md": "d5ceb22f85e7e57bef3687a75895048b",
+      ".lovable/sources.yaml": "85650baf848ef209adbcf704cd10bef1",
       "GUIDE.md": "ffb6b2e24fa6a20877ec47f257b2c53f",
       "README.md": "241ab32491c77f92e8afa3db51c00960",
       "assets/icon.png": "01d17c9b16a75e32b38c4fdf8dc722a5",

@@ -26,6 +26,12 @@ const config: CapacitorConfig = {
     allowMixedContent: false,
     // Release builds must never fall back to plain HTTP.
     webContentsDebuggingEnabled: false,
+    // Secure origin (https://localhost) so localStorage — and therefore the
+    // Supabase session — persists across app restarts.
+    androidScheme: "https",
+    // Android 15+ forces edge-to-edge; without margins the header/footer are
+    // drawn under the system bars and the UI looks cut off.
+    adjustMarginsForEdgeToEdge: "force",
   },
   plugins: {
     SplashScreen: {
@@ -40,6 +46,7 @@ const config: CapacitorConfig = {
     StatusBar: {
       style: "LIGHT",
       backgroundColor: "#7C3AED",
+      overlaysWebView: false,
     },
   },
 };

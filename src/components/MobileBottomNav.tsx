@@ -63,14 +63,14 @@ const MobileBottomNav = () => {
   return (
     <>
       {/* Bottom Navigation Bar - Only visible on mobile */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-lg border-t border-border safe-area-bottom">
-        <div className="flex items-center justify-around h-14 px-2">
+      <nav className="safe-area-bottom safe-area-x fixed inset-x-0 bottom-0 z-50 max-w-full border-t border-border bg-background/95 backdrop-blur-lg md:hidden">
+        <div className="flex h-14 min-w-0 items-center justify-around px-1">
           {navItems.map((item, index) => (
             <button
               key={index}
               onClick={() => item.path ? navigate(item.path) : item.action?.()}
               className={cn(
-                "flex flex-col items-center justify-center gap-0.5 flex-1 py-1 px-1 rounded-lg transition-all",
+                "flex min-w-0 flex-1 flex-col items-center justify-center gap-0.5 rounded-lg px-0.5 py-1 transition-all",
                 isActive(item.path)
                   ? "text-primary"
                   : "text-muted-foreground hover:text-foreground"
@@ -80,7 +80,7 @@ const MobileBottomNav = () => {
                 "h-5 w-5 transition-transform",
                 isActive(item.path) && "scale-110"
               )} />
-              <span className="text-[10px] font-medium">{item.label}</span>
+              <span className="max-w-full truncate text-[10px] font-medium">{item.label}</span>
             </button>
           ))}
         </div>

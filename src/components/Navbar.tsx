@@ -74,14 +74,14 @@ const Navbar = () => {
   useSyncListener(["cart"], fetchCartCount);
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container flex h-16 items-center justify-between gap-4 px-4">
+      <div className="container flex min-w-0 flex-wrap items-center gap-2 px-4 py-2 md:h-16 md:flex-nowrap md:justify-between md:gap-4 md:py-0">
         {/* Right side - Icons */}
-        <div className="flex items-center gap-2">
+        <div className="order-2 flex w-full min-w-0 items-center justify-between gap-0 md:order-none md:w-auto md:justify-start md:gap-2">
           <ThemeToggle />
           <Button 
             variant="ghost" 
             size="icon" 
-            className="relative"
+            className="relative h-9 w-9 md:h-10 md:w-10"
             onClick={() => navigate("/cart")}
             ref={(el: HTMLButtonElement | null) => { (cartRef as React.MutableRefObject<HTMLElement | null>).current = el; }}
           >
@@ -95,6 +95,7 @@ const Navbar = () => {
           <Button 
             variant="ghost" 
             size="icon"
+            className="h-9 w-9 md:h-10 md:w-10"
             onClick={() => navigate("/favorites")}
           >
             <Heart className="h-5 w-5" />
@@ -102,7 +103,7 @@ const Navbar = () => {
           <Button 
             variant="ghost" 
             size="icon"
-            className="relative"
+            className="relative h-9 w-9 md:h-10 md:w-10"
             onClick={() => {
               if (compareCount > 0) {
                 navigate(`/compare?products=${compareProducts.join(",")}`);
@@ -162,7 +163,7 @@ const Navbar = () => {
                 </DropdownMenuContent>
               </DropdownMenu>
             ) : (
-              <Button onClick={() => navigate("/auth")} size="sm">
+              <Button onClick={() => navigate("/auth")} size="sm" className="shrink-0 px-3">
                 تسجيل الدخول
               </Button>
             )
@@ -170,7 +171,7 @@ const Navbar = () => {
         </div>
 
         {/* Center - Search */}
-        <div className="flex-1 max-w-2xl flex items-center gap-2">
+        <div className="order-3 flex w-full min-w-0 items-center gap-2 md:order-none md:max-w-2xl md:flex-1">
           <SearchAutocomplete className="flex-1" />
           <Button 
             variant="outline" 
@@ -183,7 +184,7 @@ const Navbar = () => {
         </div>
 
         {/* Left side - Logo & Menu */}
-        <div className="flex items-center gap-4">
+        <div className="order-1 flex w-full min-w-0 items-center justify-between gap-2 md:order-none md:w-auto md:justify-start md:gap-4">
           <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
             <SheetTrigger asChild>
               <Button variant="ghost" size="icon" className="md:hidden">
@@ -295,19 +296,19 @@ const Navbar = () => {
           <BrandLogo
             as="h1"
             onClick={() => navigate("/")}
-            className="text-3xl md:text-4xl"
+            className="max-w-[160px] text-2xl md:max-w-none md:text-4xl"
           />
         </div>
       </div>
 
       {/* Mega Menu Navigation */}
       <nav className="border-t bg-background/95">
-        <div className="container px-4 flex items-center justify-between h-10">
+        <div className="container flex h-10 min-w-0 items-center justify-between overflow-hidden px-4">
           <div className="hidden md:block">
             <MegaMenu />
           </div>
           
-          <div className="flex items-center gap-3 md:gap-4">
+          <div className="flex min-w-0 items-center gap-3 overflow-x-auto scrollbar-hide md:gap-4 md:overflow-visible">
             <NavLink 
               to="/" 
               className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors whitespace-nowrap"

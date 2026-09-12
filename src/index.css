@@ -169,11 +169,20 @@ All colors MUST be HSL.
     direction: rtl;
     overflow-x: hidden;
     opacity: 1;
+    width: 100%;
+    min-width: 0;
   }
   
   html {
     direction: rtl;
     overflow-x: hidden;
+    width: 100%;
+  }
+
+  #root {
+    width: 100%;
+    min-width: 0;
+    overflow-x: clip;
   }
 
   /* Hide scrollbars globally for horizontal scroll containers */
@@ -190,6 +199,11 @@ All colors MUST be HSL.
   /* Safe area for iOS devices */
   .safe-area-bottom {
     padding-bottom: env(safe-area-inset-bottom, 0);
+  }
+
+  .safe-area-x {
+    padding-left: env(safe-area-inset-left, 0);
+    padding-right: env(safe-area-inset-right, 0);
   }
 
   /* Hover scale animation */

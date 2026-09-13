@@ -134,6 +134,14 @@ const Profile = () => {
               حفظ التغييرات
             </Button>
           </Card>
+
+          {user?.email && (
+            <>
+              <ChangePasswordCard email={user.email} />
+              <DeleteAccountCard email={user.email} />
+            </>
+          )}
+          </div>
         )}
       </main>
       <Footer />

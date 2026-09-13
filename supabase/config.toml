@@ -7,3 +7,5 @@ project_id = "cflrdbkvpzzilazdufmh"
     verify_jwt = true
   [functions.verify-email-otp]
     verify_jwt = false
+  [functions.delete-own-account]
+    verify_jwt = true

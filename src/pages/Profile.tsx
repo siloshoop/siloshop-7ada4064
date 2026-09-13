@@ -7,10 +7,12 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Loader2, User } from "lucide-react";
+import { Loader2, User, IdCard } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import ChangePasswordCard from "@/components/account/ChangePasswordCard";
+import DeleteAccountCard from "@/components/account/DeleteAccountCard";
 
 const Profile = () => {
   const { user, loading: authLoading } = useAuth();
@@ -70,7 +72,41 @@ const Profile = () => {
             <Loader2 className="h-8 w-8 animate-spin text-primary" />
           </div>
         ) : (
-          <Card className="p-6 space-y-5">
+          <div className="space-y-4">
+          <Card className="p-4 sm:p-6 space-y-3">
+            <div className="flex items-center gap-2">
+              <IdCard className="h-5 w-5 text-primary" />
+              <h2 className="font-semibold">معلومات الحساب</h2>
+            </div>
+            <dl className="grid gap-2 text-sm sm:grid-cols-2">
+              <div className="flex justify-between gap-2 sm:flex-col sm:justify-start">
+                <dt className="text-muted-foreground">الاسم</dt>
+                <dd className="font-medium">{fullName || "—"}</dd>
+              </div>
+              <div className="flex justify-between gap-2 sm:flex-col sm:justify-start">
+                <dt className="text-muted-foreground">البريد الإلكتروني</dt>
+                <dd className="font-medium break-all" dir="ltr">{user?.email || "—"}</dd>
+              </div>
+              <div className="flex justify-between gap-2 sm:flex-col sm:justify-start">
+                <dt className="text-muted-foreground">رقم الهاتف</dt>
+                <dd className="font-medium" dir="ltr">{phone || "—"}</dd>
+              </div>
+              <div className="flex justify-between gap-2 sm:flex-col sm:justify-start">
+                <dt className="text-muted-foreground">تاريخ الانضمام</dt>
+                <dd className="font-medium">
+                  {user?.created_at
+                    ? new Date(user.created_at).toLocaleDateString("ar-EG", {
+                        year: "numeric",
+                        month: "long",
+                        day: "numeric",
+                      })
+                    : "—"}
+                </dd>
+              </div>
+            </dl>
+          </Card>
+
+          <Card className="p-4 sm:p-6 space-y-5">
             <div className="flex items-center gap-4">
               <Avatar className="h-16 w-16">
                 <AvatarImage src={avatarUrl || undefined} />
@@ -98,6 +134,14 @@ const Profile = () => {
               حفظ التغييرات
             </Button>
           </Card>
+
+          {user?.email && (
+            <>
+              <ChangePasswordCard email={user.email} />
+              <DeleteAccountCard email={user.email} />
+            </>
+          )}
+          </div>
         )}
       </main>
       <Footer />

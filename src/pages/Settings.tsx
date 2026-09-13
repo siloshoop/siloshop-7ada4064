@@ -14,7 +14,7 @@ const items = [
   { to: "/account/addresses", icon: MapPin, title: "العناوين", desc: "إدارة عناوين الشحن" },
   { to: "/notifications/settings", icon: Bell, title: "الإشعارات", desc: "تفضيلات التنبيهات" },
   { to: "/followed-brands", icon: HeartHandshake, title: "العلامات المتابعة", desc: "العلامات التجارية التي تتابعها" },
-  { to: "/forgot-password", icon: Lock, title: "كلمة المرور", desc: "تغيير كلمة المرور" },
+  { to: "/profile", icon: Lock, title: "كلمة المرور والحساب", desc: "تغيير كلمة المرور أو حذف الحساب" },
 ];
 
 const sellerStatusMeta: Record<string, { label: string; color: string; desc: string }> = {

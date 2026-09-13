@@ -7,10 +7,12 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Loader2, User } from "lucide-react";
+import { Loader2, User, IdCard } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import ChangePasswordCard from "@/components/account/ChangePasswordCard";
+import DeleteAccountCard from "@/components/account/DeleteAccountCard";
 
 const Profile = () => {
   const { user, loading: authLoading } = useAuth();

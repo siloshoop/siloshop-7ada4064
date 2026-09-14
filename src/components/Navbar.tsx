@@ -143,6 +143,10 @@ const Navbar = () => {
                     <LayoutDashboard className="ml-2 h-4 w-4" />
                     <span>لوحة التحكم</span>
                   </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => navigate("/profile")}>
+                    <User className="ml-2 h-4 w-4" />
+                    <span>الملف الشخصي</span>
+                  </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => navigate("/wishlist")}>
                     <Gift className="ml-2 h-4 w-4" />
                     <span>قوائم الأمنيات</span>

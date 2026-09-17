@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
 
 const MAX_PRODUCTS = 4;
 const UPDATED_EVENT = "compare-products-updated";
@@ -31,9 +32,10 @@ const writeGuest = (ids: string[]) => {
  * account on sign-in. The 4-product cap is enforced by a database trigger too.
  */
 export const useCompareProducts = () => {
+  const { user, loading: authLoading } = useAuth();
   const [compareProducts, setCompareProducts] = useState<string[]>([]);
-  const [userId, setUserId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const userId = user?.id ?? null;
 
   const load = useCallback(async (uid: string | null) => {
     if (!uid) {
@@ -62,32 +64,18 @@ export const useCompareProducts = () => {
 
 
   useEffect(() => {
-    let active = true;
-
-    supabase.auth.getSession().then(({ data }) => {
-      if (!active) return;
-      const uid = data.session?.user?.id ?? null;
-      setUserId(uid);
-      void load(uid);
-    });
-
-    const { data: sub } = supabase.auth.onAuthStateChange((_event, session) => {
-      const uid = session?.user?.id ?? null;
-      setUserId(uid);
-      void load(uid);
-    });
+    if (authLoading) return;
+    void load(userId);
 
     const sync = () => {
-      void supabase.auth.getSession().then(({ data }) => load(data.session?.user?.id ?? null));
+      void load(userId);
     };
     window.addEventListener(UPDATED_EVENT, sync);
 
     return () => {
-      active = false;
-      sub.subscription.unsubscribe();
       window.removeEventListener(UPDATED_EVENT, sync);
     };
-  }, [load]);
+  }, [authLoading, load, userId]);
 
   const addProduct = useCallback(
     async (productId: string): Promise<{ success: boolean; message: string }> => {

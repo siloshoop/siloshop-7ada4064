@@ -92,7 +92,7 @@ const ProductRecommendations = () => {
           .limit(8);
 
         // If not enough products, fill with popular products
-        if ((recommendedProducts || []).length < 4) {
+        if (categoryIds.length > 0 && (recommendedProducts || []).length < 4) {
           const { data: popularProducts } = await supabase
             .from("products")
             .select("id, name, price, original_price, image_url, category_id, reviews(rating)")

@@ -38,6 +38,7 @@ export const NotificationsDropdown = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { toast } = useToast();
+  const userId = user?.id;
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [filteredNotifications, setFilteredNotifications] = useState<Notification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
@@ -46,13 +47,13 @@ export const NotificationsDropdown = () => {
   const [showFilters, setShowFilters] = useState(false);
 
   useEffect(() => {
-    if (!user) return;
+    if (!userId) return;
 
     const fetchNotifications = async () => {
       const { data } = await supabase
         .from("notifications")
         .select("*")
-        .eq("user_id", user.id)
+        .eq("user_id", userId)
         .order("created_at", { ascending: false })
         .limit(50);
 
@@ -65,14 +66,14 @@ export const NotificationsDropdown = () => {
     fetchNotifications();
 
     const channel = supabase
-      .channel('notifications-channel')
+      .channel(`notifications-channel-${userId}`)
       .on(
         'postgres_changes',
         {
           event: 'INSERT',
           schema: 'public',
           table: 'notifications',
-          filter: `user_id=eq.${user.id}`
+          filter: `user_id=eq.${userId}`
         },
         (payload) => {
           const newNotification = payload.new as Notification;
@@ -90,7 +91,7 @@ export const NotificationsDropdown = () => {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [user, toast]);
+  }, [userId, toast]);
 
   // Filter notifications based on search and type
   useEffect(() => {

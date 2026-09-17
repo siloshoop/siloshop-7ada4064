@@ -7,6 +7,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ThemeProvider } from "next-themes";
 import { FlyToCartProvider } from "@/components/FlyToCart";
+import { AuthProvider } from "@/hooks/useAuth";
 // Homepage stays eager (visibility-first per project error-isolation memory).
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
@@ -138,11 +139,12 @@ const RouteFallback = () => (
 const App = () => (
   <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
     <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <FlyToCartProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
+      <AuthProvider>
+        <TooltipProvider>
+          <FlyToCartProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
           <Suspense fallback={<RouteFallback />}>
           <Routes>
             <Route path="/" element={<Index />} />
@@ -263,9 +265,10 @@ const App = () => (
             <Route path="*" element={<NotFound />} />
           </Routes>
           </Suspense>
-        </BrowserRouter>
-        </FlyToCartProvider>
-      </TooltipProvider>
+          </BrowserRouter>
+          </FlyToCartProvider>
+        </TooltipProvider>
+      </AuthProvider>
     </QueryClientProvider>
   </ThemeProvider>
 );

@@ -1,7 +1,10 @@
 // One-release cleanup for the previous Workbox app-shell worker.
 // Push notifications use /push-notifications-sw.js and are intentionally untouched.
-const isAppShellCache = (name) =>
-  (/workbox|precache|siloshop-pages|siloshop-versioned-assets|runtime/i.test(name));
+const isAppShellCache = (name) => {
+  const workboxCache = /(^|-)precache-v\d+-|(^|-)runtime-|(^|-)googleAnalytics-/.test(name)
+    && name.endsWith(self.registration.scope);
+  return workboxCache || name === "siloshop-pages" || name === "siloshop-versioned-assets";
+};
 
 self.addEventListener("install", () => self.skipWaiting());
 

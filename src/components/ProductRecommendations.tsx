@@ -17,6 +17,7 @@ interface Product {
 
 const ProductRecommendations = () => {
   const { user } = useAuth();
+  const userId = user?.id;
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const isVisible = true;
@@ -26,12 +27,12 @@ const ProductRecommendations = () => {
       try {
         let categoryIds: string[] = [];
         
-        if (user) {
+        if (userId) {
           // Get categories from user's recently viewed products
           const { data: recentViewed } = await supabase
             .from("recently_viewed")
             .select("products(category_id)")
-            .eq("user_id", user.id)
+            .eq("user_id", userId)
             .order("viewed_at", { ascending: false })
             .limit(10);
 
@@ -43,7 +44,7 @@ const ProductRecommendations = () => {
           const { data: favorites } = await supabase
             .from("favorites")
             .select("products(category_id)")
-            .eq("user_id", user.id)
+            .eq("user_id", userId)
             .limit(10);
 
           const favoriteCategories = (favorites || [])
@@ -54,7 +55,7 @@ const ProductRecommendations = () => {
           const { data: orders } = await supabase
             .from("orders")
             .select("order_items(products(category_id))")
-            .eq("customer_id", user.id)
+            .eq("customer_id", userId)
             .limit(5);
 
           const orderCategories = (orders || [])
@@ -73,10 +74,10 @@ const ProductRecommendations = () => {
 
         if (categoryIds.length > 0) {
           // Get products from preferred categories, excluding already viewed
-          const { data: viewedProductIds } = user ? await supabase
+          const { data: viewedProductIds } = userId ? await supabase
             .from("recently_viewed")
             .select("product_id")
-            .eq("user_id", user.id) : { data: [] };
+            .eq("user_id", userId) : { data: [] };
 
           const excludeIds = (viewedProductIds || []).map(v => v.product_id);
 
@@ -112,7 +113,7 @@ const ProductRecommendations = () => {
     };
 
     fetchRecommendations();
-  }, [user]);
+  }, [userId]);
 
   // Return null while loading to prevent gap
   if (loading) {

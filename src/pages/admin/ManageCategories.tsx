@@ -68,6 +68,7 @@ const ManageCategories = () => {
   const [editing, setEditing] = useState<CategoryRow | null>(null);
   const [form, setForm] = useState(emptyForm);
   const [saving, setSaving] = useState(false);
+  const [togglingId, setTogglingId] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -209,18 +210,24 @@ const ManageCategories = () => {
   };
 
   const toggleActive = async (row: CategoryRow) => {
-    const { error } = await supabase
+    const next = !row.is_active;
+    setTogglingId(row.id);
+    const { data, error } = await supabase
       .from("categories")
-      .update({ is_active: !row.is_active })
-      .eq("id", row.id);
+      .update({ is_active: next })
+      .eq("id", row.id)
+      .select("id,is_active")
+      .single();
+    setTogglingId(null);
     if (error) {
       toast({ title: "تعذر التحديث", description: error.message, variant: "destructive" });
       return;
     }
-    setRows((prev) => prev.map((r) => (r.id === row.id ? { ...r, is_active: !r.is_active } : r)));
+    setRows((prev) => prev.map((r) => (r.id === row.id ? { ...r, is_active: data.is_active } : r)));
+    toast({ title: data.is_active ? "تم تفعيل الفئة" : "تم إخفاء الفئة" });
     void logAdminAction("category_visibility_changed", {
       category_id: row.id,
-      is_active: !row.is_active,
+      is_active: data.is_active,
     });
   };
 

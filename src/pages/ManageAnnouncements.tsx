@@ -42,6 +42,7 @@ const ManageAnnouncements = () => {
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [togglingId, setTogglingId] = useState<string | null>(null);
   const { toast } = useToast();
 
   const [formData, setFormData] = useState({
@@ -142,10 +143,15 @@ const ManageAnnouncements = () => {
   };
 
   const toggleStatus = async (id: string, currentStatus: boolean) => {
-    const { error } = await supabase
+    const next = !currentStatus;
+    setTogglingId(id);
+    const { data, error } = await supabase
       .from("announcements")
-      .update({ is_active: !currentStatus })
-      .eq("id", id);
+      .update({ is_active: next })
+      .eq("id", id)
+      .select("id,is_active")
+      .single();
+    setTogglingId(null);
 
     if (error) {
       toast({
@@ -154,10 +160,10 @@ const ManageAnnouncements = () => {
         variant: "destructive",
       });
     } else {
-      fetchAnnouncements();
+      setAnnouncements((prev) => prev.map((item) => item.id === id ? { ...item, is_active: data.is_active } : item));
       toast({
-        title: currentStatus ? "تم إلغاء التفعيل" : "تم التفعيل",
-        description: currentStatus ? "تم إخفاء الإعلان" : "تم إظهار الإعلان",
+        title: data.is_active ? "تم التفعيل" : "تم إلغاء التفعيل",
+        description: data.is_active ? "سيظهر الإعلان فورًا ضمن فترة عرضه" : "تم إخفاء الإعلان فورًا",
       });
     }
   };
@@ -369,6 +375,7 @@ const ManageAnnouncements = () => {
                             id={`toggle-${announcement.id}`}
                             checked={announcement.is_active}
                             onCheckedChange={() => toggleStatus(announcement.id, announcement.is_active)}
+                            disabled={togglingId === announcement.id}
                           />
                         </div>
                         

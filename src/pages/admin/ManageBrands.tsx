@@ -58,6 +58,7 @@ const ManageBrands = () => {
   const [reordering, setReordering] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<BrandRow | null>(null);
   const [deleting, setDeleting] = useState(false);
+  const [togglingId, setTogglingId] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -114,18 +115,27 @@ const ManageBrands = () => {
   };
 
   const toggleActive = async (row: BrandRow) => {
-    const { error } = await supabase
+    const next = !row.is_active;
+    setTogglingId(row.id);
+    const { data, error } = await supabase
       .from("brands")
-      .update({ is_active: !row.is_active })
-      .eq("id", row.id);
+      .update({ is_active: next })
+      .eq("id", row.id)
+      .select("id,is_active")
+      .single();
+    setTogglingId(null);
     if (error) {
       toast({ title: "تعذر التحديث", description: error.message, variant: "destructive" });
       return;
     }
-    setRows((prev) => prev.map((r) => (r.id === row.id ? { ...r, is_active: !r.is_active } : r)));
+    setRows((prev) => prev.map((r) => (r.id === row.id ? { ...r, is_active: data.is_active } : r)));
+    toast({
+      title: data.is_active ? "تم تفعيل العلامة التجارية" : "تم إخفاء العلامة التجارية",
+      description: data.is_active ? "ستظهر الآن في صفحات المتجر" : "لن تظهر في صفحات المتجر",
+    });
     void logAdminAction("brand_visibility_changed", {
       brand_id: row.id,
-      is_active: !row.is_active,
+      is_active: data.is_active,
     });
   };
 
@@ -234,6 +244,7 @@ const ManageBrands = () => {
                 <Switch
                   checked={b.is_active}
                   onCheckedChange={() => toggleActive(b)}
+                  disabled={togglingId === b.id}
                   aria-label="تفعيل العلامة"
                 />
                 <div className="flex flex-col">

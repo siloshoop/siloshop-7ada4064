@@ -133,7 +133,7 @@ const SellerProducts = () => {
         .select("id,name,price,stock_quantity,image_url,moderation_status,moderation_reason,is_active,created_at,sku,barcode,brand_id")
         .eq("vendor_id", user.id)
         .order("created_at", { ascending: false }),
-      supabase.from("brands").select("id,name").order("name"),
+      supabase.from("brands").select("id,name").eq("is_active", true).order("name"),
     ]);
     if (productsRes.error) toast({ title: "تعذّر تحميل المنتجات", description: productsRes.error.message, variant: "destructive" });
     setRows((productsRes.data as Row[]) ?? []);
@@ -203,7 +203,7 @@ const SellerProducts = () => {
       return;
     }
     toast({ title: msg });
-    load();
+    await load();
   };
 
   const bulkUpdate = async (payload: { price_pct?: number; stock?: number; is_active?: boolean }) => {
@@ -231,7 +231,7 @@ const SellerProducts = () => {
     toast({ title: `تم تحديث ${Number(data ?? 0)} منتج` });
     setPricePct("");
     setBulkStock("");
-    load();
+    await load();
   };
 
   const bulkSubmitForReview = async () => {

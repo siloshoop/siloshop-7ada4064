@@ -316,6 +316,7 @@ const SearchPage = () => {
           supabase
             .from("brands")
             .select("id")
+            .eq("is_active", true)
             .or(`name_ar.ilike.%${escaped}%,name.ilike.%${escaped}%`),
           supabase
             .from("profiles")

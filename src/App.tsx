@@ -1,13 +1,14 @@
-import { Suspense } from "react";
+import { Suspense, useEffect, useState, type ReactNode } from "react";
 import { lazyWithRetry as lazy } from "@/lib/lazyWithRetry";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { ThemeProvider } from "next-themes";
 import { FlyToCartProvider } from "@/components/FlyToCart";
 import { AuthProvider } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
 // Homepage stays eager (visibility-first per project error-isolation memory).
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
@@ -136,6 +137,34 @@ const RouteFallback = () => (
   </div>
 );
 
+const ACTIVATION_TABLES = [
+  "brands", "native_ads", "announcements", "products", "categories",
+  "subcategories", "daily_deals", "faq_items", "pickup_centers",
+] as const;
+
+const PublicActivationSync = ({ children }: { children: ReactNode }) => {
+  const { pathname } = useLocation();
+  const [revision, setRevision] = useState(0);
+
+  useEffect(() => {
+    if (pathname.startsWith("/admin") || pathname.startsWith("/dashboard") || pathname.startsWith("/seller")) return;
+
+    const channel = supabase.channel("public-activation-sync");
+    ACTIVATION_TABLES.forEach((table) => {
+      channel.on("postgres_changes", { event: "*", schema: "public", table }, () => {
+        setRevision((value) => value + 1);
+      });
+    });
+    channel.subscribe();
+
+    return () => {
+      void supabase.removeChannel(channel);
+    };
+  }, [pathname]);
+
+  return <div key={revision} className="contents">{children}</div>;
+};
+
 const App = () => (
   <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
     <QueryClientProvider client={queryClient}>
@@ -145,6 +174,7 @@ const App = () => (
           <Toaster />
           <Sonner />
           <BrowserRouter>
+          <PublicActivationSync>
           <Suspense fallback={<RouteFallback />}>
           <Routes>
             <Route path="/" element={<Index />} />
@@ -265,6 +295,7 @@ const App = () => (
             <Route path="*" element={<NotFound />} />
           </Routes>
           </Suspense>
+          </PublicActivationSync>
           </BrowserRouter>
           </FlyToCartProvider>
         </TooltipProvider>

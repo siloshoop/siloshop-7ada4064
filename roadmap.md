@@ -54,3 +54,9 @@
 - [ ] Trace admin mutations and public visibility filters for every toggle-backed section
 - [ ] Fix persistence, immediate refresh, and clear feedback without touching subscriptions or balances
 - [ ] Verify database policies and desktop/mobile/Android-visible behavior
+
+## Google Play demo catalog
+
+- [ ] Add 20 clearly labeled TEST DATA products across active categories and brands
+- [ ] Verify database persistence and public visibility without touching subscriptions or balances
+- [ ] Test product display on desktop, mobile, and Android WebView sizes

@@ -1,4 +1,4 @@
-import { Capacitor } from "@capacitor/core";
+import { Capacitor, SystemBars, SystemBarsStyle } from "@capacitor/core";
 import { supabase } from "@/integrations/supabase/client";
 
 /** True only when running inside the Android/iOS Capacitor shell. */
@@ -16,6 +16,11 @@ export const initNativeApp = async () => {
       import("@capacitor/status-bar"),
       import("@capacitor/splash-screen"),
     ]);
+
+    // Capacitor 8 exposes Android system-bar insets as
+    // --safe-area-inset-* CSS variables when viewport-fit=cover is present.
+    await SystemBars.setStyle({ style: SystemBarsStyle.Light }).catch(() => undefined);
+    await SystemBars.show().catch(() => undefined);
 
     await StatusBar.setOverlaysWebView({ overlay: false }).catch(() => undefined);
     await StatusBar.setStyle({ style: Style.Light }).catch(() => undefined);

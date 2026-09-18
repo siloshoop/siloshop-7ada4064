@@ -31,4 +31,4 @@
 - [x] Fix responsive banner image/text separation
 - [x] Render active native ads in all configured placements
 - [x] Add campaign date controls and status visibility in admin
-- [ ] Verify database reads, live activation, images, and responsive layouts
+- [x] Verify database reads, live activation, images, and responsive layouts

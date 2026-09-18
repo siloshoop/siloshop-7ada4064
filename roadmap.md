@@ -32,3 +32,11 @@
 - [x] Render active native ads in all configured placements
 - [x] Add campaign date controls and status visibility in admin
 - [x] Verify database reads, live activation, images, and responsive layouts
+
+## Device image uploads
+
+- [ ] Inventory every image-capable form and existing upload path
+- [ ] Add shared URL + device upload controls with preview, replace, and delete
+- [ ] Integrate across admin, vendor, profile, review, return, and messaging image forms
+- [ ] Verify Android WebView file selection, responsive previews, storage cleanup, and existing URL flows
+- [ ] Confirm subscription and points systems remain untouched

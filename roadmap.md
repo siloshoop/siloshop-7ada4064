@@ -48,3 +48,9 @@
 - [x] Fix force-logout authentication for opaque server keys
 - [x] Verify database admin boundary; non-admin product action correctly returns not_authorized
 - [ ] Verify privileged admin mutations end to end (blocked: available test session is not an admin)
+
+## Activation toggle reliability
+
+- [ ] Trace admin mutations and public visibility filters for every toggle-backed section
+- [ ] Fix persistence, immediate refresh, and clear feedback without touching subscriptions or balances
+- [ ] Verify database policies and desktop/mobile/Android-visible behavior

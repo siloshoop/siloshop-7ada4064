@@ -253,11 +253,15 @@ const ProductCard = memo(({
         </div>
 
         <img
-          src={image}
+          src={image || "/placeholder.svg"}
           alt={name}
           loading="lazy"
           decoding="async"
           onLoad={() => setImageLoaded(true)}
+          onError={(event) => {
+            event.currentTarget.src = "/placeholder.svg";
+            setImageLoaded(true);
+          }}
           className={`object-cover w-full h-full transition-all duration-700 ease-out ${
             imageLoaded ? "opacity-100" : "opacity-0"
           } ${isHovered ? "scale-110" : "scale-100"}`}

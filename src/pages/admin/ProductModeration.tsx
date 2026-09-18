@@ -241,7 +241,7 @@ const ProductModeration = () => {
               ))}
             </TabsList>
           </Tabs>
-          <div className="relative min-w-[220px] flex-1">
+          <div className="relative min-w-0 basis-full flex-1 sm:basis-auto">
             <Search className="absolute end-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
               value={search}
@@ -251,21 +251,21 @@ const ProductModeration = () => {
             />
           </div>
           <Select value={categoryId} onValueChange={setCategoryId}>
-            <SelectTrigger className="w-40"><SelectValue placeholder="الفئة" /></SelectTrigger>
+            <SelectTrigger className="w-full min-w-0 sm:w-40"><SelectValue placeholder="الفئة" /></SelectTrigger>
             <SelectContent>
               <SelectItem value={ALL}>كل الفئات</SelectItem>
               {categories.map((c) => <SelectItem key={c.id} value={c.id}>{c.label}</SelectItem>)}
             </SelectContent>
           </Select>
           <Select value={brandId} onValueChange={setBrandId}>
-            <SelectTrigger className="w-40"><SelectValue placeholder="العلامة" /></SelectTrigger>
+            <SelectTrigger className="w-full min-w-0 sm:w-40"><SelectValue placeholder="العلامة" /></SelectTrigger>
             <SelectContent>
               <SelectItem value={ALL}>كل العلامات</SelectItem>
               {brands.map((b) => <SelectItem key={b.id} value={b.id}>{b.label}</SelectItem>)}
             </SelectContent>
           </Select>
           <Select value={sort} onValueChange={(v) => setSort(v as typeof sort)}>
-            <SelectTrigger className="w-36"><SelectValue /></SelectTrigger>
+            <SelectTrigger className="w-full min-w-0 sm:w-36"><SelectValue /></SelectTrigger>
             <SelectContent>
               {SORTS.map((s) => <SelectItem key={s.value} value={s.value}>{s.label}</SelectItem>)}
             </SelectContent>

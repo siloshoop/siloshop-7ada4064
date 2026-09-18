@@ -299,18 +299,23 @@ const PopularCategories = () => {
                     <span className="text-xs text-muted-foreground">({expandedSubs.length} تصنيف فرعي)</span>
                   </div>
                   <div className="flex gap-2">
-                    <button
+                    <Button
+                      variant="link"
+                      size="sm"
                       onClick={() => navigate(`/category/${expandedCategoryId}`)}
-                      className="text-xs text-primary hover:underline font-medium"
+                      className="h-auto p-1 text-xs font-medium"
                     >
                       عرض الكل
-                    </button>
-                    <button
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
                       onClick={() => setExpandedCategoryId(null)}
-                      className="p-1 rounded-full hover:bg-muted transition-colors"
+                      className="h-7 w-7 rounded-full"
+                      aria-label="إغلاق التصنيفات الفرعية"
                     >
                       <X className="h-4 w-4 text-muted-foreground" />
-                    </button>
+                    </Button>
                   </div>
                 </div>
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2">

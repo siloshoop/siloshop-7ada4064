@@ -111,7 +111,7 @@ const SellerInventory = () => {
               <TabsTrigger value="out">نفذت ({counts.out})</TabsTrigger>
             </TabsList>
           </Tabs>
-          <div className="relative min-w-[200px] flex-1">
+          <div className="relative min-w-0 basis-full flex-1 sm:basis-auto">
             <Search className="absolute end-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="ابحث بالاسم أو SKU أو الباركود" className="pe-9" />
           </div>

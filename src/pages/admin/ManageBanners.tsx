@@ -24,6 +24,8 @@ interface BannerRow {
   placement: string;
   priority: number;
   is_active: boolean;
+  start_date: string | null;
+  end_date: string | null;
 }
 
 const PLACEMENTS = [
@@ -43,6 +45,8 @@ const emptyForm = {
   placement: "home",
   priority: 0,
   is_active: true,
+  start_date: "",
+  end_date: "",
 };
 
 const ManageBanners = () => {
@@ -58,7 +62,7 @@ const ManageBanners = () => {
     setLoading(true);
     const { data, error } = await supabase
       .from("native_ads")
-      .select("id, title, description, image_url, cta_text, cta_url, sponsor_name, placement, priority, is_active")
+      .select("id, title, description, image_url, cta_text, cta_url, sponsor_name, placement, priority, is_active, start_date, end_date")
       .order("priority", { ascending: false });
     if (error) toast({ title: "خطأ", description: error.message, variant: "destructive" });
     setRows((data ?? []) as BannerRow[]);
@@ -94,6 +98,8 @@ const ManageBanners = () => {
       placement: form.placement,
       priority: Number(form.priority) || 0,
       is_active: form.is_active,
+      start_date: form.start_date ? new Date(form.start_date).toISOString() : null,
+      end_date: form.end_date ? new Date(form.end_date).toISOString() : null,
     };
     const { error } = editing
       ? await supabase.from("native_ads").update(payload).eq("id", editing.id)
@@ -174,6 +180,10 @@ const ManageBanners = () => {
                   <p className="truncate text-xs text-muted-foreground">
                     {b.sponsor_name} · {b.cta_url || "بدون رابط"}
                   </p>
+                  <p className="mt-1 text-[11px] text-muted-foreground">
+                    {b.start_date ? `يبدأ ${new Date(b.start_date).toLocaleString("ar-SY")}` : "يبدأ فوراً"}
+                    {b.end_date ? ` · ينتهي ${new Date(b.end_date).toLocaleString("ar-SY")}` : " · بلا تاريخ انتهاء"}
+                  </p>
                 </div>
                 <Badge variant="outline">
                   {PLACEMENTS.find((p) => p.value === b.placement)?.label ?? b.placement}
@@ -196,6 +206,8 @@ const ManageBanners = () => {
                       placement: b.placement,
                       priority: b.priority,
                       is_active: b.is_active,
+                      start_date: b.start_date ? b.start_date.slice(0, 16) : "",
+                      end_date: b.end_date ? b.end_date.slice(0, 16) : "",
                     });
                     setOpen(true);
                   }}
@@ -241,6 +253,16 @@ const ManageBanners = () => {
               onChange={(e) => setForm({ ...form, priority: Number(e.target.value) })}
               placeholder="الأولوية"
             />
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+              <label className="space-y-1 text-sm">
+                <span>تاريخ البدء (اختياري)</span>
+                <Input type="datetime-local" value={form.start_date} onChange={(e) => setForm({ ...form, start_date: e.target.value })} />
+              </label>
+              <label className="space-y-1 text-sm">
+                <span>تاريخ الانتهاء (اختياري)</span>
+                <Input type="datetime-local" value={form.end_date} onChange={(e) => setForm({ ...form, end_date: e.target.value })} />
+              </label>
+            </div>
             <label className="flex items-center gap-2 text-sm">
               <Switch checked={form.is_active} onCheckedChange={(v) => setForm({ ...form, is_active: v })} />
               مفعّل

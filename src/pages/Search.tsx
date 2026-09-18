@@ -38,6 +38,7 @@ import {
 } from "lucide-react";
 import { addRecentSearch } from "@/lib/searchHistory";
 import SyrianFlag from "@/components/SyrianFlag";
+import NativeAdBanner from "@/components/NativeAdBanner";
 
 interface Product {
   id: string;
@@ -1067,6 +1068,8 @@ const SearchPage = () => {
             </div>
           </div>
         </div>
+
+        <NativeAdBanner placement="search" className="mb-8 !px-0" />
 
         <div className="flex gap-8">
           {/* Desktop Filters Sidebar */}

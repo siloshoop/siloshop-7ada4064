@@ -46,4 +46,5 @@
 - [x] Fix product flag authorization function signature
 - [x] Unify user ban and activation behind audited admin actions
 - [x] Fix force-logout authentication for opaque server keys
-- [ ] Verify admin and denied-user boundaries end to end
+- [x] Verify database admin boundary; non-admin product action correctly returns not_authorized
+- [ ] Verify privileged admin mutations end to end (blocked: available test session is not an admin)

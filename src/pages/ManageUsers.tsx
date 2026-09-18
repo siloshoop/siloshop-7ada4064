@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { useAdminCheck } from "@/hooks/useAdminCheck";
 import { supabase } from "@/integrations/supabase/client";
-import { logActivity } from "@/hooks/useActivityLog";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
@@ -212,34 +211,16 @@ const ManageUsers = () => {
     }
 
     try {
-      const { error } = await supabase
-        .from("profiles")
-        .update({
-          is_banned: true,
-          banned_at: new Date().toISOString(),
-          ban_reason: reason || null,
-        })
-        .eq("id", userId);
+      if (reason.trim().length < 5) {
+        throw new Error("يرجى كتابة سبب واضح من 5 أحرف على الأقل");
+      }
 
-      if (error) throw error;
-
-      // Send notification to banned user
-      await supabase.rpc('send_notification', {
-        _target_user_id: userId,
-        _title: "تم حظر حسابك",
-        _message: reason 
-          ? `تم حظر حسابك بسبب: ${reason}. يرجى التواصل مع الدعم إذا كنت تعتقد أن هذا خطأ.`
-          : "تم حظر حسابك. يرجى التواصل مع الدعم إذا كنت تعتقد أن هذا خطأ.",
-        _type: "warning",
+      const { error } = await supabase.rpc("admin_ban_user", {
+        _user_id: userId,
+        _reason: reason.trim(),
       });
 
-      // Log activity
-      if (user) {
-        await logActivity(user.id, "user_banned", { 
-          banned_user_id: userId, 
-          reason: reason || null 
-        });
-      }
+      if (error) throw error;
 
       toast({
         title: "تم الحظر",
@@ -259,29 +240,9 @@ const ManageUsers = () => {
 
   const unbanUser = async (userId: string) => {
     try {
-      const { error } = await supabase
-        .from("profiles")
-        .update({
-          is_banned: false,
-          banned_at: null,
-          ban_reason: null,
-        })
-        .eq("id", userId);
+      const { error } = await supabase.rpc("admin_activate_user", { _user_id: userId });
 
       if (error) throw error;
-
-      // Send notification to unbanned user
-      await supabase.rpc('send_notification', {
-        _target_user_id: userId,
-        _title: "تم إلغاء حظر حسابك",
-        _message: "تم إلغاء حظر حسابك ويمكنك الآن استخدام المنصة بشكل طبيعي.",
-        _type: "info",
-      });
-
-      // Log activity
-      if (user) {
-        await logActivity(user.id, "user_unbanned", { unbanned_user_id: userId });
-      }
 
       toast({
         title: "تم إلغاء الحظر",

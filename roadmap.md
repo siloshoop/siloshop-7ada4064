@@ -40,3 +40,10 @@
 - [x] Integrate across admin, vendor, profile, review, return, and messaging image forms
 - [x] Verify Android-compatible file selection, responsive previews, storage cleanup, and existing URL flows
 - [x] Confirm subscription and points systems remain untouched
+
+## Admin action reliability
+
+- [x] Fix product flag authorization function signature
+- [x] Unify user ban and activation behind audited admin actions
+- [x] Fix force-logout authentication for opaque server keys
+- [ ] Verify admin and denied-user boundaries end to end

@@ -16,6 +16,7 @@ import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "
 import {
   Loader2, Search, Check, X, ExternalLink, Sparkles, Flame, ThumbsUp, Eye, EyeOff,
 } from "lucide-react";
+import { broadcastActivationChange } from "@/lib/activationSync";
 
 type Status = "pending" | "approved" | "rejected" | "draft" | "hidden" | "archived";
 
@@ -88,6 +89,7 @@ const ProductModeration = () => {
   const [bulkRejecting, setBulkRejecting] = useState(false);
   const [reason, setReason] = useState("");
   const [working, setWorking] = useState(false);
+  const [togglingId, setTogglingId] = useState<string | null>(null);
 
   useEffect(() => {
     void (async () => {
@@ -189,6 +191,7 @@ const ProductModeration = () => {
     product: ProductRow,
     flags: { is_featured?: boolean; is_trending?: boolean; is_recommended?: boolean; is_active?: boolean }
   ) => {
+    setTogglingId(product.id);
     const { error } = await supabase.rpc("admin_set_product_flags", {
       _product_id: product.id,
       _is_featured: flags.is_featured ?? null,
@@ -197,10 +200,28 @@ const ProductModeration = () => {
       _is_active: flags.is_active ?? null,
     });
     if (error) {
+      setTogglingId(null);
       toast({ title: "تعذر تحديث حالة العرض", description: adminErrorMessage(error.message), variant: "destructive" });
       return;
     }
-    setRows((prev) => prev.map((r) => (r.id === product.id ? { ...r, ...flags } : r)));
+    const { data: saved, error: refreshError } = await supabase
+      .from("products")
+      .select("is_featured,is_trending,is_recommended,is_active")
+      .eq("id", product.id)
+      .single();
+    if (refreshError || !saved) {
+      setTogglingId(null);
+      toast({ title: "تم الحفظ وتعذر تحديث العرض", description: refreshError?.message, variant: "destructive" });
+      void load();
+      return;
+    }
+    setRows((prev) => prev.map((r) => (r.id === product.id ? { ...r, ...saved } : r)));
+    setTogglingId(null);
+    toast({
+      title: "تم تحديث حالة المنتج",
+      description: flags.is_active === undefined ? "تم حفظ إعدادات العرض" : saved.is_active ? "المنتج ظاهر الآن" : "تم إخفاء المنتج",
+    });
+    void broadcastActivationChange("products", product.id);
   };
 
   const bulkFlags = async (flags: { is_featured?: boolean; is_trending?: boolean; is_recommended?: boolean; is_active?: boolean }) => {
@@ -227,6 +248,9 @@ const ProductModeration = () => {
       variant: ok === ids.length ? "default" : "destructive",
     });
     void load();
+    if (flags.is_active !== undefined) {
+      ids.slice(0, ok).forEach((id) => void broadcastActivationChange("products", id));
+    }
   };
 
   const allSelected = rows.length > 0 && rows.every((r) => selected.has(r.id));
@@ -366,6 +390,7 @@ const ProductModeration = () => {
                   <Button
                     size="sm"
                     variant={p.is_featured ? "default" : "outline"}
+                    disabled={togglingId === p.id}
                     onClick={() => setFlags(p, { is_featured: !p.is_featured })}
                     aria-label="تمييز المنتج"
                   >
@@ -374,6 +399,7 @@ const ProductModeration = () => {
                   <Button
                     size="sm"
                     variant={p.is_trending ? "default" : "outline"}
+                    disabled={togglingId === p.id}
                     onClick={() => setFlags(p, { is_trending: !p.is_trending })}
                     aria-label="منتج رائج"
                   >
@@ -382,6 +408,7 @@ const ProductModeration = () => {
                   <Button
                     size="sm"
                     variant={p.is_recommended ? "default" : "outline"}
+                    disabled={togglingId === p.id}
                     onClick={() => setFlags(p, { is_recommended: !p.is_recommended })}
                     aria-label="موصى به"
                   >
@@ -390,6 +417,7 @@ const ProductModeration = () => {
                   <Button
                     size="sm"
                     variant="outline"
+                    disabled={togglingId === p.id}
                     onClick={() => setFlags(p, { is_active: !(p.is_active ?? false) })}
                     aria-label="إظهار أو إخفاء"
                   >

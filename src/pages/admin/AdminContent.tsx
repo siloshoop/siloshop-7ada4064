@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { broadcastActivationChange } from "@/lib/activationSync";
 import AdminLayout from "@/components/admin/AdminLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -105,12 +106,19 @@ const AdminContent = () => {
   };
 
   const toggleFaq = async (row: FaqItem, next: boolean) => {
-    const { error } = await supabase.from("faq_items").update({ is_active: next }).eq("id", row.id);
+    const { data, error } = await supabase
+      .from("faq_items")
+      .update({ is_active: next })
+      .eq("id", row.id)
+      .select("id,is_active")
+      .single();
     if (error) {
       toast({ title: "تعذر التحديث", description: error.message, variant: "destructive" });
       return;
     }
-    setFaqs((prev) => prev.map((r) => (r.id === row.id ? { ...r, is_active: next } : r)));
+    setFaqs((prev) => prev.map((r) => (r.id === row.id ? { ...r, is_active: data.is_active } : r)));
+    toast({ title: data.is_active ? "تم نشر السؤال" : "تم إخفاء السؤال" });
+    void broadcastActivationChange("faq_items", row.id);
   };
 
   const savePage = async () => {

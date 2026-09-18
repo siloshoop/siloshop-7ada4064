@@ -110,10 +110,13 @@ const ManageCoupons = () => {
   };
 
   const toggleStatus = async (id: string, currentStatus: boolean) => {
-    const { error } = await supabase
+    const next = !currentStatus;
+    const { data, error } = await supabase
       .from("coupons")
-      .update({ is_active: !currentStatus })
-      .eq("id", id);
+      .update({ is_active: next })
+      .eq("id", id)
+      .select("id,is_active")
+      .single();
 
     if (error) {
       toast({
@@ -122,7 +125,8 @@ const ManageCoupons = () => {
         variant: "destructive",
       });
     } else {
-      fetchCoupons();
+      setCoupons((prev) => prev.map((coupon) => coupon.id === id ? { ...coupon, is_active: data.is_active } : coupon));
+      toast({ title: data.is_active ? "تم تفعيل الكوبون" : "تم إيقاف الكوبون" });
     }
   };
 

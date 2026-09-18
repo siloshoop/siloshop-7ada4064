@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
+import { broadcastActivationChange } from "@/lib/activationSync";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
@@ -270,21 +271,25 @@ const ManageSubcategories = () => {
 
   const handleToggleActive = async (id: string, currentStatus: boolean) => {
     try {
-      const { error } = await supabase
+      const next = !currentStatus;
+      const { data, error } = await supabase
         .from("subcategories")
-        .update({ is_active: !currentStatus })
-        .eq("id", id);
+        .update({ is_active: next })
+        .eq("id", id)
+        .select("id,is_active")
+        .single();
 
       if (error) throw error;
 
-      setSubcategories(subcategories.map(s =>
-        s.id === id ? { ...s, is_active: !currentStatus } : s
+      setSubcategories((prev) => prev.map(s =>
+        s.id === id ? { ...s, is_active: data.is_active } : s
       ));
 
       toast({
         title: "تم بنجاح",
-        description: `تم ${!currentStatus ? "تفعيل" : "إلغاء تفعيل"} التصنيف الفرعي`,
+        description: `تم ${data.is_active ? "تفعيل" : "إلغاء تفعيل"} التصنيف الفرعي`,
       });
+      void broadcastActivationChange("subcategories", id);
     } catch (error) {
       toast({
         title: "خطأ",

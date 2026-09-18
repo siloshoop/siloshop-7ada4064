@@ -13,6 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Loader2, Plus, Pencil, Trash2 } from "lucide-react";
 import ImageUploadField from "@/components/ImageUploadField";
+import { broadcastActivationChange } from "@/lib/activationSync";
 
 interface BannerRow {
   id: string;
@@ -58,6 +59,7 @@ const ManageBanners = () => {
   const [editing, setEditing] = useState<BannerRow | null>(null);
   const [form, setForm] = useState(emptyForm);
   const [saving, setSaving] = useState(false);
+  const [togglingId, setTogglingId] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -132,18 +134,28 @@ const ManageBanners = () => {
   };
 
   const toggleActive = async (row: BannerRow) => {
-    const { error } = await supabase
+    const next = !row.is_active;
+    setTogglingId(row.id);
+    const { data, error } = await supabase
       .from("native_ads")
-      .update({ is_active: !row.is_active })
-      .eq("id", row.id);
+      .update({ is_active: next })
+      .eq("id", row.id)
+      .select("id,is_active")
+      .single();
+    setTogglingId(null);
     if (error) {
       toast({ title: "تعذر التحديث", description: error.message, variant: "destructive" });
       return;
     }
-    setRows((prev) => prev.map((r) => (r.id === row.id ? { ...r, is_active: !r.is_active } : r)));
+    setRows((prev) => prev.map((r) => (r.id === row.id ? { ...r, is_active: data.is_active } : r)));
+    toast({
+      title: data.is_active ? "تم تفعيل البانر" : "تم إيقاف البانر",
+      description: data.is_active ? "سيظهر عند حلول موعد عرضه" : "تم إخفاؤه من صفحات المتجر",
+    });
+    void broadcastActivationChange("native_ads", row.id);
     void logAdminAction("banner_visibility_changed", {
       banner_id: row.id,
-      is_active: !row.is_active,
+      is_active: data.is_active,
     });
   };
 
@@ -190,7 +202,7 @@ const ManageBanners = () => {
                   {PLACEMENTS.find((p) => p.value === b.placement)?.label ?? b.placement}
                 </Badge>
                 <Badge variant="secondary">أولوية {b.priority}</Badge>
-                <Switch checked={b.is_active} onCheckedChange={() => toggleActive(b)} aria-label="تفعيل" />
+                <Switch checked={b.is_active} onCheckedChange={() => toggleActive(b)} disabled={togglingId === b.id} aria-label="تفعيل" />
                 <Button
                   variant="ghost"
                   size="icon"

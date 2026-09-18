@@ -18,6 +18,7 @@ import { useToast } from "@/hooks/use-toast";
 import { logAdminAction } from "@/lib/auditLog";
 import { SYRIAN_GOVERNORATES } from "@/lib/syrianGovernorates";
 import { Loader2, Plus, Save, Trash2, MapPin } from "lucide-react";
+import { broadcastActivationChange } from "@/lib/activationSync";
 
 interface Center {
   id: string;
@@ -51,6 +52,7 @@ const PickupCenters = () => {
   const [filter, setFilter] = useState<string>(ALL);
   const [form, setForm] = useState(emptyForm);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [togglingId, setTogglingId] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -112,16 +114,23 @@ const PickupCenters = () => {
   };
 
   const toggleActive = async (center: Center) => {
-    const { error } = await supabase
+    const next = !center.is_active;
+    setTogglingId(center.id);
+    const { data, error } = await supabase
       .from("pickup_centers")
-      .update({ is_active: !center.is_active })
-      .eq("id", center.id);
+      .update({ is_active: next })
+      .eq("id", center.id)
+      .select("id,is_active")
+      .single();
+    setTogglingId(null);
     if (error) {
       toast({ title: "تعذر التحديث", variant: "destructive" });
       return;
     }
-    void logAdminAction("pickup_center_toggled", { id: center.id, is_active: !center.is_active });
-    void load();
+    setCenters((prev) => prev.map((item) => item.id === center.id ? { ...item, is_active: data.is_active } : item));
+    toast({ title: data.is_active ? "تم تفعيل المركز" : "تم تعطيل المركز" });
+    void broadcastActivationChange("pickup_centers", center.id);
+    void logAdminAction("pickup_center_toggled", { id: center.id, is_active: data.is_active });
   };
 
   const remove = async (center: Center) => {
@@ -287,6 +296,7 @@ const PickupCenters = () => {
                       <Switch
                         checked={c.is_active}
                         onCheckedChange={() => toggleActive(c)}
+                        disabled={togglingId === c.id}
                         aria-label="تفعيل / تعطيل"
                       />
                       <Button size="sm" variant="outline" onClick={() => startEdit(c)}>

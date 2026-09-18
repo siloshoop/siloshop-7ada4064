@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
+import { broadcastActivationChange } from "@/lib/activationSync";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
@@ -220,21 +221,25 @@ const ManageDeals = () => {
 
   const handleToggleActive = async (deal: Deal) => {
     try {
-      const { error } = await supabase
+      const next = !deal.is_active;
+      const { data, error } = await supabase
         .from("daily_deals")
-        .update({ is_active: !deal.is_active })
-        .eq("id", deal.id);
+        .update({ is_active: next })
+        .eq("id", deal.id)
+        .select("id,is_active")
+        .single();
 
       if (error) throw error;
 
-      setDeals(deals.map(d => 
-        d.id === deal.id ? { ...d, is_active: !d.is_active } : d
+      setDeals((prev) => prev.map(d =>
+        d.id === deal.id ? { ...d, is_active: data.is_active } : d
       ));
 
       toast({
         title: "تم بنجاح",
-        description: deal.is_active ? "تم إيقاف العرض" : "تم تفعيل العرض",
+        description: data.is_active ? "تم تفعيل العرض" : "تم إيقاف العرض",
       });
+      void broadcastActivationChange("daily_deals", deal.id);
     } catch (error) {
       toast({
         title: "خطأ",

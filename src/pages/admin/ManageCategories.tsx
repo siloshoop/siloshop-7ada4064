@@ -16,6 +16,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Loader2, Plus, Pencil, FolderTree, ChevronUp, ChevronDown, Trash2 } from "lucide-react";
 import ImageUploadField from "@/components/ImageUploadField";
+import { broadcastActivationChange } from "@/lib/activationSync";
 
 interface CategoryRow {
   id: string;
@@ -68,6 +69,7 @@ const ManageCategories = () => {
   const [editing, setEditing] = useState<CategoryRow | null>(null);
   const [form, setForm] = useState(emptyForm);
   const [saving, setSaving] = useState(false);
+  const [togglingId, setTogglingId] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -209,18 +211,25 @@ const ManageCategories = () => {
   };
 
   const toggleActive = async (row: CategoryRow) => {
-    const { error } = await supabase
+    const next = !row.is_active;
+    setTogglingId(row.id);
+    const { data, error } = await supabase
       .from("categories")
-      .update({ is_active: !row.is_active })
-      .eq("id", row.id);
+      .update({ is_active: next })
+      .eq("id", row.id)
+      .select("id,is_active")
+      .single();
+    setTogglingId(null);
     if (error) {
       toast({ title: "تعذر التحديث", description: error.message, variant: "destructive" });
       return;
     }
-    setRows((prev) => prev.map((r) => (r.id === row.id ? { ...r, is_active: !r.is_active } : r)));
+    setRows((prev) => prev.map((r) => (r.id === row.id ? { ...r, is_active: data.is_active } : r)));
+    toast({ title: data.is_active ? "تم تفعيل الفئة" : "تم إخفاء الفئة" });
+    void broadcastActivationChange("categories", row.id);
     void logAdminAction("category_visibility_changed", {
       category_id: row.id,
-      is_active: !row.is_active,
+      is_active: data.is_active,
     });
   };
 
@@ -312,7 +321,7 @@ const ManageCategories = () => {
                     <ChevronDown className="h-3 w-3" />
                   </Button>
                 </div>
-                <Switch checked={c.is_active} onCheckedChange={() => toggleActive(c)} aria-label="تفعيل الفئة" />
+                <Switch checked={c.is_active} onCheckedChange={() => toggleActive(c)} disabled={togglingId === c.id} aria-label="تفعيل الفئة" />
                 <Button variant="ghost" size="icon" onClick={() => openEdit(c)} aria-label="تعديل">
                   <Pencil className="h-4 w-4" />
                 </Button>

@@ -10,7 +10,7 @@ import { Loader2, Truck } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { saveShippingInfo, friendlyOrderError, type ShippingInfoInput } from "@/lib/orderStatus";
 
-export interface ShippingInfoValues extends ShippingInfoInput {}
+export type ShippingInfoValues = ShippingInfoInput;
 
 interface Props {
   orderId: string | null;

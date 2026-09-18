@@ -130,7 +130,8 @@ const SellerApplication = () => {
       toast({ title: "حجم الصورة كبير", description: "الحد الأقصى 5 ميجابايت", variant: "destructive" });
       return;
     }
-    kind === "logo" ? setUploadingLogo(true) : setUploadingCover(true);
+    if (kind === "logo") setUploadingLogo(true);
+    else setUploadingCover(true);
     const ext = file.name.split(".").pop() || "jpg";
     const path = `${user.id}/${kind}-${Date.now()}.${ext}`;
     const { error } = await supabase.storage.from("store-assets").upload(path, file, { upsert: true });
@@ -142,7 +143,8 @@ const SellerApplication = () => {
       else { setCoverPath(path); setCoverPreview(url); }
       toast({ title: "تم رفع الصورة" });
     }
-    kind === "logo" ? setUploadingLogo(false) : setUploadingCover(false);
+    if (kind === "logo") setUploadingLogo(false);
+    else setUploadingCover(false);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {

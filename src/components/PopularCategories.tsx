@@ -19,6 +19,7 @@ import {
   Gamepad, Dice1, Puzzle, Lightbulb, TreeDeciduous, Cat, X
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 
 interface PopularCategory {
   id: string;

@@ -260,19 +260,19 @@ const Notifications = () => {
               </p>
             </div>
           </div>
-          <div className="flex gap-2">
-            <Button variant="outline" onClick={() => navigate("/notifications/settings")}>
+          <div className="flex w-full flex-wrap gap-2 sm:w-auto">
+            <Button variant="outline" className="min-w-0 flex-1 sm:flex-none" onClick={() => navigate("/notifications/settings")}>
               <Settings className="h-4 w-4 ml-2" />
               إعدادات الإشعارات
             </Button>
             {unreadCount > 0 && (
-              <Button variant="outline" onClick={markAllAsRead}>
+              <Button variant="outline" className="min-w-0 flex-1 sm:flex-none" onClick={markAllAsRead}>
                 <CheckCheck className="h-4 w-4 ml-2" />
                 تحديد الكل كمقروء
               </Button>
             )}
             {notifications.some(n => n.is_read) && (
-              <Button variant="outline" onClick={deleteAllRead}>
+              <Button variant="outline" className="min-w-0 flex-1 sm:flex-none" onClick={deleteAllRead}>
                 <Trash2 className="h-4 w-4 ml-2" />
                 حذف المقروءة
               </Button>

@@ -171,7 +171,7 @@ const VendorOrders = () => {
 
         <Card>
           <CardContent className="flex flex-wrap items-end gap-3 p-4">
-            <div className="min-w-[220px] flex-1">
+            <div className="min-w-0 basis-full flex-1 sm:basis-auto">
               <div className="relative">
                 <Search className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                 <Input
@@ -183,7 +183,7 @@ const VendorOrders = () => {
               </div>
             </div>
             <Select value={status} onValueChange={setStatus}>
-              <SelectTrigger className="w-[180px]">
+              <SelectTrigger className="w-full min-w-0 sm:w-[180px]">
                 <SelectValue placeholder="كل الحالات" />
               </SelectTrigger>
               <SelectContent className="bg-background">
@@ -193,10 +193,10 @@ const VendorOrders = () => {
                 ))}
               </SelectContent>
             </Select>
-            <div className="flex items-center gap-2">
-              <Input type="date" value={dateFrom} onChange={(e) => setDateFrom(e.target.value)} className="w-[150px]" />
+            <div className="grid w-full grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-2 sm:w-auto">
+              <Input type="date" value={dateFrom} onChange={(e) => setDateFrom(e.target.value)} className="w-full sm:w-[150px]" />
               <span className="text-sm text-muted-foreground">إلى</span>
-              <Input type="date" value={dateTo} onChange={(e) => setDateTo(e.target.value)} className="w-[150px]" />
+              <Input type="date" value={dateTo} onChange={(e) => setDateTo(e.target.value)} className="w-full sm:w-[150px]" />
             </div>
           </CardContent>
         </Card>

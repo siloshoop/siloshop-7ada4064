@@ -79,7 +79,7 @@ const Settings = () => {
           </Link>
 
           {items.map(({ to, icon: Icon, title, desc }) => (
-            <Link key={to} to={to}>
+            <Link key={`${to}-${title}`} to={to}>
               <Card className="p-4 flex items-center gap-4 hover:bg-accent transition-colors">
                 <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
                   <Icon className="h-5 w-5 text-primary" />

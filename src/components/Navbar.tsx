@@ -195,7 +195,7 @@ const Navbar = () => {
                 <Menu className="h-5 w-5" />
               </Button>
             </SheetTrigger>
-            <SheetContent side="right" className="w-[min(300px,calc(100vw-1rem))]">
+            <SheetContent side="right" className="w-[min(300px,calc(100vw-1rem))] max-w-[calc(100vw-1rem)]">
               <SheetHeader>
                 <SheetTitle>القائمة</SheetTitle>
               </SheetHeader>

@@ -29,11 +29,14 @@ const config: CapacitorConfig = {
     // Secure origin (https://localhost) so localStorage — and therefore the
     // Supabase session — persists across app restarts.
     androidScheme: "https",
-    // Android 15+ forces edge-to-edge; without margins the header/footer are
-    // drawn under the system bars and the UI looks cut off.
-    adjustMarginsForEdgeToEdge: "force",
   },
   plugins: {
+    SystemBars: {
+      // Capacitor 8 injects --safe-area-inset-* values for Android 15+
+      // and consumes native insets on older WebViews when necessary.
+      insetsHandling: "css",
+      style: "LIGHT",
+    },
     SplashScreen: {
       launchShowDuration: 1500,
       launchAutoHide: true,

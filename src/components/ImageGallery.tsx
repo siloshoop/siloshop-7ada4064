@@ -158,7 +158,7 @@ export const ImageGallery = ({ images, productName, videoUrl }: ImageGalleryProp
             variant="secondary"
             size="icon"
             aria-label="عرض بالحجم الكامل"
-            className={`absolute top-3 left-3 h-9 w-9 rounded-full opacity-0 group-hover:opacity-100 transition-opacity backdrop-blur ${
+            className={`absolute top-3 left-3 h-9 w-9 rounded-full opacity-100 transition-opacity backdrop-blur sm:opacity-0 sm:group-hover:opacity-100 ${
               showVideo ? "hidden" : ""
             }`}
             onClick={() => setIsLightboxOpen(true)}
@@ -172,7 +172,7 @@ export const ImageGallery = ({ images, productName, videoUrl }: ImageGalleryProp
                 variant="secondary"
                 size="icon"
                 aria-label="الصورة السابقة"
-                className="absolute right-3 top-1/2 -translate-y-1/2 h-10 w-10 rounded-full opacity-0 group-hover:opacity-100 transition-opacity backdrop-blur"
+                className="absolute right-3 top-1/2 h-10 w-10 -translate-y-1/2 rounded-full opacity-100 transition-opacity backdrop-blur sm:opacity-0 sm:group-hover:opacity-100"
                 onClick={goToPrevious}
               >
                 <ChevronRight className="h-5 w-5" />
@@ -181,7 +181,7 @@ export const ImageGallery = ({ images, productName, videoUrl }: ImageGalleryProp
                 variant="secondary"
                 size="icon"
                 aria-label="الصورة التالية"
-                className="absolute left-3 top-1/2 -translate-y-1/2 h-10 w-10 rounded-full opacity-0 group-hover:opacity-100 transition-opacity backdrop-blur"
+                className="absolute left-3 top-1/2 h-10 w-10 -translate-y-1/2 rounded-full opacity-100 transition-opacity backdrop-blur sm:opacity-0 sm:group-hover:opacity-100"
                 onClick={goToNext}
               >
                 <ChevronLeft className="h-5 w-5" />

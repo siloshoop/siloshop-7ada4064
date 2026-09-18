@@ -224,9 +224,11 @@ const OrderDetails = () => {
 
         <Card>
           <CardHeader>
-            <CardTitle className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-              <span>تفاصيل الطلب {orderDisplayNumber(order)}</span>
-              <Badge variant={status.variant}>{status.label}</Badge>
+            <CardTitle className="flex min-w-0 flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+              <span className="min-w-0 break-words">تفاصيل الطلب {orderDisplayNumber(order)}</span>
+              <Badge variant={status.variant} className="max-w-full self-start whitespace-normal sm:max-w-[70%] sm:self-auto">
+                {status.label}
+              </Badge>
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3 text-sm">

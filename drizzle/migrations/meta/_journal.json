@@ -15,6 +15,13 @@
       "when": 1789710180165,
       "tag": "0001_fix_admin_set_product_flags_actor_role",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1789719254580,
+      "tag": "0002_fix_admin_actions_and_product_flags",
+      "breakpoints": true
     }
   ]
 }

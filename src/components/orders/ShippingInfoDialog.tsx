@@ -10,7 +10,7 @@ import { Loader2, Truck } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { saveShippingInfo, friendlyOrderError, type ShippingInfoInput } from "@/lib/orderStatus";
 
-export interface ShippingInfoValues extends ShippingInfoInput {}
+export type ShippingInfoValues = ShippingInfoInput;
 
 interface Props {
   orderId: string | null;
@@ -69,7 +69,7 @@ const ShippingInfoDialog = ({ orderId, open, onOpenChange, initial, onSaved }: P
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[480px]" dir="rtl">
+      <DialogContent className="max-w-[480px]" dir="rtl">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Truck className="h-5 w-5" />

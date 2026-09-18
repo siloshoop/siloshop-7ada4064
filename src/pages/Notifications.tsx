@@ -260,19 +260,19 @@ const Notifications = () => {
               </p>
             </div>
           </div>
-          <div className="flex gap-2">
-            <Button variant="outline" onClick={() => navigate("/notifications/settings")}>
+          <div className="flex w-full flex-wrap gap-2 sm:w-auto">
+            <Button variant="outline" className="min-w-0 flex-1 sm:flex-none" onClick={() => navigate("/notifications/settings")}>
               <Settings className="h-4 w-4 ml-2" />
               إعدادات الإشعارات
             </Button>
             {unreadCount > 0 && (
-              <Button variant="outline" onClick={markAllAsRead}>
+              <Button variant="outline" className="min-w-0 flex-1 sm:flex-none" onClick={markAllAsRead}>
                 <CheckCheck className="h-4 w-4 ml-2" />
                 تحديد الكل كمقروء
               </Button>
             )}
             {notifications.some(n => n.is_read) && (
-              <Button variant="outline" onClick={deleteAllRead}>
+              <Button variant="outline" className="min-w-0 flex-1 sm:flex-none" onClick={deleteAllRead}>
                 <Trash2 className="h-4 w-4 ml-2" />
                 حذف المقروءة
               </Button>
@@ -284,20 +284,20 @@ const Notifications = () => {
         <Card className="mb-6">
           <CardContent className="p-4">
             <div className="flex flex-wrap gap-4">
-              <div className="flex-1 min-w-[200px]">
+              <div className="min-w-0 basis-full flex-1 sm:basis-auto">
                 <div className="relative">
-                  <Search className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Search className="absolute end-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                   <Input
                     placeholder="بحث في الإشعارات..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="pr-10"
+                    className="pe-10"
                   />
                   {searchQuery && (
                     <Button
                       variant="ghost"
                       size="icon"
-                      className="absolute left-1 top-1/2 -translate-y-1/2 h-7 w-7"
+                      className="absolute start-1 top-1/2 h-7 w-7 -translate-y-1/2"
                       onClick={() => setSearchQuery("")}
                     >
                       <X className="h-4 w-4" />
@@ -306,7 +306,7 @@ const Notifications = () => {
                 </div>
               </div>
               <Select value={typeFilter} onValueChange={setTypeFilter}>
-                <SelectTrigger className="w-[180px]">
+                <SelectTrigger className="w-full min-w-0 sm:w-[180px]">
                   <Filter className="h-4 w-4 ml-2" />
                   <SelectValue placeholder="نوع الإشعار" />
                 </SelectTrigger>

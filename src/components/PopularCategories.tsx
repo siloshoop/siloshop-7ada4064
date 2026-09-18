@@ -19,6 +19,7 @@ import {
   Gamepad, Dice1, Puzzle, Lightbulb, TreeDeciduous, Cat, X
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 
 interface PopularCategory {
   id: string;
@@ -287,30 +288,35 @@ const PopularCategories = () => {
           <div className="mt-4 animate-in slide-in-from-top-2 fade-in duration-300">
             <Card className="border border-primary/20 bg-gradient-to-br from-muted/50 to-background shadow-lg overflow-hidden">
               <CardContent className="p-4 md:p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <div className="flex items-center gap-2">
+                <div className="mb-4 flex min-w-0 flex-wrap items-center justify-between gap-2">
+                  <div className="flex min-w-0 flex-wrap items-center gap-2">
                     <div className={`p-1.5 rounded-lg bg-gradient-to-br ${categoryColors[expandedColorIndex % categoryColors.length].bg}`}>
                       {(() => {
                         const Icon = getIconComponent(expandedCategory.icon);
                         return <Icon className={`h-4 w-4 ${categoryColors[expandedColorIndex % categoryColors.length].icon}`} />;
                       })()}
                     </div>
-                    <h3 className="font-bold text-foreground">{expandedCategory.name_ar}</h3>
+                    <h3 className="min-w-0 break-words font-bold text-foreground">{expandedCategory.name_ar}</h3>
                     <span className="text-xs text-muted-foreground">({expandedSubs.length} تصنيف فرعي)</span>
                   </div>
                   <div className="flex gap-2">
-                    <button
+                    <Button
+                      variant="link"
+                      size="sm"
                       onClick={() => navigate(`/category/${expandedCategoryId}`)}
-                      className="text-xs text-primary hover:underline font-medium"
+                      className="h-auto p-1 text-xs font-medium"
                     >
                       عرض الكل
-                    </button>
-                    <button
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
                       onClick={() => setExpandedCategoryId(null)}
-                      className="p-1 rounded-full hover:bg-muted transition-colors"
+                      className="h-7 w-7 rounded-full"
+                      aria-label="إغلاق التصنيفات الفرعية"
                     >
                       <X className="h-4 w-4 text-muted-foreground" />
-                    </button>
+                    </Button>
                   </div>
                 </div>
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2">

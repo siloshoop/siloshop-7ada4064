@@ -88,7 +88,7 @@ const AdminAuditLog = () => {
     >
       <Card className="mb-4">
         <CardContent className="flex flex-wrap items-center gap-3 p-4">
-          <div className="relative min-w-[220px] flex-1">
+          <div className="relative min-w-0 basis-full flex-1 sm:basis-auto">
             <Search className="absolute end-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
               value={search}
@@ -98,7 +98,7 @@ const AdminAuditLog = () => {
             />
           </div>
           <Select value={target} onValueChange={setTarget}>
-            <SelectTrigger className="w-[200px]"><SelectValue placeholder="الجدول" /></SelectTrigger>
+            <SelectTrigger className="w-full min-w-0 sm:w-[200px]"><SelectValue placeholder="الجدول" /></SelectTrigger>
             <SelectContent>
               <SelectItem value={ALL}>كل الجداول</SelectItem>
               {targets.map((t) => (

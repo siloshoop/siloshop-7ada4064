@@ -107,7 +107,7 @@ const AdminReviews = () => {
         </Button>
       }
     >
-      <div className="mb-4 grid grid-cols-3 gap-3">
+      <div className="mb-4 grid grid-cols-1 gap-3 min-[360px]:grid-cols-3">
         {[
           { label: "إجمالي المعروض", value: stats.total },
           { label: "مخفية", value: stats.hidden },
@@ -130,7 +130,7 @@ const AdminReviews = () => {
             ))}
           </TabsList>
         </Tabs>
-        <div className="relative min-w-[220px] flex-1">
+        <div className="relative min-w-0 basis-full flex-1 sm:basis-auto">
           <Search className="absolute end-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
             value={search}

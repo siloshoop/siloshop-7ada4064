@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">SiloShop</string>
+    <string name="title_activity_main">SiloShop</string>
+    <string name="package_name">app.lovable.p456c8c161d24407ca1f5c7b374b1fe4d</string>
+    <string name="custom_url_scheme">app.lovable.p456c8c161d24407ca1f5c7b374b1fe4d</string>
+</resources>

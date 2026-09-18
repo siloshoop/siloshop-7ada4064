@@ -48,8 +48,8 @@ const Footer = () => {
 
       {/* Background decoration */}
       <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute bottom-0 left-0 w-64 h-64 bg-primary/5 rounded-full blur-3xl" />
-        <div className="absolute top-0 right-0 w-96 h-96 bg-accent/5 rounded-full blur-3xl" />
+        <div className="absolute bottom-0 start-0 h-64 w-64 max-w-full rounded-full bg-primary/5 blur-3xl" />
+        <div className="absolute end-0 top-0 h-96 w-96 max-w-full rounded-full bg-accent/5 blur-3xl" />
       </div>
       
       <div className="container px-4 py-12 relative z-10">

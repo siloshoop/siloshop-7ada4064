@@ -224,43 +224,57 @@ const ProductCard = memo(({
           {id ? (
             <FavoriteButton productId={id} variant="ghost" size="icon" />
           ) : (
-            <button
-              className="h-7 w-7 flex items-center justify-center rounded-lg bg-background/80 backdrop-blur-md shadow-sm hover:bg-primary hover:text-primary-foreground transition-all duration-300 hover:scale-110"
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              aria-label="إضافة إلى المفضلة"
+              className="h-7 w-7 rounded-lg bg-background/80 shadow-sm backdrop-blur-md hover:bg-primary hover:text-primary-foreground"
               onClick={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
               }}
             >
               <Heart className="h-3.5 w-3.5" />
-            </button>
+            </Button>
           )}
           {id && (
-            <button
-              className="h-7 w-7 flex items-center justify-center rounded-lg bg-background/80 backdrop-blur-md shadow-sm hover:bg-primary hover:text-primary-foreground transition-all duration-300 hover:scale-110 opacity-0 group-hover:opacity-100 translate-x-2 group-hover:translate-x-0"
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              className="h-7 w-7 rounded-lg bg-background/80 opacity-100 shadow-sm backdrop-blur-md hover:bg-primary hover:text-primary-foreground sm:translate-x-2 sm:opacity-0 sm:group-hover:translate-x-0 sm:group-hover:opacity-100"
               onClick={handleCompare}
               title="أضف للمقارنة"
             >
               <Scale className="h-3.5 w-3.5" />
-            </button>
+            </Button>
           )}
         </div>
 
         <img
-          src={image}
+          src={image || "/placeholder.svg"}
           alt={name}
           loading="lazy"
           decoding="async"
           onLoad={() => setImageLoaded(true)}
+          onError={(event) => {
+            event.currentTarget.src = "/placeholder.svg";
+            setImageLoaded(true);
+          }}
           className={`object-cover w-full h-full transition-all duration-700 ease-out ${
             imageLoaded ? "opacity-100" : "opacity-0"
           } ${isHovered ? "scale-110" : "scale-100"}`}
         />
 
-        <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-black/10 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-500" />
+        <div className="absolute inset-0 bg-gradient-to-t from-foreground/50 via-foreground/10 to-transparent opacity-0 transition-all duration-500 group-hover:opacity-100" />
 
-        <div className="absolute bottom-0 left-0 right-0 p-2 translate-y-full group-hover:translate-y-0 transition-transform duration-400 ease-out">
-          <button
-            className="w-full flex items-center justify-center gap-1.5 bg-background/90 backdrop-blur-md text-foreground py-2 rounded-lg text-xs font-semibold shadow-lg hover:bg-primary hover:text-primary-foreground transition-colors duration-200"
+        <div className="absolute inset-x-0 bottom-0 hidden translate-y-full p-2 transition-transform duration-300 ease-out group-hover:translate-y-0 sm:block">
+          <Button
+            type="button"
+            variant="secondary"
+            size="sm"
+            className="w-full bg-background/90 text-xs font-semibold shadow-lg backdrop-blur-md hover:bg-primary hover:text-primary-foreground"
             onClick={(e) => {
               e.stopPropagation();
               goToProduct();
@@ -268,7 +282,7 @@ const ProductCard = memo(({
           >
             <Eye className="h-3.5 w-3.5" />
             عرض سريع
-          </button>
+          </Button>
         </div>
       </div>
 
@@ -288,8 +302,8 @@ const ProductCard = memo(({
         {/* Local seller / imported-from-Turkey badge */}
         <ProductOriginBadge productType={productType} compact />
 
-        <div className="flex items-center gap-1">
-          <div className="flex text-amber-400">
+        <div className="flex min-w-0 flex-wrap items-center gap-1">
+          <div className="flex shrink-0 text-warning">
             {[...Array(5)].map((_, i) => (
               <Star
                 key={i}
@@ -297,19 +311,19 @@ const ProductCard = memo(({
               />
             ))}
           </div>
-          <span className="text-[10px] text-muted-foreground">
+          <span className="min-w-0 truncate text-[10px] text-muted-foreground">
             {rating > 0 ? rating.toFixed(1) : "—"} ({reviews} تقييم)
           </span>
           {typeof soldCount === "number" && soldCount > 0 && (
-            <span className="text-[10px] text-muted-foreground">
+            <span className="min-w-0 truncate text-[10px] text-muted-foreground">
               · تم بيع {soldCount.toLocaleString()}
             </span>
           )}
 
         </div>
 
-        <div className="flex items-baseline gap-1.5">
-          <span className="text-sm font-bold text-primary">
+        <div className="flex min-w-0 flex-wrap items-baseline gap-1.5">
+          <span className="break-words text-sm font-bold text-primary">
             {price.toLocaleString()} ل.س
           </span>
           {originalPrice && originalPrice > price && (

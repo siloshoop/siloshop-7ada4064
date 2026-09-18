@@ -83,7 +83,7 @@ export const ProductReviews = ({ productId, vendorId }: ProductReviewsProps) => 
     }
 
     const base = (rows as any[]) || [];
-    let repliesByReview: Record<string, ReviewReply[]> = {};
+    const repliesByReview: Record<string, ReviewReply[]> = {};
     const ids = base.map((r) => r.id);
     if (ids.length > 0) {
       const { data: replies } = await supabase

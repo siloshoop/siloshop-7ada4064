@@ -73,8 +73,8 @@ const Navbar = () => {
 
   useSyncListener(["cart"], fetchCartCount);
   return (
-    <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container flex min-w-0 flex-wrap items-center gap-2 px-4 py-2 md:h-16 md:flex-nowrap md:justify-between md:gap-4 md:py-0">
+    <header className="safe-area-top sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <div className="container flex min-w-0 flex-wrap items-center gap-2 px-3 py-2 sm:px-4 md:h-16 md:flex-nowrap md:justify-between md:gap-4 md:py-0">
         {/* Right side - Icons */}
         <div className="order-2 flex w-full min-w-0 items-center justify-between gap-0 md:order-none md:w-auto md:justify-start md:gap-2">
           <ThemeToggle />
@@ -195,7 +195,7 @@ const Navbar = () => {
                 <Menu className="h-5 w-5" />
               </Button>
             </SheetTrigger>
-            <SheetContent side="right" className="w-[300px]">
+            <SheetContent side="right" className="w-[min(300px,calc(100vw-1rem))]">
               <SheetHeader>
                 <SheetTitle>القائمة</SheetTitle>
               </SheetHeader>
@@ -300,14 +300,14 @@ const Navbar = () => {
           <BrandLogo
             as="h1"
             onClick={() => navigate("/")}
-            className="max-w-[160px] text-2xl md:max-w-none md:text-4xl"
+            className="max-w-[160px] text-xl sm:text-2xl md:max-w-none md:text-3xl"
           />
         </div>
       </div>
 
       {/* Mega Menu Navigation */}
       <nav className="border-t bg-background/95">
-        <div className="container flex h-10 min-w-0 items-center justify-between overflow-hidden px-4">
+        <div className="container flex h-10 min-w-0 items-center justify-between overflow-hidden px-3 sm:px-4">
           <div className="hidden md:block">
             <MegaMenu />
           </div>

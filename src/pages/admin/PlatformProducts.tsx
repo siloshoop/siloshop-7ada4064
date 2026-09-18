@@ -69,7 +69,8 @@ const PlatformProducts = () => {
 
   const toggleSelect = (id: string) => {
     const s = new Set(selected);
-    s.has(id) ? s.delete(id) : s.add(id);
+    if (s.has(id)) s.delete(id);
+    else s.add(id);
     setSelected(s);
   };
 

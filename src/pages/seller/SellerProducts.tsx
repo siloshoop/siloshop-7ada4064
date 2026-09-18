@@ -181,7 +181,8 @@ const SellerProducts = () => {
   const toggleOne = (id: string) =>
     setSelected((prev) => {
       const next = new Set(prev);
-      next.has(id) ? next.delete(id) : next.add(id);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
       return next;
     });
 
@@ -357,12 +358,12 @@ const SellerProducts = () => {
     >
       <Card className="mb-4">
         <CardContent className="flex flex-wrap gap-3 p-4">
-          <div className="relative min-w-[200px] flex-1">
+          <div className="relative min-w-0 basis-full flex-1 sm:basis-auto">
             <Search className="absolute end-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="ابحث بالاسم أو SKU أو الباركود" className="pe-9" />
           </div>
           <Select value={status} onValueChange={setStatus}>
-            <SelectTrigger className="w-44"><SelectValue /></SelectTrigger>
+            <SelectTrigger className="w-full min-w-0 sm:w-44"><SelectValue /></SelectTrigger>
             <SelectContent>
               {STATUS_FILTERS.map((s) => (
                 <SelectItem key={s} value={s}>{s === "all" ? "كل الحالات" : moderationLabel(s)}</SelectItem>
@@ -370,7 +371,7 @@ const SellerProducts = () => {
             </SelectContent>
           </Select>
           <Select value={brandFilter} onValueChange={setBrandFilter}>
-            <SelectTrigger className="w-44"><SelectValue placeholder="العلامة التجارية" /></SelectTrigger>
+            <SelectTrigger className="w-full min-w-0 sm:w-44"><SelectValue placeholder="العلامة التجارية" /></SelectTrigger>
             <SelectContent>
               <SelectItem value="all">كل العلامات التجارية</SelectItem>
               {brands.map((b) => (
@@ -379,7 +380,7 @@ const SellerProducts = () => {
             </SelectContent>
           </Select>
           <Select value={stockFilter} onValueChange={setStockFilter}>
-            <SelectTrigger className="w-40"><SelectValue /></SelectTrigger>
+            <SelectTrigger className="w-full min-w-0 sm:w-40"><SelectValue /></SelectTrigger>
             <SelectContent>
               {STOCK_FILTERS.map((s) => (
                 <SelectItem key={s.value} value={s.value}>{s.label}</SelectItem>
@@ -387,7 +388,7 @@ const SellerProducts = () => {
             </SelectContent>
           </Select>
           <Select value={sortBy} onValueChange={setSortBy}>
-            <SelectTrigger className="w-40"><SelectValue /></SelectTrigger>
+            <SelectTrigger className="w-full min-w-0 sm:w-40"><SelectValue /></SelectTrigger>
             <SelectContent>
               {SORT_OPTIONS.map((s) => (
                 <SelectItem key={s.value} value={s.value}>{s.label}</SelectItem>

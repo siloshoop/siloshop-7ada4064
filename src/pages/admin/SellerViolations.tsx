@@ -191,7 +191,7 @@ const SellerViolationsAdmin = () => {
             </TabsList>
           </Tabs>
           <Input
-            className="min-w-[200px] flex-1"
+            className="min-w-0 basis-full flex-1 sm:basis-auto"
             placeholder="بحث باسم البائع أو السبب"
             value={search}
             onChange={(e) => setSearch(e.target.value)}

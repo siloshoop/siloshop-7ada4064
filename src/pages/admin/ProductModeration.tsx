@@ -22,6 +22,13 @@ type Status = "pending" | "approved" | "rejected" | "draft" | "hidden" | "archiv
 const ALL = "__all__";
 const PAGE_SIZE = 30;
 
+const adminErrorMessage = (message: string) => {
+  if (message.includes("not_authorized")) return "ليس لديك صلاحية لتنفيذ هذا الإجراء";
+  if (message.includes("product_not_found")) return "المنتج غير موجود أو تم حذفه";
+  if (message.includes("actor_admin_role")) return "تعذر التحقق من صلاحية المدير. حدّث الصفحة وحاول مجددًا";
+  return message;
+};
+
 interface ProductRow {
   id: string;
   name: string;
@@ -149,7 +156,7 @@ const ProductModeration = () => {
     });
     setWorking(false);
     if (error) {
-      toast({ title: "تعذر تنفيذ الإجراء", description: error.message, variant: "destructive" });
+      toast({ title: "تعذر تنفيذ الإجراء", description: adminErrorMessage(error.message), variant: "destructive" });
       return;
     }
     toast({ title: action === "approve" ? "تم اعتماد المنتج" : "تم رفض المنتج" });
@@ -190,7 +197,7 @@ const ProductModeration = () => {
       _is_active: flags.is_active ?? null,
     });
     if (error) {
-      toast({ title: "تعذر تحديث حالة العرض", description: error.message, variant: "destructive" });
+      toast({ title: "تعذر تحديث حالة العرض", description: adminErrorMessage(error.message), variant: "destructive" });
       return;
     }
     setRows((prev) => prev.map((r) => (r.id === product.id ? { ...r, ...flags } : r)));
@@ -201,6 +208,7 @@ const ProductModeration = () => {
     if (!ids.length) return;
     setWorking(true);
     let ok = 0;
+    let lastError = "";
     for (const id of ids) {
       const { error } = await supabase.rpc("admin_set_product_flags", {
         _product_id: id,
@@ -210,9 +218,14 @@ const ProductModeration = () => {
         _is_active: flags.is_active ?? null,
       });
       if (!error) ok += 1;
+      else lastError = adminErrorMessage(error.message);
     }
     setWorking(false);
-    toast({ title: `تم تحديث ${ok} منتج` });
+    toast({
+      title: ok === ids.length ? `تم تحديث ${ok} منتج` : `تم تحديث ${ok} من ${ids.length} منتج`,
+      description: lastError || undefined,
+      variant: ok === ids.length ? "default" : "destructive",
+    });
     void load();
   };
 

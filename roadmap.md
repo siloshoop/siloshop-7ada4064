@@ -14,8 +14,14 @@
 - [x] Re-run authenticated and public browser checks plus Android source validation
 - [x] Record remaining device-only or toolchain limitations
 
-### Validation limits
+### Native build verification
 
-- Browser viewport coverage completed at 320×640, 360×800, 373×812, 412×915, 480×960, and 740×360.
-- Native icons and splash resources validate successfully, and Capacitor 8 SystemBars CSS inset handling is configured.
-- A native Gradle/AAB build still requires a local JDK, Android SDK, and release keystore; this environment has no `JAVA_HOME`.
+- [x] JDK 21 + Android SDK 36 installed; `./gradlew assembleDebug` and `./gradlew bundleRelease` both succeed
+- [x] Release bundle contains web assets, launcher icons, splash resources, and Capacitor config
+- [x] Bundle signing verified with a throwaway test key (real release key stays on the owner's machine)
+- [x] 77 checks over the bundled Android assets in an Android WebView user agent at 320×640, 360×800, 373×812, 412×915, 480×960, 800×360, 915×412: no overflow, clipping, broken images, or page errors
+- [x] Fixed collapsed header navigation row at widths ≥768px (landscape)
+
+### Remaining owner-only step
+
+- Signed production AAB must be built locally with the private upload keystore (`docs/android-signing.md`).

@@ -13,6 +13,7 @@ import { Loader2, Plus, Trash2, Megaphone, Pencil, GripVertical, Eye, EyeOff } f
 import { format } from "date-fns";
 import { ar } from "date-fns/locale";
 import { Switch } from "@/components/ui/switch";
+import { broadcastActivationChange } from "@/lib/activationSync";
 
 interface Announcement {
   id: string;
@@ -128,6 +129,7 @@ const ManageAnnouncements = () => {
         description: error.message,
         variant: "destructive",
       });
+      void broadcastActivationChange("announcements", id);
     }
   };
 

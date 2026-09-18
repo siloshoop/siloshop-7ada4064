@@ -16,6 +16,7 @@ import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "
 import {
   Loader2, Search, Check, X, ExternalLink, Sparkles, Flame, ThumbsUp, Eye, EyeOff,
 } from "lucide-react";
+import { broadcastActivationChange } from "@/lib/activationSync";
 
 type Status = "pending" | "approved" | "rejected" | "draft" | "hidden" | "archived";
 
@@ -218,6 +219,7 @@ const ProductModeration = () => {
       title: "تم تحديث حالة المنتج",
       description: flags.is_active === undefined ? "تم حفظ إعدادات العرض" : saved.is_active ? "المنتج ظاهر الآن" : "تم إخفاء المنتج",
     });
+    void broadcastActivationChange("products", product.id);
   };
 
   const bulkFlags = async (flags: { is_featured?: boolean; is_trending?: boolean; is_recommended?: boolean; is_active?: boolean }) => {

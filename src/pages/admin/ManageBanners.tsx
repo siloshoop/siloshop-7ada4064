@@ -13,6 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Loader2, Plus, Pencil, Trash2 } from "lucide-react";
 import ImageUploadField from "@/components/ImageUploadField";
+import { broadcastActivationChange } from "@/lib/activationSync";
 
 interface BannerRow {
   id: string;
@@ -151,6 +152,7 @@ const ManageBanners = () => {
       title: data.is_active ? "تم تفعيل البانر" : "تم إيقاف البانر",
       description: data.is_active ? "سيظهر عند حلول موعد عرضه" : "تم إخفاؤه من صفحات المتجر",
     });
+    void broadcastActivationChange("native_ads", row.id);
     void logAdminAction("banner_visibility_changed", {
       banner_id: row.id,
       is_active: data.is_active,

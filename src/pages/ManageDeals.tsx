@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
+import { broadcastActivationChange } from "@/lib/activationSync";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
@@ -106,6 +107,7 @@ const ManageDeals = () => {
         description: "يرجى ملء جميع الحقول المطلوبة",
         variant: "destructive",
       });
+      void broadcastActivationChange("daily_deals", deal.id);
       return;
     }
 

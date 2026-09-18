@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { broadcastActivationChange } from "@/lib/activationSync";
 import AdminLayout from "@/components/admin/AdminLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -117,6 +118,7 @@ const AdminContent = () => {
     }
     setFaqs((prev) => prev.map((r) => (r.id === row.id ? { ...r, is_active: data.is_active } : r)));
     toast({ title: data.is_active ? "تم نشر السؤال" : "تم إخفاء السؤال" });
+    void broadcastActivationChange("faq_items", row.id);
   };
 
   const savePage = async () => {

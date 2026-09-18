@@ -9,6 +9,7 @@ import { ThemeProvider } from "next-themes";
 import { FlyToCartProvider } from "@/components/FlyToCart";
 import { AuthProvider } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
+import { ACTIVATION_CHANNEL } from "@/lib/activationSync";
 // Homepage stays eager (visibility-first per project error-isolation memory).
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
@@ -149,10 +150,16 @@ const PublicActivationSync = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     if (pathname.startsWith("/admin") || pathname.startsWith("/dashboard") || pathname.startsWith("/seller")) return;
 
-    const channel = supabase.channel("public-activation-sync");
-    ACTIVATION_TABLES.forEach((table) => {
-      channel.on("postgres_changes", { event: "*", schema: "public", table }, () => {
+    const channel = supabase
+      .channel(ACTIVATION_CHANNEL)
+      .on("broadcast", { event: "changed" }, () => {
         setRevision((value) => value + 1);
+      });
+    ACTIVATION_TABLES.forEach((table) => {
+      channel.on("postgres_changes", { event: "UPDATE", schema: "public", table }, (payload) => {
+        const oldRow = payload.old as { is_active?: boolean };
+        const newRow = payload.new as { is_active?: boolean };
+        if (oldRow.is_active !== newRow.is_active) setRevision((value) => value + 1);
       });
     });
     channel.subscribe();

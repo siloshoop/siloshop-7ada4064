@@ -16,6 +16,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Loader2, Plus, Pencil, FolderTree, ChevronUp, ChevronDown, Trash2 } from "lucide-react";
 import ImageUploadField from "@/components/ImageUploadField";
+import { broadcastActivationChange } from "@/lib/activationSync";
 
 interface CategoryRow {
   id: string;
@@ -225,6 +226,7 @@ const ManageCategories = () => {
     }
     setRows((prev) => prev.map((r) => (r.id === row.id ? { ...r, is_active: data.is_active } : r)));
     toast({ title: data.is_active ? "تم تفعيل الفئة" : "تم إخفاء الفئة" });
+    void broadcastActivationChange("categories", row.id);
     void logAdminAction("category_visibility_changed", {
       category_id: row.id,
       is_active: data.is_active,

@@ -16,6 +16,7 @@ import {
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Loader2, Plus, Pencil, ArrowUp, ArrowDown, Trash2 } from "lucide-react";
 import ImageUploadField from "@/components/ImageUploadField";
+import { broadcastActivationChange } from "@/lib/activationSync";
 
 interface BrandRow {
   id: string;
@@ -133,6 +134,7 @@ const ManageBrands = () => {
       title: data.is_active ? "تم تفعيل العلامة التجارية" : "تم إخفاء العلامة التجارية",
       description: data.is_active ? "ستظهر الآن في صفحات المتجر" : "لن تظهر في صفحات المتجر",
     });
+    void broadcastActivationChange("brands", row.id);
     void logAdminAction("brand_visibility_changed", {
       brand_id: row.id,
       is_active: data.is_active,

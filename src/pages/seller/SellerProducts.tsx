@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import { broadcastActivationChange } from "@/lib/activationSync";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import SellerLayout from "@/components/seller/SellerLayout";
@@ -229,6 +230,9 @@ const SellerProducts = () => {
       return;
     }
     toast({ title: `تم تحديث ${Number(data ?? 0)} منتج` });
+    if (payload.is_active !== undefined) {
+      ids.forEach((id) => void broadcastActivationChange("products", id));
+    }
     setPricePct("");
     setBulkStock("");
     await load();

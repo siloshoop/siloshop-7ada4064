@@ -18,6 +18,7 @@ import { useToast } from "@/hooks/use-toast";
 import { logAdminAction } from "@/lib/auditLog";
 import { SYRIAN_GOVERNORATES } from "@/lib/syrianGovernorates";
 import { Loader2, Plus, Save, Trash2, MapPin } from "lucide-react";
+import { broadcastActivationChange } from "@/lib/activationSync";
 
 interface Center {
   id: string;
@@ -128,6 +129,7 @@ const PickupCenters = () => {
     }
     setCenters((prev) => prev.map((item) => item.id === center.id ? { ...item, is_active: data.is_active } : item));
     toast({ title: data.is_active ? "تم تفعيل المركز" : "تم تعطيل المركز" });
+    void broadcastActivationChange("pickup_centers", center.id);
     void logAdminAction("pickup_center_toggled", { id: center.id, is_active: data.is_active });
   };
 

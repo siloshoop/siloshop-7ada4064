@@ -25,3 +25,10 @@
 ### Remaining owner-only step
 
 - Signed production AAB must be built locally with the private upload keystore (`docs/android-signing.md`).
+
+## Banner and campaign visibility
+
+- [ ] Fix responsive banner image/text separation
+- [ ] Render active native ads in all configured placements
+- [ ] Add campaign date controls and status visibility in admin
+- [ ] Verify database reads, live activation, images, and responsive layouts

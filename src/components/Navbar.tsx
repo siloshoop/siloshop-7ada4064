@@ -308,11 +308,11 @@ const Navbar = () => {
       {/* Mega Menu Navigation */}
       <nav className="border-t bg-background/95">
         <div className="container flex h-10 min-w-0 items-center justify-between overflow-hidden px-3 sm:px-4">
-          <div className="hidden md:block">
+          <div className="hidden shrink-0 md:block">
             <MegaMenu />
           </div>
           
-          <div className="flex min-w-0 items-center gap-3 overflow-x-auto scrollbar-hide md:gap-4 md:overflow-visible">
+          <div className="flex min-w-0 flex-1 items-center justify-end gap-3 overflow-x-auto scrollbar-hide md:gap-4">
             <NavLink 
               to="/" 
               className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors whitespace-nowrap"

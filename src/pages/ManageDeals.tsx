@@ -107,7 +107,6 @@ const ManageDeals = () => {
         description: "يرجى ملء جميع الحقول المطلوبة",
         variant: "destructive",
       });
-      void broadcastActivationChange("daily_deals", deal.id);
       return;
     }
 
@@ -240,6 +239,7 @@ const ManageDeals = () => {
         title: "تم بنجاح",
         description: data.is_active ? "تم تفعيل العرض" : "تم إيقاف العرض",
       });
+      void broadcastActivationChange("daily_deals", deal.id);
     } catch (error) {
       toast({
         title: "خطأ",

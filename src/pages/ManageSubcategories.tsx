@@ -185,7 +185,6 @@ const ManageSubcategories = () => {
         description: "يرجى ملء جميع الحقول المطلوبة",
         variant: "destructive",
       });
-      void broadcastActivationChange("subcategories", id);
       return;
     }
 
@@ -290,6 +289,7 @@ const ManageSubcategories = () => {
         title: "تم بنجاح",
         description: `تم ${data.is_active ? "تفعيل" : "إلغاء تفعيل"} التصنيف الفرعي`,
       });
+      void broadcastActivationChange("subcategories", id);
     } catch (error) {
       toast({
         title: "خطأ",

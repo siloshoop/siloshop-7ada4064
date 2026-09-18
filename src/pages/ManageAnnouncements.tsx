@@ -129,7 +129,6 @@ const ManageAnnouncements = () => {
         description: error.message,
         variant: "destructive",
       });
-      void broadcastActivationChange("announcements", id);
     }
   };
 
@@ -167,6 +166,7 @@ const ManageAnnouncements = () => {
         title: data.is_active ? "تم التفعيل" : "تم إلغاء التفعيل",
         description: data.is_active ? "سيظهر الإعلان فورًا ضمن فترة عرضه" : "تم إخفاء الإعلان فورًا",
       });
+      void broadcastActivationChange("announcements", id);
     }
   };
 

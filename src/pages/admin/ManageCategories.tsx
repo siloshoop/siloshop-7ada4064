@@ -321,7 +321,7 @@ const ManageCategories = () => {
                     <ChevronDown className="h-3 w-3" />
                   </Button>
                 </div>
-                <Switch checked={c.is_active} onCheckedChange={() => toggleActive(c)} aria-label="تفعيل الفئة" />
+                <Switch checked={c.is_active} onCheckedChange={() => toggleActive(c)} disabled={togglingId === c.id} aria-label="تفعيل الفئة" />
                 <Button variant="ghost" size="icon" onClick={() => openEdit(c)} aria-label="تعديل">
                   <Pencil className="h-4 w-4" />
                 </Button>

@@ -199,8 +199,8 @@ const ProductModeration = () => {
       _is_recommended: flags.is_recommended ?? null,
       _is_active: flags.is_active ?? null,
     });
-    setTogglingId(null);
     if (error) {
+      setTogglingId(null);
       toast({ title: "تعذر تحديث حالة العرض", description: adminErrorMessage(error.message), variant: "destructive" });
       return;
     }
@@ -210,11 +210,13 @@ const ProductModeration = () => {
       .eq("id", product.id)
       .single();
     if (refreshError || !saved) {
+      setTogglingId(null);
       toast({ title: "تم الحفظ وتعذر تحديث العرض", description: refreshError?.message, variant: "destructive" });
       void load();
       return;
     }
     setRows((prev) => prev.map((r) => (r.id === product.id ? { ...r, ...saved } : r)));
+    setTogglingId(null);
     toast({
       title: "تم تحديث حالة المنتج",
       description: flags.is_active === undefined ? "تم حفظ إعدادات العرض" : saved.is_active ? "المنتج ظاهر الآن" : "تم إخفاء المنتج",
@@ -246,6 +248,9 @@ const ProductModeration = () => {
       variant: ok === ids.length ? "default" : "destructive",
     });
     void load();
+    if (flags.is_active !== undefined) {
+      ids.slice(0, ok).forEach((id) => void broadcastActivationChange("products", id));
+    }
   };
 
   const allSelected = rows.length > 0 && rows.every((r) => selected.has(r.id));

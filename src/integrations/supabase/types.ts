@@ -4603,6 +4603,23 @@ export type Database = {
           user_id: string
         }[]
       }
+      get_public_feature_flags: {
+        Args: never
+        Returns: {
+          description: string
+          enabled: boolean
+          key: string
+          label_ar: string
+        }[]
+      }
+      get_review_helpful_summary: {
+        Args: { _review_ids: string[] }
+        Returns: {
+          current_user_voted: boolean
+          helpful_count: number
+          review_id: string
+        }[]
+      }
       get_seller_performance: {
         Args: { _vendor_id?: string }
         Returns: {

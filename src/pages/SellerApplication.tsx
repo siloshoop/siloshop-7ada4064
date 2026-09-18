@@ -13,7 +13,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { SYRIAN_GOVERNORATES } from "@/lib/syrianGovernorates";
-import { Loader2, ShieldCheck, Clock, XCircle, PauseCircle, Upload, ImageIcon, CheckCircle } from "lucide-react";
+import { Loader2, ShieldCheck, Clock, XCircle, PauseCircle, Upload, CheckCircle } from "lucide-react";
+import ImageUploadField from "@/components/ImageUploadField";
 
 type SellerStatus = "pending" | "approved" | "rejected" | "suspended";
 
@@ -61,10 +62,6 @@ const SellerApplication = () => {
   const [description, setDescription] = useState("");
   const [logoPath, setLogoPath] = useState<string | null>(null);
   const [coverPath, setCoverPath] = useState<string | null>(null);
-  const [logoPreview, setLogoPreview] = useState<string | null>(null);
-  const [coverPreview, setCoverPreview] = useState<string | null>(null);
-  const [uploadingLogo, setUploadingLogo] = useState(false);
-  const [uploadingCover, setUploadingCover] = useState(false);
 
   useEffect(() => {
     if (!authLoading && !user) navigate("/auth");
@@ -98,8 +95,6 @@ const SellerApplication = () => {
       setDescription(a.store_description ?? "");
       setLogoPath(a.logo_url);
       setCoverPath(a.cover_image_url);
-      setLogoPreview(await signedUrl(a.logo_url));
-      setCoverPreview(await signedUrl(a.cover_image_url));
     } else {
       const { data: profile } = await supabase
         .from("profiles")
@@ -118,34 +113,6 @@ const SellerApplication = () => {
     if (user) loadApplication();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
-
-  const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>, kind: "logo" | "cover") => {
-    const file = e.target.files?.[0];
-    if (!file || !user) return;
-    if (!file.type.startsWith("image/")) {
-      toast({ title: "الملف يجب أن يكون صورة", variant: "destructive" });
-      return;
-    }
-    if (file.size > 5 * 1024 * 1024) {
-      toast({ title: "حجم الصورة كبير", description: "الحد الأقصى 5 ميجابايت", variant: "destructive" });
-      return;
-    }
-    if (kind === "logo") setUploadingLogo(true);
-    else setUploadingCover(true);
-    const ext = file.name.split(".").pop() || "jpg";
-    const path = `${user.id}/${kind}-${Date.now()}.${ext}`;
-    const { error } = await supabase.storage.from("store-assets").upload(path, file, { upsert: true });
-    if (error) {
-      toast({ title: "فشل رفع الصورة", description: error.message, variant: "destructive" });
-    } else {
-      const url = await signedUrl(path);
-      if (kind === "logo") { setLogoPath(path); setLogoPreview(url); }
-      else { setCoverPath(path); setCoverPreview(url); }
-      toast({ title: "تم رفع الصورة" });
-    }
-    if (kind === "logo") setUploadingLogo(false);
-    else setUploadingCover(false);
-  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -285,36 +252,29 @@ const SellerApplication = () => {
                   <Textarea rows={3} value={description} onChange={(e) => setDescription(e.target.value)} disabled={!isEditable} maxLength={1000} />
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label>شعار المتجر (اختياري)</Label>
-                    <div className="flex items-center gap-3">
-                      {logoPreview ? (
-                        <img src={logoPreview} alt="شعار المتجر" className="h-14 w-14 rounded-lg object-cover border" loading="lazy" />
-                      ) : (
-                        <div className="h-14 w-14 rounded-lg border flex items-center justify-center text-muted-foreground">
-                          <ImageIcon className="h-5 w-5" />
-                        </div>
-                      )}
-                      <Input type="file" accept="image/*" disabled={!isEditable || uploadingLogo} onChange={(e) => handleUpload(e, "logo")} />
-                      {uploadingLogo && <Loader2 className="h-4 w-4 animate-spin" />}
-                    </div>
+                {user && (
+                  <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                    <ImageUploadField
+                      label="شعار المتجر (اختياري)"
+                      value={logoPath ?? ""}
+                      onChange={(value) => setLogoPath(value || null)}
+                      bucket="store-assets"
+                      folder={user.id}
+                      privateBucket
+                      disabled={!isEditable}
+                      previewClassName="sm:w-24"
+                    />
+                    <ImageUploadField
+                      label="صورة الغلاف (اختياري)"
+                      value={coverPath ?? ""}
+                      onChange={(value) => setCoverPath(value || null)}
+                      bucket="store-assets"
+                      folder={user.id}
+                      privateBucket
+                      disabled={!isEditable}
+                    />
                   </div>
-                  <div className="space-y-2">
-                    <Label>صورة الغلاف (اختياري)</Label>
-                    <div className="flex items-center gap-3">
-                      {coverPreview ? (
-                        <img src={coverPreview} alt="غلاف المتجر" className="h-14 w-24 rounded-lg object-cover border" loading="lazy" />
-                      ) : (
-                        <div className="h-14 w-24 rounded-lg border flex items-center justify-center text-muted-foreground">
-                          <ImageIcon className="h-5 w-5" />
-                        </div>
-                      )}
-                      <Input type="file" accept="image/*" disabled={!isEditable || uploadingCover} onChange={(e) => handleUpload(e, "cover")} />
-                      {uploadingCover && <Loader2 className="h-4 w-4 animate-spin" />}
-                    </div>
-                  </div>
-                </div>
+                )}
 
                 {isEditable && (
                   <Button type="submit" size="lg" disabled={saving} className="w-full md:w-auto">

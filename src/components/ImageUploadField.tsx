@@ -126,7 +126,10 @@ const ImageUploadField = ({
         dir="ltr"
         value={value}
         disabled={disabled || uploading}
-        onChange={(event) => onChange(event.target.value)}
+        onChange={(event) => {
+          if (uploadedPathRef.current) void removeTemporaryUpload();
+          onChange(event.target.value);
+        }}
         placeholder="https://..."
         aria-label={`${label} عبر رابط`}
       />
@@ -162,6 +165,7 @@ const ImageUploadField = ({
             ref={inputRef}
             type="file"
             accept="image/*"
+            capture={undefined}
             className="sr-only"
             disabled={disabled || uploading}
             onChange={(event) => void upload(event.target.files?.[0])}

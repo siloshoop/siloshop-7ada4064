@@ -110,7 +110,7 @@ const Profile = () => {
           <Card className="p-4 sm:p-6 space-y-5">
             <div className="flex min-w-0 flex-col items-start gap-4 sm:flex-row sm:items-center">
               <Avatar className="h-16 w-16">
-                <AvatarImage src={avatarUrl.startsWith("http") ? avatarUrl : undefined} />
+                <AvatarImage src={avatarUrl || undefined} />
                 <AvatarFallback>{fullName.charAt(0) || "?"}</AvatarFallback>
               </Avatar>
             </div>
@@ -119,9 +119,8 @@ const Profile = () => {
                 label="الصورة الشخصية"
                 value={avatarUrl}
                 onChange={setAvatarUrl}
-                bucket="profile-images"
+                bucket="product-images"
                 folder={user.id}
-                privateBucket
                 previewClassName="sm:w-24"
               />
             )}

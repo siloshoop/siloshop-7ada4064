@@ -504,7 +504,7 @@ const ManageUsers = () => {
                             updateProfileRole(userProfile.id, value)
                           }
                         >
-                          <SelectTrigger className="w-32">
+                          <SelectTrigger className="w-full min-w-0 sm:w-32">
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>

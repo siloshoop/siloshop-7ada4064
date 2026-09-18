@@ -18,7 +18,7 @@ const PullToRefreshIndicator = ({
 
   return (
     <div
-      className="fixed top-0 left-0 right-0 z-50 flex justify-center pointer-events-none md:hidden"
+      className="safe-area-top fixed inset-x-0 top-0 z-50 flex justify-center pointer-events-none md:hidden"
       style={{
         transform: `translateY(${Math.min(pullDistance, 100)}px)`,
         opacity: Math.min(progress, 1),

@@ -769,10 +769,10 @@ const Product = () => {
 
       </main>
 
-      <div className="h-16 md:hidden" aria-hidden="true" />
+      <div className="h-[calc(4rem+max(env(safe-area-inset-bottom,0px),var(--safe-area-inset-bottom,0px)))] md:hidden" aria-hidden="true" />
 
       {/* Sticky mobile action bar */}
-      <div className="fixed inset-x-0 bottom-[calc(3.5rem+env(safe-area-inset-bottom,0px))] z-40 border-t bg-background/95 shadow-lg backdrop-blur supports-[backdrop-filter]:bg-background/80 md:hidden">
+      <div className="safe-area-bottom safe-area-x fixed inset-x-0 bottom-0 z-40 border-t bg-background/95 shadow-lg backdrop-blur supports-[backdrop-filter]:bg-background/80 md:hidden">
         <div className="container px-3 py-2 flex items-center gap-2">
           <FavoriteButton productId={id!} variant="outline" size="icon" />
           <Button

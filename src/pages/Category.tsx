@@ -7,6 +7,7 @@ import { ProductGridSkeleton } from "@/components/skeletons/ProductSkeletons";
 import ProductCard from "@/components/ProductCard";
 import { SearchFilters } from "@/components/SearchFilters";
 import { Loader2 } from "lucide-react";
+import NativeAdBanner from "@/components/NativeAdBanner";
 interface Product {
   id: string;
   name: string;
@@ -217,6 +218,8 @@ const Category = () => {
             onFilterChange={(f) => setFilters((prev) => ({ ...prev, ...f }))}
           />
         </div>
+
+        <NativeAdBanner placement="category" className="mb-8 !px-0" />
 
         {filteredProducts.length === 0 ? (
           <div className="text-center py-12">

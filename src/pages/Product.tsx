@@ -31,6 +31,7 @@ import SeoHead from "@/components/SeoHead";
 import ProductVariantPicker from "@/components/product/ProductVariantPicker";
 import type { Database } from "@/integrations/supabase/types";
 import { notifySync, useSyncListener } from "@/lib/uiSync";
+import NativeAdBanner from "@/components/NativeAdBanner";
 
 type ProductVariant = Database["public"]["Tables"]["product_variants"]["Row"];
 interface Product {
@@ -368,6 +369,7 @@ const Product = () => {
       />
       <Navbar />
       <main className="flex-1 container max-w-6xl px-4 py-6 md:py-8">
+        <NativeAdBanner placement="product" className="mb-8 !px-0" />
         <div className="grid lg:grid-cols-[minmax(0,1.05fr)_minmax(0,1fr)] gap-6 lg:gap-10 animate-fade-in">
           {/* Image Gallery */}
           <div className="relative">

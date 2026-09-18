@@ -149,16 +149,15 @@ export const ProductReviews = ({ productId, vendorId }: ProductReviewsProps) => 
       // Fetch helpful votes for all loaded reviews
       const reviewIds = data.map((r: any) => r.id);
       if (reviewIds.length > 0) {
-        const { data: votes } = await supabase
-          .from("review_helpful_votes")
-          .select("review_id, user_id")
-          .in("review_id", reviewIds);
+        const { data: votes } = await supabase.rpc("get_review_helpful_summary", {
+          _review_ids: reviewIds,
+        });
 
         const counts: Record<string, number> = {};
         const mine = new Set<string>();
         (votes || []).forEach((v: any) => {
-          counts[v.review_id] = (counts[v.review_id] || 0) + 1;
-          if (user && v.user_id === user.id) mine.add(v.review_id);
+          counts[v.review_id] = Number(v.helpful_count) || 0;
+          if (v.current_user_voted) mine.add(v.review_id);
         });
         setHelpfulCounts(counts);
         setMyVotes(mine);

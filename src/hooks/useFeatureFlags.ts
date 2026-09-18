@@ -29,10 +29,7 @@ const fetchFlags = async (force = false): Promise<FeatureFlag[]> => {
   if (!force && cache) return Promise.resolve(cache);
   if (!force && inflight) return inflight;
   inflight = (async () => {
-    const { data } = await supabase
-      .from("feature_flags")
-      .select("key, enabled, label_ar, description")
-      .order("key");
+    const { data } = await supabase.rpc("get_public_feature_flags");
     cache = (data ?? []) as FeatureFlag[];
     inflight = null;
     listeners.forEach((fn) => fn(cache as FeatureFlag[]));

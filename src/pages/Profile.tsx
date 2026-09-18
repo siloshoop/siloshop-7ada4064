@@ -13,6 +13,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import ChangePasswordCard from "@/components/account/ChangePasswordCard";
 import DeleteAccountCard from "@/components/account/DeleteAccountCard";
+import ImageUploadField from "@/components/ImageUploadField";
 
 const Profile = () => {
   const { user, loading: authLoading } = useAuth();
@@ -109,14 +110,21 @@ const Profile = () => {
           <Card className="p-4 sm:p-6 space-y-5">
             <div className="flex min-w-0 flex-col items-start gap-4 sm:flex-row sm:items-center">
               <Avatar className="h-16 w-16">
-                <AvatarImage src={avatarUrl || undefined} />
+                <AvatarImage src={avatarUrl.startsWith("http") ? avatarUrl : undefined} />
                 <AvatarFallback>{fullName.charAt(0) || "?"}</AvatarFallback>
               </Avatar>
-              <div className="w-full min-w-0 flex-1">
-                <Label htmlFor="avatar">رابط الصورة</Label>
-                <Input id="avatar" value={avatarUrl} onChange={(e) => setAvatarUrl(e.target.value)} placeholder="https://..." />
-              </div>
             </div>
+            {user && (
+              <ImageUploadField
+                label="الصورة الشخصية"
+                value={avatarUrl}
+                onChange={setAvatarUrl}
+                bucket="profile-images"
+                folder={user.id}
+                privateBucket
+                previewClassName="sm:w-24"
+              />
+            )}
             <div>
               <Label htmlFor="fullName">الاسم الكامل</Label>
               <Input id="fullName" value={fullName} onChange={(e) => setFullName(e.target.value)} />

@@ -15,6 +15,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Loader2, Plus, Pencil, FolderTree, ChevronUp, ChevronDown, Trash2 } from "lucide-react";
+import ImageUploadField from "@/components/ImageUploadField";
 
 interface CategoryRow {
   id: string;
@@ -400,22 +401,20 @@ const ManageCategories = () => {
             </TabsContent>
 
             <TabsContent value="media" className="space-y-3">
-              <div className="space-y-2">
-                <Label>رابط الصورة</Label>
-                <Input
-                  value={form.image_url}
-                  onChange={(e) => setForm({ ...form, image_url: e.target.value })}
-                  placeholder="https://..."
-                />
-              </div>
-              <div className="space-y-2">
-                <Label>رابط صورة البانر</Label>
-                <Input
-                  value={form.banner_url}
-                  onChange={(e) => setForm({ ...form, banner_url: e.target.value })}
-                  placeholder="https://..."
-                />
-              </div>
+              <ImageUploadField
+                label="صورة الفئة"
+                value={form.image_url}
+                onChange={(image_url) => setForm({ ...form, image_url })}
+                bucket="product-images"
+                folder="platform/categories"
+              />
+              <ImageUploadField
+                label="صورة بانر الفئة"
+                value={form.banner_url}
+                onChange={(banner_url) => setForm({ ...form, banner_url })}
+                bucket="product-images"
+                folder="platform/categories"
+              />
             </TabsContent>
 
             <TabsContent value="seo" className="space-y-3">

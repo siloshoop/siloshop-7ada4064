@@ -11,6 +11,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Loader2, Save, Store } from "lucide-react";
 import { resolveStoreAssetUrl } from "@/lib/storeAssets";
+import ImageUploadField from "@/components/ImageUploadField";
 
 interface StoreProfile {
   store_name: string | null;
@@ -135,16 +136,27 @@ const SellerStore = () => {
               <Label htmlFor="store_description">وصف المتجر</Label>
               <Textarea id="store_description" rows={4} value={form.store_description ?? ""} onChange={set("store_description")} />
             </div>
-            <div className="grid gap-3 sm:grid-cols-2">
-              <div className="space-y-1.5">
-                <Label htmlFor="logo_url">رابط الشعار</Label>
-                <Input id="logo_url" value={form.logo_url ?? ""} onChange={set("logo_url")} dir="ltr" />
+            {user && (
+              <div className="grid gap-3 sm:grid-cols-2">
+                <ImageUploadField
+                  label="شعار المتجر"
+                  value={form.logo_url ?? ""}
+                  onChange={(logo_url) => setForm((current) => ({ ...current, logo_url }))}
+                  bucket="store-assets"
+                  folder={user.id}
+                  privateBucket
+                  previewClassName="sm:w-24"
+                />
+                <ImageUploadField
+                  label="غلاف المتجر"
+                  value={form.cover_image_url ?? ""}
+                  onChange={(cover_image_url) => setForm((current) => ({ ...current, cover_image_url }))}
+                  bucket="store-assets"
+                  folder={user.id}
+                  privateBucket
+                />
               </div>
-              <div className="space-y-1.5">
-                <Label htmlFor="cover_image_url">رابط الغلاف</Label>
-                <Input id="cover_image_url" value={form.cover_image_url ?? ""} onChange={set("cover_image_url")} dir="ltr" />
-              </div>
-            </div>
+            )}
             {(logoPreview || coverPreview) && (
               <div className="flex items-center gap-3">
                 {logoPreview && <img loading="lazy" decoding="async" src={logoPreview} alt="شعار المتجر" className="h-12 w-12 rounded-md object-cover" />}

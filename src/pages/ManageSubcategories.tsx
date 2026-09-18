@@ -22,6 +22,7 @@ import {
   Star, Link as LinkIcon, Watch
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import ImageUploadField from "@/components/ImageUploadField";
 
 // Explicit map instead of `import * as LucideIcons` — a namespace import pulls
 // the entire icon library (~700 kB) into this route's bundle.
@@ -452,25 +453,21 @@ const ManageSubcategories = () => {
                       </Select>
                     </div>
 
-                    <div className="space-y-2">
-                      <Label htmlFor="image_url">رابط الصورة</Label>
-                      <Input
-                        id="image_url"
-                        value={formData.image_url}
-                        onChange={(e) => setFormData({ ...formData, image_url: e.target.value })}
-                        placeholder="https://..."
-                      />
-                    </div>
+                    <ImageUploadField
+                      label="صورة التصنيف الفرعي"
+                      value={formData.image_url}
+                      onChange={(image_url) => setFormData({ ...formData, image_url })}
+                      bucket="product-images"
+                      folder="platform/subcategories"
+                    />
 
-                    <div className="space-y-2">
-                      <Label htmlFor="banner_url">رابط صورة البانر</Label>
-                      <Input
-                        id="banner_url"
-                        value={formData.banner_url}
-                        onChange={(e) => setFormData({ ...formData, banner_url: e.target.value })}
-                        placeholder="https://..."
-                      />
-                    </div>
+                    <ImageUploadField
+                      label="صورة بانر التصنيف الفرعي"
+                      value={formData.banner_url}
+                      onChange={(banner_url) => setFormData({ ...formData, banner_url })}
+                      bucket="product-images"
+                      folder="platform/subcategories"
+                    />
 
                     <div className="space-y-2">
                       <Label htmlFor="seo_title">عنوان SEO</Label>

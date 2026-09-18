@@ -17,6 +17,7 @@ import { Link } from "react-router-dom";
 import { useShowroomAdmin, getShowroomStatus, type ShowroomItem } from "@/hooks/useShowroom";
 import PremiumShowroom from "@/components/PremiumShowroom";
 import { VendorPicker, ProductPicker } from "@/components/admin/ShowroomEntityPicker";
+import ImageUploadField from "@/components/ImageUploadField";
 
 const emptyForm = {
   item_type: "store",
@@ -321,14 +322,21 @@ const ShowroomManagement = () => {
                 <Label>وصف قصير</Label>
                 <Textarea rows={2} value={form.subtitle} onChange={(e) => set("subtitle", e.target.value)} />
               </div>
-              <div className="space-y-2">
-                <Label>رابط صورة الغلاف</Label>
-                <Input dir="ltr" value={form.cover_image_url} onChange={(e) => set("cover_image_url", e.target.value)} />
-              </div>
-              <div className="space-y-2">
-                <Label>رابط الشعار</Label>
-                <Input dir="ltr" value={form.logo_url} onChange={(e) => set("logo_url", e.target.value)} />
-              </div>
+              <ImageUploadField
+                label="صورة الغلاف"
+                value={form.cover_image_url}
+                onChange={(value) => set("cover_image_url", value)}
+                bucket="product-images"
+                folder="platform/showroom"
+              />
+              <ImageUploadField
+                label="الشعار"
+                value={form.logo_url}
+                onChange={(value) => set("logo_url", value)}
+                bucket="product-images"
+                folder="platform/showroom"
+                previewClassName="sm:w-24"
+              />
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-2">
                   <Label>التقييم</Label>

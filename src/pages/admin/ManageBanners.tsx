@@ -12,6 +12,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Loader2, Plus, Pencil, Trash2 } from "lucide-react";
+import ImageUploadField from "@/components/ImageUploadField";
 
 interface BannerRow {
   id: string;
@@ -231,7 +232,13 @@ const ManageBanners = () => {
           <div className="space-y-3">
             <Input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} placeholder="العنوان" />
             <Textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} placeholder="الوصف" />
-            <Input value={form.image_url} onChange={(e) => setForm({ ...form, image_url: e.target.value })} placeholder="رابط الصورة" />
+            <ImageUploadField
+              label="صورة البانر"
+              value={form.image_url}
+              onChange={(image_url) => setForm({ ...form, image_url })}
+              bucket="product-images"
+              folder="platform/banners"
+            />
             <Input value={form.sponsor_name} onChange={(e) => setForm({ ...form, sponsor_name: e.target.value })} placeholder="الجهة الراعية" />
             <Input value={form.cta_text} onChange={(e) => setForm({ ...form, cta_text: e.target.value })} placeholder="نص الزر" />
             <Input

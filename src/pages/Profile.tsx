@@ -107,12 +107,12 @@ const Profile = () => {
           </Card>
 
           <Card className="p-4 sm:p-6 space-y-5">
-            <div className="flex items-center gap-4">
+            <div className="flex min-w-0 flex-col items-start gap-4 sm:flex-row sm:items-center">
               <Avatar className="h-16 w-16">
                 <AvatarImage src={avatarUrl || undefined} />
                 <AvatarFallback>{fullName.charAt(0) || "?"}</AvatarFallback>
               </Avatar>
-              <div className="flex-1">
+              <div className="w-full min-w-0 flex-1">
                 <Label htmlFor="avatar">رابط الصورة</Label>
                 <Input id="avatar" value={avatarUrl} onChange={(e) => setAvatarUrl(e.target.value)} placeholder="https://..." />
               </div>

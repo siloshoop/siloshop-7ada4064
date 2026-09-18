@@ -226,14 +226,14 @@ export const NotificationsDropdown = () => {
           {unreadCount > 0 && (
             <Badge
               variant="destructive"
-              className="absolute -top-1 -left-1 h-5 w-5 flex items-center justify-center p-0 text-xs"
+              className="absolute -top-1 -end-1 flex h-5 min-w-5 items-center justify-center p-0 text-xs"
             >
               {unreadCount}
             </Badge>
           )}
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-96">
+      <DropdownMenuContent align="end" className="w-[min(24rem,calc(100vw-1rem))]">
         <div className="p-2 border-b space-y-2">
           <div className="flex items-center justify-between">
             <span className="font-semibold">الإشعارات</span>

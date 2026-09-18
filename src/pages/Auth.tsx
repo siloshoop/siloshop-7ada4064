@@ -532,7 +532,7 @@ const Auth = () => {
                   <Label htmlFor="signup-phone">رقم الهاتف</Label>
                   <div className="flex gap-2" dir="ltr">
                     <Select value={phoneCountry} onValueChange={setPhoneCountry} disabled={isLoading}>
-                      <SelectTrigger className="w-[130px] shrink-0" aria-label="مفتاح الدولة">
+                      <SelectTrigger className="w-28 shrink-0 sm:w-[130px]" aria-label="مفتاح الدولة">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent className="max-h-72">

@@ -69,7 +69,7 @@ const ShippingInfoDialog = ({ orderId, open, onOpenChange, initial, onSaved }: P
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[480px]" dir="rtl">
+      <DialogContent className="max-w-[480px]" dir="rtl">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Truck className="h-5 w-5" />

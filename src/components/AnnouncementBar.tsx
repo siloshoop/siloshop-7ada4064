@@ -68,15 +68,15 @@ const AnnouncementBar = () => {
       </div>
       
       <div className="container relative">
-        <div className="flex items-center justify-center py-2.5 px-8">
-          <div className="flex items-center gap-3 overflow-hidden">
+        <div className="flex min-h-10 items-center justify-center px-10 py-2">
+          <div className="flex min-w-0 items-center gap-2 overflow-hidden sm:gap-3">
             <CurrentIcon className="h-4 w-4 text-primary-foreground shrink-0 animate-pulse" />
             
-            <div className="relative h-6 overflow-hidden">
+            <div className="relative h-6 min-w-0 flex-1 overflow-hidden text-center">
               {announcements.map((announcement, index) => (
                 <p
                   key={announcement.id}
-                  className={`text-sm font-medium text-primary-foreground whitespace-nowrap absolute transition-all duration-500 ease-out ${
+                  className={`absolute inset-x-0 truncate text-sm font-medium text-primary-foreground transition-all duration-500 ease-out ${
                     index === currentIndex
                       ? "translate-y-0 opacity-100"
                       : index < currentIndex
@@ -92,7 +92,7 @@ const AnnouncementBar = () => {
 
           <button
             onClick={() => setIsVisible(false)}
-            className="absolute left-4 p-1 rounded-full hover:bg-primary-foreground/20 transition-colors"
+            className="absolute end-2 rounded-full p-1 transition-colors hover:bg-primary-foreground/20 sm:end-4"
             aria-label="إغلاق الإعلان"
           >
             <X className="h-4 w-4 text-primary-foreground" />

@@ -1,7 +1,6 @@
-import { ElementType, HTMLAttributes } from "react";
+import { ElementType, HTMLAttributes, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
-import logoAsset from "@/assets/siloshop-logo-full.png.asset.json";
 
 type BrandLogoProps = HTMLAttributes<HTMLElement> & {
   as?: ElementType;
@@ -11,6 +10,7 @@ type BrandLogoProps = HTMLAttributes<HTMLElement> & {
 
 const BrandLogo = ({ as: Tag = "span", className, onClick, linkToHome = true, ...rest }: BrandLogoProps) => {
   const navigate = useNavigate();
+  const [imageFailed, setImageFailed] = useState(false);
   const handleClick: React.MouseEventHandler<HTMLElement> = (e) => {
     if (onClick) {
       onClick(e);
@@ -24,7 +24,7 @@ const BrandLogo = ({ as: Tag = "span", className, onClick, linkToHome = true, ..
   return (
     <Tag
       className={cn(
-        "inline-flex items-center leading-none",
+        "inline-flex min-w-0 items-center gap-2 leading-none",
         clickable && "cursor-pointer hover:opacity-80 transition-opacity",
         className
       )}
@@ -33,14 +33,18 @@ const BrandLogo = ({ as: Tag = "span", className, onClick, linkToHome = true, ..
       aria-label={clickable ? "الصفحة الرئيسية" : undefined}
       {...rest}
     >
-      <img
-        src={logoAsset.url}
-        alt="SiloShop"
-        loading="eager"
-        decoding="async"
-        className="h-[2.1em] w-auto select-none object-contain"
-        draggable={false}
-      />
+      {!imageFailed && (
+        <img
+          src="/favicon.png"
+          alt=""
+          loading="eager"
+          decoding="async"
+          className="h-[1.65em] w-[1.65em] shrink-0 select-none object-contain"
+          draggable={false}
+          onError={() => setImageFailed(true)}
+        />
+      )}
+      <span className="min-w-0 truncate font-bold text-foreground" dir="ltr">SiloShop</span>
     </Tag>
   );
 };

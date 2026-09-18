@@ -1,25 +1,22 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { 
+import {
   Home, 
   Search, 
   Grid3X3, 
   Heart, 
   User,
-  MessageCircle,
   Settings,
-  ShoppingCart,
   Smartphone,
   Shirt,
   Baby,
   Footprints,
   Gamepad2,
   Sparkle,
-  X
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "./ui/sheet";
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from "./ui/sheet";
 import { ScrollArea } from "./ui/scroll-area";
 
 interface Category {
@@ -64,13 +61,13 @@ const MobileBottomNav = () => {
     <>
       {/* Bottom Navigation Bar - Only visible on mobile */}
       <nav className="safe-area-bottom safe-area-x fixed inset-x-0 bottom-0 z-50 max-w-full border-t border-border bg-background/95 backdrop-blur-lg md:hidden">
-        <div className="flex h-14 min-w-0 items-center justify-around px-1">
+        <div className="flex h-14 min-w-0 items-center justify-around px-0.5 sm:px-1">
           {navItems.map((item, index) => (
             <button
               key={index}
               onClick={() => item.path ? navigate(item.path) : item.action?.()}
               className={cn(
-                "flex min-w-0 flex-1 flex-col items-center justify-center gap-0.5 rounded-lg px-0.5 py-1 transition-all",
+                "flex h-12 min-w-0 flex-1 flex-col items-center justify-center gap-0.5 rounded-lg px-0.5 py-1 transition-all",
                 isActive(item.path)
                   ? "text-primary"
                   : "text-muted-foreground hover:text-foreground"
@@ -80,7 +77,7 @@ const MobileBottomNav = () => {
                 "h-5 w-5 transition-transform",
                 isActive(item.path) && "scale-110"
               )} />
-              <span className="max-w-full truncate text-[10px] font-medium">{item.label}</span>
+               <span className="max-w-full truncate text-[9px] font-medium min-[360px]:text-[10px]">{item.label}</span>
             </button>
           ))}
         </div>
@@ -88,11 +85,11 @@ const MobileBottomNav = () => {
 
       {/* Categories Sheet */}
       <Sheet open={showCategories} onOpenChange={setShowCategories}>
-        <SheetContent side="bottom" className="h-[70vh] rounded-t-3xl">
+        <SheetContent side="bottom" className="safe-screen-height h-[70dvh] overflow-hidden rounded-t-2xl pb-[max(1.5rem,env(safe-area-inset-bottom))]">
           <SheetHeader className="pb-4">
             <SheetTitle className="text-center">تصفح الفئات</SheetTitle>
           </SheetHeader>
-          <ScrollArea className="h-full pb-8">
+           <ScrollArea className="h-[calc(100%-3.5rem)] pb-4">
             <button
               onClick={() => {
                 navigate("/turkish-products");
@@ -102,7 +99,7 @@ const MobileBottomNav = () => {
             >
               منتجات تركية
             </button>
-            <div className="grid grid-cols-3 gap-3 px-2">
+             <div className="grid grid-cols-2 gap-2 px-2 min-[360px]:grid-cols-3 min-[360px]:gap-3">
               {categories.map((category) => {
                 const IconComponent = iconMap[category.icon || "Smartphone"] || Grid3X3;
                 return (
@@ -129,7 +126,7 @@ const MobileBottomNav = () => {
       </Sheet>
 
       {/* Spacer to prevent content from being hidden behind nav */}
-      <div className="md:hidden h-14" />
+       <div className="mobile-nav-spacer md:hidden" />
     </>
   );
 };

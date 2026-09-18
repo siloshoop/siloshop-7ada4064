@@ -1025,7 +1025,7 @@ const SearchPage = () => {
                 <Button variant="outline" size="lg" className="relative w-full sm:w-auto lg:hidden">
                   <SlidersHorizontal className="h-5 w-5" />
                   {activeFiltersCount > 0 && (
-                    <Badge className="absolute -top-2 -right-2 h-5 w-5 p-0 flex items-center justify-center">
+                    <Badge className="absolute -top-2 -end-2 flex h-5 min-w-5 items-center justify-center p-0">
                       {activeFiltersCount}
                     </Badge>
                   )}

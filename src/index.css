@@ -169,6 +169,9 @@ All colors MUST be HSL.
     opacity: 1;
     width: 100%;
     min-width: 0;
+    min-height: 100vh;
+    min-height: 100dvh;
+    overflow-wrap: anywhere;
   }
   
   html {
@@ -180,7 +183,23 @@ All colors MUST be HSL.
   #root {
     width: 100%;
     min-width: 0;
+    min-height: 100vh;
+    min-height: 100dvh;
     overflow-x: clip;
+  }
+
+  img,
+  video,
+  canvas,
+  svg {
+    max-width: 100%;
+  }
+
+  input,
+  textarea,
+  select,
+  button {
+    min-width: 0;
   }
 
   /* Hide scrollbars globally for horizontal scroll containers */
@@ -199,9 +218,21 @@ All colors MUST be HSL.
     padding-bottom: env(safe-area-inset-bottom, 0);
   }
 
+  .safe-area-top {
+    padding-top: env(safe-area-inset-top, 0);
+  }
+
   .safe-area-x {
     padding-left: env(safe-area-inset-left, 0);
     padding-right: env(safe-area-inset-right, 0);
+  }
+
+  .mobile-nav-spacer {
+    height: calc(3.5rem + env(safe-area-inset-bottom, 0px));
+  }
+
+  .safe-screen-height {
+    max-height: calc(100dvh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px));
   }
 
   /* Hover scale animation */

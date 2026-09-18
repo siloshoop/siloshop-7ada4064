@@ -10,6 +10,8 @@ import { useToast } from "@/hooks/use-toast";
 import { Loader2, Plus, Save, Trash2 } from "lucide-react";
 import { money, weight as weightSchema, codeText, friendlyDbError } from "@/lib/productValidation";
 import { z } from "zod";
+import { useAuth } from "@/hooks/useAuth";
+import ImageUploadField from "@/components/ImageUploadField";
 
 interface AttributeValue {
   id: string;
@@ -66,6 +68,7 @@ const variantSchema = z.object({
 
 const ProductVariantsManager = ({ productId }: { productId: string }) => {
   const { toast } = useToast();
+  const { user } = useAuth();
   const [attributes, setAttributes] = useState<Attribute[]>([]);
   const [variants, setVariants] = useState<Variant[]>([]);
   const [loading, setLoading] = useState(true);
@@ -365,13 +368,13 @@ const ProductVariantsManager = ({ productId }: { productId: string }) => {
                 onChange={(e) => setDraft({ ...draft, weight: e.target.value })}
               />
             </div>
-            <div className="space-y-2 md:col-span-2">
-              <Label>رابط صورة المتغير</Label>
-              <Input
-                type="url"
+            <div className="md:col-span-2">
+              <ImageUploadField
+                label="صورة المتغير"
                 value={draft.image_url}
-                onChange={(e) => setDraft({ ...draft, image_url: e.target.value })}
-                placeholder="https://example.com/image.jpg"
+                onChange={(image_url) => setDraft({ ...draft, image_url })}
+                bucket="product-images"
+                folder={user?.id ?? ""}
               />
             </div>
             <div className="flex items-center gap-2 pt-6">
@@ -453,12 +456,13 @@ const ProductVariantsManager = ({ productId }: { productId: string }) => {
                       onChange={(e) => setEditRows({ ...editRows, [v.id]: { ...row, weight: e.target.value } })}
                     />
                   </div>
-                  <div className="space-y-2 md:col-span-2">
-                    <Label>رابط صورة المتغير</Label>
-                    <Input
-                      type="url"
-                      value={row.image_url}
-                      onChange={(e) => setEditRows({ ...editRows, [v.id]: { ...row, image_url: e.target.value } })}
+                  <div className="md:col-span-2">
+                    <ImageUploadField
+                      label="صورة المتغير"
+                      value={row.image_url ?? ""}
+                      onChange={(image_url) => setEditRows({ ...editRows, [v.id]: { ...row, image_url } })}
+                      bucket="product-images"
+                      folder={user?.id ?? ""}
                     />
                   </div>
                   <div className="flex items-center gap-2 pt-6">

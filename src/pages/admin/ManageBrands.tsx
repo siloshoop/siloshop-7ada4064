@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Loader2, Plus, Pencil, ArrowUp, ArrowDown, Trash2 } from "lucide-react";
+import ImageUploadField from "@/components/ImageUploadField";
 
 interface BrandRow {
   id: string;
@@ -292,8 +293,21 @@ const ManageBrands = () => {
 
             <div className="space-y-3">
               <h4 className="text-sm font-semibold text-muted-foreground">الوسائط</h4>
-              <Input value={form.logo_url} onChange={(e) => setForm({ ...form, logo_url: e.target.value })} placeholder="رابط الشعار" />
-              <Input value={form.banner_url} onChange={(e) => setForm({ ...form, banner_url: e.target.value })} placeholder="رابط البانر" />
+              <ImageUploadField
+                label="الشعار"
+                value={form.logo_url}
+                onChange={(logo_url) => setForm({ ...form, logo_url })}
+                bucket="product-images"
+                folder="platform/brands"
+                previewClassName="sm:w-24"
+              />
+              <ImageUploadField
+                label="البانر"
+                value={form.banner_url}
+                onChange={(banner_url) => setForm({ ...form, banner_url })}
+                bucket="product-images"
+                folder="platform/brands"
+              />
             </div>
 
             <div className="space-y-3">

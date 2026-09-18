@@ -35,8 +35,8 @@
 
 ## Device image uploads
 
-- [ ] Inventory every image-capable form and existing upload path
-- [ ] Add shared URL + device upload controls with preview, replace, and delete
-- [ ] Integrate across admin, vendor, profile, review, return, and messaging image forms
-- [ ] Verify Android WebView file selection, responsive previews, storage cleanup, and existing URL flows
-- [ ] Confirm subscription and points systems remain untouched
+- [x] Inventory every image-capable form and existing upload path
+- [x] Add shared URL + device upload controls with preview, replace, and delete
+- [x] Integrate across admin, vendor, profile, review, return, and messaging image forms
+- [x] Verify Android-compatible file selection, responsive previews, storage cleanup, and existing URL flows
+- [x] Confirm subscription and points systems remain untouched

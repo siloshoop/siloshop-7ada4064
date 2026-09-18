@@ -13,6 +13,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import ChangePasswordCard from "@/components/account/ChangePasswordCard";
 import DeleteAccountCard from "@/components/account/DeleteAccountCard";
+import ImageUploadField from "@/components/ImageUploadField";
 
 const Profile = () => {
   const { user, loading: authLoading } = useAuth();
@@ -112,11 +113,17 @@ const Profile = () => {
                 <AvatarImage src={avatarUrl || undefined} />
                 <AvatarFallback>{fullName.charAt(0) || "?"}</AvatarFallback>
               </Avatar>
-              <div className="w-full min-w-0 flex-1">
-                <Label htmlFor="avatar">رابط الصورة</Label>
-                <Input id="avatar" value={avatarUrl} onChange={(e) => setAvatarUrl(e.target.value)} placeholder="https://..." />
-              </div>
             </div>
+            {user && (
+              <ImageUploadField
+                label="الصورة الشخصية"
+                value={avatarUrl}
+                onChange={setAvatarUrl}
+                bucket="product-images"
+                folder={user.id}
+                previewClassName="sm:w-24"
+              />
+            )}
             <div>
               <Label htmlFor="fullName">الاسم الكامل</Label>
               <Input id="fullName" value={fullName} onChange={(e) => setFullName(e.target.value)} />

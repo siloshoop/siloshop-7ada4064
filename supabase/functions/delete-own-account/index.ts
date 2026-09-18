@@ -49,12 +49,20 @@ Deno.serve(async (req) => {
     });
 
     // Block deletion while the account still has orders in flight
-    const { data: openOrders } = await admin
+    const { data: openOrders, error: openOrdersError } = await admin
       .from("orders")
       .select("id")
-      .eq("user_id", user.id)
+      .eq("customer_id", user.id)
       .not("status", "in", "(delivered,cancelled,refunded,failed)")
       .limit(1);
+
+    if (openOrdersError) {
+      console.error("delete-own-account order check failed", openOrdersError.message);
+      return new Response(JSON.stringify({ error: "order_check_failed" }), {
+        status: 500,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
 
     if (openOrders && openOrders.length > 0) {
       return new Response(

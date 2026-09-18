@@ -8,6 +8,13 @@
       "when": 1789709919133,
       "tag": "0000_restrict_public_internal_tables",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1789710180165,
+      "tag": "0001_fix_admin_set_product_flags_actor_role",
+      "breakpoints": true
     }
   ]
 }

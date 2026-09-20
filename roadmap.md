@@ -57,6 +57,6 @@
 
 ## Google Play demo catalog
 
-- [ ] Add 20 clearly labeled TEST DATA products across active categories and brands
-- [ ] Verify database persistence and public visibility without touching subscriptions or balances
-- [ ] Test product display on desktop, mobile, and Android WebView sizes
+- [x] Add 20 clearly labeled TEST DATA products across active categories and brands
+- [x] Verify database persistence and public visibility without touching subscriptions or balances
+- [x] Test product display on desktop, mobile, and Android WebView sizes

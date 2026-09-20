@@ -145,21 +145,27 @@ const ACTIVATION_TABLES = [
 
 const PublicActivationSync = ({ children }: { children: ReactNode }) => {
   const { pathname } = useLocation();
-  const [revision, setRevision] = useState(0);
+  const pathnameRef = useRef(pathname);
+  pathnameRef.current = pathname;
 
   useEffect(() => {
-    if (pathname.startsWith("/admin") || pathname.startsWith("/dashboard") || pathname.startsWith("/seller")) return;
+    // Refresh cached data only — never remount the routed tree, which would wipe
+    // form inputs, open dialogs and pagination for shoppers mid-session.
+    const refresh = () => {
+      const current = pathnameRef.current;
+      if (current.startsWith("/admin") || current.startsWith("/dashboard") || current.startsWith("/seller")) return;
+      void queryClient.invalidateQueries();
+      window.dispatchEvent(new CustomEvent("activation-changed"));
+    };
 
     const channel = supabase
       .channel(ACTIVATION_CHANNEL)
-      .on("broadcast", { event: "changed" }, () => {
-        setRevision((value) => value + 1);
-      });
+      .on("broadcast", { event: "changed" }, refresh);
     ACTIVATION_TABLES.forEach((table) => {
       channel.on("postgres_changes", { event: "UPDATE", schema: "public", table }, (payload) => {
         const oldRow = payload.old as { is_active?: boolean };
         const newRow = payload.new as { is_active?: boolean };
-        if (oldRow.is_active !== newRow.is_active) setRevision((value) => value + 1);
+        if (oldRow.is_active !== newRow.is_active) refresh();
       });
     });
     channel.subscribe();
@@ -167,9 +173,9 @@ const PublicActivationSync = ({ children }: { children: ReactNode }) => {
     return () => {
       void supabase.removeChannel(channel);
     };
-  }, [pathname]);
+  }, []);
 
-  return <div key={revision} className="contents">{children}</div>;
+  return <>{children}</>;
 };
 
 const App = () => (

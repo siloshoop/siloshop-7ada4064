@@ -120,7 +120,7 @@ const Profile = () => {
                 value={avatarUrl}
                 onChange={setAvatarUrl}
                 bucket="product-images"
-                folder={user.id}
+                folder={`avatars/${user.id}`}
                 previewClassName="sm:w-24"
               />
             )}

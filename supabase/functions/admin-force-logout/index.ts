@@ -1,7 +1,12 @@
 // Force-logout a user: revokes all their refresh tokens.
 // Only callable by an admin / super_admin (verified server-side).
 import { createClient } from "npm:@supabase/supabase-js@2.57.4";
-import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
+
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Methods": "POST, OPTIONS",
+};
 
 const json = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), {

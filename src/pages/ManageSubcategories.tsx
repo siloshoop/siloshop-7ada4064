@@ -463,7 +463,7 @@ const ManageSubcategories = () => {
                       value={formData.image_url}
                       onChange={(image_url) => setFormData({ ...formData, image_url })}
                       bucket="product-images"
-                      folder={user?.id ?? ""}
+                      folder="platform/subcategories"
                     />
 
                     <ImageUploadField
@@ -471,7 +471,7 @@ const ManageSubcategories = () => {
                       value={formData.banner_url}
                       onChange={(banner_url) => setFormData({ ...formData, banner_url })}
                       bucket="product-images"
-                      folder={user?.id ?? ""}
+                      folder="platform/subcategories"
                     />
 
                     <div className="space-y-2">

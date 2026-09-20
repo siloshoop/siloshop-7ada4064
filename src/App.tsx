@@ -1,4 +1,4 @@
-import { Suspense, useEffect, useState, type ReactNode } from "react";
+import { Suspense, useEffect, useRef, type ReactNode } from "react";
 import { lazyWithRetry as lazy } from "@/lib/lazyWithRetry";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";

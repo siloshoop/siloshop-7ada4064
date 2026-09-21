@@ -78,6 +78,7 @@ interface Product {
   seo_title?: string | null;
   seo_description?: string | null;
   seo_keywords?: string | null;
+  purchase_enabled?: boolean | null;
 }
 
 const Product = () => {
@@ -319,7 +320,8 @@ const Product = () => {
     product.max_order_quantity && product.max_order_quantity > 0 ? product.max_order_quantity : Infinity,
     effectiveStock || Infinity
   );
-  const canAddToCart = inStock && (!hasVariants || !!selectedVariant);
+  const previewOnly = product.purchase_enabled === false;
+  const canAddToCart = inStock && !previewOnly && (!hasVariants || !!selectedVariant);
 
   const buyNow = async () => {
     await addToCart();

@@ -8,6 +8,7 @@ import {
   Heart, 
   User,
   Settings,
+  ShieldCheck,
   Smartphone,
   Shirt,
   Baby,

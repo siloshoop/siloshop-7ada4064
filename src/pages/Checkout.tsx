@@ -522,6 +522,17 @@ const Checkout = () => {
         });
         return;
       }
+      if (message.includes("PREVIEW_ONLY")) {
+        const name = message.split("PREVIEW_ONLY:")[1]?.split("\n")[0]?.trim();
+        toast({
+          title: "منتج للمعاينة فقط",
+          description: name
+            ? `"${name}" معروض للمعاينة فقط وغير متاح للشراء حالياً. يرجى إزالته من السلة.`
+            : "أحد المنتجات معروض للمعاينة فقط وغير متاح للشراء حالياً. يرجى إزالته من السلة.",
+          variant: "destructive",
+        });
+        return;
+      }
       if (message.includes("ORDER_RATE_LIMIT")) {
         toast({
           title: "تم تجاوز الحد المسموح",

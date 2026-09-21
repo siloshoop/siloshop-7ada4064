@@ -26,6 +26,8 @@ const PAGE_SIZE = 30;
 const adminErrorMessage = (message: string) => {
   if (message.includes("not_authorized")) return "ليس لديك صلاحية لتنفيذ هذا الإجراء";
   if (message.includes("product_not_found")) return "المنتج غير موجود أو تم حذفه";
+  if (message.includes("reason_required")) return "يجب كتابة السبب قبل تنفيذ هذا الإجراء";
+  if (message.includes("product_not_approved")) return "التعليق متاح للمنتجات المعتمدة فقط";
   if (message.includes("actor_admin_role")) return "تعذر التحقق من صلاحية المدير. حدّث الصفحة وحاول مجددًا";
   return message;
 };
@@ -86,6 +88,8 @@ const ProductModeration = () => {
   const [vendors, setVendors] = useState<Record<string, string>>({});
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [rejecting, setRejecting] = useState<ProductRow | null>(null);
+  const [suspending, setSuspending] = useState<ProductRow | null>(null);
+  const [isSuperAdmin, setIsSuperAdmin] = useState(false);
   const [bulkRejecting, setBulkRejecting] = useState(false);
   const [reason, setReason] = useState("");
   const [working, setWorking] = useState(false);

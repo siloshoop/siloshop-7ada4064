@@ -500,6 +500,16 @@ const SellerProducts = () => {
                   {p.moderation_status === "rejected" && p.moderation_reason && (
                     <p className="mt-1 text-xs text-destructive">سبب الرفض: {p.moderation_reason}</p>
                   )}
+                  {p.moderation_status === "hidden" && (
+                    <p className="mt-1 text-xs text-destructive">
+                      تم تعليق المنتج من الإدارة{p.moderation_reason ? `: ${p.moderation_reason}` : ""}
+                    </p>
+                  )}
+                  {p.moderation_status === "pending" && (
+                    <p className="mt-1 text-xs text-muted-foreground">
+                      قيد مراجعة الإدارة — لا يظهر للمشترين حتى الموافقة.
+                    </p>
+                  )}
                 </div>
                 <Badge variant="secondary" className={moderationBadgeClass(p.moderation_status)}>
                   {moderationLabel(p.moderation_status)}

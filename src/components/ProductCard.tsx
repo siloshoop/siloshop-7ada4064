@@ -172,10 +172,13 @@ const ProductCard = memo(({
         description: "تم إضافة المنتج إلى السلة",
       });
     } catch (error) {
-      console.error("Cart error:", error);
+      const message = String((error as { message?: string })?.message ?? "");
+      const previewOnly = message.includes("PREVIEW_ONLY");
       toast({
-        title: "خطأ",
-        description: "فشل في إضافة المنتج للسلة",
+        title: previewOnly ? "منتج للمعاينة فقط" : "خطأ",
+        description: previewOnly
+          ? "هذا المنتج معروض للمعاينة فقط وغير متاح للشراء حالياً."
+          : "فشل في إضافة المنتج للسلة",
         variant: "destructive",
       });
     }

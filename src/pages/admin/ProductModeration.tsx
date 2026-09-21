@@ -407,7 +407,12 @@ const ProductModeration = () => {
                   className="h-16 w-16 rounded object-cover"
                 />
                 <div className="min-w-0 flex-1">
-                  <p className="truncate font-semibold">{p.name}</p>
+                  <p className="truncate font-semibold">
+                    {p.name}
+                    {p.purchase_enabled === false && (
+                      <Badge variant="secondary" className="ms-2 bg-amber-500/15 text-amber-600">معاينة فقط</Badge>
+                    )}
+                  </p>
                   <p className="text-sm text-muted-foreground">
                     {new Intl.NumberFormat("ar-SY").format(p.price)} ل.س · المخزون {p.stock_quantity ?? 0}
                     {" · "}البائع: {vendors[p.vendor_id] ?? "—"}

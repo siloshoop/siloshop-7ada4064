@@ -162,7 +162,7 @@ const ProductModeration = () => {
 
   useEffect(() => { setPage(0); }, [status, search, brandId, categoryId, sort]);
 
-  const moderate = async (product: ProductRow, action: "approve" | "reject", why?: string) => {
+  const moderate = async (product: ProductRow, action: "approve" | "reject" | "suspend", why?: string) => {
     setWorking(true);
     const { error } = await supabase.rpc("admin_moderate_product", {
       _product_id: product.id,
@@ -174,9 +174,14 @@ const ProductModeration = () => {
       toast({ title: "تعذر تنفيذ الإجراء", description: adminErrorMessage(error.message), variant: "destructive" });
       return;
     }
-    toast({ title: action === "approve" ? "تم اعتماد المنتج" : "تم رفض المنتج" });
+    toast({
+      title:
+        action === "approve" ? "تم اعتماد المنتج" : action === "suspend" ? "تم تعليق المنتج" : "تم رفض المنتج",
+    });
     setRejecting(null);
+    setSuspending(null);
     setReason("");
+    void broadcastActivationChange("products", product.id);
     void load();
   };
 

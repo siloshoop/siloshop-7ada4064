@@ -15,6 +15,7 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import {
   Loader2, Search, Check, X, ExternalLink, Sparkles, Flame, ThumbsUp, Eye, EyeOff,
+  ShoppingCart, Ban,
 } from "lucide-react";
 import { broadcastActivationChange } from "@/lib/activationSync";
 
@@ -51,6 +52,7 @@ interface ProductRow {
   is_trending: boolean | null;
   is_recommended: boolean | null;
   views_count: number | null;
+  purchase_enabled: boolean | null;
 }
 
 interface Option { id: string; label: string }
@@ -120,7 +122,7 @@ const ProductModeration = () => {
     let query = supabase
       .from("products")
       .select(
-        "id, name, price, image_url, is_active, stock_quantity, moderation_status, moderation_reason, created_at, sku, barcode, vendor_id, brand_id, category_id, is_featured, is_trending, is_recommended, views_count",
+        "id, name, price, image_url, is_active, stock_quantity, moderation_status, moderation_reason, created_at, sku, barcode, vendor_id, brand_id, category_id, is_featured, is_trending, is_recommended, views_count, purchase_enabled",
         { count: "exact" }
       )
       .eq("product_type", "seller")
@@ -238,6 +240,28 @@ const ProductModeration = () => {
     toast({
       title: "تم تحديث حالة المنتج",
       description: flags.is_active === undefined ? "تم حفظ إعدادات العرض" : saved.is_active ? "المنتج ظاهر الآن" : "تم إخفاء المنتج",
+    });
+    void broadcastActivationChange("products", product.id);
+  };
+
+  const setPurchaseEnabled = async (product: ProductRow, enabled: boolean) => {
+    setTogglingId(product.id);
+    const { error } = await supabase.rpc("admin_set_product_purchase_enabled", {
+      _product_id: product.id,
+      _enabled: enabled,
+    });
+    if (error) {
+      setTogglingId(null);
+      toast({ title: "تعذر تحديث حالة الشراء", description: adminErrorMessage(error.message), variant: "destructive" });
+      return;
+    }
+    setRows((prev) => prev.map((r) => (r.id === product.id ? { ...r, purchase_enabled: enabled } : r)));
+    setTogglingId(null);
+    toast({
+      title: enabled ? "المنتج متاح للشراء" : "المنتج للمعاينة فقط",
+      description: enabled
+        ? "يمكن للمشترين إضافته إلى السلة وإتمام الطلب."
+        : "سيظل المنتج ظاهراً لكن الشراء والإضافة إلى السلة معطّلان.",
     });
     void broadcastActivationChange("products", product.id);
   };
@@ -383,7 +407,12 @@ const ProductModeration = () => {
                   className="h-16 w-16 rounded object-cover"
                 />
                 <div className="min-w-0 flex-1">
-                  <p className="truncate font-semibold">{p.name}</p>
+                  <p className="truncate font-semibold">
+                    {p.name}
+                    {p.purchase_enabled === false && (
+                      <Badge variant="secondary" className="ms-2 bg-amber-500/15 text-amber-600">معاينة فقط</Badge>
+                    )}
+                  </p>
                   <p className="text-sm text-muted-foreground">
                     {new Intl.NumberFormat("ar-SY").format(p.price)} ل.س · المخزون {p.stock_quantity ?? 0}
                     {" · "}البائع: {vendors[p.vendor_id] ?? "—"}
@@ -469,6 +498,20 @@ const ProductModeration = () => {
                       disabled={working}
                     >
                       <EyeOff className="me-1 h-4 w-4" /> تعليق
+                    </Button>
+                  )}
+                  {isSuperAdmin && (
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      disabled={togglingId === p.id}
+                      onClick={() => setPurchaseEnabled(p, p.purchase_enabled === false)}
+                    >
+                      {p.purchase_enabled === false ? (
+                        <><ShoppingCart className="me-1 h-4 w-4" /> إتاحة الشراء</>
+                      ) : (
+                        <><Ban className="me-1 h-4 w-4" /> معاينة فقط</>
+                      )}
                     </Button>
                   )}
                 </div>

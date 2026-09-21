@@ -164,6 +164,17 @@ export const friendlyDbError = (error: any): string => {
   const msg: string = error?.message ?? "";
   const code: string = error?.code ?? "";
 
+  if (msg.includes("PREVIEW_ONLY")) {
+    const name = msg.split("PREVIEW_ONLY:")[1]?.split("\n")[0]?.trim();
+    return name
+      ? `"${name}" معروض للمعاينة فقط وغير متاح للشراء حالياً.`
+      : "هذا المنتج معروض للمعاينة فقط وغير متاح للشراء حالياً.";
+  }
+  if (msg.includes("purchase_flag_change_not_allowed")) {
+    return "تغيير حالة الشراء متاح للمدير الأعلى فقط.";
+  }
+
+
   if (code === "22003" || /numeric field overflow|out of range/i.test(msg)) {
     return "أحد الأرقام المُدخلة كبير جداً (السعر أو الكمية). يرجى إدخال قيمة أصغر.";
   }

@@ -8,6 +8,7 @@ import {
   Heart, 
   User,
   Settings,
+  ShieldCheck,
   Smartphone,
   Shirt,
   Baby,
@@ -34,6 +35,7 @@ const MobileBottomNav = () => {
   const location = useLocation();
   const [categories, setCategories] = useState<Category[]>([]);
   const [showCategories, setShowCategories] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -46,12 +48,30 @@ const MobileBottomNav = () => {
     fetchCategories();
   }, []);
 
+  useEffect(() => {
+    let cancelled = false;
+    void (async () => {
+      const { data: auth } = await supabase.auth.getUser();
+      if (!auth?.user) {
+        if (!cancelled) setIsAdmin(false);
+        return;
+      }
+      const { data } = await supabase.rpc("has_any_admin_role", { _user_id: auth.user.id });
+      if (!cancelled) setIsAdmin(Boolean(data));
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   const navItems = [
     { icon: Home, label: "الرئيسية", path: "/" },
     { icon: Search, label: "بحث", path: "/search" },
     { icon: Grid3X3, label: "الفئات", action: () => setShowCategories(true) },
     { icon: Heart, label: "المفضلة", path: "/favorites" },
-    { icon: Settings, label: "الإعدادات", path: "/notifications/settings" },
+    isAdmin
+      ? { icon: ShieldCheck, label: "الإدارة", path: "/admin/products" }
+      : { icon: Settings, label: "الإعدادات", path: "/notifications/settings" },
     { icon: User, label: "حسابي", path: "/dashboard" },
   ];
 

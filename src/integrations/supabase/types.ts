@@ -2438,6 +2438,7 @@ export type Database = {
           platform_shipping_fee: number
           price: number
           product_type: string
+          purchase_enabled: boolean
           return_policy: string | null
           seo_description: string | null
           seo_keywords: string | null
@@ -2503,6 +2504,7 @@ export type Database = {
           platform_shipping_fee?: number
           price: number
           product_type?: string
+          purchase_enabled?: boolean
           return_policy?: string | null
           seo_description?: string | null
           seo_keywords?: string | null
@@ -2568,6 +2570,7 @@ export type Database = {
           platform_shipping_fee?: number
           price?: number
           product_type?: string
+          purchase_enabled?: boolean
           return_policy?: string | null
           seo_description?: string | null
           seo_keywords?: string | null
@@ -4436,6 +4439,10 @@ export type Database = {
           _is_trending?: boolean
           _product_id: string
         }
+        Returns: undefined
+      }
+      admin_set_product_purchase_enabled: {
+        Args: { _enabled: boolean; _product_id: string }
         Returns: undefined
       }
       admin_set_user_role: {

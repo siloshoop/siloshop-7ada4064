@@ -32,6 +32,7 @@ import ProductVariantPicker from "@/components/product/ProductVariantPicker";
 import type { Database } from "@/integrations/supabase/types";
 import { notifySync, useSyncListener } from "@/lib/uiSync";
 import NativeAdBanner from "@/components/NativeAdBanner";
+import { friendlyDbError } from "@/lib/productValidation";
 
 type ProductVariant = Database["public"]["Tables"]["product_variants"]["Row"];
 interface Product {
@@ -78,6 +79,7 @@ interface Product {
   seo_title?: string | null;
   seo_description?: string | null;
   seo_keywords?: string | null;
+  purchase_enabled?: boolean | null;
 }
 
 const Product = () => {
@@ -251,7 +253,7 @@ const Product = () => {
     } catch (error) {
       toast({
         title: "خطأ",
-        description: error.message,
+        description: friendlyDbError(error),
         variant: "destructive",
       });
     } finally {
@@ -319,7 +321,8 @@ const Product = () => {
     product.max_order_quantity && product.max_order_quantity > 0 ? product.max_order_quantity : Infinity,
     effectiveStock || Infinity
   );
-  const canAddToCart = inStock && (!hasVariants || !!selectedVariant);
+  const previewOnly = product.purchase_enabled === false;
+  const canAddToCart = inStock && !previewOnly && (!hasVariants || !!selectedVariant);
 
   const buyNow = async () => {
     await addToCart();
@@ -557,6 +560,12 @@ const Product = () => {
                   </span>
                 )}
               </div>
+
+              {previewOnly && (
+                <div className="rounded-xl border border-amber-500/40 bg-amber-500/10 p-3 text-sm text-amber-700 dark:text-amber-400">
+                  هذا المنتج معروض للمعاينة فقط وغير متاح للشراء حالياً.
+                </div>
+              )}
 
               <div className="hidden md:flex gap-2">
                 <Button

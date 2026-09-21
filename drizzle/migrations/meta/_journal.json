@@ -43,6 +43,13 @@
       "when": 1789988108702,
       "tag": "0005_extend_product_moderation_log_actions",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1789988585829,
+      "tag": "0006_product_preview_only_purchase_flag",
+      "breakpoints": true
     }
   ]
 }

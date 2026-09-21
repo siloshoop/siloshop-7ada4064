@@ -29,6 +29,13 @@
       "when": 1789719635394,
       "tag": "0003_secure_realtime_activation_visibility",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1789987925294,
+      "tag": "0004_enforce_product_approval_workflow",
+      "breakpoints": true
     }
   ]
 }

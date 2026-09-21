@@ -494,6 +494,20 @@ const ProductModeration = () => {
                       <EyeOff className="me-1 h-4 w-4" /> تعليق
                     </Button>
                   )}
+                  {isSuperAdmin && (
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      disabled={togglingId === p.id}
+                      onClick={() => setPurchaseEnabled(p, p.purchase_enabled === false)}
+                    >
+                      {p.purchase_enabled === false ? (
+                        <><ShoppingCart className="me-1 h-4 w-4" /> إتاحة الشراء</>
+                      ) : (
+                        <><Ban className="me-1 h-4 w-4" /> معاينة فقط</>
+                      )}
+                    </Button>
+                  )}
                 </div>
               </CardContent>
             </Card>

@@ -461,6 +461,16 @@ const ProductModeration = () => {
                       <X className="me-1 h-4 w-4" /> رفض
                     </Button>
                   )}
+                  {isSuperAdmin && p.moderation_status === "approved" && (
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => { setSuspending(p); setReason(""); }}
+                      disabled={working}
+                    >
+                      <EyeOff className="me-1 h-4 w-4" /> تعليق
+                    </Button>
+                  )}
                 </div>
               </CardContent>
             </Card>
@@ -480,29 +490,40 @@ const ProductModeration = () => {
         </div>
       )}
 
-      <Dialog open={!!rejecting || bulkRejecting} onOpenChange={(o) => { if (!o) { setRejecting(null); setBulkRejecting(false); } }}>
+      <Dialog
+        open={!!rejecting || !!suspending || bulkRejecting}
+        onOpenChange={(o) => { if (!o) { setRejecting(null); setSuspending(null); setBulkRejecting(false); } }}
+      >
         <DialogContent dir="rtl">
           <DialogHeader>
-            <DialogTitle>{bulkRejecting ? `رفض ${selected.size} منتج` : "رفض المنتج"}</DialogTitle>
+            <DialogTitle>
+              {suspending ? "تعليق المنتج" : bulkRejecting ? `رفض ${selected.size} منتج` : "رفض المنتج"}
+            </DialogTitle>
           </DialogHeader>
           <Textarea
             value={reason}
             onChange={(e) => setReason(e.target.value)}
-            placeholder="سبب الرفض (يظهر للبائع)"
+            placeholder={suspending ? "سبب التعليق (يظهر للبائع)" : "سبب الرفض (يظهر للبائع)"}
             maxLength={500}
           />
           <DialogFooter>
-            <Button variant="outline" onClick={() => { setRejecting(null); setBulkRejecting(false); }}>إلغاء</Button>
+            <Button
+              variant="outline"
+              onClick={() => { setRejecting(null); setSuspending(null); setBulkRejecting(false); }}
+            >
+              إلغاء
+            </Button>
             <Button
               variant="destructive"
               disabled={working || !reason.trim()}
               onClick={() => {
-                if (bulkRejecting) void bulkModerate("reject", reason.trim());
+                if (suspending) void moderate(suspending, "suspend", reason.trim());
+                else if (bulkRejecting) void bulkModerate("reject", reason.trim());
                 else if (rejecting) void moderate(rejecting, "reject", reason.trim());
               }}
             >
               {working && <Loader2 className="me-2 h-4 w-4 animate-spin" />}
-              تأكيد الرفض
+              {suspending ? "تأكيد التعليق" : "تأكيد الرفض"}
             </Button>
           </DialogFooter>
         </DialogContent>

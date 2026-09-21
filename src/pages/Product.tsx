@@ -32,6 +32,7 @@ import ProductVariantPicker from "@/components/product/ProductVariantPicker";
 import type { Database } from "@/integrations/supabase/types";
 import { notifySync, useSyncListener } from "@/lib/uiSync";
 import NativeAdBanner from "@/components/NativeAdBanner";
+import { friendlyDbError } from "@/lib/productValidation";
 
 type ProductVariant = Database["public"]["Tables"]["product_variants"]["Row"];
 interface Product {

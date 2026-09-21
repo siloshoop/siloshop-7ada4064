@@ -150,16 +150,18 @@ const ProductCard = memo(({
         .maybeSingle();
 
       if (existingItem) {
-        await supabase
+        const { error } = await supabase
           .from("cart_items")
           .update({ quantity: existingItem.quantity + 1 })
           .eq("id", existingItem.id);
+        if (error) throw error;
       } else {
-        await supabase.from("cart_items").insert({
+        const { error } = await supabase.from("cart_items").insert({
           user_id: user.id,
           product_id: productId,
           quantity: 1,
         });
+        if (error) throw error;
       }
 
       notifySync("cart");

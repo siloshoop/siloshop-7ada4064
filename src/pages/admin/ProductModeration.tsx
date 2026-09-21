@@ -97,6 +97,15 @@ const ProductModeration = () => {
 
   useEffect(() => {
     void (async () => {
+      const { data: auth } = await supabase.auth.getUser();
+      if (!auth?.user) return;
+      const { data } = await supabase.rpc("has_role", { _user_id: auth.user.id, _role: "super_admin" });
+      setIsSuperAdmin(Boolean(data));
+    })();
+  }, []);
+
+  useEffect(() => {
+    void (async () => {
       const [{ data: b }, { data: c }] = await Promise.all([
         supabase.from("brands").select("id, name_ar").order("name_ar"),
         supabase.from("categories").select("id, name_ar").order("name_ar"),

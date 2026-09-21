@@ -15,6 +15,7 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import {
   Loader2, Search, Check, X, ExternalLink, Sparkles, Flame, ThumbsUp, Eye, EyeOff,
+  ShoppingCart, Ban,
 } from "lucide-react";
 import { broadcastActivationChange } from "@/lib/activationSync";
 

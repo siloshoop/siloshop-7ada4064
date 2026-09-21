@@ -26,6 +26,8 @@ const PAGE_SIZE = 30;
 const adminErrorMessage = (message: string) => {
   if (message.includes("not_authorized")) return "ليس لديك صلاحية لتنفيذ هذا الإجراء";
   if (message.includes("product_not_found")) return "المنتج غير موجود أو تم حذفه";
+  if (message.includes("reason_required")) return "يجب كتابة السبب قبل تنفيذ هذا الإجراء";
+  if (message.includes("product_not_approved")) return "التعليق متاح للمنتجات المعتمدة فقط";
   if (message.includes("actor_admin_role")) return "تعذر التحقق من صلاحية المدير. حدّث الصفحة وحاول مجددًا";
   return message;
 };
@@ -86,10 +88,21 @@ const ProductModeration = () => {
   const [vendors, setVendors] = useState<Record<string, string>>({});
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [rejecting, setRejecting] = useState<ProductRow | null>(null);
+  const [suspending, setSuspending] = useState<ProductRow | null>(null);
+  const [isSuperAdmin, setIsSuperAdmin] = useState(false);
   const [bulkRejecting, setBulkRejecting] = useState(false);
   const [reason, setReason] = useState("");
   const [working, setWorking] = useState(false);
   const [togglingId, setTogglingId] = useState<string | null>(null);
+
+  useEffect(() => {
+    void (async () => {
+      const { data: auth } = await supabase.auth.getUser();
+      if (!auth?.user) return;
+      const { data } = await supabase.rpc("has_role", { _user_id: auth.user.id, _role: "super_admin" });
+      setIsSuperAdmin(Boolean(data));
+    })();
+  }, []);
 
   useEffect(() => {
     void (async () => {
@@ -149,7 +162,7 @@ const ProductModeration = () => {
 
   useEffect(() => { setPage(0); }, [status, search, brandId, categoryId, sort]);
 
-  const moderate = async (product: ProductRow, action: "approve" | "reject", why?: string) => {
+  const moderate = async (product: ProductRow, action: "approve" | "reject" | "suspend", why?: string) => {
     setWorking(true);
     const { error } = await supabase.rpc("admin_moderate_product", {
       _product_id: product.id,
@@ -161,9 +174,14 @@ const ProductModeration = () => {
       toast({ title: "تعذر تنفيذ الإجراء", description: adminErrorMessage(error.message), variant: "destructive" });
       return;
     }
-    toast({ title: action === "approve" ? "تم اعتماد المنتج" : "تم رفض المنتج" });
+    toast({
+      title:
+        action === "approve" ? "تم اعتماد المنتج" : action === "suspend" ? "تم تعليق المنتج" : "تم رفض المنتج",
+    });
     setRejecting(null);
+    setSuspending(null);
     setReason("");
+    void broadcastActivationChange("products", product.id);
     void load();
   };
 
@@ -443,6 +461,16 @@ const ProductModeration = () => {
                       <X className="me-1 h-4 w-4" /> رفض
                     </Button>
                   )}
+                  {isSuperAdmin && p.moderation_status === "approved" && (
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => { setSuspending(p); setReason(""); }}
+                      disabled={working}
+                    >
+                      <EyeOff className="me-1 h-4 w-4" /> تعليق
+                    </Button>
+                  )}
                 </div>
               </CardContent>
             </Card>
@@ -462,29 +490,40 @@ const ProductModeration = () => {
         </div>
       )}
 
-      <Dialog open={!!rejecting || bulkRejecting} onOpenChange={(o) => { if (!o) { setRejecting(null); setBulkRejecting(false); } }}>
+      <Dialog
+        open={!!rejecting || !!suspending || bulkRejecting}
+        onOpenChange={(o) => { if (!o) { setRejecting(null); setSuspending(null); setBulkRejecting(false); } }}
+      >
         <DialogContent dir="rtl">
           <DialogHeader>
-            <DialogTitle>{bulkRejecting ? `رفض ${selected.size} منتج` : "رفض المنتج"}</DialogTitle>
+            <DialogTitle>
+              {suspending ? "تعليق المنتج" : bulkRejecting ? `رفض ${selected.size} منتج` : "رفض المنتج"}
+            </DialogTitle>
           </DialogHeader>
           <Textarea
             value={reason}
             onChange={(e) => setReason(e.target.value)}
-            placeholder="سبب الرفض (يظهر للبائع)"
+            placeholder={suspending ? "سبب التعليق (يظهر للبائع)" : "سبب الرفض (يظهر للبائع)"}
             maxLength={500}
           />
           <DialogFooter>
-            <Button variant="outline" onClick={() => { setRejecting(null); setBulkRejecting(false); }}>إلغاء</Button>
+            <Button
+              variant="outline"
+              onClick={() => { setRejecting(null); setSuspending(null); setBulkRejecting(false); }}
+            >
+              إلغاء
+            </Button>
             <Button
               variant="destructive"
               disabled={working || !reason.trim()}
               onClick={() => {
-                if (bulkRejecting) void bulkModerate("reject", reason.trim());
+                if (suspending) void moderate(suspending, "suspend", reason.trim());
+                else if (bulkRejecting) void bulkModerate("reject", reason.trim());
                 else if (rejecting) void moderate(rejecting, "reject", reason.trim());
               }}
             >
               {working && <Loader2 className="me-2 h-4 w-4 animate-spin" />}
-              تأكيد الرفض
+              {suspending ? "تأكيد التعليق" : "تأكيد الرفض"}
             </Button>
           </DialogFooter>
         </DialogContent>

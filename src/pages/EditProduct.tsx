@@ -409,9 +409,21 @@ const EditProduct = () => {
 
 
 
+      let reviewAgain = false;
+      if (id) {
+        const { data: after } = await supabase
+          .from("products")
+          .select("moderation_status")
+          .eq("id", id)
+          .maybeSingle();
+        reviewAgain = after?.moderation_status === "pending";
+      }
+
       toast({
         title: "تم بنجاح",
-        description: "تم تحديث المنتج بنجاح",
+        description: reviewAgain
+          ? "تم حفظ التعديلات وأُعيد المنتج إلى قيد المراجعة، وسيظهر للمشترين بعد موافقة الإدارة."
+          : "تم تحديث المنتج بنجاح",
       });
 
       navigate("/dashboard");

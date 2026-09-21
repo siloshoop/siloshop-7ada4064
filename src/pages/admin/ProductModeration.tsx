@@ -314,9 +314,9 @@ const ProductModeration = () => {
       <Card className="mb-4">
         <CardContent className="flex flex-wrap items-center gap-3 p-4">
           <Tabs value={status} onValueChange={(v) => setStatus(v as Status)}>
-            <TabsList className="flex-wrap">
+            <TabsList className="flex h-auto flex-wrap gap-1">
               {STATUS_TABS.map((t) => (
-                <TabsTrigger key={t.value} value={t.value}>{t.label}</TabsTrigger>
+                <TabsTrigger key={t.value} value={t.value} className="text-xs sm:text-sm">{t.label}</TabsTrigger>
               ))}
             </TabsList>
           </Tabs>

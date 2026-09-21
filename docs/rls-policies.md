@@ -37,6 +37,23 @@ Because `orders` is in `supabase_realtime`, RLS on `SELECT` doubles as the broad
 The vendor SELECT policy above is therefore load-bearing — without it, realtime would
 leak other customers' rows to any authenticated subscriber.
 
+### `products` — approval workflow
+Enforced by `enforce_product_moderation()` (BEFORE INSERT OR UPDATE), not by the UI:
+- Seller inserts are forced to `draft`/`pending` with `is_active = false`; `moderated_by`,
+  `moderated_at`, reason fields and merchandising flags cannot be set by the vendor.
+- A non-admin may only move `draft|rejected -> pending`, or archive/unarchive. Any other
+  transition (notably `-> approved`) raises `moderation_status_change_not_allowed`.
+- Editing a material field (name, description, price, images, video, category, brand) on an
+  approved product sends it back to `pending` and logs an `edit` row in
+  `product_moderation_log`. Stock/price-independent operational updates do not.
+- Only `moderation_status = 'approved'` may be `is_active = true`, so pending, rejected and
+  suspended products are invisible to the public SELECT policy.
+
+`admin_moderate_product()` is the only approve/reject/hide/restore/suspend/delete path:
+admin-role required, `reject|hide|suspend` require a reason (shown to the seller),
+`suspend|delete` are `super_admin`-only, `suspend` requires the product to be approved, and
+every action writes a `product_moderation_log` row (actor + timestamp) plus a seller notification.
+
 ### `coupons`
 `used_count` may only be changed by `redeem_coupon()`. Enforced by:
 1. `REVOKE UPDATE (used_count) ON coupons FROM authenticated`

@@ -252,7 +252,7 @@ const Product = () => {
     } catch (error) {
       toast({
         title: "خطأ",
-        description: error.message,
+        description: friendlyDbError(error),
         variant: "destructive",
       });
     } finally {
@@ -559,6 +559,12 @@ const Product = () => {
                   </span>
                 )}
               </div>
+
+              {previewOnly && (
+                <div className="rounded-xl border border-amber-500/40 bg-amber-500/10 p-3 text-sm text-amber-700 dark:text-amber-400">
+                  هذا المنتج معروض للمعاينة فقط وغير متاح للشراء حالياً.
+                </div>
+              )}
 
               <div className="hidden md:flex gap-2">
                 <Button

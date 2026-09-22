@@ -525,7 +525,7 @@ const Cart = () => {
               <p className="text-muted-foreground">
                 يجب تسجيل الدخول لعرض عربة التسوق
               </p>
-              <Button onClick={() => navigate("/auth")} className="w-full">
+              <Button onClick={() => navigate("/auth", { state: { from: "/cart" } })} className="w-full">
                 تسجيل الدخول
               </Button>
             </CardContent>

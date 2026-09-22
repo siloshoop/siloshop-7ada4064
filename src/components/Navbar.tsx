@@ -6,7 +6,7 @@ import SearchAutocomplete from "@/components/search/SearchAutocomplete";
 import { NotificationsDropdown } from "@/components/NotificationsDropdown";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import PushNotificationManager from "@/components/PushNotificationManager";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { NavLink } from "@/components/NavLink";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
@@ -34,6 +34,7 @@ import { notifySync, useSyncListener } from "@/lib/uiSync";
 
 const Navbar = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { user, signOut, loading } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [cartCount, setCartCount] = useState(0);
@@ -167,7 +168,7 @@ const Navbar = () => {
                 </DropdownMenuContent>
               </DropdownMenu>
             ) : (
-              <Button onClick={() => navigate("/auth")} size="sm" className="shrink-0 px-3">
+              <Button onClick={() => navigate("/auth", { state: { from: location.pathname + location.search } })} size="sm" className="shrink-0 px-3">
                 تسجيل الدخول
               </Button>
             )
@@ -287,7 +288,7 @@ const Navbar = () => {
                 {!user && (
                   <Button 
                     onClick={() => {
-                      navigate("/auth");
+                      navigate("/auth", { state: { from: location.pathname + location.search } });
                       setMobileMenuOpen(false);
                     }}
                   >

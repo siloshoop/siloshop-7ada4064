@@ -399,7 +399,7 @@ const Auth = () => {
         <CardContent className="px-4 pb-4 pt-0 sm:px-6 sm:pb-6">
           <Tabs
             value={authMode}
-            onValueChange={(value) => navigate(value === "signup" ? "/auth?mode=signup" : "/auth", { state: location.state })}
+            onValueChange={(value) => navigate(value === "signup" ? "/auth?mode=signup" : "/auth", { replace: true, state: location.state })}
             className="w-full"
           >
             <TabsList className="mb-4 grid w-full grid-cols-2 sm:mb-6">

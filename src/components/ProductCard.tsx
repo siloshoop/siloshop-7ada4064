@@ -1,5 +1,5 @@
 import { Heart, Star, Scale, ShoppingCart, Eye, Store } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { FavoriteButton } from "@/components/FavoriteButton";
@@ -52,6 +52,7 @@ const ProductCard = memo(({
 
 }: ProductCardProps) => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { user } = useAuth();
   const { toast } = useToast();
   const { addProduct } = useCompareProducts();
@@ -137,7 +138,7 @@ const ProductCard = memo(({
     if (!productId) return;
 
     if (!user) {
-      navigate("/auth");
+      navigate("/auth", { state: { from: location.pathname + location.search } });
       return;
     }
 

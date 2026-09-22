@@ -113,9 +113,9 @@ const Index = () => {
     return (
       <div className="min-h-screen flex flex-col">
         <Navbar />
-        <main className="flex-1 container px-4 py-8">
-          <div className="flex items-center justify-between mb-6">
-            <div>
+        <main className="container flex-1 px-3 py-5 sm:px-4 sm:py-8">
+          <div className="mb-5 flex min-w-0 flex-col gap-3 sm:mb-6 sm:flex-row sm:items-center sm:justify-between">
+            <div className="min-w-0">
               <h1 className="text-2xl font-bold mb-2 text-right">نتائج البحث عن "{searchQuery}"</h1>
               <p className="text-muted-foreground text-right">{products.length} منتج</p>
             </div>

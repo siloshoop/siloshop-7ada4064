@@ -996,7 +996,7 @@ const SearchPage = () => {
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
-      <main className="flex-1 container px-4 py-8">
+      <main className="container flex-1 px-3 py-5 sm:px-4 sm:py-8">
         {/* Search Header */}
         <div className="mb-6 space-y-4">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
@@ -1089,7 +1089,7 @@ const SearchPage = () => {
           </aside>
 
           {/* Products Grid */}
-          <div className="flex-1">
+          <div className="min-w-0 flex-1">
             {loading ? (
               <ProductGridSkeleton count={12} />
             ) : products.length === 0 ? (
@@ -1104,7 +1104,7 @@ const SearchPage = () => {
               </div>
             ) : (
               <>
-                <div className="grid grid-cols-2 gap-4 sm:gap-6 xl:grid-cols-3">
+                <div className="grid grid-cols-2 items-stretch gap-2.5 sm:gap-6 xl:grid-cols-3">
                   {products.map((product, index) => {
                     const avgRating = getAverageRating(product.reviews);
                     const discount = product.original_price

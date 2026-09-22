@@ -4540,10 +4540,6 @@ export type Database = {
         }
         Returns: Json
       }
-      delete_email: {
-        Args: { message_id: number; queue_name: string }
-        Returns: boolean
-      }
       delete_or_archive_product: {
         Args: { _product_id: string }
         Returns: string
@@ -4556,11 +4552,6 @@ export type Database = {
       edit_chat_message: {
         Args: { p_content: string; p_message_id: string }
         Returns: undefined
-      }
-      email_queue_dispatch: { Args: never; Returns: undefined }
-      enqueue_email: {
-        Args: { payload: Json; queue_name: string }
-        Returns: number
       }
       forward_chat_message: {
         Args: { p_message_id: string; p_target_conversation_id: string }
@@ -4836,15 +4827,6 @@ export type Database = {
         Args: { p_conversation_id: string }
         Returns: undefined
       }
-      move_to_dlq: {
-        Args: {
-          dlq_name: string
-          message_id: number
-          payload: Json
-          source_queue: string
-        }
-        Returns: number
-      }
       next_order_number: { Args: never; Returns: string }
       normalize_order_status: { Args: { _status: string }; Returns: string }
       order_reports: { Args: { _from?: string; _to?: string }; Returns: Json }
@@ -4873,14 +4855,6 @@ export type Database = {
         }[]
       }
       reactivate_seller: { Args: { _user_id: string }; Returns: undefined }
-      read_email_batch: {
-        Args: { batch_size: number; queue_name: string; vt: number }
-        Returns: {
-          message: Json
-          msg_id: number
-          read_ct: number
-        }[]
-      }
       record_contact_rate_limit: {
         Args: { _email_hash: string; _ip_hash: string }
         Returns: undefined

@@ -18,10 +18,10 @@ android {
         }
     }
 
-    namespace = "app.lovable.p456c8c161d24407ca1f5c7b374b1fe4d"
+    namespace = "com.siloshop.app"
     compileSdk = rootProject.ext.compileSdkVersion
     defaultConfig {
-        applicationId "app.lovable.p456c8c161d24407ca1f5c7b374b1fe4d"
+        applicationId "com.siloshop.app"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1

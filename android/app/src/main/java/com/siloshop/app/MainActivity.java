@@ -1,4 +1,4 @@
-package app.lovable.p456c8c161d24407ca1f5c7b374b1fe4d;
+package com.siloshop.app;
 
 import com.getcapacitor.BridgeActivity;
 

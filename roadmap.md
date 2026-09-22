@@ -60,3 +60,9 @@
 - [x] Add 20 clearly labeled TEST DATA products across active categories and brands
 - [x] Verify database persistence and public visibility without touching subscriptions or balances
 - [x] Test product display on desktop, mobile, and Android WebView sizes
+## Current Android UI and navigation pass
+
+- [x] Fix shared safe-area spacing, RTL wrapping, and viewport overflow
+- [x] Fix product-card mobile alignment and action layout
+- [x] Fix login/register and Android hardware Back navigation history
+- [x] Verify representative pages at small/large portrait and landscape Android sizes

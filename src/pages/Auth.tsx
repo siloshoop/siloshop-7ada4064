@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -86,6 +86,12 @@ const Auth = () => {
   const [showPassword, setShowPassword] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
+  const location = useLocation();
+  const [searchParams] = useSearchParams();
+  const authMode = searchParams.get("mode") === "signup" ? "signup" : "signin";
+  const returnTo = typeof location.state === "object" && location.state && "from" in location.state
+    ? String((location.state as { from?: string }).from || "/")
+    : "/";
 
   // Sign In State
   const [signInEmail, setSignInEmail] = useState("");
@@ -231,7 +237,7 @@ const Auth = () => {
         description: "مرحباً بعودتك!",
       });
 
-      navigate("/");
+      navigate(returnTo, { replace: true });
     } catch (error) {
       const rawMsg = (error as Error)?.message || "";
       const attempt = recordFailedAttempt();
@@ -375,24 +381,28 @@ const Auth = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/5 via-background to-accent/5 p-4">
-      <Card className="w-full max-w-md shadow-2xl">
-        <CardHeader className="space-y-1 text-center">
-          <div className="flex justify-center mb-4">
-            <div className="w-16 h-16 bg-gradient-to-br from-primary to-accent rounded-2xl flex items-center justify-center">
+    <div className="safe-area-top safe-area-bottom flex min-h-[100dvh] items-start justify-center bg-gradient-to-br from-primary/5 via-background to-accent/5 p-2 sm:items-center sm:p-4">
+      <Card className="my-2 w-full max-w-md overflow-hidden shadow-2xl sm:my-4">
+        <CardHeader className="space-y-1 p-4 text-center sm:p-6">
+          <div className="mb-2 flex justify-center sm:mb-4">
+            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-accent sm:h-16 sm:w-16 sm:rounded-2xl">
               <ShoppingBag className="w-8 h-8 text-primary-foreground" />
             </div>
           </div>
-          <CardTitle className="text-3xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+          <CardTitle className="bg-gradient-to-r from-primary to-accent bg-clip-text text-2xl font-bold text-transparent sm:text-3xl">
             مرحباً بك
           </CardTitle>
           <CardDescription className="text-base">
             سجل الدخول أو أنشئ حساباً جديداً للبدء
           </CardDescription>
         </CardHeader>
-        <CardContent>
-          <Tabs defaultValue="signin" className="w-full">
-            <TabsList className="grid w-full grid-cols-2 mb-6">
+        <CardContent className="px-4 pb-4 pt-0 sm:px-6 sm:pb-6">
+          <Tabs
+            value={authMode}
+            onValueChange={(value) => navigate(value === "signup" ? "/auth?mode=signup" : "/auth", { replace: true, state: location.state })}
+            className="w-full"
+          >
+            <TabsList className="mb-4 grid w-full grid-cols-2 sm:mb-6">
               <TabsTrigger value="signin">تسجيل الدخول</TabsTrigger>
               <TabsTrigger value="signup">حساب جديد</TabsTrigger>
             </TabsList>

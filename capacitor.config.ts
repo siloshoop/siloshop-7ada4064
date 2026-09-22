@@ -49,7 +49,9 @@ const config: CapacitorConfig = {
     StatusBar: {
       style: "LIGHT",
       backgroundColor: "#7C3AED",
-      overlaysWebView: false,
+      // The WebView draws edge-to-edge and CSS consumes the exact native
+      // insets once. Keeping overlaysWebView false would reserve them twice.
+      overlaysWebView: true,
     },
   },
 };

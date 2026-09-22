@@ -1,5 +1,5 @@
 import { Heart, Star, Scale, ShoppingCart, Eye, Store } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { FavoriteButton } from "@/components/FavoriteButton";
@@ -52,6 +52,7 @@ const ProductCard = memo(({
 
 }: ProductCardProps) => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { user } = useAuth();
   const { toast } = useToast();
   const { addProduct } = useCompareProducts();
@@ -137,7 +138,7 @@ const ProductCard = memo(({
     if (!productId) return;
 
     if (!user) {
-      navigate("/auth");
+      navigate("/auth", { state: { from: location.pathname + location.search } });
       return;
     }
 
@@ -189,7 +190,7 @@ const ProductCard = memo(({
   return (
     <a
       href={productId ? `/product/${productId}` : undefined}
-      className="group relative block cursor-pointer rounded-xl overflow-hidden bg-card border border-border/40 hover:border-primary/40 transition-all duration-400 ease-[cubic-bezier(0.22,1,0.36,1)] hover:shadow-[0_8px_40px_-12px_hsl(var(--primary)/0.25)] active:scale-[0.98]"
+      className="group relative flex h-full min-w-0 cursor-pointer flex-col overflow-hidden rounded-xl border border-border/40 bg-card transition-all duration-400 ease-[cubic-bezier(0.22,1,0.36,1)] hover:border-primary/40 hover:shadow-[0_8px_40px_-12px_hsl(var(--primary)/0.25)] active:scale-[0.98]"
       onClick={(e) => {
         // Let the browser handle ctrl/cmd/middle-click so the product can be
         // opened in a new tab, and keep SPA navigation for plain clicks.
@@ -203,7 +204,7 @@ const ProductCard = memo(({
 
       <div className="relative aspect-square overflow-hidden bg-muted/30">
         {discount && (
-          <div className="absolute top-2 left-2 z-10">
+          <div className="absolute start-2 top-2 z-10">
             <Badge className="bg-sale text-sale-foreground font-bold text-[10px] px-1.5 py-0.5 rounded-md shadow-lg backdrop-blur-sm border-0">
               {discount}%-
             </Badge>
@@ -218,7 +219,7 @@ const ProductCard = memo(({
           </div>
         )}
         {!isOutOfStock && isLowStock && (
-          <div className="absolute bottom-2 left-2 z-10">
+          <div className="absolute bottom-2 start-2 z-10">
             <Badge className="bg-warning text-warning-foreground font-semibold text-[10px] px-1.5 py-0.5 rounded-md shadow-md border-0 animate-pulse">
               متبقي {stockQuantity}
             </Badge>
@@ -291,8 +292,8 @@ const ProductCard = memo(({
         </div>
       </div>
 
-      <div className="p-3 space-y-1.5">
-        <h3 className="font-semibold text-xs leading-snug line-clamp-2 min-h-[2rem] text-foreground group-hover:text-primary transition-colors duration-300">
+      <div className="flex min-w-0 flex-1 flex-col gap-1.5 p-2.5 sm:p-3">
+        <h3 className="line-clamp-2 min-h-[2rem] text-xs font-semibold leading-snug text-foreground transition-colors duration-300 group-hover:text-primary">
           {name}
         </h3>
 
@@ -327,8 +328,8 @@ const ProductCard = memo(({
 
         </div>
 
-        <div className="flex min-w-0 flex-wrap items-baseline gap-1.5">
-          <span className="break-words text-sm font-bold text-primary">
+        <div className="flex min-w-0 flex-wrap items-baseline gap-x-1.5 gap-y-0.5">
+          <span className="whitespace-nowrap text-sm font-bold text-primary">
             {price.toLocaleString()} ل.س
           </span>
           {originalPrice && originalPrice > price && (
@@ -338,10 +339,10 @@ const ProductCard = memo(({
           )}
         </div>
 
-        <div className="text-[10px] flex items-center gap-1">
+        <div className="flex min-w-0 items-center gap-1 text-[10px]">
           {shippingCost !== undefined ? (
             shippingCost > 0 ? (
-              <span className="text-muted-foreground">🚚 شحن: {shippingCost.toLocaleString()} ل.س</span>
+              <span className="line-clamp-2 text-muted-foreground">🚚 شحن: {shippingCost.toLocaleString()} ل.س</span>
             ) : (
               <span className="text-green-600 dark:text-green-400 font-medium">🚚 شحن مجاني</span>
             )
@@ -359,7 +360,7 @@ const ProductCard = memo(({
         </p>
 
         <Button
-          className="w-full rounded-lg font-semibold text-xs h-8 shadow-sm hover:shadow-md transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] group/btn active:scale-95 disabled:opacity-60"
+          className="group/btn mt-auto h-9 w-full rounded-lg px-2 text-xs font-semibold shadow-sm transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] hover:shadow-md active:scale-95 disabled:opacity-60"
           onClick={handleAddToCart}
           disabled={isOutOfStock}
           variant={isOutOfStock ? "secondary" : "default"}

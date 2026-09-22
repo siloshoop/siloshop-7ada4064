@@ -145,8 +145,6 @@ const MobileBottomNav = () => {
         </SheetContent>
       </Sheet>
 
-      {/* Spacer to prevent content from being hidden behind nav */}
-       <div className="mobile-nav-spacer md:hidden" />
     </>
   );
 };

@@ -206,7 +206,7 @@ export const ImageGallery = ({ images, productName, videoUrl }: ImageGalleryProp
 
         {/* Thumbnails: vertical on desktop, horizontal on mobile */}
         {(total > 1 || !!videoUrl) && (
-          <div className="flex md:flex-col gap-2 md:w-20 overflow-x-auto md:overflow-y-auto md:max-h-[520px] scrollbar-hide">
+          <div className="flex gap-2 overflow-x-auto scrollbar-hide md:max-h-[min(520px,60dvh)] md:w-20 md:flex-col md:overflow-y-auto">
             {!!videoUrl && (
               <button
                 onClick={() => setShowVideo(true)}

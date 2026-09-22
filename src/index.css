@@ -178,7 +178,9 @@ All colors MUST be HSL.
     min-width: 0;
     min-height: 100vh;
     min-height: 100dvh;
-    overflow-wrap: anywhere;
+    overflow-wrap: normal;
+    word-break: normal;
+    hyphens: none;
   }
   
   html {
@@ -193,6 +195,17 @@ All colors MUST be HSL.
     min-height: 100vh;
     min-height: 100dvh;
     overflow-x: clip;
+  }
+
+  /* Arabic must wrap between words, never between joined letters. Flex/grid
+     children may still shrink without forcing text outside their container. */
+  :where(p, h1, h2, h3, h4, h5, h6, span, label, a, button, dd, dt) {
+    word-break: normal;
+    overflow-wrap: normal;
+  }
+
+  :where(.flex, .grid) > * {
+    min-width: 0;
   }
 
   img,
@@ -236,6 +249,15 @@ All colors MUST be HSL.
 
   .mobile-nav-spacer {
     height: calc(3.5rem + max(env(safe-area-inset-bottom, 0px), var(--safe-area-inset-bottom, 0px)));
+  }
+
+  .mobile-nav-content {
+    padding-bottom: calc(3.75rem + max(env(safe-area-inset-bottom, 0px), var(--safe-area-inset-bottom, 0px)));
+  }
+
+  .break-safe {
+    overflow-wrap: anywhere;
+    word-break: normal;
   }
 
   .safe-screen-height {

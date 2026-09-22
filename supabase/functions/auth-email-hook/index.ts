@@ -15,11 +15,58 @@ const corsHeaders = {
 }
 
 // Configuration
-const SITE_NAME = "siloshop"
+const SITE_NAME = "SiloShop"
 const SENDER_DOMAIN = "notify.siloshop.net"
 const ROOT_DOMAIN = "siloshop.net"
-const FROM_DOMAIN = "notify.siloshop.net"
+const FROM_DOMAIN = "siloshop.net" // Domain shown in From address
 const SITE_URL = `https://${ROOT_DOMAIN}`
+
+// Codes are stored as a keyed HMAC (never plain text, never a bare hash):
+// a leaked database row cannot be brute-forced back to the 6-digit code
+// without the server-side secret.
+async function hashCode(value: string): Promise<string> {
+  const secret = Deno.env.get('OTP_HASH_SECRET')
+  if (!secret) throw new Error('OTP_HASH_SECRET is not configured')
+  const key = await crypto.subtle.importKey(
+    'raw',
+    new TextEncoder().encode(secret),
+    { name: 'HMAC', hash: 'SHA-256' },
+    false,
+    ['sign']
+  )
+  const signature = await crypto.subtle.sign('HMAC', key, new TextEncoder().encode(value))
+  return Array.from(new Uint8Array(signature))
+    .map((b) => b.toString(16).padStart(2, '0'))
+    .join('')
+}
+
+// The auth provider issues an 8-digit token; the app's verification screen uses
+// a 6-digit code. Issue our own 6-digit code for sign-up confirmation, store its
+// hash, and invalidate any previous code for the same address.
+async function issueSignupCode(email: string): Promise<string> {
+  const digits = new Uint32Array(1)
+  crypto.getRandomValues(digits)
+  const code = String(digits[0] % 1000000).padStart(6, '0')
+  const normalizedEmail = email.trim().toLowerCase()
+  const codeHash = await hashCode(`${normalizedEmail}:${code}`)
+
+  const supabase = createClient(
+    Deno.env.get('SUPABASE_URL')!,
+    Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
+  )
+  // Issuing a new code invalidates any previous one for this address.
+  await supabase.from('email_verification_codes').delete().eq('email', normalizedEmail)
+  const { error } = await supabase.from('email_verification_codes').insert({
+    email: normalizedEmail,
+    code_hash: codeHash,
+    expires_at: new Date(Date.now() + 10 * 60 * 1000).toISOString(),
+    used_at: null,
+    attempts: 0,
+  })
+  if (error) throw new Error(`Failed to store verification code: ${error.message}`)
+
+  return code
+}
 
 // Template mapping for preview mode
 const EMAIL_TEMPLATES: Record<string, React.ComponentType<any>> = {

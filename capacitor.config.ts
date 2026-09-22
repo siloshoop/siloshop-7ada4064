@@ -11,7 +11,7 @@ import type { CapacitorConfig } from "@capacitor/cli";
 const devServerUrl = process.env.CAP_SERVER_URL;
 
 const config: CapacitorConfig = {
-  appId: "app.lovable.p456c8c161d24407ca1f5c7b374b1fe4d",
+  appId: "com.siloshop.app",
   appName: "SiloShop",
   webDir: "dist",
   ...(devServerUrl

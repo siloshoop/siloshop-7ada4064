@@ -5,7 +5,7 @@ No duplicate database, users, products or orders — everything reads/writes the
 with the same RLS, roles (buyer / seller / admin / super admin) and payment rules.
 
 ## Files
-- `capacitor.config.ts` — app id `app.lovable.p456c8c161d24407ca1f5c7b374b1fe4d`, name `SiloShop`.
+- `capacitor.config.ts` — app id `com.siloshop.app`, name `SiloShop`.
   The dev live-reload server is **opt-in** through `CAP_SERVER_URL`, so release builds are secure by default.
 - `assets/icon.png`, `assets/splash.png`, `assets/splash-dark.png` — sources for native icons/splash.
 - `src/lib/native.ts` — status bar, splash hide, Android hardware back button (no-op on the website).

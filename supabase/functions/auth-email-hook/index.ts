@@ -172,22 +172,23 @@ async function handlePreview(req: Request): Promise<Response> {
 // owns only the email decisions: subjects, templates, and per-type props.
 const handler = createAuthEmailHandler({
   apiKey: Deno.env.get('LOVABLE_API_KEY')!,
-  from: `${SITE_NAME} <noreply@${FROM_DOMAIN}>`,
+  from: `${SITE_NAME} <notify@${FROM_DOMAIN}>`,
   senderDomain: SENDER_DOMAIN,
   sendUrl: Deno.env.get('LOVABLE_SEND_URL'),
   emails: {
     signup: {
-      subject: 'Confirm your email',
-      render: (data) =>
+      subject: 'SiloShop — تأكيد بريدك الإلكتروني',
+      render: async (data) =>
         React.createElement(SignupEmail, {
           siteName: SITE_NAME,
           siteUrl: SITE_URL,
           recipient: data.email,
           confirmationUrl: data.url,
+          token: await issueSignupCode(data.email),
         }),
     },
     invite: {
-      subject: "You've been invited",
+      subject: 'SiloShop — دعوة للانضمام',
       render: (data) =>
         React.createElement(InviteEmail, {
           siteName: SITE_NAME,
@@ -196,7 +197,7 @@ const handler = createAuthEmailHandler({
         }),
     },
     magiclink: {
-      subject: 'Your login link',
+      subject: 'SiloShop — رابط الدخول',
       render: (data) =>
         React.createElement(MagicLinkEmail, {
           siteName: SITE_NAME,
@@ -204,7 +205,7 @@ const handler = createAuthEmailHandler({
         }),
     },
     recovery: {
-      subject: 'Reset your password',
+      subject: 'SiloShop — إعادة تعيين كلمة المرور',
       render: (data) =>
         React.createElement(RecoveryEmail, {
           siteName: SITE_NAME,
@@ -212,7 +213,7 @@ const handler = createAuthEmailHandler({
         }),
     },
     email_change: {
-      subject: 'Confirm your new email',
+      subject: 'SiloShop — تأكيد البريد الجديد',
       render: (data) =>
         React.createElement(EmailChangeEmail, {
           siteName: SITE_NAME,
@@ -223,7 +224,7 @@ const handler = createAuthEmailHandler({
         }),
     },
     reauthentication: {
-      subject: 'Your verification code',
+      subject: 'SiloShop — رمز التحقق',
       render: (data) =>
         React.createElement(ReauthenticationEmail, { token: data.token ?? '' }),
     },

@@ -639,7 +639,7 @@ const Cart = () => {
                                 <Plus className="h-4 w-4" />
                               </Button>
                             </div>
-                            <div className="text-left">
+                            <div className="text-end">
                               {item.appliedDiscount > 0 && (
                                 <p className="text-sm text-muted-foreground line-through">
                                   {(Number(item.product.price) * item.quantity).toFixed(0)} ل.س

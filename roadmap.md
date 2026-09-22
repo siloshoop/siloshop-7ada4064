@@ -62,7 +62,7 @@
 - [x] Test product display on desktop, mobile, and Android WebView sizes
 ## Current Android UI and navigation pass
 
-- [ ] Fix shared safe-area spacing, RTL wrapping, and viewport overflow
-- [ ] Fix product-card mobile alignment and action layout
-- [ ] Fix login/register and Android hardware Back navigation history
-- [ ] Verify representative pages at small/large portrait and landscape Android sizes
+- [x] Fix shared safe-area spacing, RTL wrapping, and viewport overflow
+- [x] Fix product-card mobile alignment and action layout
+- [x] Fix login/register and Android hardware Back navigation history
+- [x] Verify representative pages at small/large portrait and landscape Android sizes

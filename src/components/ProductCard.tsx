@@ -204,7 +204,7 @@ const ProductCard = memo(({
 
       <div className="relative aspect-square overflow-hidden bg-muted/30">
         {discount && (
-          <div className="absolute top-2 left-2 z-10">
+          <div className="absolute start-2 top-2 z-10">
             <Badge className="bg-sale text-sale-foreground font-bold text-[10px] px-1.5 py-0.5 rounded-md shadow-lg backdrop-blur-sm border-0">
               {discount}%-
             </Badge>
@@ -219,7 +219,7 @@ const ProductCard = memo(({
           </div>
         )}
         {!isOutOfStock && isLowStock && (
-          <div className="absolute bottom-2 left-2 z-10">
+          <div className="absolute bottom-2 start-2 z-10">
             <Badge className="bg-warning text-warning-foreground font-semibold text-[10px] px-1.5 py-0.5 rounded-md shadow-md border-0 animate-pulse">
               متبقي {stockQuantity}
             </Badge>

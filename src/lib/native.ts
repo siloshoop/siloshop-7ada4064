@@ -22,7 +22,7 @@ export const initNativeApp = async () => {
     await SystemBars.setStyle({ style: SystemBarsStyle.Light }).catch(() => undefined);
     await SystemBars.show().catch(() => undefined);
 
-    await StatusBar.setOverlaysWebView({ overlay: false }).catch(() => undefined);
+    await StatusBar.setOverlaysWebView({ overlay: true }).catch(() => undefined);
     await StatusBar.setStyle({ style: Style.Light }).catch(() => undefined);
     if (Capacitor.getPlatform() === "android") {
       await StatusBar.setBackgroundColor({ color: "#7C3AED" }).catch(() => undefined);
@@ -43,6 +43,8 @@ export const initNativeApp = async () => {
     App.addListener("backButton", ({ canGoBack }) => {
       if (canGoBack && window.location.pathname !== "/") {
         window.history.back();
+      } else if (/^\/(auth|forgot-password|verify-email|reset-password)/.test(window.location.pathname)) {
+        window.location.assign("/");
       } else {
         void App.exitApp();
       }

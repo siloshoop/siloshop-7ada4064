@@ -360,7 +360,7 @@ const Product = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col pb-20 md:pb-0">
+    <div className="flex min-h-screen flex-col md:pb-0">
       <SeoHead
         title={seoTitle}
         description={seoDescription}
@@ -525,7 +525,7 @@ const Product = () => {
 
             {/* Quantity + primary actions */}
             <div className="space-y-3">
-              <div className="flex items-center gap-4">
+              <div className="flex flex-wrap items-center gap-3 sm:gap-4">
                 <span className="text-sm font-medium text-muted-foreground">الكمية</span>
                 <div className="flex items-center rounded-full border bg-background overflow-hidden">
                   <Button
@@ -610,7 +610,7 @@ const Product = () => {
             </div>
 
             {/* Trust badges */}
-            <div className="grid grid-cols-3 gap-2 pt-2">
+            <div className="grid grid-cols-2 gap-2 pt-2">
               <div className="flex flex-col items-center text-center gap-1 rounded-xl border bg-muted/30 p-3">
                 <Truck className="h-4 w-4 text-primary" />
                 <span className="text-[11px] text-muted-foreground leading-tight">
@@ -780,7 +780,7 @@ const Product = () => {
 
       </main>
 
-      <div className="h-[calc(4rem+max(env(safe-area-inset-bottom,0px),var(--safe-area-inset-bottom,0px)))] md:hidden" aria-hidden="true" />
+      <div className="h-[calc(3.75rem+max(env(safe-area-inset-bottom,0px),var(--safe-area-inset-bottom,0px)))] shrink-0 md:hidden" aria-hidden="true" />
 
       {/* Sticky mobile action bar */}
       <div className="safe-area-bottom safe-area-x fixed inset-x-0 bottom-0 z-40 border-t bg-background/95 shadow-lg backdrop-blur supports-[backdrop-filter]:bg-background/80 md:hidden">

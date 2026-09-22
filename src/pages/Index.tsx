@@ -171,7 +171,7 @@ const Index = () => {
       />
       <AnnouncementBar />
       <Navbar />
-      <main className="flex-1 pb-[120px] md:pb-0 page-enter">
+      <main className="mobile-nav-content flex-1 page-enter md:pb-0">
         {/* Featured showroom — real items, or the frontend-only demo when empty */}
         <SectionErrorBoundary>
           <PremiumShowroom />

@@ -539,8 +539,8 @@ const Cart = () => {
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
-      <main className="flex-1 container px-4 py-8">
-        <h1 className="text-3xl font-bold mb-8">عربة التسوق</h1>
+      <main className="container flex-1 px-3 py-5 sm:px-4 sm:py-8">
+        <h1 className="mb-5 text-2xl font-bold sm:mb-8 sm:text-3xl">عربة التسوق</h1>
 
         {cartItems.length === 0 ? (
           <Card>
@@ -563,17 +563,17 @@ const Cart = () => {
                 
                 return (
                   <Card key={item.id}>
-                    <CardContent className="p-6">
-                      <div className="flex gap-4">
+                    <CardContent className="p-3 sm:p-6">
+                      <div className="grid min-w-0 grid-cols-[5rem_minmax(0,1fr)] gap-3 sm:grid-cols-[6rem_minmax(0,1fr)] sm:gap-4">
                         <img loading="lazy" decoding="async"
                           src={item.product.image_url}
                           alt={item.product.name}
-                          className="w-24 h-24 object-cover rounded-lg"
+                          className="aspect-square h-auto w-full rounded-lg object-cover"
                         />
-                        <div className="flex-1 space-y-2">
-                          <div className="flex items-start justify-between">
-                            <div>
-                              <h3 className="font-bold text-lg">{item.product.name}</h3>
+                        <div className="min-w-0 space-y-2">
+                          <div className="flex min-w-0 items-start justify-between gap-1">
+                            <div className="min-w-0">
+                              <h3 className="text-sm font-bold leading-snug sm:text-lg">{item.product.name}</h3>
                               {item.variantLabel && (
                                 <p className="text-xs text-muted-foreground">{item.variantLabel}</p>
                               )}
@@ -617,8 +617,8 @@ const Cart = () => {
                             </p>
                           )}
 
-                          <div className="flex items-center justify-between flex-wrap gap-2">
-                            <div className="flex items-center gap-2">
+                          <div className="flex flex-col gap-2 min-[360px]:flex-row min-[360px]:items-center min-[360px]:justify-between">
+                            <div className="flex items-center gap-1 sm:gap-2">
                               <Button
                                 size="icon"
                                 variant="outline"
@@ -627,7 +627,7 @@ const Cart = () => {
                               >
                                 <Minus className="h-4 w-4" />
                               </Button>
-                              <span className="w-12 text-center font-bold">
+                              <span className="w-8 text-center font-bold sm:w-12">
                                 {item.quantity}
                               </span>
                               <Button

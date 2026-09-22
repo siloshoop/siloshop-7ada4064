@@ -7,7 +7,7 @@ import SectionErrorBoundary from "@/components/SectionErrorBoundary";
 const Categories = () => (
   <div className="min-h-screen flex flex-col">
     <Navbar />
-    <main className="flex-1 pb-[120px] md:pb-0 page-enter">
+    <main className="mobile-nav-content flex-1 page-enter md:pb-0">
       <div className="container px-4 pt-6">
         <h1 className="text-2xl font-bold md:text-3xl">تصفّح الفئات</h1>
         <p className="mt-1 text-sm text-muted-foreground">اختر الفئة المناسبة لتصل إلى المنتجات بسرعة.</p>

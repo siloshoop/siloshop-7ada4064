@@ -1,6 +1,7 @@
 import * as React from 'npm:react@18.3.1'
 import { renderAsync } from 'npm:@react-email/components@0.0.22'
 import { createAuthEmailHandler } from 'npm:@lovable.dev/email-js@0.1.0'
+import { createClient } from 'npm:@supabase/supabase-js@2'
 import { SignupEmail } from '../_shared/email-templates/signup.tsx'
 import { InviteEmail } from '../_shared/email-templates/invite.tsx'
 import { MagicLinkEmail } from '../_shared/email-templates/magic-link.tsx'
@@ -15,11 +16,58 @@ const corsHeaders = {
 }
 
 // Configuration
-const SITE_NAME = "siloshop"
+const SITE_NAME = "SiloShop"
 const SENDER_DOMAIN = "notify.siloshop.net"
 const ROOT_DOMAIN = "siloshop.net"
-const FROM_DOMAIN = "notify.siloshop.net"
+const FROM_DOMAIN = "siloshop.net" // Domain shown in From address
 const SITE_URL = `https://${ROOT_DOMAIN}`
+
+// Codes are stored as a keyed HMAC (never plain text, never a bare hash):
+// a leaked database row cannot be brute-forced back to the 6-digit code
+// without the server-side secret.
+async function hashCode(value: string): Promise<string> {
+  const secret = Deno.env.get('OTP_HASH_SECRET')
+  if (!secret) throw new Error('OTP_HASH_SECRET is not configured')
+  const key = await crypto.subtle.importKey(
+    'raw',
+    new TextEncoder().encode(secret),
+    { name: 'HMAC', hash: 'SHA-256' },
+    false,
+    ['sign']
+  )
+  const signature = await crypto.subtle.sign('HMAC', key, new TextEncoder().encode(value))
+  return Array.from(new Uint8Array(signature))
+    .map((b) => b.toString(16).padStart(2, '0'))
+    .join('')
+}
+
+// The auth provider issues an 8-digit token; the app's verification screen uses
+// a 6-digit code. Issue our own 6-digit code for sign-up confirmation, store its
+// hash, and invalidate any previous code for the same address.
+async function issueSignupCode(email: string): Promise<string> {
+  const digits = new Uint32Array(1)
+  crypto.getRandomValues(digits)
+  const code = String(digits[0] % 1000000).padStart(6, '0')
+  const normalizedEmail = email.trim().toLowerCase()
+  const codeHash = await hashCode(`${normalizedEmail}:${code}`)
+
+  const supabase = createClient(
+    Deno.env.get('SUPABASE_URL')!,
+    Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
+  )
+  // Issuing a new code invalidates any previous one for this address.
+  await supabase.from('email_verification_codes').delete().eq('email', normalizedEmail)
+  const { error } = await supabase.from('email_verification_codes').insert({
+    email: normalizedEmail,
+    code_hash: codeHash,
+    expires_at: new Date(Date.now() + 10 * 60 * 1000).toISOString(),
+    used_at: null,
+    attempts: 0,
+  })
+  if (error) throw new Error(`Failed to store verification code: ${error.message}`)
+
+  return code
+}
 
 // Template mapping for preview mode
 const EMAIL_TEMPLATES: Record<string, React.ComponentType<any>> = {
@@ -44,6 +92,7 @@ const SAMPLE_DATA: Record<string, object> = {
     siteUrl: SAMPLE_PROJECT_URL,
     recipient: SAMPLE_EMAIL,
     confirmationUrl: SAMPLE_PROJECT_URL,
+    token: '123456',
   },
   magiclink: {
     siteName: SITE_NAME,
@@ -124,22 +173,23 @@ async function handlePreview(req: Request): Promise<Response> {
 // owns only the email decisions: subjects, templates, and per-type props.
 const handler = createAuthEmailHandler({
   apiKey: Deno.env.get('LOVABLE_API_KEY')!,
-  from: `${SITE_NAME} <noreply@${FROM_DOMAIN}>`,
+  from: `${SITE_NAME} <notify@${FROM_DOMAIN}>`,
   senderDomain: SENDER_DOMAIN,
   sendUrl: Deno.env.get('LOVABLE_SEND_URL'),
   emails: {
     signup: {
-      subject: 'Confirm your email',
-      render: (data) =>
+      subject: 'SiloShop — تأكيد بريدك الإلكتروني',
+      render: async (data) =>
         React.createElement(SignupEmail, {
           siteName: SITE_NAME,
           siteUrl: SITE_URL,
           recipient: data.email,
           confirmationUrl: data.url,
+          token: await issueSignupCode(data.email),
         }),
     },
     invite: {
-      subject: "You've been invited",
+      subject: 'SiloShop — دعوة للانضمام',
       render: (data) =>
         React.createElement(InviteEmail, {
           siteName: SITE_NAME,
@@ -148,7 +198,7 @@ const handler = createAuthEmailHandler({
         }),
     },
     magiclink: {
-      subject: 'Your login link',
+      subject: 'SiloShop — رابط الدخول',
       render: (data) =>
         React.createElement(MagicLinkEmail, {
           siteName: SITE_NAME,
@@ -156,7 +206,7 @@ const handler = createAuthEmailHandler({
         }),
     },
     recovery: {
-      subject: 'Reset your password',
+      subject: 'SiloShop — إعادة تعيين كلمة المرور',
       render: (data) =>
         React.createElement(RecoveryEmail, {
           siteName: SITE_NAME,
@@ -164,7 +214,7 @@ const handler = createAuthEmailHandler({
         }),
     },
     email_change: {
-      subject: 'Confirm your new email',
+      subject: 'SiloShop — تأكيد البريد الجديد',
       render: (data) =>
         React.createElement(EmailChangeEmail, {
           siteName: SITE_NAME,
@@ -175,7 +225,7 @@ const handler = createAuthEmailHandler({
         }),
     },
     reauthentication: {
-      subject: 'Your verification code',
+      subject: 'SiloShop — رمز التحقق',
       render: (data) =>
         React.createElement(ReauthenticationEmail, { token: data.token ?? '' }),
     },

@@ -66,3 +66,10 @@
 - [x] Fix product-card mobile alignment and action layout
 - [x] Fix login/register and Android hardware Back navigation history
 - [x] Verify representative pages at small/large portrait and landscape Android sizes
+
+## Physical Android device verification
+
+- [ ] Build and upload the current Android WebView APK to a real-device cloud
+- [ ] Verify RTL, safe areas, margins, and overflow on small and large Android phones
+- [ ] Verify system Back across Home, Login, Register, product, cart, and modal flows
+- [ ] Record device models, Android versions, screenshots, and any remaining blocker

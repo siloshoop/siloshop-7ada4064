@@ -53,8 +53,9 @@ describe("buildInvoiceBlocks", () => {
     expect(syp).toMatchObject({ subtotal: 100000, shipping: 3000, total: 103000 });
     // The USD block never receives the order-level shipping recorded in SYP.
     expect(usd).toMatchObject({ subtotal: 50, shipping: 0, discount: 0, total: 50 });
-    // No cross-currency sum anywhere.
-    expect(syp.total + usd.total).not.toBe(103050);
+    // Each block is built only from its own currency's items — no cross-currency sum.
+    expect(syp.subtotal).toBe(100000);
+    expect(usd.subtotal).toBe(50);
   });
 
   it("falls back to item math when order amounts are missing", () => {

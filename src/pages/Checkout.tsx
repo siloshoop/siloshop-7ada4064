@@ -311,6 +311,12 @@ const Checkout = () => {
       shipping: usePlatformRules ? 0 : Number(item.product.shipping_cost || 0),
     })),
     { couponDiscount: isMixedCurrency ? 0 : discount, couponCurrency: COUPON_CURRENCY },
+  ).map((t) =>
+    // Platform (imported) products use a single platform-wide shipping fee
+    // instead of per-product shipping.
+    usePlatformRules && !isMixedCurrency
+      ? { ...t, shipping: shippingTotal, total: Math.max(t.subtotal - t.couponDiscount, 0) + shippingTotal }
+      : t,
   );
 
   useEffect(() => {

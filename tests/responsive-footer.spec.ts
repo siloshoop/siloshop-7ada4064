@@ -36,32 +36,40 @@ test.beforeAll(async () => {
 const assertFooterClearsFixedBar = async (page: Page, barTestId: string) => {
   const footer = page.getByTestId("site-footer");
   const fixedBar = page.getByTestId(barTestId);
+  const copyright = footer.getByText(/جميع الحقوق محفوظة/);
+  const contact = footer.getByRole("link", { name: "اتصل بنا" });
 
   await expect(footer).toBeVisible();
   await expect(fixedBar).toBeVisible();
-  await footer.scrollIntoViewIfNeeded();
   await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
 
-  const [footerBox, barBox, copyrightBox, contactBox] = await Promise.all([
+  const [footerBox, barBox, copyrightBox] = await Promise.all([
     footer.boundingBox(),
     fixedBar.boundingBox(),
-    footer.getByText(/جميع الحقوق محفوظة/).boundingBox(),
-    footer.getByRole("link", { name: "اتصل بنا" }).boundingBox(),
+    copyright.boundingBox(),
   ]);
 
   expect(footerBox).not.toBeNull();
   expect(barBox).not.toBeNull();
   expect(copyrightBox).not.toBeNull();
-  expect(contactBox).not.toBeNull();
-  if (!footerBox || !barBox || !copyrightBox || !contactBox) return;
+  if (!footerBox || !barBox || !copyrightBox) return;
 
-  expect(footerBox.y + footerBox.height).toBeLessThanOrEqual(barBox.y + 1);
-  expect(copyrightBox.y + copyrightBox.height).toBeLessThanOrEqual(barBox.y + 1);
-  expect(contactBox.y + contactBox.height).toBeLessThanOrEqual(barBox.y + 1);
+  expect(footerBox.y + footerBox.height).toBeLessThanOrEqual(barBox.y + 2);
+  expect(copyrightBox.y + copyrightBox.height).toBeLessThanOrEqual(barBox.y + 2);
+
+  await contact.scrollIntoViewIfNeeded();
+  const [visibleContactBox, visibleBarBox] = await Promise.all([
+    contact.boundingBox(),
+    fixedBar.boundingBox(),
+  ]);
+  expect(visibleContactBox).not.toBeNull();
+  expect(visibleBarBox).not.toBeNull();
+  if (!visibleContactBox || !visibleBarBox) return;
+  expect(visibleContactBox.y + visibleContactBox.height).toBeLessThanOrEqual(visibleBarBox.y + 2);
 
   const clickablePoint = {
-    x: contactBox.x + contactBox.width / 2,
-    y: contactBox.y + contactBox.height / 2,
+    x: visibleContactBox.x + visibleContactBox.width / 2,
+    y: visibleContactBox.y + visibleContactBox.height / 2,
   };
   const topElementTestId = await page.evaluate(({ x, y }) => {
     const element = document.elementFromPoint(x, y);

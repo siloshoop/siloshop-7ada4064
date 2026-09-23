@@ -814,26 +814,37 @@ const Checkout = () => {
                     )}
                   </div>
 
-                  <div className="space-y-2 pt-4 border-t">
-                    <div className="flex justify-between">
-                      <span>المجموع الفرعي</span>
-                      <span>{subtotal} ل.س</span>
-                    </div>
-                    {discount > 0 && (
-                      <div className="flex justify-between text-green-600">
-                        <span>الخصم</span>
-                        <span>-{discount} ل.س</span>
+                  {currencyTotals.map((t) => (
+                    <div key={t.currency} className="space-y-2 pt-4 border-t">
+                      {isMixedCurrency && (
+                        <p className="font-semibold text-sm">إجمالي منتجات {currencyName(t.currency)}</p>
+                      )}
+                      <div className="flex justify-between">
+                        <span>المجموع الفرعي</span>
+                        <span>{formatPrice(t.subtotal, t.currency, { maximumFractionDigits: 0 })}</span>
                       </div>
-                    )}
-                    <div className="flex justify-between">
-                      <span>الشحن</span>
-                      <span>{shippingTotal > 0 ? `${shippingTotal} ل.س` : 'مجاني'}</span>
+                      {t.couponDiscount > 0 && (
+                        <div className="flex justify-between text-green-600">
+                          <span>الخصم</span>
+                          <span>-{formatPrice(t.couponDiscount, t.currency, { maximumFractionDigits: 0 })}</span>
+                        </div>
+                      )}
+                      <div className="flex justify-between">
+                        <span>الشحن</span>
+                        <span>
+                          {t.shipping > 0
+                            ? formatPrice(t.shipping, t.currency, { maximumFractionDigits: 0 })
+                            : "مجاني"}
+                        </span>
+                      </div>
+                      <div className="border-t pt-2 flex justify-between font-bold text-lg">
+                        <span>الإجمالي</span>
+                        <span className="text-primary">
+                          {formatPrice(t.total, t.currency, { maximumFractionDigits: 0 })}
+                        </span>
+                      </div>
                     </div>
-                    <div className="border-t pt-2 flex justify-between font-bold text-lg">
-                      <span>الإجمالي</span>
-                      <span className="text-primary">{total} ل.س</span>
-                    </div>
-                  </div>
+                  ))}
 
                   {platformBlocked ? (
                     <div className="rounded-lg border border-destructive/30 bg-destructive/5 p-3 text-sm space-y-1">

@@ -36,7 +36,7 @@ interface ProductCardProps {
   soldCount?: number | null;
 }
 
-
+const ProductCard = memo(({
   id,
   name,
   price,

@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
+import { formatPrice, currencySymbol } from "@/lib/currency";
 import Navbar from "@/components/Navbar";
 import ProductOriginBadge from "@/components/product/ProductOriginBadge";
 import SellerInfoCard from "@/components/product/SellerInfoCard";
@@ -455,10 +456,10 @@ const Product = () => {
                 <span className="text-3xl font-bold text-primary">
                   {effectivePrice.toLocaleString()}
                 </span>
-                <span className="text-sm text-foreground/70">ل.س</span>
+                <span className="text-sm text-foreground/70">{currencySymbol(product.currency)}</span>
                 {effectiveOriginalPrice && (
                   <span className="text-sm text-muted-foreground line-through">
-                    {effectiveOriginalPrice.toLocaleString()} ل.س
+                    {formatPrice(effectiveOriginalPrice, product.currency)}
                   </span>
                 )}
                 {discount > 0 && (
@@ -501,7 +502,7 @@ const Product = () => {
                 <Truck className="h-3.5 w-3.5 text-primary" />
                 {product.shipping_cost === 0 || product.shipping_cost === null
                   ? "شحن مجاني"
-                  : `الشحن: ${Number(product.shipping_cost).toLocaleString()} ل.س`}
+                  : `الشحن: ${formatPrice(product.shipping_cost, product.currency)}`}
               </span>
               {product.shipping_duration_text && (
                 <>

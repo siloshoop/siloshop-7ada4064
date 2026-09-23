@@ -462,7 +462,7 @@ const Cart = () => {
       currency: normalizeCurrency((item.product as any).currency),
       lineSubtotal: Number(item.product.price) * item.quantity,
       savings: item.savings,
-      shipping: Number(item.product.shipping_cost || 0) * item.quantity,
+      shipping: Number(item.product.shipping_cost || 0),
     })),
     { couponDiscount, couponCurrency: COUPON_CURRENCY, taxRate: TAX_RATE },
   );

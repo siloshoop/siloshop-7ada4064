@@ -79,3 +79,10 @@
 - [x] Unify safe-area and content heights for mobile navigation and product purchase bars
 - [x] Reserve the exact fixed-bar height after page footers, including preview-only product notices
 - [x] Run automated footer visibility and click-clearance checks across Android portrait and landscape sizes
+
+## Comprehensive mobile overlap repair
+
+- [ ] Fix overlapping headings, controls, product rows, form actions, and footer content shown in Android screenshots
+- [ ] Apply safe shared wrapping and shrinking rules to Arabic text and interactive controls without visual redesign
+- [ ] Audit representative public, buyer, seller, and admin screens at narrow Android widths
+- [ ] Run automated tests and verify corrected screens visually

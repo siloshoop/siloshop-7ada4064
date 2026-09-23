@@ -780,8 +780,6 @@ const Product = () => {
 
       </main>
 
-      <div className="h-[calc(3.75rem+max(env(safe-area-inset-bottom,0px),var(--safe-area-inset-bottom,0px)))] shrink-0 md:hidden" aria-hidden="true" />
-
       {/* Sticky mobile action bar */}
       <div className="safe-area-bottom safe-area-x fixed inset-x-0 bottom-0 z-40 border-t bg-background/95 shadow-lg backdrop-blur supports-[backdrop-filter]:bg-background/80 md:hidden">
         {previewOnly && (
@@ -816,6 +814,10 @@ const Product = () => {
       </div>
 
       <Footer />
+      <div
+        className={`${previewOnly ? "h-[calc(5.75rem+max(env(safe-area-inset-bottom,0px),var(--safe-area-inset-bottom,0px)))]" : "h-[calc(3.75rem+max(env(safe-area-inset-bottom,0px),var(--safe-area-inset-bottom,0px)))]"} shrink-0 md:hidden`}
+        aria-hidden="true"
+      />
     </div>
   );
 };

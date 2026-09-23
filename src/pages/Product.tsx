@@ -456,10 +456,10 @@ const Product = () => {
                 <span className="text-3xl font-bold text-primary">
                   {effectivePrice.toLocaleString()}
                 </span>
-                <span className="text-sm text-foreground/70">{currencySymbol(product.currency)}</span>
+                <span className="text-sm text-foreground/70">{currencySymbol((product as any).currency)}</span>
                 {effectiveOriginalPrice && (
                   <span className="text-sm text-muted-foreground line-through">
-                    {formatPrice(effectiveOriginalPrice, product.currency)}
+                    {formatPrice(effectiveOriginalPrice, (product as any).currency)}
                   </span>
                 )}
                 {discount > 0 && (
@@ -502,7 +502,7 @@ const Product = () => {
                 <Truck className="h-3.5 w-3.5 text-primary" />
                 {product.shipping_cost === 0 || product.shipping_cost === null
                   ? "شحن مجاني"
-                  : `الشحن: ${formatPrice(product.shipping_cost, product.currency)}`}
+                  : `الشحن: ${formatPrice(product.shipping_cost, (product as any).currency)}`}
               </span>
               {product.shipping_duration_text && (
                 <>

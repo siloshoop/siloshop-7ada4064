@@ -6,7 +6,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Alert, AlertDescription } from "@/components/ui/alert";
 import { CheckCircle2, ShieldAlert, Trash2 } from "lucide-react";
 import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
@@ -164,13 +163,15 @@ const DeleteAccount = () => {
             </Card>
           )}
 
-          <Alert>
-            <ShieldAlert className="h-4 w-4" />
-            <AlertDescription className="break-safe">
+          <Card className="border-destructive/30 bg-destructive/5">
+            <CardContent className="pt-6 flex gap-3 items-start text-sm">
+              <ShieldAlert className="h-4 w-4 mt-0.5 shrink-0 text-destructive" />
+              <p className="break-safe">
               حذف الحساب نهائي ولا يمكن التراجع عنه. إذا كنت مسجّل الدخول، يمكنك أيضًا حذف حسابك
               فورًا من <Link to="/profile" className="text-primary hover:underline">إعدادات الحساب</Link>.
-            </AlertDescription>
-          </Alert>
+              </p>
+            </CardContent>
+          </Card>
 
           <Card>
             <CardHeader>

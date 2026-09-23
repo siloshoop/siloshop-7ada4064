@@ -101,6 +101,7 @@ const AdminPickupCenters = lazy(() => import("./pages/admin/PickupCenters"));
 
 const ContentPage = lazy(() => import("./pages/ContentPage"));
 const Privacy = lazy(() => import("./pages/Privacy"));
+const DeleteAccount = lazy(() => import("./pages/DeleteAccount"));
 const Terms = lazy(() => import("./pages/Terms"));
 const GuestTrack = lazy(() => import("./pages/GuestTrack"));
 import RequireRole from "@/components/RequireRole";
@@ -283,6 +284,7 @@ const App = () => (
             <Route path="/faq" element={<FAQ />} />
             <Route path="/pricing" element={<Pricing />} />
             <Route path="/privacy" element={<Privacy />} />
+            <Route path="/delete-account" element={<DeleteAccount />} />
             <Route path="/terms" element={<Terms />} />
             <Route path="/shipping" element={<Shipping />} />
             <Route path="/about" element={<About />} />

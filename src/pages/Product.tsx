@@ -781,13 +781,16 @@ const Product = () => {
       </main>
 
       {/* Sticky mobile action bar */}
-      <div className="safe-area-bottom safe-area-x fixed inset-x-0 bottom-0 z-40 border-t bg-background/95 shadow-lg backdrop-blur supports-[backdrop-filter]:bg-background/80 md:hidden">
+      <div
+        data-testid="mobile-product-bar"
+        className="mobile-fixed-bottom safe-area-x fixed inset-x-0 bottom-0 z-40 border-t bg-background/95 shadow-lg backdrop-blur supports-[backdrop-filter]:bg-background/80 md:hidden"
+      >
         {previewOnly && (
-          <div className="border-b border-amber-500/40 bg-amber-500/10 px-3 py-1.5 text-center text-[11px] leading-snug text-amber-700 dark:text-amber-400">
+          <div className="mobile-product-notice flex items-center justify-center border-b border-amber-500/40 bg-amber-500/10 px-3 py-1.5 text-center text-[11px] leading-snug text-amber-700 dark:text-amber-400">
             هذا المنتج معروض للمعاينة فقط وغير متاح للشراء حالياً.
           </div>
         )}
-        <div className="container px-3 py-2 flex items-center gap-2">
+        <div className="mobile-fixed-bar-content container flex items-center gap-2 px-3 py-2">
           <FavoriteButton productId={id!} variant="outline" size="icon" />
           <Button
             variant="outline"
@@ -815,7 +818,8 @@ const Product = () => {
 
       <Footer />
       <div
-        className={`${previewOnly ? "h-[calc(6.25rem+max(env(safe-area-inset-bottom,0px),var(--safe-area-inset-bottom,0px)))]" : "h-[calc(3.75rem+max(env(safe-area-inset-bottom,0px),var(--safe-area-inset-bottom,0px)))]"} shrink-0 md:hidden`}
+        className="mobile-product-bar-spacer md:hidden"
+        data-preview-only={previewOnly}
         aria-hidden="true"
       />
     </div>

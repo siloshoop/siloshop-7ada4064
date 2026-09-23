@@ -73,3 +73,9 @@
 - [ ] Verify RTL, safe areas, margins, and overflow on small and large Android phones
 - [ ] Verify system Back across Home, Login, Register, product, cart, and modal flows
 - [ ] Record device models, Android versions, screenshots, and any remaining blocker
+
+## Fixed mobile bars and footer clearance
+
+- [x] Unify safe-area and content heights for mobile navigation and product purchase bars
+- [x] Reserve the exact fixed-bar height after page footers, including preview-only product notices
+- [ ] Run automated footer visibility and click-clearance checks across Android portrait and landscape sizes

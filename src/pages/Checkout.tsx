@@ -506,6 +506,7 @@ const Checkout = () => {
               customer_name: customerName,
               items: vendorItems,
               total_amount: vendorTotal,
+              currency: orderCurrency,
               shipping_address: fullAddress,
             },
           });

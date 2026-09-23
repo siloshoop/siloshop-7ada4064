@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Printer, Tag } from "lucide-react";
+import { formatPrice, normalizeCurrency } from "@/lib/currency";
 
 export interface PrintOrderItem {
   name: string;
@@ -17,6 +18,8 @@ export interface PrintOrderData {
   city: string | null;
   items: PrintOrderItem[];
   storeName?: string | null;
+  /** Order currency; prices are shown with this currency's symbol, never converted. */
+  currency?: string | null;
 }
 
 /* --- Minimal Code 39 barcode as inline SVG (no external deps) --- */
@@ -54,7 +57,8 @@ const esc = (s: unknown) =>
     ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c] as string)
   );
 
-const money = (n: number) => `${Number(n || 0).toLocaleString("ar-SY")} ل.س`;
+const money = (n: number, currency?: string | null) =>
+  formatPrice(n, currency, { maximumFractionDigits: 0 });
 
 const docStyles = `
   @page { size: A4; margin: 12mm; }
@@ -75,6 +79,7 @@ const docStyles = `
 
 const buildHtml = (order: PrintOrderData, mode: "invoice" | "label") => {
   const total = order.items.reduce((s, i) => s + i.quantity * i.price, 0);
+  const currency = normalizeCurrency(order.currency);
   const shortId = order.id.slice(0, 8).toUpperCase();
   const date = new Date(order.created_at).toLocaleDateString("ar-SY", {
     year: "numeric",
@@ -108,14 +113,14 @@ const buildHtml = (order: PrintOrderData, mode: "invoice" | "label") => {
               <td>${esc(i.name)}</td>
               <td>${esc(i.sku || i.barcode || "-")}</td>
               <td>${i.quantity}</td>
-              <td>${esc(money(i.price))}</td>
-              <td>${esc(money(i.quantity * i.price))}</td>
+              <td>${esc(money(i.price, currency))}</td>
+              <td>${esc(money(i.quantity * i.price, currency))}</td>
             </tr>`
           )
           .join("")}
       </tbody>
     </table>
-    <div class="total">إجمالي منتجاتك: ${esc(money(total))}</div>
+    <div class="total">إجمالي منتجاتك: ${esc(money(total, currency))}</div>
     <div class="note">الدفع عند الاستلام. هذه الفاتورة خاصة بمنتجات هذا المتجر فقط داخل الطلب.</div>
   `;
 

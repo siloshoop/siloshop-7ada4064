@@ -3,13 +3,16 @@ import { Button } from "@/components/ui/button";
 import { Download, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { currencyName, formatPrice } from "@/lib/currency";
+import { buildInvoiceBlocks } from "@/lib/invoiceTotals";
 
 const esc = (s: unknown) =>
   String(s ?? "").replace(/[&<>"']/g, (c) =>
     ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c] as string)
   );
 
-const money = (n: number) => `${Number(n || 0).toLocaleString("ar-SY")} ل.س`;
+const money = (n: number, currency?: string | null) =>
+  formatPrice(n, currency, { maximumFractionDigits: 0 });
 
 const statusLabels: Record<string, string> = {
   pending: "قيد المعالجة",
@@ -61,7 +64,7 @@ const CustomerInvoice = ({ orderId }: Props) => {
 
       const { data: items, error: itemsError } = await supabase
         .from("order_items")
-        .select("quantity, price, variant_label, product_name, subtotal, discount_amount, product:products(name)")
+        .select("quantity, price, currency, variant_label, product_name, subtotal, discount_amount, product:products(name)")
         .eq("order_id", orderId);
 
       if (itemsError) throw itemsError;
@@ -84,15 +87,9 @@ const CustomerInvoice = ({ orderId }: Props) => {
         month: "long",
         day: "numeric",
       });
-      const orderItems = items || [];
-      const itemsTotal = orderItems.reduce((s, i: any) => s + Number(i.price) * i.quantity, 0);
-      const itemsDiscount = orderItems.reduce((s, i: any) => s + Number(i.discount_amount || 0), 0);
-      const subtotal = Number((order as any).subtotal_amount || 0) || itemsTotal;
-      const discount = Number((order as any).discount_amount || 0) || itemsDiscount;
-      const shipping = Number((order as any).shipping_amount || 0) ||
-        Math.max(0, Number(order.total_amount) - itemsTotal + discount);
-      const tax = Number((order as any).tax_amount || 0);
-      const total = Number(order.total_amount || 0) || (subtotal - discount + shipping + tax);
+      const orderItems = (items || []) as any[];
+      const blocks = buildInvoiceBlocks(order as any, orderItems);
+      const multi = blocks.length > 1;
       const customerName = (order as any).profiles?.full_name || "غير متوفر";
       const statusLabel = statusLabels[order.status || "pending"] || "قيد المعالجة";
 
@@ -123,28 +120,36 @@ const CustomerInvoice = ({ orderId }: Props) => {
             </div>
           </div>
         </div>
-        <table>
-          <thead><tr><th>المنتج</th><th>الكمية</th><th>السعر</th><th>الإجمالي</th></tr></thead>
-          <tbody>
-            ${orderItems
-              .map(
-                (i: any) => `<tr>
-                  <td>${esc(i.product_name || i.product?.name || "منتج")}${i.variant_label ? ` <span class="muted">(${esc(i.variant_label)})</span>` : ""}</td>
-                  <td>${i.quantity}</td>
-                  <td>${esc(money(i.price))}</td>
-                  <td>${esc(money(i.subtotal != null ? i.subtotal : i.quantity * i.price))}</td>
-                </tr>`
-              )
-              .join("")}
-          </tbody>
-        </table>
-        <div class="totals">
-          <div class="row"><span>المنتجات</span><span>${esc(money(subtotal))}</span></div>
-          ${discount > 0 ? `<div class="row"><span>الخصم</span><span>-${esc(money(discount))}</span></div>` : ""}
-          <div class="row"><span>الشحن</span><span>${shipping > 0 ? esc(money(shipping)) : "مجاني"}</span></div>
-          ${tax > 0 ? `<div class="row"><span>الضريبة</span><span>${esc(money(tax))}</span></div>` : ""}
-          <div class="row grand"><span>الإجمالي</span><span>${esc(money(total))}</span></div>
-        </div>
+        ${multi ? `<div class="note" style="text-align:right">تحتوي هذه الفاتورة على منتجات بعملتين مختلفتين. كل عملة لها جدول وإجمالي مستقل، ولا يتم جمع المبالغ أو تحويلها بين العملتين.</div>` : ""}
+        ${blocks
+          .map(
+            (b) => `<div class="box">
+          <div><strong>${esc(currencyName(b.currency))} (${esc(b.currency === "USD" ? "$" : "ل.س")})</strong></div>
+          <table>
+            <thead><tr><th>المنتج</th><th>الكمية</th><th>السعر</th><th>الإجمالي</th></tr></thead>
+            <tbody>
+              ${b.items
+                .map(
+                  (i: any) => `<tr>
+                    <td>${esc(i.product_name || i.product?.name || "منتج")}${i.variant_label ? ` <span class="muted">(${esc(i.variant_label)})</span>` : ""}</td>
+                    <td>${i.quantity}</td>
+                    <td>${esc(money(i.price, b.currency))}</td>
+                    <td>${esc(money(i.subtotal != null ? i.subtotal : i.quantity * i.price, b.currency))}</td>
+                  </tr>`,
+                )
+                .join("")}
+            </tbody>
+          </table>
+          <div class="totals">
+            <div class="row"><span>المنتجات</span><span>${esc(money(b.subtotal, b.currency))}</span></div>
+            ${b.discount > 0 ? `<div class="row"><span>الخصم</span><span>-${esc(money(b.discount, b.currency))}</span></div>` : ""}
+            <div class="row"><span>الشحن</span><span>${b.shipping > 0 ? esc(money(b.shipping, b.currency)) : "مجاني"}</span></div>
+            ${b.tax > 0 ? `<div class="row"><span>الضريبة</span><span>${esc(money(b.tax, b.currency))}</span></div>` : ""}
+            <div class="row grand"><span>الإجمالي (${esc(currencyName(b.currency))})</span><span>${esc(money(b.total, b.currency))}</span></div>
+          </div>
+        </div>`,
+          )
+          .join("")}
         ${order.payment_method === "cod" ? `<div class="note"><strong>طريقة الدفع:</strong> الدفع عند الاستلام</div>` : ""}
         <div class="note">شكرًا لتسوقكم من سيلو شوب — هذه الفاتورة صادرة إلكترونيًا ولا تحتاج إلى توقيع أو ختم.</div>
         <script>window.onload = function(){ window.focus(); window.print(); };</script>

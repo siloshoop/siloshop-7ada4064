@@ -13,6 +13,7 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { Loader2, Lock, Phone, MapPin, User, Package, Truck, Ban } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 import OrderStatusBadge from "@/components/orders/OrderStatusBadge";
 import OrderTimelineLog from "@/components/orders/OrderTimelineLog";
 import PrintOrderDocs from "@/components/seller/PrintOrderDocs";
@@ -56,6 +57,7 @@ const SellerOrderDetailSheet = ({ order, open, onOpenChange, onChanged }: Props)
   const [cancelOpen, setCancelOpen] = useState(false);
   const [cancelReason, setCancelReason] = useState("");
   const [localOrder, setLocalOrder] = useState<SellerOrderRow | null>(order);
+  const [orderCurrency, setOrderCurrency] = useState<string | null>(null);
 
   useEffect(() => setLocalOrder(order), [order]);
 
@@ -67,6 +69,12 @@ const SellerOrderDetailSheet = ({ order, open, onOpenChange, onChanged }: Props)
       .then((rows) => { if (active) setItems(rows); })
       .catch((e) => toast({ title: "خطأ", description: friendlyOrderError(e), variant: "destructive" }))
       .finally(() => { if (active) setLoadingItems(false); });
+    void supabase
+      .from("orders")
+      .select("currency")
+      .eq("id", order.id)
+      .maybeSingle()
+      .then(({ data }) => { if (active) setOrderCurrency((data as any)?.currency ?? null); });
     return () => { active = false; };
   }, [open, order?.id]);
 
@@ -84,8 +92,9 @@ const SellerOrderDetailSheet = ({ order, open, onOpenChange, onChanged }: Props)
       customer_name: localOrder.customer_name,
       city: localOrder.city,
       items: items.map((i) => ({ name: i.product_name || "منتج", quantity: i.quantity, price: i.price })),
+      currency: orderCurrency,
     };
-  }, [localOrder, items]);
+  }, [localOrder, items, orderCurrency]);
 
   const runAction = async (action: SellerAction) => {
     if (!localOrder) return;

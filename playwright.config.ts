@@ -15,6 +15,9 @@ export default defineConfig({
     locale: "ar-SY",
     colorScheme: "light",
     reducedMotion: "reduce",
+    launchOptions: process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH
+      ? { executablePath: process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH }
+      : undefined,
   },
   webServer: {
     command: "bun run dev --host 0.0.0.0 --port 8080",

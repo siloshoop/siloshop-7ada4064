@@ -153,28 +153,36 @@ const CustomerInvoice = ({ orderId }: Props) => {
             </div>
           </div>
         </div>
-        <table>
-          <thead><tr><th>المنتج</th><th>الكمية</th><th>السعر</th><th>الإجمالي</th></tr></thead>
-          <tbody>
-            ${orderItems
-              .map(
-                (i: any) => `<tr>
-                  <td>${esc(i.product_name || i.product?.name || "منتج")}${i.variant_label ? ` <span class="muted">(${esc(i.variant_label)})</span>` : ""}</td>
-                  <td>${i.quantity}</td>
-                  <td>${esc(money(i.price))}</td>
-                  <td>${esc(money(i.subtotal != null ? i.subtotal : i.quantity * i.price))}</td>
-                </tr>`
-              )
-              .join("")}
-          </tbody>
-        </table>
-        <div class="totals">
-          <div class="row"><span>المنتجات</span><span>${esc(money(subtotal))}</span></div>
-          ${discount > 0 ? `<div class="row"><span>الخصم</span><span>-${esc(money(discount))}</span></div>` : ""}
-          <div class="row"><span>الشحن</span><span>${shipping > 0 ? esc(money(shipping)) : "مجاني"}</span></div>
-          ${tax > 0 ? `<div class="row"><span>الضريبة</span><span>${esc(money(tax))}</span></div>` : ""}
-          <div class="row grand"><span>الإجمالي</span><span>${esc(money(total))}</span></div>
-        </div>
+        ${multi ? `<div class="note" style="text-align:right">تحتوي هذه الفاتورة على منتجات بعملتين مختلفتين. كل عملة لها جدول وإجمالي مستقل، ولا يتم جمع المبالغ أو تحويلها بين العملتين.</div>` : ""}
+        ${blocks
+          .map(
+            (b) => `<div class="box">
+          <div><strong>${esc(currencyName(b.currency))} (${esc(b.currency === "USD" ? "$" : "ل.س")})</strong></div>
+          <table>
+            <thead><tr><th>المنتج</th><th>الكمية</th><th>السعر</th><th>الإجمالي</th></tr></thead>
+            <tbody>
+              ${b.list
+                .map(
+                  (i: any) => `<tr>
+                    <td>${esc(i.product_name || i.product?.name || "منتج")}${i.variant_label ? ` <span class="muted">(${esc(i.variant_label)})</span>` : ""}</td>
+                    <td>${i.quantity}</td>
+                    <td>${esc(money(i.price, b.currency))}</td>
+                    <td>${esc(money(i.subtotal != null ? i.subtotal : i.quantity * i.price, b.currency))}</td>
+                  </tr>`,
+                )
+                .join("")}
+            </tbody>
+          </table>
+          <div class="totals">
+            <div class="row"><span>المنتجات</span><span>${esc(money(b.subtotal, b.currency))}</span></div>
+            ${b.discount > 0 ? `<div class="row"><span>الخصم</span><span>-${esc(money(b.discount, b.currency))}</span></div>` : ""}
+            <div class="row"><span>الشحن</span><span>${b.shipping > 0 ? esc(money(b.shipping, b.currency)) : "مجاني"}</span></div>
+            ${b.tax > 0 ? `<div class="row"><span>الضريبة</span><span>${esc(money(b.tax, b.currency))}</span></div>` : ""}
+            <div class="row grand"><span>الإجمالي (${esc(currencyName(b.currency))})</span><span>${esc(money(b.total, b.currency))}</span></div>
+          </div>
+        </div>`,
+          )
+          .join("")}
         ${order.payment_method === "cod" ? `<div class="note"><strong>طريقة الدفع:</strong> الدفع عند الاستلام</div>` : ""}
         <div class="note">شكرًا لتسوقكم من سيلو شوب — هذه الفاتورة صادرة إلكترونيًا ولا تحتاج إلى توقيع أو ختم.</div>
         <script>window.onload = function(){ window.focus(); window.print(); };</script>

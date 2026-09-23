@@ -78,6 +78,7 @@ const EnhancedDailyDeals = () => {
             id: (deal.products as any).id,
             name: (deal.products as any).name,
             price: (deal.products as any).price,
+            currency: (deal.products as any).currency,
             original_price: (deal.products as any).original_price,
             image_url: (deal.products as any).image_url,
             reviews: (deal.products as any).reviews || [],

@@ -54,6 +54,7 @@ const RecentlyViewed = () => {
             id: (item.products as any).id,
             name: (item.products as any).name,
             price: (item.products as any).price,
+            currency: (item.products as any).currency,
             original_price: (item.products as any).original_price,
             image_url: (item.products as any).image_url,
             reviews: (item.products as any).reviews || []

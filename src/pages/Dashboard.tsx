@@ -1,3 +1,4 @@
+import { formatPrice } from "@/lib/currency";
 import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
@@ -760,7 +761,7 @@ const Dashboard = () => {
                             )}
                           </div>
                           <p className="text-sm text-muted-foreground">
-                            {product.price} ل.س
+                            {formatPrice(product.price, product.currency)}
                           </p>
                           <p className="text-xs text-muted-foreground">
                             الكمية: {product.stock_quantity}

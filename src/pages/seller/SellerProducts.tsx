@@ -1,3 +1,4 @@
+import { formatPrice } from "@/lib/currency";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -131,7 +132,7 @@ const SellerProducts = () => {
     const [productsRes, brandsRes] = await Promise.all([
       supabase
         .from("products")
-        .select("id,name,price,stock_quantity,image_url,moderation_status,moderation_reason,is_active,created_at,sku,barcode,brand_id")
+        .select("id,name,price,currency,stock_quantity,image_url,moderation_status,moderation_reason,is_active,created_at,sku,barcode,brand_id")
         .eq("vendor_id", user.id)
         .order("created_at", { ascending: false }),
       supabase.from("brands").select("id,name").eq("is_active", true).order("name"),
@@ -487,7 +488,7 @@ const SellerProducts = () => {
                 <div className="min-w-0 flex-1">
                   <p className="truncate font-semibold">{p.name}</p>
                   <p className="text-sm text-muted-foreground">
-                    {Number(p.price).toLocaleString("ar-SY")} ل.س · المخزون: {p.stock_quantity ?? 0}
+                    {formatPrice(p.price, (p as any).currency)} · المخزون: {p.stock_quantity ?? 0}
                     {p.is_active === false && " · مخفي"}
                   </p>
                   {(p.sku || p.barcode) && (

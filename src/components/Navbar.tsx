@@ -313,7 +313,7 @@ const Navbar = () => {
             <MegaMenu />
           </div>
           
-          <div className="flex min-w-0 flex-1 items-center justify-end gap-3 overflow-x-auto scrollbar-hide md:gap-4">
+          <div className="flex min-w-0 flex-1 items-center justify-start gap-4 overflow-x-auto scrollbar-hide [&>*]:shrink-0 md:justify-end">
             <NavLink 
               to="/" 
               className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors whitespace-nowrap"

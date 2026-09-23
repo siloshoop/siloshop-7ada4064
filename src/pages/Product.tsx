@@ -815,7 +815,7 @@ const Product = () => {
 
       <Footer />
       <div
-        className={`${previewOnly ? "h-[calc(5.75rem+max(env(safe-area-inset-bottom,0px),var(--safe-area-inset-bottom,0px)))]" : "h-[calc(3.75rem+max(env(safe-area-inset-bottom,0px),var(--safe-area-inset-bottom,0px)))]"} shrink-0 md:hidden`}
+        className={`${previewOnly ? "h-[calc(6.25rem+max(env(safe-area-inset-bottom,0px),var(--safe-area-inset-bottom,0px)))]" : "h-[calc(3.75rem+max(env(safe-area-inset-bottom,0px),var(--safe-area-inset-bottom,0px)))]"} shrink-0 md:hidden`}
         aria-hidden="true"
       />
     </div>

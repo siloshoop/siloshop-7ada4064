@@ -10,6 +10,7 @@ interface DealProduct {
   id: string;
   name: string;
   price: number;
+  currency?: string | null;
   original_price: number | null;
   image_url: string;
   reviews: { rating: number }[];
@@ -61,6 +62,7 @@ const EnhancedDailyDeals = () => {
               id,
               name,
               price,
+              currency,
               original_price,
               image_url,
               reviews (rating)
@@ -77,6 +79,7 @@ const EnhancedDailyDeals = () => {
             id: (deal.products as any).id,
             name: (deal.products as any).name,
             price: (deal.products as any).price,
+            currency: (deal.products as any).currency,
             original_price: (deal.products as any).original_price,
             image_url: (deal.products as any).image_url,
             reviews: (deal.products as any).reviews || [],
@@ -201,6 +204,7 @@ const EnhancedDailyDeals = () => {
                   id={product.id}
                   name={product.name}
                   price={dealPrice}
+                  currency={(product as any).currency}
                   originalPrice={product.price}
                   image={product.image_url}
                   rating={avgRating}

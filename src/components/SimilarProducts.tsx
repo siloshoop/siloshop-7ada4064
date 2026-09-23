@@ -34,7 +34,7 @@ const SimilarProducts = ({ productId, categoryId, vendorId }: SimilarProductsPro
         let query = supabase
           .from("products")
           .select(
-            "id, name, price, original_price, image_url, vendor_id, product_type, ships_within_days, shipping_cost, reviews(rating)",
+            "id, name, price, currency, original_price, image_url, vendor_id, product_type, ships_within_days, shipping_cost, reviews(rating)",
           )
           .eq("is_active", true)
           .neq("id", productId)
@@ -54,7 +54,7 @@ const SimilarProducts = ({ productId, categoryId, vendorId }: SimilarProductsPro
           const { data: vendorProducts } = await supabase
             .from("products")
             .select(
-              "id, name, price, original_price, image_url, vendor_id, product_type, ships_within_days, shipping_cost, reviews(rating)",
+              "id, name, price, currency, original_price, image_url, vendor_id, product_type, ships_within_days, shipping_cost, reviews(rating)",
             )
             .eq("is_active", true)
             .eq("vendor_id", vendorId)
@@ -105,6 +105,7 @@ const SimilarProducts = ({ productId, categoryId, vendorId }: SimilarProductsPro
               id={product.id}
               name={product.name}
               price={product.price}
+              currency={(product as any).currency}
               originalPrice={product.original_price || undefined}
               image={product.image_url || "/placeholder.svg"}
               rating={avgRating}

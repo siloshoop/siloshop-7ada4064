@@ -48,6 +48,7 @@ const Favorites = () => {
             id,
             name,
             price,
+            currency,
             original_price,
             image_url,
             stock_quantity,
@@ -233,6 +234,7 @@ const Favorites = () => {
                   id={product.id}
                   name={product.name}
                   price={product.price}
+                  currency={(product as any).currency}
                   originalPrice={product.original_price || undefined}
                   image={product.image_url}
                   rating={4}

@@ -297,7 +297,7 @@ const SearchPage = () => {
       let query = supabase
         .from("products")
         .select(
-          "id, name, price, original_price, image_url, vendor_id, category_id, subcategory_id, stock_quantity, shipping_cost, product_type, ships_within_days, colors, sizes, reviews(rating)",
+          "id, name, price, currency, original_price, image_url, vendor_id, category_id, subcategory_id, stock_quantity, shipping_cost, product_type, ships_within_days, colors, sizes, reviews(rating)",
         )
         .eq("is_active", true);
 
@@ -1116,6 +1116,7 @@ const SearchPage = () => {
                           id={product.id}
                           name={product.name}
                           price={product.price}
+                          currency={(product as any).currency}
                           originalPrice={product.original_price || undefined}
                           image={product.image_url}
                           rating={avgRating}

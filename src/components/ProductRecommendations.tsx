@@ -69,7 +69,7 @@ const ProductRecommendations = () => {
 
         let query = supabase
           .from("products")
-          .select("id, name, price, original_price, image_url, category_id, reviews(rating)")
+          .select("id, name, price, currency, original_price, image_url, category_id, reviews(rating)")
           .eq("is_active", true);
 
         if (categoryIds.length > 0) {
@@ -96,7 +96,7 @@ const ProductRecommendations = () => {
         if (categoryIds.length > 0 && (recommendedProducts || []).length < 4) {
           const { data: popularProducts } = await supabase
             .from("products")
-            .select("id, name, price, original_price, image_url, category_id, reviews(rating)")
+            .select("id, name, price, currency, original_price, image_url, category_id, reviews(rating)")
             .eq("is_active", true)
             .order("created_at", { ascending: false })
             .limit(8);
@@ -157,6 +157,7 @@ const ProductRecommendations = () => {
                   id={product.id}
                   name={product.name}
                   price={product.price}
+                  currency={(product as any).currency}
                   originalPrice={product.original_price || undefined}
                   image={product.image_url}
                   rating={avgRating}

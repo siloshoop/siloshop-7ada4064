@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
+import { formatPrice } from "@/lib/currency";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import CartRecommendations from "@/components/CartRecommendations";
@@ -41,7 +42,7 @@ const CART_SELECT = `
   quantity,
   variant_id,
   variant:product_variants(id, attributes, price, discount_price, stock_quantity),
-  product:products(id, name, price, image_url, stock_quantity, category_id, shipping_cost, shipping_duration_text)
+  product:products(id, name, price, currency, image_url, stock_quantity, category_id, shipping_cost, shipping_duration_text)
 `;
 
 /** Applies the chosen variant's own price and stock to the cart row. */
@@ -169,7 +170,7 @@ const Cart = () => {
           id,
           quantity,
           variant_id,
-          product:products(id, name, price, image_url, stock_quantity)
+          product:products(id, name, price, currency, image_url, stock_quantity)
         `)
         .eq("user_id", user.id)
         .order("created_at", { ascending: false });
@@ -578,14 +579,14 @@ const Cart = () => {
                                 <p className="text-xs text-muted-foreground">{item.variantLabel}</p>
                               )}
                               <p className="text-sm text-muted-foreground">
-                                {item.product.price} ل.س للقطعة
+                                {formatPrice(item.product.price, (item.product as any).currency)} للقطعة
                               </p>
 
                               <p className="text-sm inline-flex items-center gap-1 mt-0.5">
                                 <Truck className="h-3.5 w-3.5 text-primary" />
                                 {Number(item.product.shipping_cost || 0) === 0
                                   ? "شحن مجاني"
-                                  : `الشحن: ${Number(item.product.shipping_cost || 0).toLocaleString()} ل.س`}
+                                  : `الشحن: ${formatPrice(item.product.shipping_cost || 0, (item.product as any).currency)}`}
                               </p>
                               {item.product.shipping_duration_text && (
                                 <p className="text-xs text-muted-foreground mt-0.5">
@@ -642,15 +643,15 @@ const Cart = () => {
                             <div className="text-end">
                               {item.appliedDiscount > 0 && (
                                 <p className="text-sm text-muted-foreground line-through">
-                                  {(Number(item.product.price) * item.quantity).toFixed(0)} ل.س
+                                  {formatPrice(Number(item.product.price) * item.quantity, (item.product as any).currency, { maximumFractionDigits: 0 })}
                                 </p>
                               )}
                               <p className="font-bold text-lg text-primary">
-                                {item.discountedPrice.toFixed(0)} ل.س
+                                {formatPrice(item.discountedPrice, (item.product as any).currency, { maximumFractionDigits: 0 })}
                               </p>
                               {item.appliedDiscount > 0 && (
                                 <p className="text-xs text-green-600">
-                                  وفرت {item.savings.toFixed(0)} ل.س
+                                  وفرت {formatPrice(item.savings, (item.product as any).currency, { maximumFractionDigits: 0 })}
                                 </p>
                               )}
                             </div>
@@ -869,7 +870,7 @@ const Cart = () => {
                       <div className="flex-1 min-w-0 space-y-1">
                         <h3 className="font-bold truncate">{item.product.name}</h3>
                         <p className="text-sm text-muted-foreground">
-                          {item.product.price} ل.س للقطعة
+                          {formatPrice(item.product.price, (item.product as any).currency)} للقطعة
                         </p>
                         <p className="text-xs text-muted-foreground">
                           الكمية: {item.quantity}

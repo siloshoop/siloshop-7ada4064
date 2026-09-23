@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { CURRENCY_OPTIONS, DEFAULT_CURRENCY } from "@/lib/currency";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, Save, Trash2, ChevronLeft, X } from "lucide-react";
@@ -50,6 +51,7 @@ const EditProduct = () => {
     description: "",
     short_description: "",
     price: "",
+    currency: DEFAULT_CURRENCY as string,
     original_price: "",
     stock_quantity: "",
     min_order_quantity: "1",
@@ -115,6 +117,7 @@ const EditProduct = () => {
               description: product.description || "",
               short_description: p.short_description || "",
               price: product.price.toString(),
+              currency: (p.currency as string) || DEFAULT_CURRENCY,
               original_price: product.original_price?.toString() || "",
               stock_quantity: product.stock_quantity?.toString() || "0",
               min_order_quantity: p.min_order_quantity?.toString() || "1",
@@ -363,6 +366,7 @@ const EditProduct = () => {
           description: formData.description,
           short_description: formData.short_description.trim() || null,
           price: values.price,
+          currency: formData.currency || DEFAULT_CURRENCY,
           original_price: values.original_price ?? null,
           stock_quantity: values.stock_quantity,
           min_order_quantity: minQty,
@@ -714,6 +718,25 @@ const EditProduct = () => {
                           required
                           placeholder="0.00"
                         />
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="currency">العملة *</Label>
+                        <Select
+                          value={formData.currency}
+                          onValueChange={(v) => setFormData({ ...formData, currency: v })}
+                        >
+                          <SelectTrigger id="currency">
+                            <SelectValue placeholder="اختر العملة" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {CURRENCY_OPTIONS.map((c) => (
+                              <SelectItem key={c.value} value={c.value}>
+                                {c.label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
                       </div>
 
                     </div>

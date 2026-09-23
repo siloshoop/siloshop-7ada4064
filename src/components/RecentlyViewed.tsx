@@ -9,6 +9,7 @@ interface Product {
   id: string;
   name: string;
   price: number;
+  currency?: string | null;
   original_price: number | null;
   image_url: string;
   reviews: { rating: number }[];
@@ -37,6 +38,7 @@ const RecentlyViewed = () => {
               id,
               name,
               price,
+              currency,
               original_price,
               image_url,
               is_active,
@@ -53,6 +55,7 @@ const RecentlyViewed = () => {
             id: (item.products as any).id,
             name: (item.products as any).name,
             price: (item.products as any).price,
+            currency: (item.products as any).currency,
             original_price: (item.products as any).original_price,
             image_url: (item.products as any).image_url,
             reviews: (item.products as any).reviews || []
@@ -115,6 +118,7 @@ const RecentlyViewed = () => {
                   id={product.id}
                   name={product.name}
                   price={product.price}
+                  currency={(product as any).currency}
                   originalPrice={product.original_price || undefined}
                   image={product.image_url}
                   rating={avgRating}

@@ -73,7 +73,7 @@ const Index = () => {
     try {
       let queryBuilder = supabase
         .from("products")
-        .select("id, name, price, original_price, image_url, reviews(rating)")
+        .select("id, name, price, currency, original_price, image_url, reviews(rating)")
         .eq("is_active", true)
         .ilike("name", `%${query}%`)
         .gte("price", filters.minPrice)
@@ -138,6 +138,7 @@ const Index = () => {
                     id={product.id}
                     name={product.name}
                     price={product.price}
+                    currency={(product as any).currency}
                     originalPrice={product.original_price || undefined}
                     image={product.image_url}
                     rating={4}

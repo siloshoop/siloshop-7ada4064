@@ -11,11 +11,14 @@ import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import React, { useState, memo } from "react";
 import { notifySync, useSyncListener } from "@/lib/uiSync";
+import { formatPrice } from "@/lib/currency";
 
 interface ProductCardProps {
   id?: string;
   name: string;
   price: number;
+  /** Currency code stored with the product ("SYP" | "USD"). No conversion. */
+  currency?: string | null;
   originalPrice?: number;
   image: string;
   rating: number;
@@ -33,11 +36,11 @@ interface ProductCardProps {
   soldCount?: number | null;
 }
 
-
 const ProductCard = memo(({
   id,
   name,
   price,
+  currency,
   originalPrice,
   image,
   rating,
@@ -330,11 +333,11 @@ const ProductCard = memo(({
 
         <div className="flex min-w-0 flex-wrap items-baseline gap-x-1.5 gap-y-0.5">
           <span className="whitespace-nowrap text-sm font-bold text-primary">
-            {price.toLocaleString()} ل.س
+            {formatPrice(price, currency)}
           </span>
           {originalPrice && originalPrice > price && (
             <span className="text-[10px] text-muted-foreground line-through">
-              {originalPrice.toLocaleString()} ل.س
+              {formatPrice(originalPrice, currency)}
             </span>
           )}
         </div>
@@ -342,7 +345,7 @@ const ProductCard = memo(({
         <div className="flex min-w-0 items-center gap-1 text-[10px]">
           {shippingCost !== undefined ? (
             shippingCost > 0 ? (
-              <span className="line-clamp-2 text-muted-foreground">🚚 شحن: {shippingCost.toLocaleString()} ل.س</span>
+              <span className="line-clamp-2 text-muted-foreground">🚚 شحن: {formatPrice(shippingCost, currency)}</span>
             ) : (
               <span className="text-green-600 dark:text-green-400 font-medium">🚚 شحن مجاني</span>
             )

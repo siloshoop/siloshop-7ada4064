@@ -778,11 +778,16 @@ const Cart = () => {
                           type="button"
                           variant="outline"
                           onClick={applyCoupon}
-                          disabled={validatingCoupon || !couponCode.trim()}
+                          disabled={validatingCoupon || !couponCode.trim() || !couponSupported}
                         >
                           {validatingCoupon ? <Loader2 className="h-4 w-4 animate-spin" /> : "تطبيق"}
                         </Button>
                       </div>
+                    )}
+                    {!couponSupported && (
+                      <p className="text-xs text-muted-foreground">
+                        أكواد الخصم بالليرة السورية فقط ولا تُطبَّق على المنتجات بالدولار.
+                      </p>
                     )}
                   </div>
 

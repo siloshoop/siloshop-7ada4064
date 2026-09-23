@@ -16,6 +16,8 @@ interface ProductCardProps {
   id?: string;
   name: string;
   price: number;
+  /** Currency code stored with the product ("SYP" | "USD"). No conversion. */
+  currency?: string | null;
   originalPrice?: number;
   image: string;
   rating: number;

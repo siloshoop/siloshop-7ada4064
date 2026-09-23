@@ -9,6 +9,7 @@ interface Product {
   id: string;
   name: string;
   price: number;
+  currency?: string | null;
   original_price: number | null;
   image_url: string;
   reviews: { rating: number }[];

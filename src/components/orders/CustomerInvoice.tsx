@@ -63,7 +63,7 @@ const CustomerInvoice = ({ orderId }: Props) => {
 
       const { data: items, error: itemsError } = await supabase
         .from("order_items")
-        .select("quantity, price, variant_label, product_name, subtotal, discount_amount, product:products(name)")
+        .select("quantity, price, currency, variant_label, product_name, subtotal, discount_amount, product:products(name)")
         .eq("order_id", orderId);
 
       if (itemsError) throw itemsError;
@@ -87,14 +87,42 @@ const CustomerInvoice = ({ orderId }: Props) => {
         day: "numeric",
       });
       const orderItems = items || [];
-      const itemsTotal = orderItems.reduce((s, i: any) => s + Number(i.price) * i.quantity, 0);
-      const itemsDiscount = orderItems.reduce((s, i: any) => s + Number(i.discount_amount || 0), 0);
-      const subtotal = Number((order as any).subtotal_amount || 0) || itemsTotal;
-      const discount = Number((order as any).discount_amount || 0) || itemsDiscount;
-      const shipping = Number((order as any).shipping_amount || 0) ||
-        Math.max(0, Number(order.total_amount) - itemsTotal + discount);
-      const tax = Number((order as any).tax_amount || 0);
-      const total = Number(order.total_amount || 0) || (subtotal - discount + shipping + tax);
+      const orderCurrency = normalizeCurrency((order as any).currency);
+
+      // Group items by their own currency — amounts in different currencies are
+      // never added together and never converted.
+      const groups = new Map<ProductCurrency, any[]>();
+      for (const it of orderItems as any[]) {
+        const cur = normalizeCurrency(it.currency ?? (order as any).currency);
+        groups.set(cur, [...(groups.get(cur) || []), it]);
+      }
+      if (groups.size === 0) groups.set(orderCurrency, []);
+
+      const orderShipping = Number((order as any).shipping_amount || 0);
+      const orderDiscount = Number((order as any).discount_amount || 0);
+      const orderTax = Number((order as any).tax_amount || 0);
+
+      const blocks = Array.from(groups.entries()).map(([currency, list]) => {
+        const itemsTotal = list.reduce(
+          (s, i: any) => s + (i.subtotal != null ? Number(i.subtotal) : Number(i.price) * i.quantity),
+          0,
+        );
+        const itemsDiscount = list.reduce((s, i: any) => s + Number(i.discount_amount || 0), 0);
+        // Order-level shipping / coupon / tax are recorded in the order currency only.
+        const isOrderCurrency = currency === orderCurrency;
+        const subtotal =
+          groups.size === 1 ? Number((order as any).subtotal_amount || 0) || itemsTotal : itemsTotal;
+        const discount = isOrderCurrency ? orderDiscount || (groups.size === 1 ? itemsDiscount : 0) : 0;
+        const shipping = isOrderCurrency ? orderShipping : 0;
+        const tax = isOrderCurrency ? orderTax : 0;
+        const total =
+          groups.size === 1 && Number(order.total_amount || 0)
+            ? Number(order.total_amount)
+            : Math.max(0, subtotal - discount) + shipping + tax;
+        return { currency, list, subtotal, discount, shipping, tax, total };
+      });
+
+      const multi = blocks.length > 1;
       const customerName = (order as any).profiles?.full_name || "غير متوفر";
       const statusLabel = statusLabels[order.status || "pending"] || "قيد المعالجة";
 

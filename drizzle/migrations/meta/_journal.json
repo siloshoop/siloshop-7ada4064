@@ -57,6 +57,13 @@
       "when": 1790165217432,
       "tag": "0007_order_currency_single_currency_enforcement",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1790166537810,
+      "tag": "0008_create_account_deletion_requests",
+      "breakpoints": true
     }
   ]
 }

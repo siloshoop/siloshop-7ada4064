@@ -3,13 +3,15 @@ import { Button } from "@/components/ui/button";
 import { Download, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { currencyName, formatPrice, normalizeCurrency, type ProductCurrency } from "@/lib/currency";
 
 const esc = (s: unknown) =>
   String(s ?? "").replace(/[&<>"']/g, (c) =>
     ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c] as string)
   );
 
-const money = (n: number) => `${Number(n || 0).toLocaleString("ar-SY")} ل.س`;
+const money = (n: number, currency?: string | null) =>
+  formatPrice(n, currency, { maximumFractionDigits: 0 });
 
 const statusLabels: Record<string, string> = {
   pending: "قيد المعالجة",

@@ -30,6 +30,8 @@ interface NewOrderPayload {
   items: OrderItem[];
   total_amount: number;
   shipping_address: string;
+  /** Order currency code ("SYP" | "USD"); amounts are never converted. */
+  currency?: string | null;
 }
 
 const handler = async (req: Request): Promise<Response> => {
@@ -65,7 +67,8 @@ const handler = async (req: Request): Promise<Response> => {
     }
     const callerId = claimsData.claims.sub as string;
 
-    const { order_id, vendor_id, customer_name, items, total_amount, shipping_address }: NewOrderPayload = await req.json();
+    const { order_id, vendor_id, customer_name, items, total_amount, shipping_address, currency }: NewOrderPayload = await req.json();
+    const symbol = String(currency ?? "").trim().toUpperCase() === "USD" ? "$" : "ل.س";
 
     if (!order_id || !vendor_id) {
       return new Response(
@@ -150,7 +153,7 @@ const handler = async (req: Request): Promise<Response> => {
       <tr>
         <td style="padding: 12px; border-bottom: 1px solid #e5e7eb;">${esc(item.product_name)}</td>
         <td style="padding: 12px; border-bottom: 1px solid #e5e7eb; text-align: center;">${esc(item.quantity)}</td>
-        <td style="padding: 12px; border-bottom: 1px solid #e5e7eb; text-align: left;">${esc(item.price)} ل.س</td>
+        <td style="padding: 12px; border-bottom: 1px solid #e5e7eb; text-align: left;">${esc(item.price)} ${esc(symbol)}</td>
       </tr>
     `).join('');
 
@@ -229,7 +232,7 @@ const handler = async (req: Request): Promise<Response> => {
                     ${itemsHtml}
                     <tr class="total-row">
                       <td colspan="2">الإجمالي</td>
-                      <td style="text-align: left;">${esc(total_amount)} ل.س</td>
+                      <td style="text-align: left;">${esc(total_amount)} ${esc(symbol)}</td>
                     </tr>
                   </tbody>
                 </table>
@@ -262,7 +265,7 @@ const handler = async (req: Request): Promise<Response> => {
     await supabase.from("notifications").insert({
       user_id: vendor_id,
       title: "طلب جديد",
-      message: `لديك طلب جديد من ${customer_name} بقيمة ${total_amount} ل.س`,
+      message: `لديك طلب جديد من ${customer_name} بقيمة ${total_amount} ${symbol}`,
       type: "new_order",
       related_id: order_id,
     });

@@ -50,6 +50,13 @@
       "when": 1789988585829,
       "tag": "0006_product_preview_only_purchase_flag",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1790165217432,
+      "tag": "0007_order_currency_single_currency_enforcement",
+      "breakpoints": true
     }
   ]
 }

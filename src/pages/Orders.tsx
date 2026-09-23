@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
+import { formatPrice } from "@/lib/currency";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Card, CardContent } from "@/components/ui/card";
@@ -157,7 +158,7 @@ const Orders = () => {
 
       let query = supabase
         .from("orders")
-        .select("id, order_number, created_at, total_amount, status, tracking_status, delivered_at", { count: "exact" })
+        .select("id, order_number, created_at, total_amount, currency, status, tracking_status, delivered_at", { count: "exact" })
         .eq("customer_id", user.id)
         .is("parent_order_id", null);
 
@@ -207,6 +208,7 @@ const Orders = () => {
             product_id,
             quantity,
             price,
+            currency,
             variant_label,
             product_name,
             product_image,
@@ -374,7 +376,7 @@ const Orders = () => {
                         <div className="flex flex-wrap items-center gap-2">
                           {getStatusBadge(order.status)}
                           <p className="text-lg font-bold text-primary">
-                            {order.total_amount.toLocaleString()} ل.س
+                            {formatPrice(order.total_amount, (order as any).currency, { maximumFractionDigits: 0 })}
                           </p>
                         </div>
                         <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
@@ -443,7 +445,7 @@ const Orders = () => {
                               <p className="text-xs text-muted-foreground">{item.variant_label}</p>
                             )}
                             <p className="text-sm text-muted-foreground">
-                              الكمية: {item.quantity} × {item.price} ل.س
+                              الكمية: {item.quantity} × {formatPrice(item.price, (item as any).currency ?? (order as any).currency, { maximumFractionDigits: 0 })}
                             </p>
                           </div>
                         </div>

@@ -16,6 +16,14 @@ import { Link } from "react-router-dom";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { SYRIAN_GOVERNORATES } from "@/lib/syrianGovernorates";
 import { useFeatureFlags } from "@/hooks/useFeatureFlags";
+import {
+  COUPON_CURRENCY,
+  currencyName,
+  formatPrice,
+  normalizeCurrency,
+  totalsByCurrency,
+  type ProductCurrency,
+} from "@/lib/currency";
 
 
 const checkoutSchema = z.object({
@@ -43,6 +51,7 @@ interface CartItem {
     id: string;
     name: string;
     price: number;
+    currency?: string | null;
     image_url: string;
     vendor_id: string;
     shipping_cost?: number;
@@ -166,7 +175,7 @@ const Checkout = () => {
           product_id,
           variant_id,
           variant:product_variants(id, attributes, price, discount_price, stock_quantity),
-          product:products(id, name, price, image_url, vendor_id, shipping_cost, product_type, shipping_duration_text, platform_free_shipping, platform_shipping_fee, platform_cod_enabled, platform_sham_cash_enabled, platform_electronic_payment_enabled)
+          product:products(id, name, price, currency, image_url, vendor_id, shipping_cost, product_type, shipping_duration_text, platform_free_shipping, platform_shipping_fee, platform_cod_enabled, platform_sham_cash_enabled, platform_electronic_payment_enabled)
         `)
         .eq("user_id", user.id);
 
@@ -203,6 +212,14 @@ const Checkout = () => {
     (sum, item) => sum + Number(item.product.price) * item.quantity,
     0
   );
+  // Currency of the cart. Amounts in different currencies are never summed or
+  // converted, so an order must be placed in a single currency.
+  const cartCurrencies = Array.from(
+    new Set(cartItems.map((i) => normalizeCurrency(i.product.currency))),
+  ) as ProductCurrency[];
+  const orderCurrency: ProductCurrency = cartCurrencies[0] ?? "SYP";
+  const isMixedCurrency = cartCurrencies.length > 1;
+  const couponSupported = !isMixedCurrency && orderCurrency === COUPON_CURRENCY;
 
   // Payment + shipping model (enforced server-side in create_order):
   //  - Seller products   -> per-product shipping, Cash on Delivery only.
@@ -285,6 +302,23 @@ const Checkout = () => {
 
   const total = Math.max(subtotal + shippingTotal - discount, 0);
 
+  // Per-currency breakdown, used when the cart mixes currencies so nothing is
+  // added across currencies.
+  const currencyTotals = totalsByCurrency(
+    cartItems.map((item) => ({
+      currency: normalizeCurrency(item.product.currency),
+      lineSubtotal: Number(item.product.price) * item.quantity,
+      shipping: usePlatformRules ? 0 : Number(item.product.shipping_cost || 0),
+    })),
+    { couponDiscount: isMixedCurrency ? 0 : discount, couponCurrency: COUPON_CURRENCY },
+  ).map((t) =>
+    // Platform (imported) products use a single platform-wide shipping fee
+    // instead of per-product shipping.
+    usePlatformRules && !isMixedCurrency
+      ? { ...t, shipping: shippingTotal, total: Math.max(t.subtotal - t.couponDiscount, 0) + shippingTotal }
+      : t,
+  );
+
   useEffect(() => {
     void (async () => {
       const { data } = await supabase.rpc("get_platform_payment_options");
@@ -325,6 +359,15 @@ const Checkout = () => {
       return;
     }
 
+    if (!couponSupported) {
+      toast({
+        title: "الكوبون غير متاح",
+        description: "أكواد الخصم تُحسب بالليرة السورية فقط، ولا يمكن تطبيقها على طلب بالدولار.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     try {
       const { data: rows, error } = await supabase
         .rpc("validate_coupon", {
@@ -358,7 +401,7 @@ const Checkout = () => {
 
       toast({
         title: "تم التطبيق",
-        description: `تم تطبيق كوبون خصم بقيمة ${discountAmount} ل.س`,
+        description: `تم تطبيق كوبون خصم بقيمة ${formatPrice(discountAmount, COUPON_CURRENCY, { maximumFractionDigits: 0 })}`,
       });
     } catch (error) {
       toast({
@@ -372,6 +415,16 @@ const Checkout = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user || cartItems.length === 0 || submitting) return;
+
+    if (isMixedCurrency) {
+      toast({
+        title: "لا يمكن إتمام الطلب",
+        description:
+          "سلتك تحتوي منتجات بالليرة السورية وأخرى بالدولار. لا يتم تحويل العملات، لذا يرجى إتمام منتجات كل عملة في طلب منفصل.",
+        variant: "destructive",
+      });
+      return;
+    }
 
     if (isMixedCart) {
       toast({
@@ -453,6 +506,7 @@ const Checkout = () => {
               customer_name: customerName,
               items: vendorItems,
               total_amount: vendorTotal,
+              currency: orderCurrency,
               shipping_address: fullAddress,
             },
           });
@@ -503,6 +557,22 @@ const Checkout = () => {
         return;
       }
 
+      if (message.includes("MIXED_CURRENCY")) {
+        toast({
+          title: "لا يمكن إتمام الطلب",
+          description: "لا يمكن دمج منتجات بالليرة السورية مع منتجات بالدولار في طلب واحد.",
+          variant: "destructive",
+        });
+        return;
+      }
+      if (message.includes("COUPON_CURRENCY_UNSUPPORTED")) {
+        toast({
+          title: "الكوبون غير متاح",
+          description: "أكواد الخصم تُحسب بالليرة السورية فقط، ولا يمكن تطبيقها على طلب بالدولار.",
+          variant: "destructive",
+        });
+        return;
+      }
       if (message.includes("MIXED_CART")) {
         toast({
           title: "لا يمكن إتمام الطلب",
@@ -699,7 +769,7 @@ const Checkout = () => {
                               <Truck className="h-3.5 w-3.5 text-primary" />
                               {Number(item.product.shipping_cost || 0) === 0
                                 ? "شحن مجاني"
-                                : `الشحن: ${Number(item.product.shipping_cost || 0).toLocaleString()} ل.س`}
+                                : `الشحن: ${formatPrice(item.product.shipping_cost || 0, item.product.currency, { maximumFractionDigits: 0 })}`}
                             </p>
                           )}
                           {item.product.shipping_duration_text && (
@@ -710,7 +780,7 @@ const Checkout = () => {
                         </div>
                         <div className="text-left">
                           <p className="font-bold">
-                            {Number(item.product.price) * item.quantity} ل.س
+                            {formatPrice(Number(item.product.price) * item.quantity, item.product.currency, { maximumFractionDigits: 0 })}
                           </p>
                         </div>
                       </div>
@@ -751,28 +821,49 @@ const Checkout = () => {
                     )}
                   </div>
 
-                  <div className="space-y-2 pt-4 border-t">
-                    <div className="flex justify-between">
-                      <span>المجموع الفرعي</span>
-                      <span>{subtotal} ل.س</span>
-                    </div>
-                    {discount > 0 && (
-                      <div className="flex justify-between text-green-600">
-                        <span>الخصم</span>
-                        <span>-{discount} ل.س</span>
+                  {currencyTotals.map((t) => (
+                    <div key={t.currency} className="space-y-2 pt-4 border-t">
+                      {isMixedCurrency && (
+                        <p className="font-semibold text-sm">إجمالي منتجات {currencyName(t.currency)}</p>
+                      )}
+                      <div className="flex justify-between">
+                        <span>المجموع الفرعي</span>
+                        <span>{formatPrice(t.subtotal, t.currency, { maximumFractionDigits: 0 })}</span>
                       </div>
-                    )}
-                    <div className="flex justify-between">
-                      <span>الشحن</span>
-                      <span>{shippingTotal > 0 ? `${shippingTotal} ل.س` : 'مجاني'}</span>
+                      {t.couponDiscount > 0 && (
+                        <div className="flex justify-between text-green-600">
+                          <span>الخصم</span>
+                          <span>-{formatPrice(t.couponDiscount, t.currency, { maximumFractionDigits: 0 })}</span>
+                        </div>
+                      )}
+                      <div className="flex justify-between">
+                        <span>الشحن</span>
+                        <span>
+                          {t.shipping > 0
+                            ? formatPrice(t.shipping, t.currency, { maximumFractionDigits: 0 })
+                            : "مجاني"}
+                        </span>
+                      </div>
+                      <div className="border-t pt-2 flex justify-between font-bold text-lg">
+                        <span>الإجمالي</span>
+                        <span className="text-primary">
+                          {formatPrice(t.total, t.currency, { maximumFractionDigits: 0 })}
+                        </span>
+                      </div>
                     </div>
-                    <div className="border-t pt-2 flex justify-between font-bold text-lg">
-                      <span>الإجمالي</span>
-                      <span className="text-primary">{total} ل.س</span>
-                    </div>
-                  </div>
+                  ))}
 
-                  {platformBlocked ? (
+                  {isMixedCurrency ? (
+                    <div className="rounded-lg border border-destructive/30 bg-destructive/5 p-3 text-sm space-y-1">
+                      <p className="font-semibold flex items-center gap-1.5 text-destructive">
+                        <AlertTriangle className="h-4 w-4" /> عملتان في سلة واحدة
+                      </p>
+                      <p className="text-muted-foreground">
+                        سلتك تحتوي منتجات بالليرة السورية وأخرى بالدولار. لا يتم جمع المبالغ أو
+                        تحويلها بين العملتين، لذا يرجى إتمام منتجات كل عملة في طلب منفصل.
+                      </p>
+                    </div>
+                  ) : platformBlocked ? (
                     <div className="rounded-lg border border-destructive/30 bg-destructive/5 p-3 text-sm space-y-1">
                       <p className="font-semibold flex items-center gap-1.5 text-destructive">
                         <AlertTriangle className="h-4 w-4" /> غير متاح حالياً
@@ -872,7 +963,7 @@ const Checkout = () => {
                     type="submit"
                     className="w-full"
                     size="lg"
-                    disabled={submitting || isMixedCart || platformBlocked}
+                    disabled={submitting || isMixedCart || platformBlocked || isMixedCurrency}
                   >
                     {submitting ? (
                       <>

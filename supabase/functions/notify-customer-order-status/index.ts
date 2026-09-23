@@ -137,6 +137,7 @@ const handler = async (req: Request): Promise<Response> => {
       .select(`
         id,
         total_amount,
+        currency,
         shipping_address,
         customer_id,
         courier_name
@@ -263,7 +264,7 @@ const handler = async (req: Request): Promise<Response> => {
                   </div>
                   <div class="info-row">
                     <span class="label">قيمة الطلب:</span>
-                    <span class="value">${esc(order.total_amount)} ل.س</span>
+                    <span class="value">${esc(order.total_amount)} ${esc(String((order as any).currency ?? "").trim().toUpperCase() === "USD" ? "$" : "ل.س")}</span>
                   </div>
                   <div class="info-row">
                     <span class="label">عنوان التوصيل:</span>

@@ -2,7 +2,13 @@ import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
-import { formatPrice } from "@/lib/currency";
+import {
+  COUPON_CURRENCY,
+  currencyName,
+  formatPrice,
+  normalizeCurrency,
+  totalsByCurrency,
+} from "@/lib/currency";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import CartRecommendations from "@/components/CartRecommendations";
@@ -447,24 +453,43 @@ const Cart = () => {
   };
 
   const itemsWithDiscounts = calculateItemsWithDiscounts();
-  const subtotal = cartItems.reduce(
-    (sum, item) => sum + Number(item.product.price) * item.quantity,
-    0
-  );
-  const totalSavings = itemsWithDiscounts.reduce((sum, item) => sum + item.savings, 0);
-  const subtotalAfterQtyDiscount = subtotal - totalSavings;
-  const shippingTotal = cartItems.reduce(
-    (sum, item) => sum + Number(item.product.shipping_cost || 0) * item.quantity,
-    0
-  );
   const TAX_RATE = 0; // الضريبة (VAT) — غير مطبّقة حالياً
-  const taxableBase = Math.max(0, subtotalAfterQtyDiscount - couponDiscount);
-  const taxAmount = taxableBase * TAX_RATE;
-  const total = taxableBase + shippingTotal + taxAmount;
+
+  // Amounts are grouped per currency: USD and SYP are never summed together
+  // and never converted.
+  const currencyTotals = totalsByCurrency(
+    itemsWithDiscounts.map((item) => ({
+      currency: normalizeCurrency((item.product as any).currency),
+      lineSubtotal: Number(item.product.price) * item.quantity,
+      savings: item.savings,
+      shipping: Number(item.product.shipping_cost || 0) * item.quantity,
+    })),
+    { couponDiscount, couponCurrency: COUPON_CURRENCY, taxRate: TAX_RATE },
+  );
+  const isMultiCurrency = currencyTotals.length > 1;
+  const couponSupported = currencyTotals.every((t) => t.currency === COUPON_CURRENCY);
+  const couponBase = currencyTotals.find((t) => t.currency === COUPON_CURRENCY);
+  const subtotalAfterQtyDiscount = Math.max(0, (couponBase?.subtotal ?? 0) - (couponBase?.savings ?? 0));
+
+  // A coupon can only price a Syrian-pound order — drop it if the cart changes.
+  useEffect(() => {
+    if (appliedCoupon && !couponSupported) {
+      setAppliedCoupon(null);
+      setCouponDiscount(0);
+    }
+  }, [appliedCoupon, couponSupported]);
 
   const applyCoupon = async () => {
     if (!couponCode.trim()) {
       toast({ title: "خطأ", description: "يرجى إدخال كود الكوبون", variant: "destructive" });
+      return;
+    }
+    if (!couponSupported) {
+      toast({
+        title: "الكوبون غير متاح",
+        description: "أكواد الخصم تُحسب بالليرة السورية فقط، ولا يمكن تطبيقها على منتجات بالدولار.",
+        variant: "destructive",
+      });
       return;
     }
     setValidatingCoupon(true);
@@ -753,76 +778,112 @@ const Cart = () => {
                           type="button"
                           variant="outline"
                           onClick={applyCoupon}
-                          disabled={validatingCoupon || !couponCode.trim()}
+                          disabled={validatingCoupon || !couponCode.trim() || !couponSupported}
                         >
                           {validatingCoupon ? <Loader2 className="h-4 w-4 animate-spin" /> : "تطبيق"}
                         </Button>
                       </div>
                     )}
-                  </div>
-
-                  {/* Totals breakdown */}
-                  <div className="space-y-2 border-t pt-4">
-                    <div className="flex justify-between text-sm">
-                      <span className="text-muted-foreground">المجموع الفرعي</span>
-                      <span>{subtotal.toFixed(0)} ل.س</span>
-                    </div>
-
-                    {totalSavings > 0 && (
-                      <div className="flex justify-between text-sm">
-                        <span className="text-green-600 flex items-center gap-1">
-                          <Percent className="h-3 w-3" />
-                          خصم الكمية
-                        </span>
-                        <span className="text-green-600 font-medium">
-                          -{totalSavings.toFixed(0)} ل.س
-                        </span>
-                      </div>
-                    )}
-
-                    {couponDiscount > 0 && (
-                      <div className="flex justify-between text-sm">
-                        <span className="text-green-600 flex items-center gap-1">
-                          <Tag className="h-3 w-3" />
-                          خصم الكوبون
-                        </span>
-                        <span className="text-green-600 font-medium">
-                          -{couponDiscount.toFixed(0)} ل.س
-                        </span>
-                      </div>
-                    )}
-
-                    <div className="flex justify-between text-sm">
-                      <span className="text-muted-foreground flex items-center gap-1">
-                        <Truck className="h-3.5 w-3.5" />
-                        تكلفة التوصيل
-                      </span>
-                      <span className={shippingTotal === 0 ? "text-green-600 font-medium" : ""}>
-                        {shippingTotal === 0 ? "مجاني" : `${shippingTotal.toFixed(0)} ل.س`}
-                      </span>
-                    </div>
-
-                    <div className="flex justify-between text-sm">
-                      <span className="text-muted-foreground flex items-center gap-1">
-                        <Receipt className="h-3.5 w-3.5" />
-                        الضريبة {TAX_RATE > 0 ? `(${(TAX_RATE * 100).toFixed(0)}%)` : ""}
-                      </span>
-                      <span>{taxAmount.toFixed(0)} ل.س</span>
-                    </div>
-
-                    <div className="border-t pt-3 mt-2">
-                      <div className="flex justify-between font-bold text-lg">
-                        <span>الإجمالي النهائي</span>
-                        <span className="text-primary">{total.toFixed(0)} ل.س</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  {(totalSavings > 0 || couponDiscount > 0) && (
-                    <div className="bg-green-50 dark:bg-green-950/40 p-3 rounded-lg">
-                      <p className="text-sm text-green-800 dark:text-green-200 font-medium">
-                        🎉 لقد وفرت {(totalSavings + couponDiscount).toFixed(0)} ل.س على هذا الطلب!
+                    {!couponSupported && (
+                      <p className="text-xs text-muted-foreground">
+                        أكواد الخصم بالليرة السورية فقط ولا تُطبَّق على المنتجات بالدولار.
                       </p>
+                    )}
+                  </div>
+
+                  {/* Totals breakdown — one independent block per currency */}
+                  {currencyTotals.map((t) => (
+                    <div key={t.currency} className="space-y-2 border-t pt-4">
+                      {isMultiCurrency && (
+                        <p className="text-sm font-semibold">
+                          إجمالي منتجات {currencyName(t.currency)} ({formatPrice(0, t.currency).split(" ").pop()})
+                        </p>
+                      )}
+                      <div className="flex justify-between text-sm">
+                        <span className="text-muted-foreground">المجموع الفرعي</span>
+                        <span>{formatPrice(t.subtotal, t.currency, { maximumFractionDigits: 0 })}</span>
+                      </div>
+
+                      {t.savings > 0 && (
+                        <div className="flex justify-between text-sm">
+                          <span className="text-green-600 flex items-center gap-1">
+                            <Percent className="h-3 w-3" />
+                            خصم الكمية
+                          </span>
+                          <span className="text-green-600 font-medium">
+                            -{formatPrice(t.savings, t.currency, { maximumFractionDigits: 0 })}
+                          </span>
+                        </div>
+                      )}
+
+                      {t.couponDiscount > 0 && (
+                        <div className="flex justify-between text-sm">
+                          <span className="text-green-600 flex items-center gap-1">
+                            <Tag className="h-3 w-3" />
+                            خصم الكوبون
+                          </span>
+                          <span className="text-green-600 font-medium">
+                            -{formatPrice(t.couponDiscount, t.currency, { maximumFractionDigits: 0 })}
+                          </span>
+                        </div>
+                      )}
+
+                      <div className="flex justify-between text-sm">
+                        <span className="text-muted-foreground flex items-center gap-1">
+                          <Truck className="h-3.5 w-3.5" />
+                          تكلفة التوصيل
+                        </span>
+                        <span className={t.shipping === 0 ? "text-green-600 font-medium" : ""}>
+                          {t.shipping === 0
+                            ? "مجاني"
+                            : formatPrice(t.shipping, t.currency, { maximumFractionDigits: 0 })}
+                        </span>
+                      </div>
+
+                      <div className="flex justify-between text-sm">
+                        <span className="text-muted-foreground flex items-center gap-1">
+                          <Receipt className="h-3.5 w-3.5" />
+                          الضريبة {TAX_RATE > 0 ? `(${(TAX_RATE * 100).toFixed(0)}%)` : ""}
+                        </span>
+                        <span>{formatPrice(t.tax, t.currency, { maximumFractionDigits: 0 })}</span>
+                      </div>
+
+                      <div className="border-t pt-3 mt-2">
+                        <div className="flex justify-between font-bold text-lg">
+                          <span>الإجمالي النهائي</span>
+                          <span className="text-primary">
+                            {formatPrice(t.total, t.currency, { maximumFractionDigits: 0 })}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+
+                  {isMultiCurrency && (
+                    <div className="rounded-lg border border-primary/20 bg-primary/5 p-3">
+                      <p className="text-sm text-muted-foreground">
+                        سلتك تحتوي منتجات بعملتين مختلفتين، ولا يتم جمع المبالغ أو تحويلها بين العملات.
+                        يرجى إتمام منتجات كل عملة في طلب منفصل.
+                      </p>
+                    </div>
+                  )}
+
+                  {currencyTotals.some((t) => t.savings > 0 || t.couponDiscount > 0) && (
+                    <div className="bg-green-50 dark:bg-green-950/40 p-3 rounded-lg space-y-0.5">
+                      {currencyTotals
+                        .filter((t) => t.savings > 0 || t.couponDiscount > 0)
+                        .map((t) => (
+                          <p
+                            key={t.currency}
+                            className="text-sm text-green-800 dark:text-green-200 font-medium"
+                          >
+                            🎉 لقد وفرت{" "}
+                            {formatPrice(t.savings + t.couponDiscount, t.currency, {
+                              maximumFractionDigits: 0,
+                            })}{" "}
+                            على هذا الطلب!
+                          </p>
+                        ))}
                     </div>
                   )}
 

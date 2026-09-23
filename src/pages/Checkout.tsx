@@ -852,7 +852,17 @@ const Checkout = () => {
                     </div>
                   ))}
 
-                  {platformBlocked ? (
+                  {isMixedCurrency ? (
+                    <div className="rounded-lg border border-destructive/30 bg-destructive/5 p-3 text-sm space-y-1">
+                      <p className="font-semibold flex items-center gap-1.5 text-destructive">
+                        <AlertTriangle className="h-4 w-4" /> عملتان في سلة واحدة
+                      </p>
+                      <p className="text-muted-foreground">
+                        سلتك تحتوي منتجات بالليرة السورية وأخرى بالدولار. لا يتم جمع المبالغ أو
+                        تحويلها بين العملتين، لذا يرجى إتمام منتجات كل عملة في طلب منفصل.
+                      </p>
+                    </div>
+                  ) : platformBlocked ? (
                     <div className="rounded-lg border border-destructive/30 bg-destructive/5 p-3 text-sm space-y-1">
                       <p className="font-semibold flex items-center gap-1.5 text-destructive">
                         <AlertTriangle className="h-4 w-4" /> غير متاح حالياً
@@ -952,7 +962,7 @@ const Checkout = () => {
                     type="submit"
                     className="w-full"
                     size="lg"
-                    disabled={submitting || isMixedCart || platformBlocked}
+                    disabled={submitting || isMixedCart || platformBlocked || isMixedCurrency}
                   >
                     {submitting ? (
                       <>

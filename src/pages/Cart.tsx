@@ -2,7 +2,13 @@ import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
-import { formatPrice } from "@/lib/currency";
+import {
+  COUPON_CURRENCY,
+  currencyName,
+  formatPrice,
+  normalizeCurrency,
+  totalsByCurrency,
+} from "@/lib/currency";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import CartRecommendations from "@/components/CartRecommendations";

@@ -3,7 +3,8 @@ import { Button } from "@/components/ui/button";
 import { Download, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { currencyName, formatPrice, normalizeCurrency, type ProductCurrency } from "@/lib/currency";
+import { currencyName, formatPrice } from "@/lib/currency";
+import { buildInvoiceBlocks } from "@/lib/invoiceTotals";
 
 const esc = (s: unknown) =>
   String(s ?? "").replace(/[&<>"']/g, (c) =>
@@ -127,7 +128,7 @@ const CustomerInvoice = ({ orderId }: Props) => {
           <table>
             <thead><tr><th>المنتج</th><th>الكمية</th><th>السعر</th><th>الإجمالي</th></tr></thead>
             <tbody>
-              ${b.list
+              ${b.items
                 .map(
                   (i: any) => `<tr>
                     <td>${esc(i.product_name || i.product?.name || "منتج")}${i.variant_label ? ` <span class="muted">(${esc(i.variant_label)})</span>` : ""}</td>

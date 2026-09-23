@@ -447,24 +447,43 @@ const Cart = () => {
   };
 
   const itemsWithDiscounts = calculateItemsWithDiscounts();
-  const subtotal = cartItems.reduce(
-    (sum, item) => sum + Number(item.product.price) * item.quantity,
-    0
-  );
-  const totalSavings = itemsWithDiscounts.reduce((sum, item) => sum + item.savings, 0);
-  const subtotalAfterQtyDiscount = subtotal - totalSavings;
-  const shippingTotal = cartItems.reduce(
-    (sum, item) => sum + Number(item.product.shipping_cost || 0) * item.quantity,
-    0
-  );
   const TAX_RATE = 0; // الضريبة (VAT) — غير مطبّقة حالياً
-  const taxableBase = Math.max(0, subtotalAfterQtyDiscount - couponDiscount);
-  const taxAmount = taxableBase * TAX_RATE;
-  const total = taxableBase + shippingTotal + taxAmount;
+
+  // Amounts are grouped per currency: USD and SYP are never summed together
+  // and never converted.
+  const currencyTotals = totalsByCurrency(
+    itemsWithDiscounts.map((item) => ({
+      currency: normalizeCurrency((item.product as any).currency),
+      lineSubtotal: Number(item.product.price) * item.quantity,
+      savings: item.savings,
+      shipping: Number(item.product.shipping_cost || 0) * item.quantity,
+    })),
+    { couponDiscount, couponCurrency: COUPON_CURRENCY, taxRate: TAX_RATE },
+  );
+  const isMultiCurrency = currencyTotals.length > 1;
+  const couponSupported = currencyTotals.every((t) => t.currency === COUPON_CURRENCY);
+  const couponBase = currencyTotals.find((t) => t.currency === COUPON_CURRENCY);
+  const subtotalAfterQtyDiscount = Math.max(0, (couponBase?.subtotal ?? 0) - (couponBase?.savings ?? 0));
+
+  // A coupon can only price a Syrian-pound order — drop it if the cart changes.
+  useEffect(() => {
+    if (appliedCoupon && !couponSupported) {
+      setAppliedCoupon(null);
+      setCouponDiscount(0);
+    }
+  }, [appliedCoupon, couponSupported]);
 
   const applyCoupon = async () => {
     if (!couponCode.trim()) {
       toast({ title: "خطأ", description: "يرجى إدخال كود الكوبون", variant: "destructive" });
+      return;
+    }
+    if (!couponSupported) {
+      toast({
+        title: "الكوبون غير متاح",
+        description: "أكواد الخصم تُحسب بالليرة السورية فقط، ولا يمكن تطبيقها على منتجات بالدولار.",
+        variant: "destructive",
+      });
       return;
     }
     setValidatingCoupon(true);

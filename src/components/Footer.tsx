@@ -139,6 +139,11 @@ const Footer = () => {
                   الشروط والأحكام
                 </Link>
               </li>
+              <li>
+                <Link to="/delete-account" className="hover:text-foreground transition-colors story-link">
+                  حذف الحساب
+                </Link>
+              </li>
             </ul>
           </div>
 

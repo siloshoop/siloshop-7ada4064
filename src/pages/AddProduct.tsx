@@ -220,6 +220,12 @@ const AddProduct = () => {
         ships_within_days: formData.ships_within_days,
       });
 
+      if (formData.price && !CURRENCY_OPTIONS.some((c) => c.value === formData.currency)) {
+        toast({ title: "العملة مطلوبة", description: "يرجى اختيار عملة السعر (ل.س أو $)", variant: "destructive" });
+        setLoading(false);
+        return;
+      }
+
       if (!parsed.success) {
         toast({ title: "بيانات غير صالحة", description: firstIssue(parsed.error), variant: "destructive" });
         setLoading(false);

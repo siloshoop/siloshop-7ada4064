@@ -145,6 +145,7 @@ const MobileBottomNav = () => {
         </SheetContent>
       </Sheet>
 
+      <div className="mobile-nav-spacer md:hidden" aria-hidden="true" />
     </>
   );
 };

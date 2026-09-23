@@ -62,9 +62,9 @@ const Profile = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex w-full max-w-full flex-col overflow-x-clip">
       <Navbar />
-      <main className="flex-1 container mx-auto px-4 py-6 max-w-2xl">
+      <main className="w-full min-w-0 flex-1 container mx-auto px-4 py-6 max-w-2xl">
         <h1 className="text-2xl font-bold mb-6 flex items-center gap-2">
           <User className="h-6 w-6" /> الملف الشخصي
         </h1>
@@ -86,7 +86,7 @@ const Profile = () => {
               </div>
               <div className="flex justify-between gap-2 sm:flex-col sm:justify-start">
                 <dt className="text-muted-foreground">البريد الإلكتروني</dt>
-                <dd className="font-medium break-all" dir="ltr">{user?.email || "—"}</dd>
+                <dd className="min-w-0 font-medium break-all" dir="ltr">{user?.email || "—"}</dd>
               </div>
               <div className="flex justify-between gap-2 sm:flex-col sm:justify-start">
                 <dt className="text-muted-foreground">رقم الهاتف</dt>

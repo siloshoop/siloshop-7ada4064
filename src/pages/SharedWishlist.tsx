@@ -52,6 +52,7 @@ const SharedWishlist = () => {
               id,
               name,
               price,
+              currency,
               original_price,
               image_url
             )

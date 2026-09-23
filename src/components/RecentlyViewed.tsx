@@ -37,6 +37,7 @@ const RecentlyViewed = () => {
               id,
               name,
               price,
+              currency,
               original_price,
               image_url,
               is_active,

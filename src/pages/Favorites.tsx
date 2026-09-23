@@ -48,6 +48,7 @@ const Favorites = () => {
             id,
             name,
             price,
+            currency,
             original_price,
             image_url,
             stock_quantity,

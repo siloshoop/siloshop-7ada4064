@@ -37,7 +37,7 @@ interface PlatformOptions {
 }
 
 const SELECT =
-  "id, name, price, original_price, discount_price, image_url, stock_quantity, product_type, ships_within_days, shipping_duration_text, platform_free_shipping, platform_shipping_fee, reviews(rating)";
+  "id, name, price, currency, original_price, discount_price, image_url, stock_quantity, product_type, ships_within_days, shipping_duration_text, platform_free_shipping, platform_shipping_fee, reviews(rating)";
 
 /** Dedicated marketplace section for Turkish (platform) products. */
 const TurkishProducts = () => {

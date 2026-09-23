@@ -30,7 +30,7 @@ const TopRatedProducts = () => {
       try {
         const { data } = await supabase
           .from("products")
-          .select("id, name, price, original_price, image_url, reviews(rating)")
+          .select("id, name, price, currency, original_price, image_url, reviews(rating)")
           .eq("is_active", true)
           .eq("moderation_status", "approved");
         if (cancelled) return;

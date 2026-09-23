@@ -88,7 +88,7 @@ const Store = () => {
         supabase
           .from("products")
           .select(
-            "id, name, price, original_price, image_url, stock_quantity, shipping_cost, product_type, ships_within_days, reviews(rating)",
+            "id, name, price, currency, original_price, image_url, stock_quantity, shipping_cost, product_type, ships_within_days, reviews(rating)",
           )
           .eq("vendor_id", vendorId)
           .eq("is_active", true)

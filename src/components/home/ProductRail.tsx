@@ -35,7 +35,7 @@ interface ProductRailProps {
 }
 
 const SELECT =
-  "id, name, price, original_price, discount_price, image_url, shipping_cost, stock_quantity, vendor_id, product_type, ships_within_days, reviews(rating)";
+  "id, name, price, currency, original_price, discount_price, image_url, shipping_cost, stock_quantity, vendor_id, product_type, ships_within_days, reviews(rating)";
 
 const ProductRail = ({
   variant,

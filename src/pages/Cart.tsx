@@ -41,7 +41,7 @@ const CART_SELECT = `
   quantity,
   variant_id,
   variant:product_variants(id, attributes, price, discount_price, stock_quantity),
-  product:products(id, name, price, image_url, stock_quantity, category_id, shipping_cost, shipping_duration_text)
+  product:products(id, name, price, currency, image_url, stock_quantity, category_id, shipping_cost, shipping_duration_text)
 `;
 
 /** Applies the chosen variant's own price and stock to the cart row. */
@@ -169,7 +169,7 @@ const Cart = () => {
           id,
           quantity,
           variant_id,
-          product:products(id, name, price, image_url, stock_quantity)
+          product:products(id, name, price, currency, image_url, stock_quantity)
         `)
         .eq("user_id", user.id)
         .order("created_at", { ascending: false });

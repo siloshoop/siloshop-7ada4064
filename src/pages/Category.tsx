@@ -73,6 +73,7 @@ const Category = () => {
         id,
         name,
         price,
+        currency,
         original_price,
         image_url,
         vendor_id,

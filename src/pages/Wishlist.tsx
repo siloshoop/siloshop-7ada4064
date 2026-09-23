@@ -88,7 +88,7 @@ const Wishlist = () => {
       const listIds = lists.map((w) => w.id);
       const { data: items } = await supabase
         .from("wishlist_items")
-        .select("id, wishlist_id, product_id, product:products(id, name, price, original_price, image_url)")
+        .select("id, wishlist_id, product_id, product:products(id, name, price, currency, original_price, image_url)")
         .in("wishlist_id", listIds);
 
       const itemsByList = new Map<string, WishlistItem[]>();

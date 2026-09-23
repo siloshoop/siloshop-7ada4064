@@ -61,6 +61,7 @@ const EnhancedDailyDeals = () => {
               id,
               name,
               price,
+              currency,
               original_price,
               image_url,
               reviews (rating)

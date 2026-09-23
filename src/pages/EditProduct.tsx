@@ -367,7 +367,6 @@ const EditProduct = () => {
           short_description: formData.short_description.trim() || null,
           price: values.price,
           currency: formData.currency || DEFAULT_CURRENCY,
-        currency: formData.currency || DEFAULT_CURRENCY,
           original_price: values.original_price ?? null,
           stock_quantity: values.stock_quantity,
           min_order_quantity: minQty,

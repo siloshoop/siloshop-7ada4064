@@ -201,6 +201,7 @@ const EnhancedDailyDeals = () => {
                   id={product.id}
                   name={product.name}
                   price={dealPrice}
+                  currency={(product as any).currency}
                   originalPrice={product.price}
                   image={product.image_url}
                   rating={avgRating}

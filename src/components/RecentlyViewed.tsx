@@ -115,6 +115,7 @@ const RecentlyViewed = () => {
                   id={product.id}
                   name={product.name}
                   price={product.price}
+                  currency={(product as any).currency}
                   originalPrice={product.original_price || undefined}
                   image={product.image_url}
                   rating={avgRating}

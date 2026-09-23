@@ -182,6 +182,7 @@ const TurkishProducts = () => {
                   id={product.id}
                   name={product.name}
                   price={effectivePrice}
+                  currency={(product as any).currency}
                   originalPrice={base && base > effectivePrice ? base : undefined}
                   image={product.image_url}
                   rating={avg}

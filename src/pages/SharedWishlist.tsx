@@ -146,6 +146,7 @@ const SharedWishlist = () => {
                   id={item.product.id}
                   name={item.product.name}
                   price={item.product.price}
+                  currency={(item.product as any).currency}
                   originalPrice={item.product.original_price || undefined}
                   image={item.product.image_url}
                   rating={4}

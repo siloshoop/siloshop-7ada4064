@@ -76,6 +76,7 @@ const CartRecommendations = ({ cartProductIds, cartCategoryIds }: CartRecommenda
             id={product.id}
             name={product.name}
             price={product.price}
+            currency={(product as any).currency}
             originalPrice={product.original_price}
             image={product.image_url}
             rating={0}

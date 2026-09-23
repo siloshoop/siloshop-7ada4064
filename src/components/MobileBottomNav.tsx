@@ -80,8 +80,11 @@ const MobileBottomNav = () => {
   return (
     <>
       {/* Bottom Navigation Bar - Only visible on mobile */}
-      <nav className="safe-area-bottom safe-area-x fixed inset-x-0 bottom-0 z-50 max-w-full border-t border-border bg-background/95 backdrop-blur-lg md:hidden">
-        <div className="flex h-14 min-w-0 items-center justify-around px-0.5 sm:px-1">
+      <nav
+        data-testid="mobile-bottom-bar"
+        className="mobile-fixed-bottom safe-area-x fixed inset-x-0 bottom-0 z-50 max-w-full border-t border-border bg-background/95 backdrop-blur-lg md:hidden"
+      >
+        <div className="mobile-fixed-bar-content flex min-w-0 items-center justify-around px-0.5 sm:px-1">
           {navItems.map((item, index) => (
             <button
               key={index}

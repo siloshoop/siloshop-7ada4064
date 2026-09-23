@@ -15,6 +15,10 @@ All colors MUST be HSL.
     --safe-area-inset-bottom: 0px;
     --safe-area-inset-left: 0px;
 
+    /* Single source of truth for fixed mobile bars and their page reserves. */
+    --mobile-fixed-bar-height: 3.5rem;
+    --mobile-product-notice-height: 2.75rem;
+
     --background: 0 0% 100%;
     --foreground: 222 47% 11%;
 
@@ -247,12 +251,34 @@ All colors MUST be HSL.
     padding-right: max(env(safe-area-inset-right, 0px), var(--safe-area-inset-right, 0px));
   }
 
+  .mobile-fixed-bottom {
+    padding-bottom: max(env(safe-area-inset-bottom, 0px), var(--safe-area-inset-bottom, 0px));
+  }
+
+  .mobile-fixed-bar-content {
+    height: var(--mobile-fixed-bar-height);
+  }
+
+  .mobile-product-notice {
+    min-height: var(--mobile-product-notice-height);
+  }
+
   .mobile-nav-spacer {
-    height: calc(3.5rem + max(env(safe-area-inset-bottom, 0px), var(--safe-area-inset-bottom, 0px)));
+    flex-shrink: 0;
+    height: calc(var(--mobile-fixed-bar-height) + max(env(safe-area-inset-bottom, 0px), var(--safe-area-inset-bottom, 0px)));
+  }
+
+  .mobile-product-bar-spacer {
+    flex-shrink: 0;
+    height: calc(var(--mobile-fixed-bar-height) + max(env(safe-area-inset-bottom, 0px), var(--safe-area-inset-bottom, 0px)));
+  }
+
+  .mobile-product-bar-spacer[data-preview-only="true"] {
+    height: calc(var(--mobile-fixed-bar-height) + var(--mobile-product-notice-height) + max(env(safe-area-inset-bottom, 0px), var(--safe-area-inset-bottom, 0px)));
   }
 
   .mobile-nav-content {
-    padding-bottom: calc(3.75rem + max(env(safe-area-inset-bottom, 0px), var(--safe-area-inset-bottom, 0px)));
+    padding-bottom: calc(var(--mobile-fixed-bar-height) + max(env(safe-area-inset-bottom, 0px), var(--safe-area-inset-bottom, 0px)));
   }
 
   .break-safe {

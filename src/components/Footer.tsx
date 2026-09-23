@@ -32,7 +32,7 @@ const Footer = () => {
       });
     }
   };
-  return <footer className="bg-muted/50 border-t relative overflow-hidden">
+  return <footer data-testid="site-footer" className="bg-muted/50 border-t relative overflow-hidden">
       {/* Instagram gradient definition */}
       <svg width="0" height="0" className="absolute" aria-hidden="true">
         <defs>

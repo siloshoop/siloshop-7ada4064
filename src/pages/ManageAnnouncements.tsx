@@ -214,13 +214,13 @@ const ManageAnnouncements = () => {
       <Navbar />
       <main className="flex-1 container px-4 py-8">
         <div className="max-w-4xl mx-auto">
-          <div className="flex items-center justify-between mb-8">
-            <div>
-              <div className="flex items-center gap-3 mb-2">
+          <div className="mb-8 flex min-w-0 flex-col items-start gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div className="min-w-0">
+              <div className="mb-2 flex min-w-0 items-center gap-3">
                 <div className="p-2 rounded-lg bg-primary/10">
                   <Megaphone className="h-8 w-8 text-primary" />
                 </div>
-                <h1 className="text-3xl font-bold">إدارة الإعلانات</h1>
+                <h1 className="min-w-0 text-2xl font-bold leading-tight sm:text-3xl">إدارة الإعلانات</h1>
               </div>
               <p className="text-muted-foreground">إنشاء وتعديل إعلانات الشريط العلوي</p>
             </div>

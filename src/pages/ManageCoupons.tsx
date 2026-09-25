@@ -170,11 +170,11 @@ const ManageCoupons = () => {
       <Navbar />
       <main className="flex-1 container px-4 py-8">
         <div className="max-w-4xl mx-auto">
-          <div className="flex items-center justify-between mb-8">
-            <div>
-              <div className="flex items-center gap-3 mb-2">
+          <div className="mb-8 flex min-w-0 flex-col items-start gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div className="min-w-0">
+              <div className="mb-2 flex min-w-0 items-center gap-3">
                 <Tag className="h-8 w-8 text-primary" />
-                <h1 className="text-3xl font-bold">إدارة كوبونات الخصم</h1>
+                <h1 className="min-w-0 text-2xl font-bold leading-tight sm:text-3xl">إدارة كوبونات الخصم</h1>
               </div>
               <p className="text-muted-foreground">إنشاء وإدارة رموز الخصم</p>
             </div>
@@ -203,7 +203,7 @@ const ManageCoupons = () => {
                     />
                   </div>
 
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 gap-4 min-[360px]:grid-cols-2">
                     <div className="space-y-2">
                       <Label htmlFor="discount_type">نوع الخصم *</Label>
                       <Select
@@ -236,7 +236,7 @@ const ManageCoupons = () => {
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 gap-4 min-[360px]:grid-cols-2">
                     <div className="space-y-2">
                       <Label htmlFor="min_purchase">الحد الأدنى للشراء (ريال)</Label>
                       <Input
@@ -291,10 +291,10 @@ const ManageCoupons = () => {
               coupons.map((coupon) => (
                 <Card key={coupon.id}>
                   <CardContent className="p-6">
-                    <div className="flex items-center justify-between">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-3 mb-2">
-                          <h3 className="text-2xl font-bold font-mono">{coupon.code}</h3>
+                    <div className="flex min-w-0 flex-col items-start gap-4 sm:flex-row sm:items-center sm:justify-between">
+                      <div className="min-w-0 flex-1">
+                        <div className="mb-2 flex min-w-0 flex-wrap items-center gap-3">
+                          <h3 className="min-w-0 break-all font-mono text-xl font-bold sm:text-2xl">{coupon.code}</h3>
                           <span className={`text-xs px-2 py-1 rounded ${
                             coupon.is_active ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
                           }`}>
@@ -306,7 +306,7 @@ const ManageCoupons = () => {
                           {coupon.discount_type === 'percentage' ? '%' : ' ريال'}
                           {coupon.min_purchase > 0 && ` - حد أدنى ${coupon.min_purchase} ريال`}
                         </p>
-                        <div className="flex gap-4 text-xs text-muted-foreground">
+                        <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground">
                           {coupon.expires_at && (
                             <span>
                               ينتهي: {format(new Date(coupon.expires_at), "dd MMM yyyy", { locale: ar })}

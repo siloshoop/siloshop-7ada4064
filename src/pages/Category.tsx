@@ -208,9 +208,9 @@ const Category = () => {
     <div className="min-h-screen flex flex-col">
       <Navbar />
       <main className="flex-1 container px-4 py-8">
-        <div className="flex items-center justify-between mb-8">
-          <div>
-            <h1 className="text-3xl font-bold mb-2">{categoryName || "الفئة"}</h1>
+        <div className="mb-8 flex min-w-0 flex-col items-start gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="min-w-0">
+            <h1 className="mb-2 min-w-0 text-2xl font-bold leading-tight sm:text-3xl">{categoryName || "الفئة"}</h1>
             <p className="text-muted-foreground">
               {filteredProducts.length} من {products.length} منتج
             </p>

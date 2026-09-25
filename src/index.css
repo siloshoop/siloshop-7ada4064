@@ -226,6 +226,16 @@ All colors MUST be HSL.
     min-width: 0;
   }
 
+  /* Keep long control labels inside their own box on narrow Android screens.
+     Arabic still wraps only between words because word-break remains normal. */
+  :where(button, [role="button"], [role="tab"], [role="menuitem"]) {
+    max-width: 100%;
+  }
+
+  :where([role="dialog"], [role="menu"], [role="listbox"]) {
+    max-width: calc(100vw - 1rem);
+  }
+
   /* Hide scrollbars globally for horizontal scroll containers */
   .scrollbar-hide {
     -ms-overflow-style: none;

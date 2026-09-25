@@ -244,9 +244,9 @@ const Addresses = () => {
     <div className="min-h-screen flex flex-col">
       <Navbar />
       <main className="flex-1 container px-4 py-6 sm:py-8">
-        <div className="flex items-center justify-between mb-6">
-          <div>
-            <h1 className="text-2xl sm:text-3xl font-bold flex items-center gap-2">
+        <div className="mb-6 flex min-w-0 flex-col items-start gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="min-w-0">
+            <h1 className="flex min-w-0 items-center gap-2 text-2xl font-bold leading-tight sm:text-3xl">
               <MapPin className="h-6 w-6 text-primary" />
               عناوين التوصيل
             </h1>

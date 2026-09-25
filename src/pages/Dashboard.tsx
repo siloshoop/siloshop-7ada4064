@@ -356,7 +356,7 @@ const Dashboard = () => {
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
-      <main className="flex-1 container px-4 py-8">
+      <main className="container min-w-0 flex-1 px-3 py-6 sm:px-4 sm:py-8">
         <div className="mb-8">
           <h1 className="text-3xl font-bold mb-2">
             مرحباً، {profile?.full_name || "عزيزي المستخدم"}
@@ -615,12 +615,12 @@ const Dashboard = () => {
 
             <Card>
               <CardHeader>
-                <div className="flex items-center justify-between mb-4">
-                  <div>
+                <div className="mb-4 flex min-w-0 flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+                  <div className="min-w-0 shrink-0">
                     <CardTitle>منتجاتي</CardTitle>
                     <CardDescription>إدارة منتجاتك المعروضة</CardDescription>
                   </div>
-                   <div className="flex gap-2 flex-wrap">
+                   <div className="grid min-w-0 grid-cols-2 gap-2 sm:grid-cols-3 lg:flex lg:flex-wrap lg:justify-end">
                     <Button 
                       variant="outline"
                       onClick={() => navigate("/dashboard/orders")}
@@ -741,15 +741,15 @@ const Dashboard = () => {
                 {filteredProducts.length > 0 ? (
                   <div className="space-y-4">
                     {filteredProducts.map((product) => (
-                      <div key={product.id} className="flex items-center gap-4 p-4 border rounded-lg">
+                      <div key={product.id} className="grid min-w-0 grid-cols-[4.5rem_minmax(0,1fr)] gap-3 rounded-lg border p-3 sm:grid-cols-[5rem_minmax(0,1fr)_auto] sm:items-center sm:gap-4 sm:p-4">
                         <img loading="lazy" decoding="async"
                           src={product.image_url || "/placeholder.svg"}
                           alt={product.name}
-                          className="w-20 h-20 object-cover rounded-md"
+                          className="h-[4.5rem] w-[4.5rem] rounded-md object-cover sm:h-20 sm:w-20"
                         />
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2">
-                            <h3 className="font-semibold">{product.name}</h3>
+                        <div className="min-w-0">
+                          <div className="flex min-w-0 flex-wrap items-center gap-1.5 sm:gap-2">
+                            <h3 className="min-w-0 max-w-full break-words font-semibold leading-snug">{product.name}</h3>
                             {product.moderation_status === "archived" ? (
                               <span className="text-xs px-2 py-1 rounded bg-muted text-muted-foreground">
                                 مؤرشف
@@ -760,14 +760,14 @@ const Dashboard = () => {
                               </span>
                             )}
                           </div>
-                          <p className="text-sm text-muted-foreground">
+                          <p className="text-sm text-muted-foreground" dir="auto">
                             {formatPrice(product.price, product.currency)}
                           </p>
                           <p className="text-xs text-muted-foreground">
                             الكمية: {product.stock_quantity}
                           </p>
                         </div>
-                        <div className="flex gap-2">
+                        <div className="col-span-2 grid grid-cols-3 gap-2 sm:col-span-1 sm:flex sm:shrink-0">
                           {product.moderation_status === "archived" ? (
                             <Button
                               variant="outline"

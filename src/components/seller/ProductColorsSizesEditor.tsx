@@ -106,7 +106,7 @@ const ProductColorsSizesEditor = ({ value, onChange }: Props) => {
       {/* Colors */}
       <div className="space-y-2">
         <Label htmlFor="csz-color">الألوان</Label>
-        <div className="flex gap-2">
+        <div className="flex min-w-0 gap-2">
           <Input
             id="csz-color"
             value={colorInput}
@@ -220,8 +220,8 @@ const ProductColorsSizesEditor = ({ value, onChange }: Props) => {
       {/* Combinations */}
       {value.variants.length > 0 && (
         <div className="space-y-2">
-          <div className="flex items-center justify-between gap-2">
-            <Label>الكمية والسعر لكل تركيبة (اختياري)</Label>
+          <div className="flex min-w-0 flex-col items-start gap-2 sm:flex-row sm:items-center sm:justify-between">
+            <Label className="min-w-0 leading-relaxed">الكمية والسعر لكل تركيبة (اختياري)</Label>
             <Button
               type="button"
               size="sm"

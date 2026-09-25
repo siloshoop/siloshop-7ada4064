@@ -355,15 +355,15 @@ const AddProduct = () => {
   }
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="flex min-h-screen min-w-0 flex-col overflow-x-clip">
       <Navbar />
-      <main className="flex-1 container px-4 py-8">
-        <Card className="max-w-3xl mx-auto">
-          <CardHeader>
-            <CardTitle className="text-3xl">إضافة منتج جديد</CardTitle>
+      <main className="container min-w-0 flex-1 px-3 py-6 sm:px-4 sm:py-8">
+        <Card className="mx-auto min-w-0 max-w-3xl">
+          <CardHeader className="p-4 sm:p-6">
+            <CardTitle className="text-2xl leading-tight sm:text-3xl">إضافة منتج جديد</CardTitle>
             <CardDescription>أضف منتجاً جديداً إلى متجرك</CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="min-w-0 p-4 pt-0 sm:p-6 sm:pt-0">
             <form onSubmit={handleSubmit} className="space-y-6">
               <Accordion type="multiple" defaultValue={["basic"]} className="w-full">
                 <AccordionItem value="basic">
@@ -561,7 +561,7 @@ const AddProduct = () => {
                 <AccordionItem value="pricing">
                   <AccordionTrigger>السعر والمخزون</AccordionTrigger>
                   <AccordionContent className="space-y-4">
-                    <div className="grid grid-cols-2 gap-4">
+                     <div className="grid grid-cols-1 gap-4 min-[360px]:grid-cols-2">
                       <div className="space-y-2">
                         <Label htmlFor="price">السعر *</Label>
                         <Input
@@ -608,7 +608,7 @@ const AddProduct = () => {
                       />
                     </div>
 
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 gap-4 min-[360px]:grid-cols-2">
                       <div className="space-y-2">
                         <Label htmlFor="min_order_quantity">الحد الأدنى للطلب</Label>
                         <Input
@@ -668,7 +668,7 @@ const AddProduct = () => {
                       </p>
                     </div>
 
-                    <div className="grid grid-cols-3 gap-4">
+                    <div className="grid grid-cols-1 gap-4 min-[360px]:grid-cols-3">
                       <div className="space-y-2">
                         <Label htmlFor="length_cm">الطول (سم)</Label>
                         <Input
@@ -701,7 +701,7 @@ const AddProduct = () => {
                       </div>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 gap-4 min-[360px]:grid-cols-2">
                       <div className="space-y-2">
                         <Label htmlFor="shipping_weight">وزن الشحن (كغ)</Label>
                         <Input
@@ -808,8 +808,8 @@ const AddProduct = () => {
                 </AccordionItem>
               </Accordion>
 
-              <div className="flex gap-4">
-                <Button type="submit" className="flex-1" size="lg" disabled={loading}>
+              <div className="grid grid-cols-1 gap-3 min-[360px]:grid-cols-2 sm:flex sm:gap-4">
+                <Button type="submit" className="min-w-0 whitespace-normal min-[360px]:col-span-2 sm:flex-1" size="lg" disabled={loading}>
                   {loading ? (
                     <>
                       <Loader2 className="ml-2 h-5 w-5 animate-spin" />
@@ -826,6 +826,7 @@ const AddProduct = () => {
                   type="button"
                   variant="secondary"
                   size="lg"
+                  className="min-w-0 whitespace-normal sm:flex-1"
                   disabled={loading}
                   onClick={(e) => handleSubmit(e as any, true)}
                 >
@@ -835,6 +836,7 @@ const AddProduct = () => {
                   type="button"
                   variant="outline"
                   onClick={() => navigate("/dashboard")}
+                  className="min-w-0 whitespace-normal sm:flex-none"
                   disabled={loading}
                 >
                   إلغاء

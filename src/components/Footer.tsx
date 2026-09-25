@@ -59,7 +59,7 @@ const Footer = () => {
             <p className="text-muted-foreground mb-4">
               وجهتك المفضلة للتسوق أونلاين بأفضل الأسعار وأعلى جودة
             </p>
-            <div className="flex gap-2">
+            <div className="flex flex-wrap gap-2">
               <Button size="icon" variant="ghost" className="hover-scale glow-on-hover" asChild>
                 <a
                   href="https://www.facebook.com/profile.php?id=61591855201582"
@@ -178,9 +178,9 @@ const Footer = () => {
             <p className="text-muted-foreground mb-4">
               احصل على آخر العروض والتخفيضات
             </p>
-            <form onSubmit={handleSubscribe} className="flex gap-2">
-              <input type="email" placeholder="بريدك الإلكتروني" className="flex-1 px-4 py-2 rounded-lg border bg-background focus:ring-2 focus:ring-primary/50 transition-all" value={email} onChange={e => setEmail(e.target.value)} required />
-              <Button type="submit" className="glow-on-hover">اشترك</Button>
+            <form onSubmit={handleSubscribe} className="flex min-w-0 flex-col gap-2 min-[360px]:flex-row">
+              <input type="email" placeholder="بريدك الإلكتروني" className="min-w-0 flex-1 px-4 py-2 rounded-lg border bg-background focus:ring-2 focus:ring-primary/50 transition-all" value={email} onChange={e => setEmail(e.target.value)} required />
+              <Button type="submit" className="glow-on-hover shrink-0">اشترك</Button>
             </form>
           </div>
         </div>

@@ -384,8 +384,8 @@ const Dashboard = () => {
         {/* Admin quick link: seller management */}
         {isAdmin && (
           <Card className="mb-6 border-primary/30">
-            <CardContent className="pt-6 flex items-center justify-between gap-4">
-              <div>
+            <CardContent className="flex min-w-0 flex-col items-start gap-4 pt-6 sm:flex-row sm:items-center sm:justify-between">
+              <div className="min-w-0">
                 <p className="font-semibold">إدارة البائعين</p>
                 <p className="text-sm text-muted-foreground">مراجعة طلبات التسجيل واعتماد أو رفض البائعين.</p>
               </div>
@@ -396,8 +396,8 @@ const Dashboard = () => {
 
         {isAdmin && (
           <Card className="mb-6 border-primary/30">
-            <CardContent className="pt-6 flex items-center justify-between gap-4">
-              <div>
+            <CardContent className="flex min-w-0 flex-col items-start gap-4 pt-6 sm:flex-row sm:items-center sm:justify-between">
+              <div className="min-w-0">
                 <p className="font-semibold">منتجات المنصة</p>
                 <p className="text-sm text-muted-foreground">إضافة وتعديل واستيراد منتجات المنصة (Excel / CSV).</p>
               </div>
@@ -408,8 +408,8 @@ const Dashboard = () => {
 
         {isAdmin && (
           <Card className="mb-6 border-primary/30">
-            <CardContent className="pt-6 flex items-center justify-between gap-4">
-              <div>
+            <CardContent className="flex min-w-0 flex-col items-start gap-4 pt-6 sm:flex-row sm:items-center sm:justify-between">
+              <div className="min-w-0">
                 <p className="font-semibold">البلاغات والإشراف</p>
                 <p className="text-sm text-muted-foreground">مراجعة بلاغات المستخدمين واتخاذ إجراءات على المحتوى المخالف.</p>
               </div>
@@ -420,8 +420,8 @@ const Dashboard = () => {
 
         {isAdmin && (
           <Card className="mb-6 border-primary/30">
-            <CardContent className="pt-6 flex items-center justify-between gap-4">
-              <div>
+            <CardContent className="flex min-w-0 flex-col items-start gap-4 pt-6 sm:flex-row sm:items-center sm:justify-between">
+              <div className="min-w-0">
                 <p className="font-semibold flex items-center gap-2"><BarChart3 className="h-4 w-4" /> لوحة التحليلات والإحصائيات</p>
                 <p className="text-sm text-muted-foreground">نظرة شاملة على المستخدمين، الطلبات، الإيرادات، المنتجات، البلاغات، والبائعين.</p>
               </div>
@@ -432,8 +432,8 @@ const Dashboard = () => {
 
         {isAdmin && (
           <Card className="mb-6 border-primary/30">
-            <CardContent className="pt-6 flex items-center justify-between gap-4">
-              <div>
+            <CardContent className="flex min-w-0 flex-col items-start gap-4 pt-6 sm:flex-row sm:items-center sm:justify-between">
+              <div className="min-w-0">
                 <p className="font-semibold">إدارة الطلبات</p>
                 <p className="text-sm text-muted-foreground">عرض كل الطلبات، البحث والفلترة، التتبع، الإلغاء وتصدير CSV.</p>
               </div>
@@ -444,8 +444,8 @@ const Dashboard = () => {
 
         {isAdmin && (
           <Card className="mb-6 border-primary/30">
-            <CardContent className="pt-6 flex items-center justify-between gap-4">
-              <div>
+            <CardContent className="flex min-w-0 flex-col items-start gap-4 pt-6 sm:flex-row sm:items-center sm:justify-between">
+              <div className="min-w-0">
                 <p className="font-semibold">إشراف الدردشة</p>
                 <p className="text-sm text-muted-foreground">مراجعة المحادثات، حذف الرسائل، حظر أو تعليق الدردشات المخالفة.</p>
               </div>
@@ -568,15 +568,15 @@ const Dashboard = () => {
                 <CardContent>
                   <div className="space-y-4">
                     {recentReviews.map((review) => (
-                      <div key={review.id} className="flex gap-4 pb-4 border-b last:border-0">
+                      <div key={review.id} className="flex min-w-0 gap-3 border-b pb-4 last:border-0 sm:gap-4">
                         <Avatar>
                           <AvatarFallback>
                             {review.profiles?.full_name?.[0]?.toUpperCase() || "?"}
                           </AvatarFallback>
                         </Avatar>
-                        <div className="flex-1">
-                          <div className="flex items-center justify-between mb-2">
-                            <div>
+                        <div className="min-w-0 flex-1">
+                          <div className="mb-2 flex min-w-0 flex-col gap-1 sm:flex-row sm:items-start sm:justify-between">
+                            <div className="min-w-0">
                               <span className="font-semibold text-sm">
                                 {review.profiles?.full_name || "مستخدم"}
                               </span>

@@ -82,7 +82,7 @@
 
 ## Comprehensive mobile overlap repair
 
-- [ ] Fix overlapping headings, controls, product rows, form actions, and footer content shown in Android screenshots
-- [ ] Apply safe shared wrapping and shrinking rules to Arabic text and interactive controls without visual redesign
-- [ ] Audit representative public, buyer, seller, and admin screens at narrow Android widths
-- [ ] Run automated tests and verify corrected screens visually
+- [x] Fix overlapping headings, controls, product rows, form actions, and footer content shown in Android screenshots
+- [x] Apply safe shared wrapping and shrinking rules to Arabic text and interactive controls without visual redesign
+- [x] Audit representative public, buyer, seller, and admin screens at narrow Android widths
+- [x] Run automated tests and verify corrected screens visually

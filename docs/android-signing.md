@@ -14,22 +14,22 @@ Back it up somewhere safe. If you lose it you cannot update the app on Google Pl
 
 ## 2. Store the credentials outside git
 
+Put **both files** in the `android/` folder (next to `gradlew`):
+
+- `android/keystore.properties`
+- your keystore file, e.g. `android/siloshop-upload.keystore`
+
 Create `android/keystore.properties`:
 
 ```properties
-storeFile=../../siloshop-upload.keystore
+storeFile=siloshop-upload.keystore
 storePassword=YOUR_STORE_PASSWORD
 keyAlias=siloshop
 keyPassword=YOUR_KEY_PASSWORD
 ```
 
-Add to `.gitignore` (inside `android/.gitignore` or the repo root):
-
-```
-keystore.properties
-*.keystore
-*.jks
-```
+- `storeFile` may be a bare filename (resolved against the `android/` folder) or an absolute path like `C:\keys\siloshop-upload.keystore`.
+- `.gitignore` already excludes `keystore.properties`, `*.keystore` and `*.jks`, so these are never committed.
 
 ## 3. Wire the signing config into Gradle
 

@@ -10,7 +10,13 @@ android {
     signingConfigs {
         release {
             if (keystorePropsFile.exists()) {
-                storeFile file(keystoreProps['storeFile'])
+                // Relative storeFile paths resolve against the android/ folder,
+                // where keystore.properties lives. Absolute paths are used as-is.
+                def storeFilePath = keystoreProps['storeFile']
+                def storeFileResolved = new File(storeFilePath).isAbsolute()
+                        ? new File(storeFilePath)
+                        : new File(rootProject.projectDir, storeFilePath)
+                storeFile storeFileResolved
                 storePassword keystoreProps['storePassword']
                 keyAlias keystoreProps['keyAlias']
                 keyPassword keystoreProps['keyPassword']

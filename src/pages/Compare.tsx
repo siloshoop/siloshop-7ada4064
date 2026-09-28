@@ -332,8 +332,14 @@ const Compare = () => {
   };
 
 
+  const getShareUrl = () => {
+    const urlIds = searchParams.get("products")?.split(",").filter(Boolean) || [];
+    const ids = products.length ? products.map((p) => p.id) : urlIds;
+    return buildCompareShareUrl(ids);
+  };
+
   const handleCopyLink = async () => {
-    const url = window.location.href;
+    const url = getShareUrl();
     try {
       await navigator.clipboard.writeText(url);
       toast({
@@ -349,7 +355,6 @@ const Compare = () => {
     }
   };
 
-  const getShareUrl = () => window.location.href;
   const getShareText = () => `مقارنة بين ${products.length} منتجات`;
 
   const handleShareWhatsApp = () => {

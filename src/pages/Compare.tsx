@@ -1,3 +1,4 @@
+import { buildCompareShareUrl } from "@/lib/shareUrl";
 import { useEffect, useState, useRef } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";

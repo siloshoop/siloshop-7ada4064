@@ -43,7 +43,7 @@ const remainingFrom = (at: number | null) => {
 
 const VerifyEmail = () => {
   const [params] = useSearchParams();
-  const emailParam = params.get("email") || "";
+  const emailParam = params.get("email") || getPendingVerifyEmail();
   const justSignedUp = params.get("sent") === "1";
   const [email, setEmail] = useState(emailParam);
   const [code, setCode] = useState("");
@@ -207,6 +207,8 @@ const VerifyEmail = () => {
         } catch {
           /* best-effort */
         }
+        clearSignUpDraft();
+        setLastEmail(email);
         const { data: app } = await supabase
           .from("seller_applications")
           .select("status")
@@ -214,6 +216,7 @@ const VerifyEmail = () => {
           .maybeSingle();
         if (app) { navigate("/seller/application"); return; }
       }
+      clearSignUpDraft();
       navigate("/");
     } catch (err) {
       const msg = (err as Error)?.message || "";

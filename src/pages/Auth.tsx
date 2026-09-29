@@ -9,6 +9,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { signIn, signUp } from "@/lib/auth";
+import { readSignUpDraft, saveSignUpDraft, readSignUpSecret, saveSignUpSecret, getLastEmail, setLastEmail, setPendingVerifyEmail } from "@/lib/authDrafts";
 import { supabase } from "@/integrations/supabase/client";
 import { logActivity } from "@/hooks/useActivityLog";
 import { Eye, EyeOff, Loader2, ShoppingBag } from "lucide-react";
@@ -94,7 +95,7 @@ const Auth = () => {
     : "/";
 
   // Sign In State
-  const [signInEmail, setSignInEmail] = useState("");
+  const [signInEmail, setSignInEmail] = useState(() => getLastEmail());
   const [signInPassword, setSignInPassword] = useState("");
   const [signInErrors, setSignInErrors] = useState<{ email?: string; password?: string }>({});
   const [failedAttempts, setFailedAttempts] = useState(0);
@@ -127,13 +128,22 @@ const Auth = () => {
 
 
   // Sign Up State
-  const [signUpEmail, setSignUpEmail] = useState("");
-  const [signUpPassword, setSignUpPassword] = useState("");
-  const [signUpFullName, setSignUpFullName] = useState("");
-  const [phoneCountry, setPhoneCountry] = useState(DEFAULT_COUNTRY);
-  const [phoneLocal, setPhoneLocal] = useState("");
-  const [signUpConfirmPassword, setSignUpConfirmPassword] = useState("");
-  const [acceptTerms, setAcceptTerms] = useState(false);
+  const [draft] = useState(() => readSignUpDraft());
+  const [secret] = useState(() => readSignUpSecret());
+  const [signUpEmail, setSignUpEmail] = useState(draft.email ?? "");
+  const [signUpPassword, setSignUpPassword] = useState(secret.password ?? "");
+  const [signUpFullName, setSignUpFullName] = useState(draft.fullName ?? "");
+  const [phoneCountry, setPhoneCountry] = useState(draft.phoneCountry ?? DEFAULT_COUNTRY);
+  const [phoneLocal, setPhoneLocal] = useState(draft.phoneLocal ?? "");
+  const [signUpConfirmPassword, setSignUpConfirmPassword] = useState(secret.confirm ?? "");
+  const [acceptTerms, setAcceptTerms] = useState(draft.acceptTerms ?? false);
+
+  useEffect(() => {
+    saveSignUpDraft({ fullName: signUpFullName, email: signUpEmail, phoneCountry, phoneLocal, acceptTerms });
+  }, [signUpFullName, signUpEmail, phoneCountry, phoneLocal, acceptTerms]);
+  useEffect(() => {
+    saveSignUpSecret(signUpPassword, signUpConfirmPassword);
+  }, [signUpPassword, signUpConfirmPassword]);
   const [signUpErrors, setSignUpErrors] = useState<{ fullName?: string; email?: string; phone?: string; password?: string; confirmPassword?: string; acceptTerms?: string }>({});
 
   const handleSignIn = async (e: React.FormEvent) => {
@@ -237,6 +247,7 @@ const Auth = () => {
         description: "مرحباً بعودتك!",
       });
 
+      setLastEmail(signInEmail);
       navigate(returnTo, { replace: true });
     } catch (error) {
       const rawMsg = (error as Error)?.message || "";
@@ -350,6 +361,8 @@ const Auth = () => {
         description: "أدخل رمز التحقق المرسل إلى بريدك لتفعيل حسابك",
       });
 
+      setPendingVerifyEmail(signUpEmail);
+      setLastEmail(signUpEmail);
       navigate(`/verify-email?email=${encodeURIComponent(signUpEmail)}&sent=1`);
     } catch (error) {
       const rawMsg = (error as Error)?.message || "";

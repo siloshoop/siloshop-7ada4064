@@ -2,6 +2,7 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useState, t
 import type { User, Session } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { setLastEmail } from "@/lib/authDrafts";
 
 interface AuthState {
   user: User | null;
@@ -44,6 +45,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const signOut = useCallback(async () => {
     try {
+      // Remember the email on this device so the next sign-in only needs the password.
+      const { data: { session: current } } = await supabase.auth.getSession();
+      if (current?.user?.email) setLastEmail(current.user.email);
       const { error } = await supabase.auth.signOut();
       if (error) throw error;
       

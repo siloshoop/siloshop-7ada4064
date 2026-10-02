@@ -372,9 +372,9 @@ const Product = () => {
         jsonLd={jsonLd}
       />
       <Navbar />
-      <main className="flex-1 container max-w-6xl px-4 py-6 md:py-8">
-        <NativeAdBanner placement="product" className="mb-8 !px-0" />
-        <div className="grid lg:grid-cols-[minmax(0,1.05fr)_minmax(0,1fr)] gap-6 lg:gap-10 animate-fade-in">
+      <main className="container max-w-6xl min-w-0 flex-1 px-3 py-4 sm:px-4 sm:py-6 md:py-8">
+        <NativeAdBanner placement="product" className="mb-5 !px-0 sm:mb-8" />
+        <div className="grid min-w-0 gap-5 animate-fade-in sm:gap-6 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,1fr)] lg:gap-10">
           {/* Image Gallery */}
           <div className="relative">
             {discount > 0 && (
@@ -392,7 +392,7 @@ const Product = () => {
           </div>
 
           {/* Details */}
-          <div className="space-y-5">
+          <div className="min-w-0 space-y-4 sm:space-y-5">
             {/* Title + seller */}
             <div className="space-y-1.5">
               <button
@@ -453,7 +453,7 @@ const Product = () => {
             {/* Price */}
             <div className="space-y-1.5">
               <div className="flex items-baseline gap-2 flex-wrap">
-                <span className="text-3xl font-bold text-primary">
+                <span className="text-2xl font-bold text-primary sm:text-3xl">
                   {effectivePrice.toLocaleString()}
                 </span>
                 <span className="text-sm text-foreground/70">{currencySymbol((product as any).currency)}</span>
@@ -516,7 +516,7 @@ const Product = () => {
 
             {/* Variant picker */}
             {hasVariants && (
-              <div className="rounded-xl border bg-muted/20 p-4">
+              <div className="min-w-0 rounded-xl border bg-muted/20 p-3 sm:p-4">
                 <ProductVariantPicker variants={variants} onSelect={setSelectedVariant} />
                 {!selectedVariant && (
                   <p className="text-xs text-muted-foreground pt-2">يرجى اختيار اللون والمقاس لعرض السعر والكمية المتوفرة</p>
@@ -611,18 +611,18 @@ const Product = () => {
             </div>
 
             {/* Trust badges */}
-            <div className="grid grid-cols-2 gap-2 pt-2">
-              <div className="flex flex-col items-center text-center gap-1 rounded-xl border bg-muted/30 p-3">
+            <div className="grid min-w-0 grid-cols-2 gap-2 pt-2">
+              <div className="flex min-w-0 flex-col items-center gap-1 rounded-xl border bg-muted/30 p-2.5 text-center sm:p-3">
                 <Truck className="h-4 w-4 text-primary" />
-                <span className="text-[11px] text-muted-foreground leading-tight">
+                <span className="break-words text-[11px] leading-tight text-muted-foreground">
                   {(product as any).ships_within_days
                     ? `يشحن خلال ${(product as any).ships_within_days} أيام`
                     : "شحن لجميع المحافظات"}
                 </span>
               </div>
-              <div className="flex flex-col items-center text-center gap-1 rounded-xl border bg-muted/30 p-3">
+              <div className="flex min-w-0 flex-col items-center gap-1 rounded-xl border bg-muted/30 p-2.5 text-center sm:p-3">
                 <ShieldCheck className="h-4 w-4 text-primary" />
-                <span className="text-[11px] text-muted-foreground leading-tight">
+                <span className="break-words text-[11px] leading-tight text-muted-foreground">
                   دفع آمن عند الاستلام
                 </span>
               </div>

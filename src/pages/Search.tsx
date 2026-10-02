@@ -998,7 +998,7 @@ const SearchPage = () => {
       <Navbar />
       <main className="container flex-1 px-3 py-5 sm:px-4 sm:py-8">
         {/* Search Header */}
-        <div className="mb-6 space-y-4">
+        <div className="mb-5 space-y-3 sm:mb-6 sm:space-y-4">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
             <form className="relative w-full flex-1" onSubmit={(e) => {
               e.preventDefault();
@@ -1012,7 +1012,7 @@ const SearchPage = () => {
                 placeholder="ابحث عن المنتجات..."
                 value={searchInput}
                 onChange={(e) => setSearchInput(e.target.value)}
-                className="pr-10 text-lg h-12"
+                className="h-11 pr-10 text-base sm:h-12 sm:text-lg"
                 enterKeyHint="search"
                 aria-label="البحث عن المنتجات"
               />
@@ -1070,9 +1070,9 @@ const SearchPage = () => {
           </div>
         </div>
 
-        <NativeAdBanner placement="search" className="mb-8 !px-0" />
+        <NativeAdBanner placement="search" className="mb-5 !px-0 sm:mb-8" />
 
-        <div className="flex gap-8">
+        <div className="flex min-w-0 gap-8">
           {/* Desktop Filters Sidebar */}
           <aside className="hidden lg:block w-72 flex-shrink-0">
             <Card className="sticky top-24">

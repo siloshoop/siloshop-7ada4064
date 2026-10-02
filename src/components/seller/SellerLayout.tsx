@@ -63,8 +63,8 @@ interface SellerLayoutProps {
 const SellerLayout = ({ title, description, actions, children }: SellerLayoutProps) => (
   <div className="min-h-screen bg-muted/30" dir="rtl">
     <Navbar />
-    <div className="container mx-auto px-4 py-6">
-      <div className="flex gap-6">
+    <div className="container mx-auto min-w-0 px-3 py-4 sm:px-4 sm:py-6">
+      <div className="flex min-w-0 gap-4 sm:gap-6">
         <aside className="hidden w-64 shrink-0 lg:block">
           <div className="sticky top-24 rounded-xl border bg-card p-4 shadow-sm">
             <div className="mb-4 flex items-center gap-2 rounded-lg bg-primary/10 px-3 py-2">
@@ -78,7 +78,7 @@ const SellerLayout = ({ title, description, actions, children }: SellerLayoutPro
         </aside>
 
         <main className="min-w-0 flex-1">
-          <header className="mb-6 flex flex-wrap items-center gap-3">
+          <header className="mb-4 flex min-w-0 flex-wrap items-center gap-2.5 sm:mb-6 sm:gap-3">
             <Sheet>
               <SheetTrigger asChild>
                 <Button variant="outline" size="icon" className="lg:hidden" aria-label="فتح قائمة لوحة البائع">
@@ -92,7 +92,7 @@ const SellerLayout = ({ title, description, actions, children }: SellerLayoutPro
               </SheetContent>
             </Sheet>
             <div className="min-w-0 flex-1">
-              <h1 className="truncate text-2xl font-bold">{title}</h1>
+              <h1 className="text-xl font-bold leading-tight sm:text-2xl">{title}</h1>
               {description && <p className="text-sm text-muted-foreground">{description}</p>}
             </div>
             {actions}

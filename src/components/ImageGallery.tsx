@@ -105,10 +105,10 @@ export const ImageGallery = ({ images, productName, videoUrl }: ImageGalleryProp
 
   return (
     <>
-      <div className="flex flex-col-reverse md:flex-row-reverse gap-3 md:gap-4">
+      <div className="flex min-w-0 flex-col-reverse gap-2.5 md:flex-row-reverse md:gap-4">
         {/* Main Image */}
         <div
-          className="relative flex-1 aspect-square bg-muted rounded-2xl overflow-hidden group select-none touch-pan-y"
+          className="group relative aspect-square min-w-0 flex-1 touch-pan-y select-none overflow-hidden rounded-xl bg-muted sm:rounded-2xl"
           onTouchStart={onTouchStart}
           onTouchEnd={onTouchEnd}
           onMouseEnter={() => setIsZooming(true)}
@@ -172,7 +172,7 @@ export const ImageGallery = ({ images, productName, videoUrl }: ImageGalleryProp
                 variant="secondary"
                 size="icon"
                 aria-label="الصورة السابقة"
-                className="absolute right-3 top-1/2 h-10 w-10 -translate-y-1/2 rounded-full opacity-100 transition-opacity backdrop-blur sm:opacity-0 sm:group-hover:opacity-100"
+                className="absolute right-2 top-1/2 h-9 w-9 -translate-y-1/2 rounded-full opacity-100 transition-opacity backdrop-blur sm:right-3 sm:h-10 sm:w-10 sm:opacity-0 sm:group-hover:opacity-100"
                 onClick={goToPrevious}
               >
                 <ChevronRight className="h-5 w-5" />
@@ -181,7 +181,7 @@ export const ImageGallery = ({ images, productName, videoUrl }: ImageGalleryProp
                 variant="secondary"
                 size="icon"
                 aria-label="الصورة التالية"
-                className="absolute left-3 top-1/2 h-10 w-10 -translate-y-1/2 rounded-full opacity-100 transition-opacity backdrop-blur sm:opacity-0 sm:group-hover:opacity-100"
+                className="absolute left-2 top-1/2 h-9 w-9 -translate-y-1/2 rounded-full opacity-100 transition-opacity backdrop-blur sm:left-3 sm:h-10 sm:w-10 sm:opacity-0 sm:group-hover:opacity-100"
                 onClick={goToNext}
               >
                 <ChevronLeft className="h-5 w-5" />
@@ -256,7 +256,7 @@ export const ImageGallery = ({ images, productName, videoUrl }: ImageGalleryProp
 
       {/* Lightbox */}
       <Dialog open={isLightboxOpen} onOpenChange={setIsLightboxOpen}>
-        <DialogContent className="max-w-7xl w-[95vw] h-[92vh] p-0 overflow-hidden">
+        <DialogContent className="h-[min(92dvh,calc(100dvh-1rem))] w-[calc(100vw-1rem)] max-w-7xl overflow-hidden p-0 sm:w-[95vw]">
           <Lightbox
             images={images}
             productName={productName}

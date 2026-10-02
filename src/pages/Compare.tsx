@@ -84,6 +84,10 @@ interface SavedComparison {
   created_at: string;
 }
 
+type ComparisonGridStyle = React.CSSProperties & {
+  "--comparison-count": number;
+};
+
 const Compare = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [products, setProducts] = useState<Product[]>([]);
@@ -599,22 +603,22 @@ const Compare = () => {
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
-      <main className="flex-1 container px-4 py-8">
-        <div className="mb-8 flex items-center justify-between flex-wrap gap-4">
-          <div className="flex items-center gap-3">
-            <Scale className="h-8 w-8 text-primary" />
-            <div>
-              <h1 className="text-3xl font-bold">مقارنة المنتجات</h1>
-              <p className="text-muted-foreground">
+      <main className="container min-w-0 flex-1 px-3 py-5 sm:px-4 sm:py-8">
+        <div className="mb-5 flex min-w-0 flex-wrap items-center justify-between gap-3 sm:mb-8 sm:gap-4">
+          <div className="flex min-w-0 items-center gap-2 sm:gap-3">
+            <Scale className="h-6 w-6 shrink-0 text-primary sm:h-8 sm:w-8" />
+            <div className="min-w-0">
+              <h1 className="text-2xl font-bold leading-tight sm:text-3xl">مقارنة المنتجات</h1>
+              <p className="text-sm text-muted-foreground sm:text-base">
                 قارن بين {products.length} منتجات جنباً إلى جنب
               </p>
             </div>
           </div>
-          <div className="flex gap-2 flex-wrap">
+          <div className="grid w-full grid-cols-2 gap-2 min-[390px]:w-auto min-[390px]:grid-cols-3 sm:flex sm:flex-wrap">
             {/* Save Comparison Button */}
             <Dialog open={saveDialogOpen} onOpenChange={setSaveDialogOpen}>
               <DialogTrigger asChild>
-                <Button variant="outline">
+                <Button variant="outline" className="w-full px-2 text-xs sm:w-auto sm:px-4 sm:text-sm">
                   <Bookmark className="h-4 w-4 ml-2" />
                   حفظ المقارنة
                 </Button>
@@ -645,7 +649,7 @@ const Compare = () => {
             {/* Load Saved Comparisons Button */}
             <Dialog open={savedDialogOpen} onOpenChange={setSavedDialogOpen}>
               <DialogTrigger asChild>
-                <Button variant="outline">
+                <Button variant="outline" className="w-full px-2 text-xs sm:w-auto sm:px-4 sm:text-sm">
                   <FolderOpen className="h-4 w-4 ml-2" />
                   المقارنات المحفوظة
                   {savedComparisons.length > 0 && (
@@ -701,7 +705,7 @@ const Compare = () => {
             {/* Export Dropdown */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="outline" disabled={exporting}>
+                <Button variant="outline" disabled={exporting} className="w-full px-2 text-xs sm:w-auto sm:px-4 sm:text-sm">
                   {exporting ? (
                     <Loader2 className="h-4 w-4 ml-2 animate-spin" />
                   ) : (
@@ -724,7 +728,7 @@ const Compare = () => {
 
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="outline">
+                <Button variant="outline" className="w-full px-2 text-xs sm:w-auto sm:px-4 sm:text-sm">
                   <Share2 className="h-4 w-4 ml-2" />
                   مشاركة المقارنة
                 </Button>
@@ -756,7 +760,7 @@ const Compare = () => {
             </DropdownMenu>
             <AlertDialog>
               <AlertDialogTrigger asChild>
-                <Button variant="destructive">
+                <Button variant="destructive" className="w-full px-2 text-xs sm:w-auto sm:px-4 sm:text-sm">
                   <Trash2 className="h-4 w-4 ml-2" />
                   مسح الكل
                 </Button>
@@ -779,14 +783,22 @@ const Compare = () => {
           </div>
         </div>
 
-        <div className="overflow-x-auto">
-          <div className="min-w-max" ref={comparisonRef}>
+        <div
+          className="comparison-scroll max-w-full overflow-x-auto overscroll-x-contain pb-2"
+          data-testid="comparison-scroll"
+          tabIndex={0}
+          aria-label="جدول مقارنة المنتجات، مرّر أفقياً لعرض جميع المنتجات"
+        >
+          <div
+            className="w-max min-w-full"
+            ref={comparisonRef}
+            style={{ "--comparison-count": products.length } as ComparisonGridStyle}
+          >
             {/* Product Images and Names Header */}
             <div 
-              className="grid gap-4 mb-6" 
-              style={{ gridTemplateColumns: `200px repeat(${products.length}, minmax(250px, 1fr))` }}
+              className="comparison-grid mb-4 grid gap-2 sm:mb-6 sm:gap-4"
             >
-              <div></div>
+              <div aria-hidden="true" />
               {products.map((product) => (
                 <Card key={product.id} className="relative overflow-hidden">
                   <Button
@@ -798,7 +810,7 @@ const Compare = () => {
                     <X className="h-4 w-4" />
                   </Button>
                   
-                  <div className="relative h-48 sm:h-56 md:h-64 w-full overflow-hidden bg-muted/30">
+                  <div className="relative h-36 w-full overflow-hidden bg-muted/30 sm:h-56 md:h-64">
                     {product.original_price && (
                       <Badge className="absolute top-2 right-2 z-10 bg-red-500">
                         خصم {calculateDiscount(product.original_price, product.price)}%
@@ -816,17 +828,17 @@ const Compare = () => {
                     />
                   </div>
 
-                  <CardContent className="p-4 space-y-3">
+                  <CardContent className="space-y-2 p-2.5 sm:space-y-3 sm:p-4">
                     <h3 
-                      className="font-bold text-lg line-clamp-2 cursor-pointer hover:text-primary transition-colors"
+                      className="line-clamp-2 min-h-10 cursor-pointer text-sm font-bold leading-snug transition-colors hover:text-primary sm:text-lg"
                       onClick={() => navigate(`/product/${product.id}`)}
                     >
                       {product.name}
                     </h3>
                     
-                    <div className="flex gap-2">
+                    <div className="flex min-w-0 gap-1.5 sm:gap-2">
                       <Button 
-                        className="flex-1"
+                        className="min-w-0 flex-1 px-2 text-xs sm:px-3 sm:text-sm"
                         size="sm"
                         onClick={() => addToCart(product.id)}
                         disabled={addingToCart === product.id || (product.stock_quantity || 0) === 0}
@@ -853,10 +865,9 @@ const Compare = () => {
                 {comparisonRows.map((row, index) => (
                   <div key={row.label}>
                     <div 
-                      className={`grid gap-4 p-4 items-center ${index % 2 === 0 ? "bg-muted/30" : ""}`}
-                      style={{ gridTemplateColumns: `200px repeat(${products.length}, minmax(250px, 1fr))` }}
+                      className={`comparison-grid grid items-center gap-2 p-2.5 text-xs sm:gap-4 sm:p-4 sm:text-sm ${index % 2 === 0 ? "bg-muted/30" : ""}`}
                     >
-                      <div className="flex items-center gap-2 font-medium text-muted-foreground">
+                      <div className="sticky end-0 z-10 flex min-w-0 items-center gap-1.5 bg-card py-1 font-medium text-muted-foreground sm:gap-2">
                         {row.icon}
                         <span>{row.label}</span>
                       </div>
@@ -873,10 +884,9 @@ const Compare = () => {
                 {/* Description Row */}
                 <Separator />
                 <div 
-                  className="grid gap-4 p-4"
-                  style={{ gridTemplateColumns: `200px repeat(${products.length}, minmax(250px, 1fr))` }}
+                  className="comparison-grid grid gap-2 p-2.5 text-xs sm:gap-4 sm:p-4 sm:text-sm"
                 >
-                  <div className="flex items-start gap-2 font-medium text-muted-foreground pt-1">
+                  <div className="sticky end-0 z-10 flex min-w-0 items-start gap-1.5 bg-card pt-1 font-medium text-muted-foreground sm:gap-2">
                     <Minus className="h-5 w-5" />
                     <span>الوصف</span>
                   </div>

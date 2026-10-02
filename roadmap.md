@@ -86,3 +86,9 @@
 - [x] Apply safe shared wrapping and shrinking rules to Arabic text and interactive controls without visual redesign
 - [x] Audit representative public, buyer, seller, and admin screens at narrow Android widths
 - [x] Run automated tests and verify corrected screens visually
+
+## Android responsive density and comparison repair
+
+- [ ] Contain and compact the comparison matrix at 360–412px without page-level cropping
+- [ ] Compact shared mobile cards, controls, overlays, search, product details, and seller layouts
+- [ ] Verify portrait and landscape Android viewports, existing tests, and production build status

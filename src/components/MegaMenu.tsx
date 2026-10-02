@@ -88,7 +88,7 @@ const MegaMenu = () => {
                 <span className="text-xs font-medium">{category.name_ar}</span>
               </NavigationMenuTrigger>
               <NavigationMenuContent>
-                <div className="grid gap-3 p-4 w-[500px] lg:w-[650px] grid-cols-[1fr_200px]">
+                <div className="grid w-[min(500px,calc(100vw-2rem))] grid-cols-[minmax(0,1fr)_minmax(140px,200px)] gap-3 p-4 lg:w-[650px]">
                   {/* Subcategories List */}
                   <div className="space-y-3">
                     <div className="flex items-center justify-between border-b pb-2">

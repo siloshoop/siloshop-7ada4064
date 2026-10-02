@@ -77,7 +77,7 @@ const Navbar = () => {
     <header className="safe-area-top sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex min-w-0 flex-wrap items-center gap-2 px-3 py-2 sm:px-4 md:h-16 md:flex-nowrap md:justify-between md:gap-4 md:py-0">
         {/* Right side - Icons */}
-        <div className="order-2 flex w-full min-w-0 items-center justify-between gap-0 md:order-none md:w-auto md:justify-start md:gap-2">
+        <div className="order-2 flex w-full min-w-0 items-center justify-between gap-0 overflow-x-auto scrollbar-hide md:order-none md:w-auto md:justify-start md:gap-2 md:overflow-visible">
           <ThemeToggle />
           <Button 
             variant="ghost" 
@@ -301,7 +301,7 @@ const Navbar = () => {
           <BrandLogo
             as="h1"
             onClick={() => navigate("/")}
-            className="max-w-[160px] text-xl sm:text-2xl md:max-w-none md:text-3xl"
+            className="max-w-[150px] text-lg min-[390px]:text-xl sm:max-w-[160px] sm:text-2xl md:max-w-none md:text-3xl"
           />
         </div>
       </div>

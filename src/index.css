@@ -250,6 +250,11 @@ All colors MUST be HSL.
       repeat(var(--comparison-count), minmax(9.75rem, 42vw));
   }
 
+  .comparison-products-grid {
+    grid-template-columns:
+      repeat(var(--comparison-count), minmax(9.75rem, 1fr));
+  }
+
   /* Hide scrollbars globally for horizontal scroll containers */
   .scrollbar-hide {
     -ms-overflow-style: none;
@@ -266,12 +271,24 @@ All colors MUST be HSL.
       10rem
       repeat(var(--comparison-count), minmax(13.75rem, 1fr));
   }
+
+
+  .comparison-products-grid {
+    grid-template-columns:
+      repeat(var(--comparison-count), minmax(13.75rem, 1fr));
+  }
 }
 
 @media (min-width: 1024px) {
   .comparison-grid {
     grid-template-columns:
       12.5rem
+      repeat(var(--comparison-count), minmax(15.625rem, 1fr));
+  }
+
+
+  .comparison-products-grid {
+    grid-template-columns:
       repeat(var(--comparison-count), minmax(15.625rem, 1fr));
   }
 }

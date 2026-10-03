@@ -89,6 +89,6 @@
 
 ## Android responsive density and comparison repair
 
-- [ ] Contain and compact the comparison matrix at 360–412px without page-level cropping
-- [ ] Compact shared mobile cards, controls, overlays, search, product details, and seller layouts
-- [ ] Verify portrait and landscape Android viewports, existing tests, and production build status
+- [x] Contain and compact the comparison matrix at 360–412px without page-level cropping
+- [x] Compact shared mobile cards, controls, overlays, search, product details, and seller layouts
+- [x] Verify portrait and landscape Android viewports, existing tests, and production build status

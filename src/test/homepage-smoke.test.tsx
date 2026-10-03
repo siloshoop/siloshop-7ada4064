@@ -20,6 +20,7 @@ const createChainableMock = () => {
   chain.like = chain;
   chain.ilike = chain;
   chain.is = chain;
+  chain.or = chain;
   chain.in = chain;
   chain.order = chain;
   chain.limit = chain;
@@ -37,6 +38,7 @@ vi.mock("@/integrations/supabase/client", () => ({
     rpc: () => Promise.resolve({ data: null, error: null }),
     auth: {
       getSession: () => Promise.resolve({ data: { session: null }, error: null }),
+      getUser: () => Promise.resolve({ data: { user: null }, error: null }),
       onAuthStateChange: () => ({ data: { subscription: { unsubscribe: () => {} } } }),
     },
     channel: () => ({

@@ -614,7 +614,7 @@ const Compare = () => {
               </p>
             </div>
           </div>
-          <div className="grid w-full grid-cols-2 gap-2 min-[390px]:w-auto min-[390px]:grid-cols-3 sm:flex sm:flex-wrap">
+          <div className="grid w-full grid-cols-2 gap-2 sm:flex sm:w-auto sm:flex-wrap">
             {/* Save Comparison Button */}
             <Dialog open={saveDialogOpen} onOpenChange={setSaveDialogOpen}>
               <DialogTrigger asChild>
@@ -796,9 +796,8 @@ const Compare = () => {
           >
             {/* Product Images and Names Header */}
             <div 
-              className="comparison-grid mb-4 grid gap-2 sm:mb-6 sm:gap-4"
+              className="comparison-products-grid mb-4 grid gap-2 sm:mb-6 sm:gap-4"
             >
-              <div aria-hidden="true" />
               {products.map((product) => (
                 <Card key={product.id} className="relative overflow-hidden">
                   <Button

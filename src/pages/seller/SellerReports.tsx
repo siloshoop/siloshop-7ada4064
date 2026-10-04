@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { exportFile, exportSuccessMessage, recordsToCsv } from "@/lib/exportFile";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
@@ -25,21 +26,6 @@ const RANGES = [
   { key: "all", label: "الكل" },
 ];
 
-const toCsv = (rows: Record<string, string | number>[]) => {
-  if (!rows.length) return "";
-  const headers = Object.keys(rows[0]);
-  const escape = (v: unknown) => `"${String(v ?? "").replace(/"/g, '""')}"`;
-  return "\uFEFF" + [headers.join(","), ...rows.map((r) => headers.map((h) => escape(r[h])).join(","))].join("\n");
-};
-
-const download = (name: string, content: string) => {
-  const url = URL.createObjectURL(new Blob([content], { type: "text/csv;charset=utf-8" }));
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = name;
-  a.click();
-  URL.revokeObjectURL(url);
-};
 
 const SellerReports = () => {
   const { user } = useAuth();
@@ -48,6 +34,15 @@ const SellerReports = () => {
   const [products, setProducts] = useState<{ name: string; price: number; stock_quantity: number | null; moderation_status: string | null }[]>([]);
   const [loading, setLoading] = useState(true);
   const [range, setRange] = useState("30");
+  const download = async (name: string, rows: Record<string, unknown>[]) => {
+    try {
+      if (!rows.length) throw new Error("لا توجد بيانات للتصدير في هذه الفترة");
+      const r = await exportFile(recordsToCsv(rows), name);
+      if (r !== "cancelled") toast({ title: exportSuccessMessage(r), description: `${rows.length} سجل` });
+    } catch (e) {
+      toast({ title: "تعذر التصدير", description: e instanceof Error ? e.message : String(e), variant: "destructive" });
+    }
+  };
 
   useEffect(() => {
     if (!user) return;
@@ -99,7 +94,7 @@ const SellerReports = () => {
             onClick={() =>
               download(
                 `orders-${range}.csv`,
-                toCsv(scoped.map((o) => ({
+                (scoped.map((o) => ({
                   رقم_الطلب: o.id,
                   التاريخ: new Date(o.created_at).toLocaleDateString("ar-SY"),
                   الحالة: o.status,
@@ -117,7 +112,7 @@ const SellerReports = () => {
             onClick={() =>
               download(
                 "products.csv",
-                toCsv(products.map((p) => ({
+                (products.map((p) => ({
                   المنتج: p.name,
                   السعر: Number(p.price || 0),
                   المخزون: p.stock_quantity ?? 0,

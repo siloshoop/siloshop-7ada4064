@@ -94,10 +94,10 @@ const CSV_TEMPLATE_ROW: Record<ProductCsvColumn, string> = {
 const SellerProducts = () => {
   const { user } = useAuth();
   const { toast } = useToast();
-  const runExport = async (csv: string, name: string) => {
+  const runExport = async (csv: string, name: string, detail?: string) => {
     try {
       const r = await exportFile(csv, name);
-      if (r !== "cancelled") toast({ title: exportSuccessMessage(r), description: name });
+      if (r !== "cancelled") toast({ title: exportSuccessMessage(r), description: detail ?? name });
     } catch (e) {
       toast({ title: "تعذر التصدير", description: e instanceof Error ? e.message : String(e), variant: "destructive" });
     }
@@ -274,8 +274,7 @@ const SellerProducts = () => {
       return;
     }
     const csv = buildProductsCsv((data as any[]) ?? []);
-    void runExport(csv, `products-${new Date().toISOString().slice(0, 10)}.csv`);
-    toast({ title: `تم تصدير ${(data ?? []).length} منتج` });
+    await runExport(csv, `products-${new Date().toISOString().slice(0, 10)}.csv`, `تم تصدير ${(data ?? []).length} منتج`);
   };
 
   const downloadTemplate = () => {

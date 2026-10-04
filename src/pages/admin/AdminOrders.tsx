@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { exportFile, exportSuccessMessage } from "@/lib/exportFile";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -256,12 +257,9 @@ const AdminOrders = () => {
           return /[",\n]/.test(str) ? `"${str}"` : str;
         }).join(",")),
       ].join("\n");
-      const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8" });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url; a.download = `orders-${new Date().toISOString().slice(0, 10)}.csv`;
-      a.click();
-      URL.revokeObjectURL(url);
+      if (!all.length) throw new Error("لا توجد طلبات مطابقة للتصدير");
+      const r = await exportFile("\uFEFF" + csv, `orders-${new Date().toISOString().slice(0, 10)}.csv`);
+      if (r !== "cancelled") toast({ title: exportSuccessMessage(r), description: `${all.length} طلب` });
     } catch (e) {
       toast({ title: "تعذر تصدير الطلبات", description: friendlyOrderError(e), variant: "destructive" });
     } finally {

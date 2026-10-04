@@ -1,4 +1,6 @@
 import { Button } from "@/components/ui/button";
+import { useToast } from "@/hooks/use-toast";
+import { exportSuccessMessage, printOrExportHtml } from "@/lib/exportFile";
 import { Printer, Tag } from "lucide-react";
 import { formatPrice, normalizeCurrency } from "@/lib/currency";
 
@@ -146,20 +148,27 @@ const buildHtml = (order: PrintOrderData, mode: "invoice" | "label") => {
   </body></html>`;
 };
 
-const openPrint = (order: PrintOrderData, mode: "invoice" | "label") => {
-  const w = window.open("", "_blank", "width=900,height=700");
-  if (!w) return;
-  w.document.open();
-  w.document.write(buildHtml(order, mode));
-  w.document.close();
-};
+export const buildPrintHtml = buildHtml;
 
 interface Props {
   order: PrintOrderData;
 }
 
 /** Seller-facing print actions: A4 invoice and a shipping label (PII-minimised). */
-const PrintOrderDocs = ({ order }: Props) => (
+const PrintOrderDocs = ({ order }: Props) => {
+  const { toast } = useToast();
+  const openPrint = async (o: PrintOrderData, mode: "invoice" | "label") => {
+    try {
+      const r = await printOrExportHtml(
+        buildHtml(o, mode),
+        `${mode === "invoice" ? "invoice" : "label"}-${o.id.slice(0, 8).toUpperCase()}.html`,
+      );
+      if (r !== "cancelled") toast({ title: exportSuccessMessage(r) });
+    } catch (e) {
+      toast({ title: "تعذر تجهيز المستند", description: e instanceof Error ? e.message : String(e), variant: "destructive" });
+    }
+  };
+  return (
   <>
     <Button variant="outline" size="sm" className="gap-2" onClick={() => openPrint(order, "invoice")}>
       <Printer className="h-4 w-4" /> طباعة الفاتورة
@@ -168,6 +177,7 @@ const PrintOrderDocs = ({ order }: Props) => (
       <Tag className="h-4 w-4" /> بطاقة الشحن
     </Button>
   </>
-);
+  );
+};
 
 export default PrintOrderDocs;

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { exportSuccessMessage, printOrExportHtml } from "@/lib/exportFile";
 import { Button } from "@/components/ui/button";
 import { Download, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -68,17 +69,6 @@ const CustomerInvoice = ({ orderId }: Props) => {
         .eq("order_id", orderId);
 
       if (itemsError) throw itemsError;
-
-      const w = window.open("", "_blank", "width=900,height=700");
-      if (!w) {
-        toast({
-          title: "تعذر فتح نافذة الطباعة",
-          description: "يرجى السماح بالنوافذ المنبثقة والمحاولة مجددًا",
-          variant: "destructive",
-        });
-        setLoading(false);
-        return;
-      }
 
       const orderNumber = (order as any).order_number || `#${order.id.slice(0, 8).toUpperCase()}`;
       const invoiceNumber = (order as any).invoice_number || orderNumber;
@@ -155,9 +145,8 @@ const CustomerInvoice = ({ orderId }: Props) => {
         <script>window.onload = function(){ window.focus(); window.print(); };</script>
       </body></html>`;
 
-      w.document.open();
-      w.document.write(html);
-      w.document.close();
+      const r = await printOrExportHtml(html, `invoice-${String(invoiceNumber).replace(/^#/, "")}.html`);
+      if (r !== "cancelled") toast({ title: exportSuccessMessage(r) });
     } catch (error: any) {
       console.error("Invoice load error:", error);
       toast({

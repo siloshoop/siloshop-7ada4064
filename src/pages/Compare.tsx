@@ -1,3 +1,5 @@
+import { copyText, openSocialShare } from "@/lib/share";
+import { canvasToBlob, exportFile } from "@/lib/exportFile";
 import { buildCompareShareUrl } from "@/lib/shareUrl";
 import { useEffect, useState, useRef } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
@@ -118,14 +120,12 @@ const Compare = () => {
         allowTaint: true,
       });
       
-      const link = document.createElement("a");
-      link.download = `comparison-${Date.now()}.png`;
-      link.href = canvas.toDataURL("image/png");
-      link.click();
-      
+      const blob = await canvasToBlob(canvas);
+      const result = await exportFile(blob, `comparison-${Date.now()}.png`, "image/png");
+      if (result === "cancelled") return;
       toast({
         title: "تم التصدير",
-        description: "تم تصدير المقارنة كصورة بنجاح",
+        description: result === "shared" ? "تم تجهيز صورة المقارنة ومشاركتها" : "تم تصدير المقارنة كصورة بنجاح",
       });
     } catch (error) {
       toast({
@@ -345,13 +345,12 @@ const Compare = () => {
 
   const handleCopyLink = async () => {
     const url = getShareUrl();
-    try {
-      await navigator.clipboard.writeText(url);
+    if (await copyText(url)) {
       toast({
         title: "تم النسخ",
         description: "تم نسخ رابط المقارنة إلى الحافظة",
       });
-    } catch {
+    } else {
       toast({
         title: "خطأ",
         description: "فشل نسخ الرابط",
@@ -362,22 +361,11 @@ const Compare = () => {
 
   const getShareText = () => `مقارنة بين ${products.length} منتجات`;
 
-  const handleShareWhatsApp = () => {
-    const url = encodeURIComponent(getShareUrl());
-    const text = encodeURIComponent(getShareText());
-    window.open(`https://wa.me/?text=${text}%20${url}`, "_blank");
-  };
+  const handleShareWhatsApp = () => openSocialShare("whatsapp", getShareUrl(), getShareText());
 
-  const handleShareTwitter = () => {
-    const url = encodeURIComponent(getShareUrl());
-    const text = encodeURIComponent(getShareText());
-    window.open(`https://twitter.com/intent/tweet?text=${text}&url=${url}`, "_blank");
-  };
+  const handleShareTwitter = () => openSocialShare("twitter", getShareUrl(), getShareText());
 
-  const handleShareFacebook = () => {
-    const url = encodeURIComponent(getShareUrl());
-    window.open(`https://www.facebook.com/sharer/sharer.php?u=${url}`, "_blank");
-  };
+  const handleShareFacebook = () => openSocialShare("facebook", getShareUrl());
 
   const addToCart = async (productId: string) => {
     if (!user) {

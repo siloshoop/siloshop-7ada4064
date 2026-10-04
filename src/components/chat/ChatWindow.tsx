@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { copyText } from "@/lib/share";
 import { Link } from "react-router-dom";
 import { formatDistanceToNow } from "date-fns";
 import { ar } from "date-fns/locale";
@@ -82,12 +83,8 @@ const ChatWindow = ({
     : thread.messages;
 
   const copy = async (text: string) => {
-    try {
-      await navigator.clipboard.writeText(text);
-      toast({ title: "تم نسخ الرسالة" });
-    } catch {
-      toast({ title: "تعذر النسخ", variant: "destructive" });
-    }
+    if (await copyText(text)) toast({ title: "تم نسخ الرسالة" });
+    else toast({ title: "تعذر النسخ", variant: "destructive" });
   };
 
   const toggleArchive = async () => {

@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { shareContent } from "@/lib/share";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
@@ -191,13 +192,10 @@ const Wishlist = () => {
     }
   };
 
-  const copyShareLink = (shareToken: string) => {
-    const link = `${window.location.origin}/wishlist/shared/${shareToken}`;
-    navigator.clipboard.writeText(link);
-    toast({
-      title: "تم النسخ",
-      description: "تم نسخ رابط المشاركة"
-    });
+  const copyShareLink = async (shareToken: string) => {
+    const result = await shareContent({ title: "قائمة الأمنيات", url: `/wishlist/shared/${shareToken}` });
+    if (result === "copied") toast({ title: "تم النسخ", description: "تم نسخ رابط المشاركة" });
+    else if (result === "failed") toast({ title: "تعذرت المشاركة", description: "تعذر نسخ رابط المشاركة", variant: "destructive" });
   };
 
   const removeItem = async (itemId: string) => {

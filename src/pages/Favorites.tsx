@@ -1,4 +1,5 @@
 import { useEffect, useState, useMemo } from "react";
+import { shareContent } from "@/lib/share";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
@@ -146,18 +147,10 @@ const Favorites = () => {
   };
 
   const shareList = async () => {
-    const url = window.location.href;
     const text = `قائمة مفضلتي (${products.length} منتج) — ${totalValue.toLocaleString()} ل.س`;
-    try {
-      if (navigator.share) {
-        await navigator.share({ title: "مفضلتي", text, url });
-      } else {
-        await navigator.clipboard.writeText(`${text}\n${url}`);
-        toast({ title: "تم النسخ", description: "تم نسخ رابط القائمة" });
-      }
-    } catch {
-      /* user aborted share/copy — ignore */
-    }
+    const result = await shareContent({ title: "مفضلتي", text, url: "/favorites" });
+    if (result === "copied") toast({ title: "تم النسخ", description: "تم نسخ رابط القائمة" });
+    else if (result === "failed") toast({ title: "تعذرت المشاركة", description: "تعذر مشاركة أو نسخ الرابط", variant: "destructive" });
   };
 
   if (authLoading || loading) {

@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { toPublicUrl } from "@/lib/share";
 import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
@@ -330,7 +331,7 @@ const Product = () => {
     navigate("/cart");
   };
 
-  const canonicalUrl = typeof window !== "undefined" ? window.location.href : undefined;
+  const canonicalUrl = typeof window !== "undefined" ? toPublicUrl(window.location.pathname) : undefined;
   const seoTitleRaw = product.seo_title || `${product.name} | Silo Shop`;
   const seoTitle = seoTitleRaw.length > 60 ? seoTitleRaw.slice(0, 57) + "..." : seoTitleRaw;
   const seoDescRaw = product.seo_description || product.short_description || product.description || "";

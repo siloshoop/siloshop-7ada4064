@@ -1,4 +1,5 @@
 import { formatPrice } from "@/lib/currency";
+import { exportFile, exportSuccessMessage } from "@/lib/exportFile";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -89,21 +90,18 @@ const CSV_TEMPLATE_ROW: Record<ProductCsvColumn, string> = {
   seo_description: "",
 };
 
-function downloadBlob(content: string, filename: string, type: string) {
-  const blob = new Blob([content], { type });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = filename;
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
-  URL.revokeObjectURL(url);
-}
 
 const SellerProducts = () => {
   const { user } = useAuth();
   const { toast } = useToast();
+  const runExport = async (csv: string, name: string) => {
+    try {
+      const r = await exportFile(csv, name);
+      if (r !== "cancelled") toast({ title: exportSuccessMessage(r), description: name });
+    } catch (e) {
+      toast({ title: "تعذر التصدير", description: e instanceof Error ? e.message : String(e), variant: "destructive" });
+    }
+  };
   const [rows, setRows] = useState<Row[]>([]);
   const [brands, setBrands] = useState<Brand[]>([]);
   const [loading, setLoading] = useState(true);
@@ -276,13 +274,13 @@ const SellerProducts = () => {
       return;
     }
     const csv = buildProductsCsv((data as any[]) ?? []);
-    downloadBlob(csv, `products-${new Date().toISOString().slice(0, 10)}.csv`, "text/csv;charset=utf-8;");
+    void runExport(csv, `products-${new Date().toISOString().slice(0, 10)}.csv`);
     toast({ title: `تم تصدير ${(data ?? []).length} منتج` });
   };
 
   const downloadTemplate = () => {
     const csv = buildProductsCsv([CSV_TEMPLATE_ROW]);
-    downloadBlob(csv, "products-template.csv", "text/csv;charset=utf-8;");
+    void runExport(csv, "products-template.csv");
   };
 
   const onFileSelected = async (file: File) => {

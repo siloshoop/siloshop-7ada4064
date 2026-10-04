@@ -68,7 +68,8 @@ describe("export utility", () => {
     const r = await exportFile(buildCsv(["h"], [["قيمة"]]), "تقرير الطلبات.csv");
     expect(r).toBe("downloaded");
     expect(click).toHaveBeenCalled();
-    expect(await captured!.text()).toContain("قيمة");
+    const text = await new Promise<string>((res) => { const fr = new FileReader(); fr.onload = () => res(String(fr.result)); fr.readAsText(captured!); });
+    expect(text).toContain("قيمة");
   });
 
   it("refuses empty files instead of reporting success", async () => {

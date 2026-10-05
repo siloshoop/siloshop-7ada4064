@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-const signUp = vi.fn().mockResolvedValue({ data: { user: null, session: null }, error: null });
+const { signUp } = vi.hoisted(() => ({ signUp: vi.fn().mockResolvedValue({ data: { user: null, session: null }, error: null }) }));
 vi.mock("@/integrations/supabase/client", () => ({ supabase: { auth: { signUp } } }));
 import { signUp as doSignUp } from "@/lib/auth";
 import { readFileSync } from "fs";

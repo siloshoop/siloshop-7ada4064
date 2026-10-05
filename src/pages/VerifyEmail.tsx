@@ -9,6 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, MailCheck, CheckCircle2, AlertCircle, Send } from "lucide-react";
 import { checkEmail } from "@/lib/authGuard";
+import { PRODUCTION_ORIGIN } from "@/lib/shareUrl";
 
 const RESEND_COOLDOWN = 60;
 const EXPIRY_SECONDS = 600;

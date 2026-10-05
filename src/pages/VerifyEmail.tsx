@@ -9,6 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, MailCheck, CheckCircle2, AlertCircle, Send } from "lucide-react";
 import { checkEmail } from "@/lib/authGuard";
+import { PRODUCTION_ORIGIN } from "@/lib/shareUrl";
 
 const RESEND_COOLDOWN = 60;
 const EXPIRY_SECONDS = 600;
@@ -99,7 +100,7 @@ const VerifyEmail = () => {
     try {
       setSendState("sending");
       setSendMessage("جاري إرسال رمز التحقق إلى بريدك...");
-      const { error } = await supabase.auth.resend({ type: "signup", email });
+      const { error } = await supabase.auth.resend({ type: "signup", email, options: { emailRedirectTo: `${PRODUCTION_ORIGIN}/` } });
       if (error) throw error;
       setResendCooldown(RESEND_COOLDOWN);
       writeIssuedAt(email, Date.now());

@@ -93,9 +93,22 @@ export const buildSocialShareUrl = (platform: SharePlatform, url: string, text =
 /** Opens a social share URL; in the Android app this hands off to the external app/browser. */
 export const openSocialShare = (platform: SharePlatform, url: string, text = ""): boolean => {
   const href = buildSocialShareUrl(platform, url, text);
-  const w = window.open(href, "_blank", "noopener,noreferrer");
-  if (!w && !Capacitor.isNativePlatform()) {
-    window.location.href = href;
+  const w = window.open(href, "_blank");
+  if (w) {
+    try {
+      w.opener = null;
+    } catch {
+      /* cross-origin — ignore */
+    }
+    return true;
   }
-  return true;
+  // Popup blocked (or WebView without popup support): hand off via a real link click.
+  const a = document.createElement("a");
+  a.href = href;
+  a.target = "_blank";
+  a.rel = "noopener noreferrer";
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  return false;
 };

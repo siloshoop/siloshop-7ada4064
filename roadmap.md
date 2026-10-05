@@ -92,3 +92,6 @@
 - [x] Contain and compact the comparison matrix at 360–412px without page-level cropping
 - [x] Compact shared mobile cards, controls, overlays, search, product details, and seller layouts
 - [x] Verify portrait and landscape Android viewports, existing tests, and production build status
+
+## Share & export centralization
+- [x] Central share (src/lib/share.ts) and export (src/lib/exportFile.ts) utilities; all callers migrated; tests added

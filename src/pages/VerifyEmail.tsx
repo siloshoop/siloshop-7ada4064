@@ -99,7 +99,7 @@ const VerifyEmail = () => {
     try {
       setSendState("sending");
       setSendMessage("جاري إرسال رمز التحقق إلى بريدك...");
-      const { error } = await supabase.auth.resend({ type: "signup", email });
+      const { error } = await supabase.auth.resend({ type: "signup", email, options: { emailRedirectTo: `${PRODUCTION_ORIGIN}/` } });
       if (error) throw error;
       setResendCooldown(RESEND_COOLDOWN);
       writeIssuedAt(email, Date.now());

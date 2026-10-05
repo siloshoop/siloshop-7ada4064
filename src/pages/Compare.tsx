@@ -117,7 +117,6 @@ const Compare = () => {
         backgroundColor: "#ffffff",
         scale: 2,
         useCORS: true,
-        allowTaint: true,
       });
       
       const blob = await canvasToBlob(canvas);
@@ -151,7 +150,6 @@ const Compare = () => {
         backgroundColor: "#ffffff",
         scale: 2,
         useCORS: true,
-        allowTaint: true,
       });
       
       const imgData = canvas.toDataURL("image/png");
@@ -162,11 +160,11 @@ const Compare = () => {
       });
       
       pdf.addImage(imgData, "PNG", 0, 0, canvas.width, canvas.height);
-      pdf.save(`comparison-${Date.now()}.pdf`);
-      
+      const result = await exportFile(pdf.output("blob"), `comparison-${Date.now()}.pdf`, "application/pdf");
+      if (result === "cancelled") return;
       toast({
         title: "تم التصدير",
-        description: "تم تصدير المقارنة كـ PDF بنجاح",
+        description: result === "shared" ? "تم تجهيز ملف PDF ومشاركته" : "تم تصدير المقارنة كـ PDF بنجاح",
       });
     } catch (error) {
       toast({

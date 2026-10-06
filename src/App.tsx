@@ -48,8 +48,6 @@ const Subcategory = lazy(() => import("./pages/Subcategory"));
 const ManageDeals = lazy(() => import("./pages/ManageDeals"));
 const SearchPage = lazy(() => import("./pages/Search"));
 const TurkishProducts = lazy(() => import("./pages/TurkishProducts"));
-const Wishlist = lazy(() => import("./pages/Wishlist"));
-const SharedWishlist = lazy(() => import("./pages/SharedWishlist"));
 const Notifications = lazy(() => import("./pages/Notifications"));
 const NotificationSettings = lazy(() => import("./pages/NotificationSettings"));
 const FollowedBrands = lazy(() => import("./pages/FollowedBrands"));
@@ -266,8 +264,6 @@ const App = () => (
             <Route path="/seller/store" element={<RequireApprovedSeller><SellerStore /></RequireApprovedSeller>} />
             <Route path="/seller/analytics" element={<RequireApprovedSeller><SellerAnalytics /></RequireApprovedSeller>} />
             <Route path="/favorites" element={<Favorites />} />
-            <Route path="/wishlist" element={<Wishlist />} />
-            <Route path="/wishlist/shared/:token" element={<SharedWishlist />} />
             <Route path="/category/:categoryId" element={<Category />} />
             <Route path="/categories" element={<Categories />} />
             <Route path="/subcategory/:categoryId/:subcategoryId" element={<Subcategory />} />

@@ -24,7 +24,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
 import { FavoriteButton } from "@/components/FavoriteButton";
-import AddToWishlistButton from "@/components/AddToWishlistButton";
 import ChatButton from "@/components/ChatButton";
 import { useRecentlyViewed } from "@/hooks/useRecentlyViewed";
 import SimilarProducts from "@/components/SimilarProducts";
@@ -606,7 +605,6 @@ const Product = () => {
                   <ArrowLeftRight className="ml-2 h-4 w-4" />
                   مقارنة
                 </Button>
-                <AddToWishlistButton productId={id!} variant="ghost" />
                 <ChatButton vendorId={product.vendor_id} productId={id} />
               </div>
             </div>

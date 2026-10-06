@@ -148,10 +148,6 @@ const Navbar = () => {
                     <User className="ml-2 h-4 w-4" />
                     <span>الملف الشخصي</span>
                   </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => navigate("/wishlist")}>
-                    <Gift className="ml-2 h-4 w-4" />
-                    <span>قوائم الأمنيات</span>
-                  </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => navigate("/orders")}>
                     <ShoppingCart className="ml-2 h-4 w-4" />
                     <span>طلباتي</span>

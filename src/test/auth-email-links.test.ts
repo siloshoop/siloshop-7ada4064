@@ -2,7 +2,11 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 const { signUp } = vi.hoisted(() => ({ signUp: vi.fn().mockResolvedValue({ data: { user: null, session: null }, error: null }) }));
 vi.mock("@/integrations/supabase/client", () => ({ supabase: { auth: { signUp } } }));
 import { signUp as doSignUp } from "@/lib/auth";
-import { readFileSync } from "fs";
+import authSrc from "@/lib/auth.ts?raw";
+import forgotSrc from "@/pages/ForgotPassword.tsx?raw";
+import verifySrc from "@/pages/VerifyEmail.tsx?raw";
+import authPageSrc from "@/pages/Auth.tsx?raw";
+import resetSrc from "@/pages/ResetPassword.tsx?raw";
 
 describe("auth email links", () => {
   beforeEach(() => signUp.mockClear());
@@ -12,11 +16,10 @@ describe("auth email links", () => {
     expect(url).toBe("https://www.siloshop.net/");
   });
   it("no auth file builds redirects from window.location", () => {
-    for (const f of ["src/lib/auth.ts", "src/pages/ForgotPassword.tsx", "src/pages/VerifyEmail.tsx", "src/pages/Auth.tsx", "src/pages/ResetPassword.tsx"]) {
-      const src = readFileSync(f, "utf8");
+    for (const src of [authSrc, forgotSrc, verifySrc, authPageSrc, resetSrc]) {
       expect(src).not.toMatch(/(redirectTo|emailRedirectTo)[^\n]*window\.location/);
       expect(src).not.toMatch(/localhost|127\.0\.0\.1/);
     }
-    expect(readFileSync("src/pages/ForgotPassword.tsx", "utf8")).toContain("${PRODUCTION_ORIGIN}/reset-password");
+    expect(forgotSrc).toContain("${PRODUCTION_ORIGIN}/reset-password");
   });
 });

@@ -30,7 +30,6 @@ interface AnalyticsData {
   units_sold?: number;
   revenue?: number;
   orders?: number;
-  wishlist_count?: number;
   cart_count?: number;
   returns?: number;
   review_count?: number;
@@ -77,7 +76,6 @@ const ProductAnalyticsDialog = ({ productId, productName, onOpenChange }: Produc
         { label: "الوحدات المباعة", value: fmtNum(data.units_sold), icon: ShoppingCart },
         { label: "الإيرادات", value: fmtMoney(data.revenue), icon: DollarSign },
         { label: "عدد الطلبات", value: fmtNum(data.orders), icon: ClipboardList },
-        { label: "قائمة الأمنيات", value: fmtNum(data.wishlist_count), icon: Heart },
         { label: "في سلة الشراء", value: fmtNum(data.cart_count), icon: ShoppingBag },
         { label: "عدد التقييمات", value: fmtNum(data.review_count), icon: ClipboardList },
         { label: "متوسط التقييم", value: Number(data.review_score ?? 0).toFixed(1), icon: Star },

@@ -876,10 +876,6 @@ const Dashboard = () => {
                     <Heart className="h-5 w-5" />
                     <span>المفضلة</span>
                   </Button>
-                  <Button variant="outline" className="h-20 flex-col gap-1" onClick={() => navigate("/wishlist")}>
-                    <ListChecks className="h-5 w-5" />
-                    <span>قوائم الرغبات</span>
-                  </Button>
                   <Button variant="outline" className="h-20 flex-col gap-1" onClick={() => navigate("/compare")}>
                     <ArrowLeftRight className="h-5 w-5" />
                     <span>مقارنة المنتجات</span>

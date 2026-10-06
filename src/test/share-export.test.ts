@@ -11,7 +11,7 @@ describe("share utility", () => {
       "https://localhost/compare?products=a,b",
       "http://127.0.0.1:8080/product/1",
       "http://192.168.1.4/store/x",
-      "https://id-preview--abc.lovable.app/wishlist/shared/t",
+      "https://id-preview--abc.lovable.app/favorites",
       "/favorites",
     ]) {
       const out = toPublicUrl(u);

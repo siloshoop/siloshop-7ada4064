@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { formatVariantLabel } from "@/lib/variantRequirement";
 import { Navigate, useNavigate } from "react-router-dom";
 import { z } from "zod";
 import { useAuth } from "@/hooks/useAuth";
@@ -188,7 +189,7 @@ const Checkout = () => {
         const attrs = (v.attributes || {}) as Record<string, string>;
         return {
           ...row,
-          variantLabel: Object.values(attrs).filter(Boolean).join(" / "),
+          variantLabel: formatVariantLabel(attrs),
           product: {
             ...row.product,
             price: Number(v.discount_price ?? v.price ?? row.product?.price),

@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
+import { formatVariantLabel } from "@/lib/variantRequirement";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
@@ -60,7 +61,7 @@ const withVariant = (rows: any[]): CartItem[] =>
     const price = v.discount_price ?? v.price ?? row.product?.price;
     return {
       ...row,
-      variantLabel: Object.values(attrs).filter(Boolean).join(" / "),
+      variantLabel: formatVariantLabel(attrs),
       product: {
         ...row.product,
         price: Number(price),

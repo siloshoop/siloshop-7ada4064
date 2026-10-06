@@ -7,6 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { notifySync, useSyncListener } from "@/lib/uiSync";
+import { productRequiresOptions } from "@/lib/variantRequirement";
 
 interface Item {
   id: string;
@@ -76,7 +77,19 @@ const FrequentlyBoughtTogether = ({ product, categoryId, vendorId }: Props) => {
     }
     setAdding(true);
     try {
-      for (const item of [product, ...chosen]) {
+      const items = [product, ...chosen];
+      const needsOptions = await Promise.all(items.map((i) => productRequiresOptions(i.id)));
+      const blocked = items.find((_, idx) => needsOptions[idx]);
+      if (blocked) {
+        toast({
+          title: "اختر الخيارات أولاً",
+          description: `يرجى اختيار اللون و/أو المقاس لـ "${blocked.name}" قبل الإضافة إلى السلة`,
+          variant: "destructive",
+        });
+        if (blocked.id !== product.id) navigate(`/product/${blocked.id}`);
+        return;
+      }
+      for (const item of items) {
         const { data: existing } = await supabase
           .from("cart_items")
           .select("id, quantity")

@@ -12,6 +12,7 @@ import { supabase } from "@/integrations/supabase/client";
 import React, { useState, memo } from "react";
 import { notifySync, useSyncListener } from "@/lib/uiSync";
 import { formatPrice } from "@/lib/currency";
+import { productRequiresOptions } from "@/lib/variantRequirement";
 
 interface ProductCardProps {
   id?: string;
@@ -146,6 +147,15 @@ const ProductCard = memo(({
     }
 
     try {
+      if (await productRequiresOptions(productId)) {
+        toast({
+          title: "اختر الخيارات أولاً",
+          description: "يرجى اختيار اللون و/أو المقاس قبل الإضافة إلى السلة",
+        });
+        navigate(`/product/${productId}`);
+        return;
+      }
+
       const { data: existingItem } = await supabase
         .from("cart_items")
         .select("id, quantity")

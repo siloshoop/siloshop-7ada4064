@@ -213,6 +213,15 @@ const Product = () => {
       return;
     }
 
+    if (variants.length > 0 && !selectedVariant) {
+      toast({
+        title: "اختر الخيارات أولاً",
+        description: "يرجى اختيار اللون و/أو المقاس قبل الإضافة إلى السلة",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setAddingToCart(true);
     try {
       // Check if the same product + variant already exists in cart

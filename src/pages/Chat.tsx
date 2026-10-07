@@ -74,17 +74,17 @@ const Chat = () => {
     <div className="flex min-h-screen flex-col" dir="rtl">
       <Navbar />
       <main className="container mx-auto max-w-3xl flex-1 px-2 py-4 sm:px-4">
-        <Card className="min-h-[75vh] overflow-hidden">
+        <Card className="h-[calc(100dvh-16rem-max(env(safe-area-inset-bottom,0px),var(--safe-area-inset-bottom,0px)))] min-h-[240px] overflow-hidden lg:h-[75vh] lg:min-h-[75vh]">
           {loading ? (
-            <div className="flex min-h-[75vh] items-center justify-center">
+            <div className="flex h-full items-center justify-center">
               <Loader2 className="h-8 w-8 animate-spin text-primary" />
             </div>
           ) : error || !conversationId ? (
-            <div className="flex min-h-[75vh] items-center justify-center p-6 text-center text-sm text-destructive">
+            <div className="flex h-full items-center justify-center p-6 text-center text-sm text-destructive">
               {error || "تعذر بدء المحادثة"}
             </div>
           ) : (
-            <div className="h-[75vh]">
+            <div className="h-full min-h-0">
               <ChatWindow
                 conversationId={conversationId}
                 peerName={peer?.full_name}

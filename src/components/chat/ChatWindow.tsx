@@ -105,13 +105,13 @@ const ChatWindow = ({
   return (
     <div className="flex h-full min-h-0 flex-col" dir="rtl">
       {/* Header */}
-      <div className="flex items-center gap-2 border-b bg-card p-3">
+      <div className="flex shrink-0 items-center gap-1 border-b bg-card p-2 sm:gap-2 sm:p-3">
         {onBack && (
           <Button variant="ghost" size="icon" className="lg:hidden" onClick={onBack} aria-label="رجوع">
             <ArrowLeft className="h-5 w-5 rotate-180" />
           </Button>
         )}
-        <Avatar className="h-10 w-10">
+        <Avatar className="h-8 w-8 shrink-0 sm:h-10 sm:w-10">
           <AvatarImage src={peerAvatar || undefined} alt={peerName || "مستخدم"} />
           <AvatarFallback>{(peerName || "؟").charAt(0)}</AvatarFallback>
         </Avatar>

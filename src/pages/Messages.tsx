@@ -45,7 +45,7 @@ const Messages = () => {
           <MessageSquare className="h-6 w-6" /> الرسائل
         </h1>
 
-        <div className="grid min-h-[70vh] gap-3 lg:grid-cols-[320px_1fr]">
+        <div className="grid h-[calc(100dvh-19rem-max(env(safe-area-inset-bottom,0px),var(--safe-area-inset-bottom,0px)))] min-h-[240px] gap-3 lg:h-[70vh] lg:min-h-[70vh] lg:grid-cols-[320px_1fr]">
           {/* Conversation list */}
           <Card className={cn("flex min-h-0 flex-col overflow-hidden", activeId && "hidden lg:flex")}>
             <div className="space-y-2 border-b p-3">

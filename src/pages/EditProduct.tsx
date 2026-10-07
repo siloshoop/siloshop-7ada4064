@@ -16,6 +16,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Loader2, Save, Trash2, ChevronLeft, X } from "lucide-react";
 import imageCompression from 'browser-image-compression';
 import { productNumbersSchema, firstIssue, friendlyDbError } from "@/lib/productValidation";
+import { useImageCropper } from "@/components/ImageCropDialog";
 import { IMAGE_FORMAT_HINT, IMAGE_SIZE_GUIDES, UploadError, describeUploadError, validateImageFile } from "@/lib/uploadErrors";
 import ProductVariantsManager from "@/components/seller/ProductVariantsManager";
 import ProductColorsSizesEditor, { type ColorsSizesValue, buildVariantRows } from "@/components/seller/ProductColorsSizesEditor";
@@ -45,6 +46,7 @@ const EditProduct = () => {
   const [fetching, setFetching] = useState(true);
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { crop: cropImage, dialog: cropDialog } = useImageCropper("product");
 
   const [formData, setFormData] = useState({
     name: "",
@@ -223,21 +225,23 @@ const EditProduct = () => {
         toast({ title: "تعذّر إضافة الصورة", description: invalid, variant: "destructive" });
         continue;
       }
+      const croppedFile = await cropImage(file);
+      if (!croppedFile) continue;
 
       try {
         const options = {
           maxSizeMB: 1,
           maxWidthOrHeight: 1920,
           useWebWorker: true,
-          fileType: file.type as any,
+          fileType: croppedFile.type as any,
         };
 
-        const compressedFile = await imageCompression(file, options);
+        const compressedFile = await imageCompression(croppedFile, options);
         validatedFiles.push(compressedFile);
         previews.push(URL.createObjectURL(compressedFile));
       } catch (error) {
-        validatedFiles.push(file);
-        previews.push(URL.createObjectURL(file));
+        validatedFiles.push(croppedFile);
+        previews.push(URL.createObjectURL(croppedFile));
       }
     }
 
@@ -670,6 +674,7 @@ const EditProduct = () => {
                       <p className="text-sm text-muted-foreground">
                         يمكنك رفع حتى {5 - existingImages.length - newFiles.length} صور إضافية · {IMAGE_SIZE_GUIDES.product} · {IMAGE_FORMAT_HINT}
                       </p>
+                      {cropDialog}
 
                       {newPreviews.length > 0 && (
                         <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mt-4">

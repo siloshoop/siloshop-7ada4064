@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
+import { IMAGE_FORMAT_HINT, IMAGE_SIZE_GUIDES, UploadError, describeUploadError, validateImageFile, type ImageKind } from "@/lib/uploadErrors";
 
 type ImageUploadFieldProps = {
   label: string;
@@ -17,6 +18,8 @@ type ImageUploadFieldProps = {
   privateBucket?: boolean;
   disabled?: boolean;
   previewClassName?: string;
+  /** Shows the recommended size guide under the field. */
+  sizeGuide?: ImageKind;
 };
 
 const isExternalUrl = (value: string) => /^(https?:|data:|blob:)/i.test(value);
@@ -30,6 +33,7 @@ const ImageUploadField = ({
   privateBucket = false,
   disabled = false,
   previewClassName,
+  sizeGuide,
 }: ImageUploadFieldProps) => {
   const { toast } = useToast();
   const inputRef = useRef<HTMLInputElement>(null);
@@ -68,22 +72,20 @@ const ImageUploadField = ({
 
   const upload = async (file?: File) => {
     if (!file) return;
-    if (!file.type.startsWith("image/")) {
-      toast({ title: "الملف يجب أن يكون صورة", variant: "destructive" });
-      return;
-    }
-    if (file.size > 5 * 1024 * 1024) {
-      toast({ title: "حجم الصورة كبير", description: "الحد الأقصى 5 ميجابايت", variant: "destructive" });
+    const invalid = validateImageFile(file);
+    if (invalid) {
+      toast({ title: "تعذّر رفع الصورة", description: invalid, variant: "destructive" });
       return;
     }
 
     setUploading(true);
     try {
-      const compressed = await imageCompression(file, {
-        maxSizeMB: 1,
-        maxWidthOrHeight: 1920,
-        useWebWorker: true,
-      });
+      let compressed: File;
+      try {
+        compressed = await imageCompression(file, { maxSizeMB: 1, maxWidthOrHeight: 1920, useWebWorker: true });
+      } catch {
+        throw new UploadError("تعذّرت معالجة الصورة؛ قد يكون الملف تالفًا. جرّب صورة أخرى.");
+      }
       const extension = (compressed.name.split(".").pop() || "jpg").toLowerCase();
       const path = `${folder}/${crypto.randomUUID()}.${extension}`;
       const { error } = await supabase.storage.from(bucket).upload(path, compressed, {
@@ -104,7 +106,7 @@ const ImageUploadField = ({
     } catch (error) {
       toast({
         title: "تعذّر رفع الصورة",
-        description: error instanceof Error ? error.message : "يرجى المحاولة مرة أخرى",
+        description: error instanceof UploadError ? error.message : describeUploadError(error, file),
         variant: "destructive",
       });
     } finally {
@@ -164,7 +166,7 @@ const ImageUploadField = ({
           <input
             ref={inputRef}
             type="file"
-            accept="image/*"
+            accept="image/jpeg,image/png,image/webp,image/gif"
             capture={undefined}
             className="sr-only"
             disabled={disabled || uploading}
@@ -172,6 +174,9 @@ const ImageUploadField = ({
           />
         </div>
       </div>
+      <p className="text-xs text-muted-foreground">
+        {sizeGuide ? `${IMAGE_SIZE_GUIDES[sizeGuide]} · ` : ""}{IMAGE_FORMAT_HINT}
+      </p>
     </div>
   );
 };

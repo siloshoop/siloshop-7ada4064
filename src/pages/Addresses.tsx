@@ -298,43 +298,14 @@ const Addresses = () => {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className="space-y-1.5">
-                    <Label>الشارع</Label>
-                    <Input 
-                      value={form.street} 
-                      onChange={(e) => setForm({ ...form, street: e.target.value })} 
-                      placeholder="اسم الشارع"
-                      required 
-                    />
-                  </div>
-                  <div className="space-y-1.5">
-                    <Label>البناء (اختياري)</Label>
-                    <Input 
-                      value={form.building} 
-                      onChange={(e) => setForm({ ...form, building: e.target.value })} 
-                      placeholder="رقم أو اسم البناء"
-                    />
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className="space-y-1.5">
-                    <Label>الشقة (اختياري)</Label>
-                    <Input 
-                      value={form.apartment} 
-                      onChange={(e) => setForm({ ...form, apartment: e.target.value })} 
-                      placeholder="رقم الشقة"
-                    />
-                  </div>
-                  <div className="space-y-1.5">
-                    <Label>علامة مميزة (اختياري)</Label>
-                    <Input 
-                      value={form.landmark} 
-                      onChange={(e) => setForm({ ...form, landmark: e.target.value })} 
-                      placeholder="مثلاً: قرب جامع ..."
-                    />
-                  </div>
+                <div className="space-y-1.5">
+                  <Label>الشارع</Label>
+                  <Input 
+                    value={form.street} 
+                    onChange={(e) => setForm({ ...form, street: e.target.value })} 
+                    placeholder="اسم الشارع"
+                    required 
+                  />
                 </div>
 
                 <div className="space-y-1.5">
@@ -415,16 +386,6 @@ const Addresses = () => {
                       <div>
                         <p>{addr.governorate}، {addr.city}</p>
                         <p className="text-muted-foreground text-xs">{addr.street}</p>
-                        {(addr.building || addr.apartment) && (
-                          <p className="text-muted-foreground text-xs">
-                            {addr.building && `بناء: ${addr.building}`}
-                            {addr.building && addr.apartment && " - "}
-                            {addr.apartment && `شقة: ${addr.apartment}`}
-                          </p>
-                        )}
-                        {addr.landmark && (
-                          <p className="text-muted-foreground text-xs font-medium">علامة مميزة: {addr.landmark}</p>
-                        )}
                       </div>
                     </div>
                     <p className="flex items-center gap-2" dir="ltr"><Phone className="h-4 w-4 text-muted-foreground" />{addr.phone}</p>

@@ -156,7 +156,7 @@ const Checkout = () => {
           phone: def.phone || f.phone,
           governorate: def.governorate || def.city || f.governorate,
           area: def.city || f.area,
-          street: [def.street, def.building, def.apartment, def.landmark].filter(Boolean).join(" - ") || f.street,
+          street: [def.street].filter(Boolean).join(" - ") || f.street,
         }));
       }
 
@@ -682,7 +682,7 @@ const Checkout = () => {
                                 phone: a.phone,
                                 governorate: a.governorate || a.city || "",
                                 area: a.city || "",
-                                street: [a.street, a.building, a.apartment, a.landmark].filter(Boolean).join(" - "),
+                                street: [a.street].filter(Boolean).join(" - "),
                               });
                             }}
                             className={`text-right p-3 rounded-lg border text-sm transition-colors ${selectedAddressId === a.id ? "border-primary bg-primary/5" : "border-border hover:bg-muted/50"}`}

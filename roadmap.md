@@ -1,5 +1,9 @@
 # Production readiness audit
 
+## Final checkout stock validation
+- [x] Existing create_order rechecks saved stock with transaction row locks before order creation, checks summed repeated lines and selected variants; no functional changes needed
+- [x] Authenticated real RPC rejected overstock, repeated overstock lines, zero-stock variant, missing variant, and zero-stock simple product; orders, stock and cart unchanged; all 104 automated tests passed
+
 ## Cart quantity stock limit
 - [x] Validate cart quantities and saved-item transfers against fresh product/selected-variant stock and prevent overlapping cart quantity changes
 - [x] Verify authenticated one-piece variant cart at 360/375/390/412px, rejected direct update to quantity 2 with saved quantity still 1, actual sold-out purchase block, 104 automated tests, and automatic build; temporary test cart row removed

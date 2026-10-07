@@ -8,3 +8,4 @@
 - Route every user-facing share through src/lib/share.ts and every file export through src/lib/exportFile.ts; they guarantee public production URLs and native (Capacitor Share/Filesystem) handling.
 - Order tracking renders child-order statuses per seller, matches parent-held items by vendor, and uses a page-specific vertical timeline; this preserves independent saved shipment progress without changing other order screens.
 - Order detail thumbnails use OrderProductImage to resolve stored paths and fall back from failed snapshots to accessible current product images without changing saved orders or weakening access policies.
+- Cart quantity changes and saved-item transfers read current selected-variant/product stock before writing, with per-row mutation locks and database guards as final authority; stale views and repeated taps cannot bypass stock limits.

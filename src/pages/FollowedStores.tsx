@@ -9,6 +9,8 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { resolveStoreAssetUrl } from "@/lib/storeAssets";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 interface FollowedStore {
   id: string;
@@ -52,7 +54,7 @@ const FollowedStores = () => {
               id: row.id,
               vendor_id: row.vendor_id,
               store_name: p?.store_name || "متجر",
-              logo_url: p?.logo_url ?? null,
+              logo_url: await resolveStoreAssetUrl(p?.logo_url || p?.avatar_url || null),
               rating: Number(p?.rating || 0),
               product_count: Number(p?.product_count || 0),
               follower_count: Number(p?.follower_count || 0),
@@ -140,17 +142,17 @@ const FollowedStores = () => {
                       onClick={() => navigate(`/store/${store.vendor_id}`)}
                       className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-full border bg-muted"
                     >
-                      {store.logo_url ? (
-                        <img
-                          src={store.logo_url}
+                      <Avatar className="h-full w-full">
+                        <AvatarImage
+                          src={store.logo_url ?? undefined}
                           alt={store.store_name}
-                          loading="lazy"
                           decoding="async"
                           className="h-full w-full object-cover"
                         />
-                      ) : (
-                        <StoreIcon className="h-6 w-6 text-primary" />
-                      )}
+                        <AvatarFallback>
+                          <StoreIcon className="h-6 w-6 text-primary" />
+                        </AvatarFallback>
+                      </Avatar>
                     </button>
                     <div className="min-w-0 flex-1">
                       <button

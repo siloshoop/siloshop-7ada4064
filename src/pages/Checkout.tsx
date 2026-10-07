@@ -762,6 +762,9 @@ const Checkout = () => {
                         />
                         <div className="flex-1">
                           <h4 className="font-medium">{item.product.name}</h4>
+                          {item.variantLabel && (
+                            <p className="text-sm text-muted-foreground">{item.variantLabel}</p>
+                          )}
                           <p className="text-sm text-muted-foreground">
                             الكمية: {item.quantity}
                           </p>

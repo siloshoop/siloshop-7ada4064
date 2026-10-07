@@ -31,6 +31,7 @@ export const ADMIN_MODULES: AdminModule[] = [
   { label: "خصائص المنتجات", description: "الخصائص العالمية (اللون، المقاس، ...)", href: "/admin/attributes", icon: SlidersHorizontal },
   { label: "أقسام الصفحة الرئيسية", description: "واجهة العرض والترتيب", href: "/admin/homepage", icon: LayoutTemplate },
   { label: "البانرات", description: "الإعلانات الترويجية الداخلية", href: "/admin/banners", icon: Image },
+  { label: "الشركاء", description: "شعارات وأسماء شركاء المنصة", href: "/admin/partners", icon: Users },
   { label: "البلاغات", description: "بلاغات المنتجات والبائعين", href: "/admin/reports", icon: Flag },
   { label: "المخالفات", description: "إنذارات ومخالفات البائعين", href: "/admin/violations", icon: ShieldAlert },
   { label: "المحادثات", description: "الإشراف على الدردشة", href: "/admin/chats", icon: MessagesSquare },

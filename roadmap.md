@@ -95,3 +95,8 @@
 
 ## Share & export centralization
 - [x] Central share (src/lib/share.ts) and export (src/lib/exportFile.ts) utilities; all callers migrated; tests added
+
+## Mobile chat clipping repair
+- [x] Bound chat and inbox height; reserve non-shrinking composer and header space
+- [ ] Verify chat controls at 360, 375, 390, and 412px and run existing tests
+- [ ] Physical Android chat verification (blocked: no device or emulator available)

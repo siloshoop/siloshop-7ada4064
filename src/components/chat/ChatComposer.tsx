@@ -38,7 +38,7 @@ const ChatComposer = ({ disabled, sending, replyTo, onCancelReply, onTyping, onS
   };
 
   return (
-    <div className="border-t bg-card p-3">
+    <div className="min-w-0 shrink-0 border-t bg-card p-2 sm:p-3">
       {replyTo && (
         <div className="mb-2 flex items-start gap-2 rounded-md border-s-2 border-primary bg-muted/60 px-3 py-2 text-xs">
           <span className="line-clamp-2 flex-1">
@@ -83,7 +83,7 @@ const ChatComposer = ({ disabled, sending, replyTo, onCancelReply, onTyping, onS
         </div>
       )}
 
-      <div className="flex items-end gap-2">
+      <div className="grid min-w-0 grid-cols-[2.5rem_2.5rem_minmax(0,1fr)_2.5rem] items-end gap-1 sm:gap-2">
         <input
           ref={fileInput}
           type="file"
@@ -119,7 +119,7 @@ const ChatComposer = ({ disabled, sending, replyTo, onCancelReply, onTyping, onS
           maxLength={4000}
           placeholder={disabled ? "الإرسال غير متاح" : "اكتب رسالة..."}
           disabled={disabled || sending}
-          className="max-h-32 min-h-[42px] flex-1 resize-none"
+          className="max-h-32 min-h-[42px] min-w-0 resize-none px-2 sm:px-3"
           onChange={(e) => {
             setText(e.target.value);
             onTyping();

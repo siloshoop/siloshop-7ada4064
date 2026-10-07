@@ -99,29 +99,33 @@ const SellerStockLog = () => {
             const positive = m.delta > 0;
             return (
               <Card key={m.id}>
-                <CardContent className="flex flex-wrap items-center gap-3 p-4">
-                  <img
-                    src={m.products?.image_url || "/placeholder.svg"}
-                    alt={m.products?.name || "منتج"}
-                    loading="lazy"
-                    decoding="async"
-                    className="h-12 w-12 rounded-md object-cover"
-                  />
-                  <div className="min-w-0 flex-1">
-                    <p className="truncate font-medium">{m.products?.name || "منتج محذوف"}</p>
-                    <p className="text-xs text-muted-foreground">
-                      {new Date(m.created_at).toLocaleString("ar-SY")}
-                      {m.note ? ` — ${m.note}` : ""}
-                    </p>
+                <CardContent className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center">
+                  <div className="flex min-w-0 flex-1 items-center gap-3">
+                    <img
+                      src={m.products?.image_url || "/placeholder.svg"}
+                      alt={m.products?.name || "منتج"}
+                      loading="lazy"
+                      decoding="async"
+                      className="h-12 w-12 shrink-0 rounded-md object-cover"
+                    />
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate font-medium">{m.products?.name || "منتج محذوف"}</p>
+                      <p className="break-words text-xs leading-relaxed text-muted-foreground">
+                        {new Date(m.created_at).toLocaleString("ar-SY", { dateStyle: "short", timeStyle: "short" })}
+                        {m.note ? ` — ${m.note}` : ""}
+                      </p>
+                    </div>
                   </div>
-                  <Badge variant={stockReasonVariant(m.reason)}>{stockReasonLabel(m.reason)}</Badge>
-                  <div className={`flex items-center gap-1 font-semibold tabular-nums ${positive ? "text-primary" : "text-destructive"}`}>
-                    {positive ? <ArrowUpRight className="h-4 w-4" /> : <ArrowDownRight className="h-4 w-4" />}
-                    {positive ? `+${m.delta}` : m.delta}
+                  <div className="flex shrink-0 flex-wrap items-center gap-3">
+                    <Badge variant={stockReasonVariant(m.reason)} className="whitespace-nowrap">{stockReasonLabel(m.reason)}</Badge>
+                    <div className={`flex items-center gap-1 whitespace-nowrap font-semibold tabular-nums ${positive ? "text-primary" : "text-destructive"}`}>
+                      {positive ? <ArrowUpRight className="h-4 w-4" /> : <ArrowDownRight className="h-4 w-4" />}
+                      <span dir="ltr">{positive ? `+${m.delta}` : m.delta}</span>
+                    </div>
+                    <span className="whitespace-nowrap text-xs text-muted-foreground tabular-nums">
+                      {m.quantity_before ?? 0} ← {m.quantity_after ?? 0}
+                    </span>
                   </div>
-                  <span className="text-xs text-muted-foreground tabular-nums">
-                    {m.quantity_before ?? 0} ← {m.quantity_after ?? 0}
-                  </span>
                 </CardContent>
               </Card>
             );

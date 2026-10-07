@@ -1,4 +1,5 @@
 # Project architecture rules
+- Buyer dashboard summary cards and quick access use router links; spending and rating summaries open existing orders rather than introducing new destinations.
 - Use saved active variant quantities as the aggregate stock for variant products, with database stock guards and cleanup; all clients must observe the same availability without reserving stock in carts.
 
 - Keep intentionally wide comparison content inside its own horizontal scroller; never allow it to widen the document viewport, because Android WebViews clip document-level overflow unpredictably in RTL.

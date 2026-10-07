@@ -36,7 +36,6 @@ const checkoutSchema = z.object({
     .min(1, "يرجى اختيار المحافظة")
     .refine((v) => (SYRIAN_GOVERNORATES as readonly string[]).includes(v), "يرجى اختيار محافظة صحيحة"),
   area: z.string().trim().max(100, "المنطقة طويلة جداً").optional(),
-  street: z.string().max(200, "العنوان طويل جداً").optional(),
   notes: z.string().max(1000, "الملاحظات طويلة جداً").optional(),
 });
 
@@ -114,13 +113,12 @@ const Checkout = () => {
     phone: "",
     governorate: "",
     area: "",
-    street: "",
     notes: "",
   });
 
 
   const composeAddress = () =>
-    ["عنوان التوصيل", formData.governorate, formData.street]
+    ["عنوان التوصيل", formData.governorate]
       .filter((v) => v && v.trim())
       .join("، ");
 
@@ -156,7 +154,6 @@ const Checkout = () => {
           phone: def.phone || f.phone,
           governorate: def.governorate || def.city || f.governorate,
           area: def.city || f.area,
-          street: [def.street].filter(Boolean).join(" - ") || f.street,
         }));
       }
 
@@ -682,7 +679,6 @@ const Checkout = () => {
                                 phone: a.phone,
                                 governorate: a.governorate || a.city || "",
                                 area: a.city || "",
-                                street: [a.street].filter(Boolean).join(" - "),
                               });
                             }}
                             className={`text-right p-3 rounded-lg border text-sm transition-colors ${selectedAddressId === a.id ? "border-primary bg-primary/5" : "border-border hover:bg-muted/50"}`}

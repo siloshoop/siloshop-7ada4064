@@ -756,6 +756,7 @@ export type Database = {
         Row: {
           code: string
           created_at: string
+          currency: string
           discount_type: string
           discount_value: number
           expires_at: string | null
@@ -763,6 +764,7 @@ export type Database = {
           is_active: boolean
           max_uses: number | null
           min_purchase: number | null
+          product_ids: string[]
           updated_at: string
           used_count: number
           vendor_id: string
@@ -770,6 +772,7 @@ export type Database = {
         Insert: {
           code: string
           created_at?: string
+          currency?: string
           discount_type: string
           discount_value: number
           expires_at?: string | null
@@ -777,6 +780,7 @@ export type Database = {
           is_active?: boolean
           max_uses?: number | null
           min_purchase?: number | null
+          product_ids?: string[]
           updated_at?: string
           used_count?: number
           vendor_id: string
@@ -784,6 +788,7 @@ export type Database = {
         Update: {
           code?: string
           created_at?: string
+          currency?: string
           discount_type?: string
           discount_value?: number
           expires_at?: string | null
@@ -791,6 +796,7 @@ export type Database = {
           is_active?: boolean
           max_uses?: number | null
           min_purchase?: number | null
+          product_ids?: string[]
           updated_at?: string
           used_count?: number
           vendor_id?: string
@@ -2531,6 +2537,7 @@ export type Database = {
           sizes: string[]
           sku: string | null
           slug: string | null
+          sold_count: number
           source: string
           specs: Json
           stock_quantity: number | null
@@ -2598,6 +2605,7 @@ export type Database = {
           sizes?: string[]
           sku?: string | null
           slug?: string | null
+          sold_count?: number
           source?: string
           specs?: Json
           stock_quantity?: number | null
@@ -2665,6 +2673,7 @@ export type Database = {
           sizes?: string[]
           sku?: string | null
           slug?: string | null
+          sold_count?: number
           source?: string
           specs?: Json
           stock_quantity?: number | null
@@ -4934,6 +4943,20 @@ export type Database = {
         Returns: {
           product_id: string
           sold: number
+        }[]
+      }
+      quote_cart_coupon: {
+        Args: { _code: string; _items: Json }
+        Returns: {
+          code: string
+          currency: string
+          discount_amount: number
+          discount_type: string
+          discount_value: number
+          eligible_subtotal: number
+          error: string
+          id: string
+          vendor_id: string
         }[]
       }
       reactivate_seller: { Args: { _user_id: string }; Returns: undefined }

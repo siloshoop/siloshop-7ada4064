@@ -141,6 +141,13 @@
       "when": 1791415864874,
       "tag": "0019_vendor_orders_currency",
       "breakpoints": true
+    },
+    {
+      "idx": 20,
+      "version": "7",
+      "when": 1791416290988,
+      "tag": "0020_seller_scoped_coupons_and_sold_count",
+      "breakpoints": true
     }
   ]
 }

@@ -60,7 +60,7 @@ const SellerOrderDetailSheet = ({ order, open, onOpenChange, onChanged }: Props)
   const [localOrder, setLocalOrder] = useState<SellerOrderRow | null>(order);
   const [orderCurrency, setOrderCurrency] = useState<string | null>(null);
 
-  useEffect(() => setLocalOrder(order), [order]);
+  useEffect(() => { setLocalOrder(order); }, [order]);
 
   useEffect(() => {
     if (!open || !order) return;

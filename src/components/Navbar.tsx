@@ -193,7 +193,7 @@ const Navbar = () => {
                 <Menu className="h-5 w-5" />
               </Button>
             </SheetTrigger>
-            <SheetContent side="right" className="w-[min(340px,calc(100vw-1rem))] max-w-[calc(100vw-1rem)] overflow-y-auto">
+            <SheetContent side="right" className="w-[min(340px,calc(100vw-1rem))] max-w-[calc(100vw-1rem)] overflow-y-auto pt-[calc(1.5rem+env(safe-area-inset-top))] pb-[calc(1.5rem+env(safe-area-inset-bottom))]">
               <SheetHeader>
                 <SheetTitle className="text-start text-lg">الفئات الأكثر شعبية</SheetTitle>
               </SheetHeader>

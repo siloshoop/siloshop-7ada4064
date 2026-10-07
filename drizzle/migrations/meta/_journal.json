@@ -99,6 +99,13 @@
       "when": 1791407517223,
       "tag": "0013_preserve_order_stock_validation_timing",
       "breakpoints": true
+    },
+    {
+      "idx": 14,
+      "version": "7",
+      "when": 1791407634968,
+      "tag": "0014_validate_order_stock_totals_and_required_variants",
+      "breakpoints": true
     }
   ]
 }

@@ -5,6 +5,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { quoteCoupon, couponErrorMessage } from "@/lib/couponQuote";
+import { fetchActiveDeals, applyDeal } from "@/lib/dealPricing";
 import {
   COUPON_CURRENCY,
   currencyName,
@@ -55,6 +56,16 @@ const CART_SELECT = `
   variant:product_variants(id, attributes, price, discount_price, stock_quantity, is_active),
   product:products(id, name, price, currency, image_url, stock_quantity, category_id, shipping_cost, shipping_mode, shipping_duration_text)
 `;
+
+/** Applies active «عروض اليوم» deals so the cart charges the real deal price. */
+const withDeals = async (rows: CartItem[]): Promise<CartItem[]> => {
+  const deals = await fetchActiveDeals(rows.map((r) => r.product?.id).filter(Boolean) as string[]);
+  return rows.map((r) =>
+    r.product && deals[r.product.id]
+      ? { ...r, product: { ...r.product, price: applyDeal(Number(r.product.price), deals[r.product.id]) } }
+      : r,
+  );
+};
 
 /** Applies the chosen variant's own price and stock to the cart row. */
 const withVariant = (rows: any[]): CartItem[] =>
@@ -145,7 +156,7 @@ const Cart = () => {
           .eq("user_id", user.id);
 
         if (error) throw error;
-        const rows = withVariant(data as any).filter((item) => item.product && item.product.stock_quantity > 0);
+        const rows = await withDeals(withVariant(data as any).filter((item) => item.product && item.product.stock_quantity > 0));
         setCartItems(rows);
         if (rows.length < (data?.length ?? 0)) {
           toast({ title: "نفذت الكمية", description: "تمت إزالة المنتجات غير المتوفرة من السلة" });
@@ -447,7 +458,7 @@ const Cart = () => {
         .select(CART_SELECT)
         .eq("user_id", user.id);
       if (error) throw error;
-      setCartItems(withVariant(data as any));
+      setCartItems(await withDeals(withVariant(data as any)));
 
       notifySync("cart");
 

@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { toPublicUrl } from "@/lib/share";
+import { readCartStock, validateCartQuantity } from "@/lib/cartStock";
 import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
@@ -253,20 +254,21 @@ const Product = () => {
         .select("id, quantity")
         .eq("user_id", user.id)
         .eq("product_id", id);
-      const { data: existingItem } = await (selectedVariant
+      const { data: existingItem, error: existingError } = await (selectedVariant
         ? existingQuery.eq("variant_id", selectedVariant.id)
         : existingQuery.is("variant_id", null)
       ).maybeSingle();
 
-      if ((existingItem?.quantity ?? 0) + quantity > effectiveStock) {
-        throw new Error("الكمية المطلوبة تتجاوز المخزون المتوفر");
-      }
+      if (existingError) throw existingError;
+      const requestedQuantity = Math.max(quantity, minQty);
+      const stock = await readCartStock(id, selectedVariant?.id);
+      validateCartQuantity((existingItem?.quantity ?? 0) + requestedQuantity, stock);
 
       let error;
       if (existingItem) {
         ({ error } = await supabase
           .from("cart_items")
-          .update({ quantity: existingItem.quantity + quantity })
+          .update({ quantity: existingItem.quantity + requestedQuantity })
           .eq("id", existingItem.id));
       } else {
         ({ error } = await supabase
@@ -275,7 +277,7 @@ const Product = () => {
             user_id: user.id,
             product_id: id,
             variant_id: selectedVariant?.id ?? null,
-            quantity: Math.max(quantity, minQty),
+            quantity: requestedQuantity,
           }));
       }
 

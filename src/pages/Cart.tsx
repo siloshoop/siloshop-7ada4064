@@ -1,4 +1,5 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { readCartStock, validateCartQuantity } from "@/lib/cartStock";
 import { formatVariantLabel } from "@/lib/variantRequirement";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
@@ -48,7 +49,7 @@ const CART_SELECT = `
   id,
   quantity,
   variant_id,
-  variant:product_variants(id, attributes, price, discount_price, stock_quantity),
+  variant:product_variants(id, attributes, price, discount_price, stock_quantity, is_active),
   product:products(id, name, price, currency, image_url, stock_quantity, category_id, shipping_cost, shipping_duration_text)
 `;
 
@@ -56,7 +57,7 @@ const CART_SELECT = `
 const withVariant = (rows: any[]): CartItem[] =>
   (rows || []).map((row: any) => {
     const v = row.variant;
-    if (!v) return { ...row, variantLabel: undefined } as CartItem;
+    if (!v) return { ...row, variantLabel: undefined, product: row.product ? { ...row.product, stock_quantity: row.variant_id ? 0 : row.product.stock_quantity } : null } as CartItem;
     const attrs = (v.attributes || {}) as Record<string, string>;
     const price = v.discount_price ?? v.price ?? row.product?.price;
     return {
@@ -65,7 +66,7 @@ const withVariant = (rows: any[]): CartItem[] =>
       product: {
         ...row.product,
         price: Number(price),
-        stock_quantity: v.stock_quantity ?? 0,
+        stock_quantity: v.is_active === false ? 0 : (v.stock_quantity ?? 0),
       },
     } as CartItem;
   });
@@ -105,6 +106,8 @@ const Cart = () => {
   const [processingSavedId, setProcessingSavedId] = useState<string | null>(null);
   const [savingItemId, setSavingItemId] = useState<string | null>(null);
   const [cartVersion, setCartVersion] = useState(0);
+  const quantityLocks = useRef(new Set<string>());
+  const [updatingItems, setUpdatingItems] = useState<Set<string>>(new Set());
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -273,13 +276,21 @@ const Cart = () => {
   };
 
   const updateQuantity = async (itemId: string, newQuantity: number) => {
-    if (newQuantity < 1) return;
+    const item = cartItems.find(row => row.id === itemId);
+    if (!item || !user || quantityLocks.current.has(itemId)) return;
+    quantityLocks.current.add(itemId);
+    setUpdatingItems(new Set(quantityLocks.current));
 
     try {
+      const stock = await readCartStock(item.product.id, item.variant_id);
+      setCartItems(items => items.map(row => row.id === itemId
+        ? { ...row, product: { ...row.product, stock_quantity: stock } } : row));
+      validateCartQuantity(newQuantity, stock);
       const { error } = await supabase
         .from("cart_items")
         .update({ quantity: newQuantity })
-        .eq("id", itemId);
+        .eq("id", itemId)
+        .eq("user_id", user.id);
 
       if (error) throw error;
 
@@ -292,9 +303,13 @@ const Cart = () => {
     } catch (error) {
       toast({
         title: "خطأ",
-        description: "فشل في تحديث الكمية",
+        description: error instanceof Error ? error.message : "تعذر تحديث الكمية؛ تحقق من المخزون المتاح",
         variant: "destructive",
       });
+      refreshCart();
+    } finally {
+      quantityLocks.current.delete(itemId);
+      setUpdatingItems(new Set(quantityLocks.current));
     }
   };
 
@@ -396,6 +411,9 @@ const Cart = () => {
       const existingCartItem =
         (cartRows || []).find((r) => (r.variant_id ?? null) === variantId) || null;
 
+      const stock = await readCartStock(item.product.id, variantId);
+      validateCartQuantity((existingCartItem?.quantity ?? 0) + item.quantity, stock);
+
       if (existingCartItem) {
         const { error: updateError } = await supabase
           .from("cart_items")
@@ -437,7 +455,7 @@ const Cart = () => {
     } catch (error) {
       toast({
         title: "خطأ",
-        description: "فشل في نقل المنتج إلى عربة التسوق",
+        description: error instanceof Error ? error.message : "فشل في نقل المنتج إلى عربة التسوق",
         variant: "destructive",
       });
     } finally {
@@ -668,7 +686,8 @@ const Cart = () => {
                                 size="icon"
                                 variant="outline"
                                 onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                                disabled={item.quantity <= 1}
+                                aria-label="تقليل الكمية"
+                                disabled={item.quantity <= 1 || updatingItems.has(item.id)}
                               >
                                 <Minus className="h-4 w-4" />
                               </Button>
@@ -679,7 +698,8 @@ const Cart = () => {
                                 size="icon"
                                 variant="outline"
                                 onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                                disabled={item.quantity >= item.product.stock_quantity}
+                                aria-label="زيادة الكمية"
+                                disabled={item.quantity >= item.product.stock_quantity || updatingItems.has(item.id)}
                               >
                                 <Plus className="h-4 w-4" />
                               </Button>

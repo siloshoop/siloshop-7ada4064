@@ -64,6 +64,13 @@
       "when": 1790166537810,
       "tag": "0008_create_account_deletion_requests",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1791402273071,
+      "tag": "0009_make_street_optional",
+      "breakpoints": true
     }
   ]
 }

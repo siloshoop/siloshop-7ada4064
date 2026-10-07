@@ -1,3 +1,4 @@
+import { formatPrice, normalizeCurrency, totalsByCurrency } from "@/lib/currency";
 import { useEffect, useState, useMemo } from "react";
 import { shareContent, toPublicUrl } from "@/lib/share";
 import { useNavigate } from "react-router-dom";
@@ -13,6 +14,7 @@ import { useToast } from "@/hooks/use-toast";
 import { notifySync, useSyncListener } from "@/lib/uiSync";
 
 interface Product {
+  currency?: string | null;
   id: string;
   name: string;
   price: number;
@@ -106,7 +108,7 @@ const Favorites = () => {
   }, [user]);
 
   const totalValue = useMemo(
-    () => products.reduce((s, p) => s + Number(p.price || 0), 0),
+    () => totalsByCurrency(products.map((p) => ({ currency: normalizeCurrency(p.currency), lineSubtotal: Number(p.price || 0) }))),
     [products]
   );
 
@@ -210,7 +212,7 @@ const Favorites = () => {
                   <div className="p-2 rounded-lg bg-accent/15"><Wallet className="h-5 w-5 text-accent" /></div>
                   <div>
                     <p className="text-xs text-muted-foreground">إجمالي قيمة المفضلة</p>
-                    <p className="text-xl font-bold">{totalValue.toLocaleString()} ل.س</p>
+                    <p className="text-xl font-bold">{totalValue.length ? totalValue.map((t) => formatPrice(t.total, t.currency)).join(" + ") : formatPrice(0)}</p>
                   </div>
                 </CardContent>
               </Card>

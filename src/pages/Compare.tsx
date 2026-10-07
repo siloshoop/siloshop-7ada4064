@@ -1,3 +1,4 @@
+import { formatPrice } from "@/lib/currency";
 import { copyText, openSocialShare } from "@/lib/share";
 import { canvasToBlob, exportFile } from "@/lib/exportFile";
 import { buildCompareShareUrl } from "@/lib/shareUrl";
@@ -50,6 +51,7 @@ import { notifySync, useSyncListener } from "@/lib/uiSync";
 // export handlers so opening the comparison page stays lightweight.
 
 interface Product {
+  currency?: string | null;
   id: string;
   name: string;
   price: number;
@@ -421,11 +423,11 @@ const Compare = () => {
       getValue: (product) => (
         <div className="text-center">
           <p className={`text-xl font-bold ${product.price === getLowestPrice() ? "text-green-600" : "text-foreground"}`}>
-            {product.price} ل.س
+            {formatPrice(product.price, product.currency)}
           </p>
           {product.original_price && (
             <p className="text-sm text-muted-foreground line-through">
-              {product.original_price} ل.س
+              {formatPrice(product.original_price, product.currency)}
             </p>
           )}
           {product.price === getLowestPrice() && products.length > 1 && (

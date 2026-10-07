@@ -40,6 +40,7 @@ import { OUT_OF_STOCK_LABEL, availableProductStock, variantInStock } from "@/lib
 
 type ProductVariant = Database["public"]["Tables"]["product_variants"]["Row"];
 interface Product {
+  currency?: string | null;
   id: string;
   name: string;
   description: string;
@@ -773,6 +774,7 @@ const Product = () => {
             <TabsContent value="shipping" className="pt-6 animate-fade-in">
               <ShippingInfo
                 shippingCost={product.shipping_cost}
+                currency={product.currency}
                 shipsWithinDays={product.ships_within_days}
                 isPlatform={product.product_type === "platform"}
               />
@@ -803,6 +805,7 @@ const Product = () => {
             price: product.price,
             image_url: product.image_url,
             stock_quantity: product.stock_quantity,
+            currency: product.currency,
           }}
           categoryId={product.category_id}
           vendorId={product.vendor_id}

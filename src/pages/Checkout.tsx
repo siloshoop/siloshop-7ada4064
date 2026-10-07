@@ -957,8 +957,8 @@ const Checkout = () => {
 
                       <p className="text-xs text-muted-foreground border-t pt-2">
                         الشحن:{" "}
-                        {shippingTotal > 0
-                          ? `${shippingTotal.toLocaleString()} ل.س`
+                        {currencyTotals.some((t) => t.shipping > 0)
+                          ? currencyTotals.filter((t) => t.shipping > 0).map((t) => formatPrice(t.shipping, t.currency)).join(" + ")
                           : "شحن مجاني"}
                       </p>
                     </div>

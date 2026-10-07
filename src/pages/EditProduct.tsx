@@ -10,7 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { CURRENCY_OPTIONS, DEFAULT_CURRENCY } from "@/lib/currency";
+import { CURRENCY_OPTIONS, DEFAULT_CURRENCY, currencySymbol } from "@/lib/currency";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, Save, Trash2, ChevronLeft, X } from "lucide-react";
@@ -789,7 +789,7 @@ const EditProduct = () => {
                   <AccordionTrigger>الشحن والأبعاد</AccordionTrigger>
                   <AccordionContent className="space-y-4">
                     <div className="space-y-2">
-                      <Label htmlFor="shipping_cost">تكلفة الشحن (ل.س)</Label>
+                      <Label htmlFor="shipping_cost">تكلفة الشحن ({currencySymbol(formData.currency)}) — بنفس عملة سعر المنتج</Label>
                       <Input
                         id="shipping_cost"
                         type="number"

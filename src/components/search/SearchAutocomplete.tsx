@@ -1,3 +1,4 @@
+import { formatPrice } from "@/lib/currency";
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Clock, Flame, Gem, Layers, Loader2, Search as SearchIcon, TrendingUp, X } from "lucide-react";
@@ -160,7 +161,7 @@ const SearchAutocomplete = ({
                     />
                     <span className="flex-1 truncate text-sm">{p.name}</span>
                     <span className="shrink-0 text-xs font-semibold text-primary">
-                      {p.price.toLocaleString()} ل.س
+                      {formatPrice(p.price, p.currency)}
                     </span>
                   </button>
                 ))

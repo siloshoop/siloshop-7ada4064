@@ -8,6 +8,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { notifySync, useSyncListener } from "@/lib/uiSync";
 import { productRequiresOptions } from "@/lib/variantRequirement";
+import { formatPrice, normalizeCurrency, totalsByCurrency } from "@/lib/currency";
 
 interface Item {
   id: string;
@@ -15,6 +16,7 @@ interface Item {
   price: number;
   image_url: string | null;
   stock_quantity: number | null;
+  currency?: string | null;
 }
 
 interface Props {
@@ -41,7 +43,7 @@ const FrequentlyBoughtTogether = ({ product, categoryId, vendorId }: Props) => {
       const base = () =>
         supabase
           .from("products")
-          .select("id, name, price, image_url, stock_quantity")
+          .select("id, name, price, image_url, stock_quantity, currency")
           .eq("is_active", true)
           .gt("stock_quantity", 0)
           .neq("id", product.id)
@@ -69,7 +71,9 @@ const FrequentlyBoughtTogether = ({ product, categoryId, vendorId }: Props) => {
   if (companions.length === 0 || !(Number(product.stock_quantity) > 0)) return null;
 
   const chosen = companions.filter((c) => selected[c.id]);
-  const total = product.price + chosen.reduce((s, c) => s + c.price, 0);
+  const totals = totalsByCurrency(
+    [product, ...chosen].map((i) => ({ currency: normalizeCurrency(i.currency), lineSubtotal: Number(i.price) || 0 })),
+  );
 
   const addBundle = async () => {
     if (!user) {
@@ -155,7 +159,7 @@ const FrequentlyBoughtTogether = ({ product, categoryId, vendorId }: Props) => {
               {product.name}
             </span>
             <span className="font-semibold text-primary">
-              {product.price.toLocaleString()} ل.س
+              {formatPrice(product.price, product.currency)}
             </span>
           </li>
           {companions.map((c) => (
@@ -167,7 +171,7 @@ const FrequentlyBoughtTogether = ({ product, categoryId, vendorId }: Props) => {
                 aria-label={`تحديد ${c.name}`}
               />
               <span className="flex-1 line-clamp-2">{c.name}</span>
-              <span className="font-semibold text-primary">{c.price.toLocaleString()} ل.س</span>
+              <span className="font-semibold text-primary">{formatPrice(c.price, c.currency)}</span>
             </li>
           ))}
         </ul>
@@ -177,7 +181,9 @@ const FrequentlyBoughtTogether = ({ product, categoryId, vendorId }: Props) => {
             <p className="text-xs text-muted-foreground">
               إجمالي {chosen.length + 1} منتجات
             </p>
-            <p className="text-xl font-bold text-primary">{total.toLocaleString()} ل.س</p>
+            {totals.map((t) => (
+              <p key={t.currency} className="text-xl font-bold text-primary">{formatPrice(t.total, t.currency)}</p>
+            ))}
           </div>
           <Button className="rounded-full" onClick={addBundle} disabled={adding}>
             {adding ? (

@@ -1,3 +1,4 @@
+import { formatPrice } from "@/lib/currency";
 import { useEffect, useState } from "react";
 import { Link, useParams, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
@@ -102,8 +103,8 @@ interface TrackingHistoryRow {
   created_at: string;
 }
 
-const formatMoney = (n: number | null | undefined) =>
-  `${new Intl.NumberFormat("ar-SY", { maximumFractionDigits: 0 }).format(Math.round(Number(n) || 0))} ل.س`;
+const formatMoney = (n: number | null | undefined, currency?: string | null) =>
+  formatPrice(Math.round(Number(n) || 0), currency, { maximumFractionDigits: 0 });
 
 const TrackOrder = () => {
   const { id } = useParams();
@@ -294,7 +295,7 @@ const TrackOrder = () => {
       .eq("parent_order_id", id).eq("customer_id", user.id).order("created_at");
     const childRows = children.data ?? [];
     const [items, shipping] = await Promise.all([
-      supabase.from("order_items").select("id, order_id, vendor_id, product_id, quantity, price, product_name, product_image, variant_label")
+      supabase.from("order_items").select("id, order_id, vendor_id, product_id, quantity, price, currency, product_name, product_image, variant_label")
         .in("order_id", [id, ...childRows.map((child) => child.id)]),
       supabase.from("shipping_details").select("shipping_company, estimated_delivery, shipped_at, delivered_at, shipping_notes").eq("order_id", id),
     ]);
@@ -566,27 +567,27 @@ const TrackOrder = () => {
                   <div className="space-y-1.5 text-sm">
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">منتجات:</span>
-                      <span className="font-medium">{formatMoney(order.subtotal_amount ?? order.total_amount)}</span>
+                      <span className="font-medium">{formatMoney(order.subtotal_amount ?? order.total_amount, (order as any).currency)}</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">الشحن:</span>
-                      <span className="font-medium">{formatMoney(order.shipping_amount)}</span>
+                      <span className="font-medium">{formatMoney(order.shipping_amount, (order as any).currency)}</span>
                     </div>
                     {!!order.discount_amount && (
                       <div className="flex justify-between">
                         <span className="text-muted-foreground">الخصم:</span>
-                        <span className="font-medium text-primary">- {formatMoney(order.discount_amount)}</span>
+                        <span className="font-medium text-primary">- {formatMoney(order.discount_amount, (order as any).currency)}</span>
                       </div>
                     )}
                     {!!order.tax_amount && (
                       <div className="flex justify-between">
                         <span className="text-muted-foreground">الضريبة:</span>
-                        <span className="font-medium">{formatMoney(order.tax_amount)}</span>
+                        <span className="font-medium">{formatMoney(order.tax_amount, (order as any).currency)}</span>
                       </div>
                     )}
                     <div className="flex justify-between text-lg font-bold pt-2 border-t">
                       <span>الإجمالي:</span>
-                      <span className="text-primary">{formatMoney(order.total_amount)}</span>
+                      <span className="text-primary">{formatMoney(order.total_amount, (order as any).currency)}</span>
                     </div>
                   </div>
                 </CardContent>
@@ -690,7 +691,7 @@ const TrackOrder = () => {
                             <p className="text-xs text-muted-foreground">{item.variant_label}</p>
                           )}
                           <p className="text-sm text-muted-foreground">
-                            الكمية: {item.quantity} × {formatMoney(item.price)}
+                            الكمية: {item.quantity} × {formatMoney(item.price, (item as any).currency ?? (order as any).currency)}
                           </p>
                         </div>
                       </Link>

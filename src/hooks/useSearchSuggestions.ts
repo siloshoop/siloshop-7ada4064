@@ -6,6 +6,7 @@ export interface ProductSuggestion {
   id: string;
   name: string;
   price: number;
+  currency?: string | null;
   image_url: string | null;
   category_id: string | null;
   brand_id: string | null;
@@ -134,7 +135,7 @@ export const useSearchSuggestions = (query: string, debounceMs = 220) => {
     const timer = window.setTimeout(async () => {
       let q = supabase
         .from("products")
-        .select("id, name, price, image_url, category_id, brand_id")
+        .select("id, name, price, currency, image_url, category_id, brand_id")
         .eq("is_active", true);
       buildFuzzyPatterns(term).forEach((pattern) => {
         q = q.ilike("name", pattern);

@@ -1,3 +1,4 @@
+import { formatPrice, normalizeCurrency } from "@/lib/currency";
 interface Props {
   product: Record<string, any>;
   vendorName?: string | null;
@@ -39,14 +40,14 @@ const ProductSpecs = ({ product, vendorName, categoryName, brandName }: Props) =
   push(
     "تكلفة الشحن",
     product.shipping_cost && Number(product.shipping_cost) > 0
-      ? `${Number(product.shipping_cost).toLocaleString()} ل.س`
+      ? formatPrice(product.shipping_cost, product.currency)
       : "شحن مجاني",
   );
   push(
     "مدة الشحن",
     product.ships_within_days ? `خلال ${product.ships_within_days} أيام` : null,
   );
-  push("العملة", product.currency === "SYP" || !product.currency ? "ليرة سورية (ل.س)" : product.currency);
+  push("العملة", normalizeCurrency(product.currency) === "USD" ? "دولار أمريكي ($)" : "ليرة سورية (ل.س)");
 
   Object.entries(custom).forEach(([k, v]) => push(k, v));
 

@@ -24,6 +24,8 @@ interface Coupon {
   used_count: number;
   expires_at: string | null;
   is_active: boolean;
+  product_ids: string[];
+  currency: string;
 }
 
 const ManageCoupons = () => {
@@ -41,7 +43,23 @@ const ManageCoupons = () => {
     min_purchase: "",
     max_uses: "",
     expires_at: "",
+    currency: "SYP",
   });
+  const [products, setProducts] = useState<{ id: string; name: string; currency: string | null }[]>([]);
+  const [selectedProducts, setSelectedProducts] = useState<string[]>([]);
+
+  useEffect(() => {
+    if (!user) return;
+    supabase
+      .from("products")
+      .select("id, name, currency")
+      .eq("vendor_id", user.id)
+      .order("created_at", { ascending: false })
+      .then(({ data }) => setProducts((data as any) || []));
+  }, [user]);
+
+  const toggleProduct = (id: string) =>
+    setSelectedProducts((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -71,9 +89,15 @@ const ManageCoupons = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) return;
+    if (selectedProducts.length === 0) {
+      toast({ title: "اختر المنتجات", description: "يجب اختيار منتج واحد على الأقل من منتجاتك ليعمل عليه الكوبون.", variant: "destructive" });
+      return;
+    }
 
     try {
       const { error } = await supabase.from("coupons").insert({
+        product_ids: selectedProducts,
+        currency: formData.currency,
         vendor_id: user.id,
         code: formData.code.toUpperCase(),
         discount_type: formData.discount_type,
@@ -97,7 +121,9 @@ const ManageCoupons = () => {
         min_purchase: "",
         max_uses: "",
         expires_at: "",
+        currency: "SYP",
       });
+      setSelectedProducts([]);
       setShowForm(false);
       fetchCoupons();
     } catch (error) {
@@ -222,7 +248,7 @@ const ManageCoupons = () => {
 
                     <div className="space-y-2">
                       <Label htmlFor="discount_value">
-                        قيمة الخصم * {formData.discount_type === "percentage" ? "(%)" : "(ريال)"}
+                        قيمة الخصم * {formData.discount_type === "percentage" ? "(%)" : formData.currency === "USD" ? "($)" : "(ل.س)"}
                       </Label>
                       <Input
                         id="discount_value"
@@ -238,7 +264,7 @@ const ManageCoupons = () => {
 
                   <div className="grid grid-cols-1 gap-4 min-[360px]:grid-cols-2">
                     <div className="space-y-2">
-                      <Label htmlFor="min_purchase">الحد الأدنى للشراء (ريال)</Label>
+                      <Label htmlFor="min_purchase">الحد الأدنى للشراء ({formData.currency === "USD" ? "$" : "ل.س"})</Label>
                       <Input
                         id="min_purchase"
                         type="number"
@@ -259,6 +285,41 @@ const ManageCoupons = () => {
                         placeholder="غير محدود"
                       />
                     </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label>عملة المبالغ</Label>
+                    <Select value={formData.currency} onValueChange={(value) => setFormData({ ...formData, currency: value })}>
+                      <SelectTrigger><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="SYP">ليرة سورية (ل.س)</SelectItem>
+                        <SelectItem value="USD">دولار ($)</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <p className="text-xs text-muted-foreground">الخصم الثابت يعمل فقط على المنتجات بنفس العملة. النسبة المئوية تعمل بأي عملة.</p>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label>المنتجات المشمولة بالكوبون * ({selectedProducts.length})</Label>
+                    <p className="text-xs text-muted-foreground">الكوبون يعمل فقط على منتجاتك التي تختارها هنا، ولا يعمل على منتجات البائعين الآخرين.</p>
+                    {products.length === 0 ? (
+                      <p className="text-sm text-muted-foreground">لا توجد منتجات في متجرك بعد.</p>
+                    ) : (
+                      <div className="max-h-56 space-y-1 overflow-y-auto rounded-md border p-2">
+                        {products.map((p) => (
+                          <label key={p.id} className="flex cursor-pointer items-center gap-2 rounded px-2 py-1.5 text-sm hover:bg-muted">
+                            <input
+                              type="checkbox"
+                              checked={selectedProducts.includes(p.id)}
+                              onChange={() => toggleProduct(p.id)}
+                              className="h-4 w-4 accent-primary"
+                            />
+                            <span className="min-w-0 flex-1 truncate">{p.name}</span>
+                            <span className="text-xs text-muted-foreground">{p.currency === "USD" ? "$" : "ل.س"}</span>
+                          </label>
+                        ))}
+                      </div>
+                    )}
                   </div>
 
                   <div className="space-y-2">
@@ -303,8 +364,12 @@ const ManageCoupons = () => {
                         </div>
                         <p className="text-sm text-muted-foreground mb-3">
                           خصم {coupon.discount_value}
-                          {coupon.discount_type === 'percentage' ? '%' : ' ريال'}
-                          {coupon.min_purchase > 0 && ` - حد أدنى ${coupon.min_purchase} ريال`}
+                          {coupon.discount_type === 'percentage' ? '%' : coupon.currency === 'USD' ? ' $' : ' ل.س'}
+                          {coupon.min_purchase > 0 && ` - حد أدنى ${coupon.min_purchase} ${coupon.currency === 'USD' ? '$' : 'ل.س'}`}
+                          {' - '}
+                          {coupon.product_ids?.length
+                            ? `يشمل ${coupon.product_ids.length} منتج`
+                            : 'لا يشمل أي منتج — أنشئ كوبونًا جديدًا واختر المنتجات'}
                         </p>
                         <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground">
                           {coupon.expires_at && (

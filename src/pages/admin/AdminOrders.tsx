@@ -65,7 +65,7 @@ type DetailPayload = {
   customer: Record<string, any> | null;
 };
 
-const PAY_STATUSES = ["pending", "completed", "failed", "refunded"];
+const PAY_STATUSES = ["completed", "failed", "refunded"];
 const PAY_LABEL: Record<string, string> = {
   pending: "بانتظار الدفع", completed: "مدفوع", failed: "فشل", refunded: "مسترد",
 };
@@ -359,8 +359,14 @@ const AdminOrders = () => {
                           <td className="px-3 py-2"><OrderStatusBadge status={r.status} /></td>
                           <td className="px-3 py-2">
                             <div className="flex flex-col gap-1">
-                              <Badge variant="outline">{PAY_LABEL[r.payment_status] || r.payment_status}</Badge>
-                              {r.payment_method && <span className="text-[10px] text-muted-foreground">{r.payment_method}</span>}
+                              {r.payment_status !== "pending" && (
+                                <Badge variant="outline" className="w-fit whitespace-nowrap">{PAY_LABEL[r.payment_status] || r.payment_status}</Badge>
+                              )}
+                              {r.payment_method && (
+                                <span className="whitespace-nowrap text-xs text-muted-foreground">
+                                  {r.payment_method === "cod" ? "الدفع عند الاستلام" : r.payment_method}
+                                </span>
+                              )}
                             </div>
                           </td>
                           <td className="whitespace-nowrap px-3 py-2">{money(r.total_amount)}</td>

@@ -6,6 +6,7 @@ import PremiumShowroom from "@/components/PremiumShowroom";
 import LocalMarketplaceBanner from "@/components/home/LocalMarketplaceBanner";
 import { SearchFilters } from "@/components/SearchFilters";
 import { supabase } from "@/integrations/supabase/client";
+import { buildFuzzyPatterns } from "@/lib/search";
 import { Loader2, Sparkles, Tag } from "lucide-react";
 import ProductCard from "@/components/ProductCard";
 import Footer from "@/components/Footer";
@@ -75,9 +76,12 @@ const Index = () => {
         .from("products")
         .select("id, name, price, currency, original_price, image_url, reviews(rating)")
         .eq("is_active", true)
-        .ilike("name", `%${query}%`)
         .gte("price", filters.minPrice)
         .lte("price", filters.maxPrice);
+
+      buildFuzzyPatterns(query).forEach((pattern) => {
+        queryBuilder = queryBuilder.or(`name.ilike.${pattern},description.ilike.${pattern}`);
+      });
 
       if (filters.categoryId) {
         queryBuilder = queryBuilder.eq("category_id", filters.categoryId);

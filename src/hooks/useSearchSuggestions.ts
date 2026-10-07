@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { matchesSearchTerm, normalizeSearchTerm } from "@/lib/search";
+import { buildFuzzyPatterns, matchesSearchTerm, normalizeSearchTerm } from "@/lib/search";
 
 export interface ProductSuggestion {
   id: string;
@@ -132,12 +132,14 @@ export const useSearchSuggestions = (query: string, debounceMs = 220) => {
     setLoading(true);
     const id = ++requestId.current;
     const timer = window.setTimeout(async () => {
-      const { data } = await supabase
+      let q = supabase
         .from("products")
         .select("id, name, price, image_url, category_id, brand_id")
-        .eq("is_active", true)
-        .ilike("name", `%${term}%`)
-        .limit(8);
+        .eq("is_active", true);
+      buildFuzzyPatterns(term).forEach((pattern) => {
+        q = q.ilike("name", pattern);
+      });
+      const { data } = await q.limit(8);
 
       // Ignore out-of-order responses.
       if (id !== requestId.current) return;

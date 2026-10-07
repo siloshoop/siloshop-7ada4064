@@ -203,6 +203,24 @@ const Product = () => {
       // Track product view for recently viewed feature
       trackProductView(id);
     }
+    if (!id) return;
+    const refreshStock = async () => {
+      const [{ data: latest }, { data: latestVariants }] = await Promise.all([
+        supabase.from("products").select("stock_quantity").eq("id", id).maybeSingle(),
+        supabase.from("product_variants").select("*").eq("product_id", id).eq("is_active", true),
+      ]);
+      if (latest) setProduct((prev) => prev ? { ...prev, stock_quantity: latest.stock_quantity } : prev);
+      if (latestVariants) {
+        setVariants(latestVariants);
+        setSelectedVariant((prev) => prev ? latestVariants.find((v) => v.id === prev.id && variantInStock(v)) ?? null : null);
+      }
+    };
+    const channel = supabase.channel(`product-stock-${id}`)
+      .on("postgres_changes", { event: "UPDATE", schema: "public", table: "products", filter: `id=eq.${id}` }, refreshStock)
+      .on("postgres_changes", { event: "*", schema: "public", table: "product_variants", filter: `product_id=eq.${id}` }, refreshStock)
+      .subscribe();
+    window.addEventListener("focus", refreshStock);
+    return () => { window.removeEventListener("focus", refreshStock); void supabase.removeChannel(channel); };
     // Only re-fetch when the product changes. `toast` / `trackProductView` are
     // intentionally omitted — including them re-ran this effect on every render.
     // eslint-disable-next-line react-hooks/exhaustive-deps

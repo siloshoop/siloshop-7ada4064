@@ -9,7 +9,7 @@ import { useCompareProducts } from "@/hooks/useCompareProducts";
 import { useFlyToCart } from "@/components/FlyToCart";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
-import React, { useState, memo } from "react";
+import React, { useState, useEffect, memo } from "react";
 import { notifySync, useSyncListener } from "@/lib/uiSync";
 import { formatPrice } from "@/lib/currency";
 import { productRequiresOptions } from "@/lib/variantRequirement";
@@ -63,6 +63,19 @@ const ProductCard = memo(({
   const { triggerFly } = useFlyToCart();
   const [imageLoaded, setImageLoaded] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
+  const [liveStock, setLiveStock] = useState(stockQuantity);
+  useEffect(() => { setLiveStock(stockQuantity); }, [stockQuantity]);
+  useEffect(() => {
+    if (!id) return;
+    const refresh = async () => {
+      const { data } = await supabase.from("products").select("stock_quantity").eq("id", id).maybeSingle();
+      if (data) setLiveStock(data.stock_quantity);
+    };
+    // Callers that do not select stock still get the saved availability.
+    if (stockQuantity == null) void refresh();
+    window.addEventListener("stock-updated", refresh);
+    return () => window.removeEventListener("stock-updated", refresh);
+  }, [id, stockQuantity]);
 
   const productId = id;
 
@@ -121,8 +134,8 @@ const ProductCard = memo(({
   };
 
 
-  const isOutOfStock = typeof stockQuantity === "number" && stockQuantity <= 0;
-  const isLowStock = typeof stockQuantity === "number" && stockQuantity > 0 && stockQuantity <= 5;
+  const isOutOfStock = typeof liveStock === "number" && liveStock <= 0;
+  const isLowStock = typeof liveStock === "number" && liveStock > 0 && liveStock <= 5;
 
   const handleAddToCart = async (e: React.MouseEvent<HTMLButtonElement>) => {
     e.stopPropagation();
@@ -234,7 +247,7 @@ const ProductCard = memo(({
         {!isOutOfStock && isLowStock && (
           <div className="absolute bottom-2 start-2 z-10">
             <Badge className="bg-warning text-warning-foreground font-semibold text-[10px] px-1.5 py-0.5 rounded-md shadow-md border-0 animate-pulse">
-              متبقي {stockQuantity}
+              متبقي {liveStock}
             </Badge>
           </div>
         )}

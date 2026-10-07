@@ -1,0 +1,2 @@
+DROP TRIGGER IF EXISTS guard_order_item_stock ON public.order_items;
+COMMENT ON FUNCTION public.guard_saved_item_stock() IS 'Cart/favorite stock validation before writes; create_order validates and locks order stock before decrementing, so order_items must not revalidate already decremented stock.';

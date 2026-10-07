@@ -134,6 +134,12 @@ const Checkout = () => {
 
   useEffect(() => {
     fetchCart();
+    window.addEventListener("cart-updated", fetchCart);
+    window.addEventListener("focus", fetchCart);
+    return () => {
+      window.removeEventListener("cart-updated", fetchCart);
+      window.removeEventListener("focus", fetchCart);
+    };
   }, [user]);
 
   useEffect(() => {

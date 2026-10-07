@@ -1,6 +1,6 @@
 import { formatPrice } from "@/lib/currency";
 import { useCallback, useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import Navbar from "@/components/Navbar";
@@ -824,21 +824,26 @@ const Dashboard = () => {
         ) : (
           <>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-              <Card>
+              <Link to="/orders" aria-label="عدد الطلبات" className="block min-w-0 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+              <Card className="h-full">
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-sm font-medium">عدد الطلبات</CardTitle>
                   <ShoppingBag className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent><div className="text-2xl font-bold">{customerStats.orders}</div></CardContent>
               </Card>
-              <Card>
+              </Link>
+              <Link to="/orders" aria-label="المبلغ الإجمالي" className="block min-w-0 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+              <Card className="h-full">
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-sm font-medium">المبلغ الإجمالي</CardTitle>
                   <DollarSign className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent><div className="text-2xl font-bold">{customerStats.totalSpent.toLocaleString()} ل.س</div></CardContent>
               </Card>
-              <Card>
+              </Link>
+              <Link to="/orders" aria-label="منتجات مقيّمة" className="block min-w-0 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+              <Card className="h-full">
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-sm font-medium">منتجات مقيّمة</CardTitle>
                   <Star className="h-4 w-4 text-muted-foreground" />
@@ -852,13 +857,16 @@ const Dashboard = () => {
                   <p className="text-[10px] text-muted-foreground mt-1">نسبة التقييم من طلباتك</p>
                 </CardContent>
               </Card>
-              <Card>
+              </Link>
+              <Link to="/favorites" aria-label="المفضلة" className="block min-w-0 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+              <Card className="h-full">
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-sm font-medium">المفضلة</CardTitle>
                   <Heart className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent><div className="text-2xl font-bold">{customerStats.favorites}</div></CardContent>
               </Card>
+              </Link>
             </div>
 
             <Card>
@@ -868,37 +876,53 @@ const Dashboard = () => {
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                  <Button variant="outline" className="h-20 flex-col gap-1" onClick={() => navigate("/orders")}>
+                  <Button asChild variant="outline" className="h-20 flex-col gap-1">
+                    <Link to="/orders">
                     <ShoppingBag className="h-5 w-5" />
                     <span>طلباتي</span>
+                                      </Link>
                   </Button>
-                  <Button variant="outline" className="h-20 flex-col gap-1" onClick={() => navigate("/favorites")}>
+                  <Button asChild variant="outline" className="h-20 flex-col gap-1">
+                    <Link to="/favorites">
                     <Heart className="h-5 w-5" />
                     <span>المفضلة</span>
+                                      </Link>
                   </Button>
-                  <Button variant="outline" className="h-20 flex-col gap-1" onClick={() => navigate("/compare")}>
+                  <Button asChild variant="outline" className="h-20 flex-col gap-1">
+                    <Link to="/compare">
                     <ArrowLeftRight className="h-5 w-5" />
                     <span>مقارنة المنتجات</span>
+                                      </Link>
                   </Button>
-                  <Button variant="outline" className="h-20 flex-col gap-1" onClick={() => navigate("/followed-stores")}>
+                  <Button asChild variant="outline" className="h-20 flex-col gap-1">
+                    <Link to="/followed-stores">
                     <Store className="h-5 w-5" />
                     <span>متاجر أتابعها</span>
+                                      </Link>
                   </Button>
-                  <Button variant="outline" className="h-20 flex-col gap-1" onClick={() => navigate("/followed-brands")}>
+                  <Button asChild variant="outline" className="h-20 flex-col gap-1">
+                    <Link to="/followed-brands">
                     <Tag className="h-5 w-5" />
                     <span>ماركات أتابعها</span>
+                                      </Link>
                   </Button>
-                  <Button variant="outline" className="h-20 flex-col gap-1" onClick={() => navigate("/notifications")}>
+                  <Button asChild variant="outline" className="h-20 flex-col gap-1">
+                    <Link to="/notifications">
                     <Bell className="h-5 w-5" />
                     <span>الإشعارات</span>
+                                      </Link>
                   </Button>
-                  <Button variant="outline" className="h-20 flex-col gap-1" onClick={() => navigate("/messages")}>
+                  <Button asChild variant="outline" className="h-20 flex-col gap-1">
+                    <Link to="/messages">
                     <MessageSquare className="h-5 w-5" />
                     <span>الرسائل</span>
+                                      </Link>
                   </Button>
-                  <Button variant="outline" className="h-20 flex-col gap-1" onClick={() => navigate("/settings")}>
+                  <Button asChild variant="outline" className="h-20 flex-col gap-1">
+                    <Link to="/settings">
                     <Settings className="h-5 w-5" />
                     <span>الإعدادات</span>
+                                      </Link>
                   </Button>
                 </div>
               </CardContent>

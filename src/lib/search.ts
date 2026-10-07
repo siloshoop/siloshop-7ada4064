@@ -41,5 +41,8 @@ export const buildFuzzyPatterns = (query: string): string[] =>
     .map((w) => w.trim())
     .filter(Boolean)
     .map((w) => (w.startsWith("ال") && w.length > 4 ? w.slice(2) : w))
-    .map((w) => `%${w.replace(FUZZY_LETTERS, "_")}%`)
+    .map((w) => {
+      const fuzzy = w.replace(FUZZY_LETTERS, "_");
+      return `%${/[^_]/.test(fuzzy) ? fuzzy : w}%`;
+    })
     .slice(0, 5);

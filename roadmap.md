@@ -1,5 +1,9 @@
 # Production readiness audit
 
+## Product listing stock consistency
+- [ ] Remove direct cart actions from product listing cards; preserve product detail purchase controls
+- [ ] Unify saved-stock indicators across listings and product options; verify browser flows and automated tests
+
 ## Footer and page navigation
 - [x] Move store-opening button to the end of Customer Service
 - [x] Reset page scroll on opening, forward/back navigation, and reload; desktop/mobile browser checks, 82 tests and automatic build passed

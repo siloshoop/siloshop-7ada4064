@@ -265,7 +265,7 @@ const Checkout = () => {
   ) as ProductCurrency[];
   const orderCurrency: ProductCurrency = cartCurrencies[0] ?? "SYP";
   const isMixedCurrency = cartCurrencies.length > 1;
-  const couponSupported = !isMixedCurrency && orderCurrency === COUPON_CURRENCY;
+  const couponSupported = !isMixedCurrency;
 
   // Payment + shipping model (enforced server-side in create_order):
   //  - Seller products   -> per-product shipping, Cash on Delivery only.
@@ -408,46 +408,39 @@ const Checkout = () => {
     if (!couponSupported) {
       toast({
         title: "الكوبون غير متاح",
-        description: "أكواد الخصم تُحسب بالليرة السورية فقط، ولا يمكن تطبيقها على طلب بالدولار.",
+        description: "لا يمكن تطبيق كوبون على سلة تجمع عملتين مختلفتين.",
         variant: "destructive",
       });
       return;
     }
 
     try {
-      const { data: rows, error } = await supabase
-        .rpc("validate_coupon", {
-          _code: couponCode.toUpperCase(),
-          _subtotal: subtotal,
-        });
+      const data = await quoteCoupon(
+        couponCode,
+        cartItems.map((item) => ({
+          product_id: item.product.id,
+          variant_id: item.variant_id ?? null,
+          quantity: item.quantity,
+        })),
+      );
 
-      if (error) throw error;
-
-      const data = Array.isArray(rows) ? rows[0] : rows;
-
-      if (!data) {
+      if (!data || data.error) {
         toast({
-          title: "خطأ",
-          description: "كود الكوبون غير صحيح أو منتهي الصلاحية أو الحد الأدنى للشراء غير محقق",
+          title: "الكوبون غير متاح",
+          description: couponErrorMessage(data?.error),
           variant: "destructive",
         });
         return;
       }
 
-      // Calculate discount
-      let discountAmount = 0;
-      if (data.discount_type === 'percentage') {
-        discountAmount = (subtotal * data.discount_value) / 100;
-      } else {
-        discountAmount = data.discount_value;
-      }
+      const discountAmount = Number(data.discount_amount) || 0;
 
       setAppliedCoupon(data);
       setDiscount(discountAmount);
 
       toast({
         title: "تم التطبيق",
-        description: `تم تطبيق كوبون خصم بقيمة ${formatPrice(discountAmount, COUPON_CURRENCY, { maximumFractionDigits: 0 })}`,
+        description: `تم تطبيق خصم ${formatPrice(discountAmount, orderCurrency, { maximumFractionDigits: 2 })} على منتجات المتجر المشمولة بالكوبون`,
       });
     } catch (error) {
       toast({

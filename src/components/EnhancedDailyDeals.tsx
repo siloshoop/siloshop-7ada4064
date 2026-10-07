@@ -76,6 +76,7 @@ const EnhancedDailyDeals = () => {
           `)
           .eq("is_active", true)
           .gt("end_date", new Date().toISOString())
+          .lte("start_date", new Date().toISOString())
           .order("end_date", { ascending: true })
           .limit(6);
 

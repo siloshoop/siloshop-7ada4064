@@ -34,9 +34,6 @@ export interface DeliveryAddress {
   governorate: string | null;
   city: string;
   street: string;
-  building: string | null;
-  apartment: string | null;
-  landmark: string | null;
   phone: string;
   notes: string | null;
   is_default: boolean;
@@ -48,9 +45,6 @@ const schema = z.object({
   city: z.string().trim().min(2, "المدينة/المنطقة مطلوبة").max(100),
   street: z.string().trim().min(2, "الشارع مطلوب").max(100),
   phone: z.string().trim().regex(/^09\d{8}$/, "رقم سوري بصيغة 09xxxxxxxx"),
-  building: z.string().trim().max(100).optional().or(z.literal("")),
-  apartment: z.string().trim().max(100).optional().or(z.literal("")),
-  landmark: z.string().trim().max(100).optional().or(z.literal("")),
   notes: z.string().trim().max(500).optional().or(z.literal("")),
 });
 
@@ -69,9 +63,6 @@ const Addresses = () => {
     governorate: "",
     city: "",
     street: "",
-    building: "",
-    apartment: "",
-    landmark: "",
     phone: "",
     notes: "",
     is_default: false,
@@ -109,9 +100,6 @@ const Addresses = () => {
       governorate: "",
       city: "",
       street: "",
-      building: "",
-      apartment: "",
-      landmark: "",
       phone: "",
       notes: "",
       is_default: false,
@@ -126,9 +114,6 @@ const Addresses = () => {
       governorate: addr.governorate || "",
       city: addr.city || "",
       street: addr.street || "",
-      building: addr.building || "",
-      apartment: addr.apartment || "",
-      landmark: addr.landmark || "",
       phone: addr.phone,
       notes: addr.notes || "",
       is_default: addr.is_default,
@@ -151,9 +136,6 @@ const Addresses = () => {
         governorate: parsed.data.governorate,
         city: parsed.data.city,
         street: parsed.data.street,
-        building: parsed.data.building || null,
-        apartment: parsed.data.apartment || null,
-        landmark: parsed.data.landmark || null,
         phone: parsed.data.phone,
         notes: parsed.data.notes || null,
       };

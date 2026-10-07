@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Plus, Save, Trash2 } from "lucide-react";
+import { Loader2, Plus, Save, Trash2, LockKeyhole } from "lucide-react";
 import { money, weight as weightSchema, codeText, friendlyDbError } from "@/lib/productValidation";
 import { z } from "zod";
 import { useAuth } from "@/hooks/useAuth";
@@ -400,7 +400,10 @@ const ProductVariantsManager = ({ productId }: { productId: string }) => {
           return (
             <Card key={v.id}>
               <CardContent className="pt-6 space-y-4">
-                <p className="font-medium text-sm text-primary">{attrLabelMap(v.attributes) || "بدون خصائص"}</p>
+                <p className={`inline-flex items-center gap-2 rounded-md border px-2 py-1 font-medium text-sm ${v.stock_quantity <= 0 || !v.is_active ? "border-dashed text-muted-foreground opacity-60" : "bg-primary text-primary-foreground"}`}>
+                  {attrLabelMap(v.attributes) || "بدون خصائص"}
+                  {(v.stock_quantity <= 0 || !v.is_active) && <><LockKeyhole className="h-3 w-3" />نفذت الكمية</>}
+                </p>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div className="space-y-2">
                     <Label>SKU</Label>

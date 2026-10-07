@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import type { Database } from "@/integrations/supabase/types";
+import { LockKeyhole } from "lucide-react";
+import { optionInStock, variantInStock } from "@/lib/stockAvailability";
 
 type ProductVariant = Database["public"]["Tables"]["product_variants"]["Row"];
 
@@ -50,19 +52,12 @@ const ProductVariantPicker = ({ variants, onSelect }: ProductVariantPickerProps)
   }, [attributeKeys, selected, variants]);
 
   useEffect(() => {
-    onSelect(matchingVariant);
+    onSelect(matchingVariant && variantInStock(matchingVariant) ? matchingVariant : null);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [matchingVariant]);
 
   const isOptionAvailable = (key: string, value: string) => {
-    const candidate = { ...selected, [key]: value };
-    return variants.some((v) => {
-      const attrs = (v.attributes || {}) as Record<string, string>;
-      const matchesSelected = Object.entries(candidate).every(
-        ([k, val]) => attrs[k] === undefined || attrs[k] === val
-      );
-      return matchesSelected && attrs[key] === value && v.stock_quantity > 0;
-    });
+    return optionInStock(variants, selected, key, value);
   };
 
   if (attributeKeys.length === 0) return null;
@@ -80,9 +75,10 @@ const ProductVariantPicker = ({ variants, onSelect }: ProductVariantPickerProps)
                 <Button
                   key={value}
                   type="button"
-                  variant={isSelected ? "default" : "outline"}
+                  variant={available ? "default" : "outline"}
                   size="sm"
-                  className={`rounded-full ${!available ? "line-through opacity-60" : ""}`}
+                  className={`rounded-full border ${isSelected && available ? "ring-2 ring-ring ring-offset-2 ring-offset-background" : ""} ${!available ? "border-dashed text-muted-foreground opacity-50" : ""}`}
+                  aria-pressed={isSelected && available}
                   disabled={!available}
                   title={!available ? "غير متوفر" : undefined}
                   aria-label={!available ? `${value} — غير متوفر` : value}
@@ -94,6 +90,7 @@ const ProductVariantPicker = ({ variants, onSelect }: ProductVariantPickerProps)
                   }
                 >
                   {value}
+                  {!available && <LockKeyhole className="ms-1 h-3 w-3" aria-hidden="true" />}
                 </Button>
               );
             })}

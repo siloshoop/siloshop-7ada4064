@@ -1158,6 +1158,7 @@ const SearchPage = () => {
                           discount={discount}
                           shippingCost={(product as any).shipping_cost || 0}
                           productType={product.product_type}
+                          stockQuantity={product.stock_quantity}
                           shipsWithinDays={product.ships_within_days}
                         />
                       </Fragment>

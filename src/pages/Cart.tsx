@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { readCartStock, validateCartQuantity } from "@/lib/cartStock";
 import { formatVariantLabel } from "@/lib/variantRequirement";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import {
@@ -628,15 +628,17 @@ const Cart = () => {
                   <Card key={item.id}>
                     <CardContent className="p-3 sm:p-6">
                       <div className="grid min-w-0 grid-cols-[5rem_minmax(0,1fr)] gap-3 sm:grid-cols-[6rem_minmax(0,1fr)] sm:gap-4">
-                        <img loading="lazy" decoding="async"
-                          src={item.product.image_url}
-                          alt={item.product.name}
-                          className="aspect-square h-auto w-full rounded-lg object-cover"
-                        />
+                        <Link to={`/product/${item.product.id}`} aria-label={item.product.name}>
+                          <img loading="lazy" decoding="async"
+                            src={item.product.image_url}
+                            alt={item.product.name}
+                            className="aspect-square h-auto w-full rounded-lg object-cover"
+                          />
+                        </Link>
                         <div className="min-w-0 space-y-2">
                           <div className="flex min-w-0 items-start justify-between gap-1">
                             <div className="min-w-0">
-                              <h3 className="text-sm font-bold leading-snug sm:text-lg">{item.product.name}</h3>
+                              <h3 className="text-sm font-bold leading-snug sm:text-lg"><Link to={`/product/${item.product.id}`} className="hover:text-primary">{item.product.name}</Link></h3>
                               {item.variantLabel && (
                                 <p className="text-xs text-muted-foreground">{item.variantLabel}</p>
                               )}
@@ -962,13 +964,15 @@ const Cart = () => {
                 <Card key={item.id}>
                   <CardContent className="p-4">
                     <div className="flex gap-3">
-                      <img loading="lazy" decoding="async"
-                        src={item.product.image_url}
-                        alt={item.product.name}
-                        className="w-20 h-20 object-cover rounded-lg shrink-0"
-                      />
+                      <Link to={`/product/${item.product.id}`} className="shrink-0" aria-label={item.product.name}>
+                        <img loading="lazy" decoding="async"
+                          src={item.product.image_url}
+                          alt={item.product.name}
+                          className="w-20 h-20 object-cover rounded-lg shrink-0"
+                        />
+                      </Link>
                       <div className="flex-1 min-w-0 space-y-1">
-                        <h3 className="font-bold truncate">{item.product.name}</h3>
+                        <h3 className="font-bold truncate"><Link to={`/product/${item.product.id}`} className="hover:text-primary">{item.product.name}</Link></h3>
                         <p className="text-sm text-muted-foreground">
                           {formatPrice(item.product.price, (item.product as any).currency)} للقطعة
                         </p>

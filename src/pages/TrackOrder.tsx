@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { Link, useParams, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -46,6 +46,7 @@ interface OrderItem {
   id: string;
   order_id: string;
   vendor_id: string | null;
+  product_id: string | null;
   quantity: number;
   price: number;
   product_name: string | null;
@@ -293,7 +294,7 @@ const TrackOrder = () => {
       .eq("parent_order_id", id).eq("customer_id", user.id).order("created_at");
     const childRows = children.data ?? [];
     const [items, shipping] = await Promise.all([
-      supabase.from("order_items").select("id, order_id, vendor_id, quantity, price, product_name, product_image, variant_label")
+      supabase.from("order_items").select("id, order_id, vendor_id, product_id, quantity, price, product_name, product_image, variant_label")
         .in("order_id", [id, ...childRows.map((child) => child.id)]),
       supabase.from("shipping_details").select("shipping_company, estimated_delivery, shipped_at, delivered_at, shipping_notes").eq("order_id", id),
     ]);
@@ -449,7 +450,7 @@ const TrackOrder = () => {
                   </CardHeader>
                   <CardContent className="p-4 pt-0 space-y-4">
                     <div className="space-y-3">
-                      {shipment.items.map((item) => <div key={item.id} className="flex items-start gap-3">
+                      {shipment.items.map((item) => <Link key={item.id} to={item.product_id ? `/product/${item.product_id}` : "#"} className="flex items-start gap-3 rounded-md transition-colors hover:bg-muted/50">
                         {item.product_image ? <img src={item.product_image} alt={item.product_name ?? "منتج"} loading="lazy" className="h-14 w-14 shrink-0 rounded object-cover" />
                           : <div className="h-14 w-14 shrink-0 rounded bg-muted flex items-center justify-center"><Package className="h-6 w-6 text-muted-foreground" /></div>}
                         <div className="min-w-0 flex-1">
@@ -457,7 +458,7 @@ const TrackOrder = () => {
                           {item.variant_label && <p className="text-xs text-muted-foreground break-words">{item.variant_label}</p>}
                           <p className="text-xs text-muted-foreground mt-1">الكمية: {item.quantity}</p>
                         </div>
-                      </div>)}
+                      </Link>)}
                     </div>
                     <Separator />
                     <ShipmentTrackingTimeline status={shipment.status || shipment.tracking_status} />
@@ -671,7 +672,7 @@ const TrackOrder = () => {
                 <CardContent>
                   <div className="space-y-4">
                     {(order.order_items ?? []).map((item, index) => (
-                      <div key={index} className="flex gap-4">
+                      <Link key={index} to={item.product_id ? `/product/${item.product_id}` : "#"} className="flex gap-4 rounded-md transition-colors hover:bg-muted/50">
                         {item.product_image ? (
                           <img loading="lazy" decoding="async"
                             src={item.product_image}
@@ -692,7 +693,7 @@ const TrackOrder = () => {
                             الكمية: {item.quantity} × {formatMoney(item.price)}
                           </p>
                         </div>
-                      </div>
+                      </Link>
                     ))}
                     {(!order.order_items || order.order_items.length === 0) && (
                       <p className="text-center text-muted-foreground py-4 text-sm">لا توجد منتجات</p>

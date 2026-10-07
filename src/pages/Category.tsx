@@ -253,6 +253,7 @@ const Category = () => {
                       reviews={product.reviews?.length || 0}
                       discount={discount}
                       shippingCost={(product as any).shipping_cost || 0}
+                      stockQuantity={product.stock_quantity}
                     />
                   </Fragment>
                 );

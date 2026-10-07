@@ -20,6 +20,7 @@ interface Row {
   stock_quantity: number | null;
   sku: string | null;
   barcode: string | null;
+  product_variants?: { id: string }[];
 }
 
 const SellerInventory = () => {
@@ -38,7 +39,7 @@ const SellerInventory = () => {
     setLoading(true);
     const { data, error } = await supabase
       .from("products")
-      .select("id,name,image_url,stock_quantity,sku,barcode")
+       .select("id,name,image_url,stock_quantity,sku,barcode,product_variants(id)")
       .eq("vendor_id", user.id)
       .order("stock_quantity", { ascending: true });
     if (error) toast({ title: "تعذّر تحميل المخزون", description: error.message, variant: "destructive" });
@@ -68,17 +69,18 @@ const SellerInventory = () => {
   }), [rows]);
 
   const save = async (row: Row) => {
+    if (row.product_variants?.length) return;
     const raw = drafts[row.id];
     const next = Math.max(0, Math.floor(Number(raw)));
     if (raw === undefined || Number.isNaN(next)) return;
     setSaving(row.id);
-    const { error } = await supabase.from("products").update({ stock_quantity: next }).eq("id", row.id);
+    const { data, error } = await supabase.from("products").update({ stock_quantity: next }).eq("id", row.id).select("stock_quantity").single();
     setSaving(null);
     if (error) {
       toast({ title: "تعذّر تحديث المخزون", description: error.message, variant: "destructive" });
       return;
     }
-    setRows((prev) => prev.map((r) => (r.id === row.id ? { ...r, stock_quantity: next } : r)));
+    setRows((prev) => prev.map((r) => (r.id === row.id ? { ...r, stock_quantity: data?.stock_quantity ?? next } : r)));
     setDrafts((d) => { const c = { ...d }; delete c[row.id]; return c; });
     toast({ title: next === 0 ? "تم التحديث — المنتج الآن نفذت كميته" : "تم تحديث المخزون" });
   };
@@ -147,11 +149,12 @@ const SellerInventory = () => {
                       className="w-24"
                       aria-label={`الكمية الجديدة لـ ${r.name}`}
                       value={drafts[r.id] ?? String(stock)}
+                      disabled={!!r.product_variants?.length}
                       onChange={(e) => setDrafts((d) => ({ ...d, [r.id]: e.target.value }))}
                     />
-                    <Button size="sm" disabled={drafts[r.id] === undefined || saving === r.id} onClick={() => save(r)}>
+                    {r.product_variants?.length ? <Button asChild size="sm" variant="outline"><Link to={`/dashboard/edit-product/${r.id}`}>الألوان والمقاسات</Link></Button> : <Button size="sm" disabled={drafts[r.id] === undefined || saving === r.id} onClick={() => save(r)}>
                       {saving === r.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <><Save className="me-1 h-4 w-4" /> حفظ</>}
-                    </Button>
+                    </Button>}
                   </div>
 
                   <div className="flex flex-wrap items-center gap-2 border-t pt-3">

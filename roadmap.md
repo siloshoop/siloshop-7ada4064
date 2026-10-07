@@ -1,5 +1,11 @@
 # Production readiness audit
 
+## Stock availability
+- [x] Apply locked sold-out options and consistent seller/buyer product status
+- [x] Enforce saved-stock purchase guards and automatic cart/favorites removal
+- [x] Verify real seller restock/sell-out, saved cart/checkout options, database rejection guards, 360/375/390/412px and landscape, 80 automated tests and automatic build
+- [ ] Verify physical Android stock behavior (blocked: no device or emulator available)
+
 - [x] Fix global responsive, RTL, safe-area, and viewport behavior
 - [x] Fix logo and production asset fallbacks
 - [x] Fix shared overlays, navigation, cards, and touch behavior

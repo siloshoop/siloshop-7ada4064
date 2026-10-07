@@ -3,7 +3,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Plus, X, RefreshCw } from "lucide-react";
+import { Plus, X, RefreshCw, LockKeyhole } from "lucide-react";
 
 export interface VariantRow {
   color: string;
@@ -241,8 +241,9 @@ const ProductColorsSizesEditor = ({ value, onChange }: Props) => {
               const key = variantKey(r.color, r.size);
               return (
                 <div key={key} className="grid grid-cols-1 gap-2 sm:grid-cols-4 sm:items-center">
-                  <p className="text-sm font-medium sm:col-span-2">
+                  <p className={`flex items-center gap-2 rounded-md border px-2 py-1 text-sm font-medium sm:col-span-2 ${Number(r.stock_quantity) > 0 ? "bg-primary text-primary-foreground" : "border-dashed text-muted-foreground opacity-60"}`}>
                     {[r.color, r.size].filter(Boolean).join(" / ")}
+                    {Number(r.stock_quantity) <= 0 && <><LockKeyhole className="h-3 w-3 shrink-0" />نفذت الكمية</>}
                   </p>
                   <Input
                     type="text"
@@ -272,8 +273,8 @@ const ProductColorsSizesEditor = ({ value, onChange }: Props) => {
             })}
           </div>
           <p className="text-xs text-muted-foreground">
-            مجموع كميات التركيبات: {totalStock.toLocaleString()} — اتركه فارغاً إن لم ترغب بتحديد
-            كمية لكل تركيبة. السعر الفارغ يعني استخدام سعر المنتج.
+            مجموع كميات التركيبات: {totalStock.toLocaleString()} — الكمية الفارغة أو صفر تعني نفاد المخزون.
+            السعر الفارغ يعني استخدام سعر المنتج.
           </p>
         </div>
       )}

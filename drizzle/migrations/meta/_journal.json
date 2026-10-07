@@ -85,6 +85,34 @@
       "when": 1791406751239,
       "tag": "0011_migration",
       "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1791407468135,
+      "tag": "0012_enforce_stock_availability",
+      "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1791407517223,
+      "tag": "0013_preserve_order_stock_validation_timing",
+      "breakpoints": true
+    },
+    {
+      "idx": 14,
+      "version": "7",
+      "when": 1791407634968,
+      "tag": "0014_validate_order_stock_totals_and_required_variants",
+      "breakpoints": true
+    },
+    {
+      "idx": 15,
+      "version": "7",
+      "when": 1791407684873,
+      "tag": "0015_publish_variant_stock_updates",
+      "breakpoints": true
     }
   ]
 }

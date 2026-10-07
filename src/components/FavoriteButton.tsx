@@ -71,6 +71,9 @@ export const FavoriteButton = ({ productId, variant = "outline", size = "lg" }: 
           description: "تم إزالة المنتج من المفضلة",
         });
       } else {
+        const { data: product, error: stockError } = await supabase.from("products").select("stock_quantity").eq("id", productId).maybeSingle();
+        if (stockError) throw stockError;
+        if (!product || product.stock_quantity <= 0) throw new Error("نفذت الكمية — لا يمكن إضافة المنتج إلى المفضلة");
         const { error } = await supabase
           .from("favorites")
           .insert({

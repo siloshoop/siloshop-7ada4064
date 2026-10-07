@@ -204,7 +204,7 @@ const Cart = () => {
       if (!user) return;
       const { data } = await supabase
         .from("delivery_addresses")
-        .select("id, label, recipient_name, city, street, phone")
+        .select("id, label, recipient_name, city, phone")
         .eq("user_id", user.id)
         .eq("is_default", true)
         .maybeSingle();

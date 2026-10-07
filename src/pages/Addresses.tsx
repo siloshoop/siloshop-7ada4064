@@ -33,7 +33,6 @@ export interface DeliveryAddress {
   recipient_name: string;
   governorate: string | null;
   city: string;
-  street: string;
   phone: string;
   notes: string | null;
   is_default: boolean;
@@ -43,7 +42,6 @@ const schema = z.object({
   recipient_name: z.string().trim().min(2, "اسم المستلم مطلوب").max(100),
   governorate: z.string().trim().refine((v) => (SYRIAN_GOVERNORATES as readonly string[]).includes(v), "يرجى اختيار المحافظة"),
   city: z.string().trim().min(2, "المدينة/المنطقة مطلوبة").max(100),
-  street: z.string().trim().min(2, "الشارع مطلوب").max(100),
   phone: z.string().trim().regex(/^09\d{8}$/, "رقم سوري بصيغة 09xxxxxxxx"),
   notes: z.string().trim().max(500).optional().or(z.literal("")),
 });
@@ -62,7 +60,6 @@ const Addresses = () => {
     recipient_name: "",
     governorate: "",
     city: "",
-    street: "",
     phone: "",
     notes: "",
     is_default: false,
@@ -99,7 +96,6 @@ const Addresses = () => {
       recipient_name: "",
       governorate: "",
       city: "",
-      street: "",
       phone: "",
       notes: "",
       is_default: false,
@@ -113,7 +109,6 @@ const Addresses = () => {
       recipient_name: addr.recipient_name,
       governorate: addr.governorate || "",
       city: addr.city || "",
-      street: addr.street || "",
       phone: addr.phone,
       notes: addr.notes || "",
       is_default: addr.is_default,
@@ -135,7 +130,6 @@ const Addresses = () => {
         recipient_name: parsed.data.recipient_name,
         governorate: parsed.data.governorate,
         city: parsed.data.city,
-        street: parsed.data.street,
         phone: parsed.data.phone,
         notes: parsed.data.notes || null,
       };
@@ -281,16 +275,6 @@ const Addresses = () => {
                 </div>
 
                 <div className="space-y-1.5">
-                  <Label>الشارع</Label>
-                  <Input 
-                    value={form.street} 
-                    onChange={(e) => setForm({ ...form, street: e.target.value })} 
-                    placeholder="اسم الشارع"
-                    required 
-                  />
-                </div>
-
-                <div className="space-y-1.5">
                   <Label>رقم الهاتف</Label>
                   <Input 
                     dir="ltr" 
@@ -367,7 +351,6 @@ const Addresses = () => {
                       <MapPin className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />
                       <div>
                         <p>{addr.governorate}، {addr.city}</p>
-                        <p className="text-muted-foreground text-xs">{addr.street}</p>
                       </div>
                     </div>
                     <p className="flex items-center gap-2" dir="ltr"><Phone className="h-4 w-4 text-muted-foreground" />{addr.phone}</p>

@@ -34,9 +34,6 @@ export interface DeliveryAddress {
   governorate: string | null;
   city: string;
   street: string;
-  building: string | null;
-  apartment: string | null;
-  landmark: string | null;
   phone: string;
   notes: string | null;
   is_default: boolean;
@@ -48,9 +45,6 @@ const schema = z.object({
   city: z.string().trim().min(2, "المدينة/المنطقة مطلوبة").max(100),
   street: z.string().trim().min(2, "الشارع مطلوب").max(100),
   phone: z.string().trim().regex(/^09\d{8}$/, "رقم سوري بصيغة 09xxxxxxxx"),
-  building: z.string().trim().max(100).optional().or(z.literal("")),
-  apartment: z.string().trim().max(100).optional().or(z.literal("")),
-  landmark: z.string().trim().max(100).optional().or(z.literal("")),
   notes: z.string().trim().max(500).optional().or(z.literal("")),
 });
 
@@ -69,9 +63,6 @@ const Addresses = () => {
     governorate: "",
     city: "",
     street: "",
-    building: "",
-    apartment: "",
-    landmark: "",
     phone: "",
     notes: "",
     is_default: false,
@@ -109,9 +100,6 @@ const Addresses = () => {
       governorate: "",
       city: "",
       street: "",
-      building: "",
-      apartment: "",
-      landmark: "",
       phone: "",
       notes: "",
       is_default: false,
@@ -126,9 +114,6 @@ const Addresses = () => {
       governorate: addr.governorate || "",
       city: addr.city || "",
       street: addr.street || "",
-      building: addr.building || "",
-      apartment: addr.apartment || "",
-      landmark: addr.landmark || "",
       phone: addr.phone,
       notes: addr.notes || "",
       is_default: addr.is_default,
@@ -151,9 +136,6 @@ const Addresses = () => {
         governorate: parsed.data.governorate,
         city: parsed.data.city,
         street: parsed.data.street,
-        building: parsed.data.building || null,
-        apartment: parsed.data.apartment || null,
-        landmark: parsed.data.landmark || null,
         phone: parsed.data.phone,
         notes: parsed.data.notes || null,
       };
@@ -298,43 +280,14 @@ const Addresses = () => {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className="space-y-1.5">
-                    <Label>الشارع</Label>
-                    <Input 
-                      value={form.street} 
-                      onChange={(e) => setForm({ ...form, street: e.target.value })} 
-                      placeholder="اسم الشارع"
-                      required 
-                    />
-                  </div>
-                  <div className="space-y-1.5">
-                    <Label>البناء (اختياري)</Label>
-                    <Input 
-                      value={form.building} 
-                      onChange={(e) => setForm({ ...form, building: e.target.value })} 
-                      placeholder="رقم أو اسم البناء"
-                    />
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className="space-y-1.5">
-                    <Label>الشقة (اختياري)</Label>
-                    <Input 
-                      value={form.apartment} 
-                      onChange={(e) => setForm({ ...form, apartment: e.target.value })} 
-                      placeholder="رقم الشقة"
-                    />
-                  </div>
-                  <div className="space-y-1.5">
-                    <Label>علامة مميزة (اختياري)</Label>
-                    <Input 
-                      value={form.landmark} 
-                      onChange={(e) => setForm({ ...form, landmark: e.target.value })} 
-                      placeholder="مثلاً: قرب جامع ..."
-                    />
-                  </div>
+                <div className="space-y-1.5">
+                  <Label>الشارع</Label>
+                  <Input 
+                    value={form.street} 
+                    onChange={(e) => setForm({ ...form, street: e.target.value })} 
+                    placeholder="اسم الشارع"
+                    required 
+                  />
                 </div>
 
                 <div className="space-y-1.5">
@@ -415,16 +368,6 @@ const Addresses = () => {
                       <div>
                         <p>{addr.governorate}، {addr.city}</p>
                         <p className="text-muted-foreground text-xs">{addr.street}</p>
-                        {(addr.building || addr.apartment) && (
-                          <p className="text-muted-foreground text-xs">
-                            {addr.building && `بناء: ${addr.building}`}
-                            {addr.building && addr.apartment && " - "}
-                            {addr.apartment && `شقة: ${addr.apartment}`}
-                          </p>
-                        )}
-                        {addr.landmark && (
-                          <p className="text-muted-foreground text-xs font-medium">علامة مميزة: {addr.landmark}</p>
-                        )}
                       </div>
                     </div>
                     <p className="flex items-center gap-2" dir="ltr"><Phone className="h-4 w-4 text-muted-foreground" />{addr.phone}</p>

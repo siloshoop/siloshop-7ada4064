@@ -129,3 +129,28 @@ export const formatAmountsByCurrency = (
     })
     .join(" · ");
 };
+
+/** Per-currency revenue buckets returned by revenue_totals_by_currency. */
+export type RevenueSplit = Partial<Record<ProductCurrency, Record<string, number>>>;
+
+/** "1٬200 ل.س · $59" — each currency shown separately, never summed together. */
+export const formatSplitTotals = (totals: RevenueSplit | null | undefined, key = "total"): string => {
+  const fmt = (n: number) => new Intl.NumberFormat("ar-SY", { maximumFractionDigits: 2 }).format(Number(n || 0));
+  const parts: string[] = [];
+  const syp = Number(totals?.SYP?.[key] || 0);
+  const usd = Number(totals?.USD?.[key] || 0);
+  if (syp) parts.push(`${fmt(syp)} ل.س`);
+  if (usd) parts.push(`$${fmt(usd)}`);
+  return parts.length ? parts.join(" · ") : "0";
+};
+
+/** Group plain amounts by currency for client-side totals. */
+export const sumByCurrency = (rows: { amount: number; currency?: string | null }[]): RevenueSplit => {
+  const out: RevenueSplit = {};
+  for (const r of rows) {
+    const c = normalizeCurrency(r.currency);
+    out[c] = { total: (out[c]?.total || 0) + Number(r.amount || 0), count: (out[c]?.count || 0) + 1 };
+  }
+  for (const c of Object.keys(out) as ProductCurrency[]) out[c]!.avg = out[c]!.total / (out[c]!.count || 1);
+  return out;
+};

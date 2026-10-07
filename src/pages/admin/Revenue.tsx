@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { formatSplitTotals, type RevenueSplit } from "@/lib/currency";
 import AdminLayout from "@/components/admin/AdminLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -25,6 +26,11 @@ const Revenue = () => {
   const [data, setData] = useState<Analytics | null>(null);
   const [loading, setLoading] = useState(true);
 
+  const [split, setSplit] = useState<RevenueSplit | null>(null);
+  useEffect(() => {
+    supabase.rpc("revenue_totals_by_currency", { _scope: "admin", _days: days }).then(({ data }) => setSplit((data as unknown as RevenueSplit) ?? null));
+  }, [days]);
+
   useEffect(() => {
     let cancelled = false;
     setLoading(true);
@@ -41,9 +47,9 @@ const Revenue = () => {
 
   const cards = data
     ? [
-        { label: `إيرادات آخر ${days} يوم`, value: money(data.orders.revenue_period), icon: DollarSign },
-        { label: "الإيرادات الإجمالية", value: money(data.orders.revenue_total), icon: TrendingUp },
-        { label: "متوسط قيمة الطلب", value: money(data.orders.avg_order_value), icon: ShoppingBag },
+        { label: `إيرادات آخر ${days} يوم`, value: formatSplitTotals(split, "period"), icon: DollarSign },
+        { label: "الإيرادات الإجمالية", value: formatSplitTotals(split), icon: TrendingUp },
+        { label: "متوسط قيمة الطلب", value: formatSplitTotals(split, "avg"), icon: ShoppingBag },
         { label: "طلبات تم توصيلها", value: new Intl.NumberFormat("ar-SY").format(data.orders.delivered), icon: Truck },
       ]
     : [];

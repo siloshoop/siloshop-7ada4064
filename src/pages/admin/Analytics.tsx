@@ -1,3 +1,4 @@
+import { formatSplitTotals, type RevenueSplit } from "@/lib/currency";
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -72,6 +73,10 @@ const AdminAnalytics = () => {
   const [data, setData] = useState<AnalyticsPayload | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [split, setSplit] = useState<RevenueSplit | null>(null);
+  useEffect(() => {
+    supabase.rpc("revenue_totals_by_currency", { _scope: "admin", _days: days }).then(({ data }) => setSplit((data as unknown as RevenueSplit) ?? null));
+  }, [days]);
 
   useEffect(() => {
     if (!authLoading && !user) navigate("/auth");
@@ -179,10 +184,10 @@ const AdminAnalytics = () => {
 
               <StatCard title="إجمالي الطلبات" value={data.orders.total}
                 hint={`${data.orders.period_count} خلال الفترة`} icon={ShoppingBag} />
-              <StatCard title="الإيرادات (كلي)" value={formatCurrency(data.orders.revenue_total)}
+              <StatCard title="الإيرادات (كلي)" value={formatSplitTotals(split)}
                 hint="الطلبات المسلّمة فقط" icon={DollarSign} />
-              <StatCard title="إيرادات الفترة" value={formatCurrency(data.orders.revenue_period)}
-                hint={`متوسط طلب: ${formatCurrency(data.orders.avg_order_value)}`} icon={TrendingUp} />
+              <StatCard title="إيرادات الفترة" value={formatSplitTotals(split, "period")}
+                hint={`متوسط طلب: ${formatSplitTotals(split, "avg")}`} icon={TrendingUp} />
               <StatCard title="بلاغات معلقة" value={data.reports.pending + data.reports.under_review}
                 hint={`الإجمالي: ${data.reports.total}`} icon={Flag} />
             </div>

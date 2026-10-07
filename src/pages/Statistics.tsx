@@ -1,3 +1,4 @@
+import { formatSplitTotals, type RevenueSplit } from "@/lib/currency";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
@@ -42,6 +43,10 @@ const Statistics = () => {
   const [topProducts, setTopProducts] = useState<ProductStat[]>([]);
   const [recentReviews, setRecentReviews] = useState<Review[]>([]);
   const [averageRating, setAverageRating] = useState(0);
+  const [split, setSplit] = useState<RevenueSplit | null>(null);
+  useEffect(() => {
+    supabase.rpc("revenue_totals_by_currency", { _scope: "vendor", _days: 365 }).then(({ data }) => setSplit((data as unknown as RevenueSplit) ?? null));
+  }, [user]);
   const [totalStats, setTotalStats] = useState({
     totalRevenue: 0,
     totalOrders: 0,
@@ -178,7 +183,7 @@ const Statistics = () => {
             </div>
             <div>
               <p className="text-sm text-muted-foreground">إجمالي الإيرادات</p>
-              <p className="text-2xl font-bold">{totalStats.totalRevenue.toFixed(2)} ل.س</p>
+              <p className="text-2xl font-bold">{formatSplitTotals(split)}</p>
             </div>
           </div>
         </Card>
@@ -214,7 +219,7 @@ const Statistics = () => {
             </div>
             <div>
               <p className="text-sm text-muted-foreground">متوسط قيمة الطلب</p>
-              <p className="text-2xl font-bold">{totalStats.averageOrder.toFixed(2)} ل.س</p>
+              <p className="text-2xl font-bold">{formatSplitTotals(split, "avg")}</p>
             </div>
           </div>
         </Card>

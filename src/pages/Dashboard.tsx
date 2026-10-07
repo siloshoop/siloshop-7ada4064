@@ -1,4 +1,4 @@
-import { formatPrice } from "@/lib/currency";
+import { formatPrice, formatSplitTotals, sumByCurrency, type RevenueSplit } from "@/lib/currency";
 import { useCallback, useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
@@ -44,6 +44,8 @@ const Dashboard = () => {
   });
   const [customerStats, setCustomerStats] = useState({ orders: 0, totalSpent: 0, reviewed: 0, favorites: 0 });
   const [loading, setLoading] = useState(true);
+  const [vendorSplit, setVendorSplit] = useState<RevenueSplit | null>(null);
+  const [customerSplit, setCustomerSplit] = useState<RevenueSplit | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [filterStatus, setFilterStatus] = useState("all");
   const [sortBy, setSortBy] = useState("date-desc");
@@ -60,7 +62,7 @@ const Dashboard = () => {
 
   const fetchCustomerStats = useCallback(async (uid: string) => {
     const [ordersRes, favRes, reviewsRes] = await Promise.all([
-      supabase.from("orders").select("total_amount, status").eq("customer_id", uid).is("parent_order_id", null),
+      supabase.from("orders").select("total_amount, status, currency").eq("customer_id", uid).is("parent_order_id", null),
       supabase.from("favorites").select("id", { count: "exact", head: true }).eq("user_id", uid),
       supabase.from("reviews").select("id", { count: "exact", head: true }).eq("user_id", uid),
     ]);
@@ -70,6 +72,7 @@ const Dashboard = () => {
     const deliveredRevenue = orders
       .filter((o: any) => o.status === "delivered")
       .reduce((s: number, o: any) => s + Number(o.total_amount || 0), 0);
+    setCustomerSplit(sumByCurrency(orders.filter((o: any) => o.status === "delivered").map((o: any) => ({ amount: Number(o.total_amount || 0), currency: o.currency }))));
     setCustomerStats({
       orders: successfulOrders.length,
       totalSpent: deliveredRevenue,
@@ -86,6 +89,8 @@ const Dashboard = () => {
       .order("created_at", { ascending: false });
     setProducts(productsData || []);
     const { data: salesStats } = await supabase.rpc("get_vendor_sales_stats");
+    const { data: split } = await supabase.rpc("revenue_totals_by_currency", { _scope: "vendor", _days: 30 });
+    setVendorSplit((split as unknown as RevenueSplit) ?? null);
     const s: any = Array.isArray(salesStats) ? salesStats[0] : salesStats;
     setStats({
       totalProducts: productsData?.length || 0,
@@ -552,7 +557,7 @@ const Dashboard = () => {
                   <DollarSign className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">{stats.estimatedRevenue.toLocaleString('ar-SY')} ل.س</div>
+                  <div className="text-2xl font-bold">{formatSplitTotals(vendorSplit)}</div>
                   <p className="text-xs text-muted-foreground mt-1">قيمة تقديرية للطلبات التي تم تسليمها فقط. يتم تحصيلها منك مباشرة من العميل عند الاستلام.</p>
                 </CardContent>
               </Card>
@@ -839,7 +844,7 @@ const Dashboard = () => {
                   <CardTitle className="text-sm font-medium">المبلغ الإجمالي</CardTitle>
                   <DollarSign className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
-                <CardContent><div className="text-2xl font-bold">{customerStats.totalSpent.toLocaleString()} ل.س</div></CardContent>
+                <CardContent><div className="text-2xl font-bold">{formatSplitTotals(customerSplit)}</div></CardContent>
               </Card>
               </Link>
               <Link to="/orders" aria-label="منتجات مقيّمة" className="block min-w-0 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">

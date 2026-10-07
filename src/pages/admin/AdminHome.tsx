@@ -1,4 +1,6 @@
-import { useMemo, useState } from "react";
+import { formatSplitTotals, type RevenueSplit } from "@/lib/currency";
+import { supabase } from "@/integrations/supabase/client";
+import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import AdminLayout, { useAdminModules } from "@/components/admin/AdminLayout";
 import DashboardKpiGrid, { type Kpi } from "@/components/admin/DashboardKpiGrid";
@@ -80,13 +82,18 @@ const AdminHome = () => {
   const [days, setDays] = useState(30);
   const { data, loading, refreshing, error, reload } = useAdminDashboard(days);
 
+  const [split, setSplit] = useState<RevenueSplit | null>(null);
+  useEffect(() => {
+    supabase.rpc("revenue_totals_by_currency", { _scope: "admin", _days: days }).then(({ data }) => setSplit((data as unknown as RevenueSplit) ?? null));
+  }, [days, data]);
+
   const kpis = useMemo<Kpi[]>(() => {
     if (!data) return [];
     const { orders, revenue, users, products } = data;
     return [
-      { label: "إجمالي الإيرادات", value: money(revenue.total), hint: `متوسط الطلب ${money(revenue.avg_order_value)}`, icon: DollarSign, tone: "primary", href: "/admin/revenue" },
-      { label: "إيرادات اليوم", value: money(revenue.today), hint: `${fmt(orders.today)} طلب اليوم`, icon: DollarSign, tone: "success", href: "/admin/revenue" },
-      { label: "إيرادات الشهر", value: money(revenue.month), hint: `آخر ${days} يوم: ${money(revenue.period)}`, icon: DollarSign, tone: "success", href: "/admin/revenue" },
+      { label: "إجمالي الإيرادات", value: formatSplitTotals(split), hint: `متوسط الطلب ${formatSplitTotals(split, "avg")}`, icon: DollarSign, tone: "primary", href: "/admin/revenue" },
+      { label: "إيرادات اليوم", value: formatSplitTotals(split, "today"), hint: `${fmt(orders.today)} طلب اليوم`, icon: DollarSign, tone: "success", href: "/admin/revenue" },
+      { label: "إيرادات الشهر", value: formatSplitTotals(split, "month"), hint: `آخر ${days} يوم: ${formatSplitTotals(split, "period")}`, icon: DollarSign, tone: "success", href: "/admin/revenue" },
       { label: "إجمالي الطلبات", value: fmt(orders.total), hint: `${fmt(orders.period)} خلال ${days} يوم`, icon: ShoppingBag, tone: "primary", href: "/admin/orders" },
       { label: "طلبات قيد الانتظار", value: fmt(orders.pending), hint: "بحاجة إلى تأكيد", icon: Hourglass, tone: "warning", href: "/admin/orders?status=pending" },
       { label: "قيد التحضير", value: fmt(orders.preparing), hint: "لدى البائعين", icon: Clock, tone: "warning", href: "/admin/orders?status=preparing" },
@@ -108,7 +115,7 @@ const AdminHome = () => {
       { label: "نفدت الكمية", value: fmt(products.out_of_stock), hint: "بحاجة إلى تزويد", icon: PackageX, tone: "danger", href: "/admin/products" },
       { label: "بلاغات مفتوحة", value: fmt(users.reports_pending), hint: "بحاجة إلى إجراء", icon: AlertTriangle, tone: "danger", href: "/admin/reports" },
     ];
-  }, [data, days]);
+  }, [data, days, split]);
 
   const series = useMemo(
     () => (data?.series ?? []).map((point) => ({ ...point, label: shortDay(point.day) })),

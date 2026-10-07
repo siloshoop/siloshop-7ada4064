@@ -26,13 +26,27 @@ import {
   type ProductCurrency,
 } from "@/lib/currency";
 import { shippingDetailLabel } from "@/lib/shippingDisplay";
+import {
+  SYRIAN_MOBILE_MAX_DIGITS,
+  SYRIAN_MOBILE_PATTERN,
+  phoneError,
+  phoneDigits,
+  sanitizePhoneInput,
+} from "@/lib/phone";
 
 
 const checkoutSchema = z.object({
-  phone: z.string()
-    .min(1, "رقم الهاتف مطلوب")
-    .transform((v) => v.replace(/[\s-]/g, ""))
-    .pipe(z.string().regex(/^09\d{8}$/, "رقم الهاتف يجب أن يكون بصيغة 09xxxxxxxx")),
+  phone: z
+    .string()
+    .transform((v) => phoneDigits(v))
+    .pipe(
+      z
+        .string()
+        .regex(
+          SYRIAN_MOBILE_PATTERN,
+          "رقم الهاتف يجب أن يبدأ بـ 09 ويتكون من 10 أرقام (مثال: 0944123456)",
+        ),
+    ),
   governorate: z.string()
     .min(1, "يرجى اختيار المحافظة")
     .refine((v) => (SYRIAN_GOVERNORATES as readonly string[]).includes(v), "يرجى اختيار محافظة صحيحة"),
@@ -117,6 +131,11 @@ const Checkout = () => {
     area: "",
     notes: "",
   });
+  const [phoneTouched, setPhoneTouched] = useState(false);
+
+  // Flag a wrong number as soon as it is typed or pasted, not only on submit.
+  const phoneFieldError =
+    phoneTouched || formData.phone.trim() !== "" ? phoneError(formData.phone) : null;
 
 
   const composeAddress = () =>
@@ -445,7 +464,11 @@ const Checkout = () => {
     // Validate form data with zod schema
     const validationResult = checkoutSchema.safeParse(formData);
     if (!validationResult.success) {
+      setPhoneTouched(true);
       const firstError = validationResult.error.errors[0];
+      if (validationResult.error.errors.some((issue) => issue.path[0] === "phone")) {
+        document.getElementById("phone")?.focus();
+      }
       toast({
         title: "خطأ في البيانات",
         description: firstError.message,
@@ -710,12 +733,35 @@ const Checkout = () => {
                     <Input
                       id="phone"
                       type="tel"
+                      inputMode="numeric"
+                      autoComplete="tel"
+                      maxLength={SYRIAN_MOBILE_MAX_DIGITS}
                       value={formData.phone}
-                      onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                      onChange={(e) =>
+                        setFormData({ ...formData, phone: sanitizePhoneInput(e.target.value) })
+                      }
+                      onPaste={(e) => {
+                        // A pasted number longer than 10 digits stays visible so the
+                        // buyer sees the message instead of a silently cut number.
+                        const pasted = sanitizePhoneInput(e.clipboardData.getData("text"));
+                        if (pasted.length > SYRIAN_MOBILE_MAX_DIGITS) {
+                          e.preventDefault();
+                          setPhoneTouched(true);
+                          setFormData({ ...formData, phone: pasted });
+                        }
+                      }}
+                      onBlur={() => setPhoneTouched(true)}
                       required
                       placeholder="مثال: 0912345678"
                       dir="ltr"
+                      aria-invalid={phoneFieldError !== null}
+                      aria-describedby={phoneFieldError ? "phone-error" : undefined}
                     />
+                    {phoneFieldError && (
+                      <p id="phone-error" className="text-xs text-destructive" role="alert">
+                        {phoneFieldError}
+                      </p>
+                    )}
                   </div>
 
                   <div className="space-y-2">

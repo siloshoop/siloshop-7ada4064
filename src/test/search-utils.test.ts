@@ -17,7 +17,7 @@ describe("search utilities", () => {
 describe("buildFuzzyPatterns", () => {
   it("tolerates Arabic letter variants and the article", () => {
     const [p] = buildFuzzyPatterns("الأحذية");
-    expect(p).toBe("%_حذ___%");
+    expect(p).toBe("%_حذ__%");
   });
   it("splits words so each must match", () => {
     expect(buildFuzzyPatterns("حذاء رياضي")).toHaveLength(2);

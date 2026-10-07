@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { ArrowLeft, Megaphone } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
@@ -24,6 +24,7 @@ interface NativeAdBannerProps {
 const NativeAdBanner = ({ placement, className = "" }: NativeAdBannerProps) => {
   const [ad, setAd] = useState<NativeAd | null>(null);
   const [imageFailed, setImageFailed] = useState(false);
+  const navigate = useNavigate();
 
   const loadAd = useCallback(async () => {
     const now = new Date().toISOString();
@@ -64,9 +65,16 @@ const NativeAdBanner = ({ placement, className = "" }: NativeAdBannerProps) => {
 
   if (!ad) return null;
 
+  const target = ad.cta_url && ad.cta_url.startsWith("/") ? ad.cta_url : null;
+
   return (
     <aside aria-label={`إعلان من ${ad.sponsor_name}`} className={`container px-4 ${className}`}>
-      <div className="overflow-hidden rounded-2xl border border-border/60 bg-card shadow-[var(--shadow-card)]">
+      <div
+        role={target ? "link" : undefined}
+        tabIndex={target ? 0 : undefined}
+        onClick={target ? () => navigate(target) : undefined}
+        onKeyDown={target ? (e) => { if (e.key === "Enter") navigate(target); } : undefined}
+        className={`${target ? "cursor-pointer " : ""}overflow-hidden rounded-2xl border border-border/60 bg-card shadow-[var(--shadow-card)]`}>
         <div className="grid min-w-0 md:grid-cols-[minmax(0,1fr)_minmax(280px,42%)] md:items-stretch">
           <div className="order-2 flex min-w-0 flex-col justify-center gap-3 p-5 text-right sm:p-6 md:order-1 md:p-8">
             <span className="inline-flex w-fit items-center gap-1.5 rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-primary">
@@ -76,9 +84,9 @@ const NativeAdBanner = ({ placement, className = "" }: NativeAdBannerProps) => {
             {ad.description && (
               <p className="max-w-2xl text-sm leading-relaxed text-muted-foreground sm:text-base">{ad.description}</p>
             )}
-            {ad.cta_url && (
+            {target && (
               <Button asChild className="mt-1 w-fit gap-1.5">
-                <Link to={ad.cta_url}>
+                <Link to={target} onClick={(e) => e.stopPropagation()}>
                   {ad.cta_text}
                   <ArrowLeft className="h-4 w-4" />
                 </Link>

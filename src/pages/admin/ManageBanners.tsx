@@ -14,6 +14,16 @@ import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "
 import { Loader2, Plus, Pencil, Trash2 } from "lucide-react";
 import ImageUploadField from "@/components/ImageUploadField";
 import { broadcastActivationChange } from "@/lib/activationSync";
+import { VendorPicker, ProductPicker } from "@/components/admin/ShowroomEntityPicker";
+
+const UUID_RE = "[0-9a-fA-F-]{36}";
+const parseTarget = (url: string): { type: "store" | "product" | "custom"; id: string } => {
+  const store = url.match(new RegExp(`^/store/(${UUID_RE})$`));
+  if (store) return { type: "store", id: store[1] };
+  const product = url.match(new RegExp(`^/product/(${UUID_RE})$`));
+  if (product) return { type: "product", id: product[1] };
+  return { type: "custom", id: "" };
+};
 
 interface BannerRow {
   id: string;
@@ -58,6 +68,16 @@ const ManageBanners = () => {
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<BannerRow | null>(null);
   const [form, setForm] = useState(emptyForm);
+  const [targetType, setTargetType] = useState<"store" | "product" | "custom">("product");
+  const [targetLabel, setTargetLabel] = useState("");
+  useEffect(() => {
+    if (!open) return;
+    const t = parseTarget(form.cta_url.trim());
+    setTargetType(form.cta_url.trim() ? t.type : "product");
+    setTargetLabel("");
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, editing]);
+  const target = parseTarget(form.cta_url.trim());
   const [saving, setSaving] = useState(false);
   const [togglingId, setTogglingId] = useState<string | null>(null);
 
@@ -253,11 +273,44 @@ const ManageBanners = () => {
             />
             <Input value={form.sponsor_name} onChange={(e) => setForm({ ...form, sponsor_name: e.target.value })} placeholder="الجهة الراعية" />
             <Input value={form.cta_text} onChange={(e) => setForm({ ...form, cta_text: e.target.value })} placeholder="نص الزر" />
-            <Input
-              value={form.cta_url}
-              onChange={(e) => setForm({ ...form, cta_url: e.target.value })}
-              placeholder="مسار داخلي مثل /category/123"
-            />
+            <Select
+              value={targetType}
+              onValueChange={(v) => {
+                setTargetType(v as "store" | "product" | "custom");
+                setTargetLabel("");
+                setForm({ ...form, cta_url: "" });
+              }}
+            >
+              <SelectTrigger><SelectValue placeholder="وجهة الإعلان" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="product">منتج</SelectItem>
+                <SelectItem value="store">متجر</SelectItem>
+                <SelectItem value="custom">مسار داخلي آخر</SelectItem>
+              </SelectContent>
+            </Select>
+            {targetType === "store" && (
+              <VendorPicker
+                selectedId={target.type === "store" ? target.id : ""}
+                selectedLabel={targetLabel || undefined}
+                onSelect={(v) => { setTargetLabel(v.name); setForm({ ...form, cta_url: `/store/${v.vendor_id}` }); }}
+                onClear={() => { setTargetLabel(""); setForm({ ...form, cta_url: "" }); }}
+              />
+            )}
+            {targetType === "product" && (
+              <ProductPicker
+                selectedId={target.type === "product" ? target.id : ""}
+                selectedLabel={targetLabel || undefined}
+                onSelect={(p) => { setTargetLabel(p.name); setForm({ ...form, cta_url: `/product/${p.product_id}` }); }}
+                onClear={() => { setTargetLabel(""); setForm({ ...form, cta_url: "" }); }}
+              />
+            )}
+            {targetType === "custom" && (
+              <Input
+                value={form.cta_url}
+                onChange={(e) => setForm({ ...form, cta_url: e.target.value })}
+                placeholder="مسار داخلي مثل /category/123"
+              />
+            )}
             <Select value={form.placement} onValueChange={(v) => setForm({ ...form, placement: v })}>
               <SelectTrigger><SelectValue placeholder="موضع الظهور" /></SelectTrigger>
               <SelectContent>

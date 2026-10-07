@@ -16,6 +16,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Loader2, Upload, ChevronLeft, X } from "lucide-react";
 import imageCompression from 'browser-image-compression';
 import { productNumbersSchema, firstIssue, friendlyDbError } from "@/lib/productValidation";
+import { useImageCropper } from "@/components/ImageCropDialog";
 import { IMAGE_FORMAT_HINT, IMAGE_SIZE_GUIDES, UploadError, describeUploadError, validateImageFile } from "@/lib/uploadErrors";
 import ProductColorsSizesEditor, { type ColorsSizesValue } from "@/components/seller/ProductColorsSizesEditor";
 import { syncColorSizeVariants } from "@/lib/productVariantsSync";
@@ -42,6 +43,7 @@ const AddProduct = () => {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { crop: cropImage, dialog: cropDialog } = useImageCropper("product");
 
   const [formData, setFormData] = useState({
     name: "",
@@ -141,16 +143,16 @@ const AddProduct = () => {
           maxSizeMB: 1,
           maxWidthOrHeight: 1920,
           useWebWorker: true,
-          fileType: file.type as any,
+          fileType: croppedFile.type as any,
         };
 
-        const compressedFile = await imageCompression(file, options);
+        const compressedFile = await imageCompression(croppedFile, options);
         validatedFiles.push(compressedFile);
         newPreviews.push(URL.createObjectURL(compressedFile));
       } catch (error) {
         console.error('Error compressing image:', error);
-        validatedFiles.push(file);
-        newPreviews.push(URL.createObjectURL(file));
+        validatedFiles.push(croppedFile);
+        newPreviews.push(URL.createObjectURL(croppedFile));
       }
     }
 
@@ -503,6 +505,7 @@ const AddProduct = () => {
                         <p className="text-sm text-muted-foreground">
                           {IMAGE_SIZE_GUIDES.product} · حتى 5 صور · {IMAGE_FORMAT_HINT}
                         </p>
+                      {cropDialog}
 
                         {imagePreviews.length > 0 && (
                           <div className="grid grid-cols-2 md:grid-cols-3 gap-4">

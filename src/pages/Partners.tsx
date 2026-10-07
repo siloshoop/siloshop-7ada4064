@@ -3,8 +3,24 @@ import Footer from "@/components/Footer";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Handshake, TrendingUp, Users, Shield } from "lucide-react";
+import { Link } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { resolveStoreAssetUrl } from "@/lib/storeAssets";
+
+interface PartnerItem { id: string; name: string; logo_url: string | null; website_url: string | null }
 
 const Partners = () => {
+  const [partners, setPartners] = useState<PartnerItem[] | null>(null);
+  useEffect(() => {
+    void supabase
+      .from("partners")
+      .select("id,name,logo_url,website_url")
+      .eq("is_active", true)
+      .order("sort_order")
+      .order("created_at")
+      .then(({ data }) => setPartners((data as PartnerItem[]) ?? []));
+  }, []);
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
@@ -60,15 +76,24 @@ const Partners = () => {
               <div>
                 <h2 className="text-3xl font-bold mb-6">شركاؤنا</h2>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-                  {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
-                    <Card key={i} className="hover:shadow-lg transition-shadow">
-                      <CardContent className="flex items-center justify-center p-6">
-                        <div className="w-full h-20 bg-muted rounded flex items-center justify-center">
-                          <span className="text-muted-foreground">شريك {i}</span>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
+                  {partners === null ? null : partners.length === 0 ? (
+                    <p className="col-span-full text-center text-muted-foreground">سيتم الإعلان عن شركائنا قريبًا</p>
+                  ) : partners.map((p) => {
+                    const logo = p.logo_url ? resolveStoreAssetUrl(p.logo_url) : null;
+                    const body = (
+                      <Card className="h-full hover:shadow-lg transition-shadow">
+                        <CardContent className="flex flex-col items-center justify-center gap-2 p-4">
+                          <div className="w-full h-20 flex items-center justify-center overflow-hidden rounded">
+                            {logo ? <img src={logo} alt={p.name} loading="lazy" className="max-h-full max-w-full object-contain" /> : <span className="font-semibold">{p.name}</span>}
+                          </div>
+                          {logo && <span className="text-center text-sm text-muted-foreground line-clamp-1">{p.name}</span>}
+                        </CardContent>
+                      </Card>
+                    );
+                    return p.website_url ? (
+                      <a key={p.id} href={p.website_url} target="_blank" rel="noopener noreferrer">{body}</a>
+                    ) : <div key={p.id}>{body}</div>;
+                  })}
                 </div>
               </div>
 
@@ -135,7 +160,7 @@ const Partners = () => {
                     نرحب بالشراكات الاستراتيجية التي تضيف قيمة لعملائنا ومجتمعنا. إذا كنت تمتلك خدمة أو منتج 
                     يمكن أن يساهم في تحسين تجربة التسوق الإلكتروني، نود سماع أفكارك.
                   </p>
-                  <Button>تواصل معنا</Button>
+                  <Button asChild><Link to="/contact">تواصل معنا</Link></Button>
                 </CardContent>
               </Card>
             </div>

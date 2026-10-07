@@ -35,7 +35,16 @@ import {
 } from "@/lib/phone";
 
 
+const nameField = (label: string) =>
+  z
+    .string()
+    .trim()
+    .min(1, `يرجى إدخال ${label}`)
+    .max(50, `${label} طويل جداً`);
+
 const checkoutSchema = z.object({
+  firstName: nameField("الاسم"),
+  lastName: nameField("الكنية"),
   phone: z
     .string()
     .transform((v) => phoneDigits(v))
@@ -126,6 +135,8 @@ const Checkout = () => {
   const { isEnabled } = useFeatureFlags();
 
   const [formData, setFormData] = useState({
+    firstName: "",
+    lastName: "",
     phone: "",
     governorate: "",
     area: "",
@@ -137,9 +148,18 @@ const Checkout = () => {
   const phoneFieldError =
     phoneTouched || formData.phone.trim() !== "" ? phoneError(formData.phone) : null;
 
+  // Split a stored recipient name ("محمد العلي") into the two checkout fields.
+  const splitRecipientName = (name?: string | null) => {
+    const parts = (name || "").trim().split(/\s+/);
+    return { firstName: parts[0] || "", lastName: parts.slice(1).join(" ") || "" };
+  };
 
   const composeAddress = () =>
-    ["عنوان التوصيل", formData.governorate]
+    [
+      [formData.firstName, formData.lastName].filter((v) => v && v.trim()).join(" "),
+      "عنوان التوصيل",
+      formData.governorate,
+    ]
       .filter((v) => v && v.trim())
       .join("، ");
 
@@ -178,6 +198,7 @@ const Checkout = () => {
         setSelectedAddressId(def.id);
         setFormData((f) => ({
           ...f,
+          ...splitRecipientName(def.recipient_name || `${f.firstName} ${f.lastName}`.trim()),
           phone: def.phone || f.phone,
           governorate: def.governorate || def.city || f.governorate,
           area: def.city || f.area,
@@ -466,9 +487,15 @@ const Checkout = () => {
     if (!validationResult.success) {
       setPhoneTouched(true);
       const firstError = validationResult.error.errors[0];
-      if (validationResult.error.errors.some((issue) => issue.path[0] === "phone")) {
-        document.getElementById("phone")?.focus();
-      }
+      const fieldId =
+        validationResult.error.errors.some((issue) => issue.path[0] === "firstName")
+          ? "first-name"
+          : validationResult.error.errors.some((issue) => issue.path[0] === "lastName")
+          ? "last-name"
+          : validationResult.error.errors.some((issue) => issue.path[0] === "phone")
+          ? "phone"
+          : null;
+      if (fieldId) document.getElementById(fieldId)?.focus();
       toast({
         title: "خطأ في البيانات",
         description: firstError.message,
@@ -501,14 +528,17 @@ const Checkout = () => {
       if (orderError) throw orderError;
       const order = { id: newOrderId as string };
 
-      // Get customer profile for name
+      // Get customer profile for name (falls back to the checkout name fields)
       const { data: customerProfile } = await supabase
         .from("profiles")
         .select("full_name")
         .eq("id", user.id)
         .single();
 
-      const customerName = customerProfile?.full_name || "عميل";
+      const customerName =
+        `${formData.firstName} ${formData.lastName}`.trim() ||
+        customerProfile?.full_name ||
+        "عميل";
 
       // Group items by vendor and notify each vendor
       const itemsByVendor = cartItems.reduce((acc, item) => {
@@ -707,6 +737,9 @@ const Checkout = () => {
                               setSelectedAddressId(a.id);
                               setFormData({
                                 ...formData,
+                                ...(a.recipient_name
+                                  ? splitRecipientName(a.recipient_name)
+                                  : {}),
                                 phone: a.phone,
                                 governorate: a.governorate || a.city || "",
                                 area: a.city || "",
@@ -728,6 +761,38 @@ const Checkout = () => {
                       <Plus className="h-3 w-3" /> حفظ عناوين للاستخدام لاحقاً
                     </Link>
                   )}
+                  <div className="grid sm:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="first-name">الاسم *</Label>
+                      <Input
+                        id="first-name"
+                        type="text"
+                        autoComplete="given-name"
+                        maxLength={50}
+                        value={formData.firstName}
+                        onChange={(e) =>
+                          setFormData({ ...formData, firstName: e.target.value })
+                        }
+                        required
+                        placeholder="مثال: محمد"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="last-name">الكنية *</Label>
+                      <Input
+                        id="last-name"
+                        type="text"
+                        autoComplete="family-name"
+                        maxLength={50}
+                        value={formData.lastName}
+                        onChange={(e) =>
+                          setFormData({ ...formData, lastName: e.target.value })
+                        }
+                        required
+                        placeholder="مثال: العلي"
+                      />
+                    </div>
+                  </div>
                   <div className="space-y-2">
                     <Label htmlFor="phone">رقم الهاتف *</Label>
                     <Input

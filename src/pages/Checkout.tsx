@@ -198,6 +198,7 @@ const Checkout = () => {
         setSelectedAddressId(def.id);
         setFormData((f) => ({
           ...f,
+          ...splitRecipientName(def.recipient_name || `${f.firstName} ${f.lastName}`.trim()),
           phone: def.phone || f.phone,
           governorate: def.governorate || def.city || f.governorate,
           area: def.city || f.area,

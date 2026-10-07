@@ -16,6 +16,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Loader2, Save, Trash2, ChevronLeft, X } from "lucide-react";
 import imageCompression from 'browser-image-compression';
 import { productNumbersSchema, firstIssue, friendlyDbError } from "@/lib/productValidation";
+import { IMAGE_FORMAT_HINT, IMAGE_SIZE_GUIDES, UploadError, describeUploadError, validateImageFile } from "@/lib/uploadErrors";
 import ProductVariantsManager from "@/components/seller/ProductVariantsManager";
 import ProductColorsSizesEditor, { type ColorsSizesValue, buildVariantRows } from "@/components/seller/ProductColorsSizesEditor";
 import { syncColorSizeVariants, COLOR_ATTR, SIZE_ATTR } from "@/lib/productVariantsSync";
@@ -217,22 +218,9 @@ const EditProduct = () => {
     const previews: string[] = [];
 
     for (const file of files) {
-      const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif'];
-      if (!validTypes.includes(file.type)) {
-        toast({
-          title: "خطأ",
-          description: `نوع الملف ${file.name} غير مدعوم`,
-          variant: "destructive",
-        });
-        continue;
-      }
-
-      if (file.size > 5242880) {
-        toast({
-          title: "خطأ",
-          description: `حجم الملف ${file.name} كبير جداً`,
-          variant: "destructive",
-        });
+      const invalid = validateImageFile(file);
+      if (invalid) {
+        toast({ title: "تعذّر إضافة الصورة", description: invalid, variant: "destructive" });
         continue;
       }
 
@@ -286,7 +274,7 @@ const EditProduct = () => {
         .from('product-images')
         .upload(fileName, file);
 
-      if (error) throw error;
+      if (error) throw new UploadError(describeUploadError(error, file));
 
       const { data: { publicUrl } } = supabase.storage
         .from('product-images')
@@ -440,7 +428,7 @@ const EditProduct = () => {
     } catch (error) {
       toast({
         title: "خطأ",
-        description: friendlyDbError(error),
+        description: error instanceof UploadError ? error.message : friendlyDbError(error),
         variant: "destructive",
       });
     } finally {
@@ -680,7 +668,7 @@ const EditProduct = () => {
                         disabled={existingImages.length + newFiles.length >= 5}
                       />
                       <p className="text-sm text-muted-foreground">
-                        يمكنك رفع حتى {5 - existingImages.length - newFiles.length} صور إضافية
+                        يمكنك رفع حتى {5 - existingImages.length - newFiles.length} صور إضافية · {IMAGE_SIZE_GUIDES.product} · {IMAGE_FORMAT_HINT}
                       </p>
 
                       {newPreviews.length > 0 && (

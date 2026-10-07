@@ -146,6 +146,7 @@ const SellerStore = () => {
                   folder={user.id}
                   privateBucket
                   previewClassName="sm:w-24"
+                  sizeGuide="logo"
                 />
                 <ImageUploadField
                   label="غلاف المتجر"
@@ -154,6 +155,7 @@ const SellerStore = () => {
                   bucket="store-assets"
                   folder={user.id}
                   privateBucket
+                  sizeGuide="cover"
                 />
               </div>
             )}

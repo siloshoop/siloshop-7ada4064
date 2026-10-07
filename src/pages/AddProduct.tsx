@@ -16,6 +16,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Loader2, Upload, ChevronLeft, X } from "lucide-react";
 import imageCompression from 'browser-image-compression';
 import { productNumbersSchema, firstIssue, friendlyDbError } from "@/lib/productValidation";
+import { IMAGE_FORMAT_HINT, IMAGE_SIZE_GUIDES, UploadError, describeUploadError, validateImageFile } from "@/lib/uploadErrors";
 import ProductColorsSizesEditor, { type ColorsSizesValue } from "@/components/seller/ProductColorsSizesEditor";
 import { syncColorSizeVariants } from "@/lib/productVariantsSync";
 
@@ -127,22 +128,9 @@ const AddProduct = () => {
     const newPreviews: string[] = [];
 
     for (const file of files) {
-      const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif'];
-      if (!validTypes.includes(file.type)) {
-        toast({
-          title: "خطأ",
-          description: `نوع الملف ${file.name} غير مدعوم`,
-          variant: "destructive",
-        });
-        continue;
-      }
-
-      if (file.size > 5242880) {
-        toast({
-          title: "خطأ",
-          description: `حجم الملف ${file.name} كبير جداً`,
-          variant: "destructive",
-        });
+      const invalid = validateImageFile(file);
+      if (invalid) {
+        toast({ title: "تعذّر إضافة الصورة", description: invalid, variant: "destructive" });
         continue;
       }
 
@@ -193,7 +181,7 @@ const AddProduct = () => {
         .from('product-images')
         .upload(fileName, file);
 
-      if (error) throw error;
+      if (error) throw new UploadError(describeUploadError(error, file));
 
       const { data: { publicUrl } } = supabase.storage
         .from('product-images')
@@ -334,7 +322,7 @@ const AddProduct = () => {
     } catch (error) {
       toast({
         title: "خطأ",
-        description: friendlyDbError(error),
+        description: error instanceof UploadError ? error.message : friendlyDbError(error),
         variant: "destructive",
       });
     } finally {
@@ -511,7 +499,7 @@ const AddProduct = () => {
                           multiple
                         />
                         <p className="text-sm text-muted-foreground">
-                          الحد الأقصى: 5 صور، 5 ميجابايت لكل صورة. الصيغ المدعومة: JPG, PNG, WEBP, GIF
+                          {IMAGE_SIZE_GUIDES.product} · حتى 5 صور · {IMAGE_FORMAT_HINT}
                         </p>
 
                         {imagePreviews.length > 0 && (

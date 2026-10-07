@@ -1,3 +1,5 @@
+export const OUT_OF_STOCK_LABEL = "نفذت الكمية";
+
 export interface StockVariant {
   attributes: unknown;
   stock_quantity: number;

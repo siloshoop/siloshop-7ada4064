@@ -1,18 +1,15 @@
-import { Heart, Star, Scale, ShoppingCart, Eye, Store } from "lucide-react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { Heart, Star, Scale, Eye, Store } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { FavoriteButton } from "@/components/FavoriteButton";
 import ProductOriginBadge from "@/components/product/ProductOriginBadge";
 import { useToast } from "@/hooks/use-toast";
 import { useCompareProducts } from "@/hooks/useCompareProducts";
-import { useFlyToCart } from "@/components/FlyToCart";
-import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import React, { useState, useEffect, memo } from "react";
-import { notifySync, useSyncListener } from "@/lib/uiSync";
 import { formatPrice } from "@/lib/currency";
-import { productRequiresOptions } from "@/lib/variantRequirement";
+import { OUT_OF_STOCK_LABEL } from "@/lib/stockAvailability";
 
 interface ProductCardProps {
   id?: string;
@@ -56,25 +53,28 @@ const ProductCard = memo(({
 
 }: ProductCardProps) => {
   const navigate = useNavigate();
-  const location = useLocation();
-  const { user } = useAuth();
   const { toast } = useToast();
   const { addProduct } = useCompareProducts();
-  const { triggerFly } = useFlyToCart();
   const [imageLoaded, setImageLoaded] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
   const [liveStock, setLiveStock] = useState(stockQuantity);
   useEffect(() => { setLiveStock(stockQuantity); }, [stockQuantity]);
   useEffect(() => {
     if (!id) return;
+    let active = true;
     const refresh = async () => {
       const { data } = await supabase.from("products").select("stock_quantity").eq("id", id).maybeSingle();
-      if (data) setLiveStock(data.stock_quantity);
+      if (active && data) setLiveStock(data.stock_quantity);
     };
-    // Callers that do not select stock still get the saved availability.
-    if (stockQuantity == null) void refresh();
+    // Saved aggregate stock is authoritative even when a listing/RPC is stale.
+    void refresh();
     window.addEventListener("stock-updated", refresh);
-    return () => window.removeEventListener("stock-updated", refresh);
+    window.addEventListener("focus", refresh);
+    return () => {
+      active = false;
+      window.removeEventListener("stock-updated", refresh);
+      window.removeEventListener("focus", refresh);
+    };
   }, [id, stockQuantity]);
 
   const productId = id;
@@ -137,80 +137,6 @@ const ProductCard = memo(({
   const isOutOfStock = typeof liveStock === "number" && liveStock <= 0;
   const isLowStock = typeof liveStock === "number" && liveStock > 0 && liveStock <= 5;
 
-  const handleAddToCart = async (e: React.MouseEvent<HTMLButtonElement>) => {
-    e.stopPropagation();
-    e.preventDefault();
-
-    const buttonRect = e.currentTarget.getBoundingClientRect();
-
-    if (isOutOfStock) {
-      toast({
-        title: "نفذت الكمية",
-        description: "هذا المنتج غير متوفر حالياً",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    if (!productId) return;
-
-    if (!user) {
-      navigate("/auth", { state: { from: location.pathname + location.search } });
-      return;
-    }
-
-    try {
-      if (await productRequiresOptions(productId)) {
-        toast({
-          title: "اختر الخيارات أولاً",
-          description: "يرجى اختيار اللون و/أو المقاس قبل الإضافة إلى السلة",
-        });
-        navigate(`/product/${productId}`);
-        return;
-      }
-
-      const { data: existingItem } = await supabase
-        .from("cart_items")
-        .select("id, quantity")
-        .eq("user_id", user.id)
-        .eq("product_id", productId)
-        .maybeSingle();
-
-      if (existingItem) {
-        const { error } = await supabase
-          .from("cart_items")
-          .update({ quantity: existingItem.quantity + 1 })
-          .eq("id", existingItem.id);
-        if (error) throw error;
-      } else {
-        const { error } = await supabase.from("cart_items").insert({
-          user_id: user.id,
-          product_id: productId,
-          quantity: 1,
-        });
-        if (error) throw error;
-      }
-
-      notifySync("cart");
-      triggerFly(buttonRect.left + buttonRect.width / 2, buttonRect.top, image);
-
-      toast({
-        title: "تمت الإضافة",
-        description: "تم إضافة المنتج إلى السلة",
-      });
-    } catch (error) {
-      const message = String((error as { message?: string })?.message ?? "");
-      const previewOnly = message.includes("PREVIEW_ONLY");
-      toast({
-        title: previewOnly ? "منتج للمعاينة فقط" : "خطأ",
-        description: previewOnly
-          ? "هذا المنتج معروض للمعاينة فقط وغير متاح للشراء حالياً."
-          : "فشل في إضافة المنتج للسلة",
-        variant: "destructive",
-      });
-    }
-  };
-
   const filledStars = Math.floor(rating);
 
   return (
@@ -240,7 +166,7 @@ const ProductCard = memo(({
         {isOutOfStock && (
           <div className="absolute inset-0 z-20 flex items-center justify-center bg-background/60 backdrop-blur-[2px]">
             <Badge className="bg-destructive text-destructive-foreground font-bold text-sm px-3 py-1 rounded-md shadow-lg border-0 animate-pop-in">
-              نفذت الكمية
+              {OUT_OF_STOCK_LABEL}
             </Badge>
           </div>
         )}
@@ -385,15 +311,6 @@ const ProductCard = memo(({
             : "التوصيل خلال 1-3 أيام"}
         </p>
 
-        <Button
-          className="group/btn mt-auto h-9 w-full rounded-lg px-2 text-xs font-semibold shadow-sm transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] hover:shadow-md active:scale-95 disabled:opacity-60"
-          onClick={handleAddToCart}
-          disabled={isOutOfStock}
-          variant={isOutOfStock ? "secondary" : "default"}
-        >
-          <ShoppingCart className="h-3.5 w-3.5 ml-1.5 transition-transform duration-300 group-hover/btn:scale-110" />
-          {isOutOfStock ? "نفذت الكمية" : "أضف للسلة"}
-        </Button>
       </div>
     </a>
 

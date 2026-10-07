@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import type { Database } from "@/integrations/supabase/types";
 import { LockKeyhole } from "lucide-react";
-import { optionInStock, variantInStock } from "@/lib/stockAvailability";
+import { OUT_OF_STOCK_LABEL, optionInStock, variantInStock } from "@/lib/stockAvailability";
 
 type ProductVariant = Database["public"]["Tables"]["product_variants"]["Row"];
 
@@ -80,8 +80,8 @@ const ProductVariantPicker = ({ variants, onSelect }: ProductVariantPickerProps)
                   className={`rounded-full border ${isSelected && available ? "ring-2 ring-ring ring-offset-2 ring-offset-background" : ""} ${!available ? "border-dashed text-muted-foreground opacity-50" : ""}`}
                   aria-pressed={isSelected && available}
                   disabled={!available}
-                  title={!available ? "غير متوفر" : undefined}
-                  aria-label={!available ? `${value} — غير متوفر` : value}
+                  title={!available ? OUT_OF_STOCK_LABEL : undefined}
+                  aria-label={!available ? `${value} — ${OUT_OF_STOCK_LABEL}` : value}
                   onClick={() =>
                     setSelected((prev) => ({
                       ...prev,

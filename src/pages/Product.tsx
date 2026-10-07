@@ -34,7 +34,7 @@ import type { Database } from "@/integrations/supabase/types";
 import { notifySync, useSyncListener } from "@/lib/uiSync";
 import NativeAdBanner from "@/components/NativeAdBanner";
 import { friendlyDbError } from "@/lib/productValidation";
-import { availableProductStock, variantInStock } from "@/lib/stockAvailability";
+import { OUT_OF_STOCK_LABEL, availableProductStock, variantInStock } from "@/lib/stockAvailability";
 
 type ProductVariant = Database["public"]["Tables"]["product_variants"]["Row"];
 interface Product {
@@ -523,7 +523,7 @@ const Product = () => {
                     inStock ? "bg-emerald-500 animate-pulse" : "bg-destructive"
                   }`}
                 />
-                {inStock ? "متوفر الآن" : "نفذت الكمية"}
+                {inStock ? "متوفر الآن" : OUT_OF_STOCK_LABEL}
               </span>
               {inStock && (
                 <span className="text-muted-foreground">· {effectiveStock} قطعة</span>

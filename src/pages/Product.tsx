@@ -40,6 +40,7 @@ import { OUT_OF_STOCK_LABEL, availableProductStock, variantInStock } from "@/lib
 
 type ProductVariant = Database["public"]["Tables"]["product_variants"]["Row"];
 interface Product {
+  currency?: string | null;
   id: string;
   name: string;
   description: string;

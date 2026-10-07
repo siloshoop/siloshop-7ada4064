@@ -51,6 +51,7 @@ import { notifySync, useSyncListener } from "@/lib/uiSync";
 // export handlers so opening the comparison page stays lightweight.
 
 interface Product {
+  currency?: string | null;
   id: string;
   name: string;
   price: number;

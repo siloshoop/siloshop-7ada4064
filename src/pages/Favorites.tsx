@@ -14,6 +14,7 @@ import { useToast } from "@/hooks/use-toast";
 import { notifySync, useSyncListener } from "@/lib/uiSync";
 
 interface Product {
+  currency?: string | null;
   id: string;
   name: string;
   price: number;

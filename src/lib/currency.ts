@@ -97,7 +97,7 @@ export const totalsByCurrency = (
   return result;
 };
 
-/** "50 $" / "500,000 ل.س" — number formatted, symbol appended. */
+/** "$50" / "500,000 ل.س" — USD symbol prefixed, Syrian pound suffixed. */
 export const formatPrice = (
   amount: number | string | null | undefined,
   currency?: string | null,
@@ -105,7 +105,27 @@ export const formatPrice = (
 ): string => {
   const n = Number(amount ?? 0);
   const value = Number.isFinite(n) ? n : 0;
-  return `${value.toLocaleString("en-US", {
+  const text = value.toLocaleString("en-US", {
     maximumFractionDigits: options?.maximumFractionDigits ?? 2,
-  })} ${currencySymbol(currency)}`;
+  });
+  return normalizeCurrency(currency) === "USD" ? `$${text}` : `${text} ل.س`;
+};
+
+/** Sum amounts per currency (never converting) and format as "$58.5 · 1,000 ل.س". */
+export const formatAmountsByCurrency = (
+  rows: { amount: number | string | null | undefined; currency?: string | null }[],
+  options?: { maximumFractionDigits?: number; divideBy?: (currency: ProductCurrency) => number },
+): string => {
+  const sums = new Map<ProductCurrency, number>();
+  for (const r of rows) {
+    const c = normalizeCurrency(r.currency);
+    sums.set(c, (sums.get(c) ?? 0) + Number(r.amount || 0));
+  }
+  if (sums.size === 0) return formatPrice(0, DEFAULT_CURRENCY, options);
+  return CURRENCY_OPTIONS.filter(({ value }) => sums.has(value))
+    .map(({ value }) => {
+      const d = options?.divideBy?.(value) ?? 1;
+      return formatPrice(d ? (sums.get(value) ?? 0) / d : 0, value, options);
+    })
+    .join(" · ");
 };

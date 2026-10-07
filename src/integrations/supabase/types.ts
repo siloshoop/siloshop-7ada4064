@@ -4739,6 +4739,7 @@ export type Database = {
         Returns: {
           city: string
           created_at: string
+          currency: string
           customer_name: string
           id: string
           status: string

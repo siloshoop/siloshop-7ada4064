@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Download } from "lucide-react";
+import { formatAmountsByCurrency, normalizeCurrency } from "@/lib/currency";
 
 interface OrderRow {
   id: string;
@@ -17,6 +18,7 @@ interface OrderRow {
   total_amount: number;
   customer_name: string | null;
   city: string | null;
+  currency?: string | null;
 }
 
 const RANGES = [
@@ -70,15 +72,16 @@ const SellerReports = () => {
   const summary = useMemo(() => {
     const delivered = scoped.filter((o) => o.status === "delivered");
     const cancelled = scoped.filter((o) => o.status === "cancelled");
-    const revenue = delivered.reduce((s, o) => s + Number(o.total_amount || 0), 0);
+    const revenueRows = delivered.map((o) => ({ amount: o.total_amount, currency: o.currency }));
+    const countBy = (c: string) => delivered.filter((o) => normalizeCurrency(o.currency) === c).length;
     const byCity = new Map<string, number>();
     scoped.forEach((o) => byCity.set(o.city || "غير محدد", (byCity.get(o.city || "غير محدد") ?? 0) + 1));
     return {
       total: scoped.length,
       delivered: delivered.length,
       cancelled: cancelled.length,
-      revenue,
-      avg: delivered.length ? revenue / delivered.length : 0,
+      revenue: formatAmountsByCurrency(revenueRows),
+      avg: formatAmountsByCurrency(revenueRows, { maximumFractionDigits: 0, divideBy: countBy }),
       topCities: [...byCity.entries()].sort((a, b) => b[1] - a[1]).slice(0, 5),
     };
   }, [scoped]);
@@ -99,6 +102,7 @@ const SellerReports = () => {
                   التاريخ: new Date(o.created_at).toLocaleDateString("ar-SY"),
                   الحالة: o.status,
                   المبلغ: Number(o.total_amount || 0),
+                  العملة: normalizeCurrency(o.currency),
                   العميل: o.customer_name ?? "",
                   المحافظة: o.city ?? "",
                 })))
@@ -141,8 +145,8 @@ const SellerReports = () => {
               { l: "إجمالي الطلبات", v: summary.total },
               { l: "طلبات مسلّمة", v: summary.delivered },
               { l: "طلبات ملغاة", v: summary.cancelled },
-              { l: "إيراد مسلّم", v: `${summary.revenue.toLocaleString("ar-SY")} ل.س` },
-              { l: "متوسط قيمة الطلب", v: `${Math.round(summary.avg).toLocaleString("ar-SY")} ل.س` },
+              { l: "إيراد مسلّم", v: summary.revenue },
+              { l: "متوسط قيمة الطلب", v: summary.avg },
             ].map((k) => (
               <Card key={k.l}>
                 <CardContent className="p-4">

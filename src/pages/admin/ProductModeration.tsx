@@ -1,3 +1,4 @@
+import { formatPrice } from "@/lib/currency";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -122,7 +123,7 @@ const ProductModeration = () => {
     let query = supabase
       .from("products")
       .select(
-        "id, name, price, image_url, is_active, stock_quantity, moderation_status, moderation_reason, created_at, sku, barcode, vendor_id, brand_id, category_id, is_featured, is_trending, is_recommended, views_count, purchase_enabled",
+        "id, name, price, currency, image_url, is_active, stock_quantity, moderation_status, moderation_reason, created_at, sku, barcode, vendor_id, brand_id, category_id, is_featured, is_trending, is_recommended, views_count, purchase_enabled",
         { count: "exact" }
       )
       .eq("product_type", "seller")
@@ -414,7 +415,7 @@ const ProductModeration = () => {
                     )}
                   </p>
                   <p className="text-sm text-muted-foreground">
-                    {new Intl.NumberFormat("ar-SY").format(p.price)} ل.س · المخزون {p.stock_quantity ?? 0}
+                    {formatPrice(p.price, (p as any).currency, { maximumFractionDigits: 0 })} · المخزون {p.stock_quantity ?? 0}
                     {" · "}البائع: {vendors[p.vendor_id] ?? "—"}
                   </p>
                   <p className="text-xs text-muted-foreground">

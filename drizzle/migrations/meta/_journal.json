@@ -134,6 +134,13 @@
       "when": 1791415128127,
       "tag": "0018_add_product_shipping_mode",
       "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "7",
+      "when": 1791415864874,
+      "tag": "0019_vendor_orders_currency",
+      "breakpoints": true
     }
   ]
 }

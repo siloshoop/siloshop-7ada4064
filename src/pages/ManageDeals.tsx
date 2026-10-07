@@ -1,3 +1,4 @@
+import { formatPrice } from "@/lib/currency";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
@@ -69,7 +70,7 @@ const ManageDeals = () => {
         // Fetch vendor's products
         const { data: productsData } = await supabase
           .from("products")
-          .select("id, name, image_url, price")
+          .select("id, name, image_url, price, currency")
           .eq("vendor_id", user.id)
           .eq("is_active", true);
 
@@ -80,7 +81,7 @@ const ManageDeals = () => {
           .from("daily_deals")
           .select(`
             *,
-            product:products(name, image_url, price)
+            product:products(name, image_url, price, currency)
           `)
           .in("product_id", (productsData || []).map(p => p.id))
           .order("created_at", { ascending: false });
@@ -154,7 +155,7 @@ const ManageDeals = () => {
         .from("daily_deals")
         .select(`
           *,
-          product:products(name, image_url, price)
+          product:products(name, image_url, price, currency)
         `)
         .in("product_id", products.map(p => p.id))
         .order("created_at", { ascending: false });
@@ -320,7 +321,7 @@ const ManageDeals = () => {
                         <SelectContent>
                           {products.map((product) => (
                             <SelectItem key={product.id} value={product.id}>
-                              {product.name} - {product.price} ل.س
+                              {product.name} - {formatPrice(product.price, (product as any).currency, { maximumFractionDigits: 0 })}
                             </SelectItem>
                           ))}
                         </SelectContent>
@@ -422,10 +423,10 @@ const ManageDeals = () => {
                         </div>
                         <div className="mt-1">
                           <span className="text-sm line-through text-muted-foreground">
-                            {deal.product.price} ل.س
+                            {formatPrice(deal.product.price, (deal.product as any).currency, { maximumFractionDigits: 0 })}
                           </span>
                           <span className="text-sm font-bold text-primary mr-2">
-                            {discountedPrice.toFixed(0)} ل.س
+                            {formatPrice(discountedPrice, (deal.product as any).currency, { maximumFractionDigits: 0 })}
                           </span>
                         </div>
                       </div>

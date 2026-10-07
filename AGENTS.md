@@ -1,4 +1,5 @@
 # Project architecture rules
+- Reset document scroll centrally inside BrowserRouter on every location change and pageshow, with native history restoration disabled, so browser and Capacitor back navigation start at the top.
 - Buyer dashboard summary cards and quick access use router links; spending and rating summaries open existing orders rather than introducing new destinations.
 - Use saved active variant quantities as the aggregate stock for variant products, with database stock guards and cleanup; all clients must observe the same availability without reserving stock in carts.
 

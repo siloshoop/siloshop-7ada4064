@@ -13,6 +13,7 @@ import { ACTIVATION_CHANNEL } from "@/lib/activationSync";
 // Homepage stays eager (visibility-first per project error-isolation memory).
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
+import PageScrollReset from "@/components/PageScrollReset";
 
 // Lazy-loaded routes. Each becomes its own async chunk.
 const Auth = lazy(() => import("./pages/Auth"));
@@ -194,6 +195,7 @@ const App = () => (
           <Toaster />
           <Sonner />
           <BrowserRouter>
+          <PageScrollReset />
           <PublicActivationSync>
           <Suspense fallback={<RouteFallback />}>
           <Routes>

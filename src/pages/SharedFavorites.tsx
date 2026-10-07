@@ -25,7 +25,7 @@ const SharedFavorites = () => {
       if (!ids.length) { setProducts([]); setLoading(false); return; }
       const { data } = await supabase
         .from("products")
-        .select("id, name, price, currency, original_price, image_url, stock_quantity")
+        .select("id, name, price, currency, original_price, image_url, stock_quantity, shipping_cost, shipping_mode")
         .in("id", ids);
       if (!active) return;
       const map = new Map((data || []).map((p: any) => [p.id, p]));
@@ -63,6 +63,8 @@ const SharedFavorites = () => {
                 rating={0}
                 reviews={0}
                 stockQuantity={p.stock_quantity}
+                shippingCost={p.shipping_cost ?? 0}
+                shippingMode={p.shipping_mode}
                 discount={p.original_price ? Math.round(((p.original_price - p.price) / p.original_price) * 100) : undefined}
               />
             ))}

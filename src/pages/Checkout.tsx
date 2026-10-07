@@ -25,6 +25,7 @@ import {
   totalsByCurrency,
   type ProductCurrency,
 } from "@/lib/currency";
+import { shippingDetailLabel } from "@/lib/shippingDisplay";
 
 
 const checkoutSchema = z.object({
@@ -55,6 +56,7 @@ interface CartItem {
     image_url: string;
     vendor_id: string;
     shipping_cost?: number;
+    shipping_mode?: string | null;
     product_type?: string;
     shipping_duration_text?: string | null;
     platform_free_shipping?: boolean | null;
@@ -179,7 +181,7 @@ const Checkout = () => {
           product_id,
           variant_id,
           variant:product_variants(id, attributes, price, discount_price, stock_quantity),
-          product:products(id, name, price, currency, image_url, stock_quantity, vendor_id, shipping_cost, product_type, shipping_duration_text, platform_free_shipping, platform_shipping_fee, platform_cod_enabled, platform_sham_cash_enabled, platform_electronic_payment_enabled)
+          product:products(id, name, price, currency, image_url, stock_quantity, vendor_id, shipping_cost, shipping_mode, product_type, shipping_duration_text, platform_free_shipping, platform_shipping_fee, platform_cod_enabled, platform_sham_cash_enabled, platform_electronic_payment_enabled)
         `)
         .eq("user_id", user.id);
 
@@ -773,9 +775,11 @@ const Checkout = () => {
                           {!usePlatformRules && (
                             <p className="text-sm inline-flex items-center gap-1 mt-0.5">
                               <Truck className="h-3.5 w-3.5 text-primary" />
-                              {Number(item.product.shipping_cost || 0) === 0
-                                ? "شحن مجاني"
-                                : `الشحن: ${formatPrice(item.product.shipping_cost || 0, item.product.currency, { maximumFractionDigits: 0 })}`}
+                              {shippingDetailLabel(
+                                item.product.shipping_mode,
+                                item.product.shipping_cost,
+                                item.product.currency,
+                              )}
                             </p>
                           )}
                           {item.product.shipping_duration_text && (

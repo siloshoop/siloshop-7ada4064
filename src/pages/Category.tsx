@@ -80,6 +80,7 @@ const Category = () => {
         brand_id,
         stock_quantity,
         shipping_cost,
+        shipping_mode,
         reviews(rating)
       `)
       .eq("category_id", categoryId)
@@ -252,7 +253,8 @@ const Category = () => {
                       rating={avgRating}
                       reviews={product.reviews?.length || 0}
                       discount={discount}
-                      shippingCost={(product as any).shipping_cost || 0}
+                      shippingCost={(product as any).shipping_cost ?? 0}
+                      shippingMode={(product as any).shipping_mode}
                       stockQuantity={product.stock_quantity}
                     />
                   </Fragment>

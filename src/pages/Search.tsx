@@ -53,6 +53,7 @@ interface Product {
   subcategory_id: string | null;
   stock_quantity: number | null;
   shipping_cost?: number;
+  shipping_mode?: string | null;
   product_type?: string | null;
   ships_within_days?: number | null;
   colors?: string[] | null;
@@ -313,7 +314,7 @@ const SearchPage = () => {
       let query = supabase
         .from("products")
         .select(
-          "id, name, price, currency, original_price, image_url, vendor_id, category_id, subcategory_id, stock_quantity, shipping_cost, product_type, ships_within_days, colors, sizes, reviews(rating)",
+          "id, name, price, currency, original_price, image_url, vendor_id, category_id, subcategory_id, stock_quantity, shipping_cost, shipping_mode, product_type, ships_within_days, colors, sizes, reviews(rating)",
         )
         .eq("is_active", true);
 
@@ -382,7 +383,8 @@ const SearchPage = () => {
 
       // Free shipping
       if (filters.freeShipping) {
-        query = query.eq("shipping_cost", 0);
+        // Free means free: a fixed price or a shipping-company price is not free shipping.
+        query = query.eq("shipping_cost", 0).or("shipping_mode.is.null,shipping_mode.neq.variable");
       }
 
       // Country of origin (local seller vs. imported platform products)
@@ -1156,7 +1158,8 @@ const SearchPage = () => {
                           rating={avgRating}
                           reviews={product.reviews?.length || 0}
                           discount={discount}
-                          shippingCost={(product as any).shipping_cost || 0}
+                          shippingCost={(product as any).shipping_cost ?? 0}
+                          shippingMode={(product as any).shipping_mode}
                           productType={product.product_type}
                           stockQuantity={product.stock_quantity}
                           shipsWithinDays={product.ships_within_days}

@@ -75,7 +75,7 @@ const Index = () => {
     try {
       let queryBuilder = supabase
         .from("products")
-        .select("id, name, price, currency, original_price, stock_quantity, image_url, reviews(rating)")
+        .select("id, name, price, currency, original_price, stock_quantity, image_url, shipping_cost, shipping_mode, reviews(rating)")
         .eq("is_active", true)
         .gte("price", filters.minPrice)
         .lte("price", filters.maxPrice);
@@ -158,6 +158,8 @@ const Index = () => {
                           )
                         : undefined
                     }
+                    shippingCost={(product as any).shipping_cost ?? 0}
+                    shippingMode={(product as any).shipping_mode}
                   />
                 </Fragment>
               ))}

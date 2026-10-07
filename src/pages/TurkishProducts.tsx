@@ -194,6 +194,9 @@ const TurkishProducts = () => {
                         ? options?.shipping_fee
                         : Number(product.platform_shipping_fee || 0)
                   }
+                  shippingMode={
+                    (product.platform_free_shipping ?? options?.free_shipping) ? "free" : "fixed"
+                  }
                   stockQuantity={product.stock_quantity}
                   productType={product.product_type}
                   shipsWithinDays={product.ships_within_days}

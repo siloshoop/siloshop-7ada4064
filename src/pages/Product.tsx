@@ -5,6 +5,7 @@ import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { formatPrice, currencySymbol } from "@/lib/currency";
+import { shippingDetailLabel } from "@/lib/shippingDisplay";
 import Navbar from "@/components/Navbar";
 import ProductOriginBadge from "@/components/product/ProductOriginBadge";
 import SellerInfoCard from "@/components/product/SellerInfoCard";
@@ -48,6 +49,7 @@ interface Product {
   original_price: number | null;
   stock_quantity: number;
   shipping_cost: number | null;
+  shipping_mode?: string | null;
   image_url: string;
   images: string[] | null;
   vendor_id: string;
@@ -540,9 +542,7 @@ const Product = () => {
               <span className="text-muted-foreground">·</span>
               <span className="inline-flex items-center gap-1.5 font-medium">
                 <Truck className="h-3.5 w-3.5 text-primary" />
-                {product.shipping_cost === 0 || product.shipping_cost === null
-                  ? "شحن مجاني"
-                  : `الشحن: ${formatPrice(product.shipping_cost, (product as any).currency)}`}
+                {shippingDetailLabel(product.shipping_mode, product.shipping_cost, (product as any).currency)}
               </span>
               {product.shipping_duration_text && (
                 <>
@@ -774,6 +774,7 @@ const Product = () => {
             <TabsContent value="shipping" className="pt-6 animate-fade-in">
               <ShippingInfo
                 shippingCost={product.shipping_cost}
+                shippingMode={product.shipping_mode}
                 currency={product.currency}
                 shipsWithinDays={product.ships_within_days}
                 isPlatform={product.product_type === "platform"}

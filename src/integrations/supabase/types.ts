@@ -2524,6 +2524,7 @@ export type Database = {
           shipping_class: string | null
           shipping_cost: number
           shipping_duration_text: string | null
+          shipping_mode: string | null
           shipping_weight: number | null
           ships_within_days: number | null
           short_description: string | null
@@ -2590,6 +2591,7 @@ export type Database = {
           shipping_class?: string | null
           shipping_cost?: number
           shipping_duration_text?: string | null
+          shipping_mode?: string | null
           shipping_weight?: number | null
           ships_within_days?: number | null
           short_description?: string | null
@@ -2656,6 +2658,7 @@ export type Database = {
           shipping_class?: string | null
           shipping_cost?: number
           shipping_duration_text?: string | null
+          shipping_mode?: string | null
           shipping_weight?: number | null
           ships_within_days?: number | null
           short_description?: string | null

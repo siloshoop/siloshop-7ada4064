@@ -19,7 +19,10 @@ const Partners = () => {
       .eq("is_active", true)
       .order("sort_order")
       .order("created_at")
-      .then(({ data }) => setPartners((data as PartnerItem[]) ?? []));
+      .then(async ({ data }) => {
+        const rows = (data as PartnerItem[]) ?? [];
+        setPartners(await Promise.all(rows.map(async (r) => ({ ...r, logo_url: await resolveStoreAssetUrl(r.logo_url) }))));
+      });
   }, []);
   return (
     <div className="min-h-screen flex flex-col">
@@ -79,7 +82,7 @@ const Partners = () => {
                   {partners === null ? null : partners.length === 0 ? (
                     <p className="col-span-full text-center text-muted-foreground">سيتم الإعلان عن شركائنا قريبًا</p>
                   ) : partners.map((p) => {
-                    const logo = p.logo_url ? resolveStoreAssetUrl(p.logo_url) : null;
+                    const logo = p.logo_url;
                     const body = (
                       <Card className="h-full hover:shadow-lg transition-shadow">
                         <CardContent className="flex flex-col items-center justify-center gap-2 p-4">

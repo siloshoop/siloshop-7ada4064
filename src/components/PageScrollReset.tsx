@@ -1,7 +1,10 @@
 import { useLayoutEffect } from "react";
 import { useLocation } from "react-router-dom";
 
-const resetScroll = () => window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+// Must never return a value: React treats an effect's return value as its cleanup.
+const resetScroll = (): void => {
+  window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+};
 
 export default function PageScrollReset() {
   const { key, pathname, search } = useLocation();
@@ -17,6 +20,8 @@ export default function PageScrollReset() {
     };
   }, []);
 
-  useLayoutEffect(resetScroll, [key, pathname, search]);
+  useLayoutEffect(() => {
+    resetScroll();
+  }, [key, pathname, search]);
   return null;
 }

@@ -102,7 +102,9 @@ const Index = () => {
           queryBuilder = queryBuilder.order("name", { ascending: false });
           break;
         default:
-          queryBuilder = queryBuilder.order("created_at", { ascending: false });
+          queryBuilder = queryBuilder
+            .order("sold_count", { ascending: false })
+            .order("created_at", { ascending: false });
       }
 
       const { data } = await queryBuilder;

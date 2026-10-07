@@ -47,7 +47,7 @@ const Subcategory = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [priceRange, setPriceRange] = useState([0, 1000000]);
   const [maxPrice, setMaxPrice] = useState(1000000);
-  const [sortBy, setSortBy] = useState("newest");
+  const [sortBy, setSortBy] = useState("best_selling");
   const [minVendorRating, setMinVendorRating] = useState(0);
   const [inStockOnly, setInStockOnly] = useState(false);
   const [hasDiscountOnly, setHasDiscountOnly] = useState(false);
@@ -183,6 +183,7 @@ const Subcategory = () => {
         stock_quantity,
         shipping_cost,
         shipping_mode,
+        sold_count,
         reviews(rating)
       `)
       .eq("is_active", true);
@@ -221,7 +222,8 @@ const Subcategory = () => {
           stock_quantity,
           shipping_cost,
           shipping_mode,
-          reviews(rating)
+          sold_count,
+        reviews(rating)
         `)
         .eq("category_id", categoryId)
         .eq("is_active", true)
@@ -309,6 +311,9 @@ const Subcategory = () => {
 
     // Sort
     switch (sortBy) {
+      case "best_selling":
+        result.sort((a: any, b: any) => (b.sold_count ?? 0) - (a.sold_count ?? 0));
+        break;
       case "price_asc":
         result.sort((a, b) => a.price - b.price);
         break;
@@ -340,7 +345,7 @@ const Subcategory = () => {
   const clearFilters = () => {
     setSearchQuery("");
     setPriceRange([0, maxPrice]);
-    setSortBy("newest");
+    setSortBy("best_selling");
     setMinVendorRating(0);
     setInStockOnly(false);
     setHasDiscountOnly(false);
@@ -349,7 +354,7 @@ const Subcategory = () => {
   const activeFiltersCount = [
     searchQuery,
     priceRange[0] > 0 || priceRange[1] < maxPrice,
-    sortBy !== "newest",
+    sortBy !== "best_selling",
     minVendorRating > 0,
     inStockOnly,
     hasDiscountOnly
@@ -442,6 +447,7 @@ const Subcategory = () => {
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
+                        <SelectItem value="best_selling">الأكثر مبيعًا</SelectItem>
                         <SelectItem value="newest">الأحدث</SelectItem>
                         <SelectItem value="price_asc">السعر: من الأقل للأعلى</SelectItem>
                         <SelectItem value="price_desc">السعر: من الأعلى للأقل</SelectItem>
@@ -515,7 +521,8 @@ const Subcategory = () => {
                   <SelectValue placeholder="الترتيب" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="newest">الأحدث</SelectItem>
+                  <SelectItem value="best_selling">الأكثر مبيعًا</SelectItem>
+                        <SelectItem value="newest">الأحدث</SelectItem>
                   <SelectItem value="price_asc">السعر: من الأقل للأعلى</SelectItem>
                   <SelectItem value="price_desc">السعر: من الأعلى للأقل</SelectItem>
                   <SelectItem value="rating">التقييم الأعلى</SelectItem>

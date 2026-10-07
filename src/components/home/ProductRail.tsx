@@ -64,6 +64,7 @@ const ProductRail = ({
           .from("products")
           .select(SELECT)
           .eq("is_active", true)
+          .order(variant === "todays_offers" ? "sold_count" : "created_at", { ascending: false })
           .order("created_at", { ascending: false })
           .limit(variant === "todays_offers" ? limit * 4 : limit);
         if (cancelled) return;

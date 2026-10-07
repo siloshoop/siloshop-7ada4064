@@ -35,7 +35,16 @@ import {
 } from "@/lib/phone";
 
 
+const nameField = (label: string) =>
+  z
+    .string()
+    .trim()
+    .min(1, `يرجى إدخال ${label}`)
+    .max(50, `${label} طويل جداً`);
+
 const checkoutSchema = z.object({
+  firstName: nameField("الاسم"),
+  lastName: nameField("الكنية"),
   phone: z
     .string()
     .transform((v) => phoneDigits(v))
@@ -126,6 +135,8 @@ const Checkout = () => {
   const { isEnabled } = useFeatureFlags();
 
   const [formData, setFormData] = useState({
+    firstName: "",
+    lastName: "",
     phone: "",
     governorate: "",
     area: "",
@@ -137,9 +148,18 @@ const Checkout = () => {
   const phoneFieldError =
     phoneTouched || formData.phone.trim() !== "" ? phoneError(formData.phone) : null;
 
+  // Split a stored recipient name ("محمد العلي") into the two checkout fields.
+  const splitRecipientName = (name?: string | null) => {
+    const parts = (name || "").trim().split(/\s+/);
+    return { firstName: parts[0] || "", lastName: parts.slice(1).join(" ") || "" };
+  };
 
   const composeAddress = () =>
-    ["عنوان التوصيل", formData.governorate]
+    [
+      [formData.firstName, formData.lastName].filter((v) => v && v.trim()).join(" "),
+      "عنوان التوصيل",
+      formData.governorate,
+    ]
       .filter((v) => v && v.trim())
       .join("، ");
 

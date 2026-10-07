@@ -1,4 +1,4 @@
-import { formatPrice } from "@/lib/currency";
+import { formatPrice, normalizeCurrency } from "@/lib/currency";
 import { copyText, openSocialShare } from "@/lib/share";
 import { canvasToBlob, exportFile } from "@/lib/exportFile";
 import { buildCompareShareUrl } from "@/lib/shareUrl";
@@ -411,7 +411,11 @@ const Compare = () => {
     return reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length;
   };
 
-  const getLowestPrice = () => Math.min(...products.map(p => p.price));
+  // Lowest price is only meaningful among products sharing the same currency.
+  const isLowestPrice = (product: Product) => {
+    const same = products.filter((p) => normalizeCurrency(p.currency) === normalizeCurrency(product.currency));
+    return same.length > 1 && product.price === Math.min(...same.map((p) => p.price));
+  };
   const getHighestRating = () => Math.max(...products.map(p => getAverageRating(p.reviews)));
   const getHighestStock = () => Math.max(...products.map(p => p.stock_quantity || 0));
   const getHighestDiscount = () => Math.max(...products.map(p => calculateDiscount(p.original_price, p.price) || 0));
@@ -422,7 +426,7 @@ const Compare = () => {
       icon: <DollarSign className="h-5 w-5" />,
       getValue: (product) => (
         <div className="text-center">
-          <p className={`text-xl font-bold ${product.price === getLowestPrice() ? "text-green-600" : "text-foreground"}`}>
+          <p className={`text-base font-bold sm:text-lg ${isLowestPrice(product) ? "text-green-600" : "text-foreground"}`}>
             {formatPrice(product.price, product.currency)}
           </p>
           {product.original_price && (
@@ -430,7 +434,7 @@ const Compare = () => {
               {formatPrice(product.original_price, product.currency)}
             </p>
           )}
-          {product.price === getLowestPrice() && products.length > 1 && (
+          {isLowestPrice(product) && (
             <Badge className="mt-1 bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300">
               <TrendingDown className="h-3 w-3 ml-1" />
               الأقل سعراً

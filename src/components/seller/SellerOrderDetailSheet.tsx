@@ -1,3 +1,4 @@
+import { formatPrice } from "@/lib/currency";
 import { useEffect, useMemo, useState } from "react";
 import {
   Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription,
@@ -156,7 +157,7 @@ const SellerOrderDetailSheet = ({ order, open, onOpenChange, onChanged }: Props)
             <div className="flex items-center gap-2"><User className="h-4 w-4 text-muted-foreground" /> {localOrder.customer_name || "غير متوفر"}</div>
             <div className="flex items-center gap-2"><Phone className="h-4 w-4 text-muted-foreground" /> {localOrder.customer_phone || "غير متوفر"}</div>
             <div className="flex items-center gap-2"><MapPin className="h-4 w-4 text-muted-foreground" /> {localOrder.city || "غير محددة"}</div>
-            <div className="flex items-center gap-2"><Package className="h-4 w-4 text-muted-foreground" /> {localOrder.items_count} منتج · إجمالي {Number(localOrder.vendor_subtotal || 0).toLocaleString("ar-SY")} ل.س</div>
+            <div className="flex items-center gap-2"><Package className="h-4 w-4 text-muted-foreground" /> {localOrder.items_count} منتج · إجمالي {formatPrice(localOrder.vendor_subtotal || 0, orderCurrency)}</div>
           </div>
 
           {printData && (
@@ -207,10 +208,10 @@ const SellerOrderDetailSheet = ({ order, open, onOpenChange, onChanged }: Props)
                     <div className="min-w-0 flex-1">
                       <p className="truncate text-sm font-medium">{it.product_name || "منتج"}</p>
                       {it.variant_label && <p className="text-xs text-muted-foreground">{it.variant_label}</p>}
-                      <p className="text-xs text-muted-foreground">الكمية: {it.quantity} × {Number(it.price).toLocaleString("ar-SY")} ل.س</p>
+                      <p className="text-xs text-muted-foreground">الكمية: {it.quantity} × {formatPrice(it.price, (it as any).currency ?? orderCurrency)}</p>
                     </div>
                     <p className="text-sm font-semibold">
-                      {Number(it.subtotal ?? it.quantity * it.price).toLocaleString("ar-SY")} ل.س
+                      {formatPrice(it.subtotal ?? it.quantity * it.price, (it as any).currency ?? orderCurrency)}
                     </p>
                   </div>
                 ))

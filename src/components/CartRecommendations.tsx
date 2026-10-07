@@ -70,7 +70,7 @@ const CartRecommendations = ({ cartProductIds, cartCategoryIds }: CartRecommenda
         <Sparkles className="h-6 w-6 text-primary" />
         <h2 className="text-2xl font-bold">منتجات قد تعجبك</h2>
       </div>
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="product-grid">
         {products.map((product) => (
           <ProductCard
             key={product.id}

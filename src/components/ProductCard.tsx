@@ -173,7 +173,7 @@ const ProductCard = memo(({
       onMouseLeave={() => setIsHovered(false)}
     >
 
-      <div className="relative aspect-[3/4] overflow-hidden bg-muted/30">
+      <div className="relative aspect-[4/5] overflow-hidden bg-muted/30">
         {discountPercent > 0 && (
           <div className="absolute end-2 top-2 z-10 max-w-[calc(100%-3.5rem)]">
             <Badge className="bg-sale text-sale-foreground font-bold text-[11px] px-2 py-1 rounded-md border-0">
@@ -184,7 +184,7 @@ const ProductCard = memo(({
 
         {isOutOfStock && (
           <div className="absolute bottom-2 end-2 z-10 max-w-[calc(100%-1rem)]">
-            <Badge className="bg-destructive text-destructive-foreground font-bold text-sm px-3 py-1 rounded-md shadow-lg border-0 animate-pop-in">
+            <Badge className="bg-destructive text-destructive-foreground font-bold text-[11px] px-2 py-0.5 rounded-md shadow-lg border-0 animate-pop-in">
               {OUT_OF_STOCK_LABEL}
             </Badge>
           </div>
@@ -199,14 +199,14 @@ const ProductCard = memo(({
 
         <div className="absolute top-2 start-2 z-10 flex flex-col gap-1">
           {id ? (
-            <FavoriteButton productId={id} variant="ghost" size="icon" className="h-9 w-9 rounded-full" />
+            <FavoriteButton productId={id} variant="ghost" size="icon" className="h-8 w-8 rounded-full" />
           ) : (
             <Button
               type="button"
               variant="ghost"
               size="icon"
               aria-label="إضافة إلى المفضلة"
-               className="h-9 w-9 rounded-full bg-background/95 shadow-sm backdrop-blur-md hover:bg-primary hover:text-primary-foreground"
+               className="h-8 w-8 rounded-full bg-background/95 shadow-sm backdrop-blur-md hover:bg-primary hover:text-primary-foreground"
               onClick={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
@@ -220,7 +220,7 @@ const ProductCard = memo(({
               type="button"
               variant="ghost"
               size="icon"
-              className="h-9 w-9 rounded-full bg-background/95 opacity-100 shadow-sm backdrop-blur-md hover:bg-primary hover:text-primary-foreground sm:translate-x-2 sm:opacity-0 sm:group-hover:translate-x-0 sm:group-hover:opacity-100"
+              className="h-8 w-8 rounded-full bg-background/95 opacity-100 shadow-sm backdrop-blur-md hover:bg-primary hover:text-primary-foreground sm:translate-x-2 sm:opacity-0 sm:group-hover:translate-x-0 sm:group-hover:opacity-100"
               onClick={handleCompare}
               title="أضف للمقارنة"
             >
@@ -264,20 +264,20 @@ const ProductCard = memo(({
       </div>
 
       {(details?.is_trending || details?.is_featured) && (
-        <div className="flex min-w-0 items-center gap-1.5 bg-primary/10 px-2.5 py-1.5 text-[11px] font-semibold text-primary">
+        <div className="flex min-w-0 items-center gap-1.5 bg-primary/10 px-2 py-1 text-[10px] font-semibold text-primary">
           {details.is_trending ? <TrendingUp className="h-3.5 w-3.5 shrink-0" /> : <Award className="h-3.5 w-3.5 shrink-0" />}
           <span className="truncate">{details.is_trending ? "رائج الآن" : "منتج مميز"}</span>
         </div>
       )}
 
-      <div className="flex min-w-0 flex-1 flex-col gap-2 p-2.5 sm:p-3">
-        <h3 className="line-clamp-2 min-h-[2.5rem] break-words text-sm font-medium leading-5 text-foreground transition-colors duration-300 group-hover:text-primary">
+      <div className="flex min-w-0 flex-1 flex-col gap-1 p-2">
+        <h3 className="line-clamp-2 min-h-[2rem] break-words text-xs font-medium leading-4 text-foreground transition-colors duration-300 group-hover:text-primary">
           {name}
         </h3>
 
         {/* Store name */}
         {sellerName && (
-          <p className="flex items-center gap-1 text-xs text-muted-foreground truncate">
+          <p className="flex items-center gap-1 text-[11px] text-muted-foreground truncate">
             <Store className="h-3 w-3 shrink-0" />
             <span className="truncate">{sellerName}</span>
           </p>
@@ -308,7 +308,7 @@ const ProductCard = memo(({
         </div>
 
         <div className="mt-auto flex min-w-0 flex-wrap items-baseline gap-x-1.5 gap-y-1">
-          <span className="break-words text-base font-bold leading-snug text-primary">
+          <span className="break-words text-sm font-bold leading-snug text-primary">
             {formatPrice(price, currency)}
           </span>
           {originalPrice && originalPrice > price && (
@@ -330,7 +330,7 @@ const ProductCard = memo(({
           )}
         </div>
 
-        <p className="text-[10px] text-muted-foreground">
+        <p className="hidden text-[10px] text-muted-foreground sm:block">
           {shipsWithinDays && shipsWithinDays > 0
             ? `التوصيل خلال ${shipsWithinDays} أيام`
             : productType === "platform"

@@ -517,3 +517,10 @@ All colors MUST be HSL.
 .category-card[data-pressed="true"] {
   transition-duration: 120ms;
 }
+
+/* Dense, equal-size product grids (Trendyol-style) */
+@layer components {
+  .product-grid { @apply grid grid-cols-2 gap-2 sm:grid-cols-3 sm:gap-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 items-stretch; }
+  .product-grid-narrow { @apply grid grid-cols-2 gap-2 sm:grid-cols-3 sm:gap-3 lg:grid-cols-4 xl:grid-cols-5 items-stretch; }
+  .product-grid > *, .product-grid-narrow > * { min-width: 0; }
+}

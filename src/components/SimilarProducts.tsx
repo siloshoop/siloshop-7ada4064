@@ -91,7 +91,7 @@ const SimilarProducts = ({ productId, categoryId, vendorId }: SimilarProductsPro
   return (
     <section className="mt-12">
       <h2 className="mb-6 text-xl font-bold md:text-2xl">منتجات ذات صلة</h2>
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="product-grid">
         {products.map((product) => {
           const avgRating = product.reviews && product.reviews.length > 0
             ? product.reviews.reduce((sum, r) => sum + r.rating, 0) / product.reviews.length

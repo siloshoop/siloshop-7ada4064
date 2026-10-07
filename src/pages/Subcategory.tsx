@@ -572,7 +572,7 @@ const Subcategory = () => {
             <Button onClick={clearFilters}>مسح الفلاتر</Button>
           </div>
         ) : (
-          <div className="grid grid-cols-2 gap-4 sm:gap-6 lg:grid-cols-3 xl:grid-cols-4">
+          <div className="product-grid-narrow">
             {filteredProducts.map((product) => {
               const avgRating = product.reviews?.length > 0
                 ? product.reviews.reduce((sum, r) => sum + r.rating, 0) / product.reviews.length

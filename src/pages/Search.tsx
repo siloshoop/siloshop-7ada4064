@@ -1097,12 +1097,9 @@ const SearchPage = () => {
               {stores.map((st) => (
                 <Link key={st.user_id} to={`/store/${st.user_id}`}
                   className="flex shrink-0 items-center gap-2 rounded-lg border bg-card px-3 py-2 hover:bg-accent">
-                  {st.logo_url ? (
-                    <img src={st.logo_url} alt={st.store_name} loading="lazy" className="h-8 w-8 rounded-md object-cover" />
-                  ) : (
-                    <Store className="h-5 w-5 text-muted-foreground" />
-                  )}
+                  <Store className="h-5 w-5 text-muted-foreground" />
                   <span className="max-w-[10rem] truncate text-sm font-medium">{st.store_name}</span>
+                  {st.city && <span className="text-xs text-muted-foreground">{st.city}</span>}
                 </Link>
               ))}
             </div>

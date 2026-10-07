@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { formatSplitTotals, type CurrencyTotals } from "@/lib/currency";
+import { formatSplitTotals, type RevenueSplit } from "@/lib/currency";
 import AdminLayout from "@/components/admin/AdminLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -26,9 +26,9 @@ const Revenue = () => {
   const [data, setData] = useState<Analytics | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const [split, setSplit] = useState<CurrencyTotals | null>(null);
+  const [split, setSplit] = useState<RevenueSplit | null>(null);
   useEffect(() => {
-    supabase.rpc("revenue_totals_by_currency", { _scope: "admin", _days: days }).then(({ data }) => setSplit((data as CurrencyTotals) ?? null));
+    supabase.rpc("revenue_totals_by_currency", { _scope: "admin", _days: days }).then(({ data }) => setSplit((data as unknown as RevenueSplit) ?? null));
   }, [days]);
 
   useEffect(() => {

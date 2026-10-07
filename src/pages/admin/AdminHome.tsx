@@ -1,4 +1,4 @@
-import { formatSplitTotals, type CurrencyTotals } from "@/lib/currency";
+import { formatSplitTotals, type RevenueSplit } from "@/lib/currency";
 import { supabase } from "@/integrations/supabase/client";
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
@@ -82,9 +82,9 @@ const AdminHome = () => {
   const [days, setDays] = useState(30);
   const { data, loading, refreshing, error, reload } = useAdminDashboard(days);
 
-  const [split, setSplit] = useState<CurrencyTotals | null>(null);
+  const [split, setSplit] = useState<RevenueSplit | null>(null);
   useEffect(() => {
-    supabase.rpc("revenue_totals_by_currency", { _scope: "admin", _days: days }).then(({ data }) => setSplit((data as CurrencyTotals) ?? null));
+    supabase.rpc("revenue_totals_by_currency", { _scope: "admin", _days: days }).then(({ data }) => setSplit((data as unknown as RevenueSplit) ?? null));
   }, [days, data]);
 
   const kpis = useMemo<Kpi[]>(() => {

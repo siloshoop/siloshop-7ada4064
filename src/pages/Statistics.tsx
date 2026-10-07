@@ -1,4 +1,4 @@
-import { formatSplitTotals, type CurrencyTotals } from "@/lib/currency";
+import { formatSplitTotals, type RevenueSplit } from "@/lib/currency";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
@@ -43,9 +43,9 @@ const Statistics = () => {
   const [topProducts, setTopProducts] = useState<ProductStat[]>([]);
   const [recentReviews, setRecentReviews] = useState<Review[]>([]);
   const [averageRating, setAverageRating] = useState(0);
-  const [split, setSplit] = useState<CurrencyTotals | null>(null);
+  const [split, setSplit] = useState<RevenueSplit | null>(null);
   useEffect(() => {
-    supabase.rpc("revenue_totals_by_currency", { _scope: "vendor", _days: 365 }).then(({ data }) => setSplit((data as CurrencyTotals) ?? null));
+    supabase.rpc("revenue_totals_by_currency", { _scope: "vendor", _days: 365 }).then(({ data }) => setSplit((data as unknown as RevenueSplit) ?? null));
   }, [user]);
   const [totalStats, setTotalStats] = useState({
     totalRevenue: 0,

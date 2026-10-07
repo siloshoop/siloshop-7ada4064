@@ -1,4 +1,4 @@
-import { formatPrice, formatSplitTotals, sumByCurrency, type CurrencyTotals } from "@/lib/currency";
+import { formatPrice, formatSplitTotals, sumByCurrency, type RevenueSplit } from "@/lib/currency";
 import { useCallback, useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
@@ -44,8 +44,8 @@ const Dashboard = () => {
   });
   const [customerStats, setCustomerStats] = useState({ orders: 0, totalSpent: 0, reviewed: 0, favorites: 0 });
   const [loading, setLoading] = useState(true);
-  const [vendorSplit, setVendorSplit] = useState<CurrencyTotals | null>(null);
-  const [customerSplit, setCustomerSplit] = useState<CurrencyTotals | null>(null);
+  const [vendorSplit, setVendorSplit] = useState<RevenueSplit | null>(null);
+  const [customerSplit, setCustomerSplit] = useState<RevenueSplit | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [filterStatus, setFilterStatus] = useState("all");
   const [sortBy, setSortBy] = useState("date-desc");
@@ -90,7 +90,7 @@ const Dashboard = () => {
     setProducts(productsData || []);
     const { data: salesStats } = await supabase.rpc("get_vendor_sales_stats");
     const { data: split } = await supabase.rpc("revenue_totals_by_currency", { _scope: "vendor", _days: 30 });
-    setVendorSplit((split as CurrencyTotals) ?? null);
+    setVendorSplit((split as unknown as RevenueSplit) ?? null);
     const s: any = Array.isArray(salesStats) ? salesStats[0] : salesStats;
     setStats({
       totalProducts: productsData?.length || 0,

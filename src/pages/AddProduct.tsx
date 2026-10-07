@@ -289,9 +289,6 @@ const AddProduct = () => {
         subcategory_id: formData.subcategory_id || null,
         image_url: mainImageUrl,
         images: imageUrls.length > 0 ? imageUrls : null,
-        length_cm: formData.length_cm ? Number(formData.length_cm) : null,
-        width_cm: formData.width_cm ? Number(formData.width_cm) : null,
-        height_cm: formData.height_cm ? Number(formData.height_cm) : null,
         shipping_weight: formData.shipping_weight ? Number(formData.shipping_weight) : null,
         shipping_class: formData.shipping_class || null,
         warranty: formData.warranty.trim() || null,
@@ -634,7 +631,7 @@ const AddProduct = () => {
                 </AccordionItem>
 
                 <AccordionItem value="shipping">
-                  <AccordionTrigger>الشحن والأبعاد</AccordionTrigger>
+                  <AccordionTrigger>الشحن</AccordionTrigger>
                   <AccordionContent className="space-y-4">
                     <div className="space-y-2">
                       <Label>طريقة الشحن</Label>
@@ -697,42 +694,10 @@ const AddProduct = () => {
                       </p>
                     </div>
 
-                    <div className="grid grid-cols-1 gap-4 min-[360px]:grid-cols-3">
-                      <div className="space-y-2">
-                        <Label htmlFor="length_cm">الطول (سم)</Label>
-                        <Input
-                          id="length_cm"
-                          type="number"
-                          step="0.01"
-                          value={formData.length_cm}
-                          onChange={(e) => setFormData({ ...formData, length_cm: e.target.value })}
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="width_cm">العرض (سم)</Label>
-                        <Input
-                          id="width_cm"
-                          type="number"
-                          step="0.01"
-                          value={formData.width_cm}
-                          onChange={(e) => setFormData({ ...formData, width_cm: e.target.value })}
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="height_cm">الارتفاع (سم)</Label>
-                        <Input
-                          id="height_cm"
-                          type="number"
-                          step="0.01"
-                          value={formData.height_cm}
-                          onChange={(e) => setFormData({ ...formData, height_cm: e.target.value })}
-                        />
-                      </div>
-                    </div>
 
                     <div className="grid grid-cols-1 gap-4 min-[360px]:grid-cols-2">
                       <div className="space-y-2">
-                        <Label htmlFor="shipping_weight">وزن الشحن (كغ)</Label>
+                        <Label htmlFor="shipping_weight">وزن الشحن (كغ) (اختياري)</Label>
                         <Input
                           id="shipping_weight"
                           type="number"
@@ -762,7 +727,7 @@ const AddProduct = () => {
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="warranty">الضمان</Label>
+                      <Label htmlFor="warranty">الضمان (اختياري)</Label>
                       <Input
                         id="warranty"
                         value={formData.warranty}
@@ -776,17 +741,17 @@ const AddProduct = () => {
                 </AccordionItem>
 
                 <AccordionItem value="specs">
-                  <AccordionTrigger>الألوان والمقاسات</AccordionTrigger>
+                  <AccordionTrigger>الألوان والمقاسات (اختياري)</AccordionTrigger>
                   <AccordionContent className="space-y-4">
                     <ProductColorsSizesEditor value={csz} onChange={setCsz} />
                   </AccordionContent>
                 </AccordionItem>
 
                 <AccordionItem value="seo">
-                  <AccordionTrigger>SEO</AccordionTrigger>
+                  <AccordionTrigger>SEO (اختياري)</AccordionTrigger>
                   <AccordionContent className="space-y-4">
                     <div className="space-y-2">
-                      <Label htmlFor="slug">الرابط المختصر (Slug)</Label>
+                      <Label htmlFor="slug">الرابط المختصر (اختياري)</Label>
                       <Input
                         id="slug"
                         value={formData.slug}
@@ -796,7 +761,7 @@ const AddProduct = () => {
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="seo_title">عنوان SEO</Label>
+                      <Label htmlFor="seo_title">عنوان SEO (اختياري)</Label>
                       <Input
                         id="seo_title"
                         value={formData.seo_title}
@@ -806,7 +771,7 @@ const AddProduct = () => {
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="seo_description">وصف SEO</Label>
+                      <Label htmlFor="seo_description">وصف SEO (اختياري)</Label>
                       <Textarea
                         id="seo_description"
                         value={formData.seo_description}
@@ -817,7 +782,7 @@ const AddProduct = () => {
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="seo_keywords">كلمات مفتاحية (مفصولة بفاصلة)</Label>
+                      <Label htmlFor="seo_keywords">كلمات مفتاحية (اختياري، مفصولة بفاصلة)</Label>
                       <Input
                         id="seo_keywords"
                         value={formData.seo_keywords}

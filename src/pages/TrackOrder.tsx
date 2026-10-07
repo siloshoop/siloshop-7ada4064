@@ -4,7 +4,9 @@ import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import OrderStatusTimeline from "@/components/OrderStatusTimeline";
+import ShipmentTrackingTimeline from "@/components/orders/ShipmentTrackingTimeline";
+import { buildTrackingShipments, type SavedShipment, type TrackingProduct } from "@/lib/orderShipments";
+import { useVendorNames } from "@/hooks/useVendorNames";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -40,6 +42,9 @@ const getBadgeVariant = (status: string): "default" | "outline" | "destructive" 
 };
 
 interface OrderItem {
+  id: string;
+  order_id: string;
+  vendor_id: string | null;
   quantity: number;
   price: number;
   product_name: string | null;
@@ -57,6 +62,8 @@ interface ShippingDetails {
 
 interface Order {
   id: string;
+  vendor_id: string | null;
+  updated_at: string | null;
   order_number: string | null;
   invoice_number: string | null;
   created_at: string;
@@ -100,6 +107,10 @@ const TrackOrder = () => {
   const { id } = useParams();
   const { user, loading: authLoading } = useAuth();
   const [order, setOrder] = useState<Order | null>(null);
+  const [shipments, setShipments] = useState<SavedShipment[]>([]);
+  const [shipmentItems, setShipmentItems] = useState<TrackingProduct[]>([]);
+  const [shipmentError, setShipmentError] = useState(false);
+  const vendorNames = useVendorNames(shipments.length ? shipments.map((s) => s.vendor_id) : shipmentItems.map((i) => i.vendor_id));
   const [statusHistory, setStatusHistory] = useState<TrackingHistoryRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [lastUpdated, setLastUpdated] = useState<Date>(new Date());
@@ -115,6 +126,7 @@ const TrackOrder = () => {
   }, [user, authLoading, navigate]);
 
   useEffect(() => {
+    if (!user || !id) return;
     fetchOrder();
     fetchStatusHistory();
 
@@ -236,6 +248,20 @@ const TrackOrder = () => {
     };
   }, [id, user]);
 
+  const shipmentKey = shipments.map((shipment) => shipment.id).sort().join(",");
+  useEffect(() => {
+    if (!user || !shipmentKey) return;
+    const channel = supabase.channel(`seller-shipment-updates-${id}`);
+    for (const shipmentId of shipmentKey.split(",")) {
+      channel.on("postgres_changes", { event: "UPDATE", schema: "public", table: "orders", filter: `id=eq.${shipmentId}` }, () => { fetchOrder(); });
+      channel.on("postgres_changes", { event: "INSERT", schema: "public", table: "tracking_history", filter: `order_id=eq.${shipmentId}` }, () => { fetchOrder(); });
+    }
+    channel.subscribe();
+    // Polling also covers child channels that reconnect independently.
+    const timer = setInterval(() => { fetchOrder(); }, 30000);
+    return () => { clearInterval(timer); supabase.removeChannel(channel); };
+  }, [shipmentKey, id, user]);
+
   // Tick every 30s to refresh "since" label
   useEffect(() => {
     const t = setInterval(() => forceTick((n) => n + 1), 30000);
@@ -247,11 +273,7 @@ const TrackOrder = () => {
 
     const { data, error } = await supabase
       .from("orders")
-      .select(`
-        *,
-        order_items(quantity, price, product_name, product_image, variant_label),
-        shipping_details(shipping_company, estimated_delivery, shipped_at, delivered_at, shipping_notes)
-      `)
+      .select("*")
       .eq("id", id)
       .eq("customer_id", user.id)
       .maybeSingle();
@@ -262,7 +284,20 @@ const TrackOrder = () => {
       return;
     }
 
-    setOrder(data as unknown as Order);
+    if (!data) { setOrder(null); setLoading(false); return; }
+    const children = await supabase.from("orders")
+      .select("id, vendor_id, status, tracking_status, updated_at")
+      .eq("parent_order_id", id).eq("customer_id", user.id).order("created_at");
+    const childRows = children.data ?? [];
+    const [items, shipping] = await Promise.all([
+      supabase.from("order_items").select("id, order_id, vendor_id, quantity, price, product_name, product_image, variant_label")
+        .in("order_id", [id, ...childRows.map((child) => child.id)]),
+      supabase.from("shipping_details").select("shipping_company, estimated_delivery, shipped_at, delivered_at, shipping_notes").eq("order_id", id),
+    ]);
+    setShipmentError(Boolean(children.error || items.error));
+    setShipments(childRows);
+    setShipmentItems(items.data ?? []);
+    setOrder({ ...data, order_items: (items.data ?? []).filter((item) => item.order_id === id), shipping_details: shipping.data ?? [] } as unknown as Order);
     setLoading(false);
     setLastUpdated(new Date());
   };
@@ -347,15 +382,16 @@ const TrackOrder = () => {
       ].filter(Boolean) as TrackingHistoryRow[];
 
   const latestNote = timelineEntries[0]?.description ?? null;
+  const trackingShipments = buildTrackingShipments(order, shipments, shipmentItems);
 
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
-      <main className="flex-1 container px-4 py-8">
+      <main className="flex-1 container px-4 py-5 sm:py-8" dir="rtl">
         <div className="max-w-6xl mx-auto">
           <div className="mb-8">
             <h1 className="text-3xl font-bold mb-2">تتبع الطلب</h1>
-            <p className="text-muted-foreground">
+            <p className="text-sm sm:text-base text-muted-foreground break-words">
               رقم الطلب: {order.order_number || order.id.slice(0, 8)}
               {order.invoice_number && <span className="mx-2">· فاتورة: {order.invoice_number}</span>}
             </p>
@@ -382,9 +418,40 @@ const TrackOrder = () => {
             </div>
           </div>
 
-          <div className="grid lg:grid-cols-2 gap-6">
+          <div className="grid lg:grid-cols-2 gap-6 items-start">
+            <div className="min-w-0 space-y-4 lg:col-start-1" data-testid="seller-shipments">
+              <h2 className="text-xl font-semibold">تتبع الشحنات</h2>
+              {shipmentError ? <p role="alert" className="text-sm text-destructive">تعذّر تحميل الشحنات. حاول التحديث مرة أخرى.</p> : trackingShipments.map((shipment, index) => (
+                <Card key={shipment.id} className="min-w-0 rounded-lg" data-shipment-id={shipment.id}>
+                  <CardHeader className="p-4 pb-3">
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                      <CardTitle className="min-w-0 text-base break-words">الشحنة {index + 1} · {vendorNames[shipment.vendor_id ?? ""] || "البائع"}</CardTitle>
+                      <Badge variant={getBadgeVariant(shipment.status || shipment.tracking_status || "") } className="max-w-full whitespace-normal text-right">
+                        {statusLabel(shipment.status || shipment.tracking_status) || "حالة الشحنة غير متاحة"}
+                      </Badge>
+                    </div>
+                    {shipment.updated_at && <p className="text-xs text-muted-foreground">آخر تحديث: {format(new Date(shipment.updated_at), "dd MMM yyyy - HH:mm", { locale: ar })}</p>}
+                  </CardHeader>
+                  <CardContent className="p-4 pt-0 space-y-4">
+                    <div className="space-y-3">
+                      {shipment.items.map((item) => <div key={item.id} className="flex items-start gap-3">
+                        {item.product_image ? <img src={item.product_image} alt={item.product_name ?? "منتج"} loading="lazy" className="h-14 w-14 shrink-0 rounded object-cover" />
+                          : <div className="h-14 w-14 shrink-0 rounded bg-muted flex items-center justify-center"><Package className="h-6 w-6 text-muted-foreground" /></div>}
+                        <div className="min-w-0 flex-1">
+                          <h3 className="text-sm font-medium break-words">{item.product_name || "منتج"}</h3>
+                          {item.variant_label && <p className="text-xs text-muted-foreground break-words">{item.variant_label}</p>}
+                          <p className="text-xs text-muted-foreground mt-1">الكمية: {item.quantity}</p>
+                        </div>
+                      </div>)}
+                    </div>
+                    <Separator />
+                    <ShipmentTrackingTimeline status={shipment.status || shipment.tracking_status} />
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
             {/* Order Details */}
-            <div className="space-y-6">
+            <div className="min-w-0 space-y-6 lg:col-start-2">
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center justify-between">
@@ -420,13 +487,7 @@ const TrackOrder = () => {
                         )}
                       </div>
                     </div>
-                  ) : (
-                    <OrderStatusTimeline
-                      status={normalizedStatus}
-                      latestNote={latestNote}
-                      className="pb-2"
-                    />
-                  )}
+                  ) : null}
 
                   <div className="flex items-center gap-3 text-sm">
                     <Clock className="h-4 w-4 text-muted-foreground" />

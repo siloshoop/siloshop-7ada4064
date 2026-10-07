@@ -39,7 +39,7 @@ const SimilarProducts = ({ productId, categoryId, vendorId }: SimilarProductsPro
           )
           .eq("is_active", true)
           .neq("id", productId)
-          .limit(8);
+          .gt("stock_quantity", 0).limit(8);
 
         // Prioritize same category products
         if (categoryId) {
@@ -60,7 +60,7 @@ const SimilarProducts = ({ productId, categoryId, vendorId }: SimilarProductsPro
             .eq("is_active", true)
             .eq("vendor_id", vendorId)
             .neq("id", productId)
-            .limit(8);
+            .gt("stock_quantity", 0).limit(8);
 
           const existingIds = new Set(data?.map(p => p.id) || []);
           const additionalProducts = vendorProducts?.filter(p => !existingIds.has(p.id)) || [];

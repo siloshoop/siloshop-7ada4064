@@ -38,7 +38,7 @@ const CartRecommendations = ({ cartProductIds, cartCategoryIds }: CartRecommenda
           .in("category_id", cartCategoryIds)
           .not("id", "in", `(${cartProductIds.join(",")})`)
           .eq("is_active", true)
-          .limit(8);
+          .gt("stock_quantity", 0).limit(8);
 
         if (error) throw error;
         setProducts(data || []);

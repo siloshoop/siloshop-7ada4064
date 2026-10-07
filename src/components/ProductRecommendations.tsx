@@ -91,7 +91,7 @@ const ProductRecommendations = () => {
 
         const { data: recommendedProducts } = await query
           .order("created_at", { ascending: false })
-          .limit(8);
+          .gt("stock_quantity", 0).limit(8);
 
         // If not enough products, fill with popular products
         if (categoryIds.length > 0 && (recommendedProducts || []).length < 4) {
@@ -100,7 +100,7 @@ const ProductRecommendations = () => {
             .select("id, name, price, currency, original_price, stock_quantity, image_url, category_id, reviews(rating)")
             .eq("is_active", true)
             .order("created_at", { ascending: false })
-            .limit(8);
+            .gt("stock_quantity", 0).limit(8);
 
           setProducts(popularProducts || []);
         } else {

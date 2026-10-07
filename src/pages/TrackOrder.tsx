@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
+import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -117,6 +118,8 @@ const TrackOrder = () => {
   const [isLive, setIsLive] = useState(false);
   const [highlightedIndex, setHighlightedIndex] = useState<number | null>(null);
   const [, forceTick] = useState(0);
+  const [refreshing, setRefreshing] = useState(false);
+  const { toast } = useToast();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -253,12 +256,12 @@ const TrackOrder = () => {
     if (!user || !shipmentKey) return;
     const channel = supabase.channel(`seller-shipment-updates-${id}`);
     for (const shipmentId of shipmentKey.split(",")) {
-      channel.on("postgres_changes", { event: "UPDATE", schema: "public", table: "orders", filter: `id=eq.${shipmentId}` }, () => { fetchOrder(); });
-      channel.on("postgres_changes", { event: "INSERT", schema: "public", table: "tracking_history", filter: `order_id=eq.${shipmentId}` }, () => { fetchOrder(); });
+      channel.on("postgres_changes", { event: "UPDATE", schema: "public", table: "orders", filter: `id=eq.${shipmentId}` }, () => { fetchOrder(); fetchStatusHistory(); });
+      channel.on("postgres_changes", { event: "INSERT", schema: "public", table: "tracking_history", filter: `order_id=eq.${shipmentId}` }, () => { fetchOrder(); fetchStatusHistory(); });
     }
     channel.subscribe();
     // Polling also covers child channels that reconnect independently.
-    const timer = setInterval(() => { fetchOrder(); }, 30000);
+    const timer = setInterval(() => { fetchOrder(); fetchStatusHistory(); }, 30000);
     return () => { clearInterval(timer); supabase.removeChannel(channel); };
   }, [shipmentKey, id, user]);
 
@@ -303,12 +306,15 @@ const TrackOrder = () => {
   };
 
   const fetchStatusHistory = async () => {
-    if (!id) return;
+    if (!id || !user) return;
 
+    // Seller status changes are saved on child shipment orders; include them in the log.
+    const { data: kids } = await supabase.from("orders").select("id")
+      .eq("parent_order_id", id).eq("customer_id", user.id);
     const { data, error } = await supabase
       .from("tracking_history")
       .select("status, description, actor_role, created_at")
-      .eq("order_id", id)
+      .in("order_id", [id, ...(kids ?? []).map((k) => k.id)])
       .order("created_at", { ascending: false });
 
     if (!error && data) {
@@ -408,11 +414,20 @@ const TrackOrder = () => {
                 variant="ghost"
                 size="sm"
                 className="h-7 px-2 text-xs"
-                onClick={() => {
-                  fetchOrder();
-                  fetchStatusHistory();
+                disabled={refreshing}
+                onClick={async () => {
+                  setRefreshing(true);
+                  try {
+                    await Promise.all([fetchOrder(), fetchStatusHistory()]);
+                    toast({ title: "تم تحديث حالة الطلب" });
+                  } catch {
+                    toast({ title: "تعذر التحديث", variant: "destructive" });
+                  } finally {
+                    setRefreshing(false);
+                  }
                 }}
               >
+                <RefreshCw className={`h-3 w-3 ml-1 ${refreshing ? "animate-spin" : ""}`} />
                 تحديث الآن
               </Button>
             </div>

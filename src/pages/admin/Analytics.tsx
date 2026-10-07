@@ -1,3 +1,4 @@
+import { formatSplitTotals, type CurrencyTotals } from "@/lib/currency";
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -179,10 +180,10 @@ const AdminAnalytics = () => {
 
               <StatCard title="إجمالي الطلبات" value={data.orders.total}
                 hint={`${data.orders.period_count} خلال الفترة`} icon={ShoppingBag} />
-              <StatCard title="الإيرادات (كلي)" value={formatCurrency(data.orders.revenue_total)}
+              <StatCard title="الإيرادات (كلي)" value={formatSplitTotals(split)}
                 hint="الطلبات المسلّمة فقط" icon={DollarSign} />
-              <StatCard title="إيرادات الفترة" value={formatCurrency(data.orders.revenue_period)}
-                hint={`متوسط طلب: ${formatCurrency(data.orders.avg_order_value)}`} icon={TrendingUp} />
+              <StatCard title="إيرادات الفترة" value={formatSplitTotals(split, "period")}
+                hint={`متوسط طلب: ${formatSplitTotals(split, "avg")}`} icon={TrendingUp} />
               <StatCard title="بلاغات معلقة" value={data.reports.pending + data.reports.under_review}
                 hint={`الإجمالي: ${data.reports.total}`} icon={Flag} />
             </div>

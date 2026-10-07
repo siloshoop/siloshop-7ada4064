@@ -1,3 +1,4 @@
+import { formatSplitTotals, type CurrencyTotals } from "@/lib/currency";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
@@ -178,7 +179,7 @@ const Statistics = () => {
             </div>
             <div>
               <p className="text-sm text-muted-foreground">إجمالي الإيرادات</p>
-              <p className="text-2xl font-bold">{totalStats.totalRevenue.toFixed(2)} ل.س</p>
+              <p className="text-2xl font-bold">{formatSplitTotals(split)}</p>
             </div>
           </div>
         </Card>
@@ -214,7 +215,7 @@ const Statistics = () => {
             </div>
             <div>
               <p className="text-sm text-muted-foreground">متوسط قيمة الطلب</p>
-              <p className="text-2xl font-bold">{totalStats.averageOrder.toFixed(2)} ل.س</p>
+              <p className="text-2xl font-bold">{formatSplitTotals(split, "avg")}</p>
             </div>
           </div>
         </Card>

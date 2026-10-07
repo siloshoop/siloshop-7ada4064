@@ -82,7 +82,7 @@ describe("shipping line on product cards", () => {
 
   it("shows the fixed price in the product currency and never says free", () => {
     renderCard({ shippingMode: "fixed", shippingCost: 5, currency: "USD" });
-    const line = screen.getByText(/شحن: 5 \$/);
+    const line = screen.getByText(/شحن: \$5/);
     expect(line).not.toHaveClass("text-success");
     expect(screen.queryByText(/شحن مجاني/)).not.toBeInTheDocument();
   });

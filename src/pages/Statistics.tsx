@@ -43,6 +43,10 @@ const Statistics = () => {
   const [topProducts, setTopProducts] = useState<ProductStat[]>([]);
   const [recentReviews, setRecentReviews] = useState<Review[]>([]);
   const [averageRating, setAverageRating] = useState(0);
+  const [split, setSplit] = useState<CurrencyTotals | null>(null);
+  useEffect(() => {
+    supabase.rpc("revenue_totals_by_currency", { _scope: "vendor", _days: 365 }).then(({ data }) => setSplit((data as CurrencyTotals) ?? null));
+  }, [user]);
   const [totalStats, setTotalStats] = useState({
     totalRevenue: 0,
     totalOrders: 0,

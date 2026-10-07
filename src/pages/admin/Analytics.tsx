@@ -73,6 +73,10 @@ const AdminAnalytics = () => {
   const [data, setData] = useState<AnalyticsPayload | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [split, setSplit] = useState<CurrencyTotals | null>(null);
+  useEffect(() => {
+    supabase.rpc("revenue_totals_by_currency", { _scope: "admin", _days: days }).then(({ data }) => setSplit((data as CurrencyTotals) ?? null));
+  }, [days]);
 
   useEffect(() => {
     if (!authLoading && !user) navigate("/auth");

@@ -1,6 +1,6 @@
 import { formatSplitTotals, type CurrencyTotals } from "@/lib/currency";
 import { supabase } from "@/integrations/supabase/client";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import AdminLayout, { useAdminModules } from "@/components/admin/AdminLayout";
 import DashboardKpiGrid, { type Kpi } from "@/components/admin/DashboardKpiGrid";

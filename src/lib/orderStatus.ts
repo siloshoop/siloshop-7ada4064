@@ -60,16 +60,25 @@ export const ORDER_STATUS_LABELS: Record<string, string> = Object.fromEntries(
 );
 
 /** Tailwind classes driven by the semantic status tokens (no hardcoded colors). */
-export const statusClasses = (status?: string | null) => {
-  const t = getStatusMeta(status).token;
-  return {
-    text: `text-[hsl(var(${t}))]`,
-    bg: `bg-[hsl(var(${t}))]`,
-    softBg: `bg-[hsl(var(${t})/0.12)]`,
-    border: `border-[hsl(var(${t})/0.4)]`,
-    badge: `bg-[hsl(var(${t})/0.14)] text-[hsl(var(${t}))] border border-[hsl(var(${t})/0.4)]`,
-  };
+// Literal class strings so Tailwind generates them (dynamic template classes are never compiled,
+// which left completed timeline circles white).
+const mk = (text: string, bg: string, softBg: string, border: string, badgeBg: string) =>
+  ({ text, bg, softBg, border, badge: `${badgeBg} ${text} border ${border}` });
+const STATUS_CLASS_MAP: Record<string, ReturnType<typeof mk>> = {
+  "--status-pending": mk("text-[hsl(var(--status-pending))]", "bg-[hsl(var(--status-pending))]", "bg-[hsl(var(--status-pending)/0.12)]", "border-[hsl(var(--status-pending)/0.4)]", "bg-[hsl(var(--status-pending)/0.14)]"),
+  "--status-confirmed": mk("text-[hsl(var(--status-confirmed))]", "bg-[hsl(var(--status-confirmed))]", "bg-[hsl(var(--status-confirmed)/0.12)]", "border-[hsl(var(--status-confirmed)/0.4)]", "bg-[hsl(var(--status-confirmed)/0.14)]"),
+  "--status-preparing": mk("text-[hsl(var(--status-preparing))]", "bg-[hsl(var(--status-preparing))]", "bg-[hsl(var(--status-preparing)/0.12)]", "border-[hsl(var(--status-preparing)/0.4)]", "bg-[hsl(var(--status-preparing)/0.14)]"),
+  "--status-ready": mk("text-[hsl(var(--status-ready))]", "bg-[hsl(var(--status-ready))]", "bg-[hsl(var(--status-ready)/0.12)]", "border-[hsl(var(--status-ready)/0.4)]", "bg-[hsl(var(--status-ready)/0.14)]"),
+  "--status-shipped": mk("text-[hsl(var(--status-shipped))]", "bg-[hsl(var(--status-shipped))]", "bg-[hsl(var(--status-shipped)/0.12)]", "border-[hsl(var(--status-shipped)/0.4)]", "bg-[hsl(var(--status-shipped)/0.14)]"),
+  "--status-out": mk("text-[hsl(var(--status-out))]", "bg-[hsl(var(--status-out))]", "bg-[hsl(var(--status-out)/0.12)]", "border-[hsl(var(--status-out)/0.4)]", "bg-[hsl(var(--status-out)/0.14)]"),
+  "--status-delivered": mk("text-[hsl(var(--status-delivered))]", "bg-[hsl(var(--status-delivered))]", "bg-[hsl(var(--status-delivered)/0.12)]", "border-[hsl(var(--status-delivered)/0.4)]", "bg-[hsl(var(--status-delivered)/0.14)]"),
+  "--status-completed": mk("text-[hsl(var(--status-completed))]", "bg-[hsl(var(--status-completed))]", "bg-[hsl(var(--status-completed)/0.12)]", "border-[hsl(var(--status-completed)/0.4)]", "bg-[hsl(var(--status-completed)/0.14)]"),
+  "--status-cancelled": mk("text-[hsl(var(--status-cancelled))]", "bg-[hsl(var(--status-cancelled))]", "bg-[hsl(var(--status-cancelled)/0.12)]", "border-[hsl(var(--status-cancelled)/0.4)]", "bg-[hsl(var(--status-cancelled)/0.14)]"),
+  "--status-returned": mk("text-[hsl(var(--status-returned))]", "bg-[hsl(var(--status-returned))]", "bg-[hsl(var(--status-returned)/0.12)]", "border-[hsl(var(--status-returned)/0.4)]", "bg-[hsl(var(--status-returned)/0.14)]"),
 };
+
+export const statusClasses = (status?: string | null) =>
+  STATUS_CLASS_MAP[getStatusMeta(status).token] ?? STATUS_CLASS_MAP["--status-pending"];
 
 const TRANSITIONS: Record<OrderStatus, OrderStatus[]> = {
   pending: ["confirmed", "cancelled"],

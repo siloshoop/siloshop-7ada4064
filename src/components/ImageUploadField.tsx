@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
+import { useImageCropper } from "@/components/ImageCropDialog";
 import { IMAGE_FORMAT_HINT, IMAGE_SIZE_GUIDES, UploadError, describeUploadError, validateImageFile, type ImageKind } from "@/lib/uploadErrors";
 
 type ImageUploadFieldProps = {
@@ -41,6 +42,7 @@ const ImageUploadField = ({
   const [preview, setPreview] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
   const [imageFailed, setImageFailed] = useState(false);
+  const { crop, dialog: cropDialog } = useImageCropper(sizeGuide ?? "product");
 
   useEffect(() => {
     let active = true;
@@ -70,12 +72,19 @@ const ImageUploadField = ({
     await supabase.storage.from(bucket).remove([path]);
   };
 
-  const upload = async (file?: File) => {
-    if (!file) return;
+  const upload = async (picked?: File) => {
+    if (!picked) return;
+    let file: File = picked;
     const invalid = validateImageFile(file);
     if (invalid) {
       toast({ title: "تعذّر رفع الصورة", description: invalid, variant: "destructive" });
       return;
+    }
+    if (sizeGuide) {
+      const cropped = await crop(file);
+      if (inputRef.current) inputRef.current.value = "";
+      if (!cropped) return;
+      file = cropped;
     }
 
     setUploading(true);
@@ -177,6 +186,7 @@ const ImageUploadField = ({
       <p className="text-xs text-muted-foreground">
         {sizeGuide ? `${IMAGE_SIZE_GUIDES[sizeGuide]} · ` : ""}{IMAGE_FORMAT_HINT}
       </p>
+      {cropDialog}
     </div>
   );
 };

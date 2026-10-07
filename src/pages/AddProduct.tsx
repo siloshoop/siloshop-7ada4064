@@ -133,6 +133,8 @@ const AddProduct = () => {
         toast({ title: "تعذّر إضافة الصورة", description: invalid, variant: "destructive" });
         continue;
       }
+      const croppedFile = await cropImage(file);
+      if (!croppedFile) continue;
 
       try {
         const options = {

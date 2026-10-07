@@ -5,7 +5,7 @@ import ProductCard from "@/components/ProductCard";
 
 const mocks = vi.hoisted(() => ({ stock: 0, from: vi.fn() }));
 vi.mock("@/integrations/supabase/client", () => ({
-  supabase: { from: mocks.from },
+  supabase: { from: mocks.from, rpc: async () => ({ data: [] }) },
 }));
 vi.mock("@/hooks/useToast", () => ({ useToast: () => ({ toast: vi.fn() }) }));
 vi.mock("@/hooks/useCompareProducts", () => ({ useCompareProducts: () => ({ addProduct: vi.fn() }) }));

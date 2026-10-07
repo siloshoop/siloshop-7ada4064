@@ -1,5 +1,7 @@
-import { useState, useEffect, useCallback, Fragment } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useState, useEffect, useCallback, useRef, Fragment } from "react";
+import { Link, useSearchParams } from "react-router-dom";
+import { buildFuzzyPatterns, matchesSearchTerm } from "@/lib/search";
+import { Store } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { ProductGridSkeleton } from "@/components/skeletons/ProductSkeletons";
@@ -163,6 +165,13 @@ const encodeFilters = (filters: Filters): string | null => {
 };
 
 
+interface StoreHit {
+  user_id: string;
+  store_name: string;
+  logo_url: string | null;
+  city: string | null;
+}
+
 const SearchPage = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [products, setProducts] = useState<Product[]>([]);
@@ -172,6 +181,12 @@ const SearchPage = () => {
   const [brands, setBrands] = useState<Brand[]>([]);
   const [loading, setLoading] = useState(true);
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
+  const [stores, setStores] = useState<StoreHit[]>([]);
+  const resultsRef = useRef<HTMLDivElement>(null);
+  const showResults = () => {
+    setMobileFiltersOpen(false);
+    window.setTimeout(() => resultsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 250);
+  };
   const [salesCounts, setSalesCounts] = useState<Map<string, number>>(new Map());
   const urlSearchQuery = searchParams.get("q")?.trim() || "";
   const urlBrandId = searchParams.get("brand")?.trim() || "";
@@ -218,13 +233,14 @@ const SearchPage = () => {
       const [categoriesRes, subcategoriesRes, vendorsRes, brandsRes] = await Promise.all([
         supabase.from("categories").select("id, name_ar").order("name_ar"),
         supabase.from("subcategories").select("id, name_ar, category_id").eq("is_active", true).order("name_ar"),
-        supabase.from("profiles").select("id, full_name").eq("role", "vendor"),
+        supabase.rpc("search_public_stores", { _term: null, _limit: 200 }),
         supabase.from("brands").select("id, name_ar").eq("is_active", true).order("name_ar"),
       ]);
 
       if (categoriesRes.data) setCategories(categoriesRes.data);
       if (subcategoriesRes.data) setSubcategories(subcategoriesRes.data);
-      if (vendorsRes.data) setVendors(vendorsRes.data as Vendor[]);
+      if (vendorsRes.data)
+        setVendors((vendorsRes.data as any[]).map((v) => ({ id: v.user_id, full_name: v.store_name })) as Vendor[]);
       if (brandsRes.data) setBrands(brandsRes.data);
 
       // Collect the color/size vocabulary actually used by live products.
@@ -303,35 +319,32 @@ const SearchPage = () => {
 
       // Free-text search: match name / description / sku / barcode, plus brands & sellers by name.
       const term = filters.search.trim();
+      if (!term) setStores([]);
       if (term) {
-        const escaped = term.replace(/[%,]/g, "");
-        const orParts = [
-          `name.ilike.%${escaped}%`,
-          `description.ilike.%${escaped}%`,
-          `sku.ilike.%${escaped}%`,
-          `barcode.ilike.%${escaped}%`,
-        ];
-
-        const [matchingBrands, matchingVendors] = await Promise.all([
-          supabase
-            .from("brands")
-            .select("id")
-            .eq("is_active", true)
-            .or(`name_ar.ilike.%${escaped}%,name.ilike.%${escaped}%`),
-          supabase
-            .from("profiles")
-            .select("id")
-            .eq("role", "vendor")
-            .ilike("full_name", `%${escaped}%`),
+        const patterns = buildFuzzyPatterns(term);
+        const [matchingBrands, matchingStores] = await Promise.all([
+          supabase.from("brands").select("id, name_ar, name").eq("is_active", true),
+          supabase.rpc("search_public_stores", { _term: term, _limit: 12 }),
         ]);
+        const brandIds = (matchingBrands.data ?? [])
+          .filter((b: any) => matchesSearchTerm(b.name_ar, term) || matchesSearchTerm(b.name, term))
+          .map((b: any) => b.id);
+        const storeRows = (matchingStores.data ?? []) as StoreHit[];
+        setStores(storeRows);
+        const vendorIds = storeRows.map((v) => v.user_id);
 
-        const brandIds = (matchingBrands.data ?? []).map((b) => b.id);
-        const vendorIds = (matchingVendors.data ?? []).map((v) => v.id);
-
-        if (brandIds.length > 0) orParts.push(`brand_id.in.(${brandIds.join(",")})`);
-        if (vendorIds.length > 0) orParts.push(`vendor_id.in.(${vendorIds.join(",")})`);
-
-        query = query.or(orParts.join(","));
+        patterns.forEach((pattern, i) => {
+          const orParts = [
+            `name.ilike.${pattern}`,
+            `description.ilike.${pattern}`,
+            `sku.ilike.${pattern}`,
+            `barcode.ilike.${pattern}`,
+          ];
+          // Brand / store matches apply to the whole phrase (first group only).
+          if (i === 0 && brandIds.length > 0) orParts.push(`brand_id.in.(${brandIds.join(",")})`);
+          if (i === 0 && vendorIds.length > 0) orParts.push(`vendor_id.in.(${vendorIds.join(",")})`);
+          query = query.or(orParts.join(","));
+        });
       }
 
       // Price range
@@ -1037,8 +1050,13 @@ const SearchPage = () => {
                 <SheetHeader>
                   <SheetTitle>تصفية النتائج</SheetTitle>
                 </SheetHeader>
-                <div className="mt-6">
+                <div className="mt-6 pb-20">
                   <FiltersContent />
+                </div>
+                <div className="sticky bottom-0 -mx-6 border-t bg-background p-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
+                  <Button className="w-full" onClick={() => { applyPriceRange(); showResults(); }}>
+                    عرض {products.length} منتج
+                  </Button>
                 </div>
               </SheetContent>
             </Sheet>
@@ -1072,7 +1090,23 @@ const SearchPage = () => {
 
         <NativeAdBanner placement="search" className="mb-5 !px-0 sm:mb-8" />
 
-        <div className="flex min-w-0 gap-8">
+        {stores.length > 0 && (
+          <div className="mb-5 min-w-0">
+            <h2 className="mb-2 flex items-center gap-2 text-base font-semibold"><Store className="h-4 w-4" /> المتاجر</h2>
+            <div className="flex gap-2 overflow-x-auto pb-1">
+              {stores.map((st) => (
+                <Link key={st.user_id} to={`/store/${st.user_id}`}
+                  className="flex shrink-0 items-center gap-2 rounded-lg border bg-card px-3 py-2 hover:bg-accent">
+                  <Store className="h-5 w-5 text-muted-foreground" />
+                  <span className="max-w-[10rem] truncate text-sm font-medium">{st.store_name}</span>
+                  {st.city && <span className="text-xs text-muted-foreground">{st.city}</span>}
+                </Link>
+              ))}
+            </div>
+          </div>
+        )}
+
+        <div ref={resultsRef} className="flex min-w-0 scroll-mt-24 gap-8">
           {/* Desktop Filters Sidebar */}
           <aside className="hidden lg:block w-72 flex-shrink-0">
             <Card className="sticky top-24">
@@ -1090,7 +1124,7 @@ const SearchPage = () => {
 
           {/* Products Grid */}
           <div className="min-w-0 flex-1">
-            {loading ? (
+            {loading && products.length === 0 ? (
               <ProductGridSkeleton count={12} />
             ) : products.length === 0 ? (
               <div className="text-center py-20 space-y-4">
@@ -1104,7 +1138,7 @@ const SearchPage = () => {
               </div>
             ) : (
               <>
-                <div className="grid grid-cols-2 items-stretch gap-2.5 sm:gap-6 xl:grid-cols-3">
+                <div className={`grid grid-cols-2 items-stretch transition-opacity gap-2.5 sm:gap-6 xl:grid-cols-3 ${loading ? "opacity-60" : ""}`}>
                   {products.map((product, index) => {
                     const avgRating = getAverageRating(product.reviews);
                     const discount = product.original_price

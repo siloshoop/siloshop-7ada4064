@@ -1,3 +1,4 @@
+import { flattenSubcategoryTree } from "@/lib/categoryTree";
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
@@ -603,9 +604,9 @@ const EditProduct = () => {
                             </SelectTrigger>
                             <SelectContent>
                               <SelectItem value="__none__">بدون تصنيف فرعي</SelectItem>
-                              {filteredSubcategories.map((sub) => (
-                                <SelectItem key={sub.id} value={sub.id}>
-                                  {sub.name_ar}
+                              {flattenSubcategoryTree(filteredSubcategories).map((sub) => (
+                                <SelectItem key={sub.id} value={sub.id} className={sub.depth ? "ps-10 text-sm" : "font-semibold"}>
+                                  {sub.label}
                                 </SelectItem>
                               ))}
                             </SelectContent>

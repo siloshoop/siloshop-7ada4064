@@ -120,6 +120,13 @@
       "when": 1791411949474,
       "tag": "0016_create_partners",
       "breakpoints": true
+    },
+    {
+      "idx": 17,
+      "version": "7",
+      "when": 1791414745345,
+      "tag": "0017_keep_approved_on_seller_edit",
+      "breakpoints": true
     }
   ]
 }

@@ -65,7 +65,8 @@ const FrequentlyBoughtTogether = ({ product, categoryId, vendorId }: Props) => {
     };
   }, [product.id, categoryId, vendorId]);
 
-  if (companions.length === 0) return null;
+  // Never suggest a bundle around a sold-out product.
+  if (companions.length === 0 || !(Number(product.stock_quantity) > 0)) return null;
 
   const chosen = companions.filter((c) => selected[c.id]);
   const total = product.price + chosen.reduce((s, c) => s + c.price, 0);

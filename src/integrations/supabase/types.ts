@@ -5049,6 +5049,10 @@ export type Database = {
         Returns: undefined
       }
       returns_run_automation: { Args: never; Returns: Json }
+      revenue_totals_by_currency: {
+        Args: { _days?: number; _scope?: string }
+        Returns: Json
+      }
       search_chat_messages: {
         Args: {
           p_conversation_id?: string

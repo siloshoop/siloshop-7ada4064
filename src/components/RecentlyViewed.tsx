@@ -9,6 +9,7 @@ interface Product {
   id: string;
   name: string;
   price: number;
+  stock_quantity?: number | null;
   currency?: string | null;
   original_price: number | null;
   image_url: string;
@@ -56,6 +57,7 @@ const RecentlyViewed = () => {
             name: (item.products as any).name,
             price: (item.products as any).price,
             currency: (item.products as any).currency,
+            stock_quantity: (item.products as any).stock_quantity,
             original_price: (item.products as any).original_price,
             image_url: (item.products as any).image_url,
             reviews: (item.products as any).reviews || []
@@ -116,6 +118,7 @@ const RecentlyViewed = () => {
               >
                 <ProductCard
                   id={product.id}
+                  stockQuantity={product.stock_quantity}
                   name={product.name}
                   price={product.price}
                   currency={(product as any).currency}

@@ -586,6 +586,7 @@ const Subcategory = () => {
                 <ProductCard
                   key={product.id}
                   id={product.id}
+                  stockQuantity={product.stock_quantity}
                   name={product.name}
                   price={product.price}
                   currency={(product as any).currency}

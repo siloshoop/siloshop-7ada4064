@@ -7,6 +7,7 @@ interface Product {
   id: string;
   name: string;
   price: number;
+  stock_quantity?: number | null;
   original_price: number | null;
   image_url: string;
   reviews: { rating: number }[];
@@ -45,7 +46,7 @@ const BestSellers = () => {
       try {
         const { data: newProducts } = await supabase
           .from("products")
-          .select("id, name, price, currency, original_price, image_url, reviews(rating)")
+          .select("id, name, price, currency, original_price, stock_quantity, image_url, reviews(rating)")
           .eq("is_active", true)
           .order("created_at", { ascending: false })
           .limit(8);
@@ -93,6 +94,7 @@ const BestSellers = () => {
               >
                 <ProductCard
                   id={product.id}
+                  stockQuantity={product.stock_quantity}
                   name={product.name}
                   price={product.price}
                   currency={(product as any).currency}

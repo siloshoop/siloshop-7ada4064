@@ -7,6 +7,7 @@ interface Product {
   id: string;
   name: string;
   price: number;
+  stock_quantity?: number | null;
   original_price?: number;
   image_url: string;
   vendor_id: string;
@@ -33,7 +34,7 @@ const CartRecommendations = ({ cartProductIds, cartCategoryIds }: CartRecommenda
         // Get products from same categories but not in cart
         const { data, error } = await supabase
           .from("products")
-          .select("id, name, price, currency, original_price, image_url, vendor_id, category_id")
+          .select("id, name, price, currency, original_price, stock_quantity, image_url, vendor_id, category_id")
           .in("category_id", cartCategoryIds)
           .not("id", "in", `(${cartProductIds.join(",")})`)
           .eq("is_active", true)
@@ -74,6 +75,7 @@ const CartRecommendations = ({ cartProductIds, cartCategoryIds }: CartRecommenda
           <ProductCard
             key={product.id}
             id={product.id}
+            stockQuantity={product.stock_quantity}
             name={product.name}
             price={product.price}
             currency={(product as any).currency}

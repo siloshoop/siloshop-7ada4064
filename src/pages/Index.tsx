@@ -35,6 +35,7 @@ interface Product {
   id: string;
   name: string;
   price: number;
+  stock_quantity?: number | null;
   original_price: number | null;
   image_url: string;
 }
@@ -74,7 +75,7 @@ const Index = () => {
     try {
       let queryBuilder = supabase
         .from("products")
-        .select("id, name, price, currency, original_price, image_url, reviews(rating)")
+        .select("id, name, price, currency, original_price, stock_quantity, image_url, reviews(rating)")
         .eq("is_active", true)
         .gte("price", filters.minPrice)
         .lte("price", filters.maxPrice);
@@ -140,6 +141,7 @@ const Index = () => {
                 <Fragment key={product.id}>
                   <ProductCard
                     id={product.id}
+                    stockQuantity={product.stock_quantity}
                     name={product.name}
                     price={product.price}
                     currency={(product as any).currency}

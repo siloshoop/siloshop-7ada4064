@@ -160,7 +160,7 @@ const SearchAutocomplete = ({
                     />
                     <span className="flex-1 truncate text-sm">{p.name}</span>
                     <span className="shrink-0 text-xs font-semibold text-primary">
-                      {p.price.toLocaleString()} ل.س
+                      {formatPrice(p.price, p.currency)}
                     </span>
                   </button>
                 ))

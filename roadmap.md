@@ -1,8 +1,8 @@
 # Production readiness audit
 
 ## Order detail product images
-- [ ] Resolve stored image paths and recover broken snapshots in buyer/seller/admin details without changing orders or layout
-- [ ] Verify saved seller order images, fallback behavior, phone widths, automated tests, and automatic build
+- [x] Resolve stored image paths and recover broken snapshots in buyer/seller/admin details without changing orders or layout
+- [x] Verify all three accessible saved seller order images, fallback unit tests, 360/375/390/412px, 91 automated tests, and automatic build; physical Android and other account roles were not tested
 
 ## Product listing stock consistency
 - [x] Remove direct cart actions from product listing cards; preserve product detail purchase controls

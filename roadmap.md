@@ -1,5 +1,9 @@
 # Production readiness audit
 
+## Product listing card layout
+- [ ] Apply large clean images, readable seller/rating/prices and saved-data badges consistently through shared listing cards
+- [ ] Verify real listings on desktop/mobile, product navigation, automated tests and automatic build
+
 ## Final checkout stock validation
 - [x] Existing create_order rechecks saved stock with transaction row locks before order creation, checks summed repeated lines and selected variants; no functional changes needed
 - [x] Authenticated real RPC rejected overstock, repeated overstock lines, zero-stock variant, missing variant, and zero-stock simple product; orders, stock and cart unchanged; all 104 automated tests passed

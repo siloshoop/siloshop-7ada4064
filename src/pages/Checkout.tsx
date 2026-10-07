@@ -728,6 +728,9 @@ const Checkout = () => {
                               setSelectedAddressId(a.id);
                               setFormData({
                                 ...formData,
+                                ...(a.recipient_name
+                                  ? splitRecipientName(a.recipient_name)
+                                  : {}),
                                 phone: a.phone,
                                 governorate: a.governorate || a.city || "",
                                 area: a.city || "",

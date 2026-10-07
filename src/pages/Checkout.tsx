@@ -487,9 +487,15 @@ const Checkout = () => {
     if (!validationResult.success) {
       setPhoneTouched(true);
       const firstError = validationResult.error.errors[0];
-      if (validationResult.error.errors.some((issue) => issue.path[0] === "phone")) {
-        document.getElementById("phone")?.focus();
-      }
+      const fieldId =
+        validationResult.error.errors.some((issue) => issue.path[0] === "firstName")
+          ? "first-name"
+          : validationResult.error.errors.some((issue) => issue.path[0] === "lastName")
+          ? "last-name"
+          : validationResult.error.errors.some((issue) => issue.path[0] === "phone")
+          ? "phone"
+          : null;
+      if (fieldId) document.getElementById(fieldId)?.focus();
       toast({
         title: "خطأ في البيانات",
         description: firstError.message,

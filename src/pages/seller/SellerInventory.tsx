@@ -152,7 +152,7 @@ const SellerInventory = () => {
                       disabled={!!r.product_variants?.length}
                       onChange={(e) => setDrafts((d) => ({ ...d, [r.id]: e.target.value }))}
                     />
-                    {r.product_variants?.length ? <Button asChild size="sm" variant="outline"><Link to={`/edit-product/${r.id}`}>الألوان والمقاسات</Link></Button> : <Button size="sm" disabled={drafts[r.id] === undefined || saving === r.id} onClick={() => save(r)}>
+                    {r.product_variants?.length ? <Button asChild size="sm" variant="outline"><Link to={`/dashboard/edit-product/${r.id}`}>الألوان والمقاسات</Link></Button> : <Button size="sm" disabled={drafts[r.id] === undefined || saving === r.id} onClick={() => save(r)}>
                       {saving === r.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <><Save className="me-1 h-4 w-4" /> حفظ</>}
                     </Button>}
                   </div>

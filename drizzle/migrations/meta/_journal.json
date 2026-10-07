@@ -106,6 +106,13 @@
       "when": 1791407634968,
       "tag": "0014_validate_order_stock_totals_and_required_variants",
       "breakpoints": true
+    },
+    {
+      "idx": 15,
+      "version": "7",
+      "when": 1791407684873,
+      "tag": "0015_publish_variant_stock_updates",
+      "breakpoints": true
     }
   ]
 }

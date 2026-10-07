@@ -5000,6 +5000,15 @@ export type Database = {
           sender_name: string
         }[]
       }
+      search_public_stores: {
+        Args: { _limit?: number; _term?: string }
+        Returns: {
+          city: string
+          logo_url: string
+          store_name: string
+          user_id: string
+        }[]
+      }
       seller_bulk_update_products: {
         Args: {
           _ids: string[]

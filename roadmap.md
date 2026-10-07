@@ -102,5 +102,7 @@
 - [ ] Physical Android chat verification (blocked: no device or emulator available)
 
 ## Seller shipment tracking page
-- [ ] Render independent saved seller shipments with vertical RTL timelines and product details
-- [ ] Verify completed/current/future states, mobile widths, existing tests, and automatic build
+- [x] Render independent saved seller shipments with vertical RTL timelines and product details
+- [x] Verify completed/current/future states, independent refresh/reload, 360/375/390/412px plus landscape, 71 automated tests, and automatic build using isolated signed-in browser fixtures
+- [ ] Verify real saved multi-seller order end to end (blocked: available account has no orders; no customer orders changed for testing)
+- [ ] Verify tracking on physical Android/PWA installation (blocked: no device or emulator available)

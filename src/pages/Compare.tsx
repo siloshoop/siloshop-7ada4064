@@ -423,7 +423,7 @@ const Compare = () => {
   const comparisonRows: ComparisonRow[] = [
     {
       label: "السعر",
-      icon: <DollarSign className="h-5 w-5" />,
+      icon: <DollarSign className="h-4 w-4" />,
       getValue: (product) => (
         <div className="text-center">
           <p className={`text-base font-bold sm:text-lg ${isLowestPrice(product) ? "text-green-600" : "text-foreground"}`}>
@@ -446,7 +446,7 @@ const Compare = () => {
     },
     {
       label: "الخصم",
-      icon: <Tag className="h-5 w-5" />,
+      icon: <Tag className="h-4 w-4" />,
       getValue: (product) => {
         const discount = calculateDiscount(product.original_price, product.price);
         const isHighest = discount === getHighestDiscount() && discount !== null && discount > 0;
@@ -470,7 +470,7 @@ const Compare = () => {
     },
     {
       label: "التقييم",
-      icon: <Star className="h-5 w-5" />,
+      icon: <Star className="h-4 w-4" />,
       getValue: (product) => {
         const rating = getAverageRating(product.reviews);
         const isHighest = rating === getHighestRating() && rating > 0;
@@ -503,28 +503,28 @@ const Compare = () => {
     },
     {
       label: "الفئة",
-      icon: <Tag className="h-5 w-5" />,
+      icon: <Tag className="h-4 w-4" />,
       getValue: (product) => (
         <p className="text-center">{product.categories?.name_ar || "غير محدد"}</p>
       ),
     },
     {
       label: "الفئة الفرعية",
-      icon: <Tag className="h-5 w-5" />,
+      icon: <Tag className="h-4 w-4" />,
       getValue: (product) => (
         <p className="text-center">{product.subcategories?.name_ar || "غير محدد"}</p>
       ),
     },
     {
       label: "البائع",
-      icon: <User className="h-5 w-5" />,
+      icon: <User className="h-4 w-4" />,
       getValue: (product) => (
         <p className="text-center">{product.vendor?.full_name || "غير محدد"}</p>
       ),
     },
     {
       label: "المخزون",
-      icon: <Package className="h-5 w-5" />,
+      icon: <Package className="h-4 w-4" />,
       getValue: (product) => {
         const stock = product.stock_quantity || 0;
         const isHighest = stock === getHighestStock() && stock > 0;
@@ -544,7 +544,7 @@ const Compare = () => {
     },
     {
       label: "التوفر",
-      icon: <Check className="h-5 w-5" />,
+      icon: <Check className="h-4 w-4" />,
       getValue: (product) => (
         <div className="flex justify-center">
           {(product.stock_quantity || 0) > 0 ? (
@@ -595,12 +595,12 @@ const Compare = () => {
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
-      <main className="container min-w-0 flex-1 px-3 py-5 sm:px-4 sm:py-8">
-        <div className="mb-5 flex min-w-0 flex-wrap items-center justify-between gap-3 sm:mb-8 sm:gap-4">
+      <main className="container min-w-0 flex-1 px-3 py-3 sm:px-4 sm:py-6">
+        <div className="mb-3 flex min-w-0 flex-wrap items-center justify-between gap-2 sm:mb-6 sm:gap-3">
           <div className="flex min-w-0 items-center gap-2 sm:gap-3">
             <Scale className="h-6 w-6 shrink-0 text-primary sm:h-8 sm:w-8" />
             <div className="min-w-0">
-              <h1 className="text-2xl font-bold leading-tight sm:text-3xl">مقارنة المنتجات</h1>
+              <h1 className="text-xl font-bold leading-tight sm:text-2xl">مقارنة المنتجات</h1>
               <p className="text-sm text-muted-foreground sm:text-base">
                 قارن بين {products.length} منتجات جنباً إلى جنب
               </p>
@@ -788,7 +788,7 @@ const Compare = () => {
           >
             {/* Product Images and Names Header */}
             <div 
-              className="comparison-products-grid mb-4 grid gap-2 sm:mb-6 sm:gap-4"
+              className="comparison-products-grid mb-3 grid gap-2 sm:mb-4 sm:gap-3"
             >
               {products.map((product) => (
                 <Card key={product.id} className="relative overflow-hidden">
@@ -801,7 +801,7 @@ const Compare = () => {
                     <X className="h-4 w-4" />
                   </Button>
                   
-                  <div className="relative h-36 w-full overflow-hidden bg-muted/30 sm:h-56 md:h-64">
+                  <div className="relative h-28 w-full overflow-hidden bg-muted/30 sm:h-44 md:h-52">
                     {product.original_price && (
                       <Badge className="absolute top-2 right-2 z-10 bg-red-500">
                         خصم {calculateDiscount(product.original_price, product.price)}%
@@ -819,9 +819,9 @@ const Compare = () => {
                     />
                   </div>
 
-                  <CardContent className="space-y-2 p-2.5 sm:space-y-3 sm:p-4">
+                  <CardContent className="space-y-1.5 p-2 sm:space-y-2 sm:p-3">
                     <h3 
-                      className="line-clamp-2 min-h-10 cursor-pointer text-sm font-bold leading-snug transition-colors hover:text-primary sm:text-lg"
+                      className="line-clamp-2 min-h-9 cursor-pointer text-xs font-bold leading-snug transition-colors hover:text-primary sm:text-base"
                       onClick={() => navigate(`/product/${product.id}`)}
                     >
                       {product.name}
@@ -856,7 +856,7 @@ const Compare = () => {
                 {comparisonRows.map((row, index) => (
                   <div key={row.label}>
                     <div 
-                      className={`comparison-grid grid items-center gap-2 p-2.5 text-xs sm:gap-4 sm:p-4 sm:text-sm ${index % 2 === 0 ? "bg-muted/30" : ""}`}
+                      className={`comparison-grid grid items-center gap-2 px-2.5 py-1.5 text-xs sm:gap-3 sm:px-4 sm:py-2.5 sm:text-sm ${index % 2 === 0 ? "bg-muted/30" : ""}`}
                     >
                       <div className="sticky end-0 z-10 flex min-w-0 items-center gap-1.5 bg-card py-1 font-medium text-muted-foreground sm:gap-2">
                         {row.icon}
@@ -875,14 +875,14 @@ const Compare = () => {
                 {/* Description Row */}
                 <Separator />
                 <div 
-                  className="comparison-grid grid gap-2 p-2.5 text-xs sm:gap-4 sm:p-4 sm:text-sm"
+                  className="comparison-grid grid gap-2 px-2.5 py-1.5 text-xs sm:gap-3 sm:px-4 sm:py-2.5 sm:text-sm"
                 >
                   <div className="sticky end-0 z-10 flex min-w-0 items-start gap-1.5 bg-card pt-1 font-medium text-muted-foreground sm:gap-2">
-                    <Minus className="h-5 w-5" />
+                    <Minus className="h-4 w-4" />
                     <span>الوصف</span>
                   </div>
                   {products.map((product) => (
-                    <p key={product.id} className="text-sm text-muted-foreground line-clamp-4">
+                    <p key={product.id} className="text-xs text-muted-foreground line-clamp-3 sm:text-sm">
                       {product.description || "لا يوجد وصف"}
                     </p>
                   ))}

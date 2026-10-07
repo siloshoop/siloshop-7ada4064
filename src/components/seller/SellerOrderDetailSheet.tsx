@@ -15,6 +15,7 @@ import { Loader2, Lock, Phone, MapPin, User, Package, Truck, Ban } from "lucide-
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import OrderStatusBadge from "@/components/orders/OrderStatusBadge";
+import OrderProductImage from "@/components/orders/OrderProductImage";
 import OrderTimelineLog from "@/components/orders/OrderTimelineLog";
 import PrintOrderDocs from "@/components/seller/PrintOrderDocs";
 import SellerOrderNotes from "@/components/seller/SellerOrderNotes";
@@ -202,7 +203,7 @@ const SellerOrderDetailSheet = ({ order, open, onOpenChange, onChanged }: Props)
               ) : (
                 items.map((it) => (
                   <div key={it.id} className="flex items-center gap-3 rounded-lg bg-muted/50 p-3">
-                    <img loading="lazy" decoding="async" src={it.product_image || "/placeholder.svg"} alt={it.product_name || ""} className="h-12 w-12 rounded object-cover" />
+                    <OrderProductImage image={it.product_image} orderItemId={it.id} alt={it.product_name || ""} className="h-12 w-12 shrink-0 rounded object-cover" />
                     <div className="min-w-0 flex-1">
                       <p className="truncate text-sm font-medium">{it.product_name || "منتج"}</p>
                       {it.variant_label && <p className="text-xs text-muted-foreground">{it.variant_label}</p>}

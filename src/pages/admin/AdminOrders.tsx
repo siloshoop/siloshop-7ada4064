@@ -20,6 +20,7 @@ import {
   ExternalLink, ShieldAlert, ScrollText, MessageSquare, Lock,
 } from "lucide-react";
 import OrderStatusBadge from "@/components/orders/OrderStatusBadge";
+import OrderProductImage from "@/components/orders/OrderProductImage";
 import OrderTimelineLog from "@/components/orders/OrderTimelineLog";
 import ShippingInfoDialog from "@/components/orders/ShippingInfoDialog";
 import {
@@ -448,7 +449,7 @@ const AdminOrders = () => {
                   {detail.items.map((it) => (
                     <div key={it.id} className="flex items-center gap-3 rounded border p-2">
                       {it.product_image && (
-                        <img src={it.product_image} alt="" loading="lazy" decoding="async" className="h-12 w-12 rounded object-cover" />
+                        <OrderProductImage image={it.product_image} orderItemId={it.id} productId={it.product_id} alt={it.product_name || ""} className="h-12 w-12 shrink-0 rounded object-cover" />
                       )}
                       <div className="min-w-0 flex-1">
                         <p className="truncate text-sm">{it.product_name || "منتج"}</p>

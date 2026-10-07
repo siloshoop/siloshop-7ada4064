@@ -189,7 +189,13 @@ const Subcategory = () => {
     const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(subcategoryId!);
     
     if (isUUID) {
-      productsQuery = productsQuery.eq("subcategory_id", subcategoryId);
+      // Include products filed under child (level-3) subcategories of this group
+      const { data: childSubs } = await supabase
+        .from("subcategories")
+        .select("id")
+        .eq("parent_subcategory_id", subcategoryId!);
+      const ids = [subcategoryId!, ...((childSubs || []).map((c: any) => c.id))];
+      productsQuery = productsQuery.in("subcategory_id", ids);
     } else {
       // For default subcategories, filter by category
       productsQuery = productsQuery.eq("category_id", categoryId);

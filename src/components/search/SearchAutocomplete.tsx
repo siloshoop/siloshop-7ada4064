@@ -1,3 +1,4 @@
+import { formatPrice } from "@/lib/currency";
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Clock, Flame, Gem, Layers, Loader2, Search as SearchIcon, TrendingUp, X } from "lucide-react";

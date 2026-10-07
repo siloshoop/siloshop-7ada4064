@@ -1,16 +1,19 @@
 import { formatPrice } from "@/lib/currency";
+import { isFreeShipping, resolveShippingMode } from "@/lib/shippingDisplay";
 import { Truck, RotateCcw, Banknote, MapPin, Clock } from "lucide-react";
 
 interface Props {
   shippingCost?: number | null;
+  shippingMode?: string | null;
   shipsWithinDays?: number | null;
   isPlatform?: boolean;
   currency?: string | null;
 }
 
 /** Shipping details + return policy summary for the product page. */
-const ShippingInfo = ({ shippingCost, shipsWithinDays, isPlatform, currency }: Props) => {
-  const freeShipping = shippingCost === 0 || shippingCost === null || shippingCost === undefined;
+const ShippingInfo = ({ shippingCost, shippingMode, shipsWithinDays, isPlatform, currency }: Props) => {
+  const freeShipping = isFreeShipping(shippingMode, shippingCost);
+  const shippingByCompany = resolveShippingMode(shippingMode, shippingCost) === "variable";
 
   const rows = [
     {
@@ -18,6 +21,8 @@ const ShippingInfo = ({ shippingCost, shipsWithinDays, isPlatform, currency }: P
       title: "تكلفة الشحن",
       value: freeShipping
         ? "شحن مجاني"
+        : shippingByCompany
+        ? "حسب شركة الشحن — يُحدد عند التجهيز"
         : `${formatPrice(shippingCost, currency)} — يحددها البائع لكل منتج`,
     },
     {

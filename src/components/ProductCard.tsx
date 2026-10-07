@@ -10,6 +10,7 @@ import { supabase } from "@/integrations/supabase/client";
 import React, { useState, useEffect, memo } from "react";
 import { formatPrice } from "@/lib/currency";
 import { OUT_OF_STOCK_LABEL } from "@/lib/stockAvailability";
+import { shippingCardLabel, isFreeShipping } from "@/lib/shippingDisplay";
 import { useVendorNames } from "@/hooks/useVendorNames";
 
 interface ProductCardProps {
@@ -24,6 +25,8 @@ interface ProductCardProps {
   reviews: number;
   discount?: number;
   shippingCost?: number;
+  /** How shipping is charged: "free" | "fixed" | "variable" (set by the shipping company). */
+  shippingMode?: string | null;
   stockQuantity?: number | null;
   /** Store (seller) display name */
   storeName?: string | null;
@@ -46,6 +49,7 @@ const ProductCard = memo(({
   reviews,
   discount,
   shippingCost,
+  shippingMode,
   stockQuantity,
   storeName,
   productType,
@@ -156,6 +160,8 @@ const ProductCard = memo(({
 
   const hasDiscount = typeof originalPrice === "number" && originalPrice > price && originalPrice > 0;
   const discountPercent = hasDiscount ? Math.round((originalPrice - price) / originalPrice * 100) : (discount && discount > 0 ? discount : 0);
+  // Free / fixed price / set by the shipping company — never free when a price exists.
+  const shippingLine = shippingCardLabel(shippingMode, shippingCost, currency);
 
   return (
     <a
@@ -318,17 +324,19 @@ const ProductCard = memo(({
           )}
         </div>
 
-        <div className="flex min-w-0 items-center gap-1 text-[10px]">
-          {shippingCost !== undefined ? (
-            shippingCost > 0 ? (
-              <span className="line-clamp-2 text-muted-foreground">🚚 شحن: {formatPrice(shippingCost, currency)}</span>
-            ) : (
-              <span className="text-success font-medium">🚚 شحن مجاني</span>
-            )
-          ) : (
-            <span className="text-success font-medium">🚚 شحن مجاني</span>
-          )}
-        </div>
+        {shippingLine && (
+          <div className="flex min-w-0 items-center gap-1 text-[10px]">
+            <span
+              className={
+                isFreeShipping(shippingMode, shippingCost)
+                  ? "text-success font-medium"
+                  : "line-clamp-2 text-muted-foreground"
+              }
+            >
+              🚚 {shippingLine}
+            </span>
+          </div>
+        )}
 
         <p className="hidden text-[10px] text-muted-foreground sm:block">
           {shipsWithinDays && shipsWithinDays > 0

@@ -34,7 +34,7 @@ const CartRecommendations = ({ cartProductIds, cartCategoryIds }: CartRecommenda
         // Get products from same categories but not in cart
         const { data, error } = await supabase
           .from("products")
-          .select("id, name, price, currency, original_price, stock_quantity, image_url, vendor_id, category_id")
+          .select("id, name, price, currency, original_price, stock_quantity, image_url, vendor_id, category_id, shipping_cost, shipping_mode")
           .in("category_id", cartCategoryIds)
           .not("id", "in", `(${cartProductIds.join(",")})`)
           .eq("is_active", true)
@@ -83,6 +83,8 @@ const CartRecommendations = ({ cartProductIds, cartCategoryIds }: CartRecommenda
             image={product.image_url}
             rating={0}
             reviews={0}
+            shippingCost={(product as any).shipping_cost ?? 0}
+            shippingMode={(product as any).shipping_mode}
           />
         ))}
       </div>

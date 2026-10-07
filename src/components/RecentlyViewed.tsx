@@ -10,6 +10,8 @@ interface Product {
   name: string;
   price: number;
   stock_quantity?: number | null;
+  shipping_cost?: number | null;
+  shipping_mode?: string | null;
   currency?: string | null;
   original_price: number | null;
   image_url: string;
@@ -42,6 +44,8 @@ const RecentlyViewed = () => {
               currency,
               original_price,
               image_url,
+              shipping_cost,
+              shipping_mode,
               is_active,
               reviews (rating)
             )
@@ -60,6 +64,8 @@ const RecentlyViewed = () => {
             stock_quantity: (item.products as any).stock_quantity,
             original_price: (item.products as any).original_price,
             image_url: (item.products as any).image_url,
+            shipping_cost: (item.products as any).shipping_cost,
+            shipping_mode: (item.products as any).shipping_mode,
             reviews: (item.products as any).reviews || []
           }));
 
@@ -127,6 +133,8 @@ const RecentlyViewed = () => {
                   rating={avgRating}
                   reviews={product.reviews?.length || 0}
                   discount={discount}
+                  shippingCost={(product as any).shipping_cost ?? 0}
+                  shippingMode={(product as any).shipping_mode}
                 />
               </div>
             );

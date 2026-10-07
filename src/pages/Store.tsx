@@ -53,6 +53,7 @@ interface StoreProduct {
   image_url: string | null;
   stock_quantity: number | null;
   shipping_cost: number | null;
+  shipping_mode: string | null;
   product_type: string | null;
   ships_within_days: number | null;
   reviews: { rating: number }[];
@@ -88,7 +89,7 @@ const Store = () => {
         supabase
           .from("products")
           .select(
-            "id, name, price, currency, original_price, image_url, stock_quantity, shipping_cost, product_type, ships_within_days, reviews(rating)",
+            "id, name, price, currency, original_price, image_url, stock_quantity, shipping_cost, shipping_mode, product_type, ships_within_days, reviews(rating)",
           )
           .eq("vendor_id", vendorId)
           .eq("is_active", true)
@@ -300,6 +301,7 @@ const Store = () => {
                         reviews={ratings.length}
                         discount={discount}
                         shippingCost={product.shipping_cost ?? 0}
+                        shippingMode={product.shipping_mode}
                         stockQuantity={product.stock_quantity}
                         storeName={profile.store_name}
                         productType={product.product_type}

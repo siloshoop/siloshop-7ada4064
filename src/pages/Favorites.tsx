@@ -21,6 +21,8 @@ interface Product {
   original_price: number | null;
   image_url: string;
   stock_quantity: number;
+  shipping_cost?: number | null;
+  shipping_mode?: string | null;
   category_id: string | null;
   category_name?: string;
 }
@@ -55,6 +57,8 @@ const Favorites = () => {
             original_price,
             image_url,
             stock_quantity,
+            shipping_cost,
+            shipping_mode,
             category_id,
             categories ( name_ar )
           )
@@ -241,6 +245,8 @@ const Favorites = () => {
                   rating={4}
                   reviews={0}
                   stockQuantity={product.stock_quantity}
+                  shippingCost={(product as any).shipping_cost ?? 0}
+                  shippingMode={(product as any).shipping_mode}
                   discount={product.original_price ? Math.round(((product.original_price - product.price) / product.original_price) * 100) : undefined}
                 />
               ))}

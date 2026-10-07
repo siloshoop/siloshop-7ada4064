@@ -181,6 +181,8 @@ const Subcategory = () => {
         image_url,
         vendor_id,
         stock_quantity,
+        shipping_cost,
+        shipping_mode,
         reviews(rating)
       `)
       .eq("is_active", true);
@@ -217,6 +219,8 @@ const Subcategory = () => {
           image_url,
           vendor_id,
           stock_quantity,
+          shipping_cost,
+          shipping_mode,
           reviews(rating)
         `)
         .eq("category_id", categoryId)
@@ -601,6 +605,8 @@ const Subcategory = () => {
                   rating={avgRating}
                   reviews={product.reviews?.length || 0}
                   discount={discount}
+                  shippingCost={(product as any).shipping_cost ?? 0}
+                  shippingMode={(product as any).shipping_mode}
                 />
               );
             })}

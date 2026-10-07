@@ -11,7 +11,9 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { CURRENCY_OPTIONS, DEFAULT_CURRENCY, currencySymbol } from "@/lib/currency";
+import { SHIPPING_MODE_OPTIONS, type ShippingMode } from "@/lib/shippingDisplay";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, Upload, ChevronLeft, X } from "lucide-react";
@@ -58,6 +60,7 @@ const AddProduct = () => {
     min_order_quantity: "1",
     max_order_quantity: "",
     shipping_cost: "0",
+    shipping_mode: "free" as ShippingMode,
     ships_within_days: "",
     video_url: "",
     category_id: "",
@@ -278,7 +281,8 @@ const AddProduct = () => {
         stock_quantity: values.stock_quantity,
         min_order_quantity: minQty,
         max_order_quantity: maxQty,
-        shipping_cost: values.shipping_cost ?? 0,
+        shipping_mode: formData.shipping_mode,
+        shipping_cost: formData.shipping_mode === "fixed" ? (values.shipping_cost ?? 0) : 0,
         ships_within_days: values.ships_within_days ?? null,
         video_url: formData.video_url.trim() || null,
         category_id: formData.category_id || null,
@@ -633,18 +637,49 @@ const AddProduct = () => {
                   <AccordionTrigger>الشحن والأبعاد</AccordionTrigger>
                   <AccordionContent className="space-y-4">
                     <div className="space-y-2">
-                      <Label htmlFor="shipping_cost">تكلفة الشحن ({currencySymbol(formData.currency)}) — بنفس عملة سعر المنتج</Label>
-                      <Input
-                        id="shipping_cost"
-                        type="number"
-                        step="0.01"
-                        min="0"
-                        value={formData.shipping_cost}
-                        onChange={(e) => setFormData({ ...formData, shipping_cost: e.target.value })}
-                        placeholder="0 = شحن مجاني"
-                      />
-                      <p className="text-xs text-muted-foreground">اتركه 0 للشحن المجاني</p>
+                      <Label>طريقة الشحن</Label>
+                      <RadioGroup
+                        value={formData.shipping_mode}
+                        onValueChange={(value) =>
+                          setFormData({ ...formData, shipping_mode: value as ShippingMode })
+                        }
+                        className="grid gap-2 sm:grid-cols-3"
+                      >
+                        {SHIPPING_MODE_OPTIONS.map((option) => (
+                          <Label
+                            key={option.value}
+                            className={`flex cursor-pointer flex-col items-start gap-1 rounded-lg border p-3 text-sm font-normal transition-colors ${
+                              formData.shipping_mode === option.value
+                                ? "border-primary bg-primary/5"
+                                : "border-border"
+                            }`}
+                          >
+                            <span className="flex items-center gap-2">
+                              <RadioGroupItem value={option.value} />
+                              <span className="font-medium">{option.label}</span>
+                            </span>
+                            <span className="text-xs text-muted-foreground">{option.hint}</span>
+                          </Label>
+                        ))}
+                      </RadioGroup>
                     </div>
+
+                    {formData.shipping_mode === "fixed" && (
+                      <div className="space-y-2">
+                        <Label htmlFor="shipping_cost">
+                          سعر الشحن الثابت ({currencySymbol(formData.currency)}) — بنفس عملة سعر المنتج
+                        </Label>
+                        <Input
+                          id="shipping_cost"
+                          type="number"
+                          step="0.01"
+                          min="0"
+                          value={formData.shipping_cost}
+                          onChange={(e) => setFormData({ ...formData, shipping_cost: e.target.value })}
+                          placeholder="مثال: 5000"
+                        />
+                      </div>
+                    )}
 
                     <div className="space-y-2">
                       <Label htmlFor="ships_within_days">مدة التجهيز والشحن (أيام)</Label>

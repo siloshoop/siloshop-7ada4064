@@ -11,6 +11,7 @@ import {
   normalizeCurrency,
   totalsByCurrency,
 } from "@/lib/currency";
+import { shippingDetailLabel } from "@/lib/shippingDisplay";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import CartRecommendations from "@/components/CartRecommendations";
@@ -41,6 +42,7 @@ interface CartItem {
     stock_quantity: number;
     category_id: string;
     shipping_cost?: number;
+    shipping_mode?: string | null;
     shipping_duration_text?: string | null;
   };
 }
@@ -50,7 +52,7 @@ const CART_SELECT = `
   quantity,
   variant_id,
   variant:product_variants(id, attributes, price, discount_price, stock_quantity, is_active),
-  product:products(id, name, price, currency, image_url, stock_quantity, category_id, shipping_cost, shipping_duration_text)
+  product:products(id, name, price, currency, image_url, stock_quantity, category_id, shipping_cost, shipping_mode, shipping_duration_text)
 `;
 
 /** Applies the chosen variant's own price and stock to the cart row. */
@@ -648,9 +650,11 @@ const Cart = () => {
 
                               <p className="text-sm inline-flex items-center gap-1 mt-0.5">
                                 <Truck className="h-3.5 w-3.5 text-primary" />
-                                {Number(item.product.shipping_cost || 0) === 0
-                                  ? "شحن مجاني"
-                                  : `الشحن: ${formatPrice(item.product.shipping_cost || 0, (item.product as any).currency)}`}
+                                {shippingDetailLabel(
+                                  item.product.shipping_mode,
+                                  item.product.shipping_cost,
+                                  (item.product as any).currency,
+                                )}
                               </p>
                               {item.product.shipping_duration_text && (
                                 <p className="text-xs text-muted-foreground mt-0.5">

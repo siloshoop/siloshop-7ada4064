@@ -14,6 +14,8 @@ interface DealProduct {
   currency?: string | null;
   original_price: number | null;
   image_url: string;
+  shipping_cost?: number | null;
+  shipping_mode?: string | null;
   reviews: { rating: number }[];
   deal_discount: number;
   deal_end_date: string;
@@ -66,6 +68,8 @@ const EnhancedDailyDeals = () => {
               currency,
               original_price,
               image_url,
+              shipping_cost,
+              shipping_mode,
               reviews (rating)
             )
           `)
@@ -84,6 +88,8 @@ const EnhancedDailyDeals = () => {
             stock_quantity: (deal.products as any).stock_quantity,
             original_price: (deal.products as any).original_price,
             image_url: (deal.products as any).image_url,
+            shipping_cost: (deal.products as any).shipping_cost,
+            shipping_mode: (deal.products as any).shipping_mode,
             reviews: (deal.products as any).reviews || [],
             deal_discount: deal.discount_percentage,
             deal_end_date: deal.end_date
@@ -213,6 +219,8 @@ const EnhancedDailyDeals = () => {
                   rating={avgRating}
                   reviews={product.reviews?.length || 0}
                   discount={product.deal_discount}
+                  shippingCost={(product as any).shipping_cost ?? 0}
+                  shippingMode={(product as any).shipping_mode}
                 />
               </div>
             );

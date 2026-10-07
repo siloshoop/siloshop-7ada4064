@@ -46,7 +46,7 @@ const BestSellers = () => {
       try {
         const { data: newProducts } = await supabase
           .from("products")
-          .select("id, name, price, currency, original_price, stock_quantity, image_url, reviews(rating)")
+          .select("id, name, price, currency, original_price, stock_quantity, image_url, shipping_cost, shipping_mode, reviews(rating)")
           .eq("is_active", true)
           .order("created_at", { ascending: false })
           .limit(8);
@@ -103,6 +103,8 @@ const BestSellers = () => {
                   rating={avgRating}
                   reviews={product.reviews?.length || 0}
                   discount={discount}
+                  shippingCost={(product as any).shipping_cost ?? 0}
+                  shippingMode={(product as any).shipping_mode}
                 />
               </div>
             );

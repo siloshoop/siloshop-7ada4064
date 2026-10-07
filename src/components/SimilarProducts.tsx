@@ -21,6 +21,7 @@ interface Product {
   product_type?: string | null;
   ships_within_days?: number | null;
   shipping_cost?: number | null;
+  shipping_mode?: string | null;
   reviews: { rating: number }[];
 }
 
@@ -35,7 +36,7 @@ const SimilarProducts = ({ productId, categoryId, vendorId }: SimilarProductsPro
         let query = supabase
           .from("products")
           .select(
-            "id, name, price, currency, original_price, stock_quantity, image_url, vendor_id, product_type, ships_within_days, shipping_cost, reviews(rating)",
+            "id, name, price, currency, original_price, stock_quantity, image_url, vendor_id, product_type, ships_within_days, shipping_cost, shipping_mode, reviews(rating)",
           )
           .eq("is_active", true)
           .neq("id", productId)
@@ -55,7 +56,7 @@ const SimilarProducts = ({ productId, categoryId, vendorId }: SimilarProductsPro
           const { data: vendorProducts } = await supabase
             .from("products")
             .select(
-              "id, name, price, currency, original_price, stock_quantity, image_url, vendor_id, product_type, ships_within_days, shipping_cost, reviews(rating)",
+              "id, name, price, currency, original_price, stock_quantity, image_url, vendor_id, product_type, ships_within_days, shipping_cost, shipping_mode, reviews(rating)",
             )
             .eq("is_active", true)
             .eq("vendor_id", vendorId)
@@ -117,6 +118,7 @@ const SimilarProducts = ({ productId, categoryId, vendorId }: SimilarProductsPro
               productType={product.product_type}
               shipsWithinDays={product.ships_within_days}
               shippingCost={product.shipping_cost ?? undefined}
+              shippingMode={product.shipping_mode}
             />
           );
         })}

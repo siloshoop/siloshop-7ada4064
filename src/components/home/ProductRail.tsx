@@ -16,6 +16,7 @@ interface ProductRow {
   discount_price: number | null;
   image_url: string;
   shipping_cost: number | null;
+  shipping_mode: string | null;
   stock_quantity: number | null;
   vendor_id: string;
   product_type: string | null;
@@ -35,7 +36,7 @@ interface ProductRailProps {
 }
 
 const SELECT =
-  "id, name, price, currency, original_price, discount_price, image_url, shipping_cost, stock_quantity, vendor_id, product_type, ships_within_days, reviews(rating)";
+  "id, name, price, currency, original_price, discount_price, image_url, shipping_cost, shipping_mode, stock_quantity, vendor_id, product_type, ships_within_days, reviews(rating)";
 
 const ProductRail = ({
   variant,
@@ -129,6 +130,7 @@ const ProductRail = ({
                     rating={avg}
                     reviews={ratings.length}
                     shippingCost={product.shipping_cost ?? undefined}
+                    shippingMode={product.shipping_mode}
                     stockQuantity={product.stock_quantity}
                     storeName={storeNames[product.vendor_id]}
                     productType={product.product_type}

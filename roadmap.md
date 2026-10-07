@@ -100,3 +100,9 @@
 - [x] Bound chat and inbox height; reserve non-shrinking composer and header space
 - [x] Verify chat controls at 360, 375, 390, and 412px with an isolated empty-thread fixture; all 63 existing tests and automatic build passed
 - [ ] Physical Android chat verification (blocked: no device or emulator available)
+
+## Seller shipment tracking page
+- [x] Render independent saved seller shipments with vertical RTL timelines and product details
+- [x] Verify completed/current/future states, independent refresh/reload, 360/375/390/412px plus landscape, 71 automated tests, and automatic build using isolated signed-in browser fixtures
+- [ ] Verify real saved multi-seller order end to end (blocked: available account has no orders; no customer orders changed for testing)
+- [ ] Verify tracking on physical Android/PWA installation (blocked: no device or emulator available)

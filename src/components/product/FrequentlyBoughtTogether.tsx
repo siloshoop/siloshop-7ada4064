@@ -45,7 +45,7 @@ const FrequentlyBoughtTogether = ({ product, categoryId, vendorId }: Props) => {
           .eq("is_active", true)
           .gt("stock_quantity", 0)
           .neq("id", product.id)
-          .limit(2);
+          .gt("stock_quantity", 0).limit(2);
 
       let rows: Item[] = [];
       if (categoryId) {

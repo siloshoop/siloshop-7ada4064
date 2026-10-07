@@ -204,7 +204,7 @@ const PickupCenters = () => {
               <Input
                 value={form.address}
                 onChange={(e) => setForm({ ...form, address: e.target.value })}
-                placeholder="الشارع وأقرب علامة مميزة"
+                placeholder="اسم الشارع"
               />
             </div>
             <div className="space-y-1.5">

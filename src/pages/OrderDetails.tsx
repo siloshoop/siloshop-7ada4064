@@ -104,7 +104,7 @@ const OrderDetails = () => {
       setOrder(ord);
       const { data: oi } = await supabase
         .from("order_items")
-        .select("id, quantity, price, currency, vendor_id, variant_label, product_name, product_image, discount_amount, subtotal, product:products(id, name, image_url)")
+        .select("id, product_id, quantity, price, currency, vendor_id, variant_label, product_name, product_image, discount_amount, subtotal, product:products(id, name, image_url)")
         .eq("order_id", id);
       setItems(oi || []);
       const { data: sd } = await supabase
@@ -304,7 +304,7 @@ const OrderDetails = () => {
               const name = it.product_name || it.product?.name || "منتج";
               const lineSubtotal = it.subtotal != null ? Number(it.subtotal) : Number(it.price) * it.quantity;
               return (
-                <Link to={it.product?.id ? `/product/${it.product.id}` : "#"} key={idx}
+                <Link to={(it.product_id || it.product?.id) ? `/product/${it.product_id || it.product?.id}` : "#"} key={idx}
                   className="flex items-center gap-3 p-3 rounded-lg bg-muted/30 hover:bg-muted/60 transition-colors">
                   <OrderProductImage
                     image={it.product_image}

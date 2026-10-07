@@ -2,6 +2,7 @@ export interface TrackingProduct {
   id: string;
   order_id: string;
   vendor_id: string | null;
+  product_id?: string | null;
   product_name: string | null;
   product_image: string | null;
   variant_label: string | null;

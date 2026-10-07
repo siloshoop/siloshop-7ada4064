@@ -4,6 +4,7 @@ import { formatVariantLabel } from "@/lib/variantRequirement";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
+import { quoteCoupon, couponErrorMessage } from "@/lib/couponQuote";
 import {
   COUPON_CURRENCY,
   currencyName,
@@ -496,6 +497,8 @@ const Cart = () => {
 
   // Amounts are grouped per currency: USD and SYP are never summed together
   // and never converted.
+  const cartCurrencyList = Array.from(new Set(itemsWithDiscounts.map((item) => normalizeCurrency((item.product as any).currency))));
+  const couponCurrency = cartCurrencyList[0] ?? COUPON_CURRENCY;
   const currencyTotals = totalsByCurrency(
     itemsWithDiscounts.map((item) => ({
       currency: normalizeCurrency((item.product as any).currency),
@@ -503,12 +506,10 @@ const Cart = () => {
       savings: item.savings,
       shipping: Number(item.product.shipping_cost || 0),
     })),
-    { couponDiscount, couponCurrency: COUPON_CURRENCY, taxRate: TAX_RATE },
+    { couponDiscount, couponCurrency, taxRate: TAX_RATE },
   );
   const isMultiCurrency = currencyTotals.length > 1;
-  const couponSupported = currencyTotals.every((t) => t.currency === COUPON_CURRENCY);
-  const couponBase = currencyTotals.find((t) => t.currency === COUPON_CURRENCY);
-  const subtotalAfterQtyDiscount = Math.max(0, (couponBase?.subtotal ?? 0) - (couponBase?.savings ?? 0));
+  const couponSupported = cartCurrencyList.length <= 1;
 
   // A coupon can only price a Syrian-pound order — drop it if the cart changes.
   useEffect(() => {
@@ -526,33 +527,25 @@ const Cart = () => {
     if (!couponSupported) {
       toast({
         title: "الكوبون غير متاح",
-        description: "أكواد الخصم تُحسب بالليرة السورية فقط، ولا يمكن تطبيقها على منتجات بالدولار.",
+        description: "لا يمكن تطبيق كوبون على سلة تجمع عملتين مختلفتين.",
         variant: "destructive",
       });
       return;
     }
     setValidatingCoupon(true);
     try {
-      const { data: rows, error } = await supabase.rpc("validate_coupon", {
-        _code: couponCode.toUpperCase().trim(),
-        _subtotal: subtotalAfterQtyDiscount,
-      });
-      if (error) throw error;
-      const data = Array.isArray(rows) ? rows[0] : rows;
-      if (!data) {
-        toast({
-          title: "كوبون غير صالح",
-          description: "الكود غير صحيح أو منتهي الصلاحية أو لم يتحقق الحد الأدنى",
-          variant: "destructive",
-        });
+      const data = await quoteCoupon(
+        couponCode,
+        itemsWithDiscounts.map((item: any) => ({ product_id: item.product.id, variant_id: item.variant_id ?? null, quantity: item.quantity })),
+      );
+      if (!data || data.error) {
+        toast({ title: "الكوبون غير متاح", description: couponErrorMessage(data?.error), variant: "destructive" });
         return;
       }
-      const discountAmount = data.discount_type === "percentage"
-        ? (subtotalAfterQtyDiscount * Number(data.discount_value)) / 100
-        : Number(data.discount_value);
+      const discountAmount = Number(data.discount_amount) || 0;
       setAppliedCoupon(data);
       setCouponDiscount(discountAmount);
-      toast({ title: "تم التطبيق", description: `تم تطبيق خصم ${discountAmount.toFixed(0)} ل.س` });
+      toast({ title: "تم التطبيق", description: `تم تطبيق خصم ${formatPrice(discountAmount, couponCurrency, { maximumFractionDigits: 2 })} على منتجات المتجر المشمولة بالكوبون` });
     } catch (error) {
       toast({ title: "خطأ", description: error.message, variant: "destructive" });
     } finally {
@@ -831,7 +824,7 @@ const Cart = () => {
                     )}
                     {!couponSupported && (
                       <p className="text-xs text-muted-foreground">
-                        أكواد الخصم بالليرة السورية فقط ولا تُطبَّق على المنتجات بالدولار.
+                        لا يمكن تطبيق كوبون على سلة تجمع عملتين. كل كوبون يخص منتجات بائع محدد فقط.
                       </p>
                     )}
                   </div>

@@ -85,6 +85,7 @@ const Category = () => {
       `)
       .eq("category_id", categoryId)
       .eq("is_active", true)
+      .order("sold_count", { ascending: false })
       .order("created_at", { ascending: false });
 
     if (productsData) {

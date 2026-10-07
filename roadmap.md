@@ -1,8 +1,8 @@
 # Production readiness audit
 
 ## Footer and page navigation
-- [ ] Move store-opening button to the end of Customer Service
-- [ ] Reset page scroll on opening, forward/back navigation, and reload; verify browser flows and tests
+- [x] Move store-opening button to the end of Customer Service
+- [x] Reset page scroll on opening, forward/back navigation, and reload; desktop/mobile browser checks, 82 tests and automatic build passed
 
 ## Stock availability
 - [x] Apply locked sold-out options and consistent seller/buyer product status

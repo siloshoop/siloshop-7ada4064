@@ -761,6 +761,38 @@ const Checkout = () => {
                       <Plus className="h-3 w-3" /> حفظ عناوين للاستخدام لاحقاً
                     </Link>
                   )}
+                  <div className="grid sm:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="first-name">الاسم *</Label>
+                      <Input
+                        id="first-name"
+                        type="text"
+                        autoComplete="given-name"
+                        maxLength={50}
+                        value={formData.firstName}
+                        onChange={(e) =>
+                          setFormData({ ...formData, firstName: e.target.value })
+                        }
+                        required
+                        placeholder="مثال: محمد"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="last-name">الكنية *</Label>
+                      <Input
+                        id="last-name"
+                        type="text"
+                        autoComplete="family-name"
+                        maxLength={50}
+                        value={formData.lastName}
+                        onChange={(e) =>
+                          setFormData({ ...formData, lastName: e.target.value })
+                        }
+                        required
+                        placeholder="مثال: العلي"
+                      />
+                    </div>
+                  </div>
                   <div className="space-y-2">
                     <Label htmlFor="phone">رقم الهاتف *</Label>
                     <Input

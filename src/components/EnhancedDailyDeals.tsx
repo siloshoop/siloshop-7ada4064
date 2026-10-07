@@ -26,6 +26,7 @@ const EnhancedDailyDeals = () => {
   const [products, setProducts] = useState<DealProduct[]>([]);
   const [loading, setLoading] = useState(true);
   const [timeLeft, setTimeLeft] = useState({
+    days: 0,
     hours: 0,
     minutes: 0,
     seconds: 0,
@@ -75,6 +76,7 @@ const EnhancedDailyDeals = () => {
           `)
           .eq("is_active", true)
           .gt("end_date", new Date().toISOString())
+          .lte("start_date", new Date().toISOString())
           .order("end_date", { ascending: true })
           .limit(6);
 
@@ -116,14 +118,16 @@ const EnhancedDailyDeals = () => {
       const diff = endDate - now;
 
       if (diff <= 0) {
-        setTimeLeft({ hours: 0, minutes: 0, seconds: 0 });
+        setTimeLeft({ days: 0, hours: 0, minutes: 0, seconds: 0 });
         return;
       }
 
+      const totalSeconds = Math.floor(diff / 1000);
       setTimeLeft({
-        hours: Math.floor(diff / (1000 * 60 * 60)),
-        minutes: Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60)),
-        seconds: Math.floor((diff % (1000 * 60)) / 1000),
+        days: Math.floor(totalSeconds / 86400),
+        hours: Math.floor((totalSeconds % 86400) / 3600),
+        minutes: Math.floor((totalSeconds % 3600) / 60),
+        seconds: totalSeconds % 60,
       });
     };
 
@@ -138,42 +142,45 @@ const EnhancedDailyDeals = () => {
   }
 
   return (
-    <section ref={sectionRef} className="py-8 relative overflow-hidden">
+    <section ref={sectionRef} className="py-4 relative overflow-hidden">
       {/* Background Effects */}
       <div className="absolute inset-0 bg-gradient-to-br from-destructive/5 via-background to-primary/5" />
-      <div className="absolute top-0 left-0 w-64 h-64 bg-destructive/10 rounded-full blur-3xl animate-float" />
-      <div className="absolute bottom-0 right-0 w-96 h-96 bg-primary/10 rounded-full blur-3xl animate-float" style={{ animationDelay: '1.5s' }} />
       
       <div className="container px-4 relative z-10">
         {/* Compact Header */}
-        <div className={`flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6 transition-all duration-700 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
+        <div className={`flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 mb-3 transition-all duration-700 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
           <div className="flex items-center gap-3">
-            <div className="p-2.5 rounded-xl bg-gradient-to-br from-destructive to-destructive/80 shadow-md animate-pulse-glow">
-              <Flame className="h-5 w-5 text-primary-foreground" />
+            <div className="p-2 rounded-lg bg-gradient-to-br from-destructive to-destructive/80 shadow-sm">
+              <Flame className="h-4 w-4 text-primary-foreground" />
             </div>
             <div>
-              <h2 className="text-xl md:text-2xl font-bold text-foreground">
+              <h2 className="text-lg md:text-xl font-bold text-foreground leading-tight">
                 عروض اليوم
               </h2>
-              <p className="text-muted-foreground text-sm">خصومات لفترة محدودة</p>
+              <p className="text-muted-foreground text-xs">خصومات لفترة محدودة</p>
             </div>
           </div>
           
-          {/* Compact Countdown Timer */}
-          <div className="flex items-center gap-3 bg-destructive/10 rounded-xl px-4 py-2 glass">
-            <Clock className="h-4 w-4 text-destructive animate-pulse" />
-            <div className="flex items-center gap-1 text-lg font-bold text-destructive">
-              <span className="bg-destructive text-primary-foreground px-2 py-0.5 rounded shadow-md">
-                {String(timeLeft.hours).padStart(2, "0")}
-              </span>
-              <span className="animate-pulse">:</span>
-              <span className="bg-destructive text-primary-foreground px-2 py-0.5 rounded shadow-md">
-                {String(timeLeft.minutes).padStart(2, "0")}
-              </span>
-              <span className="animate-pulse">:</span>
-              <span className="bg-destructive text-primary-foreground px-2 py-0.5 rounded shadow-md">
-                {String(timeLeft.seconds).padStart(2, "0")}
-              </span>
+          {/* Compact Countdown Timer: أيام : ساعات : دقائق : ثواني */}
+          <div className="flex items-center gap-2 bg-destructive/10 rounded-lg px-3 py-1.5 glass">
+            <Clock className="h-4 w-4 text-destructive" />
+            <div className="flex items-center gap-1 font-bold text-destructive tabular-nums" aria-label="الوقت المتبقي">
+              {([
+                [timeLeft.days, "أيام"],
+                [timeLeft.hours, "ساعات"],
+                [timeLeft.minutes, "دقائق"],
+                [timeLeft.seconds, "ثواني"],
+              ] as const).map(([value, label], i) => (
+                <div key={label} className="flex items-center gap-1">
+                  {i > 0 && <span className="text-sm">:</span>}
+                  <div className="flex flex-col items-center leading-none">
+                    <span className="min-w-[1.75rem] rounded bg-destructive px-1 py-0.5 text-center text-sm text-primary-foreground">
+                      {String(Math.min(value, 99)).padStart(2, "0")}
+                    </span>
+                    <span className="mt-0.5 text-[9px] font-medium text-muted-foreground">{label}</span>
+                  </div>
+                </div>
+              ))}
             </div>
             <Button 
               size="sm" 
@@ -199,7 +206,7 @@ const EnhancedDailyDeals = () => {
             return (
               <div 
                 key={product.id} 
-                className={`relative transition-all duration-500 hover-lift ${isVisible ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-8 scale-95'}`}
+                className={`relative transition-all duration-500 ${isVisible ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-8 scale-95'}`}
                 style={{ transitionDelay: `${200 + index * 50}ms` }}
               >
                 <Badge 

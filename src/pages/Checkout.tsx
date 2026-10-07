@@ -5,6 +5,7 @@ import { z } from "zod";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { quoteCoupon, couponErrorMessage } from "@/lib/couponQuote";
+import { fetchActiveDeals, fetchQuantityTiers, tierPercent } from "@/lib/dealPricing";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
@@ -242,7 +243,17 @@ const Checkout = () => {
           },
         };
       });
-      setCartItems(rows as any);
+      // Apply active deals and quantity tiers exactly like create_order does.
+      const ids = rows.map((r: any) => r.product.id);
+      const [deals, tiers] = await Promise.all([fetchActiveDeals(ids), fetchQuantityTiers(ids)]);
+      const priced = rows.map((r: any) => {
+        const d = deals[r.product.id] ?? 0;
+        const t = tierPercent(tiers[r.product.id], r.quantity);
+        if (!d && !t) return r;
+        const price = Math.round(Number(r.product.price) * (1 - d / 100) * (1 - t / 100) * 100) / 100;
+        return { ...r, product: { ...r.product, price } };
+      });
+      setCartItems(priced as any);
 
     } catch (error) {
       toast({

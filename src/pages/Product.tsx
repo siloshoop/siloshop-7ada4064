@@ -37,6 +37,7 @@ import type { Database } from "@/integrations/supabase/types";
 import { notifySync, useSyncListener } from "@/lib/uiSync";
 import NativeAdBanner from "@/components/NativeAdBanner";
 import { friendlyDbError } from "@/lib/productValidation";
+import { fetchActiveDeals, applyDeal } from "@/lib/dealPricing";
 import { OUT_OF_STOCK_LABEL, availableProductStock, variantInStock } from "@/lib/stockAvailability";
 
 type ProductVariant = Database["public"]["Tables"]["product_variants"]["Row"];
@@ -94,6 +95,13 @@ const Product = () => {
   const { user } = useAuth();
   const [searchParams] = useSearchParams();
   const [product, setProduct] = useState<Product | null>(null);
+  const [dealPct, setDealPct] = useState(0);
+  useEffect(() => {
+    if (!product?.id) return;
+    let cancelled = false;
+    fetchActiveDeals([product.id]).then((m) => { if (!cancelled) setDealPct(m[product.id] ?? 0); });
+    return () => { cancelled = true; };
+  }, [product?.id]);
   const [quantity, setQuantity] = useState(1);
   const [loading, setLoading] = useState(true);
   const [addingToCart, setAddingToCart] = useState(false);
@@ -333,8 +341,11 @@ const Product = () => {
 
   // Prepare images array for gallery
   const hasVariants = variants.length > 0;
-  const effectivePrice = selectedVariant?.discount_price ?? selectedVariant?.price ?? product.price;
-  const effectiveOriginalPrice = selectedVariant ? (selectedVariant.discount_price ? selectedVariant.price : null) : product.original_price;
+  const basePrice = selectedVariant?.discount_price ?? selectedVariant?.price ?? product.price;
+  // Active «عروض اليوم» deal is charged for real at checkout (effective_unit_price).
+  const effectivePrice = applyDeal(Number(basePrice), dealPct);
+  const baseOriginalPrice = selectedVariant ? (selectedVariant.discount_price ? selectedVariant.price : null) : product.original_price;
+  const effectiveOriginalPrice = dealPct ? Math.max(Number(baseOriginalPrice ?? 0), Number(basePrice)) : baseOriginalPrice;
   // Total stock across all variants — used before the shopper picks a combination
   const totalVariantStock = availableProductStock(product.stock_quantity, variants);
   const effectiveStock = hasVariants

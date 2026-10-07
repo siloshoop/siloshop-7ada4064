@@ -1,4 +1,4 @@
-import { Heart, Star, Scale, Eye, Store } from "lucide-react";
+import { Heart, Star, Scale, Eye, Store, TrendingUp, Award } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -10,6 +10,7 @@ import { supabase } from "@/integrations/supabase/client";
 import React, { useState, useEffect, memo } from "react";
 import { formatPrice } from "@/lib/currency";
 import { OUT_OF_STOCK_LABEL } from "@/lib/stockAvailability";
+import { useVendorNames } from "@/hooks/useVendorNames";
 
 interface ProductCardProps {
   id?: string;
@@ -58,13 +59,29 @@ const ProductCard = memo(({
   const [imageLoaded, setImageLoaded] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
   const [liveStock, setLiveStock] = useState(stockQuantity);
+  const [details, setDetails] = useState<{
+    vendor_id?: string;
+    is_featured?: boolean;
+    is_trending?: boolean;
+    reviews?: { rating: number }[];
+  } | null>(null);
+  const vendorNames = useVendorNames([details?.vendor_id]);
+  const sellerName = storeName || (details?.vendor_id ? vendorNames[details.vendor_id] : undefined);
+  const reviewCount = details?.reviews?.length ?? reviews;
+  const averageRating = details?.reviews
+    ? (reviewCount > 0 ? details.reviews.reduce((sum, review) => sum + review.rating, 0) / reviewCount : 0)
+    : rating;
   useEffect(() => { setLiveStock(stockQuantity); }, [stockQuantity]);
   useEffect(() => {
     if (!id) return;
+    setDetails(null);
     let active = true;
     const refresh = async () => {
-      const { data } = await supabase.from("products").select("stock_quantity").eq("id", id).maybeSingle();
-      if (active && data) setLiveStock(data.stock_quantity);
+      const { data } = await supabase.from("products").select("stock_quantity, vendor_id, is_featured, is_trending, reviews(rating)").eq("id", id).maybeSingle();
+      if (active && data) {
+        setLiveStock(data.stock_quantity);
+        setDetails(data);
+      }
     };
     // Saved aggregate stock is authoritative even when a listing/RPC is stale.
     void refresh();
@@ -137,12 +154,14 @@ const ProductCard = memo(({
   const isOutOfStock = typeof liveStock === "number" && liveStock <= 0;
   const isLowStock = typeof liveStock === "number" && liveStock > 0 && liveStock <= 5;
 
-  const filledStars = Math.floor(rating);
+  const hasDiscount = typeof originalPrice === "number" && originalPrice > price && originalPrice > 0;
+  const discountPercent = hasDiscount ? Math.round((originalPrice - price) / originalPrice * 100) : (discount && discount > 0 ? discount : 0);
 
   return (
     <a
       href={productId ? `/product/${productId}` : undefined}
-      className="group relative flex h-full min-w-0 cursor-pointer flex-col overflow-hidden rounded-xl border border-border/40 bg-card transition-all duration-400 ease-[cubic-bezier(0.22,1,0.36,1)] hover:border-primary/40 hover:shadow-[0_8px_40px_-12px_hsl(var(--primary)/0.25)] active:scale-[0.98]"
+      className="group relative flex h-full min-w-0 cursor-pointer flex-col overflow-hidden rounded-lg border border-border bg-card shadow-card transition-all duration-300 motion-reduce:transition-none hover:border-primary/40 hover:shadow-elegant"
+      data-product-card
       onClick={(e) => {
         // Let the browser handle ctrl/cmd/middle-click so the product can be
         // opened in a new tab, and keep SPA navigation for plain clicks.
@@ -154,17 +173,17 @@ const ProductCard = memo(({
       onMouseLeave={() => setIsHovered(false)}
     >
 
-      <div className="relative aspect-square overflow-hidden bg-muted/30">
-        {discount && (
-          <div className="absolute start-2 top-2 z-10">
-            <Badge className="bg-sale text-sale-foreground font-bold text-[10px] px-1.5 py-0.5 rounded-md shadow-lg backdrop-blur-sm border-0">
-              {discount}%-
+      <div className="relative aspect-[3/4] overflow-hidden bg-muted/30">
+        {discountPercent > 0 && (
+          <div className="absolute end-2 top-2 z-10 max-w-[calc(100%-3.5rem)]">
+            <Badge className="bg-sale text-sale-foreground font-bold text-[11px] px-2 py-1 rounded-md border-0">
+              خصم {discountPercent}%
             </Badge>
           </div>
         )}
 
         {isOutOfStock && (
-          <div className="absolute inset-0 z-20 flex items-center justify-center bg-background/60 backdrop-blur-[2px]">
+          <div className="absolute bottom-2 end-2 z-10 max-w-[calc(100%-1rem)]">
             <Badge className="bg-destructive text-destructive-foreground font-bold text-sm px-3 py-1 rounded-md shadow-lg border-0 animate-pop-in">
               {OUT_OF_STOCK_LABEL}
             </Badge>
@@ -178,16 +197,16 @@ const ProductCard = memo(({
           </div>
         )}
 
-        <div className="absolute top-2 right-2 z-10 flex flex-col gap-1">
+        <div className="absolute top-2 start-2 z-10 flex flex-col gap-1">
           {id ? (
-            <FavoriteButton productId={id} variant="ghost" size="icon" />
+            <FavoriteButton productId={id} variant="ghost" size="icon" className="h-9 w-9 rounded-full" />
           ) : (
             <Button
               type="button"
               variant="ghost"
               size="icon"
               aria-label="إضافة إلى المفضلة"
-              className="h-7 w-7 rounded-lg bg-background/80 shadow-sm backdrop-blur-md hover:bg-primary hover:text-primary-foreground"
+               className="h-9 w-9 rounded-full bg-background/95 shadow-sm backdrop-blur-md hover:bg-primary hover:text-primary-foreground"
               onClick={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
@@ -201,7 +220,7 @@ const ProductCard = memo(({
               type="button"
               variant="ghost"
               size="icon"
-              className="h-7 w-7 rounded-lg bg-background/80 opacity-100 shadow-sm backdrop-blur-md hover:bg-primary hover:text-primary-foreground sm:translate-x-2 sm:opacity-0 sm:group-hover:translate-x-0 sm:group-hover:opacity-100"
+              className="h-9 w-9 rounded-full bg-background/95 opacity-100 shadow-sm backdrop-blur-md hover:bg-primary hover:text-primary-foreground sm:translate-x-2 sm:opacity-0 sm:group-hover:translate-x-0 sm:group-hover:opacity-100"
               onClick={handleCompare}
               title="أضف للمقارنة"
             >
@@ -220,9 +239,9 @@ const ProductCard = memo(({
             event.currentTarget.src = "/placeholder.svg";
             setImageLoaded(true);
           }}
-          className={`object-cover w-full h-full transition-all duration-700 ease-out ${
+          className={`object-contain w-full h-full transition-all duration-500 ease-out motion-reduce:transition-none ${
             imageLoaded ? "opacity-100" : "opacity-0"
-          } ${isHovered ? "scale-110" : "scale-100"}`}
+          } ${isHovered ? "scale-105 motion-reduce:scale-100" : "scale-100"}`}
         />
 
         <div className="absolute inset-0 bg-gradient-to-t from-foreground/50 via-foreground/10 to-transparent opacity-0 transition-all duration-500 group-hover:opacity-100" />
@@ -244,16 +263,23 @@ const ProductCard = memo(({
         </div>
       </div>
 
-      <div className="flex min-w-0 flex-1 flex-col gap-1.5 p-2.5 sm:p-3">
-        <h3 className="line-clamp-2 min-h-[2rem] text-xs font-semibold leading-snug text-foreground transition-colors duration-300 group-hover:text-primary">
+      {(details?.is_trending || details?.is_featured) && (
+        <div className="flex min-w-0 items-center gap-1.5 bg-primary/10 px-2.5 py-1.5 text-[11px] font-semibold text-primary">
+          {details.is_trending ? <TrendingUp className="h-3.5 w-3.5 shrink-0" /> : <Award className="h-3.5 w-3.5 shrink-0" />}
+          <span className="truncate">{details.is_trending ? "رائج الآن" : "منتج مميز"}</span>
+        </div>
+      )}
+
+      <div className="flex min-w-0 flex-1 flex-col gap-2 p-2.5 sm:p-3">
+        <h3 className="line-clamp-2 min-h-[2.5rem] break-words text-sm font-medium leading-5 text-foreground transition-colors duration-300 group-hover:text-primary">
           {name}
         </h3>
 
         {/* Store name */}
-        {storeName && (
-          <p className="flex items-center gap-1 text-[10px] text-muted-foreground truncate">
-            <Store className="h-2.5 w-2.5 shrink-0" />
-            <span className="truncate">{storeName}</span>
+        {sellerName && (
+          <p className="flex items-center gap-1 text-xs text-muted-foreground truncate">
+            <Store className="h-3 w-3 shrink-0" />
+            <span className="truncate">{sellerName}</span>
           </p>
         )}
 
@@ -261,16 +287,17 @@ const ProductCard = memo(({
         <ProductOriginBadge productType={productType} compact />
 
         <div className="flex min-w-0 flex-wrap items-center gap-1">
-          <div className="flex shrink-0 text-warning">
+          <div className="flex shrink-0 text-warning" role="img" aria-label={`التقييم ${averageRating.toFixed(1)} من 5`}>
             {[...Array(5)].map((_, i) => (
-              <Star
-                key={i}
-                className={`h-2.5 w-2.5 ${i < filledStars ? "fill-current" : "text-muted"}`}
-              />
+              <span key={i} className="relative h-3 w-3">
+                <Star className="h-3 w-3 text-muted-foreground/40" />
+                {averageRating >= i + 1 && <Star className="absolute inset-0 h-3 w-3 fill-current" />}
+                {averageRating > i && averageRating < i + 1 && <span className="absolute inset-y-0 left-0 w-1/2 overflow-hidden"><Star className="h-3 w-3 max-w-none fill-current" /></span>}
+              </span>
             ))}
           </div>
-          <span className="min-w-0 truncate text-[10px] text-muted-foreground">
-            {rating > 0 ? rating.toFixed(1) : "—"} ({reviews} تقييم)
+          <span className="min-w-0 text-[11px] text-muted-foreground">
+            {averageRating > 0 ? averageRating.toFixed(1) : "—"} ({reviewCount})
           </span>
           {typeof soldCount === "number" && soldCount > 0 && (
             <span className="min-w-0 truncate text-[10px] text-muted-foreground">
@@ -280,8 +307,8 @@ const ProductCard = memo(({
 
         </div>
 
-        <div className="flex min-w-0 flex-wrap items-baseline gap-x-1.5 gap-y-0.5">
-          <span className="whitespace-nowrap text-sm font-bold text-primary">
+        <div className="mt-auto flex min-w-0 flex-wrap items-baseline gap-x-1.5 gap-y-1">
+          <span className="break-words text-base font-bold leading-snug text-primary">
             {formatPrice(price, currency)}
           </span>
           {originalPrice && originalPrice > price && (
@@ -296,10 +323,10 @@ const ProductCard = memo(({
             shippingCost > 0 ? (
               <span className="line-clamp-2 text-muted-foreground">🚚 شحن: {formatPrice(shippingCost, currency)}</span>
             ) : (
-              <span className="text-green-600 dark:text-green-400 font-medium">🚚 شحن مجاني</span>
+              <span className="text-success font-medium">🚚 شحن مجاني</span>
             )
           ) : (
-            <span className="text-green-600 dark:text-green-400 font-medium">🚚 شحن مجاني</span>
+            <span className="text-success font-medium">🚚 شحن مجاني</span>
           )}
         </div>
 

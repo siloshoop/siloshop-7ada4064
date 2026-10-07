@@ -375,6 +375,7 @@ const ProductVariantsManager = ({ productId }: { productId: string }) => {
                 onChange={(image_url) => setDraft({ ...draft, image_url })}
                 bucket="product-images"
                 folder={user?.id ?? ""}
+                sizeGuide="product"
               />
             </div>
             <div className="flex items-center gap-2 pt-6">
@@ -466,6 +467,7 @@ const ProductVariantsManager = ({ productId }: { productId: string }) => {
                       onChange={(image_url) => setEditRows({ ...editRows, [v.id]: { ...row, image_url } })}
                       bucket="product-images"
                       folder={user?.id ?? ""}
+                      sizeGuide="product"
                     />
                   </div>
                   <div className="flex items-center gap-2 pt-6">

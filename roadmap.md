@@ -1,8 +1,9 @@
 # Production readiness audit
 
 ## Cart quantity stock limit
-- [ ] Validate cart quantities against fresh product/selected-variant stock and prevent overlapping quantity changes
-- [ ] Verify saved database guards, authenticated cart behavior, automated tests, and build
+- [x] Validate cart quantities and saved-item transfers against fresh product/selected-variant stock and prevent overlapping cart quantity changes
+- [x] Verify authenticated one-piece variant cart at 360/375/390/412px, rejected direct update to quantity 2 with saved quantity still 1, actual sold-out purchase block, 104 automated tests, and automatic build; temporary test cart row removed
+- [ ] Physical Android verification (blocked: no device or emulator available)
 
 ## Order detail product images
 - [x] Resolve stored image paths and recover broken snapshots in buyer/seller/admin details without changing orders or layout

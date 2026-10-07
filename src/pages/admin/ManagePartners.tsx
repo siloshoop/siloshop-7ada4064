@@ -94,7 +94,7 @@ const ManagePartners = () => {
   };
 
   return (
-    <AdminLayout>
+    <AdminLayout title="الشركاء">
       <div className="space-y-4" dir="rtl">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>

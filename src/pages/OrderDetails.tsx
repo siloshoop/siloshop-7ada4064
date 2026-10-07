@@ -17,6 +17,7 @@ import OrderStatusTimeline from "@/components/OrderStatusTimeline";
 import OrderTimelineLog from "@/components/orders/OrderTimelineLog";
 import OrderHelpActions from "@/components/orders/OrderHelpActions";
 import CustomerInvoice from "@/components/orders/CustomerInvoice";
+import OrderProductImage from "@/components/orders/OrderProductImage";
 import { useToast } from "@/hooks/use-toast";
 
 const statusMap: Record<string, { label: string; variant: "default" | "secondary" | "destructive" | "outline" }> = {
@@ -103,7 +104,7 @@ const OrderDetails = () => {
       setOrder(ord);
       const { data: oi } = await supabase
         .from("order_items")
-        .select("quantity, price, currency, vendor_id, variant_label, product_name, product_image, discount_amount, subtotal, product:products(id, name, image_url)")
+        .select("id, quantity, price, currency, vendor_id, variant_label, product_name, product_image, discount_amount, subtotal, product:products(id, name, image_url)")
         .eq("order_id", id);
       setItems(oi || []);
       const { data: sd } = await supabase
@@ -301,17 +302,17 @@ const OrderDetails = () => {
           <CardContent className="space-y-3">
             {items.map((it, idx) => {
               const name = it.product_name || it.product?.name || "منتج";
-              const image = it.product_image || it.product?.image_url || "/placeholder.svg";
               const lineSubtotal = it.subtotal != null ? Number(it.subtotal) : Number(it.price) * it.quantity;
               return (
                 <Link to={it.product?.id ? `/product/${it.product.id}` : "#"} key={idx}
                   className="flex items-center gap-3 p-3 rounded-lg bg-muted/30 hover:bg-muted/60 transition-colors">
-                  <img
-                    src={image}
+                  <OrderProductImage
+                    image={it.product_image}
+                    fallbackImage={it.product?.image_url}
+                    productId={it.product?.id}
+                    orderItemId={it.id}
                     alt={name}
-                    loading="lazy"
-                    decoding="async"
-                    className="w-16 h-16 rounded object-cover"
+                    className="w-16 h-16 shrink-0 rounded object-cover"
                   />
                   <div className="flex-1">
                     <p className="font-medium">{name}</p>

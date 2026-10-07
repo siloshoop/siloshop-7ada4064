@@ -1,5 +1,9 @@
 # Production readiness audit
 
+## Order detail product images
+- [ ] Resolve stored image paths and recover broken snapshots in buyer/seller/admin details without changing orders or layout
+- [ ] Verify saved seller order images, fallback behavior, phone widths, automated tests, and automatic build
+
 ## Product listing stock consistency
 - [x] Remove direct cart actions from product listing cards; preserve product detail purchase controls
 - [x] Unify saved-stock indicators across listings and product options; real homepage/detail navigation and search at 360/375/390/412px passed, 86 tests and automatic build passed

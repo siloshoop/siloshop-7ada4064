@@ -528,14 +528,17 @@ const Checkout = () => {
       if (orderError) throw orderError;
       const order = { id: newOrderId as string };
 
-      // Get customer profile for name
+      // Get customer profile for name (falls back to the checkout name fields)
       const { data: customerProfile } = await supabase
         .from("profiles")
         .select("full_name")
         .eq("id", user.id)
         .single();
 
-      const customerName = customerProfile?.full_name || "عميل";
+      const customerName =
+        `${formData.firstName} ${formData.lastName}`.trim() ||
+        customerProfile?.full_name ||
+        "عميل";
 
       // Group items by vendor and notify each vendor
       const itemsByVendor = cartItems.reduce((acc, item) => {

@@ -1,5 +1,10 @@
 # Production readiness audit
 
+## Stock availability
+- [ ] Apply locked sold-out options and consistent seller/buyer product status
+- [ ] Enforce saved-stock purchase guards and automatic cart/favorites removal
+- [ ] Verify stock transitions, mobile controls, automated tests and automatic build
+
 - [x] Fix global responsive, RTL, safe-area, and viewport behavior
 - [x] Fix logo and production asset fallbacks
 - [x] Fix shared overlays, navigation, cards, and touch behavior

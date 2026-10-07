@@ -199,7 +199,7 @@ const ProductCard = memo(({
 
         <div className="absolute top-2 start-2 z-10 flex flex-col gap-1">
           {id ? (
-            <FavoriteButton productId={id} variant="ghost" size="icon" />
+            <FavoriteButton productId={id} variant="ghost" size="icon" className="h-9 w-9 rounded-full" />
           ) : (
             <Button
               type="button"

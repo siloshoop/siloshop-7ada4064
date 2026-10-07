@@ -173,14 +173,14 @@ const Checkout = () => {
           product_id,
           variant_id,
           variant:product_variants(id, attributes, price, discount_price, stock_quantity),
-          product:products(id, name, price, currency, image_url, vendor_id, shipping_cost, product_type, shipping_duration_text, platform_free_shipping, platform_shipping_fee, platform_cod_enabled, platform_sham_cash_enabled, platform_electronic_payment_enabled)
+          product:products(id, name, price, currency, image_url, stock_quantity, vendor_id, shipping_cost, product_type, shipping_duration_text, platform_free_shipping, platform_shipping_fee, platform_cod_enabled, platform_sham_cash_enabled, platform_electronic_payment_enabled)
         `)
         .eq("user_id", user.id);
 
       if (error) throw error;
       // Each chosen size/color keeps its own price — mirror it into the row so
       // the displayed totals match what create_order computes server-side.
-      const rows = ((data as any[]) || []).map((row: any) => {
+      const rows = ((data as any[]) || []).filter((row: any) => row.product && (row.variant_id ? row.variant?.stock_quantity > 0 : row.product.stock_quantity > 0)).map((row: any) => {
         const v = row.variant;
         if (!v) return row;
         const attrs = (v.attributes || {}) as Record<string, string>;

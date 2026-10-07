@@ -34,6 +34,7 @@ import type { Database } from "@/integrations/supabase/types";
 import { notifySync, useSyncListener } from "@/lib/uiSync";
 import NativeAdBanner from "@/components/NativeAdBanner";
 import { friendlyDbError } from "@/lib/productValidation";
+import { availableProductStock, variantInStock } from "@/lib/stockAvailability";
 
 type ProductVariant = Database["public"]["Tables"]["product_variants"]["Row"];
 interface Product {
@@ -213,6 +214,7 @@ const Product = () => {
       return;
     }
 
+    if (!id || !product) return;
     if (variants.length > 0 && !selectedVariant) {
       toast({
         title: "اختر الخيارات أولاً",
@@ -224,16 +226,23 @@ const Product = () => {
 
     setAddingToCart(true);
     try {
+      if (!canAddToCart || (selectedVariant && !variantInStock(selectedVariant))) {
+        throw new Error("نفذت الكمية");
+      }
       // Check if the same product + variant already exists in cart
       const existingQuery = supabase
         .from("cart_items")
         .select("id, quantity")
         .eq("user_id", user.id)
-        .eq("product_id", id!);
+        .eq("product_id", id);
       const { data: existingItem } = await (selectedVariant
         ? existingQuery.eq("variant_id", selectedVariant.id)
         : existingQuery.is("variant_id", null)
       ).maybeSingle();
+
+      if ((existingItem?.quantity ?? 0) + quantity > effectiveStock) {
+        throw new Error("الكمية المطلوبة تتجاوز المخزون المتوفر");
+      }
 
       let error;
       if (existingItem) {
@@ -303,7 +312,7 @@ const Product = () => {
   const effectivePrice = selectedVariant?.discount_price ?? selectedVariant?.price ?? product.price;
   const effectiveOriginalPrice = selectedVariant ? (selectedVariant.discount_price ? selectedVariant.price : null) : product.original_price;
   // Total stock across all variants — used before the shopper picks a combination
-  const totalVariantStock = variants.reduce((sum, v) => sum + (v.stock_quantity || 0), 0);
+  const totalVariantStock = availableProductStock(product.stock_quantity, variants);
   const effectiveStock = hasVariants
     ? (selectedVariant ? selectedVariant.stock_quantity : totalVariantStock)
     : product.stock_quantity;
@@ -496,7 +505,7 @@ const Product = () => {
                     inStock ? "bg-emerald-500 animate-pulse" : "bg-destructive"
                   }`}
                 />
-                {inStock ? "متوفر الآن" : "غير متوفر"}
+                {inStock ? "متوفر الآن" : "نفذت الكمية"}
               </span>
               {inStock && (
                 <span className="text-muted-foreground">· {effectiveStock} قطعة</span>

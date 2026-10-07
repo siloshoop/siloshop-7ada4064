@@ -65,7 +65,7 @@ const Favorites = () => {
           data
             .map((f: any) => {
               const p = f.products;
-              if (!p) return null;
+              if (!p || p.stock_quantity <= 0) return null;
               return { ...p, category_name: p.categories?.name_ar || "أخرى" };
             })
             .filter(Boolean) as Product[]
@@ -89,15 +89,18 @@ const Favorites = () => {
         },
         () => fetchFavorites()
       )
+      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'products' }, () => fetchFavorites())
       .subscribe();
 
     const onBus = () => {
       void fetchFavorites();
     };
     window.addEventListener("favorites-updated", onBus);
+    window.addEventListener("focus", onBus);
 
     return () => {
       window.removeEventListener("favorites-updated", onBus);
+      window.removeEventListener("focus", onBus);
       supabase.removeChannel(channel);
     };
   }, [user]);
@@ -128,14 +131,16 @@ const Favorites = () => {
       const toUpdate = inStock.filter((p) => existingMap.has(p.id));
 
       if (toInsert.length > 0) {
-        await supabase.from("cart_items").insert(toInsert);
+        const { error } = await supabase.from("cart_items").insert(toInsert);
+        if (error) throw error;
       }
       for (const p of toUpdate) {
-        await supabase
+        const { error } = await supabase
           .from("cart_items")
           .update({ quantity: (existingMap.get(p.id) as number) + 1 })
           .eq("user_id", user.id)
           .eq("product_id", p.id);
+        if (error) throw error;
       }
       toast({ title: "تمت الإضافة", description: `أُضيف ${inStock.length} منتج إلى السلة` });
       notifySync("cart");

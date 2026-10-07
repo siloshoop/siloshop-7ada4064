@@ -110,6 +110,20 @@ const Cart = () => {
 
   const refreshCart = useCallback(() => setCartVersion((v) => v + 1), []);
   useSyncListener(["cart"], refreshCart);
+  useEffect(() => {
+    if (!user) return;
+    const refresh = () => {
+      refreshCart();
+      notifySync("favorites");
+    };
+    const channel = supabase.channel(`cart-stock-${user.id}`)
+      .on("postgres_changes", { event: "UPDATE", schema: "public", table: "products" }, refresh)
+      .on("postgres_changes", { event: "*", schema: "public", table: "product_variants" }, refresh)
+      .on("postgres_changes", { event: "*", schema: "public", table: "cart_items", filter: `user_id=eq.${user.id}` }, refreshCart)
+      .subscribe();
+    window.addEventListener("focus", refresh);
+    return () => { window.removeEventListener("focus", refresh); void supabase.removeChannel(channel); };
+  }, [user, refreshCart]);
 
   useEffect(() => {
     const fetchCart = async () => {
@@ -125,12 +139,16 @@ const Cart = () => {
           .eq("user_id", user.id);
 
         if (error) throw error;
-        setCartItems(withVariant(data as any));
+        const rows = withVariant(data as any).filter((item) => item.product && item.product.stock_quantity > 0);
+        setCartItems(rows);
+        if (rows.length < (data?.length ?? 0)) {
+          toast({ title: "نفذت الكمية", description: "تمت إزالة المنتجات غير المتوفرة من السلة" });
+        }
 
 
         // Fetch quantity discounts for all products
         if (data && data.length > 0) {
-          const productIds = data.map((item: any) => item.product.id);
+          const productIds = data.filter((item: any) => item.product).map((item: any) => item.product.id);
           const { data: discountData } = await supabase
             .from("quantity_discounts")
             .select("product_id, min_quantity, discount_percentage")

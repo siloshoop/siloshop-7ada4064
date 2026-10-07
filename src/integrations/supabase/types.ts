@@ -2520,6 +2520,7 @@ export type Database = {
           platform_free_shipping: boolean | null
           platform_sham_cash_enabled: boolean | null
           platform_shipping_fee: number
+          pre_archive_status: string | null
           price: number
           product_type: string
           purchase_enabled: boolean
@@ -2588,6 +2589,7 @@ export type Database = {
           platform_free_shipping?: boolean | null
           platform_sham_cash_enabled?: boolean | null
           platform_shipping_fee?: number
+          pre_archive_status?: string | null
           price: number
           product_type?: string
           purchase_enabled?: boolean
@@ -2656,6 +2658,7 @@ export type Database = {
           platform_free_shipping?: boolean | null
           platform_sham_cash_enabled?: boolean | null
           platform_shipping_fee?: number
+          pre_archive_status?: string | null
           price?: number
           product_type?: string
           purchase_enabled?: boolean
@@ -4642,6 +4645,10 @@ export type Database = {
       edit_chat_message: {
         Args: { p_content: string; p_message_id: string }
         Returns: undefined
+      }
+      effective_unit_price: {
+        Args: { _price: number; _product_id: string; _qty: number }
+        Returns: number
       }
       forward_chat_message: {
         Args: { p_message_id: string; p_target_conversation_id: string }

@@ -148,6 +148,13 @@
       "when": 1791416290988,
       "tag": "0020_seller_scoped_coupons_and_sold_count",
       "breakpoints": true
+    },
+    {
+      "idx": 21,
+      "version": "7",
+      "when": 1791416621074,
+      "tag": "0021_real_deal_prices_and_restore_fix",
+      "breakpoints": true
     }
   ]
 }

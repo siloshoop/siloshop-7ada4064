@@ -1,5 +1,5 @@
 import { useEffect, useState, useMemo } from "react";
-import { shareContent } from "@/lib/share";
+import { shareContent, toPublicUrl } from "@/lib/share";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
@@ -152,10 +152,11 @@ const Favorites = () => {
   };
 
   const shareList = async () => {
-    const text = `قائمة مفضلتي (${products.length} منتج) — ${totalValue.toLocaleString()} ل.س`;
-    const result = await shareContent({ title: "مفضلتي", text, url: "/favorites" });
-    if (result === "copied") toast({ title: "تم النسخ", description: "تم نسخ رابط القائمة" });
-    else if (result === "failed") toast({ title: "تعذرت المشاركة", description: "تعذر مشاركة أو نسخ الرابط", variant: "destructive" });
+    const text = `قائمة مفضلتي على SiloShop (${products.length} منتج)`;
+    const url = toPublicUrl(`/shared-favorites?products=${products.map((p) => p.id).join(",")}`);
+    const result = await shareContent({ title: "مفضلتي", text, url });
+    if (result === "copied") toast({ title: "تم نسخ رابط القائمة", description: url });
+    else if (result === "failed") toast({ title: "تعذرت المشاركة", description: url, variant: "destructive" });
   };
 
   if (authLoading || loading) {

@@ -26,6 +26,7 @@ import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
 import { FavoriteButton } from "@/components/FavoriteButton";
 import ChatButton from "@/components/ChatButton";
+import ShareProductButton from "@/components/product/ShareProductButton";
 import { useRecentlyViewed } from "@/hooks/useRecentlyViewed";
 import SimilarProducts from "@/components/SimilarProducts";
 import MarketPriceBar from "@/components/MarketPriceBar";
@@ -644,6 +645,7 @@ const Product = () => {
                   مقارنة
                 </Button>
                 <ChatButton vendorId={product.vendor_id} productId={id} />
+                <ShareProductButton productId={id!} productName={product.name} className="rounded-full" />
               </div>
             </div>
 
@@ -830,6 +832,7 @@ const Product = () => {
         )}
         <div className="mobile-fixed-bar-content container flex items-center gap-2 px-3 py-2">
           <FavoriteButton productId={id!} variant="outline" size="icon" />
+          <ShareProductButton productId={id!} productName={product.name} variant="outline" size="icon" showLabel={false} className="shrink-0" />
           <Button
             variant="outline"
             className="flex-1 rounded-full"

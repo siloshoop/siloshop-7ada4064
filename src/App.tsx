@@ -21,6 +21,7 @@ const Dashboard = lazy(() => import("./pages/Dashboard"));
 const AddProduct = lazy(() => import("./pages/AddProduct"));
 const EditProduct = lazy(() => import("./pages/EditProduct"));
 const Favorites = lazy(() => import("./pages/Favorites"));
+const SharedFavorites = lazy(() => import("./pages/SharedFavorites"));
 const ManageCoupons = lazy(() => import("./pages/ManageCoupons"));
 const ManageSubcategories = lazy(() => import("./pages/ManageSubcategories"));
 const TrackOrder = lazy(() => import("./pages/TrackOrder"));
@@ -274,6 +275,7 @@ const App = () => (
             <Route path="/seller/store" element={<RequireApprovedSeller><SellerStore /></RequireApprovedSeller>} />
             <Route path="/seller/analytics" element={<RequireApprovedSeller><SellerAnalytics /></RequireApprovedSeller>} />
             <Route path="/favorites" element={<Favorites />} />
+            <Route path="/shared-favorites" element={<SharedFavorites />} />
             <Route path="/category/:categoryId" element={<Category />} />
             <Route path="/categories" element={<Categories />} />
             <Route path="/subcategory/:categoryId/:subcategoryId" element={<Subcategory />} />

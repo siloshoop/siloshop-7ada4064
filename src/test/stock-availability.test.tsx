@@ -21,7 +21,7 @@ describe("stock availability", () => {
   it.each(["اللون", "المقاس"])("locks zero-stock %s and allows available options", (key) => {
     const onSelect = vi.fn();
     render(<ProductVariantPicker variants={[variant("a", { [key]: "متاح" }, 2), variant("b", { [key]: "نافد" }, 0)]} onSelect={onSelect} />);
-    const soldOut = screen.getByRole("button", { name: "نافد — غير متوفر" });
+    const soldOut = screen.getByRole("button", { name: "نافد — نفذت الكمية" });
     expect(soldOut).toBeDisabled();
     expect(soldOut).toHaveClass("border-dashed");
     expect(soldOut.querySelector("svg")).not.toBeNull();
@@ -44,6 +44,6 @@ describe("stock availability", () => {
     fireEvent.click(screen.getByRole("button", { name: "M" }));
     rerender(<ProductVariantPicker variants={[variant("a", { المقاس: "M" }, 0)]} onSelect={onSelect} />);
     expect(onSelect).toHaveBeenLastCalledWith(null);
-    expect(screen.getByRole("button", { name: "M — غير متوفر" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "M — نفذت الكمية" })).toBeDisabled();
   });
 });

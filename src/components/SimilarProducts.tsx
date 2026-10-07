@@ -14,6 +14,7 @@ interface Product {
   id: string;
   name: string;
   price: number;
+  stock_quantity?: number | null;
   original_price: number | null;
   image_url: string | null;
   vendor_id: string;
@@ -34,7 +35,7 @@ const SimilarProducts = ({ productId, categoryId, vendorId }: SimilarProductsPro
         let query = supabase
           .from("products")
           .select(
-            "id, name, price, currency, original_price, image_url, vendor_id, product_type, ships_within_days, shipping_cost, reviews(rating)",
+            "id, name, price, currency, original_price, stock_quantity, image_url, vendor_id, product_type, ships_within_days, shipping_cost, reviews(rating)",
           )
           .eq("is_active", true)
           .neq("id", productId)
@@ -54,7 +55,7 @@ const SimilarProducts = ({ productId, categoryId, vendorId }: SimilarProductsPro
           const { data: vendorProducts } = await supabase
             .from("products")
             .select(
-              "id, name, price, currency, original_price, image_url, vendor_id, product_type, ships_within_days, shipping_cost, reviews(rating)",
+              "id, name, price, currency, original_price, stock_quantity, image_url, vendor_id, product_type, ships_within_days, shipping_cost, reviews(rating)",
             )
             .eq("is_active", true)
             .eq("vendor_id", vendorId)
@@ -103,6 +104,7 @@ const SimilarProducts = ({ productId, categoryId, vendorId }: SimilarProductsPro
             <ProductCard
               key={product.id}
               id={product.id}
+              stockQuantity={product.stock_quantity}
               name={product.name}
               price={product.price}
               currency={(product as any).currency}

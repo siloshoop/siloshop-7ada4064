@@ -10,6 +10,7 @@ interface DealProduct {
   id: string;
   name: string;
   price: number;
+  stock_quantity?: number | null;
   currency?: string | null;
   original_price: number | null;
   image_url: string;
@@ -80,6 +81,7 @@ const EnhancedDailyDeals = () => {
             name: (deal.products as any).name,
             price: (deal.products as any).price,
             currency: (deal.products as any).currency,
+            stock_quantity: (deal.products as any).stock_quantity,
             original_price: (deal.products as any).original_price,
             image_url: (deal.products as any).image_url,
             reviews: (deal.products as any).reviews || [],
@@ -202,6 +204,7 @@ const EnhancedDailyDeals = () => {
                 </Badge>
                 <ProductCard
                   id={product.id}
+                  stockQuantity={product.stock_quantity}
                   name={product.name}
                   price={dealPrice}
                   currency={(product as any).currency}

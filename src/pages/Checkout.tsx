@@ -4,6 +4,7 @@ import { Navigate, useNavigate } from "react-router-dom";
 import { z } from "zod";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
+import { quoteCoupon, couponErrorMessage } from "@/lib/couponQuote";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
@@ -356,7 +357,7 @@ const Checkout = () => {
       lineSubtotal: Number(item.product.price) * item.quantity,
       shipping: usePlatformRules ? 0 : Number(item.product.shipping_cost || 0),
     })),
-    { couponDiscount: isMixedCurrency ? 0 : discount, couponCurrency: COUPON_CURRENCY },
+    { couponDiscount: isMixedCurrency ? 0 : discount, couponCurrency: orderCurrency },
   ).map((t) =>
     // Platform (imported) products use a single platform-wide shipping fee
     // instead of per-product shipping.
@@ -617,10 +618,10 @@ const Checkout = () => {
         });
         return;
       }
-      if (message.includes("COUPON_CURRENCY_UNSUPPORTED")) {
+      if (message.includes("Invalid or expired coupon")) {
         toast({
           title: "الكوبون غير متاح",
-          description: "أكواد الخصم تُحسب بالليرة السورية فقط، ولا يمكن تطبيقها على طلب بالدولار.",
+          description: "الكوبون لم يعد صالحًا للمنتجات في سلتك. أزل الكوبون وحاول مجددًا.",
           variant: "destructive",
         });
         return;

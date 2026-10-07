@@ -503,7 +503,7 @@ const Cart = () => {
       savings: item.savings,
       shipping: Number(item.product.shipping_cost || 0),
     })),
-    { couponDiscount, couponCurrency: COUPON_CURRENCY, taxRate: TAX_RATE },
+    { couponDiscount, couponCurrency: currencyTotals0Currency(), taxRate: TAX_RATE },
   );
   const isMultiCurrency = currencyTotals.length > 1;
   const couponSupported = currencyTotals.every((t) => t.currency === COUPON_CURRENCY);

@@ -29,6 +29,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { useCompareProducts } from "@/hooks/useCompareProducts";
 import MegaMenu from "@/components/MegaMenu";
+import CategoryDrawerList from "@/components/CategoryDrawerList";
 import BrandLogo from "@/components/BrandLogo";
 import { notifySync, useSyncListener } from "@/lib/uiSync";
 
@@ -188,15 +189,18 @@ const Navbar = () => {
         <div className="order-1 flex w-full min-w-0 items-center justify-between gap-2 md:order-none md:w-auto md:justify-start md:gap-4">
           <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
             <SheetTrigger asChild>
-              <Button variant="ghost" size="icon" className="md:hidden">
+              <Button variant="ghost" size="icon" aria-label="الفئات">
                 <Menu className="h-5 w-5" />
               </Button>
             </SheetTrigger>
-            <SheetContent side="right" className="w-[min(300px,calc(100vw-1rem))] max-w-[calc(100vw-1rem)]">
+            <SheetContent side="right" className="w-[min(340px,calc(100vw-1rem))] max-w-[calc(100vw-1rem)] overflow-y-auto">
               <SheetHeader>
-                <SheetTitle>القائمة</SheetTitle>
+                <SheetTitle className="text-start text-lg">الفئات الأكثر شعبية</SheetTitle>
               </SheetHeader>
-              <div className="flex flex-col gap-4 mt-6">
+              <div className="mt-4">
+                <CategoryDrawerList onNavigate={() => setMobileMenuOpen(false)} />
+              </div>
+              <div className="mt-6 flex flex-col gap-1 border-t pt-4 md:hidden">
                 <Button 
                   variant="ghost" 
                   className="justify-start" 

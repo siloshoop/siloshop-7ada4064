@@ -8,6 +8,13 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
+    --pastel-rose: 350 90% 94%; --pastel-rose-fg: 350 65% 48%;
+    --pastel-violet: 263 85% 95%; --pastel-violet-fg: 263 60% 52%;
+    --pastel-sky: 205 90% 93%; --pastel-sky-fg: 205 70% 42%;
+    --pastel-mint: 155 60% 91%; --pastel-mint-fg: 155 55% 32%;
+    --pastel-peach: 28 95% 92%; --pastel-peach-fg: 24 75% 44%;
+    --pastel-lemon: 48 95% 89%; --pastel-lemon-fg: 40 80% 36%;
+    --pastel-teal: 180 55% 90%; --pastel-teal-fg: 182 60% 30%;
     /* Capacitor 8 injects these on Android. Browser env() values remain the
        source of truth on iOS and installed web apps. */
     --safe-area-inset-top: 0px;
@@ -103,6 +110,13 @@ All colors MUST be HSL.
   }
 
   .dark {
+    --pastel-rose: 350 40% 22%; --pastel-rose-fg: 350 85% 78%;
+    --pastel-violet: 263 35% 24%; --pastel-violet-fg: 263 85% 80%;
+    --pastel-sky: 205 40% 22%; --pastel-sky-fg: 205 85% 76%;
+    --pastel-mint: 155 30% 20%; --pastel-mint-fg: 155 60% 70%;
+    --pastel-peach: 28 40% 22%; --pastel-peach-fg: 28 90% 76%;
+    --pastel-lemon: 48 35% 20%; --pastel-lemon-fg: 48 90% 70%;
+    --pastel-teal: 180 30% 20%; --pastel-teal-fg: 180 60% 70%;
     /* Order status tokens (dark) */
     --status-pending: 45 93% 58%;
     --status-confirmed: 217 91% 65%;

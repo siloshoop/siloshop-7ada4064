@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { ArrowLeft, BadgeCheck, Banknote, MessageCircle, Store } from "lucide-react";
+import { ArrowLeft, BadgeCheck, Banknote, MessageCircle } from "lucide-react";
 import SyrianFlag from "@/components/SyrianFlag";
 
 const PERKS = [
@@ -33,13 +33,6 @@ const LocalMarketplaceBanner = () => (
               >
                 تسوّق الآن
                 <ArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-0.5 motion-reduce:transition-none" />
-              </Link>
-              <Link
-                to="/seller/application"
-                className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-5 py-2.5 text-sm font-semibold transition-colors hover:border-primary/40 hover:text-primary"
-              >
-                <Store className="h-4 w-4" />
-                افتح متجرك
               </Link>
             </div>
           </div>

@@ -1,5 +1,9 @@
 # Production readiness audit
 
+## Footer and page navigation
+- [ ] Move store-opening button to the end of Customer Service
+- [ ] Reset page scroll on opening, forward/back navigation, and reload; verify browser flows and tests
+
 ## Stock availability
 - [x] Apply locked sold-out options and consistent seller/buyer product status
 - [x] Enforce saved-stock purchase guards and automatic cart/favorites removal

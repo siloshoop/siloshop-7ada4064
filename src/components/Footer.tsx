@@ -1,4 +1,4 @@
-import { Facebook, Instagram, MessageCircle, Send, Twitter, Youtube } from "lucide-react";
+import { Facebook, Instagram, MessageCircle, Send, Twitter, Youtube, Store } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
@@ -143,6 +143,14 @@ const Footer = () => {
                 <Link to="/delete-account" className="hover:text-foreground transition-colors story-link">
                   حذف الحساب
                 </Link>
+              </li>
+              <li>
+                <Button asChild variant="outline" className="h-auto gap-1.5 rounded-full border-border bg-card px-5 py-2.5 text-sm font-semibold transition-colors hover:border-primary/40 hover:text-primary">
+                  <Link to="/seller/application">
+                    <Store className="h-4 w-4" />
+                    افتح متجرك
+                  </Link>
+                </Button>
               </li>
             </ul>
           </div>

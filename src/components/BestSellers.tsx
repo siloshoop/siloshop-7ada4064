@@ -77,7 +77,7 @@ const BestSellers = () => {
             <p className="text-muted-foreground text-xs">المنتجات الأكثر طلباً</p>
           </div>
         </div>
-        <div className={`grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 ${isVisible ? 'stagger-children' : ''}`}>
+        <div className={`product-grid ${isVisible ? 'stagger-children' : ''}`}>
           {products.map((product, index) => {
             const avgRating = product.reviews?.length
               ? product.reviews.reduce((sum, r) => sum + r.rating, 0) / product.reviews.length

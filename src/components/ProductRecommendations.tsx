@@ -139,7 +139,7 @@ const ProductRecommendations = () => {
             <p className="text-muted-foreground text-xs">منتجات مختارة بناءً على اهتماماتك</p>
           </div>
         </div>
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+        <div className="product-grid">
           {products.map((product, index) => {
             const avgRating = product.reviews?.length
               ? product.reviews.reduce((sum, r) => sum + r.rating, 0) / product.reviews.length

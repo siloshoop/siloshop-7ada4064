@@ -1138,7 +1138,7 @@ const SearchPage = () => {
               </div>
             ) : (
               <>
-                <div className={`grid grid-cols-2 items-stretch transition-opacity gap-2.5 sm:gap-6 xl:grid-cols-3 ${loading ? "opacity-60" : ""}`}>
+                <div className={`product-grid-narrow items-stretch transition-opacity ${loading ? "opacity-60" : ""}`}>
                   {products.map((product, index) => {
                     const avgRating = getAverageRating(product.reviews);
                     const discount = product.original_price

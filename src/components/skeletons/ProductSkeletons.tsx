@@ -28,7 +28,7 @@ export const ProductRailSkeleton = ({ count = 5 }: { count?: number }) => (
 
 /** Responsive grid placeholder for search / category / store listings. */
 export const ProductGridSkeleton = ({ count = 8 }: { count?: number }) => (
-  <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+  <div className="product-grid">
     {Array.from({ length: count }).map((_, i) => (
       <ProductCardSkeleton key={i} />
     ))}

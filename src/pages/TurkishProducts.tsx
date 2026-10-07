@@ -167,7 +167,7 @@ const TurkishProducts = () => {
             </Button>
           </div>
         ) : (
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+          <div className="product-grid">
             {products.map((product) => {
               const effectivePrice = product.discount_price ?? product.price;
               const base = product.original_price ?? undefined;

@@ -2,7 +2,7 @@
 
 ## Compact mobile screen frame
 - [x] Compact the mobile header without removing controls and preserve the fixed bottom bar
-- [ ] Verify stationary bars, safe areas, drawer access, and footer clearance at mobile sizes
+- [x] Verify stationary bars and drawer access at 360/375/390/412px, footer clearance in portrait/landscape, 40 responsive checks, 122 automated tests, and automatic build; native safe-area behavior still needs a physical device
 - [ ] Physical Android frame verification (blocked: no physical device available)
 
 ## Product listing card layout

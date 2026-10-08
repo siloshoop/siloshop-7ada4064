@@ -1,5 +1,11 @@
 # Production readiness audit
 
+## Capacitor performance before installation
+- [ ] Measure public mobile loading and navigation without using the owner's account
+- [ ] Reduce confirmed unnecessary requests while preserving stock freshness and stationary header
+- [ ] Recheck public interactions, performance, responsive bars, and automated tests
+- [ ] Physical Capacitor performance (blocked: no phone or emulator available)
+
 ## Compact mobile screen frame
 - [x] Compact the mobile header without removing controls and preserve the fixed bottom bar
 - [x] Verify stationary bars and drawer access at 360/375/390/412px, footer clearance in portrait/landscape, 40 responsive checks, 122 automated tests, and automatic build; native safe-area behavior still needs a physical device

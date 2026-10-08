@@ -38,18 +38,30 @@ const MegaMenu = () => {
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
 
   useEffect(() => {
+    const desktop = window.matchMedia("(min-width: 768px)");
+    let active = true;
+    let requested = false;
     const fetchData = async () => {
+      if (!desktop.matches || requested) return;
+      requested = true;
       const [categoriesRes, subcategoriesRes] = await Promise.all([
         supabase.from("categories").select("*").order("name_ar"),
         supabase.from("subcategories").select("*").eq("is_active", true).order("sort_order")
       ]);
 
+      if (!active) return;
       if (categoriesRes.data) setCategories(categoriesRes.data);
       if (subcategoriesRes.data) setSubcategories(subcategoriesRes.data);
       setLoading(false);
     };
 
     fetchData();
+    const onResize = () => { void fetchData(); };
+    desktop.addEventListener("change", onResize);
+    return () => {
+      active = false;
+      desktop.removeEventListener("change", onResize);
+    };
   }, []);
 
   const getCategorySubcategories = (categoryId: string) => {

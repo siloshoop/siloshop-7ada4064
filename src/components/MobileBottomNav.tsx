@@ -38,15 +38,18 @@ const MobileBottomNav = () => {
   const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
+    if (!showCategories || categories.length > 0) return;
+    let active = true;
     const fetchCategories = async () => {
       const { data } = await supabase
         .from("categories")
         .select("id, name_ar, icon")
         .order("name_ar");
-      if (data) setCategories(data);
+      if (active && data) setCategories(data);
     };
     fetchCategories();
-  }, []);
+    return () => { active = false; };
+  }, [showCategories, categories.length]);
 
   useEffect(() => {
     let cancelled = false;

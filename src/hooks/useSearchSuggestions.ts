@@ -97,7 +97,7 @@ const loadPopular = (): Promise<string[]> => {
  * Live search suggestions: debounced product lookup (server-side ilike) plus
  * instant category/brand matches from cached taxonomies.
  */
-export const useSearchSuggestions = (query: string, debounceMs = 220) => {
+export const useSearchSuggestions = (query: string, debounceMs = 220, enabled = true) => {
   const [taxonomies, setTaxonomies] = useState<Taxonomies>(() => taxonomyCache ?? { categories: [], brands: [] });
   const [popular, setPopular] = useState<string[]>(() => popularCache ?? []);
   const [products, setProducts] = useState<ProductSuggestion[]>([]);
@@ -105,18 +105,19 @@ export const useSearchSuggestions = (query: string, debounceMs = 220) => {
   const requestId = useRef(0);
 
   useEffect(() => {
+    if (!enabled) return;
     let active = true;
     void loadTaxonomies().then((t) => active && setTaxonomies(t));
     void loadPopular().then((p) => active && setPopular(p));
     return () => {
       active = false;
     };
-  }, []);
+  }, [enabled]);
 
   const term = query.trim();
 
   useEffect(() => {
-    if (term.length < 2) {
+    if (!enabled || term.length < 2) {
       setProducts([]);
       setLoading(false);
       return;
@@ -150,8 +151,11 @@ export const useSearchSuggestions = (query: string, debounceMs = 220) => {
       setLoading(false);
     }, debounceMs);
 
-    return () => window.clearTimeout(timer);
-  }, [term, debounceMs]);
+    return () => {
+      window.clearTimeout(timer);
+      requestId.current++;
+    };
+  }, [term, debounceMs, enabled]);
 
   const categoryMatches = useMemo(
     () => (term ? taxonomies.categories.filter((c) => matchesSearchTerm(c.name, term)).slice(0, 4) : []),

@@ -788,8 +788,9 @@ const Compare = () => {
           >
             {/* Product Images and Names Header */}
             <div 
-              className="comparison-products-grid mb-3 grid gap-2 sm:mb-4 sm:gap-3"
+              className="comparison-grid mb-2 grid gap-2 px-2 sm:mb-3 sm:gap-3 sm:px-3"
             >
+              <div aria-hidden="true" />
               {products.map((product) => (
                 <Card key={product.id} className="relative overflow-hidden">
                   <Button

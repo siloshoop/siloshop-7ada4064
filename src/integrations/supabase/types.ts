@@ -1494,6 +1494,44 @@ export type Database = {
         }
         Relationships: []
       }
+      order_item_status_history: {
+        Row: {
+          changed_by: string | null
+          created_at: string
+          id: string
+          note: string | null
+          order_item_id: string
+          status: string
+          tracking_number: string | null
+        }
+        Insert: {
+          changed_by?: string | null
+          created_at?: string
+          id?: string
+          note?: string | null
+          order_item_id: string
+          status: string
+          tracking_number?: string | null
+        }
+        Update: {
+          changed_by?: string | null
+          created_at?: string
+          id?: string
+          note?: string | null
+          order_item_id?: string
+          status?: string
+          tracking_number?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "order_item_status_history_order_item_id_fkey"
+            columns: ["order_item_id"]
+            isOneToOne: false
+            referencedRelation: "order_items"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       order_items: {
         Row: {
           created_at: string | null
@@ -1506,10 +1544,14 @@ export type Database = {
           product_image: string | null
           product_name: string | null
           quantity: number
+          shipping_carrier: string | null
           shipping_duration_text: string | null
           stock_applied: boolean
           stock_restored: boolean
           subtotal: number | null
+          tracking_number: string | null
+          tracking_status: string | null
+          tracking_updated_at: string | null
           variant_id: string | null
           variant_label: string | null
           vendor_id: string
@@ -1525,10 +1567,14 @@ export type Database = {
           product_image?: string | null
           product_name?: string | null
           quantity: number
+          shipping_carrier?: string | null
           shipping_duration_text?: string | null
           stock_applied?: boolean
           stock_restored?: boolean
           subtotal?: number | null
+          tracking_number?: string | null
+          tracking_status?: string | null
+          tracking_updated_at?: string | null
           variant_id?: string | null
           variant_label?: string | null
           vendor_id: string
@@ -1544,10 +1590,14 @@ export type Database = {
           product_image?: string | null
           product_name?: string | null
           quantity?: number
+          shipping_carrier?: string | null
           shipping_duration_text?: string | null
           stock_applied?: boolean
           stock_restored?: boolean
           subtotal?: number | null
+          tracking_number?: string | null
+          tracking_status?: string | null
+          tracking_updated_at?: string | null
           variant_id?: string | null
           variant_label?: string | null
           vendor_id?: string
@@ -5259,6 +5309,16 @@ export type Database = {
       }
       track_product_metric: {
         Args: { _metric: string; _product_id: string }
+        Returns: undefined
+      }
+      update_order_item_tracking: {
+        Args: {
+          _carrier?: string
+          _item_id: string
+          _note?: string
+          _status: string
+          _tracking_number?: string
+        }
         Returns: undefined
       }
       update_order_shipping: {

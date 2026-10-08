@@ -839,8 +839,8 @@ const Compare = () => {
                           <Loader2 className="h-4 w-4 animate-spin" />
                         ) : (
                           <>
-                            <ShoppingCart className="h-4 w-4 ml-1" />
-                            أضف للسلة
+                            <ShoppingCart className="h-4 w-4 sm:ml-1" />
+                            <span className="hidden sm:inline">أضف للسلة</span>
                           </>
                         )}
                       </Button>

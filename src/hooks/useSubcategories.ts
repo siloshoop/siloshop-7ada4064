@@ -8,9 +8,10 @@ export interface Subcategory {
   icon: string | null;
 }
 
-export const useSubcategories = () => {
+export const useSubcategories = (enabled = true) => {
   return useQuery({
-    queryKey: ["subcategories"],
+    queryKey: ["public-navigation", "subcategories"],
+    enabled,
     queryFn: async () => {
       const { data, error } = await supabase
         .from("subcategories")

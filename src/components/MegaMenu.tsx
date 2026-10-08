@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { ChevronLeft, Shirt, ShoppingBag, Watch, Baby, Footprints, Sofa, Gamepad2, Sparkle, BookOpen, Dumbbell, Loader2 } from "lucide-react";
 import {
@@ -19,8 +19,15 @@ const iconMap: Record<string, any> = {
 
 const MegaMenu = () => {
   const navigate = useNavigate();
-  const { data: categories = [], isLoading: categoriesLoading } = useCategories();
-  const { data: subcategories = [], isLoading: subcategoriesLoading } = useSubcategories();
+  const [desktop, setDesktop] = useState(() => window.matchMedia("(min-width: 768px)").matches);
+  useEffect(() => {
+    const media = window.matchMedia("(min-width: 768px)");
+    const sync = () => setDesktop(media.matches);
+    media.addEventListener("change", sync);
+    return () => media.removeEventListener("change", sync);
+  }, []);
+  const { data: categories = [], isLoading: categoriesLoading } = useCategories(desktop);
+  const { data: subcategories = [], isLoading: subcategoriesLoading } = useSubcategories(desktop);
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
 
   const getCategorySubcategories = (categoryId: string) => {

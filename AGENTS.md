@@ -14,3 +14,4 @@
 - Cart quantity changes and saved-item transfers read current selected-variant/product stock before writing, with per-row mutation locks and database guards as final authority; stale views and repeated taps cannot bypass stock limits.
 - ProductCard metadata/stock refreshes go through src/lib/productCardMeta.ts, which batches same-tick requests and shares only in-flight requests; no completed stock cache is allowed, so mount/focus/stock events still read fresh availability.
 - Load hidden desktop menus only at desktop widths, mobile category lists on opening, and search suggestions on focus; this avoids competing with initial mobile content while preserving every control.
+- Share public navigation lookups through namespaced React Query hooks and existing activation invalidation; this deduplicates remounts without colliding with page-specific query shapes.

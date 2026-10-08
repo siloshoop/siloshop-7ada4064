@@ -7,9 +7,10 @@ export interface Category {
   icon: string | null;
 }
 
-export const useCategories = () => {
+export const useCategories = (enabled = true) => {
   return useQuery({
-    queryKey: ["categories"],
+    queryKey: ["public-navigation", "categories"],
+    enabled,
     queryFn: async () => {
       const { data, error } = await supabase
         .from("categories")

@@ -17,24 +17,19 @@ export const initNativeApp = async () => {
       import("@capacitor/splash-screen"),
     ]);
 
-    // Hide splash screen as soon as plugins are loaded and React has likely
-    // completed its first meaningful paint.
-    void SplashScreen.hide().catch(() => undefined);
+    // Apply native insets before revealing content to avoid header jumps.
+    await SystemBars.setStyle({ style: SystemBarsStyle.Light }).catch(() => undefined);
+    await SystemBars.show().catch(() => undefined);
 
-    // Non-critical native UI adjustments are performed without awaiting to avoid
-    // blocking the splash screen hide or app interactive state.
-    void SystemBars.setStyle({ style: SystemBarsStyle.Light }).catch(() => undefined);
-    void SystemBars.show().catch(() => undefined);
-
-    void StatusBar.setOverlaysWebView({ overlay: true }).catch(() => undefined);
-    void StatusBar.setStyle({ style: Style.Light }).catch(() => undefined);
+    await StatusBar.setOverlaysWebView({ overlay: true }).catch(() => undefined);
+    await StatusBar.setStyle({ style: Style.Light }).catch(() => undefined);
     if (Capacitor.getPlatform() === "android") {
-      void StatusBar.setBackgroundColor({ color: "#7C3AED" }).catch(() => undefined);
+      await StatusBar.setBackgroundColor({ color: "#7C3AED" }).catch(() => undefined);
     }
 
     // Keep the stored Supabase session alive across app close/reopen and
     // background/foreground cycles. Data itself always comes from Supabase.
-    void supabase.auth.startAutoRefresh().catch(() => undefined);
+    supabase.auth.startAutoRefresh().catch(() => undefined);
     App.addListener("appStateChange", ({ isActive }) => {
       if (isActive) {
         void supabase.auth.startAutoRefresh().catch(() => undefined);
@@ -53,6 +48,7 @@ export const initNativeApp = async () => {
         void App.exitApp();
       }
     });
+    await SplashScreen.hide().catch(() => undefined);
   } catch {
     // Plugins unavailable – ignore.
   }

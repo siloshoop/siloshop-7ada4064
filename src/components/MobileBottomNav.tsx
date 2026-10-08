@@ -28,8 +28,8 @@ const iconMap: Record<string, any> = {
 const MobileBottomNav = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { data: categories = [] } = useCategories();
   const [showCategories, setShowCategories] = useState(false);
+  const { data: categories = [] } = useCategories(showCategories);
   const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {

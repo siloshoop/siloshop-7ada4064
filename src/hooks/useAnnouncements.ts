@@ -9,7 +9,7 @@ export interface Announcement {
 
 export const useAnnouncements = () => {
   return useQuery({
-    queryKey: ["announcements"],
+    queryKey: ["public-navigation", "announcements"],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("announcements")

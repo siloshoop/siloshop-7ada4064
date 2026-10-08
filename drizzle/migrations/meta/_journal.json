@@ -169,6 +169,13 @@
       "when": 1791439619798,
       "tag": "0023_daily_revenue_by_currency",
       "breakpoints": true
+    },
+    {
+      "idx": 24,
+      "version": "7",
+      "when": 1791490551701,
+      "tag": "0024_order_item_independent_tracking",
+      "breakpoints": true
     }
   ]
 }

@@ -58,6 +58,9 @@ export interface SellerOrderItem {
   price: number;
   currency?: string | null;
   subtotal: number | null;
+  tracking_status?: string | null;
+  tracking_number?: string | null;
+  shipping_carrier?: string | null;
 }
 
 export const fetchSellerOrderItems = async (orderId: string): Promise<SellerOrderItem[]> => {
@@ -67,10 +70,23 @@ export const fetchSellerOrderItems = async (orderId: string): Promise<SellerOrde
   if (error) throw error;
   const rows = (data || []) as SellerOrderItem[];
   if (!rows.length) return rows;
-  const { data: snapshots, error: snapshotError } = await supabase.from("order_items").select("id,currency").in("id", rows.map((r) => r.id));
+  const { data: snapshots, error: snapshotError } = await supabase.from("order_items").select("id,currency,tracking_status,tracking_number,shipping_carrier").in("id", rows.map((r) => r.id));
   if (snapshotError) throw snapshotError;
-  const currencies = new Map((snapshots ?? []).map((r) => [r.id, r.currency]));
-  return rows.map((r) => ({ ...r, currency: currencies.get(r.id) ?? r.currency ?? null }));
+  const saved = new Map((snapshots ?? []).map((r) => [r.id, r]));
+  return rows.map((r) => {
+    const s = saved.get(r.id);
+    return { ...r, currency: s?.currency ?? r.currency ?? null, tracking_status: s?.tracking_status ?? null,
+      tracking_number: s?.tracking_number ?? null, shipping_carrier: s?.shipping_carrier ?? null };
+  });
+};
+
+/** Updates only this one order item's tracking; other items are never touched. */
+export const updateOrderItemTracking = async (itemId: string, status: string, trackingNumber?: string, carrier?: string) => {
+  const { error } = await supabase.rpc("update_order_item_tracking", {
+    _item_id: itemId, _status: status,
+    _tracking_number: trackingNumber?.trim() || null, _carrier: carrier?.trim() || null,
+  });
+  if (error) throw error;
 };
 
 export interface OrderNote {

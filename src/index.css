@@ -72,6 +72,9 @@ All colors MUST be HSL.
     /* Gradients */
     --gradient-primary: linear-gradient(135deg, hsl(263 70% 50%) 0%, hsl(290 70% 60%) 100%);
     --gradient-hero: linear-gradient(135deg, hsl(263 70% 50% / 0.1) 0%, hsl(340 82% 52% / 0.1) 100%);
+    /* Brand wordmark: purple → pink → orange → yellow, matching the logo art. */
+    --gradient-logo: linear-gradient(90deg, hsl(263 75% 50%) 0%, hsl(340 82% 52%) 34%, hsl(22 95% 48%) 68%, hsl(45 92% 42%) 100%);
+    --logo-purple: 263 70% 45%;
     
     /* Shadows */
     --shadow-elegant: 0 4px 20px -2px hsl(263 70% 50% / 0.15);
@@ -177,6 +180,10 @@ All colors MUST be HSL.
     --sidebar-accent-foreground: 210 40% 98%;
     --sidebar-border: 222 47% 25%;
     --sidebar-ring: 263 70% 50%;
+
+    /* Brighter wordmark stops so the brand text stays legible on dark surfaces. */
+    --gradient-logo: linear-gradient(90deg, hsl(258 100% 80%) 0%, hsl(340 92% 70%) 34%, hsl(22 98% 66%) 68%, hsl(45 96% 62%) 100%);
+    --logo-purple: 263 92% 74%;
   }
 }
 
@@ -542,4 +549,24 @@ All colors MUST be HSL.
   .product-grid { @apply grid grid-cols-2 gap-2 sm:grid-cols-3 sm:gap-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 items-stretch; }
   .product-grid-narrow { @apply grid grid-cols-2 gap-2 sm:grid-cols-3 sm:gap-3 lg:grid-cols-4 xl:grid-cols-5 items-stretch; }
   .product-grid > *, .product-grid-narrow > * { min-width: 0; }
+
+  /* SiloShop wordmark painted with the logo gradient (theme-aware via --gradient-logo). */
+  .brand-logo-text {
+    background-image: var(--gradient-logo);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  /* "Home" in the top bar: the logo's purple, tuned per theme for contrast. */
+  .brand-home-link {
+    color: hsl(var(--logo-purple));
+  }
+
+
+  @supports not ((-webkit-background-clip: text) or (background-clip: text)) {
+    .brand-logo-text {
+      color: hsl(var(--logo-purple));
+    }
+  }
 }

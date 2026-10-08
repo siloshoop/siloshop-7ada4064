@@ -1,4 +1,4 @@
-import { ShoppingCart, Search, Menu, Heart, User, LogOut, LayoutDashboard, SlidersHorizontal, Gift, Scale } from "lucide-react";
+import { ShoppingCart, Search, Menu, Heart, User, LogOut, LayoutDashboard, SlidersHorizontal, Gift, Scale, Home } from "lucide-react";
 import { useFlyToCart } from "@/components/FlyToCart";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -307,6 +307,16 @@ const Navbar = () => {
               </div>
             </SheetContent>
           </Sheet>
+          <NavLink
+            to="/"
+            aria-label="الرئيسية"
+            title="الرئيسية"
+            className="brand-home-link flex h-8 shrink-0 items-center gap-1 rounded-full px-1.5 text-sm font-semibold transition-colors hover:bg-primary/10 sm:px-2.5"
+            activeClassName="bg-primary/10"
+          >
+            <Home className="h-4 w-4 shrink-0" />
+            <span className="whitespace-nowrap">الرئيسية</span>
+          </NavLink>
           <BrandLogo
             as="h1"
             onClick={() => navigate("/")}

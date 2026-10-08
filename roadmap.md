@@ -155,3 +155,8 @@
 - [x] Verify completed/current/future states, independent refresh/reload, 360/375/390/412px plus landscape, 71 automated tests, and automatic build using isolated signed-in browser fixtures
 - [ ] Verify real saved multi-seller order end to end (blocked: available account has no orders; no customer orders changed for testing)
 - [ ] Verify tracking on physical Android/PWA installation (blocked: no device or emulator available)
+
+## Top bar Home item + gradient wordmark
+- [x] Add "الرئيسية" with home icon next to the logo in the top bar (both themes)
+- [x] Paint the SiloShop wordmark with the logo's purple→pink→orange→yellow gradient via theme-aware tokens
+- [x] Verify light/dark at 360/393/1280px, Home click navigates, no overflow or wrap, 130 tests, automatic build OK

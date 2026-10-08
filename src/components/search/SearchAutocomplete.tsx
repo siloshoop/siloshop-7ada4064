@@ -37,7 +37,7 @@ const SearchAutocomplete = ({
   const inputRef = useRef<HTMLInputElement>(null);
 
   const { products, categories, brands, smartSuggestions, loading, prefetch } =
-    useSearchSuggestions(value);
+    useSearchSuggestions(value, 220, open);
 
   useEffect(() => {
     let active = true;
@@ -55,6 +55,7 @@ const SearchAutocomplete = ({
   }, []);
 
   useEffect(() => {
+    if (!open) return;
     let active = true;
     void supabase.rpc("popular_search_terms", { _limit: 8 }).then(({ data }) => {
       if (active && data) setPopularTerms(data);
@@ -62,7 +63,7 @@ const SearchAutocomplete = ({
     return () => {
       active = false;
     };
-  }, []);
+  }, [open]);
 
   // Close on outside click / Escape
   useEffect(() => {

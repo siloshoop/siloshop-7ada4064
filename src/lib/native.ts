@@ -17,8 +17,7 @@ export const initNativeApp = async () => {
       import("@capacitor/splash-screen"),
     ]);
 
-    // Capacitor 8 exposes Android system-bar insets as
-    // --safe-area-inset-* CSS variables when viewport-fit=cover is present.
+    // Apply native insets before revealing content to avoid header jumps.
     await SystemBars.setStyle({ style: SystemBarsStyle.Light }).catch(() => undefined);
     await SystemBars.show().catch(() => undefined);
 
@@ -49,7 +48,6 @@ export const initNativeApp = async () => {
         void App.exitApp();
       }
     });
-
     await SplashScreen.hide().catch(() => undefined);
   } catch {
     // Plugins unavailable – ignore.

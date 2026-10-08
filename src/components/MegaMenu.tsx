@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
 import { ChevronLeft, Shirt, ShoppingBag, Watch, Baby, Footprints, Sofa, Gamepad2, Sparkle, BookOpen, Dumbbell, Loader2 } from "lucide-react";
 import {
   NavigationMenu,
@@ -10,55 +9,32 @@ import {
   NavigationMenuTrigger,
 } from "@/components/ui/navigation-menu";
 import { cn } from "@/lib/utils";
-
-interface Category {
-  id: string;
-  name_ar: string;
-  icon: string | null;
-}
-
-interface Subcategory {
-  id: string;
-  category_id: string;
-  name_ar: string;
-  icon: string | null;
-}
+import { useCategories } from "@/hooks/useCategories";
+import { useSubcategories } from "@/hooks/useSubcategories";
 
 const iconMap: Record<string, any> = {
   Shirt, ShoppingBag, Watch, Baby, Footprints, Sofa, Gamepad2, Sparkle, BookOpen, Dumbbell,
   UserCircle: Shirt,
 };
 
-
 const MegaMenu = () => {
   const navigate = useNavigate();
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [subcategories, setSubcategories] = useState<Subcategory[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [activeCategory, setActiveCategory] = useState<string | null>(null);
-
+  const [desktop, setDesktop] = useState(() => window.matchMedia("(min-width: 768px)").matches);
   useEffect(() => {
-    const fetchData = async () => {
-      const [categoriesRes, subcategoriesRes] = await Promise.all([
-        supabase.from("categories").select("*").order("name_ar"),
-        supabase.from("subcategories").select("*").eq("is_active", true).order("sort_order")
-      ]);
-
-      if (categoriesRes.data) setCategories(categoriesRes.data);
-      if (subcategoriesRes.data) setSubcategories(subcategoriesRes.data);
-      setLoading(false);
-    };
-
-    fetchData();
+    const media = window.matchMedia("(min-width: 768px)");
+    const sync = () => setDesktop(media.matches);
+    media.addEventListener("change", sync);
+    return () => media.removeEventListener("change", sync);
   }, []);
+  const { data: categories = [], isLoading: categoriesLoading } = useCategories(desktop);
+  const { data: subcategories = [], isLoading: subcategoriesLoading } = useSubcategories(desktop);
+  const [activeCategory, setActiveCategory] = useState<string | null>(null);
 
   const getCategorySubcategories = (categoryId: string) => {
     return subcategories.filter(sub => sub.category_id === categoryId);
   };
 
-
-
-  if (loading) {
+  if (categoriesLoading || subcategoriesLoading) {
     return (
       <div className="flex items-center gap-2 px-4">
         <Loader2 className="h-4 w-4 animate-spin" />
@@ -89,7 +65,6 @@ const MegaMenu = () => {
               </NavigationMenuTrigger>
               <NavigationMenuContent>
                 <div className="grid w-[min(500px,calc(100vw-2rem))] grid-cols-[minmax(0,1fr)_minmax(140px,200px)] gap-3 p-4 lg:w-[650px]">
-                  {/* Subcategories List */}
                   <div className="space-y-3">
                     <div className="flex items-center justify-between border-b pb-2">
                       <h3 className="text-base font-bold text-foreground">{category.name_ar}</h3>
@@ -125,7 +100,6 @@ const MegaMenu = () => {
                     </div>
                   </div>
                   
-                  {/* Category highlight tile — design-system gradient, no external imagery */}
                   <button
                     type="button"
                     className="relative rounded-lg overflow-hidden group h-32 text-right"
@@ -139,7 +113,6 @@ const MegaMenu = () => {
                       <p className="text-primary-foreground/80 text-xs">اكتشف المزيد</p>
                     </div>
                   </button>
-
                 </div>
               </NavigationMenuContent>
             </NavigationMenuItem>

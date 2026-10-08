@@ -19,12 +19,7 @@ import {
 import { cn } from "@/lib/utils";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "./ui/sheet";
 import { ScrollArea } from "./ui/scroll-area";
-
-interface Category {
-  id: string;
-  name_ar: string;
-  icon: string | null;
-}
+import { useCategories } from "@/hooks/useCategories";
 
 const iconMap: Record<string, any> = {
   Smartphone, Shirt, Baby, Footprints, Gamepad2, Sparkle,
@@ -33,20 +28,9 @@ const iconMap: Record<string, any> = {
 const MobileBottomNav = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const [categories, setCategories] = useState<Category[]>([]);
   const [showCategories, setShowCategories] = useState(false);
+  const { data: categories = [] } = useCategories(showCategories);
   const [isAdmin, setIsAdmin] = useState(false);
-
-  useEffect(() => {
-    const fetchCategories = async () => {
-      const { data } = await supabase
-        .from("categories")
-        .select("id, name_ar, icon")
-        .order("name_ar");
-      if (data) setCategories(data);
-    };
-    fetchCategories();
-  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -79,7 +63,6 @@ const MobileBottomNav = () => {
 
   return (
     <>
-      {/* Bottom Navigation Bar - Only visible on mobile */}
       <nav
         data-testid="mobile-bottom-bar"
         className="mobile-fixed-bottom safe-area-x fixed inset-x-0 bottom-0 z-50 max-w-full border-t border-border bg-background/95 backdrop-blur-lg md:hidden"
@@ -106,7 +89,6 @@ const MobileBottomNav = () => {
         </div>
       </nav>
 
-      {/* Categories Sheet */}
       <Sheet open={showCategories} onOpenChange={setShowCategories}>
         <SheetContent side="bottom" className="safe-screen-height h-[70dvh] overflow-hidden rounded-t-2xl pb-[max(1.5rem,env(safe-area-inset-bottom))]">
           <SheetHeader className="pb-4">

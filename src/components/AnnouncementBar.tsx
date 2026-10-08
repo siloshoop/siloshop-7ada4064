@@ -1,12 +1,6 @@
 import { useState, useEffect } from "react";
 import { X, Percent, Gift, Truck, Tag, Sparkles, Zap, Star, Heart } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
-
-interface Announcement {
-  id: string;
-  text: string;
-  icon: string;
-}
+import { useAnnouncements } from "@/hooks/useAnnouncements";
 
 const iconMap: { [key: string]: React.ComponentType<{ className?: string }> } = {
   percent: Percent,
@@ -22,29 +16,7 @@ const iconMap: { [key: string]: React.ComponentType<{ className?: string }> } = 
 const AnnouncementBar = () => {
   const [isVisible, setIsVisible] = useState(true);
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [announcements, setAnnouncements] = useState<Announcement[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    fetchAnnouncements();
-  }, []);
-
-  const fetchAnnouncements = async () => {
-    try {
-      const { data, error } = await supabase
-        .from("announcements")
-        .select("id, text, icon")
-        .eq("is_active", true)
-        .order("sort_order", { ascending: true });
-
-      if (error) throw error;
-      setAnnouncements(data || []);
-    } catch (error) {
-      console.error("Error fetching announcements:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const { data: announcements = [], isLoading } = useAnnouncements();
 
   useEffect(() => {
     if (announcements.length === 0) return;
@@ -56,7 +28,7 @@ const AnnouncementBar = () => {
     return () => clearInterval(interval);
   }, [announcements.length]);
 
-  if (!isVisible || loading || announcements.length === 0) return null;
+  if (!isVisible || isLoading || announcements.length === 0) return null;
 
   const CurrentIcon = iconMap[announcements[currentIndex]?.icon] || Tag;
 

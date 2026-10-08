@@ -1,5 +1,11 @@
 # Production readiness audit
 
+## Capacitor performance before installation
+- [x] Measure public mobile loading three times before/after without the owner's account; total initial requests fell on home/search/categories, but measured load times did not improve consistently
+- [x] Defer hidden menus/search lookups, share navigation queries, and coalesce in-flight product metadata without caching stock; preserve native inset setup before splash hide
+- [x] Verify search → product without document reload (875ms measured), category drawer, desktop menu, sticky header, 124 unit tests, 40 responsive checks, and automatic build
+- [ ] Physical Capacitor performance (blocked: no phone or emulator available)
+
 ## Compact mobile screen frame
 - [x] Compact the mobile header without removing controls and preserve the fixed bottom bar
 - [x] Verify stationary bars and drawer access at 360/375/390/412px, footer clearance in portrait/landscape, 40 responsive checks, 122 automated tests, and automatic build; native safe-area behavior still needs a physical device

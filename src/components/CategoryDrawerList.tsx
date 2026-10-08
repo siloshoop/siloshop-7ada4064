@@ -1,7 +1,7 @@
-import { useEffect, useState, type ComponentType, type SVGProps } from "react";
+import { type ComponentType, type SVGProps } from "react";
 import { Link } from "react-router-dom";
 import { BookOpen, Car, ChevronLeft, Footprints, Gamepad2, Gem, Laptop, PawPrint, Shirt, Sofa, Trophy } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
+import { useCategories } from "@/hooks/useCategories";
 
 type Icon = ComponentType<SVGProps<SVGSVGElement> & { className?: string }>;
 const svg = (d: React.ReactNode): Icon => (props) => (
@@ -30,14 +30,9 @@ const ITEMS: { name: string; icon: Icon; tone: Tone }[] = [
   { name: "السيارات والدراجات", icon: Car, tone: "teal" },
 ];
 
-/** Popular categories list for the header drawer; links resolve by Arabic name. */
 const CategoryDrawerList = ({ onNavigate }: { onNavigate: () => void }) => {
-  const [ids, setIds] = useState<Record<string, string>>({});
-  useEffect(() => {
-    supabase.from("categories").select("id,name_ar").eq("is_active", true).then(({ data }) => {
-      setIds(Object.fromEntries((data || []).map((c) => [c.name_ar, c.id])));
-    });
-  }, []);
+  const { data: categories = [] } = useCategories();
+  const ids = Object.fromEntries(categories.map((c) => [c.name_ar, c.id]));
 
   return (
     <ul className="space-y-1">

@@ -321,7 +321,7 @@ const ManageDeals = () => {
                         <SelectContent>
                           {products.map((product) => (
                             <SelectItem key={product.id} value={product.id}>
-                              {product.name} - {formatPrice(product.price, (product as any).currency, { maximumFractionDigits: 0 })}
+                              {product.name} - {formatPrice(product.price, (product as any).currency, { maximumFractionDigits: 2 })}
                             </SelectItem>
                           ))}
                         </SelectContent>
@@ -423,10 +423,10 @@ const ManageDeals = () => {
                         </div>
                         <div className="mt-1">
                           <span className="text-sm line-through text-muted-foreground">
-                            {formatPrice(deal.product.price, (deal.product as any).currency, { maximumFractionDigits: 0 })}
+                            {formatPrice(deal.product.price, (deal.product as any).currency, { maximumFractionDigits: 2 })}
                           </span>
                           <span className="text-sm font-bold text-primary mr-2">
-                            {formatPrice(discountedPrice, (deal.product as any).currency, { maximumFractionDigits: 0 })}
+                            {formatPrice(discountedPrice, (deal.product as any).currency, { maximumFractionDigits: 2 })}
                           </span>
                         </div>
                       </div>

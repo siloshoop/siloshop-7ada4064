@@ -1,3 +1,8 @@
+import { useAuth } from "@/hooks/useAuth";
+import { useEffect } from "react";
+import { reportMoney, loadReportMoney, type ReportMoneyRow } from "@/lib/reportCurrency";
+import { formatKnownPrice } from "@/lib/currency";
+import { withDisplayCurrency } from "@/lib/displayCurrency";
 import RevenueCurrencyChart from "@/components/RevenueCurrencyChart";
 import { useState } from "react";
 import { Link } from "react-router-dom";
@@ -11,13 +16,40 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import useSellerDashboard from "@/hooks/useSellerDashboard";
 
-const currency = (n: number) => `${Math.round(Number(n) || 0).toLocaleString("ar-SY")} ل.س`;
 const num = (n: number) => (Number(n) || 0).toLocaleString("ar-SY");
 const shortDate = (d: string) => new Date(d).toLocaleDateString("ar-SY", { day: "numeric", month: "short" });
 
 const SellerAnalytics = () => {
+  const { user } = useAuth();
   const [days, setDays] = useState(30);
   const { data, loading } = useSellerDashboard(days);
+  const [moneyRows, setMoneyRows] = useState<ReportMoneyRow[] | null>(null);
+  const [latestCurrencies, setLatestCurrencies] = useState<Record<string, string | null>>({});
+  useEffect(() => {
+    let active = true;
+    if (!user) return;
+    loadReportMoney(null, null, user.id, "unitTotal").then((rows) => { if (active) setMoneyRows(rows); }).catch(() => { if (active) setMoneyRows(null); });
+    withDisplayCurrency(data?.latest_orders ?? [], "orders").then((rows) => { if (active) setLatestCurrencies(Object.fromEntries(rows.map((r) => [r.id, r.currency]))); }).catch(() => { if (active) setLatestCurrencies({}); });
+    return () => { active = false; };
+  }, [data, user]);
+  const salesMoney = (key: string) => {
+    if (!moneyRows) return "—";
+    const now = new Date();
+    const today = now.toISOString().slice(0,10);
+    const yesterday = new Date(now.getTime() - 86400000).toISOString().slice(0,10);
+    const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).getTime();
+    return reportMoney(moneyRows, (r) => {
+      if (!["delivered", "completed"].includes(r.status)) return false;
+      const date = new Date(r.created_at).getTime();
+      if (key === "today") return r.created_at.slice(0,10) === today;
+      if (key === "yesterday") return r.created_at.slice(0,10) === yesterday;
+      if (key === "week") return date >= now.getTime() - 7 * 86400000;
+      if (key === "month") return date >= monthStart;
+      if (key === "period") return date >= now.getTime() - days * 86400000;
+      return true;
+    });
+  };
+
 
   const o = data?.orders ?? {};
   const e = data?.engagement ?? {};
@@ -31,7 +63,7 @@ const SellerAnalytics = () => {
   const cancelRate = totalOrders > 0 ? ((Number(o.cancelled ?? 0) / totalOrders) * 100).toFixed(1) : "0.0";
 
   const kpis = [
-    { label: `إيراد آخر ${days} يوم`, value: currency(Number(s.period ?? 0)) },
+    { label: `إيراد آخر ${days} يوم`, value: salesMoney("period") },
     { label: "طلبات الفترة", value: num(ordersPeriod) },
     { label: "زوّار (مشاهدات)", value: num(views) },
     { label: "معدل التحويل", value: `${conversion}%` },
@@ -120,7 +152,7 @@ const SellerAnalytics = () => {
               <Link key={tp.id} to={`/product/${tp.id}`} className="flex items-center gap-3 rounded-lg border p-2 hover:bg-muted">
                 <span className="min-w-0 flex-1 truncate text-sm">{tp.name}</span>
                 <Badge variant="secondary">{num(tp.units)}</Badge>
-                <span className="text-xs text-muted-foreground">{currency(tp.revenue)}</span>
+                <span className="text-xs text-muted-foreground">{moneyRows ? reportMoney(moneyRows, (r) => r.product_id === tp.id && ["delivered", "completed"].includes(r.status)) : "—"}</span>
               </Link>
             ))}
           </CardContent>

@@ -1,3 +1,4 @@
+import { formatPrice } from "@/lib/currency";
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import Navbar from "@/components/Navbar";
@@ -280,10 +281,10 @@ const PlatformProducts = () => {
                     <td className="p-2">{catMap.get(p.category_id) || "—"}</td>
                     <td className="p-2">{brandMap.get(p.brand_id) || "—"}</td>
                     <td className="p-2">
-                      {Number(p.price).toLocaleString()} {p.currency === "SYP" ? "ل.س" : p.currency}
+                      {formatPrice(p.price, p.currency)}
                       {p.discount_price && (
                         <span className="block text-xs text-green-600">
-                          خصم: {Number(p.discount_price).toLocaleString()}
+                          خصم: {formatPrice(p.discount_price, p.currency)}
                         </span>
                       )}
                     </td>

@@ -1,3 +1,4 @@
+import { currencySymbol } from "@/lib/currency";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -346,7 +347,7 @@ const PlatformProductForm = ({ open, onOpenChange, product, onSaved, categories,
             </div>
             {!form.platform_free_shipping && (
               <div className="space-y-1.5">
-                <Label>قيمة الشحن (ل.س)</Label>
+                <Label>قيمة الشحن ({currencySymbol(form.currency)})</Label>
                 <Input
                   type="number"
                   min={0}

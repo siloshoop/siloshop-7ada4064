@@ -317,9 +317,9 @@ const OrderDetails = () => {
                   <div className="flex-1">
                     <p className="font-medium">{name}</p>
                     {it.variant_label && <p className="text-xs text-muted-foreground">{it.variant_label}</p>}
-                    <p className="text-xs text-muted-foreground">{it.quantity} × {formatPrice(it.price, it.currency ?? order.currency, { maximumFractionDigits: 0 })}</p>
+                    <p className="text-xs text-muted-foreground">{it.quantity} × {formatPrice(it.price, it.currency ?? order.currency, { maximumFractionDigits: 2 })}</p>
                   </div>
-                  <p className="font-bold">{formatPrice(lineSubtotal, it.currency ?? order.currency, { maximumFractionDigits: 0 })}</p>
+                  <p className="font-bold">{formatPrice(lineSubtotal, it.currency ?? order.currency, { maximumFractionDigits: 2 })}</p>
                 </Link>
               );
             })}
@@ -365,16 +365,16 @@ const OrderDetails = () => {
         <Card>
           <CardHeader><CardTitle className="flex items-center gap-2"><Receipt className="h-5 w-5" />ملخص الفاتورة</CardTitle></CardHeader>
           <CardContent className="space-y-2 text-sm">
-            <div className="flex justify-between"><span className="text-muted-foreground">المنتجات</span><span>{formatPrice(subtotal, order.currency, { maximumFractionDigits: 0 })}</span></div>
-            <div className="flex justify-between"><span className="text-muted-foreground">الشحن</span><span>{shippingAmount > 0 ? formatPrice(shippingAmount, order.currency, { maximumFractionDigits: 0 }) : "مجاني"}</span></div>
+            <div className="flex justify-between"><span className="text-muted-foreground">المنتجات</span><span>{formatPrice(subtotal, order.currency, { maximumFractionDigits: 2 })}</span></div>
+            <div className="flex justify-between"><span className="text-muted-foreground">الشحن</span><span>{shippingAmount > 0 ? formatPrice(shippingAmount, order.currency, { maximumFractionDigits: 2 }) : "مجاني"}</span></div>
             {discount > 0 && (
-              <div className="flex justify-between text-green-600"><span>الخصم {order.coupon_code ? `(${order.coupon_code})` : ""}</span><span>-{formatPrice(discount, order.currency, { maximumFractionDigits: 0 })}</span></div>
+              <div className="flex justify-between text-green-600"><span>الخصم {order.coupon_code ? `(${order.coupon_code})` : ""}</span><span>-{formatPrice(discount, order.currency, { maximumFractionDigits: 2 })}</span></div>
             )}
             {taxAmount > 0 && (
-              <div className="flex justify-between"><span className="text-muted-foreground">الضريبة</span><span>{formatPrice(taxAmount, order.currency, { maximumFractionDigits: 0 })}</span></div>
+              <div className="flex justify-between"><span className="text-muted-foreground">الضريبة</span><span>{formatPrice(taxAmount, order.currency, { maximumFractionDigits: 2 })}</span></div>
             )}
             <div className="border-t pt-2 mt-2 flex justify-between font-bold text-lg">
-              <span>الإجمالي</span><span className="text-primary">{formatPrice(total, order.currency, { maximumFractionDigits: 0 })}</span>
+              <span>الإجمالي</span><span className="text-primary">{formatPrice(total, order.currency, { maximumFractionDigits: 2 })}</span>
             </div>
           </CardContent>
         </Card>

@@ -112,7 +112,7 @@ const TurkishProducts = () => {
                 ? "يتم تحديد تكلفة الشحن عند إتمام الشراء."
                 : options.free_shipping
                   ? "شحن مجاني على منتجات هذا القسم."
-                  : `تكلفة الشحن: ${options.shipping_fee.toLocaleString()} ل.س لكل طلب.`}
+                  : `تكلفة الشحن: ${options.shipping_fee.toLocaleString()} بعملة الطلب.`}
             </p>
           </div>
           <div className="rounded-2xl border border-border/60 bg-card p-4">

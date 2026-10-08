@@ -1,3 +1,5 @@
+import { formatKnownPrice as money } from "@/lib/currency";
+import { withDisplayCurrency } from "@/lib/displayCurrency";
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -28,6 +30,7 @@ interface OrderRow {
   created_at: string;
   status: string;
   total_amount: number;
+  currency?: string | null;
   role: string;
 }
 
@@ -43,7 +46,6 @@ const STATUS_LABEL: Record<string, string> = {
   banned: "محظور",
 };
 
-const money = (n: number) => `${new Intl.NumberFormat("ar-SY").format(Math.round(n || 0))} ل.س`;
 
 const AdminUserDetail = () => {
   const { id = "" } = useParams();
@@ -76,7 +78,7 @@ const AdminUserDetail = () => {
     ]);
     setProfile((p as Profile) ?? null);
     setRoles(((r as { role: string }[]) ?? []).map((x) => x.role));
-    setOrders((o as OrderRow[]) ?? []);
+    setOrders(await withDisplayCurrency((o as OrderRow[]) ?? [], "orders"));
     setActivity((a as ActivityRow[]) ?? []);
     setLoading(false);
   };
@@ -227,7 +229,7 @@ const AdminUserDetail = () => {
                     {o.id.slice(0, 8)} · {new Date(o.created_at).toLocaleDateString("ar-SY")}
                   </span>
                   <Badge variant="outline">{o.status}</Badge>
-                  <span className="whitespace-nowrap text-xs">{money(Number(o.total_amount))}</span>
+                  <span className="whitespace-nowrap text-xs">{money(o.total_amount, o.currency)}</span>
                 </div>
               ))
             )}

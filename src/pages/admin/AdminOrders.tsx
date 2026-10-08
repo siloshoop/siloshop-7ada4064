@@ -1,3 +1,5 @@
+import { formatKnownPrice as money } from "@/lib/currency";
+import { withDisplayCurrency } from "@/lib/displayCurrency";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { exportFile, exportSuccessMessage } from "@/lib/exportFile";
 import { Link } from "react-router-dom";
@@ -39,6 +41,7 @@ type OrderRow = {
   status: string;
   payment_status: string;
   total_amount: number;
+  currency?: string | null;
   phone: string | null;
   courier_name: string | null;
   customer_id: string;
@@ -71,7 +74,6 @@ const PAY_LABEL: Record<string, string> = {
 };
 const REOPEN_TARGETS: OrderStatus[] = ["pending", "confirmed", "preparing", "ready_for_shipping", "shipped"];
 const PAGE_SIZE = 50;
-const money = (n: unknown) => `${Number(n ?? 0).toLocaleString("ar-SY")} ل.س`;
 const orderLabel = (r: { order_number?: string | null; id: string }) => r.order_number || `#${r.id.slice(0, 8)}`;
 
 const AdminOrders = () => {
@@ -101,7 +103,7 @@ const AdminOrders = () => {
   const [freezeReason, setFreezeReason] = useState("");
   const [reopenStatus, setReopenStatus] = useState<OrderStatus>("confirmed");
   const [reopenReason, setReopenReason] = useState("");
-  const [history, setHistory] = useState<Array<{ id: string; status: string; total_amount: number; role: string }>>([]);
+  const [history, setHistory] = useState<Array<{ id: string; status: string; total_amount: number; currency?: string | null; role: string }>>([]);
 
   // notes thread
   const [notes, setNotes] = useState<OrderNote[]>([]);
@@ -138,7 +140,7 @@ const AdminOrders = () => {
       toast({ title: "تعذر تحميل الطلبات", description: friendlyOrderError(error), variant: "destructive" });
       setRows([]); setTotal(0);
     } else {
-      const list = (data as unknown as OrderRow[]) || [];
+      const list = await withDisplayCurrency((data as unknown as OrderRow[]) || [], "orders");
       setRows(list);
       setTotal(list[0]?.total_count ?? 0);
     }
@@ -179,7 +181,7 @@ const AdminOrders = () => {
     if (error) toast({ title: "تعذر تحميل تفاصيل الطلب", description: friendlyOrderError(error), variant: "destructive" });
     const payload = (d as unknown as DetailPayload) || null;
     setDetail(payload);
-    setHistory((h as any[]) || []);
+    setHistory(await withDisplayCurrency((h as Array<{ id: string; status: string; total_amount: number; role: string }>) || [], "orders"));
     setNextStatus(normalizeStatus(payload?.order?.status));
     setReopenStatus("confirmed");
     setDetailLoading(false);
@@ -216,6 +218,7 @@ const AdminOrders = () => {
     { key: "payment_status", label: "حالة الدفع" },
     { key: "payment_method", label: "طريقة الدفع" },
     { key: "total_amount", label: "المبلغ" },
+    { key: "currency", label: "العملة" },
     { key: "customer_name", label: "اسم العميل" },
     { key: "customer_email", label: "البريد الإلكتروني" },
     { key: "phone", label: "الهاتف" },
@@ -242,7 +245,7 @@ const AdminOrders = () => {
           _offset: offset,
         });
         if (error) throw error;
-        const list = (data as unknown as OrderRow[]) || [];
+        const list = await withDisplayCurrency((data as unknown as OrderRow[]) || [], "orders");
         all.push(...list);
         totalCount = list[0]?.total_count ?? all.length;
         if (list.length === 0) break;
@@ -369,7 +372,7 @@ const AdminOrders = () => {
                               )}
                             </div>
                           </td>
-                          <td className="whitespace-nowrap px-3 py-2">{money(r.total_amount)}</td>
+                          <td className="whitespace-nowrap px-3 py-2">{money(r.total_amount, r.currency)}</td>
                           <td className="whitespace-nowrap px-3 py-2 text-xs text-muted-foreground">
                             {new Date(r.created_at).toLocaleDateString("ar-SY")}
                           </td>
@@ -450,7 +453,7 @@ const AdminOrders = () => {
               </div>
 
               <div>
-                <p className="mb-2 text-sm font-semibold">المنتجات ({detail.items.length}) — {money(order.total_amount)}</p>
+                <p className="mb-2 text-sm font-semibold">المنتجات ({detail.items.length}) — {money(order.total_amount, order.currency)}</p>
                 <div className="space-y-2">
                   {detail.items.map((it) => (
                     <div key={it.id} className="flex items-center gap-3 rounded border p-2">
@@ -461,7 +464,7 @@ const AdminOrders = () => {
                         <p className="truncate text-sm">{it.product_name || "منتج"}</p>
                         <p className="text-xs text-muted-foreground">البائع: {it.vendor_name || "—"}</p>
                       </div>
-                      <div className="whitespace-nowrap text-xs">{it.quantity} × {money(it.price)}</div>
+                      <div className="whitespace-nowrap text-xs">{it.quantity} × {money(it.price, it.currency ?? order.currency)}</div>
                     </div>
                   ))}
                 </div>
@@ -485,7 +488,7 @@ const AdminOrders = () => {
                       <Link to={`/orders/track/${h.id}`} className="underline">{h.id.slice(0, 8)}</Link>
                       <span className="text-muted-foreground">{h.role}</span>
                       <span>{ORDER_STATUS_LABELS[normalizeStatus(h.status)]}</span>
-                      <span>{money(h.total_amount)}</span>
+                      <span>{money(h.total_amount, h.currency)}</span>
                     </li>
                   ))}
                 </ul>

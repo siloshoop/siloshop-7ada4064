@@ -469,8 +469,8 @@ const Subcategory = () => {
                       className="w-full"
                     />
                     <div className="flex items-center justify-between text-sm">
-                      <span>{priceRange[0].toLocaleString()} ل.س</span>
-                      <span>{priceRange[1].toLocaleString()} ل.س</span>
+                      <span>{priceRange[0].toLocaleString()}</span>
+                      <span>{priceRange[1].toLocaleString()} (بعملة المنتج)</span>
                     </div>
                   </div>
 
@@ -544,7 +544,7 @@ const Subcategory = () => {
             )}
             {(priceRange[0] > 0 || priceRange[1] < maxPrice) && (
               <Badge variant="secondary" className="gap-1">
-                السعر: {priceRange[0].toLocaleString()} - {priceRange[1].toLocaleString()} ل.س
+                السعر: {priceRange[0].toLocaleString()} - {priceRange[1].toLocaleString()} (بعملة المنتج)
                 <X className="w-3 h-3 cursor-pointer" onClick={() => setPriceRange([0, maxPrice])} />
               </Badge>
             )}

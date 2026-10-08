@@ -1,3 +1,4 @@
+import { withDisplayCurrency } from "@/lib/displayCurrency";
 import { useEffect, useMemo, useState } from "react";
 import { exportFile, exportSuccessMessage, recordsToCsv } from "@/lib/exportFile";
 import { supabase } from "@/integrations/supabase/client";
@@ -33,7 +34,7 @@ const SellerReports = () => {
   const { user } = useAuth();
   const { toast } = useToast();
   const [orders, setOrders] = useState<OrderRow[]>([]);
-  const [products, setProducts] = useState<{ name: string; price: number; stock_quantity: number | null; moderation_status: string | null }[]>([]);
+  const [products, setProducts] = useState<{ name: string; price: number; currency: string | null; stock_quantity: number | null; moderation_status: string | null }[]>([]);
   const [loading, setLoading] = useState(true);
   const [range, setRange] = useState("30");
   const download = async (name: string, rows: Record<string, unknown>[]) => {
@@ -52,10 +53,11 @@ const SellerReports = () => {
       setLoading(true);
       const [ordersRes, productsRes] = await Promise.all([
         supabase.rpc("get_vendor_orders"),
-        supabase.from("products").select("name,price,stock_quantity,moderation_status").eq("vendor_id", user.id),
+        supabase.from("products").select("name,price,currency,stock_quantity,moderation_status").eq("vendor_id", user.id),
       ]);
       if (ordersRes.error) toast({ title: "تعذّر تحميل التقارير", description: ordersRes.error.message, variant: "destructive" });
-      setOrders((ordersRes.data as OrderRow[]) ?? []);
+      try { setOrders(await withDisplayCurrency((ordersRes.data as OrderRow[]) ?? [], "orders")); }
+      catch (error) { toast({ title: "تعذر قراءة عملات الطلبات", description: String(error), variant: "destructive" }); }
       setProducts(productsRes.data ?? []);
       setLoading(false);
     })();
@@ -81,7 +83,7 @@ const SellerReports = () => {
       delivered: delivered.length,
       cancelled: cancelled.length,
       revenue: formatAmountsByCurrency(revenueRows),
-      avg: formatAmountsByCurrency(revenueRows, { maximumFractionDigits: 0, divideBy: countBy }),
+      avg: formatAmountsByCurrency(revenueRows, { maximumFractionDigits: 2, divideBy: countBy }),
       topCities: [...byCity.entries()].sort((a, b) => b[1] - a[1]).slice(0, 5),
     };
   }, [scoped]);
@@ -119,6 +121,7 @@ const SellerReports = () => {
                 (products.map((p) => ({
                   المنتج: p.name,
                   السعر: Number(p.price || 0),
+                   العملة: normalizeCurrency(p.currency),
                   المخزون: p.stock_quantity ?? 0,
                   الحالة: p.moderation_status ?? "",
                 })))

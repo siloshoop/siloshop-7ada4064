@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { formatKnownPrice } from "@/lib/currency";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
@@ -41,6 +42,7 @@ const ProductAnalyticsDialog = ({ productId, productName, onOpenChange }: Produc
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [data, setData] = useState<AnalyticsData | null>(null);
+  const [currency, setCurrency] = useState<string | null>(null);
 
   useEffect(() => {
     if (!productId) return;
@@ -48,12 +50,17 @@ const ProductAnalyticsDialog = ({ productId, productName, onOpenChange }: Produc
     setLoading(true);
     setError(null);
     setData(null);
-    (supabase.rpc as any)("product_analytics", { _product_id: productId }).then(
-      ({ data: res, error: err }: { data: unknown; error: { message: string } | null }) => {
+    setCurrency(null);
+    Promise.all([
+      supabase.rpc("product_analytics", { _product_id: productId }),
+      supabase.from("products").select("currency").eq("id", productId).maybeSingle(),
+    ]).then(
+      ([{ data: res, error: err }, product]) => {
         if (!active) return;
         if (err) {
           setError(err.message);
         } else {
+          setCurrency(product.data?.currency ?? null);
           setData((res as AnalyticsData) ?? {});
         }
         setLoading(false);
@@ -65,7 +72,7 @@ const ProductAnalyticsDialog = ({ productId, productName, onOpenChange }: Produc
   }, [productId]);
 
   const fmtNum = (v: number | undefined) => Number(v ?? 0).toLocaleString("ar-SY");
-  const fmtMoney = (v: number | undefined) => `${Number(v ?? 0).toLocaleString("ar-SY")} ل.س`;
+  const fmtMoney = (v: number | undefined) => formatKnownPrice(v, currency);
   const fmtPct = (v: number | undefined) => `${Number(v ?? 0).toLocaleString("ar-SY", { maximumFractionDigits: 2 })}%`;
 
   const kpis = data

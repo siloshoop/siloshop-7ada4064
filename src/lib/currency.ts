@@ -17,9 +17,9 @@ export const CURRENCY_OPTIONS: { value: ProductCurrency; symbol: string; label: 
 
 /** Symbol for a stored currency code; falls back to the Syrian pound. */
 export const currencySymbol = (currency?: string | null): string =>
-  currency === "USD" ? "$" : "ل.س";
+  normalizeCurrency(currency) === "USD" ? "$" : "ل.س";
 
-/** Currency coupons are expressed in: coupon values carry no currency of their own. */
+/** Default for legacy coupons without a saved currency. */
 export const COUPON_CURRENCY: ProductCurrency = "SYP";
 
 /** Any stored value -> a supported currency code (defaults to the Syrian pound). */
@@ -117,17 +117,25 @@ export const formatAmountsByCurrency = (
   options?: { maximumFractionDigits?: number; divideBy?: (currency: ProductCurrency) => number },
 ): string => {
   const sums = new Map<ProductCurrency, number>();
+  let unknownAmount = 0;
+  let hasUnknownCurrency = false;
   for (const r of rows) {
+    if (!["USD", "SYP"].includes(String(r.currency ?? "").trim().toUpperCase())) {
+      unknownAmount += Number(r.amount || 0);
+      hasUnknownCurrency = true;
+      continue;
+    }
     const c = normalizeCurrency(r.currency);
     sums.set(c, (sums.get(c) ?? 0) + Number(r.amount || 0));
   }
-  if (sums.size === 0) return formatPrice(0, DEFAULT_CURRENCY, options);
-  return CURRENCY_OPTIONS.filter(({ value }) => sums.has(value))
+  if (sums.size === 0 && !hasUnknownCurrency) return "0";
+  const parts = CURRENCY_OPTIONS.filter(({ value }) => sums.has(value))
     .map(({ value }) => {
       const d = options?.divideBy?.(value) ?? 1;
       return formatPrice(d ? (sums.get(value) ?? 0) / d : 0, value, options);
-    })
-    .join(" · ");
+    });
+  if (hasUnknownCurrency) parts.push(formatKnownPrice(unknownAmount, null));
+  return parts.join(" · ");
 };
 
 /** Per-currency revenue buckets returned by revenue_totals_by_currency. */
@@ -151,6 +159,13 @@ export const sumByCurrency = (rows: { amount: number; currency?: string | null }
     const c = normalizeCurrency(r.currency);
     out[c] = { total: (out[c]?.total || 0) + Number(r.amount || 0), count: (out[c]?.count || 0) + 1 };
   }
-  for (const c of Object.keys(out) as ProductCurrency[]) out[c]!.avg = out[c]!.total / (out[c]!.count || 1);
+  for (const c of Object.keys(out) as ProductCurrency[]) {
+    const bucket = out[c];
+    if (bucket) bucket.avg = bucket.total / (bucket.count || 1);
+  }
   return out;
 };
+
+/** Never guess a currency for legacy report payloads that omit it. */
+export const formatKnownPrice = (amount: number | string | null | undefined, currency?: string | null): string =>
+  ["USD", "SYP"].includes(String(currency ?? "").trim().toUpperCase()) ? formatPrice(amount, currency) : `${Number(amount ?? 0).toLocaleString("en-US", { maximumFractionDigits: 2 })} (العملة غير متاحة)`;

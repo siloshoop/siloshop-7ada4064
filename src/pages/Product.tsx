@@ -515,6 +515,7 @@ const Product = () => {
                 productId={product.id}
                 price={effectivePrice}
                 categoryId={product.category_id}
+                currency={product.currency}
               />
             </div>
 

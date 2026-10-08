@@ -2,12 +2,13 @@ import { useEffect, useState } from "react";
 import { CartesianGrid, Legend, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { supabase } from "@/integrations/supabase/client";
 import { Skeleton } from "@/components/ui/skeleton";
+import { formatPrice } from "@/lib/currency";
 
 type Point = { day: string; syp: number; usd: number };
 
 const shortDate = (d: string) => new Date(d).toLocaleDateString("ar-SY", { day: "numeric", month: "short" });
-const syp = (n: number) => `${Math.round(Number(n) || 0).toLocaleString("ar-SY")} ل.س`;
-const usd = (n: number) => `$${(Number(n) || 0).toLocaleString("en-US", { maximumFractionDigits: 2 })}`;
+const syp = (n: number) => formatPrice(n, "SYP");
+const usd = (n: number) => formatPrice(n, "USD");
 
 /**
  * Daily revenue with dollars and ل.س as separate lines on separate axes.

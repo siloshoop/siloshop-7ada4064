@@ -2,14 +2,16 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
 import { TrendingDown, TrendingUp, Minus } from "lucide-react";
+import { formatPrice, normalizeCurrency } from "@/lib/currency";
 
 interface Props {
   productId: string;
   price: number;
   categoryId: string | null;
+  currency?: string | null;
 }
 
-const MarketPriceBar = ({ productId, price, categoryId }: Props) => {
+const MarketPriceBar = ({ productId, price, categoryId, currency }: Props) => {
   const [avg, setAvg] = useState<number | null>(null);
   const [count, setCount] = useState(0);
 
@@ -21,6 +23,7 @@ const MarketPriceBar = ({ productId, price, categoryId }: Props) => {
         .select("price")
         .eq("is_active", true)
         .eq("category_id", categoryId)
+         .eq("currency", normalizeCurrency(currency))
         .neq("id", productId)
         .limit(200);
       if (data && data.length > 0) {
@@ -29,7 +32,7 @@ const MarketPriceBar = ({ productId, price, categoryId }: Props) => {
         setCount(data.length);
       }
     })();
-  }, [productId, categoryId]);
+  }, [productId, categoryId, currency]);
 
   if (!avg || count === 0) return null;
 
@@ -59,7 +62,7 @@ const MarketPriceBar = ({ productId, price, categoryId }: Props) => {
           {label}
         </div>
         <span className="text-xs text-muted-foreground">
-          متوسط: {Math.round(avg).toLocaleString()} ل.س
+          متوسط: {formatPrice(avg, currency)}
         </span>
       </div>
       <div className="relative h-2 rounded-full bg-muted overflow-hidden">

@@ -1,3 +1,5 @@
+import { formatPrice } from "@/lib/currency";
+import { loadReportMoney, reportMoney, reportAverage, type ReportMoneyRow } from "@/lib/reportCurrency";
 import { useCallback, useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAdminCheck } from "@/hooks/useAdminCheck";
@@ -74,11 +76,10 @@ interface OrderReportPayload {
   totals: OrderReportTotals;
   daily: Array<{ day: string; orders: number; revenue: number }>;
   monthly: Array<{ month: string; orders: number; revenue: number }>;
-  top_products: Array<{ product_id: string; name: string; qty: number; revenue: number }>;
+  top_products: Array<{ product_id: string; name: string; quantity: number; revenue: number }>;
   top_sellers: Array<{ vendor_id: string; name: string; orders: number; revenue: number }>;
 }
 
-const money = (n: unknown) => `${Number(n ?? 0).toLocaleString("ar-SY")} ل.س`;
 
 const rangeToDates = (range: OrdersReportRange, customFrom: string, customTo: string) => {
   const now = new Date();
@@ -118,30 +119,52 @@ const OrdersReportSection = () => {
   const [customTo, setCustomTo] = useState("");
   const [data, setData] = useState<OrderReportPayload | null>(null);
   const [loading, setLoading] = useState(true);
+  const [moneyRows, setMoneyRows] = useState<ReportMoneyRow[]>([]);
+  const [orderAmounts, setOrderAmounts] = useState<{ amount: number; currency: string | null }[]>([]);
 
   useEffect(() => {
     let cancelled = false;
     const load = async () => {
       setLoading(true);
       const { from, to } = rangeToDates(range, customFrom, customTo);
-      const { data: res, error } = await supabase.rpc("order_reports", { _from: from, _to: to });
+      const [{ data: res, error }, savedMoney, savedOrders] = await Promise.all([
+        supabase.rpc("order_reports", { _from: from, _to: to }),
+        loadReportMoney(from, to),
+        (async () => {
+          const rows: { amount: number; currency: string | null }[] = [];
+          for (let offset = 0; ; offset += 1000) {
+            let q = supabase.from("orders").select("total_amount,currency,status").order("id").range(offset, offset + 999);
+            if (from) q = q.gte("created_at", from);
+            if (to) q = q.lte("created_at", to);
+            const { data, error } = await q;
+            if (error) throw error;
+            for (const order of data ?? []) if (!["cancelled", "returned", "refunded"].includes(order.status)) rows.push({ amount: Number(order.total_amount), currency: order.currency });
+            if (!data || data.length < 1000) break;
+          }
+          return rows;
+        })(),
+      ]);
       if (cancelled) return;
       if (error) {
         toast({ title: "تعذر تحميل تقرير الطلبات", description: error.message, variant: "destructive" });
         setData(null);
       } else {
+        setMoneyRows(savedMoney);
+        setOrderAmounts(savedOrders);
         setData((res as unknown as OrderReportPayload) || null);
       }
       setLoading(false);
     };
-    if (range !== "custom" || (customFrom && customTo)) void load();
+    if (range !== "custom" || (customFrom && customTo)) void load().catch((error) => { if (!cancelled) { setData(null); setLoading(false); toast({ title: "تعذر تحميل عملات التقرير", description: String(error), variant: "destructive" }); } });
     return () => { cancelled = true; };
   }, [range, customFrom, customTo, toast]);
 
   const totals = data?.totals;
   const daily = (data?.daily || []).map((d) => ({
     day: new Date(d.day).toLocaleDateString("ar-SY", { month: "short", day: "numeric" }),
-    orders: Number(d.orders), revenue: Number(d.revenue),
+    orders: Number(d.orders),
+    syp: moneyRows.filter((r) => r.created_at.slice(0,10) === d.day.slice(0,10) && r.currency === "SYP").reduce((s,r) => s+r.amount,0),
+    usd: moneyRows.filter((r) => r.created_at.slice(0,10) === d.day.slice(0,10) && r.currency === "USD").reduce((s,r) => s+r.amount,0),
   }));
   const monthly = (data?.monthly || []).map((m) => ({
     month: m.month, orders: Number(m.orders), revenue: Number(m.revenue),
@@ -175,12 +198,12 @@ const OrdersReportSection = () => {
       ) : (
         <>
           <div className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-6">
-            <RangeStatCard title="عدد الطلبات" value={totals?.orders_count ?? 0} />
-            <RangeStatCard title="الإيرادات" value={money(totals?.revenue)} />
-            <RangeStatCard title="متوسط قيمة الطلب" value={money(totals?.avg_order_value)} />
-            <RangeStatCard title="الملغاة" value={totals?.cancelled_count ?? 0} />
-            <RangeStatCard title="المكتملة" value={totals?.completed_count ?? 0} />
-            <RangeStatCard title="المرتجعة" value={totals?.returned_count ?? 0} />
+            <RangeStatCard title="عدد الطلبات" value={totals?.orders_count ?? (totals as any)?.orders ?? 0} />
+            <RangeStatCard title="الإيرادات" value={reportMoney(moneyRows, (r) => !["cancelled", "returned", "refunded"].includes(r.status))} />
+            <RangeStatCard title="متوسط قيمة الطلب" value={reportAverage(orderAmounts)} />
+            <RangeStatCard title="الملغاة" value={totals?.cancelled_count ?? (totals as any)?.cancelled ?? 0} />
+            <RangeStatCard title="المكتملة" value={totals?.completed_count ?? (totals as any)?.completed ?? 0} />
+            <RangeStatCard title="المرتجعة" value={totals?.returned_count ?? (totals as any)?.returned ?? 0} />
           </div>
 
           <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
@@ -196,10 +219,11 @@ const OrdersReportSection = () => {
                         <CartesianGrid strokeDasharray="3 3" opacity={0.3} />
                         <XAxis dataKey="day" tick={{ fontSize: 11 }} />
                         <YAxis tick={{ fontSize: 11 }} />
-                        <Tooltip />
+                        <Tooltip formatter={(value: number, name: string) => name === "USD" || name === "SYP" ? formatPrice(value, name) : value} />
                         <Legend />
                         <Line type="monotone" dataKey="orders" name="الطلبات" stroke="hsl(var(--primary))" strokeWidth={2} dot={false} />
-                        <Line type="monotone" dataKey="revenue" name="الإيرادات" stroke="hsl(var(--accent))" strokeWidth={2} dot={false} />
+                        <Line type="monotone" dataKey="syp" name="SYP" stroke="hsl(var(--accent))" strokeWidth={2} dot={false} />
+                         <Line type="monotone" dataKey="usd" name="USD" stroke="hsl(var(--success))" strokeWidth={2} dot={false} />
                       </LineChart>
                     </ResponsiveContainer>
                   )}
@@ -249,8 +273,8 @@ const OrdersReportSection = () => {
                         {topProducts.map((p) => (
                           <tr key={p.product_id} className="border-t">
                             <td className="px-3 py-2">{p.name || "—"}</td>
-                            <td className="px-3 py-2">{p.qty}</td>
-                            <td className="whitespace-nowrap px-3 py-2">{money(p.revenue)}</td>
+                            <td className="px-3 py-2">{p.quantity}</td>
+                            <td className="whitespace-nowrap px-3 py-2">{reportMoney(moneyRows, (r) => r.product_id === p.product_id && !["cancelled", "returned", "refunded"].includes(r.status))}</td>
                           </tr>
                         ))}
                       </tbody>
@@ -280,7 +304,7 @@ const OrdersReportSection = () => {
                           <tr key={v.vendor_id} className="border-t">
                             <td className="px-3 py-2">{v.name || "—"}</td>
                             <td className="px-3 py-2">{v.orders}</td>
-                            <td className="whitespace-nowrap px-3 py-2">{money(v.revenue)}</td>
+                            <td className="whitespace-nowrap px-3 py-2">{reportMoney(moneyRows, (r) => r.vendor_id === v.vendor_id && !["cancelled", "returned", "refunded"].includes(r.status))}</td>
                           </tr>
                         ))}
                       </tbody>

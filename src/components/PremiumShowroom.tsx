@@ -4,9 +4,9 @@ import { ArrowLeft, BadgeCheck, ChevronLeft, ChevronRight, Sparkles, Star, Store
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useShowroom, type ShowroomItem, type ShowroomItemLive } from "@/hooks/useShowroom";
+import { formatPrice } from "@/lib/currency";
 
 
-const formatPrice = (value: number) => `${Number(value).toLocaleString("ar-SY")} ل.س`;
 const targetOf = (item: ShowroomItem) => {
   if (item.link_url?.startsWith("/")) return item.link_url;
   if (item.item_type === "product" && item.product_id) return `/product/${item.product_id}`;
@@ -38,7 +38,7 @@ const ShowroomStand = memo(({ item, offset, isCenter, priority, onSelect }: Stan
         <div className="flex items-center gap-2"><span className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-2.5 py-1 text-[11px] font-semibold text-primary">{item.item_type === "store" ? <Store className="h-3 w-3" /> : <Sparkles className="h-3 w-3" />}{item.item_type === "store" ? "متجر مميز" : "منتج مميز"}</span>{item.is_verified && <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-success"><BadgeCheck className="h-3.5 w-3.5" /> موثّق</span>}{item.rating != null && <span className="ms-auto inline-flex items-center gap-1 text-xs font-bold"><Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />{Number(item.rating).toFixed(1)}</span>}</div>
         <h2 className="line-clamp-1 text-lg font-bold md:text-xl">{item.title}</h2>
         {item.subtitle && <p className="line-clamp-2 text-sm text-muted-foreground">{item.subtitle}</p>}
-        {item.item_type === "product" && item.price != null && <div className="flex items-baseline gap-2"><span className="text-lg font-extrabold text-primary">{formatPrice(item.discount_price ?? item.price)}</span>{item.discount_price != null && item.discount_price < item.price && <span className="text-sm text-muted-foreground line-through">{formatPrice(item.price)}</span>}</div>}
+        {item.item_type === "product" && item.price != null && <div className="flex items-baseline gap-2"><span className="text-lg font-extrabold text-primary">{formatPrice(item.discount_price ?? item.price, item.currency)}</span>{item.discount_price != null && item.discount_price < item.price && <span className="text-sm text-muted-foreground line-through">{formatPrice(item.price, item.currency)}</span>}</div>}
         <div className="flex gap-2 pt-1"><Button size="sm" className="group gap-1.5" tabIndex={isCenter ? 0 : -1} disabled={!target} onClick={(event) => { event.stopPropagation(); if (target) navigate(target); }}>{item.item_type === "store" ? "زيارة المتجر" : "عرض المنتج"}<ArrowLeft className="h-3.5 w-3.5 transition-transform group-hover:-translate-x-0.5" /></Button>{item.sponsor_name && <span className="self-center text-[11px] text-muted-foreground">برعاية {item.sponsor_name}</span>}</div>
       </div>
     </article>

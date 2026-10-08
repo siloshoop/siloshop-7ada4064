@@ -45,9 +45,10 @@ function escapeCsvField(value: unknown): string {
   return str;
 }
 
-export function buildProductsCsv(rows: Array<Partial<Record<ProductCsvColumn, unknown>>>): string {
-  const header = PRODUCT_CSV_COLUMNS.join(",");
-  const lines = rows.map((row) => PRODUCT_CSV_COLUMNS.map((col) => escapeCsvField(row[col])).join(","));
+export function buildProductsCsv(rows: Array<Partial<Record<ProductCsvColumn, unknown>> & { currency?: string | null }>): string {
+  const columns = [...PRODUCT_CSV_COLUMNS, "currency"] as const;
+  const header = columns.join(",");
+  const lines = rows.map((row) => columns.map((col) => escapeCsvField(row[col])).join(","));
   return CSV_BOM + [header, ...lines].join("\r\n");
 }
 

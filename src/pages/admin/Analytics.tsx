@@ -49,8 +49,6 @@ const RANGES = [
 
 const COLORS = ["hsl(var(--primary))", "hsl(var(--accent))", "#10b981", "#f59e0b", "#3b82f6", "#ef4444"];
 
-const formatCurrency = (n: number) =>
-  new Intl.NumberFormat("ar-SY", { maximumFractionDigits: 0 }).format(Math.round(n || 0)) + " ل.س";
 
 const StatCard = ({
   title, value, hint, icon: Icon, tone = "primary",

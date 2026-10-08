@@ -115,7 +115,7 @@ export const SearchFilters = ({ onFilterChange }: SearchFiltersProps) => {
         <div className="space-y-6 mt-6">
           {/* نطاق السعر */}
           <div className="space-y-4">
-            <Label>نطاق السعر (ل.س)</Label>
+            <Label>نطاق السعر (بعملة المنتج)</Label>
             <div className="px-2">
               <Slider
                 value={priceRange}

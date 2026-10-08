@@ -1,4 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
+import { withDisplayCurrency } from "@/lib/displayCurrency";
 
 export interface SellerOrderRow {
   id: string;
@@ -10,6 +11,7 @@ export interface SellerOrderRow {
   payment_status: string;
   payment_method: string;
   total_amount: number;
+  currency?: string | null;
   vendor_subtotal: number;
   items_count: number;
   customer_name: string | null;
@@ -42,7 +44,7 @@ export const fetchSellerOrders = async (
     _offset: filters.offset ?? 0,
   });
   if (error) throw error;
-  const rows = (data || []) as SellerOrderRow[];
+  const rows = await withDisplayCurrency((data || []) as SellerOrderRow[], "orders");
   const total = rows.length > 0 ? Number(rows[0].total_count) : 0;
   return { rows, total };
 };
@@ -54,6 +56,7 @@ export interface SellerOrderItem {
   variant_label: string | null;
   quantity: number;
   price: number;
+  currency?: string | null;
   subtotal: number | null;
 }
 
@@ -62,7 +65,12 @@ export const fetchSellerOrderItems = async (orderId: string): Promise<SellerOrde
   // the items that belong to the current seller (or all of them for admins).
   const { data, error } = await supabase.rpc("seller_order_items", { _order_id: orderId });
   if (error) throw error;
-  return (data || []) as SellerOrderItem[];
+  const rows = (data || []) as SellerOrderItem[];
+  if (!rows.length) return rows;
+  const { data: snapshots, error: snapshotError } = await supabase.from("order_items").select("id,currency").in("id", rows.map((r) => r.id));
+  if (snapshotError) throw snapshotError;
+  const currencies = new Map((snapshots ?? []).map((r) => [r.id, r.currency]));
+  return rows.map((r) => ({ ...r, currency: currencies.get(r.id) ?? r.currency ?? null }));
 };
 
 export interface OrderNote {

@@ -21,6 +21,7 @@ import {
 import { ORDER_STATUSES, normalizeStatus } from "@/lib/orderStatus";
 import { fetchSellerOrders, type SellerOrderRow } from "@/lib/sellerOrders";
 import { useToast } from "@/hooks/use-toast";
+import { formatKnownPrice, formatAmountsByCurrency } from "@/lib/currency";
 
 const PAGE_SIZE = 20;
 
@@ -30,7 +31,7 @@ interface Kpis {
   shipped: number;
   delivered: number;
   cancelled: number;
-  revenue: number;
+  revenue: string;
 }
 
 const VendorOrders = () => {
@@ -48,7 +49,7 @@ const VendorOrders = () => {
   const [page, setPage] = useState(0);
   const [selectedOrder, setSelectedOrder] = useState<SellerOrderRow | null>(null);
   const [sheetOpen, setSheetOpen] = useState(false);
-  const [kpis, setKpis] = useState<Kpis>({ pending: 0, preparing: 0, shipped: 0, delivered: 0, cancelled: 0, revenue: 0 });
+  const [kpis, setKpis] = useState<Kpis>({ pending: 0, preparing: 0, shipped: 0, delivered: 0, cancelled: 0, revenue: "0" });
 
   useEffect(() => {
     if (!authLoading && !user) navigate("/auth");
@@ -83,7 +84,8 @@ const VendorOrders = () => {
     if (!user) return;
     try {
       const { rows: all } = await fetchSellerOrders({ limit: 1000, offset: 0 });
-      const next: Kpis = { pending: 0, preparing: 0, shipped: 0, delivered: 0, cancelled: 0, revenue: 0 };
+      const next: Kpis = { pending: 0, preparing: 0, shipped: 0, delivered: 0, cancelled: 0, revenue: "0" };
+      const revenueRows: { amount: number; currency?: string | null }[] = [];
       for (const r of all) {
         const s = normalizeStatus(r.status);
         if (s === "pending") next.pending++;
@@ -91,8 +93,9 @@ const VendorOrders = () => {
         else if (s === "shipped" || s === "out_for_delivery" || s === "ready_for_shipping") next.shipped++;
         else if (s === "delivered" || s === "completed") next.delivered++;
         else if (s === "cancelled" || s === "returned") next.cancelled++;
-        if (s !== "cancelled" && s !== "returned") next.revenue += Number(r.vendor_subtotal || 0);
+        if (s !== "cancelled" && s !== "returned") revenueRows.push({ amount: Number(r.vendor_subtotal || 0), currency: r.currency });
       }
+      next.revenue = formatAmountsByCurrency(revenueRows);
       setKpis(next);
     } catch {
       /* non-fatal */
@@ -162,7 +165,7 @@ const VendorOrders = () => {
                 <Wallet className="h-4 w-4 text-primary" />
               </div>
               <div className="min-w-0">
-                <p className="truncate text-lg font-bold">{kpis.revenue.toLocaleString("ar-SY")} ل.س</p>
+                <p className="text-lg font-bold">{kpis.revenue}</p>
                 <p className="text-xs text-muted-foreground">إيرادات فعّالة</p>
               </div>
             </CardContent>
@@ -246,7 +249,7 @@ const VendorOrders = () => {
                         <TableCell className="text-sm">{order.city || "—"}</TableCell>
                         <TableCell className="text-sm">{order.items_count}</TableCell>
                         <TableCell className="text-sm font-semibold">
-                          {Number(order.vendor_subtotal || 0).toLocaleString("ar-SY")} ل.س
+                          {formatKnownPrice(order.vendor_subtotal, order.currency)}
                         </TableCell>
                         <TableCell><OrderStatusBadge status={order.status} /></TableCell>
                         <TableCell>

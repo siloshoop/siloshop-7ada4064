@@ -906,7 +906,7 @@ const Checkout = () => {
                         </div>
                         <div className="text-left">
                           <p className="font-bold">
-                            {formatPrice(Number(item.product.price) * item.quantity, item.product.currency, { maximumFractionDigits: 0 })}
+                            {formatPrice(Number(item.product.price) * item.quantity, item.product.currency, { maximumFractionDigits: 2 })}
                           </p>
                         </div>
                       </div>
@@ -954,26 +954,26 @@ const Checkout = () => {
                       )}
                       <div className="flex justify-between">
                         <span>المجموع الفرعي</span>
-                        <span>{formatPrice(t.subtotal, t.currency, { maximumFractionDigits: 0 })}</span>
+                        <span>{formatPrice(t.subtotal, t.currency, { maximumFractionDigits: 2 })}</span>
                       </div>
                       {t.couponDiscount > 0 && (
                         <div className="flex justify-between text-green-600">
                           <span>الخصم</span>
-                          <span>-{formatPrice(t.couponDiscount, t.currency, { maximumFractionDigits: 0 })}</span>
+                          <span>-{formatPrice(t.couponDiscount, t.currency, { maximumFractionDigits: 2 })}</span>
                         </div>
                       )}
                       <div className="flex justify-between">
                         <span>الشحن</span>
                         <span>
                           {t.shipping > 0
-                            ? formatPrice(t.shipping, t.currency, { maximumFractionDigits: 0 })
+                            ? formatPrice(t.shipping, t.currency, { maximumFractionDigits: 2 })
                             : "مجاني"}
                         </span>
                       </div>
                       <div className="border-t pt-2 flex justify-between font-bold text-lg">
                         <span>الإجمالي</span>
                         <span className="text-primary">
-                          {formatPrice(t.total, t.currency, { maximumFractionDigits: 0 })}
+                          {formatPrice(t.total, t.currency, { maximumFractionDigits: 2 })}
                         </span>
                       </div>
                     </div>

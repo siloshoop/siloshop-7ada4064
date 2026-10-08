@@ -44,7 +44,7 @@ const BrandLogo = ({ as: Tag = "span", className, onClick, linkToHome = true, ..
           onError={() => setImageFailed(true)}
         />
       )}
-      <span className="min-w-0 truncate font-bold text-foreground" dir="ltr">SiloShop</span>
+      <span className="brand-logo-text min-w-0 truncate font-bold" dir="ltr">SiloShop</span>
     </Tag>
   );
 };

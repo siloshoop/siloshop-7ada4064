@@ -8,6 +8,11 @@ export interface TrackingProduct {
   variant_label: string | null;
   quantity: number;
   price: number;
+  /** Independent per-product saved status (order_items.tracking_status). */
+  tracking_status?: string | null;
+  tracking_number?: string | null;
+  shipping_carrier?: string | null;
+  tracking_updated_at?: string | null;
 }
 
 export interface SavedShipment {

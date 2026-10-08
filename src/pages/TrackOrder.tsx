@@ -6,7 +6,7 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import ShipmentTrackingTimeline from "@/components/orders/ShipmentTrackingTimeline";
+import OrderItemTrackingCard from "@/components/orders/OrderItemTrackingCard";
 import { buildTrackingShipments, type SavedShipment, type TrackingProduct } from "@/lib/orderShipments";
 import { useVendorNames } from "@/hooks/useVendorNames";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -295,7 +295,7 @@ const TrackOrder = () => {
       .eq("parent_order_id", id).eq("customer_id", user.id).order("created_at");
     const childRows = children.data ?? [];
     const [items, shipping] = await Promise.all([
-      supabase.from("order_items").select("id, order_id, vendor_id, product_id, quantity, price, currency, product_name, product_image, variant_label")
+      supabase.from("order_items").select("id, order_id, vendor_id, product_id, quantity, price, currency, product_name, product_image, variant_label, tracking_status, tracking_number, shipping_carrier, tracking_updated_at")
         .in("order_id", [id, ...childRows.map((child) => child.id)]),
       supabase.from("shipping_details").select("shipping_company, estimated_delivery, shipped_at, delivered_at, shipping_notes").eq("order_id", id),
     ]);
@@ -449,20 +449,11 @@ const TrackOrder = () => {
                     </div>
                     {shipment.updated_at && <p className="text-xs text-muted-foreground">آخر تحديث: {format(new Date(shipment.updated_at), "dd MMM yyyy - HH:mm", { locale: ar })}</p>}
                   </CardHeader>
-                  <CardContent className="p-4 pt-0 space-y-4">
-                    <div className="space-y-3">
-                      {shipment.items.map((item) => <Link key={item.id} to={item.product_id ? `/product/${item.product_id}` : "#"} className="flex items-start gap-3 rounded-md transition-colors hover:bg-muted/50">
-                        {item.product_image ? <img src={item.product_image} alt={item.product_name ?? "منتج"} loading="lazy" className="h-14 w-14 shrink-0 rounded object-cover" />
-                          : <div className="h-14 w-14 shrink-0 rounded bg-muted flex items-center justify-center"><Package className="h-6 w-6 text-muted-foreground" /></div>}
-                        <div className="min-w-0 flex-1">
-                          <h3 className="text-sm font-medium break-words">{item.product_name || "منتج"}</h3>
-                          {item.variant_label && <p className="text-xs text-muted-foreground break-words">{item.variant_label}</p>}
-                          <p className="text-xs text-muted-foreground mt-1">الكمية: {item.quantity}</p>
-                        </div>
-                      </Link>)}
-                    </div>
-                    <Separator />
-                    <ShipmentTrackingTimeline status={shipment.status || shipment.tracking_status} />
+                  <CardContent className="p-4 pt-0 space-y-3">
+                    <p className="text-xs text-muted-foreground">لكل منتج حالة تتبع مستقلة — اضغط على المنتج لعرض مراحل تتبعه.</p>
+                    {shipment.items.map((item, i) => (
+                      <OrderItemTrackingCard key={item.id} item={item} defaultOpen={shipment.items.length === 1 && i === 0} />
+                    ))}
                   </CardContent>
                 </Card>
               ))}

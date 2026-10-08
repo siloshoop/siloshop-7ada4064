@@ -17,20 +17,24 @@ export const initNativeApp = async () => {
       import("@capacitor/splash-screen"),
     ]);
 
-    // Capacitor 8 exposes Android system-bar insets as
-    // --safe-area-inset-* CSS variables when viewport-fit=cover is present.
-    await SystemBars.setStyle({ style: SystemBarsStyle.Light }).catch(() => undefined);
-    await SystemBars.show().catch(() => undefined);
+    // Hide splash screen as soon as plugins are loaded and React has likely
+    // completed its first meaningful paint.
+    void SplashScreen.hide().catch(() => undefined);
 
-    await StatusBar.setOverlaysWebView({ overlay: true }).catch(() => undefined);
-    await StatusBar.setStyle({ style: Style.Light }).catch(() => undefined);
+    // Non-critical native UI adjustments are performed without awaiting to avoid
+    // blocking the splash screen hide or app interactive state.
+    void SystemBars.setStyle({ style: SystemBarsStyle.Light }).catch(() => undefined);
+    void SystemBars.show().catch(() => undefined);
+
+    void StatusBar.setOverlaysWebView({ overlay: true }).catch(() => undefined);
+    void StatusBar.setStyle({ style: Style.Light }).catch(() => undefined);
     if (Capacitor.getPlatform() === "android") {
-      await StatusBar.setBackgroundColor({ color: "#7C3AED" }).catch(() => undefined);
+      void StatusBar.setBackgroundColor({ color: "#7C3AED" }).catch(() => undefined);
     }
 
     // Keep the stored Supabase session alive across app close/reopen and
     // background/foreground cycles. Data itself always comes from Supabase.
-    supabase.auth.startAutoRefresh().catch(() => undefined);
+    void supabase.auth.startAutoRefresh().catch(() => undefined);
     App.addListener("appStateChange", ({ isActive }) => {
       if (isActive) {
         void supabase.auth.startAutoRefresh().catch(() => undefined);
@@ -49,8 +53,6 @@ export const initNativeApp = async () => {
         void App.exitApp();
       }
     });
-
-    await SplashScreen.hide().catch(() => undefined);
   } catch {
     // Plugins unavailable – ignore.
   }

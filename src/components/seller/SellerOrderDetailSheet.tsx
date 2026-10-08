@@ -21,6 +21,7 @@ import OrderTimelineLog from "@/components/orders/OrderTimelineLog";
 import PrintOrderDocs from "@/components/seller/PrintOrderDocs";
 import SellerOrderNotes from "@/components/seller/SellerOrderNotes";
 import SellerOrderShippingForm from "@/components/seller/SellerOrderShippingForm";
+import SellerItemTrackingControl from "@/components/seller/SellerItemTrackingControl";
 import { changeOrderStatus, friendlyOrderError, normalizeStatus, type OrderStatus } from "@/lib/orderStatus";
 import {
   cancelSellerOrder, fetchSellerOrderItems, type SellerOrderItem, type SellerOrderRow,
@@ -204,7 +205,8 @@ const SellerOrderDetailSheet = ({ order, open, onOpenChange, onChanged }: Props)
                 <p className="text-sm text-muted-foreground">لا توجد منتجات.</p>
               ) : (
                 items.map((it) => (
-                  <div key={it.id} className="flex items-center gap-3 rounded-lg bg-muted/50 p-3">
+                  <div key={it.id} className="rounded-lg bg-muted/50 p-3">
+                  <div className="flex items-center gap-3">
                     <OrderProductImage image={it.product_image} orderItemId={it.id} alt={it.product_name || ""} className="h-12 w-12 shrink-0 rounded object-cover" />
                     <div className="min-w-0 flex-1">
                       <p className="truncate text-sm font-medium">{it.product_name || "منتج"}</p>
@@ -214,6 +216,9 @@ const SellerOrderDetailSheet = ({ order, open, onOpenChange, onChanged }: Props)
                     <p className="text-sm font-semibold">
                       {formatPrice(it.subtotal ?? it.quantity * it.price, (it as any).currency ?? orderCurrency)}
                     </p>
+                  </div>
+                  <SellerItemTrackingControl item={it} disabled={frozen}
+                    onSaved={(patch) => setItems((prev) => prev.map((x) => x.id === it.id ? { ...x, ...patch } : x))} />
                   </div>
                 ))
               )}

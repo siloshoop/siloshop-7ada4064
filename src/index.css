@@ -361,6 +361,11 @@ All colors MUST be HSL.
     max-height: calc(100dvh - max(env(safe-area-inset-top, 0px), var(--safe-area-inset-top, 0px)) - max(env(safe-area-inset-bottom, 0px), var(--safe-area-inset-bottom, 0px)));
   }
 
+  .safe-side-sheet {
+    top: max(env(safe-area-inset-top, 0px), var(--safe-area-inset-top, 0px));
+    bottom: max(env(safe-area-inset-bottom, 0px), var(--safe-area-inset-bottom, 0px));
+  }
+
   /* Hover scale animation */
   .hover-scale {
     transition: all 0.3s cubic-bezier(0.22,1,0.36,1);

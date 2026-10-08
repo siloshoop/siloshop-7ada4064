@@ -75,15 +75,16 @@ const Navbar = () => {
 
   useSyncListener(["cart"], fetchCartCount);
   return (
-    <header className="safe-area-top sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container flex min-w-0 flex-wrap items-center gap-2 px-3 py-2 sm:px-4 md:h-16 md:flex-nowrap md:justify-between md:gap-4 md:py-0">
+    <header data-testid="site-header" className="safe-area-top safe-area-x sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <div className="container flex min-w-0 flex-wrap items-center justify-between gap-x-1 gap-y-1 px-2 py-1 sm:px-4 md:h-16 md:flex-nowrap md:gap-4 md:py-0">
         {/* Right side - Icons */}
-        <div className="order-2 flex w-full min-w-0 items-center justify-between gap-0 overflow-x-auto scrollbar-hide md:order-none md:w-auto md:justify-start md:gap-2 md:overflow-visible">
-          <ThemeToggle />
+        <div className="order-2 flex min-w-0 items-center gap-0 md:order-none md:justify-start md:gap-2">
+          <div className="hidden md:block"><ThemeToggle /></div>
           <Button 
             variant="ghost" 
             size="icon" 
             className="relative h-9 w-9 md:h-10 md:w-10"
+            aria-label="السلة"
             onClick={() => navigate("/cart")}
             ref={(el: HTMLButtonElement | null) => { (cartRef as React.MutableRefObject<HTMLElement | null>).current = el; }}
           >
@@ -97,7 +98,7 @@ const Navbar = () => {
           <Button 
             variant="ghost" 
             size="icon"
-            className="h-9 w-9 md:h-10 md:w-10"
+            className="hidden h-9 w-9 md:inline-flex md:h-10 md:w-10"
             onClick={() => navigate("/favorites")}
           >
             <Heart className="h-5 w-5" />
@@ -125,7 +126,7 @@ const Navbar = () => {
 
           {user && (
             <>
-              <PushNotificationManager variant="icon" />
+              <div className="hidden md:block"><PushNotificationManager variant="icon" /></div>
               <NotificationsDropdown />
             </>
           )}
@@ -134,7 +135,7 @@ const Navbar = () => {
             user ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="icon">
+                  <Button variant="ghost" size="icon" aria-label="حسابي" className="h-9 w-9 md:h-10 md:w-10">
                     <User className="h-5 w-5" />
                   </Button>
                 </DropdownMenuTrigger>
@@ -165,15 +166,16 @@ const Navbar = () => {
                 </DropdownMenuContent>
               </DropdownMenu>
             ) : (
-              <Button onClick={() => navigate("/auth", { state: { from: location.pathname + location.search } })} size="sm" className="shrink-0 px-3">
-                تسجيل الدخول
+              <Button onClick={() => navigate("/auth", { state: { from: location.pathname + location.search } })} size="sm" aria-label="تسجيل الدخول" className="h-9 w-9 shrink-0 px-0 md:w-auto md:px-3">
+                <User className="h-5 w-5 md:hidden" />
+                <span className="hidden md:inline">تسجيل الدخول</span>
               </Button>
             )
           )}
         </div>
 
         {/* Center - Search */}
-        <div className="order-3 flex w-full min-w-0 items-center gap-2 md:order-none md:max-w-2xl md:flex-1">
+        <div className="order-3 flex w-full min-w-0 items-center gap-1 md:order-none md:max-w-2xl md:flex-1">
           <SearchAutocomplete className="flex-1" />
           <Button 
             variant="outline" 
@@ -186,14 +188,14 @@ const Navbar = () => {
         </div>
 
         {/* Left side - Logo & Menu */}
-        <div className="order-1 flex w-full min-w-0 items-center justify-between gap-2 md:order-none md:w-auto md:justify-start md:gap-4">
+        <div className="order-1 flex min-w-0 items-center gap-1 md:order-none md:gap-4">
           <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
             <SheetTrigger asChild>
-              <Button variant="ghost" size="icon" aria-label="الفئات">
+              <Button variant="ghost" size="icon" className="h-9 w-9 md:h-10 md:w-10" aria-label="الفئات">
                 <Menu className="h-5 w-5" />
               </Button>
             </SheetTrigger>
-            <SheetContent side="right" className="w-[min(340px,calc(100vw-1rem))] max-w-[calc(100vw-1rem)] overflow-y-auto pt-[calc(1.5rem+env(safe-area-inset-top))] pb-[calc(1.5rem+env(safe-area-inset-bottom))]">
+            <SheetContent side="right" className="w-[min(340px,calc(100vw-1rem))] max-w-[calc(100vw-1rem)] overflow-y-auto">
               <SheetHeader>
                 <SheetTitle className="text-start text-lg">الفئات الأكثر شعبية</SheetTitle>
               </SheetHeader>
@@ -201,6 +203,13 @@ const Navbar = () => {
                 <CategoryDrawerList onNavigate={() => setMobileMenuOpen(false)} />
               </div>
               <div className="mt-6 flex flex-col gap-1 border-t pt-4 md:hidden">
+                <div className="flex items-center gap-2">
+                  <ThemeToggle />
+                  {user && <PushNotificationManager variant="icon" />}
+                </div>
+                <Button variant="ghost" className="justify-start" onClick={() => { navigate("/turkish-products"); setMobileMenuOpen(false); }}>
+                  منتجات تركية
+                </Button>
                 <Button 
                   variant="ghost" 
                   className="justify-start" 
@@ -301,13 +310,13 @@ const Navbar = () => {
           <BrandLogo
             as="h1"
             onClick={() => navigate("/")}
-            className="max-w-[150px] text-lg min-[390px]:text-xl sm:max-w-[160px] sm:text-2xl md:max-w-none md:text-3xl"
+            className="max-w-[100px] text-base sm:max-w-[160px] sm:text-2xl md:max-w-none md:text-3xl"
           />
         </div>
       </div>
 
       {/* Mega Menu Navigation */}
-      <nav className="border-t bg-background/95">
+      <nav className="hidden border-t bg-background/95 md:block">
         <div className="container flex h-10 min-w-0 items-center justify-between overflow-hidden px-3 sm:px-4">
           <div className="hidden shrink-0 md:block">
             <MegaMenu />

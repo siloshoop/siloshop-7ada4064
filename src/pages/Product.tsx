@@ -113,35 +113,24 @@ const Product = () => {
   const [selectedVariant, setSelectedVariant] = useState<ProductVariant | null>(null);
   const viewTrackedRef = useState(() => ({ current: "" }))[0];
 
-  const addToCompare = () => {
-    const currentCompare = searchParams.get("compare")?.split(",") || [];
-    
+  // Uses the same saved compare list as product cards (account or guest storage).
+  const addToCompare = async () => {
     if (!id) return;
-    
-    if (currentCompare.includes(id)) {
-      toast({
-        title: "تنبيه",
-        description: "المنتج موجود بالفعل في قائمة المقارنة",
-      });
+    const result = await addCompareProduct(id);
+    if (result.message === "exists") {
+      toast({ title: "تنبيه", description: "المنتج موجود بالفعل في قائمة المقارنة" });
       return;
     }
-
-    if (currentCompare.length >= 4) {
-      toast({
-        title: "تنبيه",
-        description: "يمكنك مقارنة حتى 4 منتجات فقط",
-        variant: "destructive",
-      });
+    if (result.message === "max") {
+      toast({ title: "تنبيه", description: "يمكنك مقارنة حتى 4 منتجات فقط", variant: "destructive" });
       return;
     }
-
-    const newCompare = [...currentCompare, id];
-    navigate(`/compare?products=${newCompare.join(",")}`);
-    
-    toast({
-      title: "تمت الإضافة",
-      description: "تم إضافة المنتج إلى قائمة المقارنة",
-    });
+    if (!result.success) {
+      toast({ title: "خطأ", description: "تعذّر إضافة المنتج إلى المقارنة", variant: "destructive" });
+      return;
+    }
+    toast({ title: "تمت الإضافة", description: "تم إضافة المنتج إلى قائمة المقارنة" });
+    navigate("/compare");
   };
 
   useEffect(() => {

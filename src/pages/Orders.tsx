@@ -1,3 +1,4 @@
+import { statusLabel as orderStatusLabel } from "@/lib/orderStatus";
 import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
@@ -204,8 +205,10 @@ const Orders = () => {
         supabase
           .from("order_items")
           .select(`
+            id,
             order_id,
             product_id,
+            tracking_status,
             quantity,
             price,
             currency,
@@ -431,7 +434,7 @@ const Orders = () => {
 
                     <div className="space-y-3">
                       {order.order_items.map((item, index) => (
-                        <div key={index} className="flex items-center gap-4 rounded-lg bg-muted/30 p-3">
+                        <Link key={index} to={`/orders/track/${order.id}${(item as any).id ? `?item=${(item as any).id}` : ""}`} className="flex items-center gap-4 rounded-lg bg-muted/30 p-3 transition-colors hover:bg-muted/60">
                           <img
                             src={item.product?.image_url || "/placeholder.svg"}
                             alt={item.product?.name || "منتج"}
@@ -447,8 +450,9 @@ const Orders = () => {
                             <p className="text-sm text-muted-foreground">
                               الكمية: {item.quantity} × {formatPrice(item.price, (item as any).currency ?? (order as any).currency, { maximumFractionDigits: 2 })}
                             </p>
+                            {(item as any).tracking_status && <Badge variant="secondary" className="mt-1">{orderStatusLabel((item as any).tracking_status)}</Badge>}
                           </div>
-                        </div>
+                        </Link>
                       ))}
                     </div>
                   </CardContent>

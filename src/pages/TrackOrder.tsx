@@ -390,7 +390,10 @@ const TrackOrder = () => {
       ].filter(Boolean) as TrackingHistoryRow[];
 
   const latestNote = timelineEntries[0]?.description ?? null;
-  const trackingShipments = buildTrackingShipments(order, shipments, shipmentItems);
+  const focusItem = new URLSearchParams(window.location.search).get("item");
+  const allShipments = buildTrackingShipments(order, shipments, shipmentItems);
+  const focused = focusItem ? allShipments.map((s) => ({ ...s, items: s.items.filter((i) => i.id === focusItem) })).filter((s) => s.items.length) : [];
+  const trackingShipments = focused.length ? focused : allShipments;
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -437,7 +440,8 @@ const TrackOrder = () => {
 
           <div className="grid lg:grid-cols-2 gap-6 items-start">
             <div className="min-w-0 space-y-4 lg:col-start-1" data-testid="seller-shipments">
-              <h2 className="text-xl font-semibold">تتبع الشحنات</h2>
+              <h2 className="text-xl font-semibold">{focused.length ? "تتبع المنتج" : "تتبع الشحنات"}</h2>
+              {focused.length > 0 && <Link to={`/orders/track/${order.id}`} className="text-sm text-primary underline">عرض كل منتجات الطلب</Link>}
               {shipmentError ? <p role="alert" className="text-sm text-destructive">تعذّر تحميل الشحنات. حاول التحديث مرة أخرى.</p> : trackingShipments.map((shipment, index) => (
                 <Card key={shipment.id} className="min-w-0 rounded-lg" data-shipment-id={shipment.id}>
                   <CardHeader className="p-4 pb-3">
@@ -452,7 +456,7 @@ const TrackOrder = () => {
                   <CardContent className="p-4 pt-0 space-y-3">
                     <p className="text-xs text-muted-foreground">لكل منتج حالة تتبع مستقلة — اضغط على المنتج لعرض مراحل تتبعه.</p>
                     {shipment.items.map((item, i) => (
-                      <OrderItemTrackingCard key={item.id} item={item} defaultOpen={shipment.items.length === 1 && i === 0} />
+                      <OrderItemTrackingCard key={item.id} item={item} defaultOpen={Boolean(focused.length) || (shipment.items.length === 1 && i === 0)} />
                     ))}
                   </CardContent>
                 </Card>

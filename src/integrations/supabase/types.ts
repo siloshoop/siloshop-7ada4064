@@ -4633,6 +4633,10 @@ export type Database = {
         }
         Returns: Json
       }
+      daily_revenue_by_currency: {
+        Args: { _days?: number; _scope?: string }
+        Returns: Json
+      }
       delete_or_archive_product: {
         Args: { _product_id: string }
         Returns: string

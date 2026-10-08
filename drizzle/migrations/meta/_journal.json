@@ -162,6 +162,13 @@
       "when": 1791417101021,
       "tag": "0022_revenue_totals_by_currency",
       "breakpoints": true
+    },
+    {
+      "idx": 23,
+      "version": "7",
+      "when": 1791439619798,
+      "tag": "0023_daily_revenue_by_currency",
+      "breakpoints": true
     }
   ]
 }

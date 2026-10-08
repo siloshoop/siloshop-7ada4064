@@ -1,3 +1,4 @@
+import RevenueCurrencyChart from "@/components/RevenueCurrencyChart";
 import { formatSplitTotals, type RevenueSplit } from "@/lib/currency";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
@@ -250,17 +251,10 @@ const Statistics = () => {
 
         <TabsContent value="revenue">
           <Card className="p-6">
-            <h2 className="text-xl font-bold mb-4">الإيرادات الأسبوعية</h2>
-            <ResponsiveContainer width="100%" height={400}>
-              <LineChart data={weeklyData}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="week" />
-                <YAxis />
-                <Tooltip />
-                <Legend />
-                <Line type="monotone" dataKey="revenue" stroke="#9333ea" name="الإيرادات (ل.س)" />
-              </LineChart>
-            </ResponsiveContainer>
+            <h2 className="text-xl font-bold mb-4">الإيرادات — آخر 90 يوم</h2>
+            <div className="h-[400px]">
+              <RevenueCurrencyChart scope="vendor" days={90} />
+            </div>
           </Card>
         </TabsContent>
 

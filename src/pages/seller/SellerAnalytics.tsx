@@ -1,3 +1,4 @@
+import RevenueCurrencyChart from "@/components/RevenueCurrencyChart";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import {
@@ -70,7 +71,14 @@ const SellerAnalytics = () => {
 
       <div className="grid gap-4 lg:grid-cols-2">
         <Card>
-          <CardHeader className="pb-2"><CardTitle className="text-base">الإيراد مقابل الزوّار</CardTitle></CardHeader>
+          <CardHeader className="pb-2"><CardTitle className="text-base">الإيرادات</CardTitle></CardHeader>
+          <CardContent className="h-64">
+            <RevenueCurrencyChart scope="vendor" days={days} reloadKey={data} />
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="pb-2"><CardTitle className="text-base">الزوّار</CardTitle></CardHeader>
           <CardContent className="h-64">
             {loading ? <Skeleton className="h-full w-full" /> : (
               <ResponsiveContainer width="100%" height="100%">
@@ -79,7 +87,6 @@ const SellerAnalytics = () => {
                   <XAxis dataKey="label" tick={{ fontSize: 11 }} />
                   <YAxis tick={{ fontSize: 11 }} width={60} />
                   <Tooltip />
-                  <Area type="monotone" dataKey="revenue" stroke="hsl(var(--primary))" fill="hsl(var(--primary) / 0.2)" />
                   <Area type="monotone" dataKey="views" stroke="hsl(var(--accent))" fill="hsl(var(--accent) / 0.15)" />
                 </AreaChart>
               </ResponsiveContainer>

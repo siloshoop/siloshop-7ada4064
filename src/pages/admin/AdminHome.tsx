@@ -1,3 +1,4 @@
+import RevenueCurrencyChart from "@/components/RevenueCurrencyChart";
 import { formatSplitTotals, type RevenueSplit } from "@/lib/currency";
 import { supabase } from "@/integrations/supabase/client";
 import { useEffect, useMemo, useState } from "react";

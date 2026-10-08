@@ -1,3 +1,4 @@
+import RevenueCurrencyChart from "@/components/RevenueCurrencyChart";
 import { Link } from "react-router-dom";
 import { useState } from "react";
 import {

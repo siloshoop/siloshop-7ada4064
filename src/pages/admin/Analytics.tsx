@@ -1,3 +1,4 @@
+import RevenueCurrencyChart from "@/components/RevenueCurrencyChart";
 import { formatSplitTotals, type RevenueSplit } from "@/lib/currency";
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";

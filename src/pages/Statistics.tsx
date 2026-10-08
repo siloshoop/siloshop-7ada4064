@@ -1,3 +1,4 @@
+import RevenueCurrencyChart from "@/components/RevenueCurrencyChart";
 import { formatSplitTotals, type RevenueSplit } from "@/lib/currency";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";

@@ -61,7 +61,6 @@ const SellerHome = () => {
   const o = data?.orders ?? {};
   const p = data?.products ?? {};
   const e = data?.engagement ?? {};
-  const w = data?.wallet;
 
   const views = Number(e.views_period ?? 0);
   const conversion = views > 0 ? ((Number(o.period ?? 0) / views) * 100).toFixed(1) : "0.0";

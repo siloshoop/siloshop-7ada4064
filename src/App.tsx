@@ -4,7 +4,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useLocation, Navigate } from "react-router-dom";
 import { ThemeProvider } from "next-themes";
 import { FlyToCartProvider } from "@/components/FlyToCart";
 import { AuthProvider } from "@/hooks/useAuth";
@@ -116,7 +116,6 @@ const SellerCustomers = lazy(() => import("./pages/seller/SellerCustomers"));
 const SellerReviews = lazy(() => import("./pages/seller/SellerReviews"));
 const SellerReports = lazy(() => import("./pages/seller/SellerReports"));
 const SellerViolations = lazy(() => import("./pages/seller/SellerViolations"));
-const SellerWallet = lazy(() => import("./pages/seller/SellerWallet"));
 const SellerStore = lazy(() => import("./pages/seller/SellerStore"));
 const SellerAnalytics = lazy(() => import("./pages/seller/SellerAnalytics"));
 const AdminSellerViolations = lazy(() => import("./pages/admin/SellerViolations"));
@@ -273,7 +272,7 @@ const App = () => (
             <Route path="/seller/reviews" element={<RequireApprovedSeller><SellerReviews /></RequireApprovedSeller>} />
             <Route path="/seller/reports" element={<RequireApprovedSeller><SellerReports /></RequireApprovedSeller>} />
             <Route path="/seller/violations" element={<RequireApprovedSeller><SellerViolations /></RequireApprovedSeller>} />
-            <Route path="/seller/wallet" element={<RequireApprovedSeller><SellerWallet /></RequireApprovedSeller>} />
+            <Route path="/seller/wallet" element={<Navigate to="/seller" replace />} />
             <Route path="/seller/store" element={<RequireApprovedSeller><SellerStore /></RequireApprovedSeller>} />
             <Route path="/seller/analytics" element={<RequireApprovedSeller><SellerAnalytics /></RequireApprovedSeller>} />
             <Route path="/favorites" element={<Favorites />} />

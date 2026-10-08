@@ -1,5 +1,10 @@
 # Production readiness audit
 
+## Compact mobile screen frame
+- [x] Compact the mobile header without removing controls and preserve the fixed bottom bar
+- [ ] Verify stationary bars, safe areas, drawer access, and footer clearance at mobile sizes
+- [ ] Physical Android frame verification (blocked: no physical device available)
+
 ## Product listing card layout
 - [x] Apply large clean images, readable seller/rating/prices and saved-data badges consistently through shared listing cards; badges use saved featured/trending flags and real discounts, without invented rankings or sponsorship
 - [x] Verify real homepage/search cards, loaded images, seller names, product navigation, no cart buttons, 360/375/390/412px without document overflow or JavaScript errors; 107 automated tests and automatic build passed

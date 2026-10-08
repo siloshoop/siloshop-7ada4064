@@ -190,7 +190,7 @@ All colors MUST be HSL.
     font-feature-settings: "cv11", "ss01";
     font-optical-sizing: auto;
     direction: rtl;
-    overflow-x: hidden;
+    overflow-x: clip;
     opacity: 1;
     width: 100%;
     min-width: 0;
@@ -203,7 +203,7 @@ All colors MUST be HSL.
   
   html {
     direction: rtl;
-    overflow-x: hidden;
+    overflow-x: clip;
     width: 100%;
   }
 

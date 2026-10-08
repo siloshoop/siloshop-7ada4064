@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { toPublicUrl } from "@/lib/share";
 import { readCartStock, validateCartQuantity } from "@/lib/cartStock";
-import { useParams, useNavigate, useSearchParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { formatPrice, currencySymbol } from "@/lib/currency";
@@ -94,7 +94,6 @@ interface Product {
 const Product = () => {
   const { id } = useParams();
   const { user } = useAuth();
-  const [searchParams] = useSearchParams();
   const [product, setProduct] = useState<Product | null>(null);
   const [dealPct, setDealPct] = useState(0);
   useEffect(() => {
@@ -107,6 +106,7 @@ const Product = () => {
   const [loading, setLoading] = useState(true);
   const [addingToCart, setAddingToCart] = useState(false);
   const navigate = useNavigate();
+  const { addProduct: addCompareProduct } = useCompareProducts();
   const { toast } = useToast();
   const { trackProductView } = useRecentlyViewed();
   const [vendorStats, setVendorStats] = useState<{ avg: number; count: number }>({ avg: 0, count: 0 });

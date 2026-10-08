@@ -38,6 +38,7 @@ import { notifySync, useSyncListener } from "@/lib/uiSync";
 import NativeAdBanner from "@/components/NativeAdBanner";
 import { friendlyDbError } from "@/lib/productValidation";
 import { fetchActiveDeals, applyDeal } from "@/lib/dealPricing";
+import { useCompareProducts } from "@/hooks/useCompareProducts";
 import { OUT_OF_STOCK_LABEL, availableProductStock, variantInStock } from "@/lib/stockAvailability";
 
 type ProductVariant = Database["public"]["Tables"]["product_variants"]["Row"];

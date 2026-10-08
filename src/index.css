@@ -182,7 +182,7 @@ All colors MUST be HSL.
     --sidebar-ring: 263 70% 50%;
 
     /* Brighter wordmark stops so the brand text stays legible on dark surfaces. */
-    --gradient-logo: linear-gradient(90deg, hsl(263 95% 74%) 0%, hsl(340 92% 68%) 34%, hsl(22 98% 64%) 68%, hsl(45 96% 60%) 100%);
+    --gradient-logo: linear-gradient(90deg, hsl(258 100% 80%) 0%, hsl(340 92% 70%) 34%, hsl(22 98% 66%) 68%, hsl(45 96% 62%) 100%);
     --logo-purple: 263 92% 74%;
   }
 }

@@ -1,3 +1,4 @@
+import { formatKnownPrice } from "@/lib/currency";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import Navbar from "@/components/Navbar";
@@ -54,6 +55,7 @@ interface TrackResult {
   cancelled_at: string | null;
   cancellation_reason: string | null;
   total_amount: number;
+  currency?: string | null;
   subtotal_amount: number | null;
   shipping_amount: number | null;
   tax_amount: number | null;
@@ -84,8 +86,6 @@ const statusLabel = (status?: string | null): string => {
   return ORDER_STATUS_LABELS[normalized] ?? EXTRA_STATUS_LABELS[normalized] ?? status ?? "";
 };
 
-const formatCurrency = (n: number | null | undefined) =>
-  new Intl.NumberFormat("ar-SY", { maximumFractionDigits: 0 }).format(Math.round(Number(n) || 0)) + " ل.س";
 
 const GuestTrack = () => {
   const [orderId, setOrderId] = useState("");
@@ -115,6 +115,8 @@ const GuestTrack = () => {
     }
     setResult({ history: [], events: [], items: [], ...payload });
   };
+
+  const formatCurrency = (n: number | null | undefined) => formatKnownPrice(n, result?.currency);
 
   const currentStatus = (result?.status || result?.tracking_status || "pending").trim().toLowerCase();
   const normalizedStatus = currentStatus === "processing" ? "preparing" : currentStatus;

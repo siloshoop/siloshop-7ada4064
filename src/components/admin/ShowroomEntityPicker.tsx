@@ -1,3 +1,5 @@
+import { formatKnownPrice as formatPrice } from "@/lib/currency";
+import { withDisplayCurrency } from "@/lib/displayCurrency";
 import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Input } from "@/components/ui/input";
@@ -16,6 +18,7 @@ export interface PickedVendor {
 
 export interface PickedProduct {
   product_id: string;
+  currency?: string | null;
   name: string;
   price: number;
   discount_price: number | null;
@@ -35,7 +38,6 @@ const useDebounced = (value: string, delay = 350) => {
   return debounced;
 };
 
-const formatPrice = (n: number) => `${Number(n).toLocaleString("ar-SY")} ل.س`;
 
 /** Real Supabase-backed searchable selector for vendors/stores (Super Admin only RPC). */
 export const VendorPicker = ({
@@ -161,10 +163,12 @@ export const ProductPicker = ({
         _vendor_id: vendorFilter || null,
         _limit: 20,
       })
-      .then(({ data, error: err }) => {
+      .then(async ({ data, error: err }) => {
         if (id !== reqId.current) return;
         if (err) setError(err.message);
-        setResults((data as PickedProduct[]) || []);
+        const enriched = await withDisplayCurrency(((data as PickedProduct[]) || []).map((p) => ({ ...p, id: p.product_id })), "products");
+        if (id !== reqId.current) return;
+        setResults(enriched);
         setLoading(false);
       });
   }, [debounced, vendorFilter]);
@@ -218,7 +222,7 @@ export const ProductPicker = ({
               <div className="min-w-0 flex-1">
                 <p className="truncate text-sm font-medium">{p.name}</p>
                 <p className="truncate text-xs text-muted-foreground">
-                  {formatPrice(p.discount_price ?? p.price)} · {p.vendor_name}
+                  {formatPrice(p.discount_price ?? p.price, p.currency)} · {p.vendor_name}
                   {p.sku ? ` · ${p.sku}` : ""}
                 </p>
               </div>

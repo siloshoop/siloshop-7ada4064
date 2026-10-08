@@ -415,7 +415,7 @@ const ProductModeration = () => {
                     )}
                   </p>
                   <p className="text-sm text-muted-foreground">
-                    {formatPrice(p.price, (p as any).currency, { maximumFractionDigits: 0 })} · المخزون {p.stock_quantity ?? 0}
+                    {formatPrice(p.price, (p as any).currency, { maximumFractionDigits: 2 })} · المخزون {p.stock_quantity ?? 0}
                     {" · "}البائع: {vendors[p.vendor_id] ?? "—"}
                   </p>
                   <p className="text-xs text-muted-foreground">

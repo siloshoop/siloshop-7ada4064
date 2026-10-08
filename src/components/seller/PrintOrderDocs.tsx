@@ -2,12 +2,13 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { exportSuccessMessage, printOrExportHtml } from "@/lib/exportFile";
 import { Printer, Tag } from "lucide-react";
-import { formatPrice, normalizeCurrency } from "@/lib/currency";
+import { formatKnownPrice, formatAmountsByCurrency } from "@/lib/currency";
 
 export interface PrintOrderItem {
   name: string;
   quantity: number;
   price: number;
+  currency?: string | null;
   sku?: string | null;
   barcode?: string | null;
 }
@@ -60,7 +61,7 @@ const esc = (s: unknown) =>
   );
 
 const money = (n: number, currency?: string | null) =>
-  formatPrice(n, currency, { maximumFractionDigits: 0 });
+  formatKnownPrice(n, currency);
 
 const docStyles = `
   @page { size: A4; margin: 12mm; }
@@ -80,8 +81,9 @@ const docStyles = `
 `;
 
 const buildHtml = (order: PrintOrderData, mode: "invoice" | "label") => {
-  const total = order.items.reduce((s, i) => s + i.quantity * i.price, 0);
-  const currency = normalizeCurrency(order.currency);
+  const currency = order.currency;
+  const amounts = order.items.map((i) => ({ amount: i.quantity * i.price, currency: i.currency ?? currency }));
+  const total = amounts.every((r) => r.currency) ? formatAmountsByCurrency(amounts) : "العملة غير متاحة";
   const shortId = order.id.slice(0, 8).toUpperCase();
   const date = new Date(order.created_at).toLocaleDateString("ar-SY", {
     year: "numeric",
@@ -115,14 +117,14 @@ const buildHtml = (order: PrintOrderData, mode: "invoice" | "label") => {
               <td>${esc(i.name)}</td>
               <td>${esc(i.sku || i.barcode || "-")}</td>
               <td>${i.quantity}</td>
-              <td>${esc(money(i.price, currency))}</td>
-              <td>${esc(money(i.quantity * i.price, currency))}</td>
+              <td>${esc(money(i.price, i.currency ?? currency))}</td>
+              <td>${esc(money(i.quantity * i.price, i.currency ?? currency))}</td>
             </tr>`
           )
           .join("")}
       </tbody>
     </table>
-    <div class="total">إجمالي منتجاتك: ${esc(money(total, currency))}</div>
+    <div class="total">إجمالي منتجاتك: ${esc(total)}</div>
     <div class="note">الدفع عند الاستلام. هذه الفاتورة خاصة بمنتجات هذا المتجر فقط داخل الطلب.</div>
   `;
 

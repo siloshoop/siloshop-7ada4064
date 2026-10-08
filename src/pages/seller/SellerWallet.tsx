@@ -1,3 +1,4 @@
+import { formatKnownPrice } from "@/lib/currency";
 import { useCallback, useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -24,7 +25,7 @@ interface PayoutRow {
   created_at: string;
 }
 
-const currency = (n: number) => `${Math.round(Number(n) || 0).toLocaleString("ar-SY")} ل.س`;
+const currency = (n: number) => formatKnownPrice(n, null);
 
 const STATUS: Record<string, { label: string; variant: "secondary" | "default" | "destructive" | "outline" }> = {
   pending: { label: "قيد المراجعة", variant: "secondary" },
@@ -135,7 +136,7 @@ const SellerWallet = () => {
           <CardHeader className="pb-3"><CardTitle className="text-base">طلب سحب جديد</CardTitle></CardHeader>
           <CardContent className="space-y-3">
             <div className="space-y-1.5">
-              <Label htmlFor="payout-amount">المبلغ (ل.س)</Label>
+              <Label htmlFor="payout-amount">المبلغ (العملة غير متاحة)</Label>
               <Input id="payout-amount" type="number" min={0} inputMode="numeric" value={amount}
                 onChange={(ev) => setAmount(ev.target.value)} placeholder="0" />
               <p className="text-xs text-muted-foreground">المتاح: {currency(wallet?.withdrawable ?? 0)}</p>

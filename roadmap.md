@@ -1,5 +1,12 @@
 # Production readiness audit
 
+## Currency display only
+- [x] Correct currency presentation in products, orders, reports, seller/admin lists, comparison and exports; preserve storage, imports and payment logic
+- [x] Verify real public USD $20 / SYP 25,000 product pages and mixed comparison signed out, 130 automated tests, no browser runtime errors, and automatic build OK
+- [ ] Authenticated cart/checkout, seller/admin reports and invoice export end-to-end (blocked: no permitted test account used; owner's real account untouched)
+- [ ] Public guest tracking and wallet currency completeness (blocked: existing payloads omit saved currency; displayed explicitly as unavailable, no database/payment changes)
+- [ ] Separate TypeScript and explicit production-build verification (not run manually; platform automatic build OK only)
+
 ## Capacitor performance before installation
 - [x] Measure public mobile loading three times before/after without the owner's account; total initial requests fell on home/search/categories, but measured load times did not improve consistently
 - [x] Defer hidden menus/search lookups, share navigation queries, and coalesce in-flight product metadata without caching stock; preserve native inset setup before splash hide

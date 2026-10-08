@@ -93,7 +93,7 @@ const AdminSettings = () => {
                 </div>
               </div>
               <div className="space-y-1">
-                <Label htmlFor="min_order">الحد الأدنى لقيمة الطلب (ل.س)</Label>
+                <Label htmlFor="min_order">الحد الأدنى لقيمة الطلب (بعملة الطلب)</Label>
                 <Input id="min_order" type="number" min={0} value={settings.min_order_amount}
                   onChange={(e) => setSettings({ ...settings, min_order_amount: Number(e.target.value) || 0 })} />
               </div>

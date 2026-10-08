@@ -27,6 +27,7 @@ export interface ShowroomItem {
 export interface ShowroomItemLive extends ShowroomItem {
   /** Live product price loaded from `products` for featured-product stands. */
   price?: number | null;
+  currency?: string | null;
   discount_price?: number | null;
 }
 
@@ -67,7 +68,7 @@ export const useShowroom = () => {
       if (productIds.length > 0) {
         const { data: prices } = await supabase
           .from("products")
-          .select("id, price, discount_price")
+          .select("id, price, discount_price, currency")
           .in("id", productIds);
         if (!active) return;
         const byId = new Map((prices || []).map((p) => [p.id, p]));
@@ -75,6 +76,7 @@ export const useShowroom = () => {
           const p = item.product_id ? byId.get(item.product_id) : undefined;
           if (p) {
             item.price = p.price;
+            item.currency = p.currency;
             item.discount_price = p.discount_price;
           }
         });

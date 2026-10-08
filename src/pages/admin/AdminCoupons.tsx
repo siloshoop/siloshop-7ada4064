@@ -1,3 +1,5 @@
+import { formatKnownPrice } from "@/lib/currency";
+import { withDisplayCurrency } from "@/lib/displayCurrency";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import AdminLayout from "@/components/admin/AdminLayout";
@@ -11,6 +13,7 @@ import { Loader2, Search, RefreshCw, Ticket } from "lucide-react";
 
 interface CouponRow {
   id: string;
+  currency?: string | null;
   code: string;
   vendor_id: string;
   vendor_name: string | null;
@@ -40,7 +43,7 @@ const AdminCoupons = () => {
     if (error) {
       toast({ title: "تعذر تحميل الكوبونات", description: error.message, variant: "destructive" });
     }
-    setRows(((data ?? []) as CouponRow[]));
+    setRows(await withDisplayCurrency((data ?? []) as CouponRow[], "coupons"));
     setLoading(false);
   }, [search, toast]);
 
@@ -128,8 +131,8 @@ const AdminCoupons = () => {
                         {!r.is_active && <Badge variant="destructive">موقوف</Badge>}
                       </div>
                       <p className="truncate text-xs text-muted-foreground">
-                        {r.vendor_name ?? "بائع"} — {r.discount_type === "percentage" ? `${r.discount_value}%` : `${r.discount_value} ل.س`}
-                        {r.min_purchase ? ` — حد أدنى ${r.min_purchase} ل.س` : ""}
+                        {r.vendor_name ?? "بائع"} — {r.discount_type === "percentage" ? `${r.discount_value}%` : formatKnownPrice(r.discount_value, r.currency)}
+                        {r.min_purchase ? ` — حد أدنى ${formatKnownPrice(r.min_purchase, r.currency)}` : ""}
                       </p>
                       <p className="text-xs text-muted-foreground">
                         استُخدم {r.used_count}{r.max_uses ? ` من ${r.max_uses}` : ""}

@@ -266,7 +266,7 @@ const SellerProducts = () => {
     const ids = filtered.map((r) => r.id);
     const { data, error } = await supabase
       .from("products")
-      .select(PRODUCT_CSV_COLUMNS.join(","))
+      .select([...PRODUCT_CSV_COLUMNS, "currency"].join(","))
       .in("id", ids);
     setExporting(false);
     if (error) {

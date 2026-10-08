@@ -104,7 +104,7 @@ interface TrackingHistoryRow {
 }
 
 const formatMoney = (n: number | null | undefined, currency?: string | null) =>
-  formatPrice(Math.round(Number(n) || 0), currency, { maximumFractionDigits: 0 });
+  formatPrice(n, currency);
 
 const TrackOrder = () => {
   const { id } = useParams();

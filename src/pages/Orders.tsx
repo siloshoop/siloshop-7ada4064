@@ -376,7 +376,7 @@ const Orders = () => {
                         <div className="flex flex-wrap items-center gap-2">
                           {getStatusBadge(order.status)}
                           <p className="text-lg font-bold text-primary">
-                            {formatPrice(order.total_amount, (order as any).currency, { maximumFractionDigits: 0 })}
+                            {formatPrice(order.total_amount, (order as any).currency, { maximumFractionDigits: 2 })}
                           </p>
                         </div>
                         <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
@@ -445,7 +445,7 @@ const Orders = () => {
                               <p className="text-xs text-muted-foreground">{item.variant_label}</p>
                             )}
                             <p className="text-sm text-muted-foreground">
-                              الكمية: {item.quantity} × {formatPrice(item.price, (item as any).currency ?? (order as any).currency, { maximumFractionDigits: 0 })}
+                              الكمية: {item.quantity} × {formatPrice(item.price, (item as any).currency ?? (order as any).currency, { maximumFractionDigits: 2 })}
                             </p>
                           </div>
                         </div>

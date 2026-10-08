@@ -1,3 +1,4 @@
+import { formatPrice as money, formatAmountsByCurrency } from "@/lib/currency";
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -47,8 +48,6 @@ const statusVariant = (s: string) =>
       ? "destructive"
       : "secondary";
 
-const money = (n: number, c: string) =>
-  `${new Intl.NumberFormat("ar-SY").format(Math.round(n || 0))} ${c === "SYP" ? "ل.س" : c}`;
 
 const FILTERS = ["all", "pending", "paid", "refunded", "failed"] as const;
 
@@ -89,9 +88,9 @@ const AdminPayments = () => {
     });
   }, [rows, filter, search]);
 
-  const total = filtered
+  const total = formatAmountsByCurrency(filtered
     .filter((r) => ["paid", "completed"].includes(r.payment_status))
-    .reduce((s, r) => s + Number(r.amount || 0), 0);
+    .map((r) => ({ amount: r.amount, currency: r.currency })));
 
   return (
     <AdminLayout
@@ -121,7 +120,7 @@ const AdminPayments = () => {
             />
           </div>
           <Badge variant="secondary">{filtered.length} عملية</Badge>
-          <Badge>{money(total, "SYP")} محصّلة</Badge>
+          <Badge>{total} محصّلة</Badge>
         </CardContent>
       </Card>
 

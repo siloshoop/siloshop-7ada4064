@@ -717,15 +717,15 @@ const Cart = () => {
                             <div className="text-end">
                               {item.appliedDiscount > 0 && (
                                 <p className="text-sm text-muted-foreground line-through">
-                                  {formatPrice(Number(item.product.price) * item.quantity, (item.product as any).currency, { maximumFractionDigits: 0 })}
+                                  {formatPrice(Number(item.product.price) * item.quantity, (item.product as any).currency, { maximumFractionDigits: 2 })}
                                 </p>
                               )}
                               <p className="font-bold text-lg text-primary">
-                                {formatPrice(item.discountedPrice, (item.product as any).currency, { maximumFractionDigits: 0 })}
+                                {formatPrice(item.discountedPrice, (item.product as any).currency, { maximumFractionDigits: 2 })}
                               </p>
                               {item.appliedDiscount > 0 && (
                                 <p className="text-xs text-green-600">
-                                  وفرت {formatPrice(item.savings, (item.product as any).currency, { maximumFractionDigits: 0 })}
+                                  وفرت {formatPrice(item.savings, (item.product as any).currency, { maximumFractionDigits: 2 })}
                                 </p>
                               )}
                             </div>
@@ -850,7 +850,7 @@ const Cart = () => {
                       )}
                       <div className="flex justify-between text-sm">
                         <span className="text-muted-foreground">المجموع الفرعي</span>
-                        <span>{formatPrice(t.subtotal, t.currency, { maximumFractionDigits: 0 })}</span>
+                        <span>{formatPrice(t.subtotal, t.currency, { maximumFractionDigits: 2 })}</span>
                       </div>
 
                       {t.savings > 0 && (
@@ -860,7 +860,7 @@ const Cart = () => {
                             خصم الكمية
                           </span>
                           <span className="text-green-600 font-medium">
-                            -{formatPrice(t.savings, t.currency, { maximumFractionDigits: 0 })}
+                            -{formatPrice(t.savings, t.currency, { maximumFractionDigits: 2 })}
                           </span>
                         </div>
                       )}
@@ -872,7 +872,7 @@ const Cart = () => {
                             خصم الكوبون
                           </span>
                           <span className="text-green-600 font-medium">
-                            -{formatPrice(t.couponDiscount, t.currency, { maximumFractionDigits: 0 })}
+                            -{formatPrice(t.couponDiscount, t.currency, { maximumFractionDigits: 2 })}
                           </span>
                         </div>
                       )}
@@ -885,7 +885,7 @@ const Cart = () => {
                         <span className={t.shipping === 0 ? "text-green-600 font-medium" : ""}>
                           {t.shipping === 0
                             ? "مجاني"
-                            : formatPrice(t.shipping, t.currency, { maximumFractionDigits: 0 })}
+                            : formatPrice(t.shipping, t.currency, { maximumFractionDigits: 2 })}
                         </span>
                       </div>
 
@@ -894,14 +894,14 @@ const Cart = () => {
                           <Receipt className="h-3.5 w-3.5" />
                           الضريبة {TAX_RATE > 0 ? `(${(TAX_RATE * 100).toFixed(0)}%)` : ""}
                         </span>
-                        <span>{formatPrice(t.tax, t.currency, { maximumFractionDigits: 0 })}</span>
+                        <span>{formatPrice(t.tax, t.currency, { maximumFractionDigits: 2 })}</span>
                       </div>
 
                       <div className="border-t pt-3 mt-2">
                         <div className="flex justify-between font-bold text-lg">
                           <span>الإجمالي النهائي</span>
                           <span className="text-primary">
-                            {formatPrice(t.total, t.currency, { maximumFractionDigits: 0 })}
+                            {formatPrice(t.total, t.currency, { maximumFractionDigits: 2 })}
                           </span>
                         </div>
                       </div>
@@ -928,7 +928,7 @@ const Cart = () => {
                           >
                             🎉 لقد وفرت{" "}
                             {formatPrice(t.savings + t.couponDiscount, t.currency, {
-                              maximumFractionDigits: 0,
+                              maximumFractionDigits: 2,
                             })}{" "}
                             على هذا الطلب!
                           </p>

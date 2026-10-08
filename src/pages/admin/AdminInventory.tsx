@@ -1,3 +1,5 @@
+import { formatKnownPrice } from "@/lib/currency";
+import { withDisplayCurrency } from "@/lib/displayCurrency";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -12,6 +14,7 @@ import { Loader2, RefreshCw, PackageX, AlertTriangle } from "lucide-react";
 
 interface InventoryRow {
   id: string;
+  currency?: string | null;
   name: string;
   vendor_id: string;
   vendor_name: string | null;
@@ -38,7 +41,7 @@ const AdminInventory = () => {
     if (error) {
       toast({ title: "تعذر تحميل المخزون", description: error.message, variant: "destructive" });
     }
-    setRows(((data ?? []) as InventoryRow[]));
+    setRows(await withDisplayCurrency((data ?? []) as InventoryRow[], "products"));
     setLoading(false);
   }, [threshold, toast]);
 
@@ -121,7 +124,7 @@ const AdminInventory = () => {
                     {!r.is_active && <Badge variant="outline">غير منشور</Badge>}
                   </div>
                   <p className="text-xs text-muted-foreground">
-                    {r.vendor_name ?? "بائع"} — {r.price.toLocaleString("ar")} ل.س — آخر تحديث {new Date(r.updated_at).toLocaleDateString("ar")}
+                    {r.vendor_name ?? "بائع"} — {formatKnownPrice(r.price, r.currency)} — آخر تحديث {new Date(r.updated_at).toLocaleDateString("ar")}
                   </p>
                 </div>
                 <Button asChild size="sm" variant="outline">

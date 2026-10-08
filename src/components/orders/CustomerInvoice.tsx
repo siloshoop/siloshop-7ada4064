@@ -13,7 +13,7 @@ const esc = (s: unknown) =>
   );
 
 const money = (n: number, currency?: string | null) =>
-  formatPrice(n, currency, { maximumFractionDigits: 0 });
+  formatPrice(n, currency, { maximumFractionDigits: 2 });
 
 const statusLabels: Record<string, string> = {
   pending: "قيد المعالجة",

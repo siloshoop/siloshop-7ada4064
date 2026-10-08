@@ -1,3 +1,8 @@
+import { useAuth } from "@/hooks/useAuth";
+import { useEffect } from "react";
+import { reportMoney, loadReportMoney, type ReportMoneyRow } from "@/lib/reportCurrency";
+import { formatKnownPrice } from "@/lib/currency";
+import { withDisplayCurrency } from "@/lib/displayCurrency";
 import RevenueCurrencyChart from "@/components/RevenueCurrencyChart";
 import { Link } from "react-router-dom";
 import { useState } from "react";
@@ -17,13 +22,40 @@ import {
 import useSellerDashboard from "@/hooks/useSellerDashboard";
 import { ORDER_STATUS_LABELS } from "@/lib/orderStatus";
 
-const currency = (n: number) => `${Math.round(Number(n) || 0).toLocaleString("ar-SY")} ل.س`;
 const num = (n: number) => (Number(n) || 0).toLocaleString("ar-SY");
 const shortDate = (d: string) => new Date(d).toLocaleDateString("ar-SY", { day: "numeric", month: "short" });
 
 const SellerHome = () => {
+  const { user } = useAuth();
   const [days, setDays] = useState(30);
   const { data, loading, refreshing, error, reload } = useSellerDashboard(days);
+  const [moneyRows, setMoneyRows] = useState<ReportMoneyRow[] | null>(null);
+  const [latestCurrencies, setLatestCurrencies] = useState<Record<string, string | null>>({});
+  useEffect(() => {
+    let active = true;
+    if (!user) return;
+    loadReportMoney(null, null, user.id, "unitTotal").then((rows) => { if (active) setMoneyRows(rows); }).catch(() => { if (active) setMoneyRows(null); });
+    withDisplayCurrency(data?.latest_orders ?? [], "orders").then((rows) => { if (active) setLatestCurrencies(Object.fromEntries(rows.map((r) => [r.id, r.currency]))); }).catch(() => { if (active) setLatestCurrencies({}); });
+    return () => { active = false; };
+  }, [data, user]);
+  const salesMoney = (key: string) => {
+    if (!moneyRows) return "—";
+    const now = new Date();
+    const today = now.toISOString().slice(0,10);
+    const yesterday = new Date(now.getTime() - 86400000).toISOString().slice(0,10);
+    const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).getTime();
+    return reportMoney(moneyRows, (r) => {
+      if (!["delivered", "completed"].includes(r.status)) return false;
+      const date = new Date(r.created_at).getTime();
+      if (key === "today") return r.created_at.slice(0,10) === today;
+      if (key === "yesterday") return r.created_at.slice(0,10) === yesterday;
+      if (key === "week") return date >= now.getTime() - 7 * 86400000;
+      if (key === "month") return date >= monthStart;
+      if (key === "period") return date >= now.getTime() - days * 86400000;
+      return true;
+    });
+  };
+
 
   const s = data?.sales ?? {};
   const o = data?.orders ?? {};
@@ -38,11 +70,11 @@ const SellerHome = () => {
     {
       title: "المبيعات والأرصدة",
       items: [
-        { label: "مبيعات اليوم", value: currency(Number(s.today ?? 0)), icon: Wallet },
-        { label: "مبيعات الأمس", value: currency(Number(s.yesterday ?? 0)), icon: Wallet },
-        { label: "مبيعات الأسبوع", value: currency(Number(s.week ?? 0)), icon: Wallet },
-        { label: "مبيعات الشهر", value: currency(Number(s.month ?? 0)), icon: Wallet },
-        { label: "إجمالي الإيراد", value: currency(Number(s.total ?? 0)), icon: Wallet },
+        { label: "مبيعات اليوم", value: salesMoney("today"), icon: Wallet },
+        { label: "مبيعات الأمس", value: salesMoney("yesterday"), icon: Wallet },
+        { label: "مبيعات الأسبوع", value: salesMoney("week"), icon: Wallet },
+        { label: "مبيعات الشهر", value: salesMoney("month"), icon: Wallet },
+        { label: "إجمالي الإيراد", value: salesMoney("total"), icon: Wallet },
         { label: "قطع مبيعة", value: num(Number(s.units_sold ?? 0)), icon: Boxes },
       ],
     },
@@ -183,7 +215,7 @@ const SellerHome = () => {
                   <img src={tp.image_url || "/placeholder.svg"} alt={tp.name} loading="lazy" className="h-10 w-10 rounded-md object-cover" />
                   <span className="min-w-0 flex-1 truncate text-sm">{tp.name}</span>
                   <Badge variant="secondary">{num(tp.units)} قطعة</Badge>
-                  <span className="text-xs text-muted-foreground">{currency(tp.revenue)}</span>
+                  <span className="text-xs text-muted-foreground">{moneyRows ? reportMoney(moneyRows, (r) => r.product_id === tp.id && ["delivered", "completed"].includes(r.status)) : "—"}</span>
                 </Link>
               ))
             )}
@@ -200,7 +232,7 @@ const SellerHome = () => {
                 <div key={ord.id} className="flex items-center justify-between gap-2 rounded-lg border p-2 text-sm">
                   <span className="font-mono text-xs">#{ord.id.slice(0, 8)}</span>
                   <Badge variant="secondary">{ORDER_STATUS_LABELS[ord.status ?? "pending"] ?? ord.status}</Badge>
-                  <span className="text-xs text-muted-foreground">{currency(ord.total_amount)}</span>
+                  <span className="text-xs text-muted-foreground">{formatKnownPrice(ord.total_amount, latestCurrencies[ord.id])}</span>
                 </div>
               ))
             )}

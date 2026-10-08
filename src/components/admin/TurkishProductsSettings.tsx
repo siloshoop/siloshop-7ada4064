@@ -137,7 +137,7 @@ const TurkishProductsSettings = () => {
               />
               {!form.free_shipping && (
                 <div className="space-y-1.5">
-                  <Label htmlFor="tp-fee">قيمة الشحن (ل.س)</Label>
+                  <Label htmlFor="tp-fee">قيمة الشحن (بعملة الطلب)</Label>
                   <Input
                     id="tp-fee"
                     type="number"

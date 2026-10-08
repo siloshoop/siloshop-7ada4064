@@ -1,4 +1,4 @@
-import { formatPrice } from "@/lib/currency";
+import { formatKnownPrice as formatPrice } from "@/lib/currency";
 import { useEffect, useMemo, useState } from "react";
 import {
   Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription,
@@ -67,6 +67,7 @@ const SellerOrderDetailSheet = ({ order, open, onOpenChange, onChanged }: Props)
     if (!open || !order) return;
     let active = true;
     setLoadingItems(true);
+    setOrderCurrency(order.currency ?? null);
     fetchSellerOrderItems(order.id)
       .then((rows) => { if (active) setItems(rows); })
       .catch((e) => toast({ title: "خطأ", description: friendlyOrderError(e), variant: "destructive" }))
@@ -93,8 +94,8 @@ const SellerOrderDetailSheet = ({ order, open, onOpenChange, onChanged }: Props)
       status: localOrder.status,
       customer_name: localOrder.customer_name,
       city: localOrder.city,
-      items: items.map((i) => ({ name: i.product_name || "منتج", quantity: i.quantity, price: i.price })),
-      currency: orderCurrency,
+      items: items.map((i) => ({ name: i.product_name || "منتج", quantity: i.quantity, price: i.price, currency: i.currency })),
+      currency: orderCurrency ?? localOrder.currency,
     };
   }, [localOrder, items, orderCurrency]);
 
@@ -157,7 +158,7 @@ const SellerOrderDetailSheet = ({ order, open, onOpenChange, onChanged }: Props)
             <div className="flex items-center gap-2"><User className="h-4 w-4 text-muted-foreground" /> {localOrder.customer_name || "غير متوفر"}</div>
             <div className="flex items-center gap-2"><Phone className="h-4 w-4 text-muted-foreground" /> {localOrder.customer_phone || "غير متوفر"}</div>
             <div className="flex items-center gap-2"><MapPin className="h-4 w-4 text-muted-foreground" /> {localOrder.city || "غير محددة"}</div>
-            <div className="flex items-center gap-2"><Package className="h-4 w-4 text-muted-foreground" /> {localOrder.items_count} منتج · إجمالي {formatPrice(localOrder.vendor_subtotal || 0, orderCurrency)}</div>
+            <div className="flex items-center gap-2"><Package className="h-4 w-4 text-muted-foreground" /> {localOrder.items_count} منتج · إجمالي {formatPrice(localOrder.vendor_subtotal || 0, orderCurrency ?? localOrder.currency)}</div>
           </div>
 
           {printData && (

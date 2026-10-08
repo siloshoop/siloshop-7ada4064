@@ -19,8 +19,6 @@ interface Analytics {
 }
 
 const RANGES = [7, 30, 90, 365];
-const money = (n: number) =>
-  `${new Intl.NumberFormat("ar-SY").format(Math.round(n || 0))} ل.س`;
 
 const Revenue = () => {
   const [days, setDays] = useState(30);

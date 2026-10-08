@@ -1,3 +1,6 @@
+import { reportMoney, loadReportMoney, type ReportMoneyRow } from "@/lib/reportCurrency";
+import { formatKnownPrice } from "@/lib/currency";
+import { withDisplayCurrency } from "@/lib/displayCurrency";
 import RevenueCurrencyChart from "@/components/RevenueCurrencyChart";
 import { formatSplitTotals, type RevenueSplit } from "@/lib/currency";
 import { supabase } from "@/integrations/supabase/client";
@@ -46,7 +49,6 @@ import {
 } from "lucide-react";
 
 const fmt = (n: number) => new Intl.NumberFormat("ar-SY").format(Math.round(n || 0));
-const money = (n: number) => `${fmt(n)} ل.س`;
 const shortDay = (value: string) =>
   new Date(value).toLocaleDateString("ar-SY", { day: "numeric", month: "short" });
 
@@ -82,6 +84,15 @@ const AdminHome = () => {
   const { modules } = useAdminModules();
   const [days, setDays] = useState(30);
   const { data, loading, refreshing, error, reload } = useAdminDashboard(days);
+  const [moneyRows, setMoneyRows] = useState<ReportMoneyRow[] | null>(null);
+  const [latestCurrencies, setLatestCurrencies] = useState<Record<string, string | null>>({});
+  useEffect(() => {
+    let active = true;
+    loadReportMoney(new Date(Date.now() - days * 86400000).toISOString(), null, undefined, "unitTotal").then((rows) => { if (active) setMoneyRows(rows); }).catch(() => { if (active) setMoneyRows(null); });
+    withDisplayCurrency(data?.latest_orders ?? [], "orders").then((rows) => { if (active) setLatestCurrencies(Object.fromEntries(rows.map((r) => [r.id, r.currency]))); }).catch(() => { if (active) setLatestCurrencies({}); });
+    return () => { active = false; };
+  }, [data, days]);
+
 
   const [split, setSplit] = useState<RevenueSplit | null>(null);
   useEffect(() => {
@@ -228,7 +239,7 @@ const AdminHome = () => {
                       <Badge variant="secondary" className="shrink-0 text-[10px]">
                         {STATUS_LABELS[order.status] ?? order.status}
                       </Badge>
-                      <span className="shrink-0 font-bold text-primary">{money(order.total_amount)}</span>
+                      <span className="shrink-0 font-bold text-primary">{formatKnownPrice(order.total_amount, latestCurrencies[order.id])}</span>
                     </Link>
                   ))
                 )}
@@ -259,7 +270,7 @@ const AdminHome = () => {
                       )}
                       <span className="min-w-0 flex-1 truncate font-medium">{product.name}</span>
                       <span className="shrink-0 text-[11px] text-muted-foreground">{fmt(product.units)} قطعة</span>
-                      <span className="shrink-0 font-bold text-primary">{money(product.revenue)}</span>
+                      <span className="shrink-0 font-bold text-primary">{moneyRows ? reportMoney(moneyRows, (r) => r.product_id === product.id && ["delivered", "completed"].includes(r.status)) : "—"}</span>
                     </Link>
                   ))
                 )}
@@ -284,7 +295,7 @@ const AdminHome = () => {
                       <Store className="h-4 w-4 text-primary" />
                       <span className="min-w-0 flex-1 truncate font-medium">{seller.name}</span>
                       <span className="shrink-0 text-[11px] text-muted-foreground">{fmt(seller.orders)} طلب</span>
-                      <span className="shrink-0 font-bold text-primary">{money(seller.revenue)}</span>
+                      <span className="shrink-0 font-bold text-primary">{moneyRows ? reportMoney(moneyRows, (r) => r.vendor_id === seller.id && ["delivered", "completed"].includes(r.status)) : "—"}</span>
                     </Link>
                   ))
                 )}

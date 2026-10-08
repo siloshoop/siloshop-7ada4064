@@ -1,3 +1,4 @@
+import { withDisplayCurrency } from "@/lib/displayCurrency";
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -8,12 +9,14 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Search, ShieldCheck } from "lucide-react";
+import { formatAmountsByCurrency } from "@/lib/currency";
 
 interface OrderRow {
   id: string;
   created_at: string;
   status: string;
   total_amount: number;
+  currency?: string | null;
   customer_name: string | null;
   city: string | null;
 }
@@ -23,7 +26,7 @@ interface CustomerRow {
   city: string;
   orders: number;
   delivered: number;
-  total: number;
+  amounts: { amount: number; currency?: string | null }[];
   last: string;
 }
 
@@ -38,7 +41,8 @@ const SellerCustomers = () => {
       setLoading(true);
       const { data, error } = await supabase.rpc("get_vendor_orders");
       if (error) toast({ title: "تعذّر تحميل العملاء", description: error.message, variant: "destructive" });
-      setOrders((data as OrderRow[]) ?? []);
+      try { setOrders(await withDisplayCurrency((data as OrderRow[]) ?? [], "orders")); }
+      catch (error) { toast({ title: "تعذر قراءة عملات الطلبات", description: String(error), variant: "destructive" }); }
       setLoading(false);
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -49,11 +53,11 @@ const SellerCustomers = () => {
     for (const o of orders) {
       const name = o.customer_name?.trim() || "عميل";
       const key = `${name}|${o.city ?? ""}`;
-      const prev = map.get(key) ?? { name, city: o.city ?? "-", orders: 0, delivered: 0, total: 0, last: o.created_at };
+      const prev = map.get(key) ?? { name, city: o.city ?? "-", orders: 0, delivered: 0, amounts: [], last: o.created_at };
       prev.orders += 1;
       if (o.status === "delivered") {
         prev.delivered += 1;
-        prev.total += Number(o.total_amount || 0);
+        prev.amounts.push({ amount: Number(o.total_amount || 0), currency: o.currency });
       }
       if (new Date(o.created_at) > new Date(prev.last)) prev.last = o.created_at;
       map.set(key, prev);
@@ -112,7 +116,7 @@ const SellerCustomers = () => {
                     <TableCell>{c.city}</TableCell>
                     <TableCell>{c.orders}</TableCell>
                     <TableCell><Badge variant="secondary">{c.delivered}</Badge></TableCell>
-                    <TableCell>{c.total.toLocaleString("ar-SY")} ل.س</TableCell>
+                    <TableCell>{formatAmountsByCurrency(c.amounts)}</TableCell>
                     <TableCell>{new Date(c.last).toLocaleDateString("ar-SY")}</TableCell>
                   </TableRow>
                 ))}

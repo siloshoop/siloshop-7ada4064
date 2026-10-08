@@ -93,15 +93,7 @@ const Revenue = () => {
               <CardTitle className="text-base">الإيرادات اليومية</CardTitle>
             </CardHeader>
             <CardContent className="h-80">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={data?.daily_orders ?? []}>
-                  <CartesianGrid strokeDasharray="3 3" opacity={0.3} />
-                  <XAxis dataKey="day" tick={{ fontSize: 11 }} />
-                  <YAxis tick={{ fontSize: 11 }} />
-                  <Tooltip formatter={(v: number) => money(v)} />
-                  <Bar dataKey="revenue" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
-                </BarChart>
-              </ResponsiveContainer>
+              <RevenueCurrencyChart scope="admin" days={days} reloadKey={data} />
             </CardContent>
           </Card>
         </>

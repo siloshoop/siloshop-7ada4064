@@ -133,17 +133,7 @@ const SellerHome = () => {
         <Card>
           <CardHeader className="pb-2"><CardTitle className="text-base">الإيرادات</CardTitle></CardHeader>
           <CardContent className="h-64">
-            {loading ? <Skeleton className="h-full w-full" /> : (
-              <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={series}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                  <XAxis dataKey="label" tick={{ fontSize: 11 }} />
-                  <YAxis tick={{ fontSize: 11 }} width={60} />
-                  <Tooltip formatter={(v: number) => currency(v)} />
-                  <Area type="monotone" dataKey="revenue" stroke="hsl(var(--primary))" fill="hsl(var(--primary) / 0.2)" />
-                </AreaChart>
-              </ResponsiveContainer>
-            )}
+            <RevenueCurrencyChart scope="vendor" days={days} reloadKey={data} />
           </CardContent>
         </Card>
 

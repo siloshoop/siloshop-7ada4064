@@ -211,16 +211,7 @@ const AdminAnalytics = () => {
                 </CardHeader>
                 <CardContent>
                   <div className="h-[280px]">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <LineChart data={dailyOrdersFormatted}>
-                        <CartesianGrid strokeDasharray="3 3" opacity={0.3} />
-                        <XAxis dataKey="day" tick={{ fontSize: 11 }} />
-                        <YAxis tick={{ fontSize: 11 }} />
-                        <Tooltip formatter={(v: number, n: string) => n === "revenue" ? formatCurrency(v) : v} />
-                        <Legend />
-                        <Line type="monotone" dataKey="revenue" name="الإيرادات" stroke="hsl(var(--primary))" strokeWidth={2} dot={false} />
-                      </LineChart>
-                    </ResponsiveContainer>
+                    <RevenueCurrencyChart scope="admin" days={days} />
                   </div>
                 </CardContent>
               </Card>

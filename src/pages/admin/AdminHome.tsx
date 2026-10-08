@@ -171,24 +171,7 @@ const AdminHome = () => {
         <>
           <div className="mt-6 grid gap-4 lg:grid-cols-2">
             <ChartCard title={`الإيرادات — آخر ${days} يوم`}>
-              <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={series}>
-                  <defs>
-                    <linearGradient id="revenueFill" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity={0.35} />
-                      <stop offset="100%" stopColor="hsl(var(--primary))" stopOpacity={0} />
-                    </linearGradient>
-                  </defs>
-                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                  <XAxis dataKey="label" tick={{ fontSize: 11 }} stroke="hsl(var(--muted-foreground))" />
-                  <YAxis tick={{ fontSize: 11 }} stroke="hsl(var(--muted-foreground))" width={70} />
-                  <Tooltip
-                    formatter={(value: number) => money(value)}
-                    contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 12, direction: "rtl" }}
-                  />
-                  <Area type="monotone" dataKey="revenue" name="الإيرادات" stroke="hsl(var(--primary))" fill="url(#revenueFill)" strokeWidth={2} />
-                </AreaChart>
-              </ResponsiveContainer>
+              <RevenueCurrencyChart scope="admin" days={days} reloadKey={data} />
             </ChartCard>
 
             <ChartCard title={`الطلبات — آخر ${days} يوم`}>

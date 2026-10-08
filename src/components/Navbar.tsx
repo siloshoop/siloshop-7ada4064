@@ -307,6 +307,16 @@ const Navbar = () => {
               </div>
             </SheetContent>
           </Sheet>
+          <NavLink
+            to="/"
+            aria-label="الرئيسية"
+            title="الرئيسية"
+            className="flex h-8 shrink-0 items-center gap-1 rounded-full px-1.5 text-sm font-semibold text-logo-purple transition-colors hover:bg-primary/10 sm:px-2.5"
+            activeClassName="bg-primary/10"
+          >
+            <Home className="h-4 w-4 shrink-0" />
+            <span className="whitespace-nowrap">الرئيسية</span>
+          </NavLink>
           <BrandLogo
             as="h1"
             onClick={() => navigate("/")}

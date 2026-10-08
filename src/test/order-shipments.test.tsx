@@ -58,3 +58,13 @@ describe("vertical tracking progress", () => {
     expect(screen.queryByRole("list")).toBeNull();
   });
 });
+describe("independent per-product tracking", () => {
+  it("each item in the same seller shipment keeps its own saved status", () => {
+    const same: TrackingProduct[] = [
+      { ...items[0], id: "x1", tracking_status: "shipped", tracking_number: "TN-1" },
+      { ...items[0], id: "x2", tracking_status: "preparing", tracking_number: null },
+    ];
+    const [shipment] = buildTrackingShipments(parent, [], same);
+    expect(shipment.items.map((i) => [i.id, i.tracking_status, i.tracking_number])).toEqual([["x1", "shipped", "TN-1"], ["x2", "preparing", null]]);
+  });
+});

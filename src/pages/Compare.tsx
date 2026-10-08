@@ -596,21 +596,21 @@ const Compare = () => {
     <div className="min-h-screen flex flex-col">
       <Navbar />
       <main className="container min-w-0 flex-1 px-3 py-3 sm:px-4 sm:py-6">
-        <div className="mb-3 flex min-w-0 flex-wrap items-center justify-between gap-2 sm:mb-6 sm:gap-3">
+        <div className="mb-2 flex min-w-0 flex-wrap items-center justify-between gap-2 sm:mb-4 sm:gap-3">
           <div className="flex min-w-0 items-center gap-2 sm:gap-3">
-            <Scale className="h-6 w-6 shrink-0 text-primary sm:h-8 sm:w-8" />
+            <Scale className="h-5 w-5 shrink-0 text-primary sm:h-7 sm:w-7" />
             <div className="min-w-0">
-              <h1 className="text-xl font-bold leading-tight sm:text-2xl">مقارنة المنتجات</h1>
-              <p className="text-sm text-muted-foreground sm:text-base">
+              <h1 className="text-lg font-bold leading-tight sm:text-xl">مقارنة المنتجات</h1>
+              <p className="text-xs text-muted-foreground sm:text-sm">
                 قارن بين {products.length} منتجات جنباً إلى جنب
               </p>
             </div>
           </div>
-          <div className="grid w-full grid-cols-2 gap-2 sm:flex sm:w-auto sm:flex-wrap">
+          <div className="grid w-full grid-cols-2 gap-1.5 sm:flex sm:w-auto sm:flex-wrap">
             {/* Save Comparison Button */}
             <Dialog open={saveDialogOpen} onOpenChange={setSaveDialogOpen}>
               <DialogTrigger asChild>
-                <Button variant="outline" className="w-full px-2 text-xs sm:w-auto sm:px-4 sm:text-sm">
+                <Button variant="outline" className="h-8 w-full px-2 text-[11px] sm:h-9 sm:w-auto sm:px-3 sm:text-sm">
                   <Bookmark className="h-4 w-4 ml-2" />
                   حفظ المقارنة
                 </Button>
@@ -641,7 +641,7 @@ const Compare = () => {
             {/* Load Saved Comparisons Button */}
             <Dialog open={savedDialogOpen} onOpenChange={setSavedDialogOpen}>
               <DialogTrigger asChild>
-                <Button variant="outline" className="w-full px-2 text-xs sm:w-auto sm:px-4 sm:text-sm">
+                <Button variant="outline" className="h-8 w-full px-2 text-[11px] sm:h-9 sm:w-auto sm:px-3 sm:text-sm">
                   <FolderOpen className="h-4 w-4 ml-2" />
                   المقارنات المحفوظة
                   {savedComparisons.length > 0 && (
@@ -697,7 +697,7 @@ const Compare = () => {
             {/* Export Dropdown */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="outline" disabled={exporting} className="w-full px-2 text-xs sm:w-auto sm:px-4 sm:text-sm">
+                <Button variant="outline" disabled={exporting} className="h-8 w-full px-2 text-[11px] sm:h-9 sm:w-auto sm:px-3 sm:text-sm">
                   {exporting ? (
                     <Loader2 className="h-4 w-4 ml-2 animate-spin" />
                   ) : (
@@ -720,7 +720,7 @@ const Compare = () => {
 
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="outline" className="w-full px-2 text-xs sm:w-auto sm:px-4 sm:text-sm">
+                <Button variant="outline" className="h-8 w-full px-2 text-[11px] sm:h-9 sm:w-auto sm:px-3 sm:text-sm">
                   <Share2 className="h-4 w-4 ml-2" />
                   مشاركة المقارنة
                 </Button>
@@ -752,7 +752,7 @@ const Compare = () => {
             </DropdownMenu>
             <AlertDialog>
               <AlertDialogTrigger asChild>
-                <Button variant="destructive" className="w-full px-2 text-xs sm:w-auto sm:px-4 sm:text-sm">
+                <Button variant="destructive" className="h-8 w-full px-2 text-[11px] sm:h-9 sm:w-auto sm:px-3 sm:text-sm">
                   <Trash2 className="h-4 w-4 ml-2" />
                   مسح الكل
                 </Button>
@@ -788,20 +788,21 @@ const Compare = () => {
           >
             {/* Product Images and Names Header */}
             <div 
-              className="comparison-products-grid mb-3 grid gap-2 sm:mb-4 sm:gap-3"
+              className="comparison-grid mb-2 grid gap-2 px-2 sm:mb-3 sm:gap-3 sm:px-3"
             >
+              <div aria-hidden="true" />
               {products.map((product) => (
                 <Card key={product.id} className="relative overflow-hidden">
                   <Button
                     size="icon"
                     variant="ghost"
-                    className="absolute top-2 left-2 z-10 bg-background/80 hover:bg-background"
+                    className="absolute top-1 left-1 z-10 h-7 w-7 bg-background/80 hover:bg-background"
                     onClick={() => removeProduct(product.id)}
                   >
                     <X className="h-4 w-4" />
                   </Button>
                   
-                  <div className="relative h-28 w-full overflow-hidden bg-muted/30 sm:h-44 md:h-52">
+                  <div className="relative h-20 w-full overflow-hidden bg-muted/30 sm:h-32 md:h-36">
                     {product.original_price && (
                       <Badge className="absolute top-2 right-2 z-10 bg-red-500">
                         خصم {calculateDiscount(product.original_price, product.price)}%
@@ -819,9 +820,9 @@ const Compare = () => {
                     />
                   </div>
 
-                  <CardContent className="space-y-1.5 p-2 sm:space-y-2 sm:p-3">
+                  <CardContent className="space-y-1 p-1.5 sm:space-y-1.5 sm:p-2">
                     <h3 
-                      className="line-clamp-2 min-h-9 cursor-pointer text-xs font-bold leading-snug transition-colors hover:text-primary sm:text-base"
+                      className="line-clamp-2 min-h-8 cursor-pointer text-xs font-bold leading-snug transition-colors hover:text-primary sm:text-sm"
                       onClick={() => navigate(`/product/${product.id}`)}
                     >
                       {product.name}
@@ -829,7 +830,7 @@ const Compare = () => {
                     
                     <div className="flex min-w-0 gap-1.5 sm:gap-2">
                       <Button 
-                        className="min-w-0 flex-1 px-2 text-xs sm:px-3 sm:text-sm"
+                        className="h-8 min-w-0 flex-1 px-2 text-[11px] sm:text-xs"
                         size="sm"
                         onClick={() => addToCart(product.id)}
                         disabled={addingToCart === product.id || (product.stock_quantity || 0) === 0}
@@ -838,8 +839,8 @@ const Compare = () => {
                           <Loader2 className="h-4 w-4 animate-spin" />
                         ) : (
                           <>
-                            <ShoppingCart className="h-4 w-4 ml-1" />
-                            أضف للسلة
+                            <ShoppingCart className="h-4 w-4 sm:ml-1" />
+                            <span className="hidden sm:inline">أضف للسلة</span>
                           </>
                         )}
                       </Button>
@@ -856,7 +857,7 @@ const Compare = () => {
                 {comparisonRows.map((row, index) => (
                   <div key={row.label}>
                     <div 
-                      className={`comparison-grid grid items-center gap-2 px-2.5 py-1.5 text-xs sm:gap-3 sm:px-4 sm:py-2.5 sm:text-sm ${index % 2 === 0 ? "bg-muted/30" : ""}`}
+                      className={`comparison-grid grid items-center gap-2 px-2 py-1 text-[11px] sm:gap-3 sm:px-3 sm:py-1.5 sm:text-sm ${index % 2 === 0 ? "bg-muted/30" : ""}`}
                     >
                       <div className="sticky end-0 z-10 flex min-w-0 items-center gap-1.5 bg-card py-1 font-medium text-muted-foreground sm:gap-2">
                         {row.icon}
@@ -875,14 +876,14 @@ const Compare = () => {
                 {/* Description Row */}
                 <Separator />
                 <div 
-                  className="comparison-grid grid gap-2 px-2.5 py-1.5 text-xs sm:gap-3 sm:px-4 sm:py-2.5 sm:text-sm"
+                  className="comparison-grid grid gap-2 px-2 py-1 text-[11px] sm:gap-3 sm:px-3 sm:py-1.5 sm:text-sm"
                 >
                   <div className="sticky end-0 z-10 flex min-w-0 items-start gap-1.5 bg-card pt-1 font-medium text-muted-foreground sm:gap-2">
                     <Minus className="h-4 w-4" />
                     <span>الوصف</span>
                   </div>
                   {products.map((product) => (
-                    <p key={product.id} className="text-xs text-muted-foreground line-clamp-3 sm:text-sm">
+                    <p key={product.id} className="text-[11px] text-muted-foreground line-clamp-3 sm:text-sm">
                       {product.description || "لا يوجد وصف"}
                     </p>
                   ))}

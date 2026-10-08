@@ -48,6 +48,26 @@ for (const width of portraitWidths) {
       });
     }
 
+    test("compact header and bottom navigation remain stationary while scrolling", async ({ page }) => {
+      await page.goto("/", { waitUntil: "domcontentloaded" });
+      const header = page.getByTestId("site-header");
+      const bottom = page.getByTestId("mobile-bottom-bar");
+      await expect(header).toBeVisible();
+      await expect(bottom).toBeVisible();
+      for (const scrollY of [600, 0, 900]) {
+        await page.evaluate((y) => window.scrollTo(0, y), scrollY);
+        const headerBox = await header.boundingBox();
+        const bottomBox = await bottom.boundingBox();
+        if (!headerBox || !bottomBox) throw new Error("Missing mobile bars");
+        expect(headerBox.y).toBeCloseTo(0, 0);
+        expect(headerBox.height).toBeLessThanOrEqual(96);
+        expect(bottomBox.y + bottomBox.height).toBeCloseTo(page.viewportSize()?.height ?? 0, 0);
+      }
+      await header.getByRole("button", { name: "الفئات", exact: true }).click();
+      await expect(page.getByRole("dialog")).toBeVisible();
+      await expectNoDocumentOverflow(page);
+    });
+
     test("product details stay inside the viewport", async ({ page }) => {
       await page.goto(productPath, { waitUntil: "domcontentloaded" });
       await expectNoDocumentOverflow(page);

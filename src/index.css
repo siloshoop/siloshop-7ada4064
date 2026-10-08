@@ -190,7 +190,7 @@ All colors MUST be HSL.
     font-feature-settings: "cv11", "ss01";
     font-optical-sizing: auto;
     direction: rtl;
-    overflow-x: hidden;
+    overflow-x: clip;
     opacity: 1;
     width: 100%;
     min-width: 0;
@@ -203,7 +203,7 @@ All colors MUST be HSL.
   
   html {
     direction: rtl;
-    overflow-x: hidden;
+    overflow-x: clip;
     width: 100%;
   }
 
@@ -359,6 +359,11 @@ All colors MUST be HSL.
 
   .safe-screen-height {
     max-height: calc(100dvh - max(env(safe-area-inset-top, 0px), var(--safe-area-inset-top, 0px)) - max(env(safe-area-inset-bottom, 0px), var(--safe-area-inset-bottom, 0px)));
+  }
+
+  .safe-side-sheet {
+    top: max(env(safe-area-inset-top, 0px), var(--safe-area-inset-top, 0px));
+    bottom: max(env(safe-area-inset-bottom, 0px), var(--safe-area-inset-bottom, 0px));
   }
 
   /* Hover scale animation */

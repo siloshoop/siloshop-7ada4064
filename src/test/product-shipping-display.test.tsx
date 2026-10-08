@@ -12,6 +12,9 @@ import {
 
 const mocks = vi.hoisted(() => ({ from: vi.fn() }));
 vi.mock("@/hooks/useVendorNames", () => ({ useVendorNames: () => ({}) }));
+vi.mock("@/lib/productCardMeta", () => ({
+  loadProductCardMeta: async () => ({ stock_quantity: 5 }),
+}));
 vi.mock("@/integrations/supabase/client", () => ({
   supabase: { from: mocks.from, rpc: async () => ({ data: [] }) },
 }));

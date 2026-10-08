@@ -37,9 +37,9 @@ const sheetVariants = cva(
         bottom:
           "inset-x-0 bottom-0 max-h-[calc(100dvh-max(env(safe-area-inset-top,0px),var(--safe-area-inset-top,0px)))] border-t data-[state=closed]:slide-out-to-bottom data-[state=open]:slide-in-from-bottom",
         left:
-          "inset-y-0 left-0 h-full w-[min(85vw,24rem)] max-w-[calc(100vw-1rem)] border-r data-[state=closed]:slide-out-to-left data-[state=open]:slide-in-from-left",
+          "safe-side-sheet left-0 w-[min(85vw,24rem)] max-w-[calc(100vw-1rem)] border-r data-[state=closed]:slide-out-to-left data-[state=open]:slide-in-from-left",
         right:
-          "inset-y-0 right-0 h-full w-[min(85vw,24rem)] max-w-[calc(100vw-1rem)] border-l data-[state=closed]:slide-out-to-right data-[state=open]:slide-in-from-right",
+          "safe-side-sheet right-0 w-[min(85vw,24rem)] max-w-[calc(100vw-1rem)] border-l data-[state=closed]:slide-out-to-right data-[state=open]:slide-in-from-right",
       },
     },
     defaultVariants: {

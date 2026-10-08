@@ -179,8 +179,8 @@ const Index = () => {
         isRefreshing={isRefreshing}
         progress={progress}
       />
-      <AnnouncementBar />
       <Navbar />
+      <AnnouncementBar />
       <main className="flex-1 page-enter">
         {/* Featured showroom — real items, or the frontend-only demo when empty */}
         <SectionErrorBoundary>

@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { toPublicUrl } from "@/lib/share";
 import { readCartStock, validateCartQuantity } from "@/lib/cartStock";
-import { useParams, useNavigate, useSearchParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { formatPrice, currencySymbol } from "@/lib/currency";
@@ -38,6 +38,7 @@ import { notifySync, useSyncListener } from "@/lib/uiSync";
 import NativeAdBanner from "@/components/NativeAdBanner";
 import { friendlyDbError } from "@/lib/productValidation";
 import { fetchActiveDeals, applyDeal } from "@/lib/dealPricing";
+import { useCompareProducts } from "@/hooks/useCompareProducts";
 import { OUT_OF_STOCK_LABEL, availableProductStock, variantInStock } from "@/lib/stockAvailability";
 
 type ProductVariant = Database["public"]["Tables"]["product_variants"]["Row"];
@@ -93,7 +94,6 @@ interface Product {
 const Product = () => {
   const { id } = useParams();
   const { user } = useAuth();
-  const [searchParams] = useSearchParams();
   const [product, setProduct] = useState<Product | null>(null);
   const [dealPct, setDealPct] = useState(0);
   useEffect(() => {
@@ -106,6 +106,7 @@ const Product = () => {
   const [loading, setLoading] = useState(true);
   const [addingToCart, setAddingToCart] = useState(false);
   const navigate = useNavigate();
+  const { addProduct: addCompareProduct } = useCompareProducts();
   const { toast } = useToast();
   const { trackProductView } = useRecentlyViewed();
   const [vendorStats, setVendorStats] = useState<{ avg: number; count: number }>({ avg: 0, count: 0 });
@@ -113,35 +114,24 @@ const Product = () => {
   const [selectedVariant, setSelectedVariant] = useState<ProductVariant | null>(null);
   const viewTrackedRef = useState(() => ({ current: "" }))[0];
 
-  const addToCompare = () => {
-    const currentCompare = searchParams.get("compare")?.split(",") || [];
-    
+  // Uses the same saved compare list as product cards (account or guest storage).
+  const addToCompare = async () => {
     if (!id) return;
-    
-    if (currentCompare.includes(id)) {
-      toast({
-        title: "تنبيه",
-        description: "المنتج موجود بالفعل في قائمة المقارنة",
-      });
+    const result = await addCompareProduct(id);
+    if (result.message === "exists") {
+      toast({ title: "تنبيه", description: "المنتج موجود بالفعل في قائمة المقارنة" });
       return;
     }
-
-    if (currentCompare.length >= 4) {
-      toast({
-        title: "تنبيه",
-        description: "يمكنك مقارنة حتى 4 منتجات فقط",
-        variant: "destructive",
-      });
+    if (result.message === "max") {
+      toast({ title: "تنبيه", description: "يمكنك مقارنة حتى 4 منتجات فقط", variant: "destructive" });
       return;
     }
-
-    const newCompare = [...currentCompare, id];
-    navigate(`/compare?products=${newCompare.join(",")}`);
-    
-    toast({
-      title: "تمت الإضافة",
-      description: "تم إضافة المنتج إلى قائمة المقارنة",
-    });
+    if (!result.success) {
+      toast({ title: "خطأ", description: "تعذّر إضافة المنتج إلى المقارنة", variant: "destructive" });
+      return;
+    }
+    toast({ title: "تمت الإضافة", description: "تم إضافة المنتج إلى قائمة المقارنة" });
+    navigate("/compare");
   };
 
   useEffect(() => {

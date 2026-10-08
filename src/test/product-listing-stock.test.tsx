@@ -14,9 +14,11 @@ vi.mock("@/components/FavoriteButton", () => ({ FavoriteButton: () => null }));
 afterEach(() => { cleanup(); mocks.metadata = {}; });
 
 const renderCard = (stockQuantity?: number) => {
-  mocks.from.mockImplementation(() => ({ select: () => ({ eq: () => ({
-    maybeSingle: async () => ({ data: { stock_quantity: mocks.stock, ...mocks.metadata } }),
-  }) }) }));
+  mocks.from.mockImplementation(() => ({ select: () => ({
+    in: async (_col: string, ids: string[]) => ({
+      data: ids.map((id) => ({ id, stock_quantity: mocks.stock, ...mocks.metadata })),
+    }),
+  }) }));
   return render(<MemoryRouter><Routes>
     <Route path="/" element={<ProductCard id="product-id" name="منتج" price={20} image="/placeholder.svg" rating={0} reviews={0} stockQuantity={stockQuantity} />} />
     <Route path="/product/:id" element={<div>صفحة المنتج</div>} />

@@ -10,6 +10,7 @@ import { supabase } from "@/integrations/supabase/client";
 import React, { useState, useEffect, memo } from "react";
 import { formatPrice } from "@/lib/currency";
 import { OUT_OF_STOCK_LABEL } from "@/lib/stockAvailability";
+import { loadProductCardMeta } from "@/lib/productCardMeta";
 import { shippingCardLabel, isFreeShipping } from "@/lib/shippingDisplay";
 import { useVendorNames } from "@/hooks/useVendorNames";
 
@@ -81,7 +82,7 @@ const ProductCard = memo(({
     setDetails(null);
     let active = true;
     const refresh = async () => {
-      const { data } = await supabase.from("products").select("stock_quantity, vendor_id, is_featured, is_trending, reviews(rating)").eq("id", id).maybeSingle();
+      const data = await loadProductCardMeta(id);
       if (active && data) {
         setLiveStock(data.stock_quantity);
         setDetails(data);

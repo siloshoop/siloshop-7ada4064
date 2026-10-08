@@ -558,6 +558,12 @@ All colors MUST be HSL.
     color: transparent;
   }
 
+  /* "Home" in the top bar: the logo's purple, tuned per theme for contrast. */
+  .brand-home-link {
+    color: hsl(var(--logo-purple));
+  }
+
+
   @supports not ((-webkit-background-clip: text) or (background-clip: text)) {
     .brand-logo-text {
       color: hsl(var(--logo-purple));

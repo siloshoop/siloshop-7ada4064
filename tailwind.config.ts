@@ -20,7 +20,6 @@ export default {
       backgroundImage: {
         "gradient-primary": "var(--gradient-primary)",
         "gradient-hero": "var(--gradient-hero)",
-        "gradient-logo": "var(--gradient-logo)",
       },
       boxShadow: {
         elegant: "var(--shadow-elegant)",
@@ -79,7 +78,6 @@ export default {
           DEFAULT: "hsl(var(--info))",
           foreground: "hsl(var(--info-foreground))",
         },
-        logoPurple: "hsl(var(--logo-purple))",
 
         sidebar: {
           DEFAULT: "hsl(var(--sidebar-background))",

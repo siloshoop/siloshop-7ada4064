@@ -21,7 +21,6 @@ import NativeAdBanner from "@/components/NativeAdBanner";
 const TurkeyMarketplace = lazy(() => import("@/components/home/TurkeyMarketplace"));
 const ProductRail = lazy(() => import("@/components/home/ProductRail"));
 const FeaturedStores = lazy(() => import("@/components/home/FeaturedStores"));
-const PopularCategories = lazy(() => import("@/components/PopularCategories"));
 const BestSellers = lazy(() => import("@/components/BestSellers"));
 const ProductRecommendations = lazy(() => import("@/components/ProductRecommendations"));
 const EnhancedDailyDeals = lazy(() => import("@/components/EnhancedDailyDeals"));
@@ -188,12 +187,6 @@ const Index = () => {
           <PremiumShowroom />
         </SectionErrorBoundary>
 
-        {/* Categories */}
-        <SectionErrorBoundary>
-          <Suspense fallback={null}>
-            <PopularCategories key={`popular-${refreshKey}`} />
-          </Suspense>
-        </SectionErrorBoundary>
 
         <SectionErrorBoundary>
           <NativeAdBanner placement="home" className="py-6" />

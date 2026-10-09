@@ -22,8 +22,8 @@ Repeat step 5 after every `git pull`.
 
 ## Run on a device / emulator
 - Release-like: `npx cap run android`
-- With live reload from the Lovable sandbox:
-  `CAP_SERVER_URL="https://456c8c16-1d24-407c-a1f5-c7b374b1fe4d.lovableproject.com?forceHideBadge=true" npx cap run android`
+- With live reload from your local dev server (same Wi-Fi):
+  `CAP_SERVER_URL="http://<your-computer-ip>:8080" npx cap run android`
 
 ## Google Play release (AAB)
 Signing needs your private keystore, so the bundle must be built on your machine.

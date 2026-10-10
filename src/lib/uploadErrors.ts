@@ -1,6 +1,7 @@
 /** Clear, specific Arabic reasons for image upload failures + recommended sizes. */
 
 export const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
+export const MAX_PRODUCT_IMAGE_BYTES = 50 * 1024 * 1024;
 export const ALLOWED_IMAGE_TYPES = ["image/jpeg", "image/jpg", "image/png", "image/webp", "image/gif"];
 
 export type ImageKind = "logo" | "cover" | "product";
@@ -8,7 +9,7 @@ export type ImageKind = "logo" | "cover" | "product";
 export const IMAGE_SIZE_GUIDES: Record<ImageKind, string> = {
   logo: "المقاس الموصى به: 500 × 500 بكسل (مربع)",
   cover: "المقاس الموصى به: 1920 × 600 بكسل (عريض)",
-  product: "المقاس الموصى به: 1000 × 1000 بكسل (مربع)",
+  product: "أبعاد مخصصة حتى 8000 × 8000 بكسل · حتى 50 ميجابايت",
 };
 
 export const IMAGE_FORMAT_HINT = "الصيغ المدعومة: JPG, PNG, WEBP, GIF · الحد الأقصى 5 ميجابايت";
@@ -18,13 +19,14 @@ export class UploadError extends Error {}
 const mb = (bytes: number) => (bytes / (1024 * 1024)).toFixed(1);
 
 /** Returns a reason string when the file can't be uploaded, otherwise null. */
-export const validateImageFile = (file: File): string | null => {
+export const validateImageFile = (file: File, kind?: ImageKind): string | null => {
+  const limit = kind === "product" ? MAX_PRODUCT_IMAGE_BYTES : MAX_IMAGE_BYTES;
   if (!file.type.startsWith("image/") || !ALLOWED_IMAGE_TYPES.includes(file.type.toLowerCase())) {
     const ext = file.name.split(".").pop()?.toUpperCase() || "غير معروفة";
     return `صيغة الملف «${file.name}» (${ext}) غير مدعومة. ${IMAGE_FORMAT_HINT}`;
   }
-  if (file.size > MAX_IMAGE_BYTES) {
-    return `حجم الصورة «${file.name}» ${mb(file.size)} ميجابايت، والحد الأقصى 5 ميجابايت. صغّر الصورة ثم أعد المحاولة.`;
+  if (file.size > limit) {
+    return `حجم الصورة «${file.name}» ${mb(file.size)} ميجابايت، والحد الأقصى ${limit / (1024 * 1024)} ميجابايت. اختر ملفًا أصغر ثم أعد المحاولة.`;
   }
   if (file.size === 0) return `الملف «${file.name}» فارغ أو تالف.`;
   return null;
@@ -43,7 +45,7 @@ export const describeUploadError = (error: unknown, file?: File): string => {
     return "انقطع الاتصال أثناء الرفع (خطأ في الشبكة). تحقق من الإنترنت ثم أعد المحاولة.";
   }
   if (status === 413 || msg.includes("too large") || msg.includes("payload") || msg.includes("exceeded the maximum")) {
-    return `حجم الصورة${file ? ` (${mb(file.size)} ميجابايت)` : ""} أكبر من المسموح به. الحد الأقصى 5 ميجابايت.`;
+    return `حجم الصورة${file ? ` (${mb(file.size)} ميجابايت)` : ""} أكبر من المسموح به في مكان الرفع هذا.`;
   }
   if (msg.includes("mime") || msg.includes("invalid_mime") || msg.includes("not supported") || status === 415) {
     return `صيغة الصورة غير مدعومة. ${IMAGE_FORMAT_HINT}`;

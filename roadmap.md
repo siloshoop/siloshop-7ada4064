@@ -160,3 +160,8 @@
 - [x] Add "الرئيسية" with home icon next to the logo in the top bar (both themes)
 - [x] Paint the SiloShop wordmark with the logo's purple→pink→orange→yellow gradient via theme-aware tokens
 - [x] Verify light/dark at 360/393/1280px, Home click navigates, no overflow or wrap, 130 tests, automatic build OK
+
+## Flexible product image cropping
+- [ ] Extend existing crop tool with custom dimensions, ratios, fit/fill and quality-preserving output
+- [ ] Align product uploads with selected dimensions and verify storage limits
+- [ ] Test crop/output and desktop/mobile browser behavior; report authenticated/device limits

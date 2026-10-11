@@ -75,7 +75,7 @@ const ImageUploadField = ({
   const upload = async (picked?: File) => {
     if (!picked) return;
     let file: File = picked;
-    const invalid = validateImageFile(file);
+    const invalid = validateImageFile(file, sizeGuide === "product" ? "product" : undefined);
     if (invalid) {
       toast({ title: "تعذّر رفع الصورة", description: invalid, variant: "destructive" });
       return;
@@ -91,7 +91,7 @@ const ImageUploadField = ({
     try {
       let compressed: File;
       try {
-        compressed = await imageCompression(file, { maxSizeMB: 1, maxWidthOrHeight: 1920, useWebWorker: true });
+        compressed = sizeGuide === "product" ? file : await imageCompression(file, { maxSizeMB: 1, maxWidthOrHeight: 1920, useWebWorker: true });
       } catch {
         throw new UploadError("تعذّرت معالجة الصورة؛ قد يكون الملف تالفًا. جرّب صورة أخرى.");
       }
@@ -184,7 +184,7 @@ const ImageUploadField = ({
         </div>
       </div>
       <p className="text-xs text-muted-foreground">
-        {sizeGuide ? `${IMAGE_SIZE_GUIDES[sizeGuide]} · ` : ""}{IMAGE_FORMAT_HINT}
+        {sizeGuide ? `${IMAGE_SIZE_GUIDES[sizeGuide]} · ` : ""}{sizeGuide === "product" ? IMAGE_FORMAT_HINT.replace("5 ميجابايت", "50 ميجابايت") : IMAGE_FORMAT_HINT}
       </p>
       {cropDialog}
     </div>

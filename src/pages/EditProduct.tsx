@@ -17,7 +17,6 @@ import { SHIPPING_MODE_OPTIONS, resolveShippingMode, type ShippingMode } from "@
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, Save, Trash2, ChevronLeft, X } from "lucide-react";
-import imageCompression from 'browser-image-compression';
 import { productNumbersSchema, firstIssue, friendlyDbError } from "@/lib/productValidation";
 import { useImageCropper } from "@/components/ImageCropDialog";
 import { IMAGE_FORMAT_HINT, IMAGE_SIZE_GUIDES, UploadError, describeUploadError, validateImageFile } from "@/lib/uploadErrors";
@@ -209,6 +208,7 @@ const EditProduct = () => {
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
+    e.target.value = "";
     if (files.length === 0) return;
 
     const totalImages = existingImages.length + newFiles.length + files.length;
@@ -225,7 +225,7 @@ const EditProduct = () => {
     const previews: string[] = [];
 
     for (const file of files) {
-      const invalid = validateImageFile(file);
+      const invalid = validateImageFile(file, "product");
       if (invalid) {
         toast({ title: "تعذّر إضافة الصورة", description: invalid, variant: "destructive" });
         continue;
@@ -233,21 +233,8 @@ const EditProduct = () => {
       const croppedFile = await cropImage(file);
       if (!croppedFile) continue;
 
-      try {
-        const options = {
-          maxSizeMB: 1,
-          maxWidthOrHeight: 1920,
-          useWebWorker: true,
-          fileType: croppedFile.type as any,
-        };
-
-        const compressedFile = await imageCompression(croppedFile, options);
-        validatedFiles.push(compressedFile);
-        previews.push(URL.createObjectURL(compressedFile));
-      } catch (error) {
-        validatedFiles.push(croppedFile);
-        previews.push(URL.createObjectURL(croppedFile));
-      }
+      validatedFiles.push(croppedFile);
+      previews.push(URL.createObjectURL(croppedFile));
     }
 
     if (validatedFiles.length > 0) {
@@ -675,7 +662,7 @@ const EditProduct = () => {
                         disabled={existingImages.length + newFiles.length >= 5}
                       />
                       <p className="text-sm text-muted-foreground">
-                        يمكنك رفع حتى {5 - existingImages.length - newFiles.length} صور إضافية · {IMAGE_SIZE_GUIDES.product} · {IMAGE_FORMAT_HINT}
+                        يمكنك رفع حتى {5 - existingImages.length - newFiles.length} صور إضافية · {IMAGE_SIZE_GUIDES.product} · {IMAGE_FORMAT_HINT.replace("5 ميجابايت", "50 ميجابايت")}
                       </p>
                       {cropDialog}
 

@@ -50,10 +50,13 @@ android {
 }
 
 // Refuse to produce an unsigned release bundle/APK (Play rejects it).
+// Android Studio's "Generate Signed App Bundle" wizard injects its own signing
+// properties, so the check is skipped in that case.
 gradle.taskGraph.whenReady { graph ->
     def wantsRelease = graph.allTasks.any { it.name.toLowerCase().contains("release") && (it.name.startsWith("bundle") || it.name.startsWith("assemble")) }
-    if (wantsRelease && !keystorePropsFile.exists()) {
-        throw new GradleException("android/keystore.properties is missing. Create it with your NEW upload keystore before building the release AAB (see docs/android-signing.md).")
+    def studioSigning = project.hasProperty("android.injected.signing.store.file")
+    if (wantsRelease && !keystorePropsFile.exists() && !studioSigning) {
+        throw new GradleException("android/keystore.properties is missing. Create it with your EXISTING upload keystore, or use Build > Generate Signed App Bundle in Android Studio (see docs/android-signing.md).")
     }
 }
 

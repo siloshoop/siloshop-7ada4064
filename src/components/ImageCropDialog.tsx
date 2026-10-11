@@ -63,12 +63,14 @@ const ImageCropDialog = ({ file, kind, onDone }: Props) => {
   const [placement, setPlacement] = useState<ImagePlacement>("fill");
   const frameRef = useRef<HTMLDivElement>(null);
   const [frame, setFrame] = useState({ width: 300, height: 256 });
+  const [media, setMedia] = useState({ width: 1, height: 1 });
   const resizeStart = useRef<{ x: number; y: number; width: number; height: number } | null>(null);
   const output = { ...preset, ...(product ? dimensions : {}) };
   const dimensionError = validateCropDimensions(output.width, output.height);
   const aspect = output.width > 0 && output.height > 0 ? output.width / output.height : 1;
   const frameScale = Math.min((frame.width - 32) / Math.max(aspect, 0.01), frame.height - 32);
   const cropSize = { width: Math.max(1, frameScale * aspect), height: Math.max(1, frameScale) };
+  const baseZoom = product ? Math.max(cropSize.width / media.width, cropSize.height / media.height) : 1;
 
   useEffect(() => {
     const el = frameRef.current;
@@ -78,7 +80,7 @@ const ImageCropDialog = ({ file, kind, onDone }: Props) => {
     });
     observer.observe(el);
     return () => observer.disconnect();
-  }, [file]);
+  }, [file, src]);
 
   useEffect(() => {
     if (!file) { setSrc(null); return; }
@@ -183,12 +185,15 @@ const ImageCropDialog = ({ file, kind, onDone }: Props) => {
             <Cropper
               image={src}
               crop={crop}
-              zoom={zoom}
+              zoom={zoom * baseZoom}
+              minZoom={baseZoom}
+              maxZoom={10 * baseZoom}
               aspect={aspect}
               cropSize={product ? cropSize : undefined}
               cropShape={kind === "logo" ? "round" : "rect"}
               onCropChange={setCrop}
-              onZoomChange={setZoom}
+              onZoomChange={(value) => setZoom(value / baseZoom)}
+              onMediaLoaded={(size) => setMedia({ width: size.width, height: size.height })}
               onCropComplete={onCropComplete}
               objectFit="contain"
               style={product && placement === "fit" ? { containerStyle: { visibility: "hidden" } } : undefined}

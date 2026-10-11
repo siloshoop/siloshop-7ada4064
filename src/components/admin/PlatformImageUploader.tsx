@@ -4,7 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { Upload, X, Star, StarOff, Loader2, GripVertical } from "lucide-react";
-import imageCompression from "browser-image-compression";
+import { useImageCropper } from "@/components/ImageCropDialog";
+import { validateImageFile } from "@/lib/uploadErrors";
 
 interface Props {
   images: string[];
@@ -17,6 +18,7 @@ const PlatformImageUploader = ({ images, mainImage, onChange }: Props) => {
   const [dragOver, setDragOver] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
+  const { crop, dialog } = useImageCropper("product");
 
   const uploadFiles = useCallback(
     async (files: File[]) => {
@@ -25,12 +27,10 @@ const PlatformImageUploader = ({ images, mainImage, onChange }: Props) => {
       const uploaded: string[] = [];
       try {
         for (const file of files) {
-          if (!file.type.startsWith("image/")) continue;
-          const compressed = await imageCompression(file, {
-            maxSizeMB: 1,
-            maxWidthOrHeight: 1600,
-            useWebWorker: true,
-          });
+          const invalid = validateImageFile(file, "product");
+          if (invalid) throw new Error(invalid);
+          const compressed = await crop(file);
+          if (!compressed) continue;
           const ext = (compressed.name.split(".").pop() || "jpg").toLowerCase();
           const path = `platform/${crypto.randomUUID()}.${ext}`;
           const { error } = await supabase.storage
@@ -48,7 +48,7 @@ const PlatformImageUploader = ({ images, mainImage, onChange }: Props) => {
         setUploading(false);
       }
     },
-    [images, mainImage, onChange, toast]
+    [images, mainImage, onChange, toast, crop]
   );
 
   const remove = (url: string) => {
@@ -69,6 +69,7 @@ const PlatformImageUploader = ({ images, mainImage, onChange }: Props) => {
 
   return (
     <div className="space-y-3">
+      {dialog}
       <Label>صور المنتج</Label>
       <div
         role="button"
@@ -102,7 +103,7 @@ const PlatformImageUploader = ({ images, mainImage, onChange }: Props) => {
           accept="image/*"
           multiple
           hidden
-          onChange={(e) => uploadFiles(Array.from(e.target.files || []))}
+          onChange={(e) => { const files = Array.from(e.target.files || []); e.target.value = ""; void uploadFiles(files); }}
         />
       </div>
 

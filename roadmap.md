@@ -162,6 +162,8 @@
 - [x] Verify light/dark at 360/393/1280px, Home click navigates, no overflow or wrap, 130 tests, automatic build OK
 
 ## Flexible product image cropping
-- [ ] Extend existing crop tool with custom dimensions, ratios, fit/fill and quality-preserving output
-- [ ] Align product uploads with selected dimensions and verify storage limits
-- [ ] Test crop/output and desktop/mobile browser behavior; report authenticated/device limits
+- [x] Extend existing crop tool with custom dimensions, ratios, fit/fill and quality-preserving output
+- [x] Align seller/admin/variant product uploads with selected dimensions; product storage accepts 50MB, other limits unchanged
+- [x] Isolated live dialog: original ratio, invalid dimensions, fit 600×900, fill 1200×1600 at 360/393/412px, cancellation and output image rendering; 135 tests and automatic build passed
+- [ ] Authenticated storage upload, product form save/edit/read-back and live AI assessment (blocked: owner's account prohibited; no permitted test account supplied)
+- [ ] Physical mobile/Capacitor and 8000×8000 device memory verification (blocked: no device available)

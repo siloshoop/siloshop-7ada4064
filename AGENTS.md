@@ -16,3 +16,5 @@
 - ProductCard metadata/stock refreshes go through src/lib/productCardMeta.ts, which batches same-tick requests and shares only in-flight requests; no completed stock cache is allowed, so mount/focus/stock events still read fresh availability.
 - Load hidden desktop menus only at desktop widths, mobile category lists on opening, and search suggestions on focus; this avoids competing with initial mobile content while preserving every control.
 - Share public navigation lookups through namespaced React Query hooks and existing activation invalidation; this deduplicates remounts without colliding with page-specific query shapes.
+
+- Route product image processing through the shared crop dialog and imageCrop helpers, upload approved files unchanged, and create a separate bounded AI transport copy; chosen output dimensions must survive every seller/admin upload path.

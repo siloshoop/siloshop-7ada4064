@@ -141,7 +141,7 @@ export const ImageGallery = ({ images, productName, videoUrl }: ImageGalleryProp
             loading="lazy"
             decoding="async"
             draggable={false}
-            className="absolute inset-0 w-full h-full object-cover animate-fade-in transition-transform duration-300 ease-out will-change-transform"
+            className="absolute inset-0 w-full h-full object-contain animate-fade-in transition-transform duration-300 ease-out will-change-transform"
             style={
               isZooming
                 ? {

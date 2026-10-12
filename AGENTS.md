@@ -18,3 +18,5 @@
 - Share public navigation lookups through namespaced React Query hooks and existing activation invalidation; this deduplicates remounts without colliding with page-specific query shapes.
 
 - Route product image processing through the shared crop dialog and imageCrop helpers, upload approved files unchanged, and create a separate bounded AI transport copy; chosen output dimensions must survive every seller/admin upload path.
+- Never force lazily used libraries (charts, export tools) into manualChunks vendor groups; Rollup then preloads them on every page.
+- FavoriteButton status checks go through src/lib/favoriteStatus.ts, which batches same-tick checks per user without caching completed results, so listings make one request instead of one per card.

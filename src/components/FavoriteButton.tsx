@@ -6,6 +6,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 import { notifySync, useSyncListener } from "@/lib/uiSync";
+import { isFavorited } from "@/lib/favoriteStatus";
 
 interface FavoriteButtonProps {
   productId: string;
@@ -27,14 +28,11 @@ export const FavoriteButton = ({ productId, variant = "outline", size = "lg", cl
       setIsFavorite(false);
       return;
     }
-    const { data } = await supabase
-      .from("favorites")
-      .select("id")
-      .eq("user_id", user.id)
-      .eq("product_id", productId)
-      .maybeSingle();
-
-    setIsFavorite(!!data);
+    try {
+      setIsFavorite(await isFavorited(user.id, productId));
+    } catch {
+      // Keep the current state on a transient network error.
+    }
   }, [user, productId]);
 
   useEffect(() => {

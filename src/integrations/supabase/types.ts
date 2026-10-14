@@ -752,9 +752,70 @@ export type Database = {
           },
         ]
       }
+      coupon_redemptions: {
+        Row: {
+          coupon_code: string
+          coupon_id: string
+          created_at: string
+          currency: string
+          customer_id: string
+          discount_amount: number
+          id: string
+          order_id: string
+          status: string
+          units: number
+          updated_at: string
+          vendor_id: string
+        }
+        Insert: {
+          coupon_code: string
+          coupon_id: string
+          created_at?: string
+          currency?: string
+          customer_id: string
+          discount_amount?: number
+          id?: string
+          order_id: string
+          status?: string
+          units?: number
+          updated_at?: string
+          vendor_id: string
+        }
+        Update: {
+          coupon_code?: string
+          coupon_id?: string
+          created_at?: string
+          currency?: string
+          customer_id?: string
+          discount_amount?: number
+          id?: string
+          order_id?: string
+          status?: string
+          units?: number
+          updated_at?: string
+          vendor_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "coupon_redemptions_coupon_id_fkey"
+            columns: ["coupon_id"]
+            isOneToOne: false
+            referencedRelation: "coupons"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "coupon_redemptions_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       coupons: {
         Row: {
           code: string
+          combinable_with_sale: boolean
           created_at: string
           currency: string
           discount_type: string
@@ -762,15 +823,20 @@ export type Database = {
           expires_at: string | null
           id: string
           is_active: boolean
+          max_discounted_units: number | null
+          max_units_per_order: number | null
           max_uses: number | null
+          max_uses_per_customer: number | null
           min_purchase: number | null
           product_ids: string[]
+          starts_at: string | null
           updated_at: string
           used_count: number
           vendor_id: string
         }
         Insert: {
           code: string
+          combinable_with_sale?: boolean
           created_at?: string
           currency?: string
           discount_type: string
@@ -778,15 +844,20 @@ export type Database = {
           expires_at?: string | null
           id?: string
           is_active?: boolean
+          max_discounted_units?: number | null
+          max_units_per_order?: number | null
           max_uses?: number | null
+          max_uses_per_customer?: number | null
           min_purchase?: number | null
           product_ids?: string[]
+          starts_at?: string | null
           updated_at?: string
           used_count?: number
           vendor_id: string
         }
         Update: {
           code?: string
+          combinable_with_sale?: boolean
           created_at?: string
           currency?: string
           discount_type?: string
@@ -794,9 +865,13 @@ export type Database = {
           expires_at?: string | null
           id?: string
           is_active?: boolean
+          max_discounted_units?: number | null
+          max_units_per_order?: number | null
           max_uses?: number | null
+          max_uses_per_customer?: number | null
           min_purchase?: number | null
           product_ids?: string[]
+          starts_at?: string | null
           updated_at?: string
           used_count?: number
           vendor_id?: string
@@ -811,6 +886,9 @@ export type Database = {
           id: string
           is_active: boolean
           product_id: string
+          sale_price: number | null
+          sale_quantity: number | null
+          sold_quantity: number
           start_date: string
         }
         Insert: {
@@ -820,6 +898,9 @@ export type Database = {
           id?: string
           is_active?: boolean
           product_id: string
+          sale_price?: number | null
+          sale_quantity?: number | null
+          sold_quantity?: number
           start_date?: string
         }
         Update: {
@@ -829,6 +910,9 @@ export type Database = {
           id?: string
           is_active?: boolean
           product_id?: string
+          sale_price?: number | null
+          sale_quantity?: number | null
+          sold_quantity?: number
           start_date?: string
         }
         Relationships: [
@@ -1534,16 +1618,24 @@ export type Database = {
       }
       order_items: {
         Row: {
+          coupon_code: string | null
+          coupon_discount: number
+          coupon_units: number
           created_at: string | null
           currency: string
+          deal_id: string | null
           discount_amount: number
           id: string
           order_id: string
+          original_price: number | null
           price: number
           product_id: string
           product_image: string | null
           product_name: string | null
           quantity: number
+          sale_discount: number
+          sale_released: boolean
+          sale_units: number
           shipping_carrier: string | null
           shipping_duration_text: string | null
           stock_applied: boolean
@@ -1557,16 +1649,24 @@ export type Database = {
           vendor_id: string
         }
         Insert: {
+          coupon_code?: string | null
+          coupon_discount?: number
+          coupon_units?: number
           created_at?: string | null
           currency?: string
+          deal_id?: string | null
           discount_amount?: number
           id?: string
           order_id: string
+          original_price?: number | null
           price: number
           product_id: string
           product_image?: string | null
           product_name?: string | null
           quantity: number
+          sale_discount?: number
+          sale_released?: boolean
+          sale_units?: number
           shipping_carrier?: string | null
           shipping_duration_text?: string | null
           stock_applied?: boolean
@@ -1580,16 +1680,24 @@ export type Database = {
           vendor_id: string
         }
         Update: {
+          coupon_code?: string | null
+          coupon_discount?: number
+          coupon_units?: number
           created_at?: string | null
           currency?: string
+          deal_id?: string | null
           discount_amount?: number
           id?: string
           order_id?: string
+          original_price?: number | null
           price?: number
           product_id?: string
           product_image?: string | null
           product_name?: string | null
           quantity?: number
+          sale_discount?: number
+          sale_released?: boolean
+          sale_units?: number
           shipping_carrier?: string | null
           shipping_duration_text?: string | null
           stock_applied?: boolean
@@ -4645,6 +4753,7 @@ export type Database = {
       }
       archive_product: { Args: { _product_id: string }; Returns: string }
       bootstrap_first_super_admin: { Args: { _email: string }; Returns: Json }
+      build_cart_lines: { Args: { _items: Json }; Returns: Json }
       can_access_conversation_file: {
         Args: { _path: string }
         Returns: boolean
@@ -4660,6 +4769,14 @@ export type Database = {
       }
       check_email_registered: { Args: { p_email: string }; Returns: Json }
       cleanup_old_rate_limits: { Args: never; Returns: undefined }
+      coupon_allocate: {
+        Args: {
+          _c: Database["public"]["Tables"]["coupons"]["Row"]
+          _lines: Json
+          _uid: string
+        }
+        Returns: Record<string, unknown>
+      }
       create_order: {
         Args: {
           _coupon_code?: string
@@ -4873,6 +4990,10 @@ export type Database = {
           rating: number
           reviewer_name: string
         }[]
+      }
+      line_pricing: {
+        Args: { _base: number; _product_id: string; _qty: number }
+        Returns: Record<string, unknown>
       }
       list_chat_messages: {
         Args: { p_before?: string; p_conversation_id: string; p_limit?: number }
@@ -5145,6 +5266,16 @@ export type Database = {
           _stock?: number
         }
         Returns: number
+      }
+      seller_coupon_stats: {
+        Args: never
+        Returns: {
+          coupon_id: string
+          customers: number
+          redemptions: number
+          reserved_units: number
+          used_units: number
+        }[]
       }
       seller_dashboard_overview: { Args: { _days?: number }; Returns: Json }
       seller_list_orders: {

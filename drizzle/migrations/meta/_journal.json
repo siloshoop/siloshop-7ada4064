@@ -176,6 +176,13 @@
       "when": 1791490551701,
       "tag": "0024_order_item_independent_tracking",
       "breakpoints": true
+    },
+    {
+      "idx": 25,
+      "version": "7",
+      "when": 1791956237974,
+      "tag": "0025_coupon_limits_sale_prices",
+      "breakpoints": true
     }
   ]
 }

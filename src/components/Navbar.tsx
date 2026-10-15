@@ -108,6 +108,9 @@ const Navbar = () => {
               <Bell className="h-5 w-5" />
             </Button>
           )}
+          <div className="md:hidden">
+            <ThemeToggle />
+          </div>
           </div>
           <div className="col-start-3 row-start-1 flex min-w-0 items-center justify-end md:contents">
           <Button 

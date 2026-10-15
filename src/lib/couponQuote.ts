@@ -25,6 +25,8 @@ export const couponErrorMessage = (error: string | null | undefined): string => 
       return "هذا الكوبون خاص بمنتجات محددة من متجر معيّن، ولا توجد في سلتك منتجات مشمولة به.";
     case "CURRENCY_MISMATCH":
       return "قيمة هذا الكوبون بعملة مختلفة عن عملة المنتجات المشمولة به.";
+    case "MIXED_CURRENCY":
+      return "لا يمكن استخدام الكوبون مع سلة تحتوي على منتجات بعملات مختلفة.";
     case "MIN_PURCHASE":
       return "لم يتحقق الحد الأدنى للشراء من المنتجات المشمولة بالكوبون.";
     case "NOT_STARTED":

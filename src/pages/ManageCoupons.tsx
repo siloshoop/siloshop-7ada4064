@@ -26,11 +26,35 @@ interface Coupon {
   is_active: boolean;
   product_ids: string[];
   currency: string;
+  max_discounted_units?: number | null;
+  max_units_per_order?: number | null;
+  max_uses_per_customer?: number | null;
+  starts_at?: string | null;
+  combinable_with_sale?: boolean;
 }
+
+interface CouponStats {
+  reserved_units: number;
+  used_units: number;
+  redemptions: number;
+}
+
+/** Derived from saved dates and limits, so expiry never depends on a background job. */
+const couponStatus = (c: Coupon, st?: CouponStats) => {
+  const now = Date.now();
+  const unitsTaken = (st?.reserved_units ?? 0) + (st?.used_units ?? 0);
+  if (!c.is_active) return { label: "موقوف", cls: "bg-muted text-muted-foreground" };
+  if (c.expires_at && new Date(c.expires_at).getTime() <= now) return { label: "منتهي", cls: "bg-muted text-muted-foreground" };
+  if (c.starts_at && new Date(c.starts_at).getTime() > now) return { label: "مجدول", cls: "bg-secondary text-secondary-foreground" };
+  if ((c.max_uses && c.used_count >= c.max_uses) || (c.max_discounted_units && unitsTaken >= c.max_discounted_units))
+    return { label: "نفدت الكمية", cls: "bg-destructive/10 text-destructive" };
+  return { label: "نشط", cls: "bg-primary/10 text-primary" };
+};
 
 const ManageCoupons = () => {
   const { user, loading: authLoading } = useAuth();
   const [coupons, setCoupons] = useState<Coupon[]>([]);
+  const [stats, setStats] = useState<Record<string, CouponStats>>({});
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const navigate = useNavigate();
@@ -44,6 +68,11 @@ const ManageCoupons = () => {
     max_uses: "",
     expires_at: "",
     currency: "SYP",
+    starts_at: "",
+    max_discounted_units: "",
+    max_units_per_order: "",
+    max_uses_per_customer: "",
+    combinable_with_sale: false,
   });
   const [products, setProducts] = useState<{ id: string; name: string; currency: string | null }[]>([]);
   const [selectedProducts, setSelectedProducts] = useState<string[]>([]);
@@ -81,8 +110,14 @@ const ManageCoupons = () => {
       .order("created_at", { ascending: false });
 
     if (data) {
-      setCoupons(data);
+      setCoupons(data as Coupon[]);
     }
+    const { data: st } = await (supabase.rpc as any)("seller_coupon_stats");
+    const map: Record<string, CouponStats> = {};
+    for (const r of (st ?? []) as any[]) {
+      map[r.coupon_id] = { reserved_units: Number(r.reserved_units), used_units: Number(r.used_units), redemptions: Number(r.redemptions) };
+    }
+    setStats(map);
     setLoading(false);
   };
 
@@ -104,8 +139,13 @@ const ManageCoupons = () => {
         discount_value: parseFloat(formData.discount_value),
         min_purchase: formData.min_purchase ? parseFloat(formData.min_purchase) : 0,
         max_uses: formData.max_uses ? parseInt(formData.max_uses) : null,
-        expires_at: formData.expires_at || null,
-      });
+        expires_at: formData.expires_at ? new Date(formData.expires_at).toISOString() : null,
+        starts_at: formData.starts_at ? new Date(formData.starts_at).toISOString() : null,
+        max_discounted_units: formData.max_discounted_units ? parseInt(formData.max_discounted_units) : null,
+        max_units_per_order: formData.max_units_per_order ? parseInt(formData.max_units_per_order) : null,
+        max_uses_per_customer: formData.max_uses_per_customer ? parseInt(formData.max_uses_per_customer) : null,
+        combinable_with_sale: formData.combinable_with_sale,
+      } as any);
 
       if (error) throw error;
 
@@ -122,6 +162,11 @@ const ManageCoupons = () => {
         max_uses: "",
         expires_at: "",
         currency: "SYP",
+        starts_at: "",
+        max_discounted_units: "",
+        max_units_per_order: "",
+        max_uses_per_customer: "",
+        combinable_with_sale: false,
       });
       setSelectedProducts([]);
       setShowForm(false);
@@ -287,6 +332,38 @@ const ManageCoupons = () => {
                     </div>
                   </div>
 
+                  <div className="grid grid-cols-1 gap-4 min-[360px]:grid-cols-3">
+                    {([
+                      ["max_discounted_units", "إجمالي القطع المخفضة"],
+                      ["max_units_per_order", "قطع مخفضة لكل طلب"],
+                      ["max_uses_per_customer", "مرات الاستخدام لكل عميل"],
+                    ] as const).map(([key, label]) => (
+                      <div key={key} className="space-y-2">
+                        <Label htmlFor={key}>{label}</Label>
+                        <Input
+                          id={key}
+                          type="number"
+                          min={1}
+                          step={1}
+                          value={formData[key]}
+                          onChange={(e) => setFormData({ ...formData, [key]: e.target.value })}
+                          placeholder="غير محدود"
+                        />
+                      </div>
+                    ))}
+                  </div>
+                  <p className="text-xs text-muted-foreground">اترك الحقل فارغًا ليكون غير محدود. مثال: إذا كان الحد قطعة واحدة لكل طلب، يُخصم سعر قطعة واحدة فقط حتى لو اشترى العميل أكثر.</p>
+
+                  <label className="flex cursor-pointer items-center gap-2 text-sm">
+                    <input
+                      type="checkbox"
+                      checked={formData.combinable_with_sale}
+                      onChange={(e) => setFormData({ ...formData, combinable_with_sale: e.target.checked })}
+                      className="h-4 w-4 accent-primary"
+                    />
+                    يمكن جمعه مع تخفيضات المنتجات (عروض اليوم)
+                  </label>
+
                   <div className="space-y-2">
                     <Label>عملة المبالغ</Label>
                     <Select value={formData.currency} onValueChange={(value) => setFormData({ ...formData, currency: value })}>
@@ -323,6 +400,16 @@ const ManageCoupons = () => {
                   </div>
 
                   <div className="space-y-2">
+                    <Label htmlFor="starts_at">تاريخ بدء الكوبون</Label>
+                    <Input
+                      id="starts_at"
+                      type="datetime-local"
+                      value={formData.starts_at}
+                      onChange={(e) => setFormData({ ...formData, starts_at: e.target.value })}
+                    />
+                  </div>
+
+                  <div className="space-y-2">
                     <Label htmlFor="expires_at">تاريخ انتهاء الصلاحية</Label>
                     <Input
                       id="expires_at"
@@ -349,17 +436,19 @@ const ManageCoupons = () => {
                 </CardContent>
               </Card>
             ) : (
-              coupons.map((coupon) => (
+              coupons.map((coupon) => {
+                const st = stats[coupon.id];
+                const status = couponStatus(coupon, st);
+                const taken = (st?.reserved_units ?? 0) + (st?.used_units ?? 0);
+                return (
                 <Card key={coupon.id}>
                   <CardContent className="p-6">
                     <div className="flex min-w-0 flex-col items-start gap-4 sm:flex-row sm:items-center sm:justify-between">
                       <div className="min-w-0 flex-1">
                         <div className="mb-2 flex min-w-0 flex-wrap items-center gap-3">
                           <h3 className="min-w-0 break-all font-mono text-xl font-bold sm:text-2xl">{coupon.code}</h3>
-                          <span className={`text-xs px-2 py-1 rounded ${
-                            coupon.is_active ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
-                          }`}>
-                            {coupon.is_active ? 'نشط' : 'غير نشط'}
+                          <span className={`text-xs px-2 py-1 rounded ${status.cls}`}>
+                            {status.label}
                           </span>
                         </div>
                         <p className="text-sm text-muted-foreground mb-3">
@@ -374,13 +463,23 @@ const ManageCoupons = () => {
                         <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground">
                           {coupon.expires_at && (
                             <span>
-                              ينتهي: {format(new Date(coupon.expires_at), "dd MMM yyyy", { locale: ar })}
+                              ينتهي: {format(new Date(coupon.expires_at), "dd MMM yyyy HH:mm", { locale: ar })}
                             </span>
                           )}
                           <span>
                             استخدم {coupon.used_count} مرة
                             {coupon.max_uses && ` من ${coupon.max_uses}`}
                           </span>
+                          <span>طلبات بالكوبون: {st?.redemptions ?? 0}</span>
+                          <span>قطع مخفضة مستخدمة: {st?.used_units ?? 0}</span>
+                          <span>محجوزة (طلبات قيد التنفيذ): {st?.reserved_units ?? 0}</span>
+                          <span>
+                            المتبقي: {coupon.max_discounted_units ? `${Math.max(coupon.max_discounted_units - taken, 0)} من ${coupon.max_discounted_units}` : "غير محدود"}
+                          </span>
+                          {coupon.max_units_per_order && <span>لكل طلب: {coupon.max_units_per_order} قطعة</span>}
+                          {coupon.max_uses_per_customer && <span>لكل عميل: {coupon.max_uses_per_customer} مرة</span>}
+                          <span>{coupon.combinable_with_sale ? "يُجمع مع التخفيضات" : "لا يُجمع مع التخفيضات"}</span>
+                          {coupon.starts_at && <span>يبدأ: {format(new Date(coupon.starts_at), "dd MMM yyyy HH:mm", { locale: ar })}</span>}
                         </div>
                       </div>
                       <div className="flex gap-2">
@@ -402,7 +501,8 @@ const ManageCoupons = () => {
                     </div>
                   </CardContent>
                 </Card>
-              ))
+                );
+              })
             )}
           </div>
         </div>

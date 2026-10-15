@@ -27,14 +27,51 @@ export const couponErrorMessage = (error: string | null | undefined): string => 
       return "قيمة هذا الكوبون بعملة مختلفة عن عملة المنتجات المشمولة به.";
     case "MIN_PURCHASE":
       return "لم يتحقق الحد الأدنى للشراء من المنتجات المشمولة بالكوبون.";
+    case "NOT_STARTED":
+      return "هذا الكوبون لم يبدأ بعد.";
+    case "USES_EXHAUSTED":
+      return "انتهت مرات استخدام هذا الكوبون.";
+    case "UNITS_EXHAUSTED":
+      return "نفدت الكمية المخصصة للخصم بهذا الكوبون.";
+    case "CUSTOMER_LIMIT":
+      return "لقد استخدمت هذا الكوبون الحد الأقصى المسموح لك.";
+    case "SALE_NOT_COMBINABLE":
+      return "المنتجات المشمولة عليها تخفيض حالي، وهذا الكوبون لا يُجمع مع التخفيضات.";
     default:
       return "كود الكوبون غير صحيح أو منتهي الصلاحية.";
   }
 };
 
+/** Extracts the reason code from a create_order coupon error message. */
+export const couponErrorFromMessage = (message: string): string | null => {
+  const m = /Invalid or expired coupon:?\s*([A-Z_]+)?/.exec(message);
+  return m ? m[1] ?? "UNKNOWN" : null;
+};
+
+const STORAGE_KEY = "siloshop.cart_coupon";
+
+/** The applied code survives cart → checkout navigation and page reloads. */
+export const saveAppliedCouponCode = (code: string | null) => {
+  try {
+    if (code) sessionStorage.setItem(STORAGE_KEY, code.trim().toUpperCase());
+    else sessionStorage.removeItem(STORAGE_KEY);
+  } catch {
+    /* storage unavailable */
+  }
+};
+
+export const loadAppliedCouponCode = (): string | null => {
+  try {
+    return sessionStorage.getItem(STORAGE_KEY);
+  } catch {
+    return null;
+  }
+};
+
 /**
- * Server-side quote: the discount applies only to the coupon seller's
- * selected products in the cart (same rule enforced by create_order).
+ * Server-side quote: discount applies only to the coupon seller's selected
+ * products, honours unit/customer limits and sale-combining rules — the same
+ * calculation create_order uses when saving the order.
  */
 export const quoteCoupon = async (code: string, items: CouponCartItem[]) => {
   const { data, error } = await (supabase.rpc as any)("quote_cart_coupon", {

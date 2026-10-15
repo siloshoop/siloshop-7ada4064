@@ -31,13 +31,13 @@ const StoreAdvantages = () => {
           {advantages.map(({ icon: Icon, title, description }) => (
             <div
               key={title}
-              className="flex flex-col items-center gap-1 sm:gap-2 rounded-xl sm:rounded-2xl border border-border/60 bg-card p-1.5 sm:p-3 md:p-4 text-center shadow-[var(--shadow-card)]"
+              className="flex min-w-0 flex-col items-center gap-1 sm:gap-2 rounded-xl sm:rounded-2xl border border-border/60 bg-card p-1.5 sm:p-3 md:p-4 text-center shadow-[var(--shadow-card)]"
             >
               <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/10 sm:h-10 sm:w-10 md:h-11 md:w-11">
                 <Icon className="h-4 w-4 text-primary sm:h-5 sm:w-5" />
               </div>
-              <h3 className="text-[10px] font-bold leading-tight sm:text-sm">{title}</h3>
-              <p className="hidden text-[11px] leading-tight text-muted-foreground sm:block md:text-xs">{description}</p>
+              <h3 className="w-full break-words text-[10px] font-bold leading-tight sm:text-sm">{title}</h3>
+              <p className="w-full break-words text-[9px] leading-tight text-muted-foreground sm:text-[11px] md:text-xs">{description}</p>
             </div>
           ))}
         </div>

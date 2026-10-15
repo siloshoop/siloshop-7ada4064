@@ -41,43 +41,11 @@ const Navbar = () => {
   const { cartRef } = useFlyToCart();
   const { count: cartCount, bounce: cartBounce } = useCartCount(user?.id);
 
-  const fetchCartCount = useCallback(async () => {
-    if (!user) {
-      setCartCount(0);
-      return;
-    }
-
-    const { data, error } = await supabase
-      .from("cart_items")
-      .select("quantity")
-      .eq("user_id", user.id);
-
-    if (error) {
-      console.error("Error fetching cart count:", error);
-      return;
-    }
-
-    const totalItems = (data || []).reduce((sum, item) => sum + (item.quantity || 0), 0);
-    setCartCount((prev) => {
-      if (totalItems !== prev && totalItems > 0) {
-        setCartBounce(true);
-        setTimeout(() => setCartBounce(false), 500);
-      }
-      return totalItems;
-    });
-  }, [user]);
-
-  useEffect(() => {
-    fetchCartCount();
-  }, [fetchCartCount]);
-
   useEffect(() => {
     const openCategories = () => setMobileMenuOpen(true);
     window.addEventListener("siloshop:open-categories", openCategories);
     return () => window.removeEventListener("siloshop:open-categories", openCategories);
   }, []);
-
-  useSyncListener(["cart"], fetchCartCount);
   return (
     <header data-testid="site-header" className="safe-area-top safe-area-x sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container grid min-w-0 grid-cols-[1fr_auto_1fr] items-center gap-x-1 gap-y-1 px-2 py-1 sm:px-4 md:flex md:h-16 md:flex-nowrap md:justify-between md:gap-4 md:py-0">
@@ -88,7 +56,7 @@ const Navbar = () => {
           <Button 
             variant="ghost" 
             size="icon" 
-            className="relative h-9 w-9 md:h-10 md:w-10"
+            className="relative hidden h-9 w-9 md:inline-flex md:h-10 md:w-10"
             aria-label="السلة"
             onClick={() => navigate("/cart")}
             ref={(el: HTMLButtonElement | null) => { (cartRef as React.MutableRefObject<HTMLElement | null>).current = el; }}
@@ -107,11 +75,29 @@ const Navbar = () => {
               <Bell className="h-5 w-5" />
             </Button>
           )}
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-9 w-9 md:h-10 md:w-10"
+            aria-label="الرسائل"
+            onClick={() => navigate("/messages")}
+          >
+            <MessageCircle className="h-5 w-5" />
+          </Button>
           <div className="md:hidden">
             <ThemeToggle />
           </div>
           </div>
           <div className="col-start-3 row-start-1 flex min-w-0 items-center justify-end md:contents">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="inline-flex h-9 w-9 md:hidden"
+            aria-label="الفئات"
+            onClick={() => setMobileMenuOpen(true)}
+          >
+            <Menu className="h-5 w-5" />
+          </Button>
           <Button 
             variant="ghost" 
             size="icon"

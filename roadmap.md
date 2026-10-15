@@ -169,5 +169,5 @@
 - [ ] Physical mobile/Capacitor and 8000×8000 device memory verification (blocked: no device available)
 
 ## Row-anchored product bulk actions
-- [ ] Reposition existing bulk toolbars beneath the last selected visible product, preserving selection and actions
-- [ ] Verify selection, deselection and RTL mobile/desktop layout with isolated data
+- [x] Reposition existing bulk toolbars beneath the last selected visible product, preserving selection and actions
+- [x] Verify selection and deselection at 375/1280px with isolated product responses, no overlap or overflow; 168 automated tests and automatic build passed (live admin account not used)

@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Download } from "lucide-react";
-import { formatAmountsByCurrency, normalizeCurrency } from "@/lib/currency";
+import { formatAmountsByCurrency, isKnownCurrency, normalizeCurrency } from "@/lib/currency";
 
 interface OrderRow {
   id: string;
@@ -75,7 +75,7 @@ const SellerReports = () => {
     const delivered = scoped.filter((o) => o.status === "delivered");
     const cancelled = scoped.filter((o) => o.status === "cancelled");
     const revenueRows = delivered.map((o) => ({ amount: o.total_amount, currency: o.currency }));
-    const countBy = (c: string) => delivered.filter((o) => normalizeCurrency(o.currency) === c).length;
+    const countBy = (c: string) => delivered.filter((o) => isKnownCurrency(o.currency) && normalizeCurrency(o.currency) === c).length;
     const byCity = new Map<string, number>();
     scoped.forEach((o) => byCity.set(o.city || "غير محدد", (byCity.get(o.city || "غير محدد") ?? 0) + 1));
     return {

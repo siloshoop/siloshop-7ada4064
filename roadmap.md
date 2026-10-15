@@ -174,4 +174,4 @@
 
 ## Coupon dates and product thumbnails
 - [x] Validate optional local start/end dates before saving, preserve strict server ordering, and reuse existing image resolution/fallbacks
-- [ ] Verify creation and thumbnails with isolated responses on desktop/mobile and run coupon tests
+- [x] Browser verification at 375/1280px with Arabic locale and Damascus timezone: reject invalid ordering, submit/read back valid fixture coupon, load saved/secondary/placeholder images, no overflow; 175 tests pass plus date tests in Damascus/New York; live production creation and physical Android not tested

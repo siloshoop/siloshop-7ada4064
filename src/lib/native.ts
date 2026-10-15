@@ -39,6 +39,17 @@ export const initNativeApp = async () => {
       }
     });
 
+    // Shared siloshop.net links opened in the app: route inside the WebView.
+    App.addListener("appUrlOpen", ({ url }) => {
+      try {
+        const u = new URL(url);
+        if (!/(^|\.)siloshop\.net$/i.test(u.hostname)) return;
+        const path = `${u.pathname}${u.search}${u.hash}` || "/";
+        window.history.pushState({}, "", path);
+        window.dispatchEvent(new PopStateEvent("popstate"));
+      } catch { /* ignore malformed links */ }
+    });
+
     App.addListener("backButton", ({ canGoBack }) => {
       if (canGoBack && window.location.pathname !== "/") {
         window.history.back();

@@ -2718,7 +2718,7 @@ export type Database = {
           colors?: string[]
           country_of_origin?: string | null
           created_at?: string | null
-          currency?: string
+          currency: string
           description?: string | null
           discount_price?: number | null
           external_id?: string | null

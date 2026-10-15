@@ -11,7 +11,7 @@ export type ProductCurrency = "SYP" | "USD";
 export const DEFAULT_CURRENCY: ProductCurrency = "SYP";
 
 export const CURRENCY_OPTIONS: { value: ProductCurrency; symbol: string; label: string }[] = [
-  { value: "SYP", symbol: "SYP", label: "الليرة السورية (ل.س)" },
+  { value: "SYP", symbol: "ل.س", label: "الليرة السورية (ل.س)" },
   { value: "USD", symbol: "$", label: "الدولار الأمريكي ($)" },
 ];
 
@@ -19,7 +19,7 @@ export const MISSING_CURRENCY_LABEL = "العملة غير متاحة";
 
 /** Symbol for a saved currency code; a missing currency is never shown as SYP. */
 export const currencySymbol = (currency?: string | null): string =>
-  !isKnownCurrency(currency) ? MISSING_CURRENCY_LABEL : normalizeCurrency(currency) === "USD" ? "$" : "SYP";
+  !isKnownCurrency(currency) ? MISSING_CURRENCY_LABEL : normalizeCurrency(currency) === "USD" ? "$" : "ل.س";
 
 /** True only for a saved, supported currency code — never guessed. */
 export const isKnownCurrency = (currency?: string | null): currency is ProductCurrency =>
@@ -106,7 +106,7 @@ export const totalsByCurrency = (
 };
 
 /**
- * Single formatter for every price in the app: "$22.00" for USD, "22 SYP" for
+ * Single formatter for every price in the app: "$22.00" for USD, "22 ل.س" for
  * Syrian pounds. A missing/unknown currency is never assumed — the bare number is shown.
  */
 export const formatPrice = (
@@ -123,7 +123,7 @@ export const formatPrice = (
     const sign = value < 0 ? "-" : "";
     return `${sign}$${Math.abs(value).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
   }
-  return `${value.toLocaleString("en-US", { maximumFractionDigits: options?.maximumFractionDigits ?? 2 })} SYP`;
+  return `${value.toLocaleString("en-US", { maximumFractionDigits: options?.maximumFractionDigits ?? 2 })} ل.س`;
 };
 
 /** Sum amounts per currency (never converting) and format as "$58.5 · 1,000 ل.س". */

@@ -61,6 +61,7 @@ const SellerOrderDetailSheet = ({ order, open, onOpenChange, onChanged }: Props)
   const [cancelReason, setCancelReason] = useState("");
   const [localOrder, setLocalOrder] = useState<SellerOrderRow | null>(order);
   const [orderCurrency, setOrderCurrency] = useState<string | null>(null);
+  const [saved, setSaved] = useState<{ subtotal_amount: number | null; discount_amount: number | null; shipping_amount: number | null; total_amount: number | null; coupon_code: string | null } | null>(null);
 
   useEffect(() => { setLocalOrder(order); }, [order]);
 
@@ -73,12 +74,17 @@ const SellerOrderDetailSheet = ({ order, open, onOpenChange, onChanged }: Props)
       .then((rows) => { if (active) setItems(rows); })
       .catch((e) => toast({ title: "خطأ", description: friendlyOrderError(e), variant: "destructive" }))
       .finally(() => { if (active) setLoadingItems(false); });
+    setSaved(null);
     void supabase
       .from("orders")
-      .select("currency")
+      .select("currency,subtotal_amount,discount_amount,shipping_amount,total_amount,coupon_code")
       .eq("id", order.id)
       .maybeSingle()
-      .then(({ data }) => { if (active) setOrderCurrency((data as any)?.currency ?? null); });
+      .then(({ data }) => {
+        if (!active) return;
+        setOrderCurrency((data as any)?.currency ?? null);
+        setSaved((data as any) ?? null);
+      });
     return () => { active = false; };
   }, [open, order?.id]);
 

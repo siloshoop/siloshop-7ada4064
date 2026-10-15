@@ -18,7 +18,7 @@ import {
 import {
   Loader2, Search, Package, Clock, Boxes, Truck, Home, XCircle, Wallet, Lock, ChevronRight, ChevronLeft,
 } from "lucide-react";
-import { ORDER_STATUSES, normalizeStatus } from "@/lib/orderStatus";
+import { SELECTABLE_ORDER_STATUSES, normalizeStatus } from "@/lib/orderStatus";
 import { fetchSellerOrders, type SellerOrderRow } from "@/lib/sellerOrders";
 import { useToast } from "@/hooks/use-toast";
 import { formatKnownPrice, formatAmountsByCurrency } from "@/lib/currency";
@@ -191,7 +191,7 @@ const VendorOrders = () => {
               </SelectTrigger>
               <SelectContent className="bg-background">
                 <SelectItem value="all">كل الحالات</SelectItem>
-                {ORDER_STATUSES.map((s) => (
+                {SELECTABLE_ORDER_STATUSES.map((s) => (
                   <SelectItem key={s.key} value={s.key}>{s.label}</SelectItem>
                 ))}
               </SelectContent>

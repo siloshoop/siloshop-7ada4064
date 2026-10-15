@@ -305,7 +305,7 @@ const AdminOrders = () => {
                 <SelectTrigger><SelectValue placeholder="الحالة" /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">كل الحالات</SelectItem>
-                  {ORDER_STATUSES.map((s) => <SelectItem key={s.key} value={s.key}>{s.label}</SelectItem>)}
+                  {SELECTABLE_ORDER_STATUSES.map((s) => <SelectItem key={s.key} value={s.key}>{s.label}</SelectItem>)}
                 </SelectContent>
               </Select>
               <Select value={payStatus} onValueChange={(v) => { setPayStatus(v); setPage(0); }}>
@@ -592,7 +592,7 @@ const AdminOrders = () => {
                   <Select value={nextStatus} onValueChange={(v) => setNextStatus(v as OrderStatus)}>
                     <SelectTrigger><SelectValue /></SelectTrigger>
                     <SelectContent>
-                      {ORDER_STATUSES.map((s) => <SelectItem key={s.key} value={s.key}>{s.label}</SelectItem>)}
+                      {SELECTABLE_ORDER_STATUSES.map((s) => <SelectItem key={s.key} value={s.key}>{s.label}</SelectItem>)}
                     </SelectContent>
                   </Select>
                   <Textarea rows={2} value={statusNote} onChange={(e) => setStatusNote(e.target.value)} placeholder="ملاحظة (اختياري)" />

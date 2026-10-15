@@ -18,7 +18,7 @@ export default function ShipmentTrackingTimeline({ status }: { status: string | 
       <Icon className="h-5 w-5 shrink-0 text-destructive" />{terminalLabels[current]}
     </div>;
   }
-  const currentIndex = ORDER_STEPS.findIndex((step) => step.key === current);
+  const currentIndex = ORDER_STEPS.findIndex((step) => step.key === (current === "completed" ? "delivered" : current));
   if (currentIndex < 0) return <p className="text-sm text-muted-foreground">حالة الشحنة غير متاحة</p>;
 
   return <ol className="space-y-0" dir="rtl" aria-label="مراحل الشحنة">

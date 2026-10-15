@@ -23,6 +23,10 @@ export interface PrintOrderData {
   storeName?: string | null;
   /** Order currency; prices are shown with this currency's symbol, never converted. */
   currency?: string | null;
+  /** Saved order amounts (never recomputed). */
+  discount?: number | null;
+  couponCode?: string | null;
+  payable?: number | null;
 }
 
 /* --- Minimal Code 39 barcode as inline SVG (no external deps) --- */
@@ -125,6 +129,8 @@ const buildHtml = (order: PrintOrderData, mode: "invoice" | "label") => {
       </tbody>
     </table>
     <div class="total">إجمالي منتجاتك: ${esc(total)}</div>
+    ${order.discount && order.discount > 0 ? `<div class="total">الخصم${order.couponCode ? ` (كوبون ${esc(order.couponCode)})` : ""}: -${esc(money(order.discount, currency))}</div>` : ""}
+    ${order.payable != null ? `<div class="total">المبلغ المطلوب تحصيله: ${esc(money(order.payable, currency))}</div>` : ""}
     <div class="note">الدفع عند الاستلام. هذه الفاتورة خاصة بمنتجات هذا المتجر فقط داخل الطلب.</div>
   `;
 

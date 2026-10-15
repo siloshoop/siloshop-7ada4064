@@ -84,7 +84,7 @@ const Navbar = () => {
             <ThemeToggle />
           </div>
           </div>
-          <div className="col-start-3 row-start-1 flex min-w-0 items-center justify-end md:contents">
+          <div className="col-start-3 row-start-1 flex min-w-0 items-center justify-end gap-1 md:contents">
           {user ? (
             <NotificationsDropdown />
           ) : (

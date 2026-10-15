@@ -103,8 +103,11 @@ const SellerOrderDetailSheet = ({ order, open, onOpenChange, onChanged }: Props)
       city: localOrder.city,
       items: items.map((i) => ({ name: i.product_name || "منتج", quantity: i.quantity, price: i.price, currency: i.currency })),
       currency: orderCurrency ?? localOrder.currency,
+      discount: saved ? Number(saved.discount_amount || 0) : null,
+      couponCode: saved?.coupon_code ?? null,
+      payable: saved?.total_amount != null ? Number(saved.total_amount) : null,
     };
-  }, [localOrder, items, orderCurrency]);
+  }, [localOrder, items, orderCurrency, saved]);
 
   const runAction = async (action: SellerAction) => {
     if (!localOrder) return;
@@ -167,6 +170,19 @@ const SellerOrderDetailSheet = ({ order, open, onOpenChange, onChanged }: Props)
             <div className="flex items-center gap-2"><MapPin className="h-4 w-4 text-muted-foreground" /> {localOrder.city || "غير محددة"}</div>
             <div className="flex items-center gap-2"><Package className="h-4 w-4 text-muted-foreground" /> {localOrder.items_count} منتج · إجمالي {formatPrice(localOrder.vendor_subtotal || 0, orderCurrency ?? localOrder.currency)}</div>
           </div>
+
+          {saved && saved.total_amount != null && (
+            <div className="space-y-1 rounded-lg border p-3 text-sm">
+              <div className="flex justify-between"><span>السعر الأصلي</span><span>{formatPrice(Number(saved.subtotal_amount || 0), orderCurrency)}</span></div>
+              {Number(saved.discount_amount || 0) > 0 && (
+                <div className="flex justify-between text-green-600"><span>الخصم {saved.coupon_code ? `(كوبون ${saved.coupon_code})` : ""}</span><span>-{formatPrice(Number(saved.discount_amount), orderCurrency)}</span></div>
+              )}
+              {Number(saved.shipping_amount || 0) > 0 && (
+                <div className="flex justify-between"><span>الشحن</span><span>{formatPrice(Number(saved.shipping_amount), orderCurrency)}</span></div>
+              )}
+              <div className="flex justify-between border-t pt-1 font-bold"><span>المبلغ المطلوب تحصيله</span><span>{formatPrice(Number(saved.total_amount), orderCurrency)}</span></div>
+            </div>
+          )}
 
           {printData && (
             <div className="flex flex-wrap gap-2">

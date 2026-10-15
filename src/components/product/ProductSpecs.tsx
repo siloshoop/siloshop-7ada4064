@@ -47,7 +47,7 @@ const ProductSpecs = ({ product, vendorName, categoryName, brandName }: Props) =
     "مدة الشحن",
     product.ships_within_days ? `خلال ${product.ships_within_days} أيام` : null,
   );
-  push("العملة", normalizeCurrency(product.currency) === "USD" ? "دولار أمريكي ($)" : "ليرة سورية (ل.س)");
+  push("العملة", !isKnownCurrency(product.currency) ? "العملة غير متاحة" : normalizeCurrency(product.currency) === "USD" ? "دولار أمريكي ($)" : "ليرة سورية (SYP)");
 
   Object.entries(custom).forEach(([k, v]) => push(k, v));
 

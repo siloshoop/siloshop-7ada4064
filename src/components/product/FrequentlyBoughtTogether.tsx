@@ -72,7 +72,7 @@ const FrequentlyBoughtTogether = ({ product, categoryId, vendorId }: Props) => {
 
   const chosen = companions.filter((c) => selected[c.id]);
   const totals = totalsByCurrency(
-    [product, ...chosen].map((i) => ({ currency: normalizeCurrency(i.currency), lineSubtotal: Number(i.price) || 0 })),
+    [product, ...chosen].map((i) => ({ currency: i.currency, lineSubtotal: Number(i.price) || 0 })),
   );
 
   const addBundle = async () => {

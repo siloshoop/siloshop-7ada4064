@@ -3,7 +3,7 @@
  * currency gets its own item table and its own totals. Amounts in different
  * currencies are NEVER added together and never converted.
  */
-import { CURRENCY_OPTIONS, normalizeCurrency, type ProductCurrency } from "@/lib/currency";
+import { CURRENCY_OPTIONS, isKnownCurrency, normalizeCurrency, type ProductCurrency } from "@/lib/currency";
 
 export interface InvoiceItem {
   currency?: string | null;
@@ -24,7 +24,8 @@ export interface InvoiceOrderAmounts {
 }
 
 export interface InvoiceBlock<T extends InvoiceItem = InvoiceItem> {
-  currency: ProductCurrency;
+  /** null = saved currency missing; shown as "العملة غير متاحة", never as SYP. */
+  currency: ProductCurrency | null;
   items: T[];
   subtotal: number;
   discount: number;
@@ -42,11 +43,12 @@ export const buildInvoiceBlocks = <T extends InvoiceItem>(
   order: InvoiceOrderAmounts,
   items: T[],
 ): InvoiceBlock<T>[] => {
-  const orderCurrency = normalizeCurrency(order.currency);
+  const orderCurrency: ProductCurrency | null = isKnownCurrency(order.currency) ? normalizeCurrency(order.currency) : null;
 
-  const groups = new Map<ProductCurrency, T[]>();
+  const groups = new Map<ProductCurrency | null, T[]>();
   for (const item of items) {
-    const currency = normalizeCurrency(item.currency ?? order.currency);
+    const raw = item.currency ?? order.currency;
+    const currency = isKnownCurrency(raw) ? normalizeCurrency(raw) : null;
     groups.set(currency, [...(groups.get(currency) || []), item]);
   }
   if (groups.size === 0) groups.set(orderCurrency, [] as T[]);
@@ -59,7 +61,7 @@ export const buildInvoiceBlocks = <T extends InvoiceItem>(
 
   const blocks: InvoiceBlock<T>[] = [];
   // Stable order: SYP first, then USD.
-  for (const { value } of CURRENCY_OPTIONS) {
+  for (const value of [...CURRENCY_OPTIONS.map((o) => o.value), null] as (ProductCurrency | null)[]) {
     const list = groups.get(value);
     if (!list) continue;
     const itemsTotal = list.reduce(

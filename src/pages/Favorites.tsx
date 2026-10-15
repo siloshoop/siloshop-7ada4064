@@ -112,7 +112,7 @@ const Favorites = () => {
   }, [user]);
 
   const totalValue = useMemo(
-    () => totalsByCurrency(products.map((p) => ({ currency: normalizeCurrency(p.currency), lineSubtotal: Number(p.price || 0) }))),
+    () => totalsByCurrency(products.map((p) => ({ currency: p.currency, lineSubtotal: Number(p.price || 0) }))),
     [products]
   );
 

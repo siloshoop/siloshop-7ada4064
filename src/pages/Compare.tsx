@@ -413,7 +413,8 @@ const Compare = () => {
 
   // Lowest price is only meaningful among products sharing the same currency.
   const isLowestPrice = (product: Product) => {
-    const same = products.filter((p) => normalizeCurrency(p.currency) === normalizeCurrency(product.currency));
+    if (!isKnownCurrency(product.currency)) return false;
+    const same = products.filter((p) => isKnownCurrency(p.currency) && normalizeCurrency(p.currency) === normalizeCurrency(product.currency));
     return same.length > 1 && product.price === Math.min(...same.map((p) => p.price));
   };
   const getHighestRating = () => Math.max(...products.map(p => getAverageRating(p.reviews)));

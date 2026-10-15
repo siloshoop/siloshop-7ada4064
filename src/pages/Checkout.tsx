@@ -23,6 +23,7 @@ import {
   COUPON_CURRENCY,
   currencyName,
   formatPrice,
+  isKnownCurrency,
   normalizeCurrency,
   totalsByCurrency,
   type ProductCurrency,

@@ -11,6 +11,7 @@ import {
   currencyName,
   currencySymbol,
   formatPrice,
+  isKnownCurrency,
   normalizeCurrency,
   totalsByCurrency,
 } from "@/lib/currency";

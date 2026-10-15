@@ -9,6 +9,7 @@ import { fetchActiveDeals, applyDeal } from "@/lib/dealPricing";
 import {
   COUPON_CURRENCY,
   currencyName,
+  currencySymbol,
   formatPrice,
   normalizeCurrency,
   totalsByCurrency,
@@ -881,7 +882,7 @@ const Cart = () => {
                     <div key={t.currency} className="space-y-2 border-t pt-4">
                       {isMultiCurrency && (
                         <p className="text-sm font-semibold">
-                          إجمالي منتجات {currencyName(t.currency)} ({formatPrice(0, t.currency).split(" ").pop()})
+                          إجمالي منتجات {currencyName(t.currency)} ({currencySymbol(t.currency)})
                         </p>
                       )}
                       <div className="flex justify-between text-sm">

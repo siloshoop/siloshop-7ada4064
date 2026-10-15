@@ -284,7 +284,7 @@ const ManageCategories = () => {
       actions={
         <div className="flex gap-2">
           <Button asChild variant="outline">
-            <Link to="/dashboard/subcategories">
+            <Link to="/admin/subcategories">
               <FolderTree className="me-1 h-4 w-4" /> الفئات الفرعية
             </Link>
           </Button>

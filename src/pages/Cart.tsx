@@ -4,7 +4,7 @@ import { formatVariantLabel } from "@/lib/variantRequirement";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
-import { quoteCoupon, couponErrorMessage } from "@/lib/couponQuote";
+import { quoteCoupon, couponErrorMessage, saveAppliedCouponCode, loadAppliedCouponCode } from "@/lib/couponQuote";
 import { fetchActiveDeals, applyDeal } from "@/lib/dealPricing";
 import {
   COUPON_CURRENCY,
@@ -556,6 +556,7 @@ const Cart = () => {
       const discountAmount = Number(data.discount_amount) || 0;
       setAppliedCoupon(data);
       setCouponDiscount(discountAmount);
+      saveAppliedCouponCode(data.code);
       toast({ title: "تم التطبيق", description: `تم تطبيق خصم ${formatPrice(discountAmount, couponCurrency, { maximumFractionDigits: 2 })} على منتجات المتجر المشمولة بالكوبون` });
     } catch (error) {
       toast({ title: "خطأ", description: error.message, variant: "destructive" });
@@ -564,7 +565,42 @@ const Cart = () => {
     }
   };
 
+  // Keep a saved coupon applied and re-priced by the server whenever the cart changes.
+  const cartSignature = itemsWithDiscounts
+    .map((i: any) => `${i.product.id}:${i.variant_id ?? ""}:${i.quantity}`)
+    .join("|");
+  useEffect(() => {
+    const code = appliedCoupon?.code ?? loadAppliedCouponCode();
+    if (!code || !couponSupported || itemsWithDiscounts.length === 0) return;
+    let cancelled = false;
+    void quoteCoupon(
+      code,
+      itemsWithDiscounts.map((item: any) => ({ product_id: item.product.id, variant_id: item.variant_id ?? null, quantity: item.quantity })),
+    )
+      .then((data) => {
+        if (cancelled) return;
+        if (!data || data.error) {
+          if (appliedCoupon) {
+            toast({ title: "تم إلغاء الكوبون", description: couponErrorMessage(data?.error), variant: "destructive" });
+          }
+          setAppliedCoupon(null);
+          setCouponDiscount(0);
+          saveAppliedCouponCode(null);
+          return;
+        }
+        setCouponCode(data.code);
+        setAppliedCoupon(data);
+        setCouponDiscount(Number(data.discount_amount) || 0);
+      })
+      .catch(() => undefined);
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [cartSignature, couponSupported]);
+
   const removeCoupon = () => {
+    saveAppliedCouponCode(null);
     setAppliedCoupon(null);
     setCouponDiscount(0);
     setCouponCode("");

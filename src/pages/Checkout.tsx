@@ -4,7 +4,7 @@ import { Navigate, useNavigate } from "react-router-dom";
 import { z } from "zod";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
-import { quoteCoupon, couponErrorMessage } from "@/lib/couponQuote";
+import { quoteCoupon, couponErrorMessage, couponErrorFromMessage, saveAppliedCouponCode, loadAppliedCouponCode } from "@/lib/couponQuote";
 import { fetchActiveDeals, fetchQuantityTiers, tierPercent } from "@/lib/dealPricing";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -407,6 +407,40 @@ const Checkout = () => {
     })();
   }, [platformOptions?.sham_cash_enabled]);
 
+  // Restore the coupon applied in the cart and keep it re-priced by the server.
+  const checkoutSignature = cartItems
+    .map((i) => `${i.product.id}:${i.variant_id ?? ""}:${i.quantity}`)
+    .join("|");
+  useEffect(() => {
+    const code = appliedCoupon?.code ?? loadAppliedCouponCode();
+    if (!code || !couponSupported || cartItems.length === 0) return;
+    let cancelled = false;
+    void quoteCoupon(
+      code,
+      cartItems.map((item) => ({ product_id: item.product.id, variant_id: item.variant_id ?? null, quantity: item.quantity })),
+    )
+      .then((data) => {
+        if (cancelled) return;
+        if (!data || data.error) {
+          if (appliedCoupon) {
+            toast({ title: "تم إلغاء الكوبون", description: couponErrorMessage(data?.error), variant: "destructive" });
+          }
+          setAppliedCoupon(null);
+          setDiscount(0);
+          saveAppliedCouponCode(null);
+          return;
+        }
+        setCouponCode(data.code);
+        setAppliedCoupon(data);
+        setDiscount(Number(data.discount_amount) || 0);
+      })
+      .catch(() => undefined);
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [checkoutSignature, couponSupported]);
+
   const applyCoupon = async () => {
     if (!couponCode.trim()) {
       toast({
@@ -449,6 +483,7 @@ const Checkout = () => {
 
       setAppliedCoupon(data);
       setDiscount(discountAmount);
+      saveAppliedCouponCode(data.code);
 
       toast({
         title: "تم التطبيق",
@@ -531,6 +566,7 @@ const Checkout = () => {
 
 
       if (orderError) throw orderError;
+      saveAppliedCouponCode(null);
       const order = { id: newOrderId as string };
 
       // Get customer profile for name (falls back to the checkout name fields)
@@ -632,7 +668,7 @@ const Checkout = () => {
       if (message.includes("Invalid or expired coupon")) {
         toast({
           title: "الكوبون غير متاح",
-          description: "الكوبون لم يعد صالحًا للمنتجات في سلتك. أزل الكوبون وحاول مجددًا.",
+          description: couponErrorMessage(couponErrorFromMessage(message)),
           variant: "destructive",
         });
         return;

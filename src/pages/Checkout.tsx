@@ -23,6 +23,7 @@ import {
   COUPON_CURRENCY,
   currencyName,
   formatPrice,
+  isKnownCurrency,
   normalizeCurrency,
   totalsByCurrency,
   type ProductCurrency,
@@ -272,11 +273,12 @@ const Checkout = () => {
   );
   // Currency of the cart. Amounts in different currencies are never summed or
   // converted, so an order must be placed in a single currency.
+  const hasMissingCurrency = cartItems.some((i) => !isKnownCurrency(i.product.currency));
   const cartCurrencies = Array.from(
-    new Set(cartItems.map((i) => normalizeCurrency(i.product.currency))),
+    new Set(cartItems.filter((i) => isKnownCurrency(i.product.currency)).map((i) => normalizeCurrency(i.product.currency))),
   ) as ProductCurrency[];
-  const orderCurrency: ProductCurrency = cartCurrencies[0] ?? "SYP";
-  const isMixedCurrency = cartCurrencies.length > 1;
+  const orderCurrency: ProductCurrency | null = cartCurrencies[0] ?? null;
+  const isMixedCurrency = cartCurrencies.length > 1 || (hasMissingCurrency && cartCurrencies.length > 0);
   const couponSupported = !isMixedCurrency;
 
   // Payment + shipping model (enforced server-side in create_order):
@@ -364,7 +366,7 @@ const Checkout = () => {
   // added across currencies.
   const currencyTotals = totalsByCurrency(
     cartItems.map((item) => ({
-      currency: normalizeCurrency(item.product.currency),
+      currency: item.product.currency,
       lineSubtotal: Number(item.product.price) * item.quantity,
       shipping: usePlatformRules ? 0 : Number(item.product.shipping_cost || 0),
     })),

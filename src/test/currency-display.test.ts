@@ -18,8 +18,8 @@ describe("saved currency amounts without conversion", () => {
     expect(formatAmountsByCurrency([{ amount: 59, currency: null }])).toBe("59 (العملة غير متاحة)");
   });
   it("never assumes Syrian pounds when the currency is missing", () => {
-    expect(formatPrice(22, null)).toBe("22");
-    expect(formatPrice(22, undefined)).toBe("22");
+    expect(formatPrice(22, null)).toBe("22 (العملة غير متاحة)");
+    expect(formatPrice(22, undefined)).toBe("22 (العملة غير متاحة)");
   });
   it("keeps mixed-currency totals independent", () => {
     const rows = [{ amount: 59, currency: "USD" }, { amount: 1000, currency: "SYP" }];

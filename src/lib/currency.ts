@@ -15,9 +15,11 @@ export const CURRENCY_OPTIONS: { value: ProductCurrency; symbol: string; label: 
   { value: "USD", symbol: "$", label: "الدولار الأمريكي ($)" },
 ];
 
-/** Symbol for a stored currency code; falls back to the Syrian pound. */
+export const MISSING_CURRENCY_LABEL = "العملة غير متاحة";
+
+/** Symbol for a saved currency code; a missing currency is never shown as SYP. */
 export const currencySymbol = (currency?: string | null): string =>
-  normalizeCurrency(currency) === "USD" ? "$" : "SYP";
+  !isKnownCurrency(currency) ? MISSING_CURRENCY_LABEL : normalizeCurrency(currency) === "USD" ? "$" : "SYP";
 
 /** True only for a saved, supported currency code — never guessed. */
 export const isKnownCurrency = (currency?: string | null): currency is ProductCurrency =>
@@ -32,10 +34,11 @@ export const normalizeCurrency = (value?: string | null): ProductCurrency =>
 
 /** Arabic name of a currency, for labelling per-currency totals. */
 export const currencyName = (currency?: string | null): string =>
-  normalizeCurrency(currency) === "USD" ? "الدولار الأمريكي" : "الليرة السورية";
+  !isKnownCurrency(currency) ? MISSING_CURRENCY_LABEL : normalizeCurrency(currency) === "USD" ? "الدولار الأمريكي" : "الليرة السورية";
 
 export interface CurrencyLine {
-  currency: ProductCurrency;
+  /** Saved currency; lines without a known currency are excluded from totals. */
+  currency: ProductCurrency | string | null | undefined;
   /** Line price before any discount. */
   lineSubtotal: number;
   /** Quantity-discount savings on this line. */
@@ -68,6 +71,7 @@ export const totalsByCurrency = (
   const map = new Map<ProductCurrency, CurrencyTotals>();
 
   for (const line of lines) {
+    if (!isKnownCurrency(line.currency)) continue;
     const currency = normalizeCurrency(line.currency);
     const entry =
       map.get(currency) ??
@@ -113,7 +117,7 @@ export const formatPrice = (
   const n = Number(amount ?? 0);
   const value = Number.isFinite(n) ? n : 0;
   if (!isKnownCurrency(currency)) {
-    return value.toLocaleString("en-US", { maximumFractionDigits: options?.maximumFractionDigits ?? 2 });
+    return `${value.toLocaleString("en-US", { maximumFractionDigits: options?.maximumFractionDigits ?? 2 })} (${MISSING_CURRENCY_LABEL})`;
   }
   if (normalizeCurrency(currency) === "USD") {
     const sign = value < 0 ? "-" : "";
@@ -145,7 +149,7 @@ export const formatAmountsByCurrency = (
       const d = options?.divideBy?.(value) ?? 1;
       return formatPrice(d ? (sums.get(value) ?? 0) / d : 0, value, options);
     });
-  if (hasUnknownCurrency) parts.push(formatKnownPrice(unknownAmount, null));
+  if (hasUnknownCurrency) parts.push(formatPrice(unknownAmount, null, options));
   return parts.join(" · ");
 };
 
@@ -180,4 +184,4 @@ export const sumByCurrency = (rows: { amount: number; currency?: string | null }
 
 /** Never guess a currency for legacy report payloads that omit it. */
 export const formatKnownPrice = (amount: number | string | null | undefined, currency?: string | null): string =>
-  isKnownCurrency(currency) ? formatPrice(amount, currency) : `${Number(amount ?? 0).toLocaleString("en-US", { maximumFractionDigits: 2 })} (العملة غير متاحة)`;
+  formatPrice(amount, currency);

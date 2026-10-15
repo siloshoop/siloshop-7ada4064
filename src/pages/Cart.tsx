@@ -11,6 +11,7 @@ import {
   currencyName,
   currencySymbol,
   formatPrice,
+  isKnownCurrency,
   normalizeCurrency,
   totalsByCurrency,
 } from "@/lib/currency";
@@ -509,11 +510,13 @@ const Cart = () => {
 
   // Amounts are grouped per currency: USD and SYP are never summed together
   // and never converted.
-  const cartCurrencyList = Array.from(new Set(itemsWithDiscounts.map((item) => normalizeCurrency((item.product as any).currency))));
+  const rawCartCurrencies = itemsWithDiscounts.map((item) => (item.product as any).currency as string | null | undefined);
+  const hasMissingCurrency = rawCartCurrencies.some((c) => !isKnownCurrency(c));
+  const cartCurrencyList = Array.from(new Set(rawCartCurrencies.filter(isKnownCurrency).map((c) => normalizeCurrency(c))));
   const couponCurrency = cartCurrencyList[0] ?? COUPON_CURRENCY;
   const currencyTotals = totalsByCurrency(
     itemsWithDiscounts.map((item) => ({
-      currency: normalizeCurrency((item.product as any).currency),
+      currency: (item.product as any).currency,
       lineSubtotal: Number(item.product.price) * item.quantity,
       savings: item.savings,
       shipping: Number(item.product.shipping_cost || 0),
@@ -521,7 +524,7 @@ const Cart = () => {
     { couponDiscount, couponCurrency, taxRate: TAX_RATE },
   );
   const isMultiCurrency = currencyTotals.length > 1;
-  const couponSupported = cartCurrencyList.length <= 1;
+  const couponSupported = cartCurrencyList.length <= 1 && !hasMissingCurrency;
 
   // A coupon can only price a Syrian-pound order — drop it if the cart changes.
   useEffect(() => {

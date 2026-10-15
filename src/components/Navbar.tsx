@@ -1,7 +1,6 @@
-import { ShoppingCart, Search, Menu, Heart, User, LogOut, LayoutDashboard, SlidersHorizontal, Gift, Scale, Home } from "lucide-react";
+import { ShoppingCart, Bell, Menu, Heart, User, LogOut, LayoutDashboard, SlidersHorizontal, Gift, Scale } from "lucide-react";
 import { useFlyToCart } from "@/components/FlyToCart";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import SearchAutocomplete from "@/components/search/SearchAutocomplete";
 import { NotificationsDropdown } from "@/components/NotificationsDropdown";
 import { ThemeToggle } from "@/components/ThemeToggle";
@@ -31,7 +30,7 @@ import { useCompareProducts } from "@/hooks/useCompareProducts";
 import MegaMenu from "@/components/MegaMenu";
 import CategoryDrawerList from "@/components/CategoryDrawerList";
 import BrandLogo from "@/components/BrandLogo";
-import { notifySync, useSyncListener } from "@/lib/uiSync";
+import { useSyncListener } from "@/lib/uiSync";
 
 const Navbar = () => {
   const navigate = useNavigate();
@@ -73,13 +72,20 @@ const Navbar = () => {
     fetchCartCount();
   }, [fetchCartCount]);
 
+  useEffect(() => {
+    const openCategories = () => setMobileMenuOpen(true);
+    window.addEventListener("siloshop:open-categories", openCategories);
+    return () => window.removeEventListener("siloshop:open-categories", openCategories);
+  }, []);
+
   useSyncListener(["cart"], fetchCartCount);
   return (
     <header data-testid="site-header" className="safe-area-top safe-area-x sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container flex min-w-0 flex-wrap items-center justify-between gap-x-1 gap-y-1 px-2 py-1 sm:px-4 md:h-16 md:flex-nowrap md:gap-4 md:py-0">
+      <div className="container grid min-w-0 grid-cols-[1fr_auto_1fr] items-center gap-x-1 gap-y-1 px-2 py-1 sm:px-4 md:flex md:h-16 md:flex-nowrap md:justify-between md:gap-4 md:py-0">
         {/* Right side - Icons */}
-        <div className="order-2 flex min-w-0 items-center gap-0 md:order-none md:justify-start md:gap-2">
+        <div className="contents md:flex md:min-w-0 md:items-center md:justify-start md:gap-2">
           <div className="hidden md:block"><ThemeToggle /></div>
+          <div data-testid="header-cart-notifications" className="col-start-1 row-start-1 flex items-center justify-start md:contents">
           <Button 
             variant="ghost" 
             size="icon" 
@@ -95,6 +101,15 @@ const Navbar = () => {
               </Badge>
             )}
           </Button>
+          {user ? (
+            <NotificationsDropdown />
+          ) : (
+            <Button variant="ghost" size="icon" aria-label="الإشعارات" className="h-9 w-9 md:hidden" onClick={() => navigate("/auth", { state: { from: "/notifications" } })}>
+              <Bell className="h-5 w-5" />
+            </Button>
+          )}
+          </div>
+          <div className="col-start-3 row-start-1 flex min-w-0 items-center justify-end md:contents">
           <Button 
             variant="ghost" 
             size="icon"
@@ -127,7 +142,6 @@ const Navbar = () => {
           {user && (
             <>
               <div className="hidden md:block"><PushNotificationManager variant="icon" /></div>
-              <NotificationsDropdown />
             </>
           )}
 
@@ -172,10 +186,11 @@ const Navbar = () => {
               </Button>
             )
           )}
+          </div>
         </div>
 
         {/* Center - Search */}
-        <div className="order-3 flex w-full min-w-0 items-center gap-1 md:order-none md:max-w-2xl md:flex-1">
+        <div className="col-span-3 col-start-1 row-start-2 flex w-full min-w-0 items-center gap-1 md:order-none md:max-w-2xl md:flex-1">
           <SearchAutocomplete className="flex-1" />
           <Button 
             variant="outline" 
@@ -188,10 +203,10 @@ const Navbar = () => {
         </div>
 
         {/* Left side - Logo & Menu */}
-        <div className="order-1 flex min-w-0 items-center gap-1 md:order-none md:gap-4">
+        <div className="col-start-2 row-start-1 flex min-w-0 items-center justify-center gap-1 md:gap-4">
           <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
             <SheetTrigger asChild>
-              <Button variant="ghost" size="icon" className="h-9 w-9 md:h-10 md:w-10" aria-label="الفئات">
+              <Button variant="ghost" size="icon" className="hidden h-10 w-10 md:inline-flex" aria-label="الفئات">
                 <Menu className="h-5 w-5" />
               </Button>
             </SheetTrigger>
@@ -307,20 +322,10 @@ const Navbar = () => {
               </div>
             </SheetContent>
           </Sheet>
-          <NavLink
-            to="/"
-            aria-label="الرئيسية"
-            title="الرئيسية"
-            className="brand-home-link flex h-8 shrink-0 items-center gap-1 rounded-full px-1.5 text-sm font-semibold transition-colors hover:bg-primary/10 sm:px-2.5"
-            activeClassName="bg-primary/10"
-          >
-            <Home className="h-4 w-4 shrink-0" />
-            <span className="whitespace-nowrap">الرئيسية</span>
-          </NavLink>
           <BrandLogo
             as="h1"
             onClick={() => navigate("/")}
-            className="max-w-[100px] text-base sm:max-w-[160px] sm:text-2xl md:max-w-none md:text-3xl"
+            className="max-w-[160px] text-lg sm:max-w-[180px] sm:text-2xl md:max-w-none md:text-3xl"
           />
         </div>
       </div>

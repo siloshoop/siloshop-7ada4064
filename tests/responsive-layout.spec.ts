@@ -63,7 +63,7 @@ for (const width of portraitWidths) {
         expect(headerBox.height).toBeLessThanOrEqual(96);
         expect(bottomBox.y + bottomBox.height).toBeCloseTo(page.viewportSize()?.height ?? 0, 0);
       }
-      await header.getByRole("button", { name: "الفئات", exact: true }).click();
+      await bottom.getByRole("button", { name: "الفئات", exact: true }).click();
       await expect(page.getByRole("dialog")).toBeVisible();
       await expectNoDocumentOverflow(page);
     });

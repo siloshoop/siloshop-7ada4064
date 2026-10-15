@@ -14,6 +14,8 @@ import { useToast } from "@/hooks/use-toast";
 import { Loader2, Plus, Trash2, Tag } from "lucide-react";
 import { format } from "date-fns";
 import { ar } from "date-fns/locale";
+import { COUPON_DATE_ORDER_ERROR, validateCouponDates } from "@/lib/couponDates";
+import OrderProductImage from "@/components/orders/OrderProductImage";
 
 interface Coupon {
   id: string;
@@ -75,14 +77,16 @@ const ManageCoupons = () => {
     max_uses_per_customer: "",
     combinable_with_sale: false,
   });
-  const [products, setProducts] = useState<{ id: string; name: string; currency: string | null }[]>([]);
+  const [products, setProducts] = useState<{ id: string; name: string; currency: string | null; image_url: string | null; images: string[] | null }[]>([]);
   const [selectedProducts, setSelectedProducts] = useState<string[]>([]);
+  const [dateError, setDateError] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     if (!user) return;
     supabase
       .from("products")
-      .select("id, name, currency")
+      .select("id, name, currency, image_url, images")
       .eq("vendor_id", user.id)
       .order("created_at", { ascending: false })
       .then(({ data }) => setProducts((data as any) || []));
@@ -124,12 +128,22 @@ const ManageCoupons = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!user) return;
+    if (!user || saving) return;
     if (selectedProducts.length === 0) {
       toast({ title: "اختر المنتجات", description: "يجب اختيار منتج واحد على الأقل من منتجاتك ليعمل عليه الكوبون.", variant: "destructive" });
       return;
     }
 
+    let dates: ReturnType<typeof validateCouponDates>;
+    try {
+      dates = validateCouponDates(formData.starts_at, formData.expires_at);
+      setDateError(null);
+    } catch (error) {
+      setDateError(error instanceof Error ? error.message : COUPON_DATE_ORDER_ERROR);
+      return;
+    }
+
+    setSaving(true);
     try {
       const { error } = await supabase.from("coupons").insert({
         product_ids: selectedProducts,
@@ -140,8 +154,7 @@ const ManageCoupons = () => {
         discount_value: parseFloat(formData.discount_value),
         min_purchase: formData.min_purchase ? parseFloat(formData.min_purchase) : 0,
         max_uses: formData.max_uses ? parseInt(formData.max_uses) : null,
-        expires_at: formData.expires_at ? new Date(formData.expires_at).toISOString() : null,
-        starts_at: formData.starts_at ? new Date(formData.starts_at).toISOString() : null,
+        ...dates,
         max_discounted_units: formData.max_discounted_units ? parseInt(formData.max_discounted_units) : null,
         max_units_per_order: formData.max_units_per_order ? parseInt(formData.max_units_per_order) : null,
         max_uses_per_customer: formData.max_uses_per_customer ? parseInt(formData.max_uses_per_customer) : null,
@@ -173,11 +186,14 @@ const ManageCoupons = () => {
       setShowForm(false);
       fetchCoupons();
     } catch (error) {
+      const message = error instanceof Error ? error.message : (error as { message?: string })?.message;
       toast({
         title: "خطأ",
-        description: error.message,
+        description: message?.includes("INVALID_COUPON_DATES") ? COUPON_DATE_ORDER_ERROR : message || "تعذر إنشاء الكوبون، حاول مجددًا.",
         variant: "destructive",
       });
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -392,6 +408,7 @@ const ManageCoupons = () => {
                               onChange={() => toggleProduct(p.id)}
                               className="h-4 w-4 accent-primary"
                             />
+                            <OrderProductImage image={p.image_url} fallbackImage={p.images?.[0]} alt={p.name} className="h-10 w-10 shrink-0 rounded object-cover" />
                             <span className="min-w-0 flex-1 truncate">{p.name}</span>
                             <span className="text-xs text-muted-foreground">{currencySymbol(p.currency)}</span>
                           </label>
@@ -405,8 +422,11 @@ const ManageCoupons = () => {
                     <Input
                       id="starts_at"
                       type="datetime-local"
+                      dir="ltr"
+                      aria-invalid={!!dateError}
+                      aria-describedby={dateError ? "coupon-date-error" : undefined}
                       value={formData.starts_at}
-                      onChange={(e) => setFormData({ ...formData, starts_at: e.target.value })}
+                      onChange={(e) => { setFormData({ ...formData, starts_at: e.target.value }); setDateError(null); }}
                     />
                   </div>
 
@@ -415,12 +435,17 @@ const ManageCoupons = () => {
                     <Input
                       id="expires_at"
                       type="datetime-local"
+                      dir="ltr"
+                      aria-invalid={!!dateError}
+                      aria-describedby={dateError ? "coupon-date-error" : undefined}
                       value={formData.expires_at}
-                      onChange={(e) => setFormData({ ...formData, expires_at: e.target.value })}
+                      onChange={(e) => { setFormData({ ...formData, expires_at: e.target.value }); setDateError(null); }}
                     />
                   </div>
+                  {dateError && <p id="coupon-date-error" role="alert" className="text-sm text-destructive">{dateError}</p>}
 
-                  <Button type="submit" className="w-full">
+                  <Button type="submit" className="w-full" disabled={saving}>
+                    {saving && <Loader2 className="me-2 h-4 w-4 animate-spin" />}
                     إنشاء الكوبون
                   </Button>
                 </form>

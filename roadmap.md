@@ -171,3 +171,7 @@
 ## Row-anchored product bulk actions
 - [x] Reposition existing bulk toolbars beneath the last selected visible product, preserving selection and actions
 - [x] Verify selection and deselection at 375/1280px with isolated product responses, no overlap or overflow; 168 automated tests and automatic build passed (live admin account not used)
+
+## Coupon dates and product thumbnails
+- [x] Validate optional local start/end dates before saving, preserve strict server ordering, and reuse existing image resolution/fallbacks
+- [x] Browser verification at 375/1280px with Arabic locale and Damascus timezone: reject invalid ordering, submit/read back valid fixture coupon, load saved/secondary/placeholder images, no overflow; 175 tests pass plus date tests in Damascus/New York; live production creation and physical Android not tested

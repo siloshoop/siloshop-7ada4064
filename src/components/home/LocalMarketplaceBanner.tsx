@@ -37,17 +37,17 @@ const LocalMarketplaceBanner = () => (
             </div>
           </div>
 
-          <div className="grid gap-3 sm:grid-cols-3">
+          <div className="grid grid-cols-3 gap-2 md:gap-3">
             {PERKS.map(({ icon: Icon, title, body }) => (
               <div
                 key={title}
-                className="rounded-2xl border border-border/60 bg-background/70 p-4 backdrop-blur-sm transition-transform duration-300 hover:-translate-y-0.5 motion-reduce:transition-none"
+                className="rounded-2xl border border-border/60 bg-background/70 p-2.5 backdrop-blur-sm transition-transform duration-300 hover:-translate-y-0.5 motion-reduce:transition-none md:p-4"
               >
-                <span className="mb-2 inline-flex h-9 w-9 items-center justify-center rounded-xl bg-primary/10 text-primary">
-                  <Icon className="h-4 w-4" />
+                <span className="mb-1.5 inline-flex h-7 w-7 items-center justify-center rounded-lg bg-primary/10 text-primary md:mb-2 md:h-9 md:w-9 md:rounded-xl">
+                  <Icon className="h-3.5 w-3.5 md:h-4 md:w-4" />
                 </span>
-                <p className="text-sm font-bold">{title}</p>
-                <p className="mt-1 text-xs leading-relaxed text-muted-foreground">{body}</p>
+                <p className="text-[11px] font-bold leading-snug md:text-sm">{title}</p>
+                <p className="mt-0.5 text-[10px] leading-relaxed text-muted-foreground md:mt-1 md:text-xs">{body}</p>
               </div>
             ))}
           </div>

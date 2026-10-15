@@ -209,7 +209,8 @@ const App = () => (
             <Route path="/dashboard/add-product" element={<RequireApprovedSeller><AddProduct /></RequireApprovedSeller>} />
             <Route path="/dashboard/edit-product/:id" element={<RequireApprovedSeller><EditProduct /></RequireApprovedSeller>} />
             <Route path="/dashboard/coupons" element={<RequireApprovedSeller><ManageCoupons /></RequireApprovedSeller>} />
-            <Route path="/dashboard/subcategories" element={<RequireRole role={["vendor","admin"]}><ManageSubcategories /></RequireRole>} />
+            <Route path="/dashboard/subcategories" element={<Navigate to="/admin/subcategories" replace />} />
+            <Route path="/admin/subcategories" element={<RequireRole role="admin"><ManageSubcategories /></RequireRole>} />
             <Route path="/dashboard/statistics" element={<RequireApprovedSeller><Statistics /></RequireApprovedSeller>} />
             <Route path="/dashboard/orders" element={<RequireApprovedSeller><VendorOrders /></RequireApprovedSeller>} />
             <Route path="/dashboard/deals" element={<RequireApprovedSeller><ManageDeals /></RequireApprovedSeller>} />

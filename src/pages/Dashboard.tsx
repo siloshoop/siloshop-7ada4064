@@ -649,13 +649,6 @@ const Dashboard = () => {
                     </Button>
                     <Button 
                       variant="outline"
-                      onClick={() => navigate("/dashboard/subcategories")}
-                    >
-                      <Layers className="ml-2 h-4 w-4" />
-                      التصنيفات
-                    </Button>
-                    <Button 
-                      variant="outline"
                       onClick={() => navigate("/dashboard/deals")}
                     >
                       <Percent className="ml-2 h-4 w-4" />

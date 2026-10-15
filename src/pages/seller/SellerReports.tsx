@@ -104,7 +104,7 @@ const SellerReports = () => {
                   التاريخ: new Date(o.created_at).toLocaleDateString("ar-SY"),
                   الحالة: o.status,
                   المبلغ: Number(o.total_amount || 0),
-                  العملة: normalizeCurrency(o.currency),
+                  العملة: o.currency ?? "غير متاحة",
                   العميل: o.customer_name ?? "",
                   المحافظة: o.city ?? "",
                 })))
@@ -121,7 +121,7 @@ const SellerReports = () => {
                 (products.map((p) => ({
                   المنتج: p.name,
                   السعر: Number(p.price || 0),
-                   العملة: normalizeCurrency(p.currency),
+                   العملة: p.currency ?? "غير متاحة",
                   المخزون: p.stock_quantity ?? 0,
                   الحالة: p.moderation_status ?? "",
                 })))

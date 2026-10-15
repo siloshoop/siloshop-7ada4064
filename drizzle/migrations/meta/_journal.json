@@ -218,13 +218,6 @@
       "when": 1792075713248,
       "tag": "0030_admin_manage_subcategories",
       "breakpoints": true
-    },
-    {
-      "idx": 31,
-      "version": "7",
-      "when": 1792092603432,
-      "tag": "0031_admin_only_shipping_management",
-      "breakpoints": true
     }
   ]
 }

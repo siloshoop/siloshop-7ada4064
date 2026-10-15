@@ -136,7 +136,7 @@ const PlatformProducts = () => {
       description: p.description,
       price: Number(p.price),
       discount_price: p.discount_price != null ? Number(p.discount_price) : null,
-      currency: p.currency || "SYP",
+      currency: p.currency || "",
       stock_quantity: p.stock_quantity ?? 0,
       sizes: p.sizes || [],
       colors: p.colors || [],

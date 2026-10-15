@@ -83,17 +83,17 @@ const SellerStore = () => {
     setSaving(true);
     const { error } = await supabase.rpc("seller_update_store_profile", {
       _store_name: form.store_name || null,
-      _store_description: form.store_description || null,
-      _contact_email: form.contact_email || null,
-      _contact_phone: form.contact_phone || null,
-      _address: form.address || null,
-      _city: form.city || null,
-      _logo_url: form.logo_url || null,
-      _cover_image_url: form.cover_image_url || null,
-      _working_hours: form.working_hours || null,
-      _return_policy: form.return_policy || null,
-      _shipping_policy: form.shipping_policy || null,
-      _business_info: form.business_info || null,
+      _store_description: form.store_description ?? "",
+      _contact_email: form.contact_email ?? "",
+      _contact_phone: form.contact_phone ?? "",
+      _address: form.address ?? "",
+      _city: form.city ?? "",
+      _logo_url: form.logo_url ?? "",
+      _cover_image_url: form.cover_image_url ?? "",
+      _working_hours: form.working_hours ?? "",
+      _return_policy: form.return_policy ?? "",
+      _shipping_policy: form.shipping_policy ?? "",
+      _business_info: form.business_info ?? "",
     });
     setSaving(false);
     if (error) {

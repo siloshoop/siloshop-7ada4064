@@ -132,7 +132,7 @@ const CustomerInvoice = ({ orderId }: Props) => {
           </table>
           <div class="totals">
             <div class="row"><span>المنتجات</span><span>${esc(money(b.subtotal, b.currency))}</span></div>
-            ${b.discount > 0 ? `<div class="row"><span>الخصم</span><span>-${esc(money(b.discount, b.currency))}</span></div>` : ""}
+            ${b.discount > 0 ? `<div class="row"><span>الخصم${(order as any).coupon_code ? ` (كوبون ${esc((order as any).coupon_code)})` : ""}</span><span>-${esc(money(b.discount, b.currency))}</span></div>` : ""}
             <div class="row"><span>الشحن</span><span>${b.shipping > 0 ? esc(money(b.shipping, b.currency)) : "مجاني"}</span></div>
             ${b.tax > 0 ? `<div class="row"><span>الضريبة</span><span>${esc(money(b.tax, b.currency))}</span></div>` : ""}
             <div class="row grand"><span>الإجمالي (${esc(currencyName(b.currency))})</span><span>${esc(money(b.total, b.currency))}</span></div>

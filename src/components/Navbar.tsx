@@ -1,4 +1,4 @@
-import { ShoppingCart, Bell, Menu, Heart, User, LogOut, LayoutDashboard, SlidersHorizontal, Gift, Scale } from "lucide-react";
+import { ShoppingCart, Bell, Menu, Heart, User, LogOut, LayoutDashboard, SlidersHorizontal, Gift, Scale, MessageCircle } from "lucide-react";
 import { useFlyToCart } from "@/components/FlyToCart";
 import { Button } from "@/components/ui/button";
 import SearchAutocomplete from "@/components/search/SearchAutocomplete";
@@ -9,7 +9,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { NavLink } from "@/components/NavLink";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -30,17 +30,16 @@ import { useCompareProducts } from "@/hooks/useCompareProducts";
 import MegaMenu from "@/components/MegaMenu";
 import CategoryDrawerList from "@/components/CategoryDrawerList";
 import BrandLogo from "@/components/BrandLogo";
-import { useSyncListener } from "@/lib/uiSync";
+import { useCartCount } from "@/hooks/useCartCount";
 
 const Navbar = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { user, signOut, loading } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [cartCount, setCartCount] = useState(0);
-  const [cartBounce, setCartBounce] = useState(false);
   const { compareProducts, compareCount } = useCompareProducts();
   const { cartRef } = useFlyToCart();
+  const { count: cartCount, bounce: cartBounce } = useCartCount(user?.id);
 
   const fetchCartCount = useCallback(async () => {
     if (!user) {

@@ -66,7 +66,7 @@ describe("shipping basis resolution", () => {
   });
   it("labels each basis in the product's own currency", () => {
     expect(shippingCardLabel("free", 0)).toBe("شحن مجاني");
-    expect(shippingCardLabel("fixed", 5, "USD")).toBe("شحن: $5");
+    expect(shippingCardLabel("fixed", 5, "USD")).toBe("شحن: $5.00");
     expect(shippingCardLabel("fixed", 5000, "SYP")).toBe("شحن: 5,000 SYP");
     expect(shippingCardLabel("variable", 0)).toBe("حسب شركة الشحن");
     expect(shippingCardLabel(undefined, undefined)).toBeNull();

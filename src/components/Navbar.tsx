@@ -46,7 +46,7 @@ const Navbar = () => {
         {/* Right side - Icons */}
         <div className="contents md:flex md:min-w-0 md:items-center md:justify-start md:gap-2">
           <div className="hidden md:block"><ThemeToggle /></div>
-          <div data-testid="header-cart-notifications" className="col-start-1 row-start-1 flex items-center justify-start md:contents">
+          <div data-testid="header-cart-notifications" className="col-start-1 row-start-1 flex w-full min-w-0 items-center justify-around md:contents">
           <Button
             variant="ghost"
             size="icon"
@@ -84,7 +84,7 @@ const Navbar = () => {
             <ThemeToggle />
           </div>
           </div>
-          <div className="col-start-3 row-start-1 flex min-w-0 items-center justify-end gap-1 md:contents">
+          <div className="col-start-3 row-start-1 flex w-full min-w-0 items-center justify-around md:contents">
           {user ? (
             <NotificationsDropdown />
           ) : (

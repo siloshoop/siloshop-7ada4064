@@ -111,7 +111,7 @@ const AdminHome = () => {
       { label: "قيد التحضير", value: fmt(orders.preparing), hint: "لدى البائعين", icon: Clock, tone: "warning", href: "/admin/orders?status=preparing" },
       { label: "جاهز للشحن", value: fmt(orders.ready_for_shipping), hint: "بانتظار الشاحن", icon: PackageCheck, tone: "default", href: "/admin/orders?status=ready_for_shipping" },
       { label: "تم الشحن", value: fmt(orders.shipped), hint: `${fmt(orders.out_for_delivery)} في مركز الشحن`, icon: Truck, tone: "default", href: "/admin/orders?status=shipped" },
-      { label: "تم الاستلام", value: fmt(orders.delivered), hint: "بانتظار الإكمال", icon: CheckCircle2, tone: "success", href: "/admin/orders?status=delivered" },
+      { label: "تم الاستلام", value: fmt(orders.delivered), hint: "استلمها العملاء", icon: CheckCircle2, tone: "success", href: "/admin/orders?status=delivered" },
       { label: "مكتملة", value: fmt(orders.completed), hint: "مغلقة نهائياً", icon: BadgeCheck, tone: "success", href: "/admin/orders?status=completed" },
       { label: "ملغاة", value: fmt(orders.cancelled), hint: `${fmt(orders.frozen)} طلب مجمّد`, icon: XCircle, tone: "danger", href: "/admin/orders?status=cancelled" },
       { label: "بائعون نشطون", value: fmt(users.sellers_approved), hint: `${fmt(users.sellers_suspended)} موقوف`, icon: Store, tone: "primary", href: "/admin/sellers" },

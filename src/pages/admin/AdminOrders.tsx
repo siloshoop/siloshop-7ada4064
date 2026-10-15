@@ -26,7 +26,7 @@ import OrderProductImage from "@/components/orders/OrderProductImage";
 import OrderTimelineLog from "@/components/orders/OrderTimelineLog";
 import ShippingInfoDialog from "@/components/orders/ShippingInfoDialog";
 import {
-  ORDER_STATUSES, ORDER_STATUS_LABELS, changeOrderStatus, setOrderFreeze, reopenOrder,
+  SELECTABLE_ORDER_STATUSES, ORDER_STATUS_LABELS, changeOrderStatus, setOrderFreeze, reopenOrder,
   friendlyOrderError, normalizeStatus, type OrderStatus,
 } from "@/lib/orderStatus";
 
@@ -148,6 +148,26 @@ const AdminOrders = () => {
   }, [debounced, status, payStatus, from, to, page, toast]);
 
   useEffect(() => { void load(); }, [load]);
+
+  // Per-status counts (reuses admin_list_orders total_count; legacy "completed" counts as received).
+  const [counts, setCounts] = useState<Record<string, number>>({});
+  const loadCounts = useCallback(async () => {
+    const keys = ["all", "pending", "ready_for_shipping", "delivered", "completed", "cancelled"];
+    const res = await Promise.all(keys.map((k) => supabase.rpc("admin_list_orders", {
+      _search: null, _status: k === "all" ? null : k, _payment_status: null, _from: null, _to: null, _limit: 1, _offset: 0,
+    })));
+    const next: Record<string, number> = {};
+    keys.forEach((k, i) => { next[k] = Number(((res[i].data as unknown as OrderRow[]) || [])[0]?.total_count ?? 0); });
+    setCounts(next);
+  }, []);
+  useEffect(() => { void loadCounts(); }, [loadCounts]);
+  const countCards = [
+    { key: "all", label: "الطلبات المستلمة", value: counts.all },
+    { key: "pending", label: "قيد الانتظار", value: counts.pending },
+    { key: "ready_for_shipping", label: "بانتظار الشحن", value: counts.ready_for_shipping },
+    { key: "delivered", label: "تم الاستلام", value: (counts.delivered ?? 0) + (counts.completed ?? 0) },
+    { key: "cancelled", label: "ملغاة", value: counts.cancelled },
+  ];
 
   const loadNotes = useCallback(async (orderId: string) => {
     setNotesLoading(true);
@@ -290,6 +310,15 @@ const AdminOrders = () => {
       }
     >
       <div className="space-y-4" dir="rtl">
+          <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-5">
+            {countCards.map((c) => (
+              <button key={c.key} type="button" onClick={() => { setStatus(c.key); setPage(0); }}
+                className={`min-w-0 rounded-lg border p-3 text-right transition-colors hover:bg-muted/50 ${status === c.key ? "border-primary bg-primary/5" : "bg-card"}`}>
+                <p className="text-lg font-bold">{c.value ?? "…"}</p>
+                <p className="truncate text-xs text-muted-foreground">{c.label}</p>
+              </button>
+            ))}
+          </div>
           <Card>
             <CardContent className="grid gap-3 pt-6 md:grid-cols-6">
               <div className="relative md:col-span-2">
@@ -374,7 +403,7 @@ const AdminOrders = () => {
                           </td>
                           <td className="whitespace-nowrap px-3 py-2">{money(r.total_amount, r.currency)}</td>
                           <td className="whitespace-nowrap px-3 py-2 text-xs text-muted-foreground">
-                            {new Date(r.created_at).toLocaleDateString("ar-SY")}
+                            {new Date(r.created_at).toLocaleString("ar-SY", { dateStyle: "short", timeStyle: "short" })}
                           </td>
                           <td className="px-3 py-2">
                             <div className="flex gap-1">

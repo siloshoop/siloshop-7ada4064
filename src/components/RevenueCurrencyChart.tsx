@@ -41,7 +41,7 @@ const RevenueCurrencyChart = ({ scope, days, reloadKey }: { scope: "admin" | "ve
           contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 12, direction: "rtl" }}
         />
         <Legend />
-        <Line yAxisId="syp" type="monotone" dataKey="syp" name="ل.س" stroke="hsl(var(--primary))" strokeWidth={2} dot={false} />
+        <Line yAxisId="syp" type="monotone" dataKey="syp" name="SYP" stroke="hsl(var(--primary))" strokeWidth={2} dot={false} />
         <Line yAxisId="usd" type="monotone" dataKey="usd" name="دولار" stroke="hsl(var(--accent))" strokeWidth={2} dot={false} />
       </LineChart>
     </ResponsiveContainer>

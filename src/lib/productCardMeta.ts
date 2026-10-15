@@ -9,6 +9,8 @@ export type ProductCardMeta = {
   reviews?: { rating: number }[];
   /** Saved list price and active sale percentage (same rule as server pricing). */
   price?: number;
+  /** Saved product currency — authoritative over listing payloads. */
+  currency?: string | null;
   deal_pct?: number;
 };
 
@@ -28,7 +30,7 @@ const flush = async () => {
     const chunk = ids.slice(i, i + 100);
     const { data } = await supabase
       .from("products")
-      .select("id, price, stock_quantity, vendor_id, is_featured, is_trending, reviews(rating)")
+      .select("id, price, currency, stock_quantity, vendor_id, is_featured, is_trending, reviews(rating)")
       .in("id", chunk);
     (data ?? []).forEach((row: any) => found.set(row.id, row));
     const nowIso = new Date().toISOString();

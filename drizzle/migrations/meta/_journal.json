@@ -183,6 +183,13 @@
       "when": 1791956237974,
       "tag": "0025_coupon_limits_sale_prices",
       "breakpoints": true
+    },
+    {
+      "idx": 26,
+      "version": "7",
+      "when": 1792071068032,
+      "tag": "0026_track_order_public_currency",
+      "breakpoints": true
     }
   ]
 }

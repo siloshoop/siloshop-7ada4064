@@ -1,3 +1,4 @@
+import { currencySymbol } from "@/lib/currency";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
@@ -293,7 +294,7 @@ const ManageCoupons = () => {
 
                     <div className="space-y-2">
                       <Label htmlFor="discount_value">
-                        قيمة الخصم * {formData.discount_type === "percentage" ? "(%)" : formData.currency === "USD" ? "($)" : "(ل.س)"}
+                        قيمة الخصم * {formData.discount_type === "percentage" ? "(%)" : `(${currencySymbol(formData.currency)})`}
                       </Label>
                       <Input
                         id="discount_value"
@@ -309,7 +310,7 @@ const ManageCoupons = () => {
 
                   <div className="grid grid-cols-1 gap-4 min-[360px]:grid-cols-2">
                     <div className="space-y-2">
-                      <Label htmlFor="min_purchase">الحد الأدنى للشراء ({formData.currency === "USD" ? "$" : "ل.س"})</Label>
+                      <Label htmlFor="min_purchase">الحد الأدنى للشراء ({currencySymbol(formData.currency)})</Label>
                       <Input
                         id="min_purchase"
                         type="number"
@@ -392,7 +393,7 @@ const ManageCoupons = () => {
                               className="h-4 w-4 accent-primary"
                             />
                             <span className="min-w-0 flex-1 truncate">{p.name}</span>
-                            <span className="text-xs text-muted-foreground">{p.currency === "USD" ? "$" : "ل.س"}</span>
+                            <span className="text-xs text-muted-foreground">{currencySymbol(p.currency)}</span>
                           </label>
                         ))}
                       </div>
@@ -453,8 +454,8 @@ const ManageCoupons = () => {
                         </div>
                         <p className="text-sm text-muted-foreground mb-3">
                           خصم {coupon.discount_value}
-                          {coupon.discount_type === 'percentage' ? '%' : coupon.currency === 'USD' ? ' $' : ' ل.س'}
-                          {coupon.min_purchase > 0 && ` - حد أدنى ${coupon.min_purchase} ${coupon.currency === 'USD' ? '$' : 'ل.س'}`}
+                          {coupon.discount_type === 'percentage' ? '%' : ` ${currencySymbol(coupon.currency)}`}
+                          {coupon.min_purchase > 0 && ` - حد أدنى ${coupon.min_purchase} ${currencySymbol(coupon.currency)}`}
                           {' - '}
                           {coupon.product_ids?.length
                             ? `يشمل ${coupon.product_ids.length} منتج`

@@ -11,13 +11,17 @@ export type ProductCurrency = "SYP" | "USD";
 export const DEFAULT_CURRENCY: ProductCurrency = "SYP";
 
 export const CURRENCY_OPTIONS: { value: ProductCurrency; symbol: string; label: string }[] = [
-  { value: "SYP", symbol: "ل.س", label: "الليرة السورية (ل.س)" },
+  { value: "SYP", symbol: "SYP", label: "الليرة السورية (ل.س)" },
   { value: "USD", symbol: "$", label: "الدولار الأمريكي ($)" },
 ];
 
 /** Symbol for a stored currency code; falls back to the Syrian pound. */
 export const currencySymbol = (currency?: string | null): string =>
-  normalizeCurrency(currency) === "USD" ? "$" : "ل.س";
+  normalizeCurrency(currency) === "USD" ? "$" : "SYP";
+
+/** True only for a saved, supported currency code — never guessed. */
+export const isKnownCurrency = (currency?: string | null): currency is ProductCurrency =>
+  ["USD", "SYP"].includes(String(currency ?? "").trim().toUpperCase());
 
 /** Default for legacy coupons without a saved currency. */
 export const COUPON_CURRENCY: ProductCurrency = "SYP";
@@ -97,7 +101,10 @@ export const totalsByCurrency = (
   return result;
 };
 
-/** "$50" / "500,000 ل.س" — USD symbol prefixed, Syrian pound suffixed. */
+/**
+ * Single formatter for every price in the app: "$22.00" for USD, "22 SYP" for
+ * Syrian pounds. A missing/unknown currency is never assumed — the bare number is shown.
+ */
 export const formatPrice = (
   amount: number | string | null | undefined,
   currency?: string | null,
@@ -105,10 +112,14 @@ export const formatPrice = (
 ): string => {
   const n = Number(amount ?? 0);
   const value = Number.isFinite(n) ? n : 0;
-  const text = value.toLocaleString("en-US", {
-    maximumFractionDigits: options?.maximumFractionDigits ?? 2,
-  });
-  return normalizeCurrency(currency) === "USD" ? `$${text}` : `${text} ل.س`;
+  if (!isKnownCurrency(currency)) {
+    return value.toLocaleString("en-US", { maximumFractionDigits: options?.maximumFractionDigits ?? 2 });
+  }
+  if (normalizeCurrency(currency) === "USD") {
+    const sign = value < 0 ? "-" : "";
+    return `${sign}$${Math.abs(value).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  }
+  return `${value.toLocaleString("en-US", { maximumFractionDigits: options?.maximumFractionDigits ?? 2 })} SYP`;
 };
 
 /** Sum amounts per currency (never converting) and format as "$58.5 · 1,000 ل.س". */
@@ -143,12 +154,11 @@ export type RevenueSplit = Partial<Record<ProductCurrency, Record<string, number
 
 /** "1٬200 ل.س · $59" — each currency shown separately, never summed together. */
 export const formatSplitTotals = (totals: RevenueSplit | null | undefined, key = "total"): string => {
-  const fmt = (n: number) => new Intl.NumberFormat("ar-SY", { maximumFractionDigits: 2 }).format(Number(n || 0));
   const parts: string[] = [];
   const syp = Number(totals?.SYP?.[key] || 0);
   const usd = Number(totals?.USD?.[key] || 0);
-  if (syp) parts.push(`${fmt(syp)} ل.س`);
-  if (usd) parts.push(`$${fmt(usd)}`);
+  if (syp) parts.push(formatPrice(syp, "SYP"));
+  if (usd) parts.push(formatPrice(usd, "USD"));
   return parts.length ? parts.join(" · ") : "0";
 };
 
@@ -168,4 +178,4 @@ export const sumByCurrency = (rows: { amount: number; currency?: string | null }
 
 /** Never guess a currency for legacy report payloads that omit it. */
 export const formatKnownPrice = (amount: number | string | null | undefined, currency?: string | null): string =>
-  ["USD", "SYP"].includes(String(currency ?? "").trim().toUpperCase()) ? formatPrice(amount, currency) : `${Number(amount ?? 0).toLocaleString("en-US", { maximumFractionDigits: 2 })} (العملة غير متاحة)`;
+  isKnownCurrency(currency) ? formatPrice(amount, currency) : `${Number(amount ?? 0).toLocaleString("en-US", { maximumFractionDigits: 2 })} (العملة غير متاحة)`;

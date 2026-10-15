@@ -11,7 +11,9 @@ interface Props {
 }
 
 const OrderStatusTimeline = ({ status, latestNote, className }: Props) => {
-  const current = normalizeStatus(status);
+  const normalized = normalizeStatus(status);
+  // Legacy "completed" orders display as received (delivered) on the step bar.
+  const current = normalized === "completed" ? "delivered" : normalized;
   const isCancelled = current === "cancelled";
   const isReturned = current === "returned";
 

@@ -33,8 +33,8 @@ export const ORDER_STATUSES: OrderStatusMeta[] = [
   { key: "ready_for_shipping", label: "جاهز للشحن", token: "--status-ready", icon: Boxes, isStep: true },
   { key: "shipped", label: "تم الشحن", token: "--status-shipped", icon: Truck, isStep: true },
   { key: "out_for_delivery", label: "تم تسليم الطلب إلى مركز الشحن", token: "--status-out", icon: Bike, isStep: true },
-  { key: "delivered", label: "تم التوصيل", token: "--status-delivered", icon: Home, isStep: true },
-  { key: "completed", label: "مكتمل", token: "--status-completed", icon: CheckCircle2, isStep: true },
+  { key: "delivered", label: "تم الاستلام", token: "--status-delivered", icon: Home, isStep: true },
+  { key: "completed", label: "تم الاستلام", token: "--status-completed", icon: CheckCircle2, isStep: false },
   { key: "cancelled", label: "ملغي", token: "--status-cancelled", icon: XCircle, isStep: false },
   { key: "returned", label: "مرتجع", token: "--status-returned", icon: RotateCcw, isStep: false },
 ];
@@ -103,7 +103,10 @@ export const canTransition = (from: string | null | undefined, to: OrderStatus, 
 };
 
 export const allowedNextStatuses = (from: string | null | undefined, role: ActorRole): OrderStatusMeta[] =>
-  ORDER_STATUSES.filter((s) => canTransition(from, s.key, role));
+  ORDER_STATUSES.filter((s) => s.key !== "completed" && canTransition(from, s.key, role));
+
+/** Statuses offered in filters/selectors; legacy "completed" stays readable but is never offered. */
+export const SELECTABLE_ORDER_STATUSES = ORDER_STATUSES.filter((s) => s.key !== "completed");
 
 /* ------------------------------------------------------------------ */
 /* Client context captured with every audited action                   */
@@ -152,7 +155,7 @@ export const ACTOR_ROLE_LABELS: Record<string, string> = {
   system: "النظام",
   buyer: "المشتري",
   seller: "البائع",
-  admin: "الإدارة",
+  admin: "SiloShop",
 };
 
 /* ------------------------------------------------------------------ */

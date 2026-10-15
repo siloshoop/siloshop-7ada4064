@@ -28,8 +28,8 @@ const statusMap: Record<string, { label: string; variant: "default" | "secondary
   ready_for_shipping: { label: "جاهز للشحن", variant: "outline" },
   shipped: { label: "تم الشحن", variant: "outline" },
   out_for_delivery: { label: "تم تسليم الطلب إلى مركز الشحن", variant: "outline" },
-  delivered: { label: "تم التوصيل", variant: "default" },
-  completed: { label: "مكتمل", variant: "default" },
+  delivered: { label: "تم الاستلام", variant: "default" },
+  completed: { label: "تم الاستلام", variant: "default" },
   cancelled: { label: "ملغي", variant: "destructive" },
   returned: { label: "مرتجع", variant: "outline" },
   refunded: { label: "تم رد المبلغ", variant: "outline" },
@@ -47,7 +47,7 @@ interface OrderNote {
 const ROLE_LABELS: Record<string, string> = {
   buyer: "أنت",
   seller: "البائع",
-  admin: "الإدارة",
+  admin: "SiloShop",
   system: "النظام",
 };
 
@@ -288,7 +288,7 @@ const OrderDetails = () => {
                     بتاريخ {format(new Date(order.cancelled_at), "dd MMMM yyyy - HH:mm", { locale: ar })}
                     {order.cancelled_by_role ? ` — بواسطة ${
                       order.cancelled_by_role === "buyer" ? "المشتري" :
-                      order.cancelled_by_role === "seller" ? "البائع" : "الإدارة"
+                      order.cancelled_by_role === "seller" ? "البائع" : "SiloShop"
                     }` : ""}
                   </p>
                 )}

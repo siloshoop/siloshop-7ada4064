@@ -39,7 +39,7 @@ const MobileBottomNav = () => {
     { icon: ShoppingCart, label: "السلة", path: "/cart", badge: cartCount },
     { icon: Heart, label: "المفضلة", path: "/favorites" },
     isAdmin
-      ? { icon: ShieldCheck, label: "الإدارة", path: "/admin/products" }
+      ? { icon: ShieldCheck, label: "SiloShop", path: "/admin/products" }
       : { icon: Settings, label: "الإعدادات", path: "/notifications/settings" },
   ];
 

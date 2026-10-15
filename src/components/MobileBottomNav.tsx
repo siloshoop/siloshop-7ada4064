@@ -1,35 +1,12 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import {
-  Home, 
-  Search, 
-  Grid3X3, 
-  Heart, 
-  User,
-  Settings,
-  ShieldCheck,
-  Smartphone,
-  Shirt,
-  Baby,
-  Footprints,
-  Gamepad2,
-  Sparkle,
-} from "lucide-react";
+import { Home, Menu, Heart, Settings, ShieldCheck } from "lucide-react";
+import { Button } from "./ui/button";
 import { cn } from "@/lib/utils";
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from "./ui/sheet";
-import { ScrollArea } from "./ui/scroll-area";
-import { useCategories } from "@/hooks/useCategories";
-
-const iconMap: Record<string, any> = {
-  Smartphone, Shirt, Baby, Footprints, Gamepad2, Sparkle,
-};
-
 const MobileBottomNav = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const [showCategories, setShowCategories] = useState(false);
-  const { data: categories = [] } = useCategories(showCategories);
   const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
@@ -50,13 +27,11 @@ const MobileBottomNav = () => {
 
   const navItems = [
     { icon: Home, label: "الرئيسية", path: "/" },
-    { icon: Search, label: "بحث", path: "/search" },
-    { icon: Grid3X3, label: "الفئات", action: () => setShowCategories(true) },
+    { icon: Menu, label: "الفئات", action: () => window.dispatchEvent(new Event("siloshop:open-categories")) },
     { icon: Heart, label: "المفضلة", path: "/favorites" },
     isAdmin
       ? { icon: ShieldCheck, label: "الإدارة", path: "/admin/products" }
       : { icon: Settings, label: "الإعدادات", path: "/notifications/settings" },
-    { icon: User, label: "حسابي", path: "/dashboard" },
   ];
 
   const isActive = (path?: string) => path && location.pathname === path;
@@ -69,7 +44,8 @@ const MobileBottomNav = () => {
       >
         <div className="mobile-fixed-bar-content flex min-w-0 items-center justify-around px-0.5 sm:px-1">
           {navItems.map((item, index) => (
-            <button
+            <Button
+              variant="ghost"
               key={index}
               onClick={() => item.path ? navigate(item.path) : item.action?.()}
               className={cn(
@@ -84,51 +60,10 @@ const MobileBottomNav = () => {
                 isActive(item.path) && "scale-110"
               )} />
                <span className="max-w-full truncate text-[9px] font-medium min-[360px]:text-[10px]">{item.label}</span>
-            </button>
+            </Button>
           ))}
         </div>
       </nav>
-
-      <Sheet open={showCategories} onOpenChange={setShowCategories}>
-        <SheetContent side="bottom" className="safe-screen-height h-[70dvh] overflow-hidden rounded-t-2xl pb-[max(1.5rem,env(safe-area-inset-bottom))]">
-          <SheetHeader className="pb-4">
-            <SheetTitle className="text-center">تصفح الفئات</SheetTitle>
-          </SheetHeader>
-           <ScrollArea className="h-[calc(100%-3.5rem)] pb-4">
-            <button
-              onClick={() => {
-                navigate("/turkish-products");
-                setShowCategories(false);
-              }}
-              className="mb-3 flex w-[calc(100%-1rem)] items-center justify-center gap-2 rounded-xl bg-primary/10 p-3 mx-2 text-sm font-semibold text-primary transition-all active:scale-95"
-            >
-              منتجات تركية
-            </button>
-             <div className="grid grid-cols-2 gap-2 px-2 min-[360px]:grid-cols-3 min-[360px]:gap-3">
-              {categories.map((category) => {
-                const IconComponent = iconMap[category.icon || "Smartphone"] || Grid3X3;
-                return (
-                  <button
-                    key={category.id}
-                    onClick={() => {
-                      navigate(`/category/${category.id}`);
-                      setShowCategories(false);
-                    }}
-                    className="flex flex-col items-center gap-2 p-4 rounded-xl bg-muted/50 hover:bg-primary/10 transition-all active:scale-95"
-                  >
-                    <div className="p-3 rounded-full bg-primary/10">
-                      <IconComponent className="h-6 w-6 text-primary" />
-                    </div>
-                    <span className="text-xs font-medium text-center line-clamp-2">
-                      {category.name_ar}
-                    </span>
-                  </button>
-                );
-              })}
-            </div>
-          </ScrollArea>
-        </SheetContent>
-      </Sheet>
 
       <div className="mobile-nav-spacer md:hidden" aria-hidden="true" />
     </>

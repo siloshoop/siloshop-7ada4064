@@ -1,6 +1,6 @@
 # Project architecture rules
 - Enrich legacy report RPC payloads with read-only, RLS-protected saved currency snapshots and paginate financial reads; never infer currencies from amounts or modify financial storage for presentation.
-- Keep mobile Navbar in two compact rows with secondary controls available in the category drawer, and inset side sheets using both browser and native safe-area values; this preserves access without occupying the scrolling viewport or system bars.
+- Keep mobile Navbar in two compact rows; the bottom Categories control opens the Navbar-owned drawer through the siloshop:open-categories event to preserve one shared menu and all secondary controls, and inset side sheets using both browser and native safe-area values; this preserves access without occupying the scrolling viewport or system bars.
 - Use overflow-x: clip rather than hidden on document roots so horizontal containment does not create an ancestor scroll container that disables sticky navigation.
 - Reset document scroll centrally inside BrowserRouter on every location change and pageshow, with native history restoration disabled, so browser and Capacitor back navigation start at the top.
 - Buyer dashboard summary cards and quick access use router links; spending and rating summaries open existing orders rather than introducing new destinations.

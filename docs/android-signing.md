@@ -60,12 +60,12 @@ android {
     }
 
     namespace = "com.siloshop.app"
-    defaultConfig {
-        applicationId "com.siloshop.app"
-        // current values — bump versionCode for every Play upload
-        versionCode 10
-        versionName "1.0.1"
-    }
+        defaultConfig {
+            applicationId "com.siloshop.app"
+            // current values — bump versionCode for every Play upload
+            versionCode 13
+            versionName "1.0.1"
+        }
 
     buildTypes {
         release {

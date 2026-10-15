@@ -31,7 +31,8 @@ android {
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         // Must be higher than every bundle already uploaded to Google Play.
-        versionCode 10
+        // Highest used on Play: 12 (per Play Console deobfuscation warning, Oct 2026).
+        versionCode 13
         versionName "1.0.1"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         aaptOptions {

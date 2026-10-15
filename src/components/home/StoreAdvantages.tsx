@@ -25,19 +25,19 @@ const advantages = [
 
 const StoreAdvantages = () => {
   return (
-    <section className="py-7">
+    <section className="py-4">
       <div className="container px-4">
-        <div className="grid grid-cols-2 gap-3 md:grid-cols-4 md:gap-4">
+        <div className="grid grid-cols-4 gap-1.5 sm:gap-3 md:gap-4">
           {advantages.map(({ icon: Icon, title, description }) => (
             <div
               key={title}
-              className="flex flex-col items-center gap-2 rounded-2xl border border-border/60 bg-card p-4 text-center shadow-[var(--shadow-card)]"
+              className="flex flex-col items-center gap-1 sm:gap-2 rounded-xl sm:rounded-2xl border border-border/60 bg-card p-1.5 sm:p-3 md:p-4 text-center shadow-[var(--shadow-card)]"
             >
-              <div className="flex h-11 w-11 items-center justify-center rounded-full bg-primary/10">
-                <Icon className="h-5 w-5 text-primary" />
+              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/10 sm:h-10 sm:w-10 md:h-11 md:w-11">
+                <Icon className="h-4 w-4 text-primary sm:h-5 sm:w-5" />
               </div>
-              <h3 className="text-sm font-bold">{title}</h3>
-              <p className="text-xs text-muted-foreground">{description}</p>
+              <h3 className="text-[10px] font-bold leading-tight sm:text-sm">{title}</h3>
+              <p className="hidden text-[11px] leading-tight text-muted-foreground sm:block md:text-xs">{description}</p>
             </div>
           ))}
         </div>

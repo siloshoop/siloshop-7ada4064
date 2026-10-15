@@ -155,7 +155,7 @@ export const ACTOR_ROLE_LABELS: Record<string, string> = {
   system: "النظام",
   buyer: "المشتري",
   seller: "البائع",
-  admin: "الإدارة",
+  admin: "SiloShop",
 };
 
 /* ------------------------------------------------------------------ */

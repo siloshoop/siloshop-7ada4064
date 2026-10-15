@@ -47,7 +47,7 @@ interface OrderNote {
 const ROLE_LABELS: Record<string, string> = {
   buyer: "أنت",
   seller: "البائع",
-  admin: "الإدارة",
+  admin: "SiloShop",
   system: "النظام",
 };
 
@@ -288,7 +288,7 @@ const OrderDetails = () => {
                     بتاريخ {format(new Date(order.cancelled_at), "dd MMMM yyyy - HH:mm", { locale: ar })}
                     {order.cancelled_by_role ? ` — بواسطة ${
                       order.cancelled_by_role === "buyer" ? "المشتري" :
-                      order.cancelled_by_role === "seller" ? "البائع" : "الإدارة"
+                      order.cancelled_by_role === "seller" ? "البائع" : "SiloShop"
                     }` : ""}
                   </p>
                 )}

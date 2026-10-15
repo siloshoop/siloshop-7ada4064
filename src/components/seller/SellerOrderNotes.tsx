@@ -10,7 +10,7 @@ import { addOrderNote, fetchOrderNotes, type OrderNote } from "@/lib/sellerOrder
 
 const ROLE_LABELS: Record<string, string> = {
   seller: "أنت (البائع)",
-  admin: "الإدارة",
+  admin: "SiloShop",
   customer: "العميل",
   system: "النظام",
 };

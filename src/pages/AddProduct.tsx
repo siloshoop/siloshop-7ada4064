@@ -204,7 +204,7 @@ const AddProduct = () => {
       });
 
       if (!CURRENCY_OPTIONS.some((c) => c.value === formData.currency)) {
-        toast({ title: "العملة مطلوبة", description: "يرجى اختيار عملة السعر (SYP أو $)", variant: "destructive" });
+        toast({ title: "العملة مطلوبة", description: "يرجى اختيار عملة السعر (ل.س أو $)", variant: "destructive" });
         setLoading(false);
         return;
       }

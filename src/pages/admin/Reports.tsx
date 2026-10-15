@@ -222,7 +222,7 @@ const OrdersReportSection = () => {
                         <Tooltip formatter={(value: number, name: string) => name === "USD" || name === "SYP" ? formatPrice(value, name) : value} />
                         <Legend />
                         <Line type="monotone" dataKey="orders" name="الطلبات" stroke="hsl(var(--primary))" strokeWidth={2} dot={false} />
-                        <Line type="monotone" dataKey="syp" name="SYP" stroke="hsl(var(--accent))" strokeWidth={2} dot={false} />
+                        <Line type="monotone" dataKey="syp" name="ل.س" stroke="hsl(var(--accent))" strokeWidth={2} dot={false} />
                          <Line type="monotone" dataKey="usd" name="USD" stroke="hsl(var(--success))" strokeWidth={2} dot={false} />
                       </LineChart>
                     </ResponsiveContainer>

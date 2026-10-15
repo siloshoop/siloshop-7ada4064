@@ -88,7 +88,7 @@ const PlatformProductImport = ({ open, onOpenChange, categories, brands, onImpor
       } else {
         norm.__values = rowCheck.data;
       }
-      if (!norm.currency || !String(norm.currency).trim()) errors.push("العملة مطلوبة لكل منتج (SYP أو USD)");
+      if (!norm.currency || !String(norm.currency).trim()) errors.push("العملة مطلوبة لكل منتج (ل.س أو USD)");
       else if (!["USD", "SYP"].includes(String(norm.currency).trim())) errors.push(`العملة غير مدعومة: "${norm.currency}" — يُسمح فقط بـ USD أو SYP`);
       if (norm.brand) {
         const b = brands.find(

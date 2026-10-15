@@ -1,3 +1,4 @@
+import { dealPercent } from "@/lib/dealPricing";
 import { useState, useEffect, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import ProductCard from "./ProductCard";
@@ -60,6 +61,9 @@ const EnhancedDailyDeals = () => {
           .select(`
             id,
             discount_percentage,
+            sale_price,
+            sale_quantity,
+            sold_quantity,
             end_date,
             product_id,
             products (
@@ -81,7 +85,7 @@ const EnhancedDailyDeals = () => {
           .limit(6);
 
         const dealProducts: DealProduct[] = (deals || [])
-          .filter(deal => deal.products)
+          .filter((deal: any) => deal.products && (deal.sale_quantity == null || deal.sold_quantity < deal.sale_quantity))
           .map(deal => ({
             id: (deal.products as any).id,
             name: (deal.products as any).name,
@@ -93,7 +97,7 @@ const EnhancedDailyDeals = () => {
             shipping_cost: (deal.products as any).shipping_cost,
             shipping_mode: (deal.products as any).shipping_mode,
             reviews: (deal.products as any).reviews || [],
-            deal_discount: deal.discount_percentage,
+            deal_discount: dealPercent(deal as any, Number((deal.products as any).price)),
             deal_end_date: deal.end_date
           }));
 

@@ -25,6 +25,9 @@ interface Deal {
   start_date: string;
   end_date: string;
   is_active: boolean;
+  sale_price?: number | null;
+  sale_quantity?: number | null;
+  sold_quantity?: number;
   product: {
     name: string;
     image_url: string | null;
@@ -51,6 +54,8 @@ const ManageDeals = () => {
     discount_percentage: 10,
     end_date: "",
     is_active: true,
+    sale_price: "",
+    sale_quantity: "",
   });
   const [submitting, setSubmitting] = useState(false);
   const navigate = useNavigate();
@@ -111,6 +116,22 @@ const ManageDeals = () => {
       return;
     }
 
+    const selected = products.find((p) => p.id === formData.product_id);
+    const salePrice = formData.sale_price ? Number(formData.sale_price) : null;
+    if (salePrice != null && selected && !(salePrice > 0 && salePrice < Number(selected.price))) {
+      toast({ title: "سعر التخفيض غير صحيح", description: "يجب أن يكون سعر التخفيض أقل من السعر الأصلي وأكبر من صفر.", variant: "destructive" });
+      return;
+    }
+    // The saved percentage mirrors the sale price so older screens stay consistent.
+    const pct = salePrice != null && selected
+      ? Math.min(99, Math.max(1, Math.round((1 - salePrice / Number(selected.price)) * 100)))
+      : formData.discount_percentage;
+    const promo = {
+      discount_percentage: pct,
+      sale_price: salePrice,
+      sale_quantity: formData.sale_quantity ? parseInt(formData.sale_quantity) : null,
+    };
+
     setSubmitting(true);
     try {
       if (editingDeal) {
@@ -119,10 +140,10 @@ const ManageDeals = () => {
           .from("daily_deals")
           .update({
             product_id: formData.product_id,
-            discount_percentage: formData.discount_percentage,
+            ...promo,
             end_date: formData.end_date,
             is_active: formData.is_active,
-          })
+          } as any)
           .eq("id", editingDeal.id);
 
         if (error) throw error;
@@ -137,10 +158,10 @@ const ManageDeals = () => {
           .from("daily_deals")
           .insert({
             product_id: formData.product_id,
-            discount_percentage: formData.discount_percentage,
+            ...promo,
             end_date: formData.end_date,
             is_active: formData.is_active,
-          });
+          } as any);
 
         if (error) throw error;
 
@@ -172,6 +193,8 @@ const ManageDeals = () => {
         discount_percentage: 10,
         end_date: "",
         is_active: true,
+        sale_price: "",
+        sale_quantity: "",
       });
     } catch (error) {
       toast({
@@ -191,6 +214,8 @@ const ManageDeals = () => {
       discount_percentage: deal.discount_percentage,
       end_date: deal.end_date.split("T")[0],
       is_active: deal.is_active,
+      sale_price: deal.sale_price != null ? String(deal.sale_price) : "",
+      sale_quantity: deal.sale_quantity != null ? String(deal.sale_quantity) : "",
     });
     setIsDialogOpen(true);
   };
@@ -291,6 +316,8 @@ const ManageDeals = () => {
                     product_id: "",
                     discount_percentage: 10,
                     end_date: "",
+                    sale_price: "",
+                    sale_quantity: "",
                     is_active: true,
                   });
                 }
@@ -341,6 +368,33 @@ const ManageDeals = () => {
                     </div>
 
                     <div className="space-y-2">
+                      <Label htmlFor="sale_price">سعر التخفيض (اختياري — بدل النسبة)</Label>
+                      <Input
+                        id="sale_price"
+                        type="number"
+                        min={0}
+                        step="0.01"
+                        value={formData.sale_price}
+                        onChange={(e) => setFormData({ ...formData, sale_price: e.target.value })}
+                        placeholder="اتركه فارغًا لاستخدام النسبة"
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="sale_quantity">كمية العرض (اختياري)</Label>
+                      <Input
+                        id="sale_quantity"
+                        type="number"
+                        min={1}
+                        step={1}
+                        value={formData.sale_quantity}
+                        onChange={(e) => setFormData({ ...formData, sale_quantity: e.target.value })}
+                        placeholder="غير محدود"
+                      />
+                      <p className="text-xs text-muted-foreground">ينتهي العرض تلقائيًا عند نفاد هذه الكمية أو عند انتهاء موعده.</p>
+                    </div>
+
+                    <div className="space-y-2">
                       <Label htmlFor="end_date">تاريخ انتهاء العرض</Label>
                       <Input
                         id="end_date"
@@ -381,8 +435,11 @@ const ManageDeals = () => {
             {deals.length > 0 ? (
               <div className="space-y-4">
                 {deals.map((deal) => {
-                  const isExpired = new Date(deal.end_date) < new Date();
-                  const discountedPrice = deal.product.price * (1 - deal.discount_percentage / 100);
+                  const soldOut = deal.sale_quantity != null && (deal.sold_quantity ?? 0) >= deal.sale_quantity;
+                  const isExpired = new Date(deal.end_date) < new Date() || soldOut;
+                  const discountedPrice = deal.sale_price != null
+                    ? Number(deal.sale_price)
+                    : Math.round(deal.product.price * (1 - deal.discount_percentage / 100) * 100) / 100;
 
                   return (
                     <div
@@ -408,7 +465,7 @@ const ManageDeals = () => {
                                 : "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-100"
                             }`}
                           >
-                            {isExpired ? "منتهي" : deal.is_active ? "نشط" : "متوقف"}
+                            {soldOut ? "نفدت الكمية" : isExpired ? "منتهي" : deal.is_active ? "نشط" : "متوقف"}
                           </span>
                         </div>
                         <div className="flex items-center gap-4 text-sm text-muted-foreground">
@@ -420,6 +477,9 @@ const ManageDeals = () => {
                             <Calendar className="h-3 w-3" />
                             ينتهي: {format(new Date(deal.end_date), "d MMM yyyy", { locale: ar })}
                           </span>
+                          {deal.sale_quantity != null && (
+                            <span>مُباع بالعرض: {deal.sold_quantity ?? 0} من {deal.sale_quantity}</span>
+                          )}
                         </div>
                         <div className="mt-1">
                           <span className="text-sm line-through text-muted-foreground">

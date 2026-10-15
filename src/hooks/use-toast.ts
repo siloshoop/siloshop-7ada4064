@@ -3,7 +3,9 @@ import * as React from "react";
 import type { ToastActionElement, ToastProps } from "@/components/ui/toast";
 
 const TOAST_LIMIT = 1;
-const TOAST_REMOVE_DELAY = 1000000;
+const TOAST_REMOVE_DELAY = 1000;
+export const SUCCESS_TOAST_MS = 3000;
+export const ERROR_TOAST_MS = 7000;
 
 type ToasterToast = ToastProps & {
   id: string;
@@ -144,9 +146,15 @@ function toast({ ...props }: Toast) {
     });
   const dismiss = () => dispatch({ type: "DISMISS_TOAST", toastId: id });
 
+  // Drop an identical toast already on screen so repeated actions don't stack duplicates.
+  memoryState.toasts
+    .filter((t) => t.open !== false && t.title === props.title && t.description === props.description)
+    .forEach((t) => dispatch({ type: "REMOVE_TOAST", toastId: t.id }));
+
   dispatch({
     type: "ADD_TOAST",
     toast: {
+      duration: props.variant === "destructive" ? ERROR_TOAST_MS : SUCCESS_TOAST_MS,
       ...props,
       id,
       open: true,

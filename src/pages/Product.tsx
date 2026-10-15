@@ -496,10 +496,9 @@ const Product = () => {
             {/* Price */}
             <div className="space-y-1.5">
               <div className="flex items-baseline gap-2 flex-wrap">
-                <span className="text-2xl font-bold text-primary sm:text-3xl">
-                  {effectivePrice.toLocaleString()}
+                <span className="text-2xl font-bold text-primary sm:text-3xl" dir="ltr">
+                  {formatPrice(effectivePrice, (product as any).currency)}
                 </span>
-                <span className="text-sm text-foreground/70">{currencySymbol((product as any).currency)}</span>
                 {effectiveOriginalPrice && (
                   <span className="text-sm text-muted-foreground line-through">
                     {formatPrice(effectiveOriginalPrice, (product as any).currency)}

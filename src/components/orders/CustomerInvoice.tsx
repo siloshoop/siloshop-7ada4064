@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Download, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { currencyName, formatPrice } from "@/lib/currency";
+import { currencyName, currencySymbol, formatPrice } from "@/lib/currency";
 import { buildInvoiceBlocks } from "@/lib/invoiceTotals";
 
 const esc = (s: unknown) =>
@@ -114,7 +114,7 @@ const CustomerInvoice = ({ orderId }: Props) => {
         ${blocks
           .map(
             (b) => `<div class="box">
-          <div><strong>${esc(currencyName(b.currency))} (${esc(b.currency === "USD" ? "$" : "ل.س")})</strong></div>
+          <div><strong>${esc(currencyName(b.currency))} (${esc(currencySymbol(b.currency))})</strong></div>
           <table>
             <thead><tr><th>المنتج</th><th>الكمية</th><th>السعر</th><th>الإجمالي</th></tr></thead>
             <tbody>

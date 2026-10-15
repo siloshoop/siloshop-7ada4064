@@ -22,6 +22,12 @@ export default function PageScrollReset() {
 
   useLayoutEffect(() => {
     resetScroll();
+    // A menu/sheet that unmounts mid-navigation can leave its page lock behind,
+    // which makes every tap do nothing. Clear any stale lock on page change.
+    const { body } = document;
+    if (body.style.pointerEvents === "none") body.style.pointerEvents = "";
+    body.removeAttribute("data-scroll-locked");
+    if (body.style.overflow === "hidden") body.style.overflow = "";
   }, [key, pathname, search]);
   return null;
 }

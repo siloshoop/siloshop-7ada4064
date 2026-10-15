@@ -150,7 +150,7 @@ const Navbar = () => {
 
           {!loading && (
             user ? (
-              <DropdownMenu>
+              <DropdownMenu modal={false}>
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" size="icon" aria-label="حسابي" className="h-9 w-9 md:h-10 md:w-10">
                     <User className="h-5 w-5" />

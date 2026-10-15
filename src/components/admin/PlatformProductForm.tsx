@@ -1,4 +1,4 @@
-import { currencySymbol } from "@/lib/currency";
+import { currencySymbol, isKnownCurrency } from "@/lib/currency";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -155,7 +155,7 @@ const PlatformProductForm = ({ open, onOpenChange, product, onSaved, categories,
       return;
     }
     const values = parsed.data;
-    if (!form.currency) {
+    if (!isKnownCurrency(form.currency) || form.currency !== form.currency.trim().toUpperCase()) {
       toast({ title: "العملة مطلوبة", description: "يرجى اختيار عملة السعر (SYP أو $)", variant: "destructive" });
       return;
     }
@@ -286,10 +286,8 @@ const PlatformProductForm = ({ open, onOpenChange, product, onSaved, categories,
               <Select value={form.currency} onValueChange={(v) => set("currency", v)}>
                 <SelectTrigger><SelectValue placeholder="اختر العملة" /></SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="SYP">ل.س</SelectItem>
+                  <SelectItem value="SYP">SYP</SelectItem>
                   <SelectItem value="USD">USD</SelectItem>
-                  <SelectItem value="EUR">EUR</SelectItem>
-                  <SelectItem value="TRY">TRY</SelectItem>
                 </SelectContent>
               </Select>
             </div>

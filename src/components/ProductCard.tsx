@@ -223,7 +223,7 @@ const ProductCard = memo(({
               variant="ghost"
               size="icon"
               aria-label="إضافة إلى المفضلة"
-               className="h-8 w-8 rounded-full bg-background/95 shadow-sm backdrop-blur-md hover:bg-primary hover:text-primary-foreground"
+               className="h-8 w-8 rounded-full bg-background/95 shadow-sm hover:bg-primary hover:text-primary-foreground"
               onClick={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
@@ -237,7 +237,7 @@ const ProductCard = memo(({
               type="button"
               variant="ghost"
               size="icon"
-              className="h-8 w-8 rounded-full bg-background/95 opacity-100 shadow-sm backdrop-blur-md hover:bg-primary hover:text-primary-foreground sm:translate-x-2 sm:opacity-0 sm:group-hover:translate-x-0 sm:group-hover:opacity-100"
+              className="h-8 w-8 rounded-full bg-background/95 opacity-100 shadow-sm hover:bg-primary hover:text-primary-foreground sm:translate-x-2 sm:opacity-0 sm:group-hover:translate-x-0 sm:group-hover:opacity-100"
               onClick={handleCompare}
               title="أضف للمقارنة"
             >
@@ -268,7 +268,7 @@ const ProductCard = memo(({
             type="button"
             variant="secondary"
             size="sm"
-            className="w-full bg-background/90 text-xs font-semibold shadow-lg backdrop-blur-md hover:bg-primary hover:text-primary-foreground"
+            className="w-full bg-background/90 text-xs font-semibold shadow-lg hover:bg-primary hover:text-primary-foreground"
             onClick={(e) => {
               e.stopPropagation();
               goToProduct();

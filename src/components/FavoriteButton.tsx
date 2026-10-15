@@ -108,7 +108,7 @@ export const FavoriteButton = ({ productId, variant = "outline", size = "lg", cl
       disabled={loading}
       aria-label={isFavorite ? "إزالة من المفضلة" : "إضافة إلى المفضلة"}
       aria-pressed={isFavorite}
-      className={`relative bg-background/95 hover:bg-primary hover:text-primary-foreground backdrop-blur-sm shadow-md transition-all duration-300 hover:scale-110 ${className}`}
+      className={`relative bg-background/95 hover:bg-primary hover:text-primary-foreground shadow-md transition-all duration-300 hover:scale-110 ${className}`}
     >
       <Heart className={`h-4 w-4 dark:text-pink-400 transition-transform ${bouncing ? "animate-bounce-in" : ""} ${isFavorite ? "fill-red-500 text-red-500 dark:fill-pink-400 dark:text-pink-400" : ""}`} />
     </Button>

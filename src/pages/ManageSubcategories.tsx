@@ -99,10 +99,6 @@ const ManageSubcategories = () => {
 
         setProfile(profileData);
 
-        if (profileData?.role !== "vendor") {
-          navigate("/dashboard");
-          return;
-        }
 
         const { data: categoriesData } = await supabase
           .from("categories")

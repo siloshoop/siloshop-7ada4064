@@ -37,7 +37,7 @@ describe("SYP invoice", () => {
   it("uses saved SYP totals and formats them as SYP", () => {
     const [b] = buildInvoiceBlocks({ currency: "SYP", subtotal_amount: 395000, discount_amount: 10000, shipping_amount: 2000, total_amount: 387000 }, [{ currency: "SYP", quantity: 1, price: 395000 }]);
     expect(b.currency).toBe("SYP");
-    expect(formatPrice(b.total, b.currency)).toBe("387,000 SYP");
+    expect(formatPrice(b.total, b.currency)).toBe("387,000 ل.س");
   });
 });
 
@@ -48,8 +48,8 @@ describe("admin & seller reports", () => {
     expect(split.USD?.total).toBe(111.5);
     expect(split.SYP?.total).toBe(395000);
     expect(split.SYP?.count).toBe(1);
-    expect(formatSplitTotals(split)).toBe("395,000 SYP · $111.50");
-    expect(formatAmountsByCurrency(rows)).toBe("395,000 SYP · $111.50 · 70 (العملة غير متاحة)");
+    expect(formatSplitTotals(split)).toBe("395,000 ل.س · $111.50");
+    expect(formatAmountsByCurrency(rows)).toBe("395,000 ل.س · $111.50 · 70 (العملة غير متاحة)");
   });
 });
 
@@ -69,7 +69,7 @@ describe("guest order tracking (mocked lookup)", () => {
   });
   it("shows a SYP order in SYP", async () => {
     await lookup("SYP", 102000);
-    expect((await screen.findAllByText("102,000 SYP")).length).toBeGreaterThan(0);
+    expect((await screen.findAllByText("102,000 ل.س")).length).toBeGreaterThan(0);
   });
   it("does not label a missing currency as SYP", async () => {
     await lookup(null, 70);

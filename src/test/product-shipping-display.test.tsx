@@ -67,7 +67,7 @@ describe("shipping basis resolution", () => {
   it("labels each basis in the product's own currency", () => {
     expect(shippingCardLabel("free", 0)).toBe("شحن مجاني");
     expect(shippingCardLabel("fixed", 5, "USD")).toBe("شحن: $5.00");
-    expect(shippingCardLabel("fixed", 5000, "SYP")).toBe("شحن: 5,000 SYP");
+    expect(shippingCardLabel("fixed", 5000, "SYP")).toBe("شحن: 5,000 ل.س");
     expect(shippingCardLabel("variable", 0)).toBe("حسب شركة الشحن");
     expect(shippingCardLabel(undefined, undefined)).toBeNull();
     expect(shippingDetailLabel("variable", 0)).toBe("الشحن حسب شركة الشحن");
@@ -98,7 +98,7 @@ describe("shipping line on product cards", () => {
 
   it("shows a saved price as a price even when the basis was never chosen", () => {
     renderCard({ shippingCost: 5000, currency: "SYP" });
-    expect(screen.getByText(/شحن: 5,000\s?SYP/)).toBeInTheDocument();
+    expect(screen.getByText(/شحن: 5,000\s?ل\.س/)).toBeInTheDocument();
     expect(screen.queryByText(/شحن مجاني/)).not.toBeInTheDocument();
   });
 

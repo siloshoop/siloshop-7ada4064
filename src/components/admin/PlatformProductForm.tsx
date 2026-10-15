@@ -156,7 +156,7 @@ const PlatformProductForm = ({ open, onOpenChange, product, onSaved, categories,
     }
     const values = parsed.data;
     if (!isKnownCurrency(form.currency) || form.currency !== form.currency.trim().toUpperCase()) {
-      toast({ title: "العملة مطلوبة", description: "يرجى اختيار عملة السعر (SYP أو $)", variant: "destructive" });
+      toast({ title: "العملة مطلوبة", description: "يرجى اختيار عملة السعر (ل.س أو $)", variant: "destructive" });
       return;
     }
     if (
@@ -286,7 +286,7 @@ const PlatformProductForm = ({ open, onOpenChange, product, onSaved, categories,
               <Select value={form.currency} onValueChange={(v) => set("currency", v)}>
                 <SelectTrigger><SelectValue placeholder="اختر العملة" /></SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="SYP">SYP</SelectItem>
+                  <SelectItem value="SYP">ل.س</SelectItem>
                   <SelectItem value="USD">USD</SelectItem>
                 </SelectContent>
               </Select>

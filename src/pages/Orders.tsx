@@ -63,6 +63,7 @@ const STATUS_VARIANTS: Record<string, "default" | "secondary" | "destructive" | 
 };
 
 interface OrderItem {
+  currency?: string | null;
   product_id: string;
   variant_label: string | null;
   product_name: string | null;
@@ -80,6 +81,7 @@ interface OrderRecord {
   order_number: string | null;
   created_at: string;
   total_amount: number;
+  currency: string | null;
   status: string | null;
   tracking_status: string | null;
   delivered_at: string | null;
@@ -95,6 +97,7 @@ interface Order {
   order_number: string | null;
   created_at: string;
   total_amount: number;
+  currency: string | null;
   status: string;
   tracking_status: string | null;
   delivered_at: string | null;
@@ -243,6 +246,7 @@ const Orders = () => {
           product_id: item.product_id,
           quantity: item.quantity,
           price: item.price,
+          currency: item.currency ?? null,
           variant_label: item.variant_label ?? null,
           product_name: item.product_name ?? null,
           product_image: item.product_image ?? null,
@@ -262,6 +266,7 @@ const Orders = () => {
         order_number: order.order_number,
         created_at: order.created_at,
         total_amount: order.total_amount,
+        currency: order.currency ?? null,
         status: order.status || "pending",
         tracking_status: order.tracking_status ?? null,
         delivered_at: order.delivered_at,

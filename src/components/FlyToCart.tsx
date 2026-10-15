@@ -51,12 +51,14 @@ const FlyingItem = ({
 }) => {
   const cartEl = cartRef.current;
   let endX = window.innerWidth / 2;
-  let endY = 20;
+  let endY = window.innerHeight - 60;
 
   if (cartEl) {
     const rect = cartEl.getBoundingClientRect();
-    endX = rect.left + rect.width / 2;
-    endY = rect.top + rect.height / 2;
+    if (rect.width > 0 && rect.height > 0) {
+      endX = rect.left + rect.width / 2;
+      endY = rect.top + rect.height / 2;
+    }
   }
 
   const dx = endX - item.startX;

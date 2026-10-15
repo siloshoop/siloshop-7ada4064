@@ -1,13 +1,16 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { Home, Menu, Heart, Settings, ShieldCheck } from "lucide-react";
+import { Home, Heart, Settings, ShieldCheck, ShoppingCart } from "lucide-react";
 import { Button } from "./ui/button";
 import { cn } from "@/lib/utils";
+import { useCartCount } from "@/hooks/useCartCount";
+
 const MobileBottomNav = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [isAdmin, setIsAdmin] = useState(false);
+  const { count: cartCount } = useCartCount();
 
   useEffect(() => {
     let cancelled = false;
@@ -25,9 +28,15 @@ const MobileBottomNav = () => {
     };
   }, []);
 
-  const navItems = [
+  const navItems: Array<{
+    icon: typeof Home;
+    label: string;
+    path?: string;
+    action?: () => void;
+    badge?: number;
+  }> = [
     { icon: Home, label: "الرئيسية", path: "/" },
-    { icon: Menu, label: "الفئات", action: () => window.dispatchEvent(new Event("siloshop:open-categories")) },
+    { icon: ShoppingCart, label: "السلة", path: "/cart", badge: cartCount },
     { icon: Heart, label: "المفضلة", path: "/favorites" },
     isAdmin
       ? { icon: ShieldCheck, label: "الإدارة", path: "/admin/products" }
@@ -49,16 +58,23 @@ const MobileBottomNav = () => {
               key={index}
               onClick={() => item.path ? navigate(item.path) : item.action?.()}
               className={cn(
-                "flex h-12 min-w-0 flex-1 flex-col items-center justify-center gap-0.5 rounded-lg px-0.5 py-1 transition-all",
+                "relative flex h-12 min-w-0 flex-1 flex-col items-center justify-center gap-0.5 rounded-lg px-0.5 py-1 transition-all",
                 isActive(item.path)
                   ? "text-primary"
                   : "text-muted-foreground hover:text-foreground"
               )}
             >
-              <item.icon className={cn(
-                "h-5 w-5 transition-transform",
-                isActive(item.path) && "scale-110"
-              )} />
+              <span className="relative">
+                <item.icon className={cn(
+                  "h-5 w-5 transition-transform",
+                  isActive(item.path) && "scale-110"
+                )} />
+                {typeof item.badge === "number" && item.badge > 0 && (
+                  <span className="absolute -top-1.5 -right-2 flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-1 text-[9px] font-semibold leading-none text-primary-foreground">
+                    {item.badge > 99 ? "99+" : item.badge}
+                  </span>
+                )}
+              </span>
                <span className="max-w-full truncate text-[9px] font-medium min-[360px]:text-[10px]">{item.label}</span>
             </Button>
           ))}

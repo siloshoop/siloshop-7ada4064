@@ -21,7 +21,7 @@ const statusLabels: Record<string, string> = {
   processing: "قيد التحضير",
   shipped: "تم الشحن",
   out_for_delivery: "تم تسليم الطلب إلى مركز الشحن",
-  delivered: "تم التوصيل",
+  delivered: "تم الاستلام",
   cancelled: "ملغي",
 };
 

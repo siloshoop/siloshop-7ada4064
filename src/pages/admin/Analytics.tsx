@@ -105,7 +105,7 @@ const AdminAnalytics = () => {
     return [
       { name: "قيد الانتظار", value: data.orders.pending },
       { name: "قيد المعالجة", value: data.orders.processing },
-      { name: "تم التوصيل", value: data.orders.delivered },
+      { name: "تم الاستلام", value: data.orders.delivered },
       { name: "ملغي", value: data.orders.cancelled },
       { name: "مرتجع", value: data.orders.returned },
     ].filter(x => x.value > 0);

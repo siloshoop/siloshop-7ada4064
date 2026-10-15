@@ -36,8 +36,8 @@ const STATUS_LABELS: Record<string, string> = {
   ready_for_shipping: "جاهز للشحن",
   shipped: "تم الشحن",
   out_for_delivery: "تم تسليم الطلب إلى مركز الشحن",
-  delivered: "تم التوصيل",
-  completed: "مكتمل",
+  delivered: "تم الاستلام",
+  completed: "تم الاستلام",
   cancelled: "ملغي",
 };
 

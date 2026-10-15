@@ -1,4 +1,4 @@
-import { formatPrice, normalizeCurrency } from "@/lib/currency";
+import { formatPrice, isKnownCurrency, normalizeCurrency } from "@/lib/currency";
 interface Props {
   product: Record<string, any>;
   vendorName?: string | null;

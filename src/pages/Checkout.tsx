@@ -276,7 +276,7 @@ const Checkout = () => {
   const cartCurrencies = Array.from(
     new Set(cartItems.filter((i) => isKnownCurrency(i.product.currency)).map((i) => normalizeCurrency(i.product.currency))),
   ) as ProductCurrency[];
-  const orderCurrency: ProductCurrency = cartCurrencies[0] ?? "SYP";
+  const orderCurrency: ProductCurrency | null = cartCurrencies[0] ?? null;
   const isMixedCurrency = cartCurrencies.length > 1 || (hasMissingCurrency && cartCurrencies.length > 0);
   const couponSupported = !isMixedCurrency;
 

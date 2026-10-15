@@ -1,4 +1,4 @@
-import { formatPrice, normalizeCurrency } from "@/lib/currency";
+import { formatPrice, isKnownCurrency, normalizeCurrency } from "@/lib/currency";
 import { copyText, openSocialShare } from "@/lib/share";
 import { canvasToBlob, exportFile } from "@/lib/exportFile";
 import { buildCompareShareUrl } from "@/lib/shareUrl";

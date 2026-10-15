@@ -166,6 +166,8 @@ export const formatSplitTotals = (totals: RevenueSplit | null | undefined, key =
 export const sumByCurrency = (rows: { amount: number; currency?: string | null }[]): RevenueSplit => {
   const out: RevenueSplit = {};
   for (const r of rows) {
+    // Rows without a saved currency are never counted as Syrian pounds.
+    if (!isKnownCurrency(r.currency)) continue;
     const c = normalizeCurrency(r.currency);
     out[c] = { total: (out[c]?.total || 0) + Number(r.amount || 0), count: (out[c]?.count || 0) + 1 };
   }

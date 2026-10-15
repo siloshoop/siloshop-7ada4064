@@ -98,7 +98,7 @@ describe("shipping line on product cards", () => {
 
   it("shows a saved price as a price even when the basis was never chosen", () => {
     renderCard({ shippingCost: 5000, currency: "SYP" });
-    expect(screen.getByText(/شحن: 5,000 ل\.س/)).toBeInTheDocument();
+    expect(screen.getByText(/شحن: 5,000\s?SYP/)).toBeInTheDocument();
     expect(screen.queryByText(/شحن مجاني/)).not.toBeInTheDocument();
   });
 

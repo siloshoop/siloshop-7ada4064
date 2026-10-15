@@ -167,3 +167,7 @@
 - [x] Isolated live dialog: original ratio, invalid dimensions, fit 600×900, fill 1200×1600 at 360/393/412px, cancellation and output image rendering; 135 tests and automatic build passed
 - [ ] Authenticated storage upload, product form save/edit/read-back and live AI assessment (blocked: owner's account prohibited; no permitted test account supplied)
 - [ ] Physical mobile/Capacitor and 8000×8000 device memory verification (blocked: no device available)
+
+## Row-anchored product bulk actions
+- [ ] Reposition existing bulk toolbars beneath the last selected visible product, preserving selection and actions
+- [ ] Verify selection, deselection and RTL mobile/desktop layout with isolated data

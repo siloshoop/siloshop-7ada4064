@@ -1,5 +1,5 @@
 import { formatPrice } from "@/lib/currency";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { Fragment, useCallback, useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -296,6 +296,8 @@ const ProductModeration = () => {
     }
   };
 
+  const toolbarAnchorId = rows.reduce<string | null>((last, row) => selected.has(row.id) ? row.id : last, null);
+
   const allSelected = rows.length > 0 && rows.every((r) => selected.has(r.id));
   const toggleOne = (id: string) =>
     setSelected((prev) => {
@@ -359,28 +361,7 @@ const ProductModeration = () => {
           <Button variant="outline" size="sm" onClick={toggleAll}>
             {allSelected ? "إلغاء تحديد الكل" : "تحديد كل الظاهر"}
           </Button>
-          {selected.size > 0 && (
-            <>
-              <Badge className="bg-primary text-primary-foreground">محدّد: {selected.size}</Badge>
-              {status !== "approved" && (
-                <Button size="sm" disabled={working} onClick={() => bulkModerate("approve")}>
-                  <Check className="me-1 h-4 w-4" /> اعتماد المحدد
-                </Button>
-              )}
-              {status !== "rejected" && (
-                <Button size="sm" variant="destructive" disabled={working} onClick={() => { setReason(""); setBulkRejecting(true); }}>
-                  <X className="me-1 h-4 w-4" /> رفض المحدد
-                </Button>
-              )}
-              <Button size="sm" variant="outline" disabled={working} onClick={() => bulkFlags({ is_featured: true })}>
-                <Sparkles className="me-1 h-4 w-4" /> تمييز
-              </Button>
-              <Button size="sm" variant="outline" disabled={working} onClick={() => bulkFlags({ is_active: false })}>
-                <EyeOff className="me-1 h-4 w-4" /> إخفاء
-              </Button>
-              {working && <Loader2 className="h-4 w-4 animate-spin text-primary" />}
-            </>
-          )}
+
         </div>
       )}
 
@@ -393,7 +374,8 @@ const ProductModeration = () => {
       ) : (
         <div className="space-y-3">
           {rows.map((p) => (
-            <Card key={p.id} className={selected.has(p.id) ? "border-primary/60" : undefined}>
+            <Fragment key={p.id}>
+            <Card className={selected.has(p.id) ? "border-primary/60" : undefined}>
               <CardContent className="flex flex-wrap items-center gap-4 p-4">
                 <Checkbox
                   checked={selected.has(p.id)}
@@ -518,6 +500,29 @@ const ProductModeration = () => {
                 </div>
               </CardContent>
             </Card>
+          {p.id === toolbarAnchorId && (
+            <div role="toolbar" aria-label="إجراءات المنتجات المحددة" className="flex min-w-0 flex-wrap items-center gap-2">
+              <Badge className="bg-primary text-primary-foreground">محدّد: {selected.size}</Badge>
+              {status !== "approved" && (
+                <Button size="sm" disabled={working} onClick={() => bulkModerate("approve")}>
+                  <Check className="me-1 h-4 w-4" /> اعتماد المحدد
+                </Button>
+              )}
+              {status !== "rejected" && (
+                <Button size="sm" variant="destructive" disabled={working} onClick={() => { setReason(""); setBulkRejecting(true); }}>
+                  <X className="me-1 h-4 w-4" /> رفض المحدد
+                </Button>
+              )}
+              <Button size="sm" variant="outline" disabled={working} onClick={() => bulkFlags({ is_featured: true })}>
+                <Sparkles className="me-1 h-4 w-4" /> تمييز
+              </Button>
+              <Button size="sm" variant="outline" disabled={working} onClick={() => bulkFlags({ is_active: false })}>
+                <EyeOff className="me-1 h-4 w-4" /> إخفاء
+              </Button>
+              {working && <Loader2 className="h-4 w-4 animate-spin text-primary" />}
+            </div>
+          )}
+            </Fragment>
           ))}
         </div>
       )}

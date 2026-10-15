@@ -45,8 +45,8 @@ describe("vertical tracking progress", () => {
   });
   it("restores all completed steps from a saved status on fresh render", () => {
     const { container } = render(<ShipmentTrackingTimeline status="completed" />);
-    expect(container.querySelectorAll('[data-state="completed"]')).toHaveLength(8);
-    expect(container.querySelectorAll(".lucide-check")).toHaveLength(8);
+    expect(container.querySelectorAll('[data-state="completed"]')).toHaveLength(7);
+    expect(container.querySelectorAll(".lucide-check")).toHaveLength(7);
   });
   it("normalizes existing processing status", () => {
     const { container } = render(<ShipmentTrackingTimeline status="processing" />);

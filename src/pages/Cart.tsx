@@ -9,6 +9,7 @@ import { fetchActiveDeals, applyDeal } from "@/lib/dealPricing";
 import {
   COUPON_CURRENCY,
   currencyName,
+  currencySymbol,
   formatPrice,
   normalizeCurrency,
   totalsByCurrency,

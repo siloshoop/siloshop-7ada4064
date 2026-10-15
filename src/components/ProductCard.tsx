@@ -1,3 +1,4 @@
+import { applyDeal } from "@/lib/dealPricing";
 import { Heart, Star, Scale, Eye, Store, TrendingUp, Award } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -69,7 +70,16 @@ const ProductCard = memo(({
     is_featured?: boolean;
     is_trending?: boolean;
     reviews?: { rating: number }[];
+    price?: number;
+    deal_pct?: number;
   } | null>(null);
+  // Active sale from the saved deal: show the sale price with the list price crossed out.
+  const saleApplies = !(typeof originalPrice === "number" && originalPrice > price)
+    && (details?.deal_pct ?? 0) > 0 && Number(details?.price) > 0;
+  if (saleApplies) {
+    originalPrice = Number(details!.price);
+    price = applyDeal(originalPrice, details!.deal_pct);
+  }
   const vendorNames = useVendorNames([details?.vendor_id]);
   const sellerName = storeName || (details?.vendor_id ? vendorNames[details.vendor_id] : undefined);
   const reviewCount = details?.reviews?.length ?? reviews;

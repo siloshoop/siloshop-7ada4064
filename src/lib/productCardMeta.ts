@@ -1,4 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
+import { dealHasStock, dealPercent } from "@/lib/dealPricing";
 
 export type ProductCardMeta = {
   stock_quantity: number | null;
@@ -6,6 +7,9 @@ export type ProductCardMeta = {
   is_featured?: boolean;
   is_trending?: boolean;
   reviews?: { rating: number }[];
+  /** Saved list price and active sale percentage (same rule as server pricing). */
+  price?: number;
+  deal_pct?: number;
 };
 
 type Waiter = (meta: ProductCardMeta | null) => void;
@@ -24,9 +28,22 @@ const flush = async () => {
     const chunk = ids.slice(i, i + 100);
     const { data } = await supabase
       .from("products")
-      .select("id, stock_quantity, vendor_id, is_featured, is_trending, reviews(rating)")
+      .select("id, price, stock_quantity, vendor_id, is_featured, is_trending, reviews(rating)")
       .in("id", chunk);
     (data ?? []).forEach((row: any) => found.set(row.id, row));
+    const nowIso = new Date().toISOString();
+    const { data: deals } = await supabase
+      .from("daily_deals")
+      .select("product_id, discount_percentage, sale_price, sale_quantity, sold_quantity")
+      .in("product_id", chunk)
+      .eq("is_active", true)
+      .lte("start_date", nowIso)
+      .gt("end_date", nowIso);
+    for (const d of (deals ?? []) as any[]) {
+      const row = found.get(d.product_id);
+      if (!row || !dealHasStock(d)) continue;
+      row.deal_pct = Math.max(row.deal_pct ?? 0, dealPercent(d, Number(row.price)));
+    }
     }
   } catch {
     // A failed metadata request must settle callers, not leave cards waiting.

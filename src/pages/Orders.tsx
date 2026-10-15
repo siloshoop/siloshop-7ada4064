@@ -63,6 +63,7 @@ const STATUS_VARIANTS: Record<string, "default" | "secondary" | "destructive" | 
 };
 
 interface OrderItem {
+  currency?: string | null;
   product_id: string;
   variant_label: string | null;
   product_name: string | null;

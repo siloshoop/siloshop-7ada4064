@@ -21,3 +21,5 @@
 - Never force lazily used libraries (charts, export tools) into manualChunks vendor groups; Rollup then preloads them on every page.
 - FavoriteButton status checks go through src/lib/favoriteStatus.ts, which batches same-tick checks per user without caching completed results, so listings make one request instead of one per card.
 - Coupon and sale pricing are computed only in public.line_pricing/coupon_allocate (used by quote_cart_coupon and create_order, with coupon row locks and coupon_redemptions reservations released by order status); clients only display server quotes so totals cannot drift.
+
+- Render product bulk actions in normal document flow after the last selected visible row; this keeps actions aligned without covering adjacent content.

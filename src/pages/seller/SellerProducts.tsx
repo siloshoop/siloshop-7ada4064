@@ -1,6 +1,6 @@
 import { formatPrice } from "@/lib/currency";
 import { exportFile, exportSuccessMessage } from "@/lib/exportFile";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { Fragment, useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { broadcastActivationChange } from "@/lib/activationSync";
@@ -175,6 +175,8 @@ const SellerProducts = () => {
     }
     return list;
   }, [rows, q, status, brandFilter, stockFilter, sortBy]);
+
+  const toolbarAnchorId = filtered.reduce<string | null>((last, row) => selected.has(row.id) ? row.id : last, null);
 
   const allVisibleSelected = filtered.length > 0 && filtered.every((r) => selected.has(r.id));
 
@@ -403,63 +405,7 @@ const SellerProducts = () => {
         </CardContent>
       </Card>
 
-      {selected.size > 0 && (
-        <Card className="mb-4 border-primary/40">
-          <CardContent className="flex flex-wrap items-center gap-3 p-4">
-            <Badge className="bg-primary text-primary-foreground">محدّد: {selected.size}</Badge>
 
-            <div className="flex items-center gap-2">
-              <Percent className="h-4 w-4 text-muted-foreground" />
-              <Input
-                type="number"
-                className="w-28"
-                placeholder="±% السعر"
-                aria-label="نسبة تغيير السعر"
-                value={pricePct}
-                onChange={(e) => setPricePct(e.target.value)}
-              />
-              <Button
-                size="sm"
-                disabled={busy || pricePct.trim() === "" || Number.isNaN(Number(pricePct))}
-                onClick={() => bulkUpdate({ price_pct: Number(pricePct) })}
-              >
-                تطبيق على الأسعار
-              </Button>
-            </div>
-
-            <div className="flex items-center gap-2">
-              <Input
-                type="number"
-                min={0}
-                className="w-28"
-                placeholder="كمية جديدة"
-                aria-label="كمية المخزون الجديدة"
-                value={bulkStock}
-                onChange={(e) => setBulkStock(e.target.value)}
-              />
-              <Button
-                size="sm"
-                disabled={busy || bulkStock.trim() === "" || Number.isNaN(Number(bulkStock))}
-                onClick={() => bulkUpdate({ stock: Math.max(0, Math.floor(Number(bulkStock))) })}
-              >
-                تعيين المخزون
-              </Button>
-            </div>
-
-            <Button size="sm" variant="outline" disabled={busy} onClick={() => bulkUpdate({ is_active: true })}>
-              <Eye className="me-1 h-4 w-4" /> إظهار
-            </Button>
-            <Button size="sm" variant="outline" disabled={busy} onClick={() => bulkUpdate({ is_active: false })}>
-              <EyeOff className="me-1 h-4 w-4" /> إخفاء
-            </Button>
-            <Button size="sm" variant="outline" disabled={busy} onClick={bulkSubmitForReview}>
-              <Send className="me-1 h-4 w-4" /> إرسال للمراجعة
-            </Button>
-            <Button size="sm" variant="ghost" onClick={() => setSelected(new Set())}>إلغاء التحديد</Button>
-            {busy && <Loader2 className="h-4 w-4 animate-spin text-primary" />}
-          </CardContent>
-        </Card>
-      )}
 
       {loading ? (
         <div className="space-y-3">{[0, 1, 2].map((i) => <Skeleton key={i} className="h-20 w-full" />)}</div>
@@ -468,7 +414,8 @@ const SellerProducts = () => {
       ) : (
         <div className="space-y-3">
           {filtered.map((p) => (
-            <Card key={p.id} className={selected.has(p.id) ? "border-primary/60" : undefined}>
+            <Fragment key={p.id}>
+            <Card className={selected.has(p.id) ? "border-primary/60" : undefined}>
               <CardContent className="flex flex-wrap items-center gap-4 p-4">
                 <Checkbox
                   checked={selected.has(p.id)}
@@ -539,6 +486,64 @@ const SellerProducts = () => {
                 </div>
               </CardContent>
             </Card>
+      {p.id === toolbarAnchorId && (
+        <Card role="toolbar" aria-label="إجراءات المنتجات المحددة" className="min-w-0 border-primary/40">
+          <CardContent className="flex flex-wrap items-center gap-3 p-4">
+            <Badge className="bg-primary text-primary-foreground">محدّد: {selected.size}</Badge>
+
+            <div className="flex min-w-0 flex-wrap items-center gap-2">
+              <Percent className="h-4 w-4 text-muted-foreground" />
+              <Input
+                type="number"
+                className="w-28"
+                placeholder="±% السعر"
+                aria-label="نسبة تغيير السعر"
+                value={pricePct}
+                onChange={(e) => setPricePct(e.target.value)}
+              />
+              <Button
+                size="sm"
+                disabled={busy || pricePct.trim() === "" || Number.isNaN(Number(pricePct))}
+                onClick={() => bulkUpdate({ price_pct: Number(pricePct) })}
+              >
+                تطبيق على الأسعار
+              </Button>
+            </div>
+
+            <div className="flex min-w-0 flex-wrap items-center gap-2">
+              <Input
+                type="number"
+                min={0}
+                className="w-28"
+                placeholder="كمية جديدة"
+                aria-label="كمية المخزون الجديدة"
+                value={bulkStock}
+                onChange={(e) => setBulkStock(e.target.value)}
+              />
+              <Button
+                size="sm"
+                disabled={busy || bulkStock.trim() === "" || Number.isNaN(Number(bulkStock))}
+                onClick={() => bulkUpdate({ stock: Math.max(0, Math.floor(Number(bulkStock))) })}
+              >
+                تعيين المخزون
+              </Button>
+            </div>
+
+            <Button size="sm" variant="outline" disabled={busy} onClick={() => bulkUpdate({ is_active: true })}>
+              <Eye className="me-1 h-4 w-4" /> إظهار
+            </Button>
+            <Button size="sm" variant="outline" disabled={busy} onClick={() => bulkUpdate({ is_active: false })}>
+              <EyeOff className="me-1 h-4 w-4" /> إخفاء
+            </Button>
+            <Button size="sm" variant="outline" disabled={busy} onClick={bulkSubmitForReview}>
+              <Send className="me-1 h-4 w-4" /> إرسال للمراجعة
+            </Button>
+            <Button size="sm" variant="ghost" onClick={() => setSelected(new Set())}>إلغاء التحديد</Button>
+            {busy && <Loader2 className="h-4 w-4 animate-spin text-primary" />}
+          </CardContent>
+        </Card>
+      )}
+            </Fragment>
           ))}
         </div>
       )}

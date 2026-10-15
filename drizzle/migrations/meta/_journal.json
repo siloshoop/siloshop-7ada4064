@@ -197,6 +197,13 @@
       "when": 1792071636761,
       "tag": "0027_seller_dashboard_latest_orders_currency",
       "breakpoints": true
+    },
+    {
+      "idx": 28,
+      "version": "7",
+      "when": 1792073141975,
+      "tag": "0028_quote_coupon_reject_mixed_currency",
+      "breakpoints": true
     }
   ]
 }

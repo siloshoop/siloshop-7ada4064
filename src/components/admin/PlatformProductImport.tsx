@@ -88,6 +88,7 @@ const PlatformProductImport = ({ open, onOpenChange, categories, brands, onImpor
       } else {
         norm.__values = rowCheck.data;
       }
+      if (!norm.currency || !String(norm.currency).trim()) errors.push("العملة مطلوبة لكل منتج (SYP أو USD)");
       if (norm.brand) {
         const b = brands.find(
           (x) => x.name.toLowerCase() === String(norm.brand).toLowerCase() ||
@@ -133,7 +134,7 @@ const PlatformProductImport = ({ open, onOpenChange, categories, brands, onImpor
         description: data.description ? String(data.description) : null,
         price: v.price,
         discount_price: v.discount_price ?? null,
-        currency: (data.currency && String(data.currency).trim()) || "SYP",
+        currency: String(data.currency).trim(),
         stock_quantity: v.stock_quantity ?? 0,
         sizes: splitList(data.sizes),
         colors: splitList(data.colors),

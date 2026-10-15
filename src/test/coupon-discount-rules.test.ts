@@ -25,5 +25,6 @@ describe("coupon checkout errors", () => {
   it("explains per-customer and sale-combining limits", () => {
     expect(couponErrorMessage("CUSTOMER_LIMIT")).toContain("الحد الأقصى");
     expect(couponErrorMessage("SALE_NOT_COMBINABLE")).toContain("لا يُجمع");
+    expect(couponErrorMessage("MIXED_CURRENCY")).toContain("عملات مختلفة");
   });
 });

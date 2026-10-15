@@ -12,7 +12,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { CURRENCY_OPTIONS, DEFAULT_CURRENCY, currencySymbol } from "@/lib/currency";
+import { CURRENCY_OPTIONS, currencySymbol } from "@/lib/currency";
 import { SHIPPING_MODE_OPTIONS, type ShippingMode } from "@/lib/shippingDisplay";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { useToast } from "@/hooks/use-toast";
@@ -53,7 +53,8 @@ const AddProduct = () => {
     description: "",
     short_description: "",
     price: "",
-    currency: DEFAULT_CURRENCY as string,
+    // No implicit default: the seller must pick the currency explicitly.
+    currency: "" as string,
     original_price: "",
     stock_quantity: "",
     min_order_quantity: "1",
@@ -202,8 +203,8 @@ const AddProduct = () => {
         ships_within_days: formData.ships_within_days,
       });
 
-      if (formData.price && !CURRENCY_OPTIONS.some((c) => c.value === formData.currency)) {
-        toast({ title: "العملة مطلوبة", description: "يرجى اختيار عملة السعر (ل.س أو $)", variant: "destructive" });
+      if (!CURRENCY_OPTIONS.some((c) => c.value === formData.currency)) {
+        toast({ title: "العملة مطلوبة", description: "يرجى اختيار عملة السعر (SYP أو $)", variant: "destructive" });
         setLoading(false);
         return;
       }
@@ -262,7 +263,7 @@ const AddProduct = () => {
         description: formData.description,
         short_description: formData.short_description.trim() || null,
         price: values.price,
-        currency: formData.currency || DEFAULT_CURRENCY,
+        currency: formData.currency,
         original_price: values.original_price ?? null,
         stock_quantity: values.stock_quantity,
         min_order_quantity: minQty,

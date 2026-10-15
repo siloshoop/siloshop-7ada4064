@@ -47,7 +47,7 @@ const empty: PlatformProduct = {
   description: "",
   price: 0,
   discount_price: null,
-  currency: "SYP",
+  currency: "",
   stock_quantity: 0,
   sizes: [],
   colors: [],
@@ -155,6 +155,10 @@ const PlatformProductForm = ({ open, onOpenChange, product, onSaved, categories,
       return;
     }
     const values = parsed.data;
+    if (!form.currency) {
+      toast({ title: "العملة مطلوبة", description: "يرجى اختيار عملة السعر (SYP أو $)", variant: "destructive" });
+      return;
+    }
     if (
       !form.platform_cod_enabled &&
       !form.platform_sham_cash_enabled &&
@@ -176,7 +180,7 @@ const PlatformProductForm = ({ open, onOpenChange, product, onSaved, categories,
       description: form.description?.trim() || null,
       price: values.price,
       discount_price: values.discount_price ?? null,
-      currency: form.currency || "SYP",
+      currency: form.currency,
       stock_quantity: values.stock_quantity ?? 0,
       sizes: form.sizes,
       colors: form.colors,
@@ -280,7 +284,7 @@ const PlatformProductForm = ({ open, onOpenChange, product, onSaved, categories,
             <div className="space-y-2">
               <Label>العملة</Label>
               <Select value={form.currency} onValueChange={(v) => set("currency", v)}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectTrigger><SelectValue placeholder="اختر العملة" /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="SYP">ل.س</SelectItem>
                   <SelectItem value="USD">USD</SelectItem>

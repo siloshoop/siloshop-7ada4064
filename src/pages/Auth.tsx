@@ -14,6 +14,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { logActivity } from "@/hooks/useActivityLog";
 import { Eye, EyeOff, Loader2, ShoppingBag } from "lucide-react";
 import { z } from "zod";
+import { validateIntlPhone } from "@/lib/intlPhone";
 import { COUNTRY_CODES, DEFAULT_COUNTRY, findCountry } from "@/lib/countryCodes";
 import SyrianFlag from "@/components/SyrianFlag";
 import {
@@ -292,7 +293,8 @@ const Auth = () => {
 
     setSignUpErrors({});
 
-    const fullPhone = `${findCountry(phoneCountry).dial}${phoneLocal.replace(/\D/g, "").replace(/^0+/, "")}`;
+    const phoneCheck = validateIntlPhone(phoneCountry, phoneLocal);
+    const fullPhone = phoneCheck.e164 ?? `${findCountry(phoneCountry).dial}${phoneLocal.replace(/\D/g, "").replace(/^0+/, "")}`;
 
     // Validate input
     const result = signUpSchema.safeParse({
@@ -314,7 +316,12 @@ const Auth = () => {
         if (err.path[0] === "confirmPassword") errors.confirmPassword = err.message;
         if (err.path[0] === "acceptTerms") errors.acceptTerms = err.message;
       });
+      if (phoneCheck.error) errors.phone = phoneCheck.error;
       setSignUpErrors(errors);
+      return;
+    }
+    if (phoneCheck.error) {
+      setSignUpErrors({ phone: phoneCheck.error });
       return;
     }
 

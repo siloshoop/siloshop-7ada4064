@@ -40,12 +40,6 @@ const Navbar = () => {
   const { compareProducts, compareCount } = useCompareProducts();
   const { cartRef } = useFlyToCart();
   const { count: cartCount, bounce: cartBounce } = useCartCount(user?.id);
-
-  useEffect(() => {
-    const openCategories = () => setMobileMenuOpen(true);
-    window.addEventListener("siloshop:open-categories", openCategories);
-    return () => window.removeEventListener("siloshop:open-categories", openCategories);
-  }, []);
   return (
     <header data-testid="site-header" className="safe-area-top safe-area-x sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container grid min-w-0 grid-cols-[1fr_auto_1fr] items-center gap-x-1 gap-y-1 px-2 py-1 sm:px-4 md:flex md:h-16 md:flex-nowrap md:justify-between md:gap-4 md:py-0">

@@ -49,9 +49,9 @@ const Profile = () => {
   const handleSave = async () => {
     setSaving(true);
     const { error } = await supabase.rpc("update_own_profile", {
-      _full_name: fullName || null,
+      _full_name: fullName.trim(),
       _phone: phone || null,
-      _avatar_url: avatarUrl || null,
+      _avatar_url: avatarUrl,
     });
     setSaving(false);
     if (error) {

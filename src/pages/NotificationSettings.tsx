@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import Navbar from "@/components/Navbar";
@@ -33,6 +33,12 @@ const NotificationSettings = () => {
     promotions: true,
     newsletter: false,
   });
+
+  // Latest saved/pending values, so quick successive toggles never resend stale ones.
+  const latestPrefs = useRef(preferences);
+  useEffect(() => {
+    latestPrefs.current = preferences;
+  }, [preferences]);
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -91,7 +97,9 @@ const NotificationSettings = () => {
 
   const handleToggle = async (key: keyof NotificationPreferences, value: boolean) => {
     if (!userId) return;
-    const previous = preferences[key];
+    const previous = latestPrefs.current[key];
+    const next = { ...latestPrefs.current, [key]: value };
+    latestPrefs.current = next;
     setPreferences((prev) => ({ ...prev, [key]: value }));
     setSavingKey(key);
     try {
@@ -100,8 +108,7 @@ const NotificationSettings = () => {
         .upsert(
           {
             user_id: userId,
-            ...preferences,
-            [key]: value,
+            ...next,
             updated_at: new Date().toISOString(),
           },
           { onConflict: "user_id" },
@@ -109,6 +116,7 @@ const NotificationSettings = () => {
       if (error) throw error;
     } catch (error) {
       console.error("Error saving preference:", error);
+      latestPrefs.current = { ...latestPrefs.current, [key]: previous };
       setPreferences((prev) => ({ ...prev, [key]: previous }));
       toast({
         title: "خطأ",

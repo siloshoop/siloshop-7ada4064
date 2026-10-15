@@ -317,7 +317,7 @@ const ManageSubcategories = () => {
       <Navbar />
       <main className="flex-1 container px-4 py-8">
         <div className="flex items-center gap-2 mb-6">
-          <Button variant="ghost" size="sm" onClick={() => navigate("/dashboard")}>
+          <Button variant="ghost" size="sm" onClick={() => navigate("/admin/categories")}>
             <ArrowRight className="h-4 w-4 ml-1" />
             لوحة التحكم
           </Button>

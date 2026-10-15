@@ -71,17 +71,10 @@ const Navbar = () => {
               </Badge>
             )}
           </Button>
-          {user ? (
-            <NotificationsDropdown />
-          ) : (
-            <Button variant="ghost" size="icon" aria-label="الإشعارات" className="h-9 w-9 md:hidden" onClick={() => navigate("/auth", { state: { from: "/notifications" } })}>
-              <Bell className="h-5 w-5" />
-            </Button>
-          )}
           <Button
             variant="ghost"
             size="icon"
-            className="h-9 w-9 md:h-10 md:w-10"
+            className="h-9 w-9 md:h-10 md:w-10 md:order-2"
             aria-label="الرسائل"
             onClick={() => navigate("/messages")}
           >
@@ -91,11 +84,18 @@ const Navbar = () => {
             <ThemeToggle />
           </div>
           </div>
-          <div className="col-start-3 row-start-1 flex min-w-0 items-center justify-end md:contents">
+          <div className="col-start-3 row-start-1 flex min-w-0 items-center justify-end gap-1 md:contents">
+          {user ? (
+            <NotificationsDropdown />
+          ) : (
+            <Button variant="ghost" size="icon" aria-label="الإشعارات" className="h-9 w-9 md:hidden" onClick={() => navigate("/auth", { state: { from: "/notifications" } })}>
+              <Bell className="h-5 w-5" />
+            </Button>
+          )}
           <Button 
             variant="ghost" 
             size="icon"
-            className="hidden h-9 w-9 md:inline-flex md:h-10 md:w-10"
+            className="hidden h-9 w-9 md:inline-flex md:h-10 md:w-10 md:order-2"
             onClick={() => navigate("/favorites")}
           >
             <Heart className="h-5 w-5" />
@@ -103,7 +103,7 @@ const Navbar = () => {
           <Button 
             variant="ghost" 
             size="icon"
-            className="relative h-9 w-9 md:h-10 md:w-10"
+            className="relative h-9 w-9 md:h-10 md:w-10 md:order-2"
             onClick={() => {
               if (compareCount > 0) {
                 navigate(`/compare?products=${compareProducts.join(",")}`);
@@ -115,7 +115,7 @@ const Navbar = () => {
           >
             <Scale className="h-5 w-5" />
             {compareCount > 0 && (
-              <Badge className="absolute -top-1 -right-1 h-5 w-5 p-0 flex items-center justify-center text-xs bg-primary">
+              <Badge className="absolute -top-1 -end-1 h-5 w-5 p-0 flex items-center justify-center text-xs bg-primary">
                 {compareCount}
               </Badge>
             )}
@@ -123,7 +123,7 @@ const Navbar = () => {
 
           {user && (
             <>
-              <div className="hidden md:block"><PushNotificationManager variant="icon" /></div>
+              <div className="hidden md:block md:order-2"><PushNotificationManager variant="icon" /></div>
             </>
           )}
 
@@ -131,7 +131,7 @@ const Navbar = () => {
             user ? (
               <DropdownMenu modal={false}>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="icon" aria-label="حسابي" className="h-9 w-9 md:h-10 md:w-10">
+                  <Button variant="ghost" size="icon" aria-label="حسابي" className="h-9 w-9 md:h-10 md:w-10 md:order-2">
                     <User className="h-5 w-5" />
                   </Button>
                 </DropdownMenuTrigger>
@@ -162,7 +162,7 @@ const Navbar = () => {
                 </DropdownMenuContent>
               </DropdownMenu>
             ) : (
-              <Button onClick={() => navigate("/auth", { state: { from: location.pathname + location.search } })} size="sm" aria-label="تسجيل الدخول" className="h-9 w-9 shrink-0 px-0 md:w-auto md:px-3">
+              <Button onClick={() => navigate("/auth", { state: { from: location.pathname + location.search } })} size="sm" aria-label="تسجيل الدخول" className="h-9 w-9 shrink-0 px-0 md:w-auto md:px-3 md:order-2">
                 <User className="h-5 w-5 md:hidden" />
                 <span className="hidden md:inline">تسجيل الدخول</span>
               </Button>

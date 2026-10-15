@@ -4,23 +4,29 @@ import { buildProductsCsv } from "@/lib/productCsv";
 
 describe("saved currency amounts without conversion", () => {
   it("preserves a USD amount and its fraction", () => {
-    expect(formatPrice(58.5, "USD")).toBe("$58.5");
+    expect(formatPrice(58.5, "USD")).toBe("$58.50");
+    expect(formatPrice(22, "USD")).toBe("$22.00");
     expect(currencySymbol("USD")).toBe("$");
   });
   it("preserves a Syrian-pound amount", () => {
-    expect(formatPrice(58000.5, "SYP")).toBe("58,000.5 ل.س");
-    expect(currencySymbol("SYP")).toBe("ل.س");
+    expect(formatPrice(58000.5, "SYP")).toBe("58,000.5 SYP");
+    expect(formatPrice(22, "SYP")).toBe("22 SYP");
+    expect(currencySymbol("SYP")).toBe("SYP");
   });
   it("does not label missing report currency as Syrian pounds", () => {
     expect(formatKnownPrice(59, null)).toBe("59 (العملة غير متاحة)");
     expect(formatAmountsByCurrency([{ amount: 59, currency: null }])).toBe("59 (العملة غير متاحة)");
+  });
+  it("never assumes Syrian pounds when the currency is missing", () => {
+    expect(formatPrice(22, null)).toBe("22");
+    expect(formatPrice(22, undefined)).toBe("22");
   });
   it("keeps mixed-currency totals independent", () => {
     const rows = [{ amount: 59, currency: "USD" }, { amount: 1000, currency: "SYP" }];
     const totals = sumByCurrency(rows);
     expect(totals.USD?.total).toBe(59);
     expect(totals.SYP?.total).toBe(1000);
-    expect(formatAmountsByCurrency(rows)).toBe("1,000 ل.س · $59");
+    expect(formatAmountsByCurrency(rows)).toBe("1,000 SYP · $59.00");
     expect(rows).toEqual([{ amount: 59, currency: "USD" }, { amount: 1000, currency: "SYP" }]);
   });
   it("keeps coupon savings in the order currency without changing other amounts", () => {

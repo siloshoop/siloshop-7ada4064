@@ -71,8 +71,11 @@ const ProductCard = memo(({
     is_trending?: boolean;
     reviews?: { rating: number }[];
     price?: number;
+    currency?: string | null;
     deal_pct?: number;
   } | null>(null);
+  // Saved product currency wins over whatever the listing query passed in.
+  const shownCurrency = details?.currency ?? currency;
   // Active sale from the saved deal: show the sale price with the list price crossed out.
   const saleApplies = !(typeof originalPrice === "number" && originalPrice > price)
     && (details?.deal_pct ?? 0) > 0 && Number(details?.price) > 0;
@@ -172,7 +175,7 @@ const ProductCard = memo(({
   const hasDiscount = typeof originalPrice === "number" && originalPrice > price && originalPrice > 0;
   const discountPercent = hasDiscount ? Math.round((originalPrice - price) / originalPrice * 100) : (discount && discount > 0 ? discount : 0);
   // Free / fixed price / set by the shipping company — never free when a price exists.
-  const shippingLine = shippingCardLabel(shippingMode, shippingCost, currency);
+  const shippingLine = shippingCardLabel(shippingMode, shippingCost, shownCurrency);
 
   return (
     <a
@@ -326,11 +329,11 @@ const ProductCard = memo(({
 
         <div className="mt-auto flex min-w-0 flex-wrap items-baseline gap-x-1.5 gap-y-1">
           <span className="break-words text-sm font-bold leading-snug text-primary">
-            {formatPrice(price, currency)}
+            {formatPrice(price, shownCurrency)}
           </span>
           {originalPrice && originalPrice > price && (
             <span className="text-[10px] text-muted-foreground line-through">
-              {formatPrice(originalPrice, currency)}
+              {formatPrice(originalPrice, shownCurrency)}
             </span>
           )}
         </div>

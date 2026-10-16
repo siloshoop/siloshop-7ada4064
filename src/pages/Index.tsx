@@ -15,7 +15,6 @@ import PullToRefreshIndicator from "@/components/PullToRefresh";
 import { usePullToRefresh } from "@/hooks/usePullToRefresh";
 import SectionErrorBoundary from "@/components/SectionErrorBoundary";
 import LazySection from "@/components/LazySection";
-import NativeAdBanner from "@/components/NativeAdBanner";
 import AnimatedProductCarousel from "@/components/home/AnimatedProductCarousel";
 
 // Below-fold sections are lazy loaded to improve initial performance

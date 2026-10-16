@@ -1,4 +1,5 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
+import { mergeSavedProductTracking } from "@/lib/liveProductTracking";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
@@ -64,6 +65,7 @@ const OrderDetails = () => {
   const [items, setItems] = useState<any[]>([]);
   const [shipping, setShipping] = useState<any>(null);
   const [trackingItems, setTrackingItems] = useState<any[]>([]);
+  const loadVersion = useRef(0);
   const [loading, setLoading] = useState(true);
   const [notes, setNotes] = useState<OrderNote[]>([]);
   const [notesLoading, setNotesLoading] = useState(true);
@@ -94,6 +96,7 @@ const OrderDetails = () => {
 
   const load = useCallback(async (initial = false) => {
       if (!user || !id) return;
+      const version = ++loadVersion.current;
       if (initial) setLoading(true);
       const { data: ord } = await supabase
         .from("orders")
@@ -101,8 +104,8 @@ const OrderDetails = () => {
         .eq("id", id)
         .eq("customer_id", user.id)
         .maybeSingle();
+      if (version !== loadVersion.current) return;
       if (!ord) { setLoading(false); return; }
-      setOrder(ord);
       const { data: children } = await supabase.from("orders").select("id,vendor_id,shipment_tracking_enabled").eq("parent_order_id", id);
       const parentId = ord.parent_order_id;
       const { data: oi } = await supabase
@@ -110,13 +113,15 @@ const OrderDetails = () => {
         .select("id, order_id, product_id, quantity, price, currency, vendor_id, variant_label, product_name, product_image, discount_amount, subtotal, tracking_status,tracking_number,shipping_carrier,tracking_updated_at, product:products(id, name, image_url)")
         .in("order_id", parentId ? [id, parentId] : [id, ...(children ?? []).map((child) => child.id)]);
       const ownItems = (oi ?? []).filter((item) => !parentId || item.order_id === id || item.vendor_id === ord.vendor_id);
-      setItems(ownItems);
-      setTrackingItems(ownItems.filter((item) => ord.shipment_tracking_enabled || (children ?? []).some((child) => child.shipment_tracking_enabled && child.vendor_id === item.vendor_id)));
       const { data: sd } = await supabase
         .from("shipping_details")
         .select("*")
         .eq("order_id", id)
         .maybeSingle();
+      if (version !== loadVersion.current) return;
+      setOrder(ord);
+      setItems(ownItems);
+      setTrackingItems(ownItems.filter((item) => ord.shipment_tracking_enabled || (children ?? []).some((child) => child.shipment_tracking_enabled && child.vendor_id === item.vendor_id)));
       setShipping(sd || null);
       setLoading(false);
   }, [id, user]);
@@ -140,7 +145,9 @@ const OrderDetails = () => {
         }
       )
       .on("postgres_changes", { event: "UPDATE", schema: "public", table: "order_items" }, (payload) => {
-        setTrackingItems((prev) => prev.map((item) => item.id === payload.new.id ? { ...item, ...payload.new } : item));
+        setItems((prev) => mergeSavedProductTracking(prev, payload.new));
+        setTrackingItems((prev) => mergeSavedProductTracking(prev, payload.new));
+        void load();
       })
       .on("postgres_changes", { event: "UPDATE", schema: "public", table: "orders", filter: `parent_order_id=eq.${id}` }, () => { void load(); })
       .on(
@@ -155,8 +162,11 @@ const OrderDetails = () => {
             .then(({ data }) => setShipping(data || null));
         }
       )
-      .subscribe();
+      .subscribe((status) => {
+        if (status === "SUBSCRIBED") void load();
+      });
     return () => {
+      loadVersion.current += 1;
       supabase.removeChannel(channel);
     };
   }, [id, user, load]);

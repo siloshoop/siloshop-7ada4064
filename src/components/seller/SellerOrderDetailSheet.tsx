@@ -55,7 +55,9 @@ const CANCELLABLE = ["pending", "confirmed", "preparing", "ready_for_shipping"];
 
 const SellerOrderDetailSheet = ({ order, open, onOpenChange, onChanged }: Props) => {
   const { toast } = useToast();
-  const trackingOn = useFeatureFlags().isEnabled("shipment_tracking");
+  // Shipment tracking is admin-controlled per order; sellers never edit it here.
+  const trackingOn = false;
+  void useFeatureFlags;
   const [items, setItems] = useState<SellerOrderItem[]>([]);
   const [loadingItems, setLoadingItems] = useState(true);
   const [acting, setActing] = useState<string | null>(null);

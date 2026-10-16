@@ -25,6 +25,7 @@ import OrderStatusBadge from "@/components/orders/OrderStatusBadge";
 import OrderProductImage from "@/components/orders/OrderProductImage";
 import OrderTimelineLog from "@/components/orders/OrderTimelineLog";
 import ShippingInfoDialog from "@/components/orders/ShippingInfoDialog";
+import AdminShipmentTrackingPanel from "@/components/admin/AdminShipmentTrackingPanel";
 import {
   SELECTABLE_ORDER_STATUSES, ORDER_STATUS_LABELS, changeOrderStatus, setOrderFreeze, reopenOrder,
   friendlyOrderError, normalizeStatus, type OrderStatus,
@@ -493,6 +494,8 @@ const AdminOrders = () => {
                   ))}
                 </div>
               </div>
+
+              <AdminShipmentTrackingPanel orderId={order.id} initialEnabled={!!(order as any).shipment_tracking_enabled} />
 
               <div className="rounded border p-3">
                 <p className="mb-2 flex items-center gap-2 text-sm font-semibold">

@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { formatPrice } from "@/lib/currency";
+import { cn } from "@/lib/utils";
 
 interface Item { id: string; name: string; price: number; currency: string | null; image_url: string | null }
 
@@ -46,7 +47,7 @@ export default function AnimatedProductCarousel() {
         <div className="absolute bottom-1.5 left-2 flex gap-1">
           {items.map((p, i) => (
             <button key={p.id} type="button" aria-label={`الشريحة ${i + 1}`} onClick={() => setIndex(i)}
-              className={`h-1.5 rounded-full transition-all ${i === index ? "w-4 bg-primary" : "w-1.5 bg-border"}`} />
+              className={cn("h-1.5 rounded-full transition-all", i === index ? "w-4 bg-primary" : "w-1.5 bg-border")} />
           ))}
         </div>
       </div>

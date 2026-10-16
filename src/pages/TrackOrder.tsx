@@ -109,6 +109,7 @@ const formatMoney = (n: number | null | undefined, currency?: string | null) =>
 const TrackOrder = () => {
   const { id } = useParams();
   const { user, loading: authLoading } = useAuth();
+  const trackingOn = useFeatureFlags().isEnabled("shipment_tracking");
   const [order, setOrder] = useState<Order | null>(null);
   const [shipments, setShipments] = useState<SavedShipment[]>([]);
   const [shipmentItems, setShipmentItems] = useState<TrackingProduct[]>([]);

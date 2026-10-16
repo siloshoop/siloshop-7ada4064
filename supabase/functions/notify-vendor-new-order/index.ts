@@ -67,8 +67,7 @@ const handler = async (req: Request): Promise<Response> => {
     }
     const callerId = claimsData.claims.sub as string;
 
-    const { order_id, vendor_id, customer_name, items, total_amount, shipping_address, currency }: NewOrderPayload = await req.json();
-    const symbol = String(currency ?? "").trim().toUpperCase() === "USD" ? "$" : "ل.س";
+    const { order_id, vendor_id }: NewOrderPayload = await req.json();
 
     if (!order_id || !vendor_id) {
       return new Response(
@@ -117,6 +116,21 @@ const handler = async (req: Request): Promise<Response> => {
         { status: 403, headers: { "Content-Type": "application/json", ...corsHeaders } }
       );
     }
+
+    // Email details come only from saved order records, never the request body.
+    const [{ data: savedOrder }, { data: savedItems }] = await Promise.all([
+      supabase.from("orders").select("customer_id, shipping_address, currency").eq("id", order_id).maybeSingle(),
+      supabase.from("order_items").select("product_name, quantity, price").eq("order_id", order_id).eq("vendor_id", vendor_id),
+    ]);
+    const { data: customerProfile } = await supabase
+      .from("profiles").select("full_name").eq("id", savedOrder?.customer_id ?? "").maybeSingle();
+    const customer_name = customerProfile?.full_name || "عميل";
+    const shipping_address = savedOrder?.shipping_address ?? "";
+    const items: OrderItem[] = (savedItems ?? []).map((i: any) => ({
+      product_name: i.product_name ?? "", quantity: Number(i.quantity) || 0, price: Number(i.price) || 0,
+    }));
+    const total_amount = items.reduce((sum, i) => sum + i.price * i.quantity, 0);
+    const symbol = String(savedOrder?.currency ?? "").trim().toUpperCase() === "USD" ? "$" : "ل.س";
 
     // Get vendor email
     const { data: vendorData, error: vendorError } = await supabase.auth.admin.getUserById(vendor_id);

@@ -652,6 +652,10 @@ const Product = () => {
                 <ChatButton vendorId={product.vendor_id} productId={id} />
                 <ShareProductButton productId={id!} productName={product.name} className="rounded-full" />
               </div>
+
+              <div className="flex justify-end md:hidden">
+                <ShareProductButton productId={id!} productName={product.name} className="rounded-full" />
+              </div>
             </div>
 
             {/* Trust badges */}

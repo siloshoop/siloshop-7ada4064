@@ -7,7 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
  * are ALSO enforced server-side (RLS + create_order), so the UI gating here is
  * purely presentational.
  */
-export type FeatureFlagKey = "platform_marketplace" | "sham_cash_payments";
+export type FeatureFlagKey = "platform_marketplace" | "sham_cash_payments" | "shipment_tracking";
 
 export interface FeatureFlag {
   key: string;

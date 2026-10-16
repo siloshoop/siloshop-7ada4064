@@ -15,6 +15,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Loader2, Lock, Phone, MapPin, User, Package, Truck, Ban } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { useFeatureFlags } from "@/hooks/useFeatureFlags";
 import OrderStatusBadge from "@/components/orders/OrderStatusBadge";
 import OrderProductImage from "@/components/orders/OrderProductImage";
 import OrderTimelineLog from "@/components/orders/OrderTimelineLog";
@@ -54,6 +55,7 @@ const CANCELLABLE = ["pending", "confirmed", "preparing", "ready_for_shipping"];
 
 const SellerOrderDetailSheet = ({ order, open, onOpenChange, onChanged }: Props) => {
   const { toast } = useToast();
+  const trackingOn = useFeatureFlags().isEnabled("shipment_tracking");
   const [items, setItems] = useState<SellerOrderItem[]>([]);
   const [loadingItems, setLoadingItems] = useState(true);
   const [acting, setActing] = useState<string | null>(null);
@@ -213,9 +215,9 @@ const SellerOrderDetailSheet = ({ order, open, onOpenChange, onChanged }: Props)
           </div>
 
           <Tabs defaultValue="items" className="pt-2">
-            <TabsList className="grid w-full grid-cols-4">
+            <TabsList className={`grid w-full ${trackingOn ? "grid-cols-4" : "grid-cols-3"}`}>
               <TabsTrigger value="items">المنتجات</TabsTrigger>
-              <TabsTrigger value="shipping">الشحن</TabsTrigger>
+              {trackingOn && <TabsTrigger value="shipping">الشحن</TabsTrigger>}
               <TabsTrigger value="timeline">السجل الزمني</TabsTrigger>
               <TabsTrigger value="notes">الملاحظات</TabsTrigger>
             </TabsList>
@@ -239,20 +241,20 @@ const SellerOrderDetailSheet = ({ order, open, onOpenChange, onChanged }: Props)
                       {formatPrice(it.subtotal ?? it.quantity * it.price, (it as any).currency ?? orderCurrency)}
                     </p>
                   </div>
-                  <SellerItemTrackingControl item={it} disabled={frozen}
-                    onSaved={(patch) => setItems((prev) => prev.map((x) => x.id === it.id ? { ...x, ...patch } : x))} />
+                  {trackingOn && <SellerItemTrackingControl item={it} disabled={frozen}
+                    onSaved={(patch) => setItems((prev) => prev.map((x) => x.id === it.id ? { ...x, ...patch } : x))} />}
                   </div>
                 ))
               )}
             </TabsContent>
 
-            <TabsContent value="shipping" className="pt-3">
+            {trackingOn && <TabsContent value="shipping" className="pt-3">
               <SellerOrderShippingForm
                 order={localOrder}
                 disabled={frozen}
                 onSaved={() => onChanged()}
               />
-            </TabsContent>
+            </TabsContent>}
 
             <TabsContent value="timeline" className="pt-3">
               <OrderTimelineLog orderId={localOrder.id} />

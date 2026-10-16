@@ -1,6 +1,7 @@
 # Production readiness audit
 
 ## Independent product tracking
+- [ ] Review immediate buyer updates and seller ownership checks; verify without changing production orders.
 - [x] Restore secure seller-owned product updates, stage timestamps and deduplicated in-app notifications while retaining admin visibility.
 - [x] Connect buyer/seller/admin tracking views to saved product state and live updates.
 - [x] Run 180 automated tests; verify saved buyer tracking page at 393/1280px, live subscription, Arabic payment text, hidden default and nonexistent-item RPC rejection. Automatic typecheck/build passed.

@@ -110,7 +110,10 @@ const formatMoney = (n: number | null | undefined, currency?: string | null) =>
 const TrackOrder = () => {
   const { id } = useParams();
   const { user, loading: authLoading } = useAuth();
-  const trackingOn = useFeatureFlags().isEnabled("shipment_tracking");
+  void useFeatureFlags;
+  // Per-order switch set by the admin (hidden by default).
+  const [trackingAllowed, setTrackingAllowed] = useState(false);
+  const trackingOn = trackingAllowed;
   const [order, setOrder] = useState<Order | null>(null);
   const [shipments, setShipments] = useState<SavedShipment[]>([]);
   const [shipmentItems, setShipmentItems] = useState<TrackingProduct[]>([]);
@@ -292,19 +295,29 @@ const TrackOrder = () => {
     }
 
     if (!data) { setOrder(null); setLoading(false); return; }
-    const children = await supabase.from("orders")
-      .select("id, vendor_id, status, tracking_status, updated_at")
-      .eq("parent_order_id", id).eq("customer_id", user.id).order("created_at");
+    // A seller sub-order holds no items itself; its products live on the parent order, matched by seller.
+    const parentId = (data as { parent_order_id?: string | null }).parent_order_id ?? null;
+    const subVendor = (data as { vendor_id?: string | null }).vendor_id ?? null;
+    const children = parentId
+      ? { data: [] as { id: string; vendor_id: string | null; status: string; tracking_status: string | null; updated_at: string; shipment_tracking_enabled: boolean }[], error: null }
+      : await supabase.from("orders")
+          .select("id, vendor_id, status, tracking_status, updated_at, shipment_tracking_enabled")
+          .eq("parent_order_id", id).eq("customer_id", user.id).order("created_at");
     const childRows = children.data ?? [];
+    const itemOrderIds = parentId ? [id, parentId] : [id, ...childRows.map((child) => child.id)];
     const [items, shipping] = await Promise.all([
       supabase.from("order_items").select("id, order_id, vendor_id, product_id, quantity, price, currency, product_name, product_image, variant_label, tracking_status, tracking_number, shipping_carrier, tracking_updated_at")
-        .in("order_id", [id, ...childRows.map((child) => child.id)]),
+        .in("order_id", itemOrderIds),
       supabase.from("shipping_details").select("shipping_company, estimated_delivery, shipped_at, delivered_at, shipping_notes").eq("order_id", id),
     ]);
+    const allItems = (items.data ?? []).filter((item) => !parentId || item.order_id === id || item.vendor_id === subVendor);
+    // Tracking is visible only for shipments the admin enabled on that order.
+    const visibleChildren = childRows.filter((c) => c.shipment_tracking_enabled || (data as any).shipment_tracking_enabled);
+    setTrackingAllowed(Boolean((data as any).shipment_tracking_enabled) || visibleChildren.length > 0);
     setShipmentError(Boolean(children.error || items.error));
-    setShipments(childRows);
-    setShipmentItems(items.data ?? []);
-    setOrder({ ...data, order_items: (items.data ?? []).filter((item) => item.order_id === id), shipping_details: shipping.data ?? [] } as unknown as Order);
+    setShipments(visibleChildren);
+    setShipmentItems(allItems.filter((item) => (data as any).shipment_tracking_enabled || visibleChildren.some((c) => c.vendor_id === item.vendor_id)));
+    setOrder({ ...data, order_items: parentId ? allItems : allItems.filter((item) => item.order_id === id), shipping_details: shipping.data ?? [] } as unknown as Order);
     setLoading(false);
     setLastUpdated(new Date());
   };

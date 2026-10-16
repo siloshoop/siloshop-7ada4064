@@ -40,15 +40,20 @@ export const initNativeApp = async () => {
     });
 
     // Shared siloshop.net links opened in the app: route inside the WebView.
-    App.addListener("appUrlOpen", ({ url }) => {
+    const openAppLink = (url?: string) => {
+      if (!url) return;
       try {
         const u = new URL(url);
         if (!/(^|\.)siloshop\.net$/i.test(u.hostname)) return;
         const path = `${u.pathname}${u.search}${u.hash}` || "/";
+        if (`${window.location.pathname}${window.location.search}${window.location.hash}` === path) return;
         window.history.pushState({}, "", path);
         window.dispatchEvent(new PopStateEvent("popstate"));
       } catch { /* ignore malformed links */ }
-    });
+    };
+    App.addListener("appUrlOpen", ({ url }) => openAppLink(url));
+    // Cold start: the link that launched a closed app arrives before the listener.
+    await App.getLaunchUrl().then((r) => openAppLink(r?.url)).catch(() => undefined);
 
     App.addListener("backButton", ({ canGoBack }) => {
       if (canGoBack && window.location.pathname !== "/") {

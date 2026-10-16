@@ -24,8 +24,10 @@
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
-                <data android:scheme="https" android:host="www.siloshop.net" />
-                <data android:scheme="https" android:host="siloshop.net" />
+                <data android:scheme="https" />
+                <data android:host="www.siloshop.net" />
+                <data android:host="siloshop.net" />
+                <data android:pathPrefix="/product/" />
             </intent-filter>
         </activity>
 

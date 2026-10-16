@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
+import { mergeSavedProductTracking } from "@/lib/liveProductTracking";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
@@ -300,8 +301,13 @@ const Orders = () => {
         { event: "*", schema: "public", table: "orders", filter: `customer_id=eq.${user.id}` },
         () => { void fetchOrders(); }
       )
-      .on("postgres_changes", { event: "UPDATE", schema: "public", table: "order_items" }, () => { void fetchOrders(); })
-      .subscribe();
+      .on("postgres_changes", { event: "UPDATE", schema: "public", table: "order_items" }, (payload) => {
+        setOrders((prev) => prev.map((order) => ({ ...order, order_items: mergeSavedProductTracking(order.order_items, payload.new) })));
+        void fetchOrders();
+      })
+      .subscribe((status) => {
+        if (status === "SUBSCRIBED") void fetchOrders();
+      });
     return () => {
       supabase.removeChannel(channel);
     };

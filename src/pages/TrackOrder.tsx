@@ -1,4 +1,5 @@
 import { formatPrice } from "@/lib/currency";
+import { mergeSavedProductTracking } from "@/lib/liveProductTracking";
 import { useFeatureFlags } from "@/hooks/useFeatureFlags";
 import { useEffect, useRef, useState } from "react";
 import { Link, useParams, useNavigate } from "react-router-dom";
@@ -238,7 +239,12 @@ const TrackOrder = () => {
       )
       // Product shipment statuses (RLS limits events to this customer's own items).
       .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'order_items' }, (payload) => {
-        if (visibleItemIds.current.has(String(payload.new.id))) void fetchOrder();
+        if (!visibleItemIds.current.has(String(payload.new.id))) return;
+        setShipmentItems((prev) => mergeSavedProductTracking(prev, payload.new));
+        setOrder((prev) => prev ? { ...prev, order_items: mergeSavedProductTracking(prev.order_items ?? [], payload.new) } : prev);
+        setLastUpdated(new Date());
+        highlight();
+        void fetchOrder();
       })
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'order_item_status_history' }, (payload) => {
         if (visibleItemIds.current.has(String(payload.new.order_item_id))) void fetchOrder();
@@ -249,6 +255,9 @@ const TrackOrder = () => {
           realtimeConnected = true;
           setIsLive(true);
           stopPolling();
+          // Catch changes committed during the initial query or a reconnection.
+          void fetchOrder();
+          void fetchStatusHistory();
         } else if (
           status === 'CHANNEL_ERROR' ||
           status === 'TIMED_OUT' ||

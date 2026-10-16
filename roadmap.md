@@ -1,6 +1,7 @@
 # Production readiness audit
 
 ## Independent product tracking
+- [x] Merge saved product events immediately in buyer pages, recover subscription/reconnection gaps and guard overlapping detail reads; 184 tests pass. Real authenticated API rejects non-owner with NOT_ALLOWED. Saved detail/tracking pages checked at 393/1280px without overflow; actual seller-to-buyer mutation remains blocked below.
 - [x] Restore secure seller-owned product updates, stage timestamps and deduplicated in-app notifications while retaining admin visibility.
 - [x] Connect buyer/seller/admin tracking views to saved product state and live updates.
 - [x] Run 180 automated tests; verify saved buyer tracking page at 393/1280px, live subscription, Arabic payment text, hidden default and nonexistent-item RPC rejection. Automatic typecheck/build passed.

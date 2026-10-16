@@ -1,7 +1,7 @@
 import { formatKnownPrice as money } from "@/lib/currency";
 import { withDisplayCurrency } from "@/lib/displayCurrency";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { exportFile, exportSuccessMessage } from "@/lib/exportFile";
+import { csvCell, exportFile, exportSuccessMessage } from "@/lib/exportFile";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";

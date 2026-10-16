@@ -434,7 +434,7 @@ const Product = () => {
                 productName={product.name}
                 videoUrl={product.video_url}
               />
-              <div className="absolute top-3 left-3 z-10 flex flex-col gap-1.5">
+              <div className="absolute top-12 right-3 z-10 flex flex-col gap-1.5">
                 <FavoriteButton productId={id!} variant="ghost" size="icon" className="h-9 w-9 rounded-full bg-background/95 shadow-sm" />
                 <ShareProductButton productId={id!} productName={product.name} size="icon" showLabel={false}
                   className="h-9 w-9 rounded-full bg-background/95 shadow-sm hover:bg-primary hover:text-primary-foreground" />

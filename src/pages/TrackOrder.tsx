@@ -228,6 +228,8 @@ const TrackOrder = () => {
           fetchOrder();
         }
       )
+      // Product shipment statuses (RLS limits events to this customer's own items).
+      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'order_items' }, () => { fetchOrder(); })
       .subscribe((status) => {
         if (status === 'SUBSCRIBED') {
           // Realtime is live: stop polling

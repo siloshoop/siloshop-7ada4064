@@ -11,11 +11,11 @@ import type { SellerOrderItem } from "@/lib/sellerOrders";
  *  Changes here never touch the order status itself. */
 export default function AdminShipmentTrackingPanel({ orderId, initialEnabled }: { orderId: string; initialEnabled: boolean }) {
   const { toast } = useToast();
-  const [enabled, setEnabled] = useState(initialEnabled);
+  const [enabled, setEnabled] = useState(true);
   const [busy, setBusy] = useState(false);
   const [items, setItems] = useState<SellerOrderItem[]>([]);
 
-  useEffect(() => setEnabled(initialEnabled), [initialEnabled, orderId]);
+  
 
   const loadItems = useCallback(async () => {
     const { data, error } = await (supabase.rpc as any)("admin_order_items_tracking", { _order_id: orderId });
@@ -44,7 +44,7 @@ export default function AdminShipmentTrackingPanel({ orderId, initialEnabled }: 
     <div className="rounded border p-3" dir="rtl">
       <div className="flex items-center justify-between gap-2">
         <p className="flex items-center gap-2 text-sm font-semibold"><Truck className="h-4 w-4" /> تتبع الشحنات لهذا الطلب</p>
-        <Switch checked={enabled} onCheckedChange={toggle} disabled={busy} aria-label="تفعيل تتبع الشحنات لهذا الطلب" />
+        
       </div>
       {enabled && items.map((it) => (
         <div key={it.id} className="mt-2 rounded bg-muted/50 p-2">

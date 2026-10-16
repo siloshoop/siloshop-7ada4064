@@ -1,4 +1,5 @@
 import { formatPrice } from "@/lib/currency";
+import { useFeatureFlags } from "@/hooks/useFeatureFlags";
 import { useEffect, useState } from "react";
 import { Link, useParams, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";

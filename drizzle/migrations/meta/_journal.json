@@ -232,6 +232,20 @@
       "when": 1792141623264,
       "tag": "0032_per_order_shipment_tracking",
       "breakpoints": true
+    },
+    {
+      "idx": 33,
+      "version": "7",
+      "when": 1792146505428,
+      "tag": "0033_per_product_seller_tracking",
+      "breakpoints": true
+    },
+    {
+      "idx": 34,
+      "version": "7",
+      "when": 1792146760257,
+      "tag": "0034_product_tracking_retry_guards",
+      "breakpoints": true
     }
   ]
 }

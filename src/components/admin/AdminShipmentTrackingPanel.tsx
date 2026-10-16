@@ -22,7 +22,14 @@ export default function AdminShipmentTrackingPanel({ orderId, initialEnabled }: 
     if (!error) setItems((data ?? []) as SellerOrderItem[]);
   }, [orderId]);
 
-  useEffect(() => { if (enabled) void loadItems(); }, [enabled, loadItems]);
+  useEffect(() => {
+    if (!enabled) return;
+    void loadItems();
+    const channel = supabase.channel(`admin-item-tracking-${orderId}`)
+      .on("postgres_changes", { event: "UPDATE", schema: "public", table: "order_items" }, () => { void loadItems(); })
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, [enabled, loadItems, orderId]);
 
   const toggle = async (next: boolean) => {
     setBusy(true);

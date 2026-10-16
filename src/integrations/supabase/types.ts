@@ -5120,6 +5120,10 @@ export type Database = {
       }
       next_order_number: { Args: never; Returns: string }
       normalize_order_status: { Args: { _status: string }; Returns: string }
+      order_item_tracking_can_transition: {
+        Args: { _from: string; _to: string }
+        Returns: boolean
+      }
       order_item_tracking_enabled: {
         Args: { _item_id: string }
         Returns: boolean

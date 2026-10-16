@@ -1,4 +1,4 @@
-import { statusLabel as orderStatusLabel } from "@/lib/orderStatus";
+import { productTrackingLabel } from "@/lib/productTracking";
 import { useCallback, useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
@@ -63,6 +63,8 @@ const STATUS_VARIANTS: Record<string, "default" | "secondary" | "destructive" | 
 };
 
 interface OrderItem {
+  id: string;
+  tracking_status?: string | null;
   currency?: string | null;
   product_id: string;
   variant_label: string | null;
@@ -243,6 +245,8 @@ const Orders = () => {
         const currentItems = orderItemsMap.get(item.order_id) || [];
 
         currentItems.push({
+          id: item.id,
+          tracking_status: item.tracking_status,
           product_id: item.product_id,
           quantity: item.quantity,
           price: item.price,
@@ -297,6 +301,7 @@ const Orders = () => {
         { event: "*", schema: "public", table: "orders", filter: `customer_id=eq.${user.id}` },
         () => { void fetchOrders(); }
       )
+      .on("postgres_changes", { event: "UPDATE", schema: "public", table: "order_items" }, () => { void fetchOrders(); })
       .subscribe();
     return () => {
       supabase.removeChannel(channel);
@@ -455,7 +460,6 @@ const Orders = () => {
                             <p className="text-sm text-muted-foreground">
                               الكمية: {item.quantity} × {formatPrice(item.price, (item as any).currency ?? (order as any).currency, { maximumFractionDigits: 2 })}
                             </p>
-                            {(item as any).tracking_status && <Badge variant="secondary" className="mt-1">{orderStatusLabel((item as any).tracking_status)}</Badge>}
                           </div>
                         </Link>
                       ))}

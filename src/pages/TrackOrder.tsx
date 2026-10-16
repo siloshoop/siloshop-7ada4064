@@ -1,6 +1,6 @@
 import { formatPrice } from "@/lib/currency";
 import { useFeatureFlags } from "@/hooks/useFeatureFlags";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link, useParams, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
@@ -9,6 +9,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import OrderItemTrackingCard from "@/components/orders/OrderItemTrackingCard";
 import { buildTrackingShipments, type SavedShipment, type TrackingProduct } from "@/lib/orderShipments";
+import { type ProductTrackingHistory } from "@/lib/productTracking";
 import { useVendorNames } from "@/hooks/useVendorNames";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -117,6 +118,9 @@ const TrackOrder = () => {
   const [order, setOrder] = useState<Order | null>(null);
   const [shipments, setShipments] = useState<SavedShipment[]>([]);
   const [shipmentItems, setShipmentItems] = useState<TrackingProduct[]>([]);
+  const [itemHistory, setItemHistory] = useState<ProductTrackingHistory[]>([]);
+  const loadVersion = useRef(0);
+  const visibleItemIds = useRef(new Set<string>());
   const [shipmentError, setShipmentError] = useState(false);
   const vendorNames = useVendorNames(shipments.length ? shipments.map((s) => s.vendor_id) : shipmentItems.map((i) => i.vendor_id));
   const [statusHistory, setStatusHistory] = useState<TrackingHistoryRow[]>([]);
@@ -142,6 +146,12 @@ const TrackOrder = () => {
 
     let pollInterval: ReturnType<typeof setInterval> | null = null;
     let realtimeConnected = false;
+    let highlightTimer: ReturnType<typeof setTimeout> | undefined;
+    const highlight = () => {
+      setHighlightedIndex(0);
+      clearTimeout(highlightTimer);
+      highlightTimer = setTimeout(() => setHighlightedIndex(null), 3000);
+    };
 
     // Start polling as fallback - will be cancelled when realtime connects
     const startPolling = () => {
@@ -173,8 +183,7 @@ const TrackOrder = () => {
         () => {
           fetchOrder();
           fetchStatusHistory();
-          setHighlightedIndex(0);
-          setTimeout(() => setHighlightedIndex(null), 3000);
+          highlight();
         }
       )
       .on(
@@ -188,8 +197,7 @@ const TrackOrder = () => {
         () => {
           fetchOrder();
           fetchStatusHistory();
-          setHighlightedIndex(0);
-          setTimeout(() => setHighlightedIndex(null), 3000);
+          highlight();
         }
       )
       .on(
@@ -229,7 +237,12 @@ const TrackOrder = () => {
         }
       )
       // Product shipment statuses (RLS limits events to this customer's own items).
-      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'order_items' }, () => { fetchOrder(); })
+      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'order_items' }, (payload) => {
+        if (visibleItemIds.current.has(String(payload.new.id))) void fetchOrder();
+      })
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'order_item_status_history' }, (payload) => {
+        if (visibleItemIds.current.has(String(payload.new.order_item_id))) void fetchOrder();
+      })
       .subscribe((status) => {
         if (status === 'SUBSCRIBED') {
           // Realtime is live: stop polling
@@ -255,6 +268,8 @@ const TrackOrder = () => {
 
     return () => {
       clearTimeout(fallbackTimer);
+      clearTimeout(highlightTimer);
+      loadVersion.current += 1;
       stopPolling();
       supabase.removeChannel(channel);
     };
@@ -282,6 +297,7 @@ const TrackOrder = () => {
 
   const fetchOrder = async () => {
     if (!user || !id) return;
+    const version = ++loadVersion.current;
 
     const { data, error } = await supabase
       .from("orders")
@@ -290,6 +306,7 @@ const TrackOrder = () => {
       .eq("customer_id", user.id)
       .maybeSingle();
 
+    if (version !== loadVersion.current) return;
     if (error) {
       console.error(error);
       setLoading(false);
@@ -313,10 +330,16 @@ const TrackOrder = () => {
       supabase.from("shipping_details").select("shipping_company, estimated_delivery, shipped_at, delivered_at, shipping_notes").eq("order_id", id),
     ]);
     const allItems = (items.data ?? []).filter((item) => !parentId || item.order_id === id || item.vendor_id === subVendor);
+    const history = allItems.length ? await supabase.from("order_item_status_history")
+      .select("order_item_id,status,created_at").in("order_item_id", allItems.map((item) => item.id))
+      .order("created_at", { ascending: false }) : { data: [], error: null };
+    if (version !== loadVersion.current) return;
+    visibleItemIds.current = new Set(allItems.map((item) => item.id));
+    setItemHistory(history.data ?? []);
     // Tracking is visible only for shipments the admin enabled on that order.
     const visibleChildren = childRows.filter((c) => c.shipment_tracking_enabled || (data as any).shipment_tracking_enabled);
     setTrackingAllowed(Boolean((data as any).shipment_tracking_enabled) || visibleChildren.length > 0);
-    setShipmentError(Boolean(children.error || items.error));
+    setShipmentError(Boolean(children.error || items.error || history.error));
     setShipments(visibleChildren);
     setShipmentItems(allItems.filter((item) => (data as any).shipment_tracking_enabled || visibleChildren.some((c) => c.vendor_id === item.vendor_id)));
     setOrder({ ...data, order_items: parentId ? allItems : allItems.filter((item) => item.order_id === id), shipping_details: shipping.data ?? [] } as unknown as Order);
@@ -471,9 +494,8 @@ const TrackOrder = () => {
                     {shipment.updated_at && <p className="text-xs text-muted-foreground">آخر تحديث: {format(new Date(shipment.updated_at), "dd MMM yyyy - HH:mm", { locale: ar })}</p>}
                   </CardHeader>
                   <CardContent className="p-4 pt-0 space-y-3">
-                    <p className="text-xs text-muted-foreground">لكل منتج حالة تتبع مستقلة — اضغط على المنتج لعرض مراحل تتبعه.</p>
                     {shipment.items.map((item, i) => (
-                      <OrderItemTrackingCard key={item.id} item={item} defaultOpen={Boolean(focused.length) || (shipment.items.length === 1 && i === 0)} />
+                      <OrderItemTrackingCard key={item.id} item={item} history={itemHistory.filter((entry) => entry.order_item_id === item.id)} defaultOpen={Boolean(focused.length) || (shipment.items.length === 1 && i === 0)} />
                     ))}
                   </CardContent>
                 </Card>

@@ -1,5 +1,10 @@
 # Production readiness audit
 
+## Independent product tracking
+- [ ] Restore secure seller-owned product updates, stage timestamps and deduplicated notifications while retaining admin visibility.
+- [ ] Connect buyer/seller/admin tracking views to saved product state and live updates.
+- [ ] Run automated tests and desktop/mobile verification; report unavailable real multi-account and Android checks.
+
 ## Currency display only
 - [x] Correct currency presentation in products, orders, reports, seller/admin lists, comparison and exports; preserve storage, imports and payment logic
 - [x] Verify real public USD $20 / SYP 25,000 product pages and mixed comparison signed out, 130 automated tests, no browser runtime errors, and automatic build OK

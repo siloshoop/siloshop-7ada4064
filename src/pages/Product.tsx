@@ -230,11 +230,6 @@ const Product = () => {
   }, [id]);
 
   const addToCart = async () => {
-    if (!user) {
-      navigate("/auth");
-      return false;
-    }
-
     if (!id || !product) return false;
     if (variants.length > 0 && !selectedVariant) {
       toast({
@@ -242,6 +237,11 @@ const Product = () => {
         description: "يرجى اختيار اللون و/أو المقاس قبل الإضافة إلى السلة",
         variant: "destructive",
       });
+      return false;
+    }
+
+    if (!user) {
+      navigate("/auth");
       return false;
     }
 

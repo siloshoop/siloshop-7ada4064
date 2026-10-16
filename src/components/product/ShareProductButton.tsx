@@ -16,7 +16,9 @@ export const productShareUrl = (productId: string) => toPublicUrl(`/product/${pr
 
 const ShareProductButton = ({ productId, productName, variant = "ghost", size = "sm", className, showLabel = true }: Props) => {
   const { toast } = useToast();
-  const onShare = async () => {
+  const onShare = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
     const url = productShareUrl(productId);
     const result = await shareContent({ title: productName, text: `${productName} على SiloShop`, url });
     if (result === "copied") toast({ title: "تم نسخ الرابط", description: url });

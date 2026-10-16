@@ -75,32 +75,32 @@ const NativeAdBanner = ({ placement, className = "" }: NativeAdBannerProps) => {
         onClick={target ? () => navigate(target) : undefined}
         onKeyDown={target ? (e) => { if (e.key === "Enter") navigate(target); } : undefined}
         className={`${target ? "cursor-pointer " : ""}overflow-hidden rounded-2xl border border-border/60 bg-card shadow-[var(--shadow-card)]`}>
-        <div className="grid min-w-0 md:grid-cols-[minmax(0,1fr)_minmax(280px,42%)] md:items-stretch">
-          <div className="order-2 flex min-w-0 flex-col justify-center gap-3 p-5 text-right sm:p-6 md:order-1 md:p-8">
-            <span className="inline-flex w-fit items-center gap-1.5 rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-primary">
-              <Megaphone className="h-3.5 w-3.5" /> إعلان · {ad.sponsor_name}
+        <div className="flex min-w-0 items-stretch">
+          <div className="flex min-w-0 flex-1 flex-col justify-center gap-1.5 p-3 text-right sm:gap-2 sm:p-4 md:p-5">
+            <span className="inline-flex w-fit items-center gap-1 rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-semibold text-primary sm:text-xs">
+              <Megaphone className="h-3 w-3" /> إعلان · {ad.sponsor_name}
             </span>
-            <h2 className="text-xl font-bold leading-snug sm:text-2xl">{ad.title}</h2>
+            <h2 className="line-clamp-2 text-sm font-bold leading-snug sm:text-lg">{ad.title}</h2>
             {ad.description && (
-              <p className="max-w-2xl text-sm leading-relaxed text-muted-foreground sm:text-base">{ad.description}</p>
+              <p className="line-clamp-2 text-xs leading-relaxed text-muted-foreground sm:text-sm">{ad.description}</p>
             )}
             {target && (
-              <Button asChild className="mt-1 w-fit gap-1.5">
+              <Button asChild size="sm" className="mt-0.5 h-8 w-fit gap-1 text-xs">
                 <Link to={target} onClick={(e) => e.stopPropagation()}>
                   {ad.cta_text}
-                  <ArrowLeft className="h-4 w-4" />
+                  <ArrowLeft className="h-3.5 w-3.5" />
                 </Link>
               </Button>
             )}
           </div>
 
-          <div className="order-1 aspect-[16/9] min-h-0 overflow-hidden bg-muted md:order-2 md:aspect-auto md:min-h-56">
+          <div className="w-28 shrink-0 overflow-hidden bg-muted sm:w-44 md:w-56">
             <img
               src={!imageFailed && ad.image_url ? ad.image_url : "/placeholder.svg"}
               alt={ad.title}
               loading={placement === "home" ? "eager" : "lazy"}
               decoding="async"
-              className="h-full w-full object-cover"
+              className="h-full max-h-40 min-h-24 w-full object-cover"
               onError={() => setImageFailed(true)}
             />
           </div>

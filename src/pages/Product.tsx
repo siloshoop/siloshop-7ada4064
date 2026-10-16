@@ -1389,28 +1389,28 @@ const Product = () => {
           </div>
         )}
         <div className="mobile-fixed-bar-content container flex items-center gap-2 px-3 py-2">
-          <FavoriteButton productId={id!} variant="outline" size="icon" />
-          <ShareProductButton productId={id!} productName={product.name} variant="outline" size="icon" showLabel={false} className="shrink-0" />
+          <div className="min-w-0 flex-1 text-right leading-tight">
+            <p className="truncate text-base font-bold text-primary">{formatPrice(effectivePrice, (product as any).currency)}</p>
+            {effectiveOriginalPrice && effectiveOriginalPrice > effectivePrice ? (
+              <p className="truncate text-xs text-muted-foreground line-through">{formatPrice(effectiveOriginalPrice, (product as any).currency)}</p>
+            ) : null}
+          </div>
           <Button
             variant="outline"
-            className="flex-1 rounded-full"
-            onClick={addToCart}
-            disabled={addingToCart || !canAddToCart}
-          >
-            {addingToCart ? (
-              <Loader2 className="ml-1 h-4 w-4 animate-spin" />
-            ) : (
-              <ShoppingCart className="ml-1 h-4 w-4" />
-            )}
-            <span className="text-xs">السلة</span>
-          </Button>
-          <Button
-            className="flex-1 rounded-full"
+            className="h-12 shrink-0 flex-col gap-0.5 border-primary px-3 text-primary"
             onClick={buyNow}
             disabled={addingToCart || !canAddToCart}
           >
-            <Zap className="ml-1 h-4 w-4" />
-            <span className="text-xs">اشترِ الآن</span>
+            <Zap className="h-4 w-4" />
+            <span className="text-[11px] leading-none">اشترِ الآن</span>
+          </Button>
+          <Button
+            className="h-12 flex-[1.4] text-sm font-bold"
+            onClick={addToCart}
+            disabled={addingToCart || !canAddToCart}
+          >
+            {addingToCart ? <Loader2 className="ml-1 h-4 w-4 animate-spin" /> : <ShoppingCart className="ml-1 h-4 w-4" />}
+            أضف إلى السلة
           </Button>
         </div>
       </div>

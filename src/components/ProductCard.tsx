@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { FavoriteButton } from "@/components/FavoriteButton";
+import ShareProductButton from "@/components/product/ShareProductButton";
 import ProductOriginBadge from "@/components/product/ProductOriginBadge";
 import { useToast } from "@/hooks/use-toast";
 import { useCompareProducts } from "@/hooks/useCompareProducts";
@@ -234,6 +235,10 @@ const ProductCard = memo(({
             >
               <Heart className="h-3.5 w-3.5" />
             </Button>
+          )}
+          {id && (
+            <ShareProductButton productId={id} productName={name} size="icon" showLabel={false}
+              className="h-8 w-8 rounded-full bg-background/95 shadow-sm hover:bg-primary hover:text-primary-foreground [&_svg]:h-3.5 [&_svg]:w-3.5" />
           )}
           {id && (
             <Button

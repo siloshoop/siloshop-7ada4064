@@ -3,8 +3,8 @@ import { PRODUCT_TRACKING_STEPS, normalizeProductTracking, productTrackingProgre
 import { cn } from "@/lib/utils";
 
 const terminalLabels: Record<string, string> = {
-  cancelled: "تم إلغاء هذا الطلب", return_requested: "تم تقديم طلب إرجاع",
-  returning: "الطلب قيد الإرجاع", returned: "تم إرجاع هذا الطلب",
+  cancelled: "تم إلغاء المنتج", return_requested: "تم تقديم طلب إرجاع",
+  returning: "المنتج قيد الإرجاع", returned: "تم إرجاع المنتج",
   refunded: "تم رد المبلغ إلى العميل",
 };
 

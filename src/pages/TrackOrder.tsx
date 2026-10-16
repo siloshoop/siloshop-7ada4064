@@ -430,6 +430,7 @@ const TrackOrder = () => {
       ].filter(Boolean) as TrackingHistoryRow[];
 
   const focusItem = new URLSearchParams(window.location.search).get("item");
+  const latestNote = timelineEntries[0]?.description ?? null;
   const allShipments = buildTrackingShipments(order, shipments, shipmentItems);
   const focused = focusItem ? allShipments.map((s) => ({ ...s, items: s.items.filter((i) => i.id === focusItem) })).filter((s) => s.items.length) : [];
   const trackingShipments = focused.length ? focused : allShipments;
@@ -551,7 +552,7 @@ const TrackOrder = () => {
                     <div className="flex items-center gap-3 text-sm">
                       <CreditCard className="h-4 w-4 text-muted-foreground" />
                       <span className="text-muted-foreground">طريقة الدفع:</span>
-                      <span className="font-medium">{order.payment_method}</span>
+                      <span className="font-medium">{order.payment_method === "cod" ? "الدفع عند الاستلام" : order.payment_method === "sham_cash" ? "شام كاش" : "طريقة دفع أخرى"}</span>
                     </div>
                   )}
 
@@ -666,7 +667,7 @@ const TrackOrder = () => {
                                 </Badge>
                                 {update.actor_role && (
                                   <span className="text-xs text-muted-foreground">
-                                    {ACTOR_ROLE_LABELS[update.actor_role] ?? update.actor_role}
+                                    {ACTOR_ROLE_LABELS[update.actor_role] ?? "النظام"}
                                   </span>
                                 )}
                                 {index === 0 && (

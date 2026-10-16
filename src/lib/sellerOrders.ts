@@ -61,6 +61,7 @@ export interface SellerOrderItem {
   tracking_status?: string | null;
   tracking_number?: string | null;
   shipping_carrier?: string | null;
+  tracking_updated_at?: string | null;
 }
 
 export const fetchSellerOrderItems = async (orderId: string): Promise<SellerOrderItem[]> => {
@@ -70,13 +71,13 @@ export const fetchSellerOrderItems = async (orderId: string): Promise<SellerOrde
   if (error) throw error;
   const rows = (data || []) as SellerOrderItem[];
   if (!rows.length) return rows;
-  const { data: snapshots, error: snapshotError } = await supabase.from("order_items").select("id,currency,tracking_status,tracking_number,shipping_carrier").in("id", rows.map((r) => r.id));
+  const { data: snapshots, error: snapshotError } = await supabase.from("order_items").select("id,currency,tracking_status,tracking_number,shipping_carrier,tracking_updated_at").in("id", rows.map((r) => r.id));
   if (snapshotError) throw snapshotError;
   const saved = new Map((snapshots ?? []).map((r) => [r.id, r]));
   return rows.map((r) => {
     const s = saved.get(r.id);
     return { ...r, currency: s?.currency ?? r.currency ?? null, tracking_status: s?.tracking_status ?? null,
-      tracking_number: s?.tracking_number ?? null, shipping_carrier: s?.shipping_carrier ?? null };
+      tracking_number: s?.tracking_number ?? null, shipping_carrier: s?.shipping_carrier ?? null, tracking_updated_at: s?.tracking_updated_at ?? null };
   });
 };
 

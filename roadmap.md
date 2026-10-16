@@ -1,5 +1,12 @@
 # Production readiness audit
 
+## Independent product tracking
+- [x] Restore secure seller-owned product updates, stage timestamps and deduplicated in-app notifications while retaining admin visibility.
+- [x] Connect buyer/seller/admin tracking views to saved product state and live updates.
+- [x] Run 180 automated tests; verify saved buyer tracking page at 393/1280px, live subscription, Arabic payment text, hidden default and nonexistent-item RPC rejection. Automatic typecheck/build passed.
+- [ ] Verify actual seller/admin product updates, visible buyer timelines, simultaneous requests and notification deduplication end-to-end (blocked: all 182 saved orders have tracking disabled; no authorized disposable multi-account test orders, and production rows not changed for testing).
+- [ ] Verify physical Android tracking (blocked: no device/emulator available; no Android release built).
+
 ## Currency display only
 - [x] Correct currency presentation in products, orders, reports, seller/admin lists, comparison and exports; preserve storage, imports and payment logic
 - [x] Verify real public USD $20 / SYP 25,000 product pages and mixed comparison signed out, 130 automated tests, no browser runtime errors, and automatic build OK

@@ -55,7 +55,7 @@ const CANCELLABLE = ["pending", "confirmed", "preparing", "ready_for_shipping"];
 
 const SellerOrderDetailSheet = ({ order, open, onOpenChange, onChanged }: Props) => {
   const { toast } = useToast();
-  // Shipment tracking is admin-controlled per order; sellers never edit it here.
+  // Customer visibility remains admin-controlled; sellers update their own items.
   const trackingOn = false;
   void useFeatureFlags;
   const [items, setItems] = useState<SellerOrderItem[]>([]);
@@ -79,6 +79,10 @@ const SellerOrderDetailSheet = ({ order, open, onOpenChange, onChanged }: Props)
       .catch((e) => toast({ title: "خطأ", description: friendlyOrderError(e), variant: "destructive" }))
       .finally(() => { if (active) setLoadingItems(false); });
     setSaved(null);
+    const itemChannel = supabase.channel(`seller-product-tracking-${order.id}`)
+      .on("postgres_changes", { event: "UPDATE", schema: "public", table: "order_items" }, () => {
+        void fetchSellerOrderItems(order.id).then((rows) => { if (active) setItems(rows); });
+      }).subscribe();
     void supabase
       .from("orders")
       .select("currency,subtotal_amount,discount_amount,shipping_amount,total_amount,coupon_code")
@@ -89,7 +93,7 @@ const SellerOrderDetailSheet = ({ order, open, onOpenChange, onChanged }: Props)
         setOrderCurrency((data as any)?.currency ?? null);
         setSaved((data as any) ?? null);
       });
-    return () => { active = false; };
+    return () => { active = false; supabase.removeChannel(itemChannel); };
   }, [open, order?.id]);
 
   const status = normalizeStatus(localOrder?.status);
@@ -243,8 +247,8 @@ const SellerOrderDetailSheet = ({ order, open, onOpenChange, onChanged }: Props)
                       {formatPrice(it.subtotal ?? it.quantity * it.price, (it as any).currency ?? orderCurrency)}
                     </p>
                   </div>
-                  {trackingOn && <SellerItemTrackingControl item={it} disabled={frozen}
-                    onSaved={(patch) => setItems((prev) => prev.map((x) => x.id === it.id ? { ...x, ...patch } : x))} />}
+                  <SellerItemTrackingControl item={it} disabled={frozen || ["cancelled", "returned", "refunded"].includes(status)}
+                    onSaved={(patch) => { setItems((prev) => prev.map((x) => x.id === it.id ? { ...x, ...patch } : x)); onChanged(); }} />
                   </div>
                 ))
               )}

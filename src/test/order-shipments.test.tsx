@@ -35,18 +35,18 @@ describe("saved seller shipments", () => {
 
 describe("vertical tracking progress", () => {
   it("keeps the previous circle filled with a check after advancing", () => {
-    const { container, rerender } = render(<ShipmentTrackingTimeline status="pending" />);
-    rerender(<ShipmentTrackingTimeline status="confirmed" />);
-    const pending = container.querySelector('[data-step="pending"]');
-    expect(pending?.getAttribute("data-state")).toBe("completed");
-    expect(pending?.querySelector(".lucide-check")).toBeTruthy();
-    expect(container.querySelector('[data-step="confirmed"]')?.getAttribute("aria-current")).toBe("step");
-    expect(container.querySelector('[data-step="preparing"]')?.getAttribute("data-state")).toBe("future");
+    const { container, rerender } = render(<ShipmentTrackingTimeline status="confirmed" />);
+    rerender(<ShipmentTrackingTimeline status="preparing" />);
+    const confirmed = container.querySelector('[data-step="confirmed"]');
+    expect(confirmed?.getAttribute("data-state")).toBe("completed");
+    expect(confirmed?.querySelector(".lucide-check")).toBeTruthy();
+    expect(container.querySelector('[data-step="preparing"]')?.getAttribute("aria-current")).toBe("step");
+    expect(container.querySelector('[data-step="ready_for_shipping"]')?.getAttribute("data-state")).toBe("future");
   });
   it("restores all completed steps from a saved status on fresh render", () => {
     const { container } = render(<ShipmentTrackingTimeline status="completed" />);
-    expect(container.querySelectorAll('[data-state="completed"]')).toHaveLength(7);
-    expect(container.querySelectorAll(".lucide-check")).toHaveLength(7);
+    expect(container.querySelectorAll('[data-state="completed"]')).toHaveLength(6);
+    expect(container.querySelectorAll(".lucide-check")).toHaveLength(6);
   });
   it("normalizes existing processing status", () => {
     const { container } = render(<ShipmentTrackingTimeline status="processing" />);

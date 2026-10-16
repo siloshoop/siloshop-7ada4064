@@ -5,8 +5,10 @@ export type ExportResult = "downloaded" | "shared" | "cancelled";
 
 export const CSV_MIME = "text/csv;charset=utf-8";
 
-const csvCell = (v: unknown) => {
-  const s = String(v ?? "");
+/** Quotes delimiters and neutralizes values a spreadsheet would run as formulas. */
+export const csvCell = (v: unknown) => {
+  let s = String(v ?? "");
+  if (typeof v === "string" && /^[=+\-@\t\r]/.test(s)) s = "'" + s;
   return /[",\n\r]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
 };
 

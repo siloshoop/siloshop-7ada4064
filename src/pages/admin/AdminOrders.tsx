@@ -273,13 +273,8 @@ const AdminOrders = () => {
       }
       const headers = CSV_COLUMNS.map((c) => c.label);
       const csv = [
-        headers.join(","),
-        ...all.map((r) => CSV_COLUMNS.map(({ key }) => {
-          const v = (r as any)[key];
-          if (v === null || v === undefined) return "";
-          const str = String(v).replace(/"/g, '""');
-          return /[",\n]/.test(str) ? `"${str}"` : str;
-        }).join(",")),
+        headers.map(csvCell).join(","),
+        ...all.map((r) => CSV_COLUMNS.map(({ key }) => csvCell((r as any)[key])).join(",")),
       ].join("\n");
       if (!all.length) throw new Error("لا توجد طلبات مطابقة للتصدير");
       const r = await exportFile("\uFEFF" + csv, `orders-${new Date().toISOString().slice(0, 10)}.csv`);

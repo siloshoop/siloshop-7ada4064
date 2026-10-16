@@ -230,19 +230,19 @@ const Product = () => {
   }, [id]);
 
   const addToCart = async () => {
-    if (!user) {
-      navigate("/auth");
-      return;
-    }
-
-    if (!id || !product) return;
+    if (!id || !product) return false;
     if (variants.length > 0 && !selectedVariant) {
       toast({
         title: "اختر الخيارات أولاً",
         description: "يرجى اختيار اللون و/أو المقاس قبل الإضافة إلى السلة",
         variant: "destructive",
       });
-      return;
+      return false;
+    }
+
+    if (!user) {
+      navigate("/auth");
+      return false;
     }
 
     setAddingToCart(true);
@@ -291,12 +291,14 @@ const Product = () => {
         title: "تمت الإضافة",
         description: "تم إضافة المنتج إلى السلة",
       });
+      return true;
     } catch (error) {
       toast({
         title: "خطأ",
         description: friendlyDbError(error),
         variant: "destructive",
       });
+      return false;
     } finally {
       setAddingToCart(false);
     }
@@ -367,10 +369,11 @@ const Product = () => {
   );
   const previewOnly = product.purchase_enabled === false;
   const canAddToCart = inStock && !previewOnly && (!hasVariants || !!selectedVariant);
+  const canStartPurchase = inStock && !previewOnly;
 
   const buyNow = async () => {
-    await addToCart();
-    navigate("/cart");
+    const added = await addToCart();
+    if (added) navigate("/cart");
   };
 
   const canonicalUrl = typeof window !== "undefined" ? toPublicUrl(window.location.pathname) : undefined;
@@ -615,7 +618,7 @@ const Product = () => {
                   variant="outline"
                   className="flex-1 rounded-full"
                   onClick={addToCart}
-                  disabled={addingToCart || !canAddToCart}
+                  disabled={addingToCart || !canStartPurchase}
                 >
                   {addingToCart ? (
                     <Loader2 className="ml-2 h-4 w-4 animate-spin" />
@@ -628,7 +631,7 @@ const Product = () => {
                   size="lg"
                   className="flex-1 rounded-full"
                   onClick={buyNow}
-                  disabled={addingToCart || !canAddToCart}
+                  disabled={addingToCart || !canStartPurchase}
                 >
                   <Zap className="ml-2 h-4 w-4" />
                   اشترِ الآن
@@ -647,6 +650,10 @@ const Product = () => {
                   مقارنة
                 </Button>
                 <ChatButton vendorId={product.vendor_id} productId={id} />
+                <ShareProductButton productId={id!} productName={product.name} className="rounded-full" />
+              </div>
+
+              <div className="flex justify-end md:hidden">
                 <ShareProductButton productId={id!} productName={product.name} className="rounded-full" />
               </div>
             </div>
@@ -846,7 +853,7 @@ const Product = () => {
             variant="outline"
             className="h-12 shrink-0 flex-col gap-0.5 border-primary px-3 text-primary"
             onClick={buyNow}
-            disabled={addingToCart || !canAddToCart}
+            disabled={addingToCart || !canStartPurchase}
           >
             <Zap className="h-4 w-4" />
             <span className="text-[11px] leading-none">اشترِ الآن</span>
@@ -854,7 +861,7 @@ const Product = () => {
           <Button
             className="h-12 flex-[1.4] text-sm font-bold"
             onClick={addToCart}
-            disabled={addingToCart || !canAddToCart}
+            disabled={addingToCart || !canStartPurchase}
           >
             {addingToCart ? <Loader2 className="ml-1 h-4 w-4 animate-spin" /> : <ShoppingCart className="ml-1 h-4 w-4" />}
             أضف إلى السلة

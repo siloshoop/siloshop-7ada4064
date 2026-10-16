@@ -836,6 +836,559 @@ const Product = () => {
           </div>
         )}
         <div className="mobile-fixed-bar-content container flex items-center gap-2 px-3 py-2">
+          <div className="min-w-0 flex-1 text-right leading-tight">
+            <p className="truncate text-base font-bold text-primary">{formatPrice(effectivePrice, (product as any).currency)}</p>
+            {effectiveOriginalPrice && effectiveOriginalPrice > effectivePrice ? (
+              <p className="truncate text-xs text-muted-foreground line-through">{formatPrice(effectiveOriginalPrice, (product as any).currency)}</p>
+            ) : null}
+          </div>
+          <Button
+            variant="outline"
+            className="h-12 shrink-0 flex-col gap-0.5 border-primary px-3 text-primary"
+            onClick={buyNow}
+            disabled={addingToCart || !canAddToCart}
+          >
+            <Zap className="h-4 w-4" />
+            <span className="text-[11px] leading-none">اشترِ الآن</span>
+          </Button>
+          <Button
+            className="h-12 flex-[1.4] text-sm font-bold"
+            onClick={addToCart}
+            disabled={addingToCart || !canAddToCart}
+          >
+            {addingToCart ? <Loader2 className="ml-1 h-4 w-4 animate-spin" /> : <ShoppingCart className="ml-1 h-4 w-4" />}
+            أضف إلى السلة
+          </Button>
+        </div>
+      </div>
+
+      <Footer />
+      </div>
+    );
+  }
+
+  if (!product) {
+    return (
+      <div className="min-h-screen flex flex-col">
+        <Navbar />
+        <div className="flex-1 flex items-center justify-center">
+          <div className="text-center">
+            <h2 className="text-2xl font-bold mb-4">المنتج غير موجود</h2>
+            <Button onClick={() => navigate("/")}>العودة للرئيسية</Button>
+          </div>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
+
+  // Prepare images array for gallery
+  const hasVariants = variants.length > 0;
+  const basePrice = selectedVariant?.discount_price ?? selectedVariant?.price ?? product.price;
+  // Active «عروض اليوم» deal is charged for real at checkout (effective_unit_price).
+  const effectivePrice = applyDeal(Number(basePrice), dealPct);
+  const baseOriginalPrice = selectedVariant ? (selectedVariant.discount_price ? selectedVariant.price : null) : product.original_price;
+  const effectiveOriginalPrice = dealPct ? Math.max(Number(baseOriginalPrice ?? 0), Number(basePrice)) : baseOriginalPrice;
+  // Total stock across all variants — used before the shopper picks a combination
+  const totalVariantStock = availableProductStock(product.stock_quantity, variants);
+  const effectiveStock = hasVariants
+    ? (selectedVariant ? selectedVariant.stock_quantity : totalVariantStock)
+    : product.stock_quantity;
+  const discount = effectiveOriginalPrice
+    ? Math.round(((effectiveOriginalPrice - effectivePrice) / effectiveOriginalPrice) * 100)
+    : 0;
+
+  const productImages = selectedVariant?.image_url
+    ? [selectedVariant.image_url, ...(product.images || [])]
+    : product.images && product.images.length > 0
+    ? product.images
+    : product.image_url
+    ? [product.image_url]
+    : [];
+
+  // Calculate average rating
+  const averageRating = product.reviews && product.reviews.length > 0
+    ? product.reviews.reduce((sum, r) => sum + r.rating, 0) / product.reviews.length
+    : 0;
+
+  const inStock = effectiveStock > 0;
+  const lowStock = inStock && effectiveStock <= 5;
+  const minQty = product.min_order_quantity && product.min_order_quantity > 0 ? product.min_order_quantity : 1;
+  const maxQty = Math.min(
+    product.max_order_quantity && product.max_order_quantity > 0 ? product.max_order_quantity : Infinity,
+    effectiveStock || Infinity
+  );
+  const previewOnly = product.purchase_enabled === false;
+  const canAddToCart = inStock && !previewOnly && (!hasVariants || !!selectedVariant);
+
+  const buyNow = async () => {
+    await addToCart();
+    navigate("/cart");
+  };
+
+  const canonicalUrl = typeof window !== "undefined" ? toPublicUrl(window.location.pathname) : undefined;
+  const seoTitleRaw = product.seo_title || `${product.name} | Silo Shop`;
+  const seoTitle = seoTitleRaw.length > 60 ? seoTitleRaw.slice(0, 57) + "..." : seoTitleRaw;
+  const seoDescRaw = product.seo_description || product.short_description || product.description || "";
+  const seoDescription = seoDescRaw.length > 160 ? seoDescRaw.slice(0, 157) + "..." : seoDescRaw;
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    name: product.name,
+    image: productImages,
+    description: seoDescription || undefined,
+    sku: selectedVariant?.sku || product.sku || undefined,
+    brand: product.brands?.name_ar ? { "@type": "Brand", name: product.brands.name_ar } : undefined,
+    ...(product.reviews && product.reviews.length > 0
+      ? {
+          aggregateRating: {
+            "@type": "AggregateRating",
+            ratingValue: averageRating.toFixed(1),
+            reviewCount: product.reviews.length,
+          },
+        }
+      : {}),
+    offers: {
+      "@type": "Offer",
+      price: effectivePrice,
+      priceCurrency: "SYP",
+      availability: inStock ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
+    },
+  };
+
+  return (
+    <div className="flex min-h-screen flex-col md:pb-0">
+      <SeoHead
+        title={seoTitle}
+        description={seoDescription}
+        keywords={product.seo_keywords}
+        canonicalUrl={canonicalUrl}
+        ogImage={productImages[0] || undefined}
+        ogType="product"
+        jsonLd={jsonLd}
+      />
+      <Navbar />
+      <main className="container max-w-6xl min-w-0 flex-1 px-3 py-4 sm:px-4 sm:py-6 md:py-8">
+        <NativeAdBanner placement="product" className="mb-5 !px-0 sm:mb-8" />
+        <div className="grid min-w-0 gap-5 animate-fade-in sm:gap-6 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,1fr)] lg:gap-10">
+          {/* Image Gallery */}
+          <div className="relative">
+            {discount > 0 && (
+              <Badge className="absolute top-3 right-3 z-10 bg-sale text-sale-foreground rounded-full px-3 py-1 text-xs font-bold shadow">
+                خصم {discount}%
+              </Badge>
+            )}
+            <div className="lg:sticky lg:top-24">
+              <ImageGallery
+                images={productImages}
+                productName={product.name}
+                videoUrl={product.video_url}
+              />
+            </div>
+          </div>
+
+          {/* Details */}
+          <div className="min-w-0 space-y-4 sm:space-y-5">
+            {/* Title + seller */}
+            <div className="space-y-1.5">
+              <button
+                onClick={() => navigate(`/vendor/${product.vendor_id}/ratings`)}
+                className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-primary transition-colors"
+              >
+                <Store className="h-3.5 w-3.5" />
+                <span>البائع: {product.vendor.full_name}</span>
+              </button>
+              <h1 className="text-xl md:text-2xl font-semibold leading-snug tracking-tight">
+                {product.name}
+              </h1>
+
+              {product.short_description && (
+                <p className="text-sm text-muted-foreground leading-relaxed">
+                  {product.short_description}
+                </p>
+              )}
+
+              {product.tags && product.tags.length > 0 && (
+                <div className="flex flex-wrap gap-1.5 pt-0.5">
+                  {product.tags.map((tag) => (
+                    <Badge key={tag} variant="secondary" className="rounded-full text-[11px] font-normal">
+                      {tag}
+                    </Badge>
+                  ))}
+                </div>
+              )}
+
+              <ProductOriginBadge
+                productType={product.product_type}
+                shipsWithinDays={product.ships_within_days}
+                className="pt-1"
+              />
+
+              {/* Rating summary */}
+              <div className="flex items-center gap-2 pt-1">
+                <div className="flex items-center gap-0.5">
+                  {[...Array(5)].map((_, i) => (
+                    <Star
+                      key={i}
+                      className={`h-3.5 w-3.5 ${
+                        i < Math.round(averageRating)
+                          ? "fill-yellow-400 text-yellow-400"
+                          : "text-muted-foreground/40"
+                      }`}
+                    />
+                  ))}
+                </div>
+                <span className="text-xs text-muted-foreground">
+                  ({averageRating.toFixed(1)}) · {product.reviews?.length || 0} تقييم
+                </span>
+              </div>
+            </div>
+
+            <Separator />
+
+            {/* Price */}
+            <div className="space-y-1.5">
+              <div className="flex items-baseline gap-2 flex-wrap">
+                <span className="text-2xl font-bold text-primary sm:text-3xl" dir="ltr">
+                  {formatPrice(effectivePrice, (product as any).currency)}
+                </span>
+                {effectiveOriginalPrice && (
+                  <span className="text-sm text-muted-foreground line-through">
+                    {formatPrice(effectiveOriginalPrice, (product as any).currency)}
+                  </span>
+                )}
+                {discount > 0 && (
+                  <span className="text-xs font-semibold text-sale-foreground bg-sale/10 px-2 py-0.5 rounded-full">
+                    وفّر {discount}%
+                  </span>
+                )}
+              </div>
+              <MarketPriceBar
+                productId={product.id}
+                price={effectivePrice}
+                categoryId={product.category_id}
+                currency={product.currency}
+              />
+            </div>
+
+            {/* Availability + shipping */}
+            <div className="flex flex-wrap items-center gap-2 text-sm">
+              <span
+                className={`inline-flex items-center gap-1.5 font-medium ${
+                  inStock ? "text-emerald-600 dark:text-emerald-400" : "text-destructive"
+                }`}
+              >
+                <span
+                  className={`inline-block h-2 w-2 rounded-full ${
+                    inStock ? "bg-emerald-500 animate-pulse" : "bg-destructive"
+                  }`}
+                />
+                {inStock ? "متوفر الآن" : OUT_OF_STOCK_LABEL}
+              </span>
+              {inStock && (
+                <span className="text-muted-foreground">· {effectiveStock} قطعة</span>
+              )}
+              {lowStock && (
+                <span className="text-amber-600 dark:text-amber-400 font-medium">
+                  · الكمية محدودة
+                </span>
+              )}
+              <span className="text-muted-foreground">·</span>
+              <span className="inline-flex items-center gap-1.5 font-medium">
+                <Truck className="h-3.5 w-3.5 text-primary" />
+                {shippingDetailLabel(product.shipping_mode, product.shipping_cost, (product as any).currency)}
+              </span>
+              {product.shipping_duration_text && (
+                <>
+                  <span className="text-muted-foreground">·</span>
+                  <span className="inline-flex items-center gap-1.5 font-medium">
+                    مدة الشحن: {product.shipping_duration_text}
+                  </span>
+                </>
+              )}
+            </div>
+
+            {/* Variant picker */}
+            {hasVariants && (
+              <div className="min-w-0 rounded-xl border bg-muted/20 p-3 sm:p-4">
+                <ProductVariantPicker variants={variants} onSelect={setSelectedVariant} />
+                {!selectedVariant && (
+                  <p className="text-xs text-muted-foreground pt-2">يرجى اختيار اللون والمقاس لعرض السعر والكمية المتوفرة</p>
+                )}
+              </div>
+            )}
+
+            {/* Quantity + primary actions */}
+            <div className="space-y-3">
+              <div className="flex flex-wrap items-center gap-3 sm:gap-4">
+                <span className="text-sm font-medium text-muted-foreground">الكمية</span>
+                <div className="flex items-center rounded-full border bg-background overflow-hidden">
+                  <Button
+                    size="icon"
+                    variant="ghost"
+                    className="h-9 w-9 rounded-none"
+                    onClick={() => setQuantity(Math.max(minQty, quantity - 1))}
+                    disabled={quantity <= minQty}
+                    aria-label="إنقاص الكمية"
+                  >
+                    <Minus className="h-4 w-4" />
+                  </Button>
+                  <span className="w-10 text-center text-sm font-semibold">{quantity}</span>
+                  <Button
+                    size="icon"
+                    variant="ghost"
+                    className="h-9 w-9 rounded-none"
+                    onClick={() =>
+                      setQuantity(Math.min(maxQty, quantity + 1))
+                    }
+                    disabled={quantity >= maxQty}
+                    aria-label="زيادة الكمية"
+                  >
+                    <Plus className="h-4 w-4" />
+                  </Button>
+                </div>
+                {(product.min_order_quantity || product.max_order_quantity) && (
+                  <span className="text-xs text-muted-foreground">
+                    {product.min_order_quantity ? `الحد الأدنى: ${product.min_order_quantity}` : ""}
+                    {product.min_order_quantity && product.max_order_quantity ? " · " : ""}
+                    {product.max_order_quantity ? `الحد الأقصى: ${product.max_order_quantity}` : ""}
+                  </span>
+                )}
+              </div>
+
+              {previewOnly && (
+                <div className="rounded-xl border border-amber-500/40 bg-amber-500/10 p-3 text-sm text-amber-700 dark:text-amber-400">
+                  هذا المنتج معروض للمعاينة فقط وغير متاح للشراء حالياً.
+                </div>
+              )}
+
+              <div className="hidden md:flex gap-2">
+                <Button
+                  size="lg"
+                  variant="outline"
+                  className="flex-1 rounded-full"
+                  onClick={addToCart}
+                  disabled={addingToCart || !canAddToCart}
+                >
+                  {addingToCart ? (
+                    <Loader2 className="ml-2 h-4 w-4 animate-spin" />
+                  ) : (
+                    <ShoppingCart className="ml-2 h-4 w-4" />
+                  )}
+                  أضف إلى السلة
+                </Button>
+                <Button
+                  size="lg"
+                  className="flex-1 rounded-full"
+                  onClick={buyNow}
+                  disabled={addingToCart || !canAddToCart}
+                >
+                  <Zap className="ml-2 h-4 w-4" />
+                  اشترِ الآن
+                </Button>
+                <FavoriteButton productId={id!} variant="outline" size="lg" />
+              </div>
+
+              <div className="hidden md:grid grid-cols-3 gap-2">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="rounded-full"
+                  onClick={addToCompare}
+                >
+                  <ArrowLeftRight className="ml-2 h-4 w-4" />
+                  مقارنة
+                </Button>
+                <ChatButton vendorId={product.vendor_id} productId={id} />
+                <ShareProductButton productId={id!} productName={product.name} className="rounded-full" />
+              </div>
+            </div>
+
+            {/* Trust badges */}
+            <div className="grid min-w-0 grid-cols-2 gap-2 pt-2">
+              <div className="flex min-w-0 flex-col items-center gap-1 rounded-xl border bg-muted/30 p-2.5 text-center sm:p-3">
+                <Truck className="h-4 w-4 text-primary" />
+                <span className="break-words text-[11px] leading-tight text-muted-foreground">
+                  {(product as any).ships_within_days
+                    ? `يشحن خلال ${(product as any).ships_within_days} أيام`
+                    : "شحن لجميع المحافظات"}
+                </span>
+              </div>
+              <div className="flex min-w-0 flex-col items-center gap-1 rounded-xl border bg-muted/30 p-2.5 text-center sm:p-3">
+                <ShieldCheck className="h-4 w-4 text-primary" />
+                <span className="break-words text-[11px] leading-tight text-muted-foreground">
+                  دفع آمن عند الاستلام
+                </span>
+              </div>
+            </div>
+
+            <SellerInfoCard
+              vendorId={product.vendor_id}
+              vendorName={product.vendor.full_name}
+              productId={id}
+              isPlatform={product.product_type === "platform"}
+              rating={vendorStats.avg}
+              ratingCount={vendorStats.count}
+            />
+
+
+            <div className="flex justify-end">
+              <ReportDialog
+                kind="product"
+                targetId={id!}
+                targetName={product.name}
+                label="الإبلاغ عن هذا المنتج"
+                className="text-muted-foreground"
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Tabbed sections */}
+        <section className="mt-10">
+          <Tabs defaultValue="description" className="w-full">
+            <TabsList className="w-full justify-start overflow-x-auto scrollbar-hide bg-transparent border-b rounded-none h-auto p-0 gap-1">
+              <TabsTrigger
+                value="description"
+                className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none px-4 py-2.5"
+              >
+                الوصف
+              </TabsTrigger>
+              <TabsTrigger
+                value="specs"
+                className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none px-4 py-2.5"
+              >
+                المواصفات
+              </TabsTrigger>
+              <TabsTrigger
+                value="reviews"
+                className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none px-4 py-2.5"
+              >
+                التقييمات ({product.reviews?.length || 0})
+              </TabsTrigger>
+              <TabsTrigger
+                value="shipping"
+                className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none px-4 py-2.5"
+              >
+                الشحن
+              </TabsTrigger>
+              <TabsTrigger
+                value="qa"
+                className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none px-4 py-2.5"
+              >
+                أسئلة وأجوبة
+              </TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="description" className="pt-6 animate-fade-in">
+              <div className="max-w-3xl">
+                <p className="text-sm md:text-base text-foreground/85 leading-relaxed whitespace-pre-wrap">
+                  {product.description || "لا يوجد وصف مفصل لهذا المنتج."}
+                </p>
+              </div>
+            </TabsContent>
+
+            <TabsContent value="specs" className="pt-6 animate-fade-in">
+              <div className="max-w-3xl space-y-4">
+                <ProductSpecs
+                  product={product as unknown as Record<string, any>}
+                  vendorName={product.vendor.full_name}
+                  categoryName={product.categories?.name_ar}
+                  brandName={product.brands?.name_ar}
+                />
+                {(product.sku || product.barcode) && (
+                  <div className="flex flex-wrap gap-4 text-xs text-muted-foreground">
+                    {product.sku && <span>رمز المنتج (SKU): {selectedVariant?.sku || product.sku}</span>}
+                    {product.barcode && <span>الباركود: {product.barcode}</span>}
+                  </div>
+                )}
+                {(product.warranty || product.gtin || product.shipping_weight || product.length_cm || product.width_cm || product.height_cm) && (
+                  <div className="rounded-xl border divide-y text-sm">
+                    {product.warranty && (
+                      <div className="flex justify-between px-3 py-2"><span className="text-muted-foreground">الضمان</span><span>{product.warranty}</span></div>
+                    )}
+                    {product.shipping_weight && (
+                      <div className="flex justify-between px-3 py-2"><span className="text-muted-foreground">الوزن</span><span>{product.shipping_weight} كغ</span></div>
+                    )}
+                    {(product.length_cm || product.width_cm || product.height_cm) && (
+                      <div className="flex justify-between px-3 py-2"><span className="text-muted-foreground">الأبعاد (طول×عرض×ارتفاع)</span><span>{[product.length_cm, product.width_cm, product.height_cm].filter(Boolean).join(" × ")} سم</span></div>
+                    )}
+                    {product.gtin && (
+                      <div className="flex justify-between px-3 py-2"><span className="text-muted-foreground">GTIN</span><span>{product.gtin}</span></div>
+                    )}
+                  </div>
+                )}
+              </div>
+            </TabsContent>
+
+            <TabsContent value="reviews" className="pt-6 animate-fade-in">
+              <ProductReviews productId={id!} vendorId={product.vendor_id} />
+            </TabsContent>
+
+            <TabsContent value="shipping" className="pt-6 animate-fade-in">
+              <ShippingInfo
+                shippingCost={product.shipping_cost}
+                shippingMode={product.shipping_mode}
+                currency={product.currency}
+                shipsWithinDays={product.ships_within_days}
+                isPlatform={product.product_type === "platform"}
+              />
+            </TabsContent>
+
+            <TabsContent value="qa" className="pt-6 animate-fade-in">
+              <ProductQuestions productId={id!} vendorId={product.vendor_id} />
+              <div className="mt-6 max-w-3xl flex justify-center">
+                <ChatButton vendorId={product.vendor_id} productId={id} />
+              </div>
+            </TabsContent>
+          </Tabs>
+        </section>
+
+        {/* Vendor Rating Section */}
+        <div className="mt-10">
+          <VendorRating 
+            vendorId={product.vendor_id} 
+            vendorName={product.vendor.full_name} 
+          />
+        </div>
+
+        {/* Frequently bought together */}
+        <FrequentlyBoughtTogether
+          product={{
+            id: product.id,
+            name: product.name,
+            price: product.price,
+            image_url: product.image_url,
+            stock_quantity: product.stock_quantity,
+            currency: product.currency,
+          }}
+          categoryId={product.category_id}
+          vendorId={product.vendor_id}
+        />
+
+        {/* Similar Products Section */}
+        <SimilarProducts 
+          productId={id!} 
+          categoryId={product.category_id} 
+          vendorId={product.vendor_id} 
+        />
+
+        {/* Recommended for you */}
+        <ProductRecommendations />
+
+      </main>
+
+      {/* Sticky mobile action bar */}
+      <div
+        data-testid="mobile-product-bar"
+        className="mobile-fixed-bottom safe-area-x fixed inset-x-0 bottom-0 z-40 border-t bg-background/95 shadow-lg backdrop-blur supports-[backdrop-filter]:bg-background/80 md:hidden"
+      >
+        {previewOnly && (
+          <div className="mobile-product-notice flex items-center justify-center border-b border-amber-500/40 bg-amber-500/10 px-3 py-1.5 text-center text-[11px] leading-snug text-amber-700 dark:text-amber-400">
+            هذا المنتج معروض للمعاينة فقط وغير متاح للشراء حالياً.
+          </div>
+        )}
+        <div className="mobile-fixed-bar-content container flex items-center gap-2 px-3 py-2">
           <FavoriteButton productId={id!} variant="outline" size="icon" />
           <ShareProductButton productId={id!} productName={product.name} variant="outline" size="icon" showLabel={false} className="shrink-0" />
           <Button

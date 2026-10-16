@@ -15,7 +15,7 @@ import PullToRefreshIndicator from "@/components/PullToRefresh";
 import { usePullToRefresh } from "@/hooks/usePullToRefresh";
 import SectionErrorBoundary from "@/components/SectionErrorBoundary";
 import LazySection from "@/components/LazySection";
-import NativeAdBanner from "@/components/NativeAdBanner";
+import AnimatedProductCarousel from "@/components/home/AnimatedProductCarousel";
 
 // Below-fold sections are lazy loaded to improve initial performance
 const TurkeyMarketplace = lazy(() => import("@/components/home/TurkeyMarketplace"));
@@ -189,7 +189,7 @@ const Index = () => {
 
 
         <SectionErrorBoundary>
-          <NativeAdBanner placement="home" className="py-6" />
+          <AnimatedProductCarousel />
         </SectionErrorBoundary>
 
         {/* Local Marketplace (Phase 1) */}

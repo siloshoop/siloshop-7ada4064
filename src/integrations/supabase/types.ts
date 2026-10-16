@@ -1896,6 +1896,7 @@ export type Database = {
           pickup_center_name: string | null
           pickup_center_phone: string | null
           refund_status: string
+          shipment_tracking_enabled: boolean
           shipped_at: string | null
           shipping_address: string | null
           shipping_amount: number
@@ -1952,6 +1953,7 @@ export type Database = {
           pickup_center_name?: string | null
           pickup_center_phone?: string | null
           refund_status?: string
+          shipment_tracking_enabled?: boolean
           shipped_at?: string | null
           shipping_address?: string | null
           shipping_amount?: number
@@ -2008,6 +2010,7 @@ export type Database = {
           pickup_center_name?: string | null
           pickup_center_phone?: string | null
           refund_status?: string
+          shipment_tracking_enabled?: boolean
           shipped_at?: string | null
           shipping_address?: string | null
           shipping_amount?: number
@@ -4603,6 +4606,17 @@ export type Database = {
         }
         Returns: undefined
       }
+      admin_order_items_tracking: {
+        Args: { _order_id: string }
+        Returns: {
+          id: string
+          product_name: string
+          shipping_carrier: string
+          tracking_number: string
+          tracking_status: string
+          vendor_id: string
+        }[]
+      }
       admin_order_sub_orders: {
         Args: { _order_id: string }
         Returns: {
@@ -4680,6 +4694,10 @@ export type Database = {
           _reason?: string
           _user_agent?: string
         }
+        Returns: undefined
+      }
+      admin_set_order_shipment_tracking: {
+        Args: { _enabled: boolean; _order_id: string }
         Returns: undefined
       }
       admin_set_product_flags: {
@@ -5102,6 +5120,10 @@ export type Database = {
       }
       next_order_number: { Args: never; Returns: string }
       normalize_order_status: { Args: { _status: string }; Returns: string }
+      order_item_tracking_enabled: {
+        Args: { _item_id: string }
+        Returns: boolean
+      }
       order_reports: { Args: { _from?: string; _to?: string }; Returns: Json }
       order_status_can_transition: {
         Args: { _from: string; _role: string; _to: string }

@@ -1,4 +1,5 @@
 import { formatPrice } from "@/lib/currency";
+import { useFeatureFlags } from "@/hooks/useFeatureFlags";
 import { useEffect, useState } from "react";
 import { Link, useParams, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
@@ -109,6 +110,7 @@ const formatMoney = (n: number | null | undefined, currency?: string | null) =>
 const TrackOrder = () => {
   const { id } = useParams();
   const { user, loading: authLoading } = useAuth();
+  const trackingOn = useFeatureFlags().isEnabled("shipment_tracking");
   const [order, setOrder] = useState<Order | null>(null);
   const [shipments, setShipments] = useState<SavedShipment[]>([]);
   const [shipmentItems, setShipmentItems] = useState<TrackingProduct[]>([]);
@@ -439,7 +441,7 @@ const TrackOrder = () => {
           </div>
 
           <div className="grid lg:grid-cols-2 gap-6 items-start">
-            <div className="min-w-0 space-y-4 lg:col-start-1" data-testid="seller-shipments">
+            {trackingOn && <div className="min-w-0 space-y-4 lg:col-start-1" data-testid="seller-shipments">
               <h2 className="text-xl font-semibold">{focused.length ? "تتبع المنتج" : "تتبع الشحنات"}</h2>
               {focused.length > 0 && <Link to={`/orders/track/${order.id}`} className="text-sm text-primary underline">عرض كل منتجات الطلب</Link>}
               {shipmentError ? <p role="alert" className="text-sm text-destructive">تعذّر تحميل الشحنات. حاول التحديث مرة أخرى.</p> : trackingShipments.map((shipment, index) => (
@@ -461,7 +463,7 @@ const TrackOrder = () => {
                   </CardContent>
                 </Card>
               ))}
-            </div>
+            </div>}
             {/* Order Details */}
             <div className="min-w-0 space-y-6 lg:col-start-2">
               <Card>

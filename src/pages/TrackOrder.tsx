@@ -429,7 +429,6 @@ const TrackOrder = () => {
         { status: "pending", description: null, actor_role: "system", created_at: order.created_at },
       ].filter(Boolean) as TrackingHistoryRow[];
 
-  const latestNote = timelineEntries[0]?.description ?? null;
   const focusItem = new URLSearchParams(window.location.search).get("item");
   const allShipments = buildTrackingShipments(order, shipments, shipmentItems);
   const focused = focusItem ? allShipments.map((s) => ({ ...s, items: s.items.filter((i) => i.id === focusItem) })).filter((s) => s.items.length) : [];

@@ -92,10 +92,9 @@ const OrderDetails = () => {
     }
   }, [id, toast]);
 
-  useEffect(() => {
-    const load = async () => {
+  const load = useCallback(async (initial = false) => {
       if (!user || !id) return;
-      setLoading(true);
+      if (initial) setLoading(true);
       const { data: ord } = await supabase
         .from("orders")
         .select("*")
@@ -120,10 +119,12 @@ const OrderDetails = () => {
         .maybeSingle();
       setShipping(sd || null);
       setLoading(false);
-    };
-    void load();
+  }, [id, user]);
+
+  useEffect(() => {
+    void load(true);
     void loadNotes();
-  }, [id, user, loadNotes]);
+  }, [load, loadNotes]);
 
   // Realtime: reflect status updates from vendor/admin immediately
   useEffect(() => {
@@ -135,12 +136,13 @@ const OrderDetails = () => {
         { event: "UPDATE", schema: "public", table: "orders", filter: `id=eq.${id}` },
         (payload) => {
           setOrder((prev: any) => (prev ? { ...prev, ...(payload.new as any) } : prev));
-          if (payload.new.shipment_tracking_enabled === false) setTrackingItems([]);
+          void load();
         }
       )
       .on("postgres_changes", { event: "UPDATE", schema: "public", table: "order_items" }, (payload) => {
         setTrackingItems((prev) => prev.map((item) => item.id === payload.new.id ? { ...item, ...payload.new } : item));
       })
+      .on("postgres_changes", { event: "UPDATE", schema: "public", table: "orders", filter: `parent_order_id=eq.${id}` }, () => { void load(); })
       .on(
         "postgres_changes",
         { event: "*", schema: "public", table: "shipping_details", filter: `order_id=eq.${id}` },
@@ -157,7 +159,7 @@ const OrderDetails = () => {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [id, user]);
+  }, [id, user, load]);
 
   const submitNote = async () => {
     if (!newNote.trim() || !id) return;

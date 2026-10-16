@@ -168,6 +168,7 @@ const ERROR_MESSAGES: Record<string, string> = {
   NOT_AUTHENTICATED: "يجب تسجيل الدخول",
   ITEM_NOT_FOUND: "المنتج غير موجود في الطلب",
   INVALID_INPUT: "بيانات الشحن غير صالحة",
+  TRACKING_ORDER_CLOSED: "لا يمكن تحديث تتبع طلب ملغي أو مرتجع أو مسترد",
   SHIPPING_DISABLED: "تتبع الشحنات غير مفعّل لهذا الطلب، فعّله أولًا",
   INVALID_STATUS_TRANSITION: "لا يمكن الانتقال إلى هذه الحالة من الحالة الحالية",
   not_authorized: "لا تملك صلاحية تنفيذ هذا الإجراء",

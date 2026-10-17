@@ -124,7 +124,7 @@ const Footer = () => {
                 <img
                   src={googlePlayBadge}
                   alt="حمّل تطبيق SiloShop من Google Play"
-                  className="h-10 w-auto max-w-full select-none md:h-11"
+                  className="h-11 w-auto max-w-full select-none md:h-12"
                   draggable={false}
                 />
               </a>

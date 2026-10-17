@@ -20,3 +20,17 @@ export const readCartStock = async (productId: string, variantId?: string | null
   if (error) throw error;
   return data?.stock_quantity ?? 0;
 };
+
+/** Hide unavailable rows only after confirming their user-owned saved deletion. */
+export const removeUnavailableCartRows = async <T extends {
+  id: string;
+  product: { stock_quantity: number } | null;
+}>(userId: string, rows: T[]) => {
+  const ids = rows.filter(row => row.product && row.product.stock_quantity <= 0).map(row => row.id);
+  if (!ids.length) return { rows, removedCount: 0, error: null };
+  const { data, error } = await supabase.from("cart_items")
+    .delete().eq("user_id", userId).in("id", ids).select("id");
+  if (error) return { rows, removedCount: 0, error };
+  const removed = new Set((data ?? []).map(row => row.id));
+  return { rows: rows.filter(row => !removed.has(row.id)), removedCount: removed.size, error: null };
+};

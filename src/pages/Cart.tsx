@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { readCartStock, validateCartQuantity } from "@/lib/cartStock";
+import { readCartStock, removeUnavailableCartRows, validateCartQuantity } from "@/lib/cartStock";
 import { formatVariantLabel } from "@/lib/variantRequirement";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
@@ -145,6 +145,7 @@ const Cart = () => {
   }, [user, refreshCart]);
 
   useEffect(() => {
+    let cancelled = false;
     const fetchCart = async () => {
       if (!user) {
         setLoading(false);
@@ -158,10 +159,17 @@ const Cart = () => {
           .eq("user_id", user.id);
 
         if (error) throw error;
-        const rows = await withDeals(withVariant(data as any).filter((item) => item.product && item.product.stock_quantity > 0));
+        const cleaned = await removeUnavailableCartRows(user.id, withVariant(data as any));
+        // Keep failed deletions visible with the existing manual remove control.
+        const rows = await withDeals(cleaned.rows.filter(item => item.product));
+        if (cancelled) return;
         setCartItems(rows);
-        if (rows.length < (data?.length ?? 0)) {
+        if (cleaned.removedCount > 0) {
+          notifySync("cart");
           toast({ title: "نفذت الكمية", description: "تمت إزالة المنتجات غير المتوفرة من السلة" });
+        }
+        if (cleaned.error) {
+          toast({ title: "خطأ", description: "تعذر حذف المنتجات النافدة من السلة؛ يمكنك حذفها يدويًا", variant: "destructive" });
         }
 
 
@@ -185,21 +193,23 @@ const Cart = () => {
                 discount_percentage: d.discount_percentage,
               });
             });
-            setDiscounts(discountMap);
+            if (!cancelled) setDiscounts(discountMap);
           }
         }
       } catch (error) {
+        if (cancelled) return;
         toast({
           title: "خطأ",
           description: "فشل في جلب عربة التسوق",
           variant: "destructive",
         });
       } finally {
-        setLoading(false);
+        if (!cancelled) setLoading(false);
       }
     };
 
     fetchCart();
+    return () => { cancelled = true; };
   }, [user, toast, cartVersion]);
 
   const fetchSavedItems = async () => {

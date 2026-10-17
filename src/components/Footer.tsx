@@ -5,6 +5,10 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Link } from "react-router-dom";
 import BrandLogo from "@/components/BrandLogo";
+import googlePlayBadge from "@/assets/google-play-badge.png";
+
+const PLAY_STORE_URL = "https://play.google.com/store/apps/details?id=com.siloshop.app";
+
 const Footer = () => {
   const [email, setEmail] = useState("");
   const {
@@ -109,6 +113,23 @@ const Footer = () => {
                 </span>
               </Button>
             </div>
+            <div className="mt-5">
+              <a
+                href={PLAY_STORE_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="hover-scale inline-flex max-w-full rounded-lg outline-none focus-visible:ring-2 focus-visible:ring-primary/60"
+                onClick={(e) => { e.preventDefault(); window.open(PLAY_STORE_URL, "_blank", "noopener,noreferrer"); }}
+              >
+                <img
+                  src={googlePlayBadge}
+                  alt="حمّل تطبيق SiloShop من Google Play"
+                  className="h-10 w-auto max-w-full select-none md:h-11"
+                  draggable={false}
+                />
+              </a>
+            </div>
+
           </div>
 
           <div>

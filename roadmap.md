@@ -183,3 +183,7 @@
 ## Coupon dates and product thumbnails
 - [x] Validate optional local start/end dates before saving, preserve strict server ordering, and reuse existing image resolution/fallbacks
 - [x] Browser verification at 375/1280px with Arabic locale and Damascus timezone: reject invalid ordering, submit/read back valid fixture coupon, load saved/secondary/placeholder images, no overflow; 175 tests pass plus date tests in Damascus/New York; live production creation and physical Android not tested
+
+## Footer Google Play badge
+- [x] Add the official Google Play badge to the footer next to the social icons, linking to https://play.google.com/store/apps/details?id=com.siloshop.app, clickable as a whole on mobile and desktop, without touching other functionality or the Android app
+- [x] Verify live preview at 393px (2x phone density) and 1280px: badge rendered from the official 646x250 asset, right edge flush with the Facebook icon (RTL start alignment), every badge edge resolves to the store link, click opens the Play Store URL, zero horizontal overflow, 189 automated tests and automatic build OK; physical Android not tested

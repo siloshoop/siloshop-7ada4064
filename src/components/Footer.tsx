@@ -56,7 +56,7 @@ const Footer = () => {
         <div className="absolute end-0 top-0 h-96 w-96 max-w-full rounded-full bg-accent/5 blur-3xl" />
       </div>
       
-      <div className="container px-4 py-12 relative z-10">
+      <div className="container footer-mobile-clearance px-4 pt-12 pb-12 relative z-10">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           <div className="animate-fade-in">
             <BrandLogo as="h2" className="text-3xl md:text-4xl mb-4 block" />

@@ -1,5 +1,10 @@
 # Production readiness audit
 
+## Seller My Store settings
+- [ ] Inspect existing store data, seller navigation, authentication and ownership permissions; reuse saved fields
+- [ ] Expose My Store and complete validation, safe saving/loading, uploads and public contact display
+- [ ] Test isolated saving/read-back and mobile/desktop layout; live writes require an authorized disposable seller account
+
 ## Independent product tracking
 - [x] Merge saved product events immediately in buyer pages, recover subscription/reconnection gaps and guard overlapping detail reads; 184 tests pass. Real authenticated API rejects non-owner with NOT_ALLOWED. Saved detail/tracking pages checked at 393/1280px without overflow; actual seller-to-buyer mutation remains blocked below.
 - [x] Restore secure seller-owned product updates, stage timestamps and deduplicated in-app notifications while retaining admin visibility.

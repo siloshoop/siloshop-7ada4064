@@ -187,3 +187,7 @@
 ## Footer Google Play badge
 - [x] Add the official Google Play badge to the footer next to the social icons, linking to https://play.google.com/store/apps/details?id=com.siloshop.app, clickable as a whole on mobile and desktop, without touching other functionality or the Android app
 - [x] Verify live preview at 393px (2x phone density) and 1280px: badge rendered from the official 646x250 asset, right edge flush with the Facebook icon (RTL start alignment), every badge edge resolves to the store link, click opens the Play Store URL, zero horizontal overflow, 189 automated tests and automatic build OK; physical Android not tested
+
+## Footer bottom-bar clearance
+- [x] Reserve the fixed bottom bar plus a margin inside the footer on phones so its last item is never flush against the bar; desktop and tablet padding unchanged
+- [x] Verify home, categories, product and contact at 393x660 (2x and 2.75x density, signed out and signed in, with a 24px bottom safe area): copyright and "حذف الحساب" fully above the bar, ~79px clearance, no overlap or horizontal overflow; 189 automated tests and automatic build OK; physical Android not tested

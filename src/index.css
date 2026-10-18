@@ -346,6 +346,17 @@ All colors MUST be HSL.
     height: calc(var(--mobile-fixed-bar-height) + max(env(safe-area-inset-bottom, 0px), var(--safe-area-inset-bottom, 0px)));
   }
 
+  /* Keep the footer's last item clear of the fixed bottom bar on phones. */
+  .footer-mobile-clearance {
+    padding-bottom: calc(var(--mobile-fixed-bar-height) + 1.5rem + max(env(safe-area-inset-bottom, 0px), var(--safe-area-inset-bottom, 0px)));
+  }
+
+  @media (min-width: 768px) {
+    .footer-mobile-clearance {
+      padding-bottom: 3rem;
+    }
+  }
+
   .mobile-product-bar-spacer {
     flex-shrink: 0;
     height: calc(var(--mobile-fixed-bar-height) + max(env(safe-area-inset-bottom, 0px), var(--safe-area-inset-bottom, 0px)));

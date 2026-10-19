@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
@@ -12,35 +12,22 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Loader2, Save, Store } from "lucide-react";
 import { resolveStoreAssetUrl } from "@/lib/storeAssets";
 import ImageUploadField from "@/components/ImageUploadField";
-
-interface StoreProfile {
-  store_name: string | null;
-  store_description: string | null;
-  contact_email: string | null;
-  contact_phone: string | null;
-  address: string | null;
-  city: string | null;
-  logo_url: string | null;
-  cover_image_url: string | null;
-  working_hours: string | null;
-  return_policy: string | null;
-  shipping_policy: string | null;
-  business_info: string | null;
-}
-
-const EMPTY: StoreProfile = {
-  store_name: "", store_description: "", contact_email: "", contact_phone: "", address: "", city: "",
-  logo_url: "", cover_image_url: "", working_hours: "", return_policy: "", shipping_policy: "", business_info: "",
-};
+import { Link } from "react-router-dom";
+import { EMPTY_STORE, storeSettingsSchema, storeSettingsArgs, type StoreSettings } from "@/lib/storeSettings";
 
 const SellerStore = () => {
   const { user } = useAuth();
   const { toast } = useToast();
-  const [form, setForm] = useState<StoreProfile>(EMPTY);
+  const [form, setForm] = useState<StoreSettings>(EMPTY_STORE);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
   const [coverPreview, setCoverPreview] = useState<string | null>(null);
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const [errors, setErrors] = useState<string[]>([]);
+  const [logoBusy, setLogoBusy] = useState(false);
+  const [coverBusy, setCoverBusy] = useState(false);
+  const readVersion = useRef(0);
 
   useEffect(() => {
     let cancelled = false;
@@ -59,70 +46,78 @@ const SellerStore = () => {
   }, [form.logo_url, form.cover_image_url]);
 
   const load = useCallback(async () => {
-    if (!user) return;
+    if (!user) { setLoading(false); return; }
+    const version = ++readVersion.current;
     setLoading(true);
-    const { data } = await supabase
-      .from("seller_applications")
-      .select("store_name,store_description,contact_email,contact_phone,address,city,logo_url,cover_image_url,working_hours,return_policy,shipping_policy,business_info")
-      .eq("user_id", user.id)
-      .order("created_at", { ascending: false })
-      .limit(1)
-      .maybeSingle();
-    if (data) setForm({ ...EMPTY, ...(data as StoreProfile) });
-    setLoading(false);
+    setLoadError(null);
+    try {
+      const { data, error } = await supabase.from("seller_applications")
+        .select("store_name,store_description,contact_email,contact_phone,address,city,logo_url,cover_image_url,working_hours,return_policy,shipping_policy,business_info")
+        .eq("user_id", user.id).eq("status", "approved")
+        .order("created_at", { ascending: false }).order("id", { ascending: false }).limit(1).maybeSingle();
+      if (version !== readVersion.current) return;
+      if (error) throw error;
+      if (!data) throw new Error("لا يوجد متجر معتمد لهذا الحساب");
+      setForm(Object.fromEntries(Object.keys(EMPTY_STORE).map((key) => [key, data[key as keyof typeof data] ?? ""])) as StoreSettings);
+    } catch (error) {
+      if (version === readVersion.current) setLoadError(error instanceof Error ? error.message : "تعذّر تحميل بيانات المتجر");
+    } finally { if (version === readVersion.current) setLoading(false); }
   }, [user]);
 
   useEffect(() => {
     void load();
+    return () => { readVersion.current += 1; };
   }, [load]);
 
-  const set = (key: keyof StoreProfile) => (ev: { target: { value: string } }) =>
+  const set = (key: keyof StoreSettings) => (ev: { target: { value: string } }) => {
     setForm((f) => ({ ...f, [key]: ev.target.value }));
+    setErrors([]);
+  };
 
   const save = async () => {
-    setSaving(true);
-    const { error } = await supabase.rpc("seller_update_store_profile", {
-      _store_name: form.store_name || null,
-      _store_description: form.store_description ?? "",
-      _contact_email: form.contact_email ?? "",
-      _contact_phone: form.contact_phone ?? "",
-      _address: form.address ?? "",
-      _city: form.city ?? "",
-      _logo_url: form.logo_url ?? "",
-      _cover_image_url: form.cover_image_url ?? "",
-      _working_hours: form.working_hours ?? "",
-      _return_policy: form.return_policy ?? "",
-      _shipping_policy: form.shipping_policy ?? "",
-      _business_info: form.business_info ?? "",
-    });
-    setSaving(false);
-    if (error) {
-      toast({ title: "تعذّر حفظ بيانات المتجر", description: error.message, variant: "destructive" });
+    if (saving || logoBusy || coverBusy || loading || loadError || !user) return;
+    const parsed = storeSettingsSchema.safeParse(form);
+    if (!parsed.success) {
+      setErrors(parsed.error.issues.map((issue) => issue.message));
+      toast({ title: "تحقق من بيانات المتجر", description: parsed.error.issues[0]?.message, variant: "destructive" });
       return;
     }
-    toast({ title: "تم حفظ بيانات المتجر" });
-    void load();
+    setErrors([]);
+    setSaving(true);
+    try {
+      const { error } = await supabase.rpc("seller_update_store_profile", storeSettingsArgs(parsed.data));
+      if (error) throw error;
+      toast({ title: "تم حفظ بيانات المتجر" });
+      await load();
+    } catch (error) {
+      toast({ title: "تعذّر حفظ بيانات المتجر", description: error instanceof Error ? error.message : "حاول مجددًا", variant: "destructive" });
+    } finally { setSaving(false); }
   };
 
   if (loading) {
     return (
-      <SellerLayout title="ملف المتجر" description="بيانات متجرك العامة وسياساته">
+      <SellerLayout title="متجري" description="إعدادات المتجر">
         <div className="space-y-3">{[0, 1, 2].map((i) => <Skeleton key={i} className="h-32 w-full" />)}</div>
       </SellerLayout>
     );
   }
 
+  if (loadError) return <SellerLayout title="متجري"><div role="alert" className="space-y-3"><p className="text-destructive">{loadError}</p><Button variant="outline" onClick={() => void load()}>إعادة المحاولة</Button></div></SellerLayout>;
+
   return (
     <SellerLayout
-      title="ملف المتجر"
-      description="بيانات متجرك العامة وسياساته"
+      title="متجري"
+      description="إعدادات المتجر"
       actions={
-        <Button onClick={save} disabled={saving}>
+        <div className="flex flex-wrap gap-2">
+        {user && <Button asChild variant="outline"><Link to={`/store/${user.id}`}>عرض المتجر</Link></Button>}
+        <Button onClick={save} disabled={saving || logoBusy || coverBusy}>
           {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <><Save className="me-2 h-4 w-4" /> حفظ</>}
         </Button>
+        </div>
       }
     >
-      <div className="grid gap-4 lg:grid-cols-2">
+      <fieldset disabled={saving} className="min-w-0 grid gap-4 lg:grid-cols-2">
         <Card>
           <CardHeader className="pb-3">
             <CardTitle className="flex items-center gap-2 text-base"><Store className="h-4 w-4 text-primary" /> الهوية</CardTitle>
@@ -130,11 +125,11 @@ const SellerStore = () => {
           <CardContent className="space-y-3">
             <div className="space-y-1.5">
               <Label htmlFor="store_name">اسم المتجر</Label>
-              <Input id="store_name" value={form.store_name ?? ""} onChange={set("store_name")} />
+              <Input maxLength={150} id="store_name" value={form.store_name ?? ""} onChange={set("store_name")} />
             </div>
             <div className="space-y-1.5">
               <Label htmlFor="store_description">وصف المتجر</Label>
-              <Textarea id="store_description" rows={4} value={form.store_description ?? ""} onChange={set("store_description")} />
+              <Textarea maxLength={5000} id="store_description" rows={4} value={form.store_description ?? ""} onChange={set("store_description")} />
             </div>
             {user && (
               <div className="grid gap-3 sm:grid-cols-2">
@@ -147,6 +142,8 @@ const SellerStore = () => {
                   privateBucket
                   previewClassName="sm:w-24"
                   sizeGuide="logo"
+                  disabled={saving}
+                  onBusyChange={setLogoBusy}
                 />
                 <ImageUploadField
                   label="غلاف المتجر"
@@ -156,6 +153,8 @@ const SellerStore = () => {
                   folder={user.id}
                   privateBucket
                   sizeGuide="cover"
+                  disabled={saving}
+                  onBusyChange={setCoverBusy}
                 />
               </div>
             )}
@@ -174,30 +173,30 @@ const SellerStore = () => {
             <div className="grid gap-3 sm:grid-cols-2">
               <div className="space-y-1.5">
                 <Label htmlFor="contact_email">البريد الإلكتروني</Label>
-                <Input id="contact_email" type="email" dir="ltr" value={form.contact_email ?? ""} onChange={set("contact_email")} />
+                <Input maxLength={255} id="contact_email" type="email" dir="ltr" value={form.contact_email ?? ""} onChange={set("contact_email")} />
               </div>
               <div className="space-y-1.5">
                 <Label htmlFor="contact_phone">الهاتف</Label>
-                <Input id="contact_phone" dir="ltr" value={form.contact_phone ?? ""} onChange={set("contact_phone")} />
+                <Input id="contact_phone" type="tel" maxLength={30} dir="ltr" value={form.contact_phone ?? ""} onChange={set("contact_phone")} />
               </div>
             </div>
             <div className="grid gap-3 sm:grid-cols-2">
               <div className="space-y-1.5">
                 <Label htmlFor="city">المدينة</Label>
-                <Input id="city" value={form.city ?? ""} onChange={set("city")} />
+                <Input maxLength={100} id="city" value={form.city ?? ""} onChange={set("city")} />
               </div>
               <div className="space-y-1.5">
                 <Label htmlFor="working_hours">ساعات العمل</Label>
-                <Input id="working_hours" value={form.working_hours ?? ""} onChange={set("working_hours")} placeholder="السبت - الخميس ٩ص - ٦م" />
+                <Input maxLength={500} id="working_hours" value={form.working_hours ?? ""} onChange={set("working_hours")} placeholder="السبت - الخميس ٩ص - ٦م" />
               </div>
             </div>
             <div className="space-y-1.5">
               <Label htmlFor="address">العنوان</Label>
-              <Textarea id="address" rows={2} value={form.address ?? ""} onChange={set("address")} />
+              <Textarea maxLength={1000} id="address" rows={2} value={form.address ?? ""} onChange={set("address")} />
             </div>
             <div className="space-y-1.5">
               <Label htmlFor="business_info">معلومات النشاط التجاري</Label>
-              <Textarea id="business_info" rows={2} value={form.business_info ?? ""} onChange={set("business_info")} />
+              <Textarea maxLength={3000} id="business_info" rows={2} value={form.business_info ?? ""} onChange={set("business_info")} />
             </div>
           </CardContent>
         </Card>
@@ -207,11 +206,12 @@ const SellerStore = () => {
           <CardContent className="grid gap-3 lg:grid-cols-2">
             <div className="space-y-1.5">
               <Label htmlFor="shipping_policy">سياسة الشحن</Label>
-              <Textarea id="shipping_policy" rows={5} value={form.shipping_policy ?? ""} onChange={set("shipping_policy")} />
+              <Textarea maxLength={5000} id="shipping_policy" rows={5} value={form.shipping_policy ?? ""} onChange={set("shipping_policy")} />
             </div>
           </CardContent>
         </Card>
-      </div>
+      </fieldset>
+      {errors.length > 0 && <ul role="alert" className="mt-3 space-y-1 text-sm text-destructive">{errors.map((message, i) => <li key={i}>{message}</li>)}</ul>}
     </SellerLayout>
   );
 };

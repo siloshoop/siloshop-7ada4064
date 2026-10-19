@@ -4919,6 +4919,13 @@ export type Database = {
           total_orders: number
         }[]
       }
+      get_store_public_contact: {
+        Args: { _vendor_id: string }
+        Returns: {
+          address: string
+          contact_phone: string
+        }[]
+      }
       get_store_public_profile: {
         Args: { _vendor_id: string }
         Returns: {
@@ -4995,6 +5002,7 @@ export type Database = {
         Args: { p_email?: string; p_phone: string }
         Returns: boolean
       }
+      is_public_store_image: { Args: { _path: string }; Returns: boolean }
       is_valid_order_status: { Args: { _status: string }; Returns: boolean }
       latest_public_reviews: {
         Args: { _limit?: number }

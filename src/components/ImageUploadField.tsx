@@ -21,6 +21,7 @@ type ImageUploadFieldProps = {
   previewClassName?: string;
   /** Shows the recommended size guide under the field. */
   sizeGuide?: ImageKind;
+  onBusyChange?: (busy: boolean) => void;
 };
 
 const isExternalUrl = (value: string) => /^(https?:|data:|blob:)/i.test(value);
@@ -35,6 +36,7 @@ const ImageUploadField = ({
   disabled = false,
   previewClassName,
   sizeGuide,
+  onBusyChange,
 }: ImageUploadFieldProps) => {
   const { toast } = useToast();
   const inputRef = useRef<HTMLInputElement>(null);
@@ -69,7 +71,8 @@ const ImageUploadField = ({
     const path = uploadedPathRef.current;
     if (!path) return;
     uploadedPathRef.current = null;
-    await supabase.storage.from(bucket).remove([path]);
+    // Store branding may already be saved; replacement must not delete live assets.
+    if (bucket !== "store-assets") await supabase.storage.from(bucket).remove([path]);
   };
 
   const upload = async (picked?: File) => {
@@ -80,6 +83,9 @@ const ImageUploadField = ({
       toast({ title: "تعذّر رفع الصورة", description: invalid, variant: "destructive" });
       return;
     }
+    onBusyChange?.(true);
+    setUploading(true);
+    try {
     if (sizeGuide) {
       const cropped = await crop(file);
       if (inputRef.current) inputRef.current.value = "";
@@ -87,8 +93,6 @@ const ImageUploadField = ({
       file = cropped;
     }
 
-    setUploading(true);
-    try {
       let compressed: File;
       try {
         compressed = sizeGuide === "product" ? file : await imageCompression(file, { maxSizeMB: 1, maxWidthOrHeight: 1920, useWebWorker: true });
@@ -96,7 +100,8 @@ const ImageUploadField = ({
         throw new UploadError("تعذّرت معالجة الصورة؛ قد يكون الملف تالفًا. جرّب صورة أخرى.");
       }
       const extension = (compressed.name.split(".").pop() || "jpg").toLowerCase();
-      const path = `${folder}/${crypto.randomUUID()}.${extension}`;
+      const prefix = bucket === "store-assets" && (sizeGuide === "logo" || sizeGuide === "cover") ? `${sizeGuide}-` : "";
+      const path = `${folder}/${prefix}${crypto.randomUUID()}.${extension}`;
       const { error } = await supabase.storage.from(bucket).upload(path, compressed, {
         cacheControl: "3600",
         upsert: false,
@@ -120,6 +125,7 @@ const ImageUploadField = ({
       });
     } finally {
       setUploading(false);
+      onBusyChange?.(false);
       if (inputRef.current) inputRef.current.value = "";
     }
   };

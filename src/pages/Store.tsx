@@ -10,6 +10,7 @@ import {
   MapPin,
   Calendar,
   Loader2,
+  Phone,
 } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -76,6 +77,7 @@ const Store = () => {
   const [loading, setLoading] = useState(true);
   const [logoUrl, setLogoUrl] = useState<string | null>(null);
   const [coverUrl, setCoverUrl] = useState<string | null>(null);
+  const [contact, setContact] = useState<{ contact_phone: string | null; address: string | null } | null>(null);
 
 
   useEffect(() => {
@@ -84,7 +86,7 @@ const Store = () => {
 
     (async () => {
       setLoading(true);
-      const [profileRes, productsRes, reviewsRes] = await Promise.all([
+      const [profileRes, productsRes, reviewsRes, contactRes] = await Promise.all([
         supabase.rpc("get_store_public_profile", { _vendor_id: vendorId }),
         supabase
           .from("products")
@@ -101,11 +103,13 @@ const Store = () => {
           .eq("vendor_id", vendorId)
           .order("created_at", { ascending: false })
           .limit(50),
+        supabase.rpc("get_store_public_contact", { _vendor_id: vendorId }),
       ]);
 
       if (cancelled) return;
       const store = (profileRes.data as StoreProfile[] | null)?.[0] ?? null;
       setProfile(store);
+      setContact(contactRes.data?.[0] ?? null);
       setFollowers(store?.follower_count ?? 0);
       setProducts((productsRes.data ?? []) as StoreProduct[]);
       setReviews((reviewsRes.data ?? []) as StoreReview[]);
@@ -387,6 +391,8 @@ const Store = () => {
                     {profile.description || "لم يضف البائع وصفاً لمتجره بعد."}
                   </p>
                   <dl className="grid gap-2 sm:grid-cols-2">
+                    {contact?.contact_phone && <div className="flex min-w-0 flex-wrap justify-between gap-2 rounded-lg border p-3"><dt className="flex items-center gap-1 text-muted-foreground"><Phone className="h-3.5 w-3.5" />الهاتف</dt><dd dir="ltr" className="font-medium"><a href={`tel:${contact.contact_phone.replace(/[^+0-9]/g, "")}`}>{contact.contact_phone}</a></dd></div>}
+                    {contact?.address && <div className="min-w-0 rounded-lg border p-3 sm:col-span-2"><dt className="text-muted-foreground">العنوان</dt><dd className="mt-1 whitespace-pre-wrap break-words font-medium">{contact.address}</dd></div>}
                     {profile.owner_name && (
                       <div className="flex justify-between rounded-lg border p-3">
                         <dt className="text-muted-foreground">صاحب المتجر</dt>

@@ -24,4 +24,5 @@
 - Coupon and sale pricing are computed only in public.line_pricing/coupon_allocate (used by quote_cart_coupon and create_order, with coupon row locks and coupon_redemptions reservations released by order status); clients only display server quotes so totals cannot drift.
 
 - Render product bulk actions in normal document flow after the last selected visible row; this keeps actions aligned without covering adjacent content.
-- Validate coupon dates through couponDates before writes, interpreting native date inputs in the device timezone and sending UTC; this mirrors the server's strict date ordering without guessing localized date strings.
+- Validate coupon dates through couponDates (device timezone to UTC) to mirror server ordering.
+- Store settings update only the owner's approved seller_applications row; public contact RPC exposes business phone/address, never identity documents or admin fields.

@@ -4,7 +4,8 @@ import { EMPTY_STORE, storeSettingsSchema, storeSettingsArgs } from "@/lib/store
 import { MemoryRouter } from "react-router-dom";
 const mocks = vi.hoisted(() => ({ rpc: vi.fn(), from: vi.fn(), toast: vi.fn(), saved: { store_name: "متجر محفوظ", store_description: "وصف سابق", city: "دمشق", address: "شارع الاختبار", contact_phone: "+963944123456" } as Record<string, string> }));
 vi.mock("@/integrations/supabase/client", () => ({ supabase: { from: mocks.from, rpc: mocks.rpc } }));
-vi.mock("@/hooks/useAuth", () => ({ useAuth: () => ({ user: { id: "seller-a" } }) }));
+const testUser = { id: "seller-a" };
+vi.mock("@/hooks/useAuth", () => ({ useAuth: () => ({ user: testUser }) }));
 vi.mock("@/hooks/use-toast", () => ({ useToast: () => ({ toast: mocks.toast }) }));
 vi.mock("@/lib/storeAssets", () => ({ resolveStoreAssetUrl: async () => null }));
 vi.mock("@/components/ImageUploadField", () => ({ default: () => null }));

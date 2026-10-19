@@ -84,15 +84,15 @@ const ImageUploadField = ({
       return;
     }
     onBusyChange?.(true);
+    setUploading(true);
+    try {
     if (sizeGuide) {
       const cropped = await crop(file);
       if (inputRef.current) inputRef.current.value = "";
-      if (!cropped) { onBusyChange?.(false); return; }
+      if (!cropped) return;
       file = cropped;
     }
 
-    setUploading(true);
-    try {
       let compressed: File;
       try {
         compressed = sizeGuide === "product" ? file : await imageCompression(file, { maxSizeMB: 1, maxWidthOrHeight: 1920, useWebWorker: true });

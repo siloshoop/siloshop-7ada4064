@@ -1,9 +1,10 @@
 # Production readiness audit
 
 ## Seller My Store settings
-- [ ] Inspect existing store data, seller navigation, authentication and ownership permissions; reuse saved fields
-- [ ] Expose My Store and complete validation, safe saving/loading, uploads and public contact display
-- [ ] Test isolated saving/read-back and mobile/desktop layout; live writes require an authorized disposable seller account
+- [x] Inspect existing store fields, navigation, auth, RLS and storage: reused approved seller_applications; all 12 approved sellers have the protected vendor role, no duplicate approved profiles
+- [x] Expose My Store at the top of seller navigation; add validation, safe loading/saving, upload busy guards and public business phone/address; guard server ownership, status and field limits without modifying saved business data
+- [x] Verify isolated UI save/read-back and public storefront at 393/1280px with zero page errors/overflow; 195 tests pass, automatic build OK
+- [ ] Verify live seller save, actual logo/cover storage upload and cross-seller/admin denial end-to-end (blocked: no authorized disposable seller test account; production profiles untouched)
 
 ## Independent product tracking
 - [x] Merge saved product events immediately in buyer pages, recover subscription/reconnection gaps and guard overlapping detail reads; 184 tests pass. Real authenticated API rejects non-owner with NOT_ALLOWED. Saved detail/tracking pages checked at 393/1280px without overflow; actual seller-to-buyer mutation remains blocked below.

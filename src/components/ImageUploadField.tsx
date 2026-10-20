@@ -150,8 +150,8 @@ const ImageUploadField = ({
         placeholder="https://..."
         aria-label={`${label} عبر رابط`}
       />
-      <div className="flex min-w-0 flex-col gap-3 rounded-md border p-3 sm:flex-row sm:items-center">
-        <div className={cn("flex h-24 w-full shrink-0 items-center justify-center overflow-hidden rounded-md bg-muted sm:w-36", previewClassName)}>
+      <div className={cn("flex min-w-0 flex-col gap-3 rounded-md border p-3", bucket !== "store-assets" && "sm:flex-row sm:items-center")}>
+        <div className={cn("flex h-24 w-full shrink-0 items-center justify-center overflow-hidden rounded-md bg-muted", bucket !== "store-assets" && "sm:w-36", previewClassName)}>
           {preview && !imageFailed ? (
             <img
               src={preview}

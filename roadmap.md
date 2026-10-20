@@ -1,5 +1,11 @@
 # Production readiness audit
 
+## Existing moderator permissions and secure buyer–seller chat
+- [ ] Inspect and reuse current roles, approval functions, policies and chat entry points
+- [ ] Enable moderator seller approvals and constrain product moderation without granting role management or super-admin tools
+- [ ] Secure existing conversation creation and buyer–seller messaging against unauthorized participants
+- [ ] Run isolated permission/flow tests and confirm automatic build; live mutations require disposable authorized test accounts
+
 ## Seller My Store settings
 - [x] Inspect existing store fields, navigation, auth, RLS and storage: reused approved seller_applications; all 12 approved sellers have the protected vendor role, no duplicate approved profiles
 - [x] Expose My Store at the top of seller navigation; add validation, safe loading/saving, upload busy guards and public business phone/address; guard server ownership, status and field limits without modifying saved business data

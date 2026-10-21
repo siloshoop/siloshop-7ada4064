@@ -260,6 +260,13 @@
       "when": 1792388995672,
       "tag": "0036_seller_store_settings_guards",
       "breakpoints": true
+    },
+    {
+      "idx": 37,
+      "version": "7",
+      "when": 1792562112691,
+      "tag": "0037_existing_moderator_approvals_secure_chat",
+      "breakpoints": true
     }
   ]
 }

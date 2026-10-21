@@ -5521,6 +5521,14 @@ export type Database = {
         }
         Returns: undefined
       }
+      validate_chat_target: {
+        Args: {
+          p_order_id?: string
+          p_product_id?: string
+          p_vendor_id: string
+        }
+        Returns: string
+      }
       validate_coupon: {
         Args: { _code: string; _subtotal: number }
         Returns: {

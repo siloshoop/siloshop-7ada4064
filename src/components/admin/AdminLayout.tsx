@@ -2,12 +2,12 @@ import { ReactNode } from "react";
 import { Link, useLocation } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import { useAdminCheck } from "@/hooks/useAdminCheck";
+import { useStaffRole } from "@/hooks/useStaffRole";
 import useFeatureFlags from "@/hooks/useFeatureFlags";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Loader2 } from "lucide-react";
-import { ADMIN_MODULES, AdminModule } from "./adminModules";
+import { ADMIN_MODULES, AdminModule, canAccessAdminModule } from "./adminModules";
 
 interface AdminLayoutProps {
   title: string;
@@ -18,8 +18,9 @@ interface AdminLayoutProps {
 
 export const useAdminModules = () => {
   const { isEnabled, loading } = useFeatureFlags();
+  const { role } = useStaffRole();
   const visible = ADMIN_MODULES.filter(
-    (m) => !m.featureFlag || isEnabled(m.featureFlag),
+    (m) => canAccessAdminModule(m.href, role) && (!m.featureFlag || isEnabled(m.featureFlag)),
   );
   return { modules: visible, loading };
 };
@@ -42,7 +43,7 @@ const NavItem = ({ module, active }: { module: AdminModule; active: boolean }) =
 );
 
 const AdminLayout = ({ title, description, actions, children }: AdminLayoutProps) => {
-  const { isAdmin, loading } = useAdminCheck();
+  const { role, loading } = useStaffRole();
   const { modules } = useAdminModules();
   const { pathname } = useLocation();
 
@@ -53,7 +54,7 @@ const AdminLayout = ({ title, description, actions, children }: AdminLayoutProps
       </div>
     );
   }
-  if (!isAdmin) return null;
+  if (!canAccessAdminModule(pathname, role)) return null;
 
   return (
     <div className="min-h-screen flex flex-col bg-background" dir="rtl">

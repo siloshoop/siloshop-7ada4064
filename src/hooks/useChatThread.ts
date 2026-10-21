@@ -69,6 +69,9 @@ const ERROR_TEXT: Record<string, string> = {
   vendor_not_found: "البائع غير موجود",
   order_not_found: "الطلب غير موجود",
   return_not_found: "طلب الإرجاع غير موجود",
+  product_not_available: "المنتج غير متاح للمراسلة؛ استخدم المحادثة من طلبك إن كنت قد اشتريته",
+  product_vendor_mismatch: "هذا المنتج لا يتبع البائع المحدد",
+  vendor_required: "يجب اختيار بائع من الطلب",
 };
 
 export const chatErrorText = (message?: string) => {

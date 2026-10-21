@@ -1,6 +1,7 @@
 import { beforeAll, afterAll, beforeEach, describe, expect, it } from "vitest";
 import { PGlite } from "@electric-sql/pglite";
 import { readFileSync } from "node:fs";
+import { Blob as NodeBlob } from "node:buffer";
 import { canAccessAdminModule } from "@/components/admin/adminModules";
 import { orderChatSellers } from "@/lib/orderChatSellers";
 
@@ -24,7 +25,7 @@ const scalar = async (sql: string) => (await db.query<{ value: unknown }>(sql)).
 
 describe("existing moderator RBAC and secure chat (isolated PostgreSQL)", () => {
   beforeAll(async () => {
-    db = new PGlite();
+    db = new PGlite({ fsBundle: new NodeBlob([readFileSync("node_modules/@electric-sql/pglite/dist/pglite.data")]) as unknown as Blob });
     await db.exec(`
       CREATE ROLE anon; CREATE ROLE authenticated; CREATE ROLE service_role;
       CREATE SCHEMA auth; CREATE SCHEMA storage;

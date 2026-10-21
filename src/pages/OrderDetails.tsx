@@ -21,6 +21,7 @@ import CustomerInvoice from "@/components/orders/CustomerInvoice";
 import OrderProductImage from "@/components/orders/OrderProductImage";
 import OrderItemTrackingCard from "@/components/orders/OrderItemTrackingCard";
 import { useToast } from "@/hooks/use-toast";
+import { orderChatSellers } from "@/lib/orderChatSellers";
 
 const statusMap: Record<string, { label: string; variant: "default" | "secondary" | "destructive" | "outline" }> = {
   pending: { label: "قيد الانتظار", variant: "secondary" },
@@ -468,7 +469,7 @@ const OrderDetails = () => {
           }}
         />
         {order.status !== "cancelled" && (
-          <OrderHelpActions orderId={order.id} vendorId={items[0]?.vendor_id} />
+          <OrderHelpActions orderId={order.id} vendorIds={orderChatSellers(items)} />
         )}
       </main>
       <Footer />

@@ -1,9 +1,9 @@
 # Production readiness audit
 
 ## Existing moderator permissions and secure buyer–seller chat
-- [ ] Inspect and reuse current roles, approval functions, policies and chat entry points
-- [ ] Enable moderator seller approvals and constrain product moderation without granting role management or super-admin tools
-- [ ] Secure existing conversation creation and buyer–seller messaging against unauthorized participants
+- [x] Inspect and reuse current roles, approval functions, policies and chat entry points
+- [x] Enable moderator seller approvals and constrain product moderation without granting role management or super-admin tools
+- [x] Secure current/legacy conversation creation, multi-seller order contact actions and message writes against unauthorized participants
 - [ ] Run isolated permission/flow tests and confirm automatic build; live mutations require disposable authorized test accounts
 
 ## Seller My Store settings

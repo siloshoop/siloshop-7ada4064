@@ -19,6 +19,7 @@ import {
   ShoppingCart, Ban,
 } from "lucide-react";
 import { broadcastActivationChange } from "@/lib/activationSync";
+import { useStaffRole } from "@/hooks/useStaffRole";
 
 type Status = "pending" | "approved" | "rejected" | "draft" | "hidden" | "archived";
 
@@ -77,6 +78,8 @@ const SORTS = [
 
 const ProductModeration = () => {
   const { toast } = useToast();
+  const { role } = useStaffRole();
+  const isModerator = role === "moderator";
   const [status, setStatus] = useState<Status>("pending");
   const [rows, setRows] = useState<ProductRow[]>([]);
   const [total, setTotal] = useState(0);
@@ -165,7 +168,7 @@ const ProductModeration = () => {
 
   useEffect(() => { setPage(0); }, [status, search, brandId, categoryId, sort]);
 
-  const moderate = async (product: ProductRow, action: "approve" | "reject" | "suspend", why?: string) => {
+  const moderate = async (product: ProductRow, action: "approve" | "reject" | "suspend" | "hide", why?: string) => {
     setWorking(true);
     const { error } = await supabase.rpc("admin_moderate_product", {
       _product_id: product.id,
@@ -179,7 +182,7 @@ const ProductModeration = () => {
     }
     toast({
       title:
-        action === "approve" ? "تم اعتماد المنتج" : action === "suspend" ? "تم تعليق المنتج" : "تم رفض المنتج",
+        action === "approve" ? "تم اعتماد المنتج" : action === "hide" ? "تم إخفاء المنتج" : action === "suspend" ? "تم تعليق المنتج" : "تم رفض المنتج",
     });
     setRejecting(null);
     setSuspending(null);
@@ -417,6 +420,7 @@ const ProductModeration = () => {
                 </div>
 
                 <div className="flex flex-wrap gap-2">
+                  {!isModerator && <>
                   <Button
                     size="sm"
                     variant={p.is_featured ? "default" : "outline"}
@@ -453,6 +457,7 @@ const ProductModeration = () => {
                   >
                     {p.is_active ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                   </Button>
+                  </>}
                   <Button asChild variant="outline" size="sm">
                     <Link to={`/product/${p.id}`}>
                       <ExternalLink className="me-1 h-4 w-4" /> عرض
@@ -473,14 +478,14 @@ const ProductModeration = () => {
                       <X className="me-1 h-4 w-4" /> رفض
                     </Button>
                   )}
-                  {isSuperAdmin && p.moderation_status === "approved" && (
+                  {(isSuperAdmin || isModerator) && p.moderation_status === "approved" && (
                     <Button
                       size="sm"
                       variant="outline"
                       onClick={() => { setSuspending(p); setReason(""); }}
                       disabled={working}
                     >
-                      <EyeOff className="me-1 h-4 w-4" /> تعليق
+                      <EyeOff className="me-1 h-4 w-4" /> {isModerator ? "إخفاء" : "تعليق"}
                     </Button>
                   )}
                   {isSuperAdmin && (
@@ -513,12 +518,13 @@ const ProductModeration = () => {
                   <X className="me-1 h-4 w-4" /> رفض المحدد
                 </Button>
               )}
-              <Button size="sm" variant="outline" disabled={working} onClick={() => bulkFlags({ is_featured: true })}>
+              {!isModerator && <><Button size="sm" variant="outline" disabled={working} onClick={() => bulkFlags({ is_featured: true })}>
                 <Sparkles className="me-1 h-4 w-4" /> تمييز
               </Button>
               <Button size="sm" variant="outline" disabled={working} onClick={() => bulkFlags({ is_active: false })}>
                 <EyeOff className="me-1 h-4 w-4" /> إخفاء
               </Button>
+              </>}
               {working && <Loader2 className="h-4 w-4 animate-spin text-primary" />}
             </div>
           )}
@@ -546,7 +552,7 @@ const ProductModeration = () => {
         <DialogContent dir="rtl">
           <DialogHeader>
             <DialogTitle>
-              {suspending ? "تعليق المنتج" : bulkRejecting ? `رفض ${selected.size} منتج` : "رفض المنتج"}
+              {suspending ? isModerator ? "إخفاء المنتج" : "تعليق المنتج" : bulkRejecting ? `رفض ${selected.size} منتج` : "رفض المنتج"}
             </DialogTitle>
           </DialogHeader>
           <Textarea
@@ -566,7 +572,7 @@ const ProductModeration = () => {
               variant="destructive"
               disabled={working || !reason.trim()}
               onClick={() => {
-                if (suspending) void moderate(suspending, "suspend", reason.trim());
+                if (suspending) void moderate(suspending, isModerator ? "hide" : "suspend", reason.trim());
                 else if (bulkRejecting) void bulkModerate("reject", reason.trim());
                 else if (rejecting) void moderate(rejecting, "reject", reason.trim());
               }}

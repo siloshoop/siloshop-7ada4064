@@ -219,7 +219,7 @@ const App = () => (
             <Route path="/dashboard/activity-logs" element={<RequireRole role="admin"><ActivityLogs /></RequireRole>} />
             <Route path="/dashboard/showroom" element={<RequireRole role="super_admin"><ShowroomManagement /></RequireRole>} />
             <Route path="/dashboard/showroom/audit" element={<RequireRole role={["admin","super_admin"]}><ShowroomAuditLog /></RequireRole>} />
-            <Route path="/dashboard/sellers" element={<RequireRole role="admin"><SellerManagement /></RequireRole>} />
+            <Route path="/dashboard/sellers" element={<RequireRole role="moderator"><SellerManagement /></RequireRole>} />
             <Route path="/dashboard/platform-products" element={<RequireRole role="super_admin"><PlatformProducts /></RequireRole>} />
             <Route path="/dashboard/reports" element={<RequireRole role="admin"><Reports /></RequireRole>} />
             <Route path="/dashboard/admin-orders" element={<RequireRole role="admin"><AdminOrders /></RequireRole>} />
@@ -229,8 +229,8 @@ const App = () => (
             <Route path="/admin" element={<RequireRole role="admin"><AdminHome /></RequireRole>} />
             <Route path="/admin/buyers" element={<RequireRole role="admin"><AdminUsers mode="buyers" /></RequireRole>} />
             <Route path="/admin/sellers" element={<RequireRole role="admin"><AdminUsers mode="sellers" /></RequireRole>} />
-            <Route path="/admin/seller-applications" element={<RequireRole role="admin"><SellerManagement /></RequireRole>} />
-            <Route path="/admin/products" element={<RequireRole role="admin"><ProductModeration /></RequireRole>} />
+            <Route path="/admin/seller-applications" element={<RequireRole role="moderator"><SellerManagement /></RequireRole>} />
+            <Route path="/admin/products" element={<RequireRole role="moderator"><ProductModeration /></RequireRole>} />
             <Route path="/admin/orders" element={<RequireRole role="admin"><AdminOrders /></RequireRole>} />
             <Route path="/admin/categories" element={<RequireRole role="admin"><ManageCategoriesAdmin /></RequireRole>} />
             <Route path="/admin/brands" element={<RequireRole role="admin"><ManageBrands /></RequireRole>} />

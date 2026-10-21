@@ -260,6 +260,27 @@
       "when": 1792388995672,
       "tag": "0036_seller_store_settings_guards",
       "breakpoints": true
+    },
+    {
+      "idx": 37,
+      "version": "7",
+      "when": 1792562112691,
+      "tag": "0037_existing_moderator_approvals_secure_chat",
+      "breakpoints": true
+    },
+    {
+      "idx": 38,
+      "version": "7",
+      "when": 1792562159403,
+      "tag": "0038_simplify_validated_chat_entry",
+      "breakpoints": true
+    },
+    {
+      "idx": 39,
+      "version": "7",
+      "when": 1792562346385,
+      "tag": "0039_moderator_product_flag_boundary",
+      "breakpoints": true
     }
   ]
 }

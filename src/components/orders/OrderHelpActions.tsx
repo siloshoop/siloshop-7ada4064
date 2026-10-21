@@ -8,14 +8,16 @@ interface Props {
   orderId?: string | null;
   vendorId?: string | null;
   vendorName?: string | null;
+  vendorIds?: string[];
 }
 
 /**
  * Post-purchase support: buyers can only contact the seller of this order
- * or report a delivery issue. No seller selection is possible.
+ * or report a delivery issue. Only sellers from the saved order are offered.
  */
-const OrderHelpActions = ({ orderId, vendorId, vendorName }: Props) => {
+const OrderHelpActions = ({ orderId, vendorId, vendorName, vendorIds }: Props) => {
   const navigate = useNavigate();
+  const sellers = vendorIds ?? (vendorId ? [vendorId] : []);
 
   return (
     <Card>
@@ -29,27 +31,29 @@ const OrderHelpActions = ({ orderId, vendorId, vendorName }: Props) => {
         <p className="text-sm text-muted-foreground">
           يمكنك التواصل مع بائع هذا الطلب مباشرة أو الإبلاغ عن مشكلة في التوصيل.
         </p>
-        {vendorId && (
+        {sellers.map((sellerId, index) => (
           <Button
+            key={sellerId}
             variant="outline"
             className="w-full"
-            onClick={() => navigate(`/chat/${vendorId}${orderId ? `?order=${orderId}` : ""}`)}
+            onClick={() => navigate(`/chat/${sellerId}${orderId ? `?order=${orderId}` : ""}`)}
           >
             <MessageCircle className="h-4 w-4 ml-2" />
-            التواصل مع البائع
+            التواصل مع البائع {sellers.length > 1 ? index + 1 : ""}
           </Button>
-        )}
-        {vendorId && (
+        ))}
+        {sellers.map((sellerId, index) => (
           <ReportDialog
+            key={`report-${sellerId}`}
             kind="seller"
-            targetId={vendorId}
+            targetId={sellerId}
             targetName={vendorName}
             variant="outline"
             size="default"
             className="w-full"
-            label="الإبلاغ عن مشكلة في التوصيل"
+            label={`الإبلاغ عن مشكلة في التوصيل${sellers.length > 1 ? ` — البائع ${index + 1}` : ""}`}
           />
-        )}
+        ))}
       </CardContent>
     </Card>
   );

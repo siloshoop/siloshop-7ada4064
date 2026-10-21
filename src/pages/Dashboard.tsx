@@ -50,6 +50,7 @@ const Dashboard = () => {
   const [filterStatus, setFilterStatus] = useState("all");
   const [sortBy, setSortBy] = useState("date-desc");
   const [isAdmin, setIsAdmin] = useState(false);
+  const [isModerator, setIsModerator] = useState(false);
   const [sellerApp, setSellerApp] = useState<{ status: string; rejection_reason: string | null } | null>(null);
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -123,10 +124,10 @@ const Dashboard = () => {
           .from("user_roles")
           .select("role")
           .eq("user_id", user.id)
-          .in("role", ["admin", "super_admin"])
-          .limit(1);
+          .in("role", ["admin", "super_admin", "moderator"]);
 
-        setIsAdmin(!!adminRoles && adminRoles.length > 0);
+        setIsAdmin((adminRoles ?? []).some((r) => r.role === "admin" || r.role === "super_admin"));
+        setIsModerator((adminRoles ?? []).some((r) => r.role === "moderator"));
 
         // Detect pending/rejected/suspended seller application
         const { data: appRow } = await supabase
@@ -371,6 +372,12 @@ const Dashboard = () => {
           </p>
         </div>
 
+        {isModerator && !isAdmin && (
+          <div className="mb-6 flex flex-wrap gap-3">
+            <Button asChild><Link to="/admin/seller-applications">طلبات الانتساب</Link></Button>
+            <Button asChild variant="outline"><Link to="/admin/products">منتجات البائعين</Link></Button>
+          </div>
+        )}
         {/* Admin User Statistics */}
         {isAdmin && (
           <Card className="mb-8">

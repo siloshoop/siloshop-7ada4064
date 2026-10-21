@@ -36,6 +36,9 @@ const Chat = () => {
 
     const init = async () => {
       setLoading(true);
+      setError(null);
+      setConversationId(null);
+      setPeer(null);
       const [{ data: profiles }, { data: convId, error: rpcError }] = await Promise.all([
         supabase.rpc("get_vendor_public_info", { vendor_id: vendorId }),
         supabase.rpc("start_conversation", {

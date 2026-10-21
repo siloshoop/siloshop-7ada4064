@@ -1,5 +1,6 @@
 import "@testing-library/jest-dom";
 
+if (typeof window !== "undefined") {
 Object.defineProperty(window, "matchMedia", {
   writable: true,
   value: (query: string) => ({
@@ -31,3 +32,4 @@ Object.defineProperty(window, "IntersectionObserver", {
   writable: true,
   value: MockIntersectionObserver,
 });
+}

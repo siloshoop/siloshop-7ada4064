@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useStaffRole } from "@/hooks/useStaffRole";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
@@ -57,6 +58,8 @@ const statusLabel: Record<Status, string> = {
 
 const SellerManagement = () => {
   const { toast } = useToast();
+  const { role } = useStaffRole();
+  const canManageSeller = role === "admin" || role === "super_admin";
   const [rows, setRows] = useState<AppRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState<Status | "all">("pending");
@@ -299,19 +302,19 @@ const SellerManagement = () => {
                     </Button>
                   </>
                 )}
-                {selected.status === "approved" && (
+                {canManageSeller && selected.status === "approved" && (
                   <Button variant="outline" onClick={() => { setSuspending(selected); setReason(""); }}>
                     <PauseCircle className="h-4 w-4 ml-1" /> إيقاف
                   </Button>
                 )}
-                {selected.status === "suspended" && (
+                {canManageSeller && selected.status === "suspended" && (
                   <Button onClick={() => reactivate(selected)} disabled={busy} className="bg-emerald-600 hover:bg-emerald-700">
                     <PlayCircle className="h-4 w-4 ml-1" /> إعادة تفعيل
                   </Button>
                 )}
-                <Button variant="destructive" onClick={() => setDeleting(selected)}>
+                {canManageSeller && <Button variant="destructive" onClick={() => setDeleting(selected)}>
                   <Trash2 className="h-4 w-4 ml-1" /> حذف
-                </Button>
+                </Button>}
               </DialogFooter>
             </div>
           )}

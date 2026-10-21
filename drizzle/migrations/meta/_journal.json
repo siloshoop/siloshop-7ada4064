@@ -267,6 +267,13 @@
       "when": 1792562112691,
       "tag": "0037_existing_moderator_approvals_secure_chat",
       "breakpoints": true
+    },
+    {
+      "idx": 38,
+      "version": "7",
+      "when": 1792562159403,
+      "tag": "0038_simplify_validated_chat_entry",
+      "breakpoints": true
     }
   ]
 }

@@ -48,6 +48,8 @@ describe("existing moderator RBAC and secure chat (isolated PostgreSQL)", () => 
       CREATE TABLE chat_audit_log(conversation_id uuid,message_id uuid,actor_id uuid,action text,metadata jsonb);
       CREATE TABLE notifications(user_id uuid,title text,message text,type text,related_id uuid);
       CREATE TABLE product_moderation_log(product_id uuid,action text,reason text,performed_by uuid,from_status text,to_status text);
+      ALTER TABLE products ADD COLUMN is_featured boolean DEFAULT false, ADD COLUMN is_trending boolean DEFAULT false, ADD COLUMN is_recommended boolean DEFAULT false;
+      CREATE TABLE admin_audit_log(actor_id uuid,actor_role text,action text,target_type text,target_id uuid,old_value jsonb,new_value jsonb);
       CREATE TABLE storage.objects(bucket_id text,name text);
       CREATE FUNCTION storage.foldername(text) RETURNS text[] LANGUAGE sql AS $$ SELECT string_to_array($1,'/') $$;
       CREATE FUNCTION public.has_any_admin_role(_user_id uuid) RETURNS boolean LANGUAGE sql SECURITY DEFINER AS $$ SELECT EXISTS(SELECT 1 FROM user_roles WHERE user_id=_user_id AND role IN ('admin','super_admin','moderator')) $$;
@@ -75,6 +77,8 @@ describe("existing moderator RBAC and secure chat (isolated PostgreSQL)", () => 
     await db.exec(functions("supabase/migrations/20260822060306_e030cec2-f532-4550-b8fd-5343eae7c709.sql", ["send_chat_message"]));
     await db.exec(read("drizzle/migrations/0037_existing_moderator_approvals_secure_chat.sql"));
     await db.exec(read("drizzle/migrations/0038_simplify_validated_chat_entry.sql"));
+    await db.exec(functions("drizzle/migrations/0002_fix_admin_actions_and_product_flags.sql", ["admin_set_product_flags"]));
+    await db.exec(read("drizzle/migrations/0039_moderator_product_flag_boundary.sql"));
   }, 30000);
   beforeEach(async () => {
     await db.exec(`RESET ROLE; TRUNCATE profiles,user_roles,seller_applications,products,orders,order_items,conversations,messages,conversation_participants,notifications,product_moderation_log;
@@ -114,6 +118,13 @@ describe("existing moderator RBAC and secure chat (isolated PostgreSQL)", () => 
   });
   it("moderator cannot manage roles", async () => {
     await asUser(1); await expect(db.query(`SELECT admin_set_user_role('${id(2)}','super_admin',true,NULL)`)).rejects.toThrow("not_authorized");
+  });
+  it("moderator cannot bypass moderation with merchandising flags", async () => {
+    await asUser(1); await expect(db.query(`SELECT admin_set_product_flags('${id(24)}',true,NULL,NULL,true)`)).rejects.toThrow("not_authorized");
+  });
+  it("super admin retains platform flags", async () => {
+    await asUser(5); await db.query(`SELECT admin_set_product_flags('${id(24)}',true,NULL,NULL,true)`);
+    expect(await scalar(`SELECT is_featured AS value FROM products WHERE id='${id(24)}'`)).toBe(true);
   });
   it("super admin retains role management", async () => {
     await asUser(5); await db.query(`SELECT admin_set_user_role('${id(2)}','moderator',true,NULL)`);

@@ -581,3 +581,12 @@ All colors MUST be HSL.
     }
   }
 }
+
+/* Category palette uses the existing theme-aware pastel tokens. */
+.category-tone-rose { background-color: hsl(var(--pastel-rose)); color: hsl(var(--pastel-rose-fg)); }
+.category-tone-violet { background-color: hsl(var(--pastel-violet)); color: hsl(var(--pastel-violet-fg)); }
+.category-tone-sky { background-color: hsl(var(--pastel-sky)); color: hsl(var(--pastel-sky-fg)); }
+.category-tone-mint { background-color: hsl(var(--pastel-mint)); color: hsl(var(--pastel-mint-fg)); }
+.category-tone-peach { background-color: hsl(var(--pastel-peach)); color: hsl(var(--pastel-peach-fg)); }
+.category-tone-lemon { background-color: hsl(var(--pastel-lemon)); color: hsl(var(--pastel-lemon-fg)); }
+.category-tone-teal { background-color: hsl(var(--pastel-teal)); color: hsl(var(--pastel-teal-fg)); }

@@ -5,6 +5,9 @@ export interface Category {
   id: string;
   name_ar: string;
   icon: string | null;
+  color: string | null;
+  image_url: string | null;
+  sort_order: number;
 }
 
 export const useCategories = (enabled = true) => {
@@ -14,9 +17,9 @@ export const useCategories = (enabled = true) => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("categories")
-        .select("id, name_ar, icon")
+        .select("id, name_ar, icon, color, image_url, sort_order")
         .eq("is_active", true)
-        .order("name_ar");
+        .order("sort_order").order("name_ar");
       if (error) throw error;
       return data as Category[];
     },

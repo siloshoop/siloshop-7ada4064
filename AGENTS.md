@@ -27,3 +27,5 @@
 - Validate coupon dates through couponDates (local to UTC).
 - Reuse moderator approval RPCs and restrict moderator tools to seller/product reviews; validate product/order seller ownership in the shared chat RPC to prevent legacy bypasses.
 - Store settings update only the owner's approved seller_applications row; public contact RPC exposes business phone/address, never identity documents or admin fields.
+
+- Category appearance uses shared semantic palette/icon keys with legacy name-based fallbacks; owner category ordering uses a locked atomic RPC so equal sort values can be reordered safely.

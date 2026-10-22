@@ -97,6 +97,7 @@ const Categories = () => {
 
             {/* Leaf grid */}
             <section className="min-w-0 flex-1">
+              {!activeGroup && activeCat && <Link to={`/category/${activeCat}`} className="mb-3 block text-sm font-semibold text-primary hover:underline">عرض كل منتجات {cats.find((c) => c.id === activeCat)?.name_ar} ←</Link>}
               {activeGroup && (
                 <Link
                   to={`/subcategory/${activeCat}/${activeGroup}`}

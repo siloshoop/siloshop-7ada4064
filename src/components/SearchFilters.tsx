@@ -61,7 +61,7 @@ export const SearchFilters = ({ onFilterChange }: SearchFiltersProps) => {
 
   const fetchFilterData = async () => {
     const [categoriesRes, brandsRes] = await Promise.all([
-      supabase.from("categories").select("id, name_ar").order("name_ar"),
+      supabase.from("categories").select("id, name_ar").eq("is_active", true).order("name_ar"),
       supabase.from("brands").select("id, name_ar").eq("is_active", true).order("name_ar"),
     ]);
     if (categoriesRes.data) setCategories(categoriesRes.data);

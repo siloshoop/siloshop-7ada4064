@@ -93,7 +93,7 @@ const AddProduct = () => {
   useEffect(() => {
     const fetchData = async () => {
       const [{ data: categoriesData }, { data: subcategoriesData }] = await Promise.all([
-        supabase.from("categories").select("*").order("name_ar"),
+        supabase.from("categories").select("*").eq("is_active", true).order("name_ar"),
         supabase.from("subcategories").select("*").eq("is_active", true).order("sort_order")
       ]);
       setCategories(categoriesData || []);

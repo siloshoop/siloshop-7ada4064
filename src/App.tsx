@@ -232,7 +232,7 @@ const App = () => (
             <Route path="/admin/seller-applications" element={<RequireRole role="moderator"><SellerManagement /></RequireRole>} />
             <Route path="/admin/products" element={<RequireRole role="moderator"><ProductModeration /></RequireRole>} />
             <Route path="/admin/orders" element={<RequireRole role="admin"><AdminOrders /></RequireRole>} />
-            <Route path="/admin/categories" element={<RequireRole role="admin"><ManageCategoriesAdmin /></RequireRole>} />
+            <Route path="/admin/categories" element={<RequireRole role="super_admin"><ManageCategoriesAdmin /></RequireRole>} />
             <Route path="/admin/brands" element={<RequireRole role="admin"><ManageBrands /></RequireRole>} />
             <Route path="/admin/attributes" element={<RequireRole role="admin"><AdminAttributes /></RequireRole>} />
             <Route path="/admin/homepage" element={<RequireRole role={["admin","super_admin"]}><ShowroomManagement /></RequireRole>} />

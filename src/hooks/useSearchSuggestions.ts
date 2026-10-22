@@ -30,11 +30,12 @@ let popularPromise: Promise<string[]> | null = null;
 const productCache = new Map<string, ProductSuggestion[]>();
 
 const loadTaxonomies = (): Promise<Taxonomies> => {
-  if (taxonomyCache) return Promise.resolve(taxonomyCache);
+  // Fetch fresh active categories whenever the suggestions open.
+  taxonomyPromise = null;
   if (!taxonomyPromise) {
     taxonomyPromise = (async () => {
       const [cats, brands] = await Promise.all([
-        supabase.from("categories").select("id, name_ar").order("name_ar"),
+        supabase.from("categories").select("id, name_ar").eq("is_active", true).order("name_ar"),
         supabase.from("brands").select("id, name_ar").eq("is_active", true).order("name_ar"),
       ]);
       const result: Taxonomies = {

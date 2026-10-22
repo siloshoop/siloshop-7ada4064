@@ -72,6 +72,7 @@ export const ADMIN_MODULES: AdminModule[] = [
 export const FUTURE_MODULES = ADMIN_MODULES.filter((m) => !!m.featureFlag);
 
 export const canAccessAdminModule = (href: string, role: string | null) => {
+  if (href === "/admin/categories") return role === "super_admin";
   if (role === "super_admin" || role === "admin") return true;
   return role === "moderator" && ["/admin/seller-applications", "/admin/products"].includes(href);
 };

@@ -1,5 +1,10 @@
 # Production readiness audit
 
+## Platform owner category management
+- [ ] Reuse category management with Arabic name, icon, color, optional image, ordering and activation
+- [ ] Enforce super_admin-only writes while preserving public category reads and existing products
+- [ ] Verify category availability, permission tests and automatic build
+
 ## Existing moderator permissions and secure buyer–seller chat
 - [x] Inspect and reuse current roles, approval functions, policies and chat entry points
 - [x] Enable moderator seller approvals and constrain product moderation without granting role management or super-admin tools

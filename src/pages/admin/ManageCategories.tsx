@@ -16,6 +16,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Loader2, Plus, Pencil, FolderTree, ChevronUp, ChevronDown, Trash2 } from "lucide-react";
 import ImageUploadField from "@/components/ImageUploadField";
+import { CATEGORY_ICONS, CATEGORY_TONES, categoryAppearance } from "@/lib/categoryAppearance";
+import { useQueryClient } from "@tanstack/react-query";
 import { broadcastActivationChange } from "@/lib/activationSync";
 
 interface CategoryRow {
@@ -24,6 +26,7 @@ interface CategoryRow {
   name_ar: string;
   description: string | null;
   icon: string | null;
+  color: string | null;
   slug: string | null;
   image_url: string | null;
   banner_url: string | null;
@@ -40,6 +43,7 @@ const emptyForm = {
   name_ar: "",
   description: "",
   icon: "",
+  color: "",
   slug: "",
   image_url: "",
   banner_url: "",
@@ -61,6 +65,15 @@ const slugify = (text: string) =>
 
 const ManageCategories = () => {
   const { toast } = useToast();
+  const queryClient = useQueryClient();
+  const [imageBusy, setImageBusy] = useState(false);
+  const [bannerBusy, setBannerBusy] = useState(false);
+  const [reordering, setReordering] = useState(false);
+  const sync = (id: string) => {
+    void queryClient.invalidateQueries({ queryKey: ["public-navigation", "categories"] });
+    window.dispatchEvent(new Event("activation-changed"));
+    void broadcastActivationChange("categories", id);
+  };
   const [rows, setRows] = useState<CategoryRow[]>([]);
   const [counts, setCounts] = useState<Record<string, number>>({});
   const [childCounts, setChildCounts] = useState<Record<string, number>>({});
@@ -77,7 +90,7 @@ const ManageCategories = () => {
       supabase
         .from("categories")
         .select(
-          "id, name, name_ar, description, icon, slug, image_url, banner_url, seo_title, seo_description, seo_keywords, is_active, sort_order, parent_id",
+          "id, name, name_ar, description, icon, color, slug, image_url, banner_url, seo_title, seo_description, seo_keywords, is_active, sort_order, parent_id",
         )
         .order("sort_order", { ascending: true })
         .order("name_ar", { ascending: true }),
@@ -148,7 +161,7 @@ const ManageCategories = () => {
 
   const openNew = () => {
     setEditing(null);
-    setForm(emptyForm);
+    setForm({ ...emptyForm, sort_order: Math.max(-1, ...rows.map((row) => row.sort_order)) + 1 });
     setOpen(true);
   };
 
@@ -159,6 +172,7 @@ const ManageCategories = () => {
       name_ar: row.name_ar,
       description: row.description ?? "",
       icon: row.icon ?? "",
+      color: row.color ?? "",
       slug: row.slug ?? "",
       image_url: row.image_url ?? "",
       banner_url: row.banner_url ?? "",
@@ -173,16 +187,18 @@ const ManageCategories = () => {
   };
 
   const save = async () => {
-    if (!form.name_ar.trim() || !form.name.trim()) {
-      toast({ title: "الاسم بالعربية والإنجليزية مطلوب", variant: "destructive" });
+    if (saving || imageBusy || bannerBusy) return;
+    if (!form.name_ar.trim()) {
+      toast({ title: "الاسم بالعربية مطلوب", variant: "destructive" });
       return;
     }
     setSaving(true);
     const payload = {
-      name: form.name.trim(),
+      name: form.name.trim() || form.name_ar.trim(),
       name_ar: form.name_ar.trim(),
       description: form.description.trim() || null,
       icon: form.icon.trim() || null,
+      color: form.color || null,
       slug: (form.slug.trim() || slugify(form.name)) || null,
       image_url: form.image_url.trim() || null,
       banner_url: form.banner_url.trim() || null,
@@ -207,6 +223,7 @@ const ManageCategories = () => {
       name_ar: payload.name_ar,
     });
     setOpen(false);
+    sync(editing?.id ?? "new");
     void load();
   };
 
@@ -226,7 +243,7 @@ const ManageCategories = () => {
     }
     setRows((prev) => prev.map((r) => (r.id === row.id ? { ...r, is_active: data.is_active } : r)));
     toast({ title: data.is_active ? "تم تفعيل الفئة" : "تم إخفاء الفئة" });
-    void broadcastActivationChange("categories", row.id);
+    sync(row.id);
     void logAdminAction("category_visibility_changed", {
       category_id: row.id,
       is_active: data.is_active,
@@ -251,28 +268,21 @@ const ManageCategories = () => {
       return;
     }
     toast({ title: "تم حذف الفئة" });
+    sync(row.id);
     void logAdminAction("category_deleted", { category_id: row.id, name_ar: row.name_ar });
     void load();
   };
 
   const move = async (row: CategoryRow, direction: "up" | "down") => {
-    const siblings = rows
-      .filter((r) => (r.parent_id ?? null) === (row.parent_id ?? null))
-      .sort((a, b) => a.sort_order - b.sort_order || a.name_ar.localeCompare(b.name_ar));
-    const idx = siblings.findIndex((r) => r.id === row.id);
-    const swapIdx = direction === "up" ? idx - 1 : idx + 1;
-    if (swapIdx < 0 || swapIdx >= siblings.length) return;
-    const other = siblings[swapIdx];
-    const rowOrder = row.sort_order;
-    const otherOrder = other.sort_order;
-    const [{ error: e1 }, { error: e2 }] = await Promise.all([
-      supabase.from("categories").update({ sort_order: otherOrder }).eq("id", row.id),
-      supabase.from("categories").update({ sort_order: rowOrder }).eq("id", other.id),
-    ]);
-    if (e1 || e2) {
+    if (reordering) return;
+    setReordering(true);
+    const { error } = await supabase.rpc("reorder_category", { p_category_id: row.id, p_direction: direction });
+    setReordering(false);
+    if (error) {
       toast({ title: "تعذر إعادة الترتيب", variant: "destructive" });
       return;
     }
+    sync(row.id);
     void logAdminAction("category_reordered", { category_id: row.id, direction });
     void load();
   };
@@ -282,14 +292,14 @@ const ManageCategories = () => {
       title="إدارة الفئات"
       description="الفئات الرئيسية للمنصة وعدد المنتجات المرتبطة بكل فئة."
       actions={
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           <Button asChild variant="outline">
             <Link to="/admin/subcategories">
               <FolderTree className="me-1 h-4 w-4" /> الفئات الفرعية
             </Link>
           </Button>
           <Button onClick={openNew}>
-            <Plus className="me-1 h-4 w-4" /> فئة جديدة
+            <Plus className="me-1 h-4 w-4" /> إضافة فئة جديدة
           </Button>
         </div>
       }
@@ -302,8 +312,8 @@ const ManageCategories = () => {
         <div className="grid gap-3">
           {orderedRows.map(({ row: c, depth }) => (
             <Card key={c.id} style={{ marginInlineStart: depth * 24 }}>
-              <CardContent className="flex items-center gap-3 p-4">
-                <span className="text-2xl">{c.icon || "📦"}</span>
+              <CardContent className="flex flex-wrap items-center gap-3 p-4">
+                <span className={`category-tone-${categoryAppearance(c).tone} flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full`}>{(() => { const { Icon, emoji } = categoryAppearance(c); return c.image_url ? <img src={c.image_url} alt="" className="h-full w-full object-cover" /> : emoji || <Icon className="h-5 w-5" />; })()}</span>
                 <div className="min-w-0 flex-1">
                   <p className="truncate font-semibold">{c.name_ar}</p>
                   <p className="truncate text-xs text-muted-foreground">{c.name}</p>
@@ -314,10 +324,10 @@ const ManageCategories = () => {
                   {c.is_active ? "مفعّلة" : "مخفية"}
                 </Badge>
                 <div className="flex flex-col">
-                  <Button variant="ghost" size="icon" className="h-5 w-5" onClick={() => move(c, "up")} aria-label="تحريك للأعلى">
+                  <Button variant="ghost" size="icon" className="h-5 w-5" onClick={() => move(c, "up")} disabled={reordering} aria-label="تحريك للأعلى">
                     <ChevronUp className="h-3 w-3" />
                   </Button>
-                  <Button variant="ghost" size="icon" className="h-5 w-5" onClick={() => move(c, "down")} aria-label="تحريك للأسفل">
+                  <Button variant="ghost" size="icon" className="h-5 w-5" onClick={() => move(c, "down")} disabled={reordering} aria-label="تحريك للأسفل">
                     <ChevronDown className="h-3 w-3" />
                   </Button>
                 </div>
@@ -349,15 +359,16 @@ const ManageCategories = () => {
 
             <TabsContent value="basic" className="space-y-3">
               <div className="space-y-2">
-                <Label>الاسم بالعربية</Label>
+                <Label htmlFor="category-name-ar">الاسم بالعربية</Label>
                 <Input
+                  id="category-name-ar"
                   value={form.name_ar}
                   onChange={(e) => setForm({ ...form, name_ar: e.target.value })}
                   placeholder="الاسم بالعربية"
                 />
               </div>
               <div className="space-y-2">
-                <Label>الاسم بالإنجليزية</Label>
+                <Label>الاسم بالإنجليزية (اختياري)</Label>
                 <Input
                   value={form.name}
                   onChange={(e) => setForm({ ...form, name: e.target.value })}
@@ -373,12 +384,17 @@ const ManageCategories = () => {
                 />
               </div>
               <div className="space-y-2">
-                <Label>أيقونة (إيموجي)</Label>
-                <Input
-                  value={form.icon}
-                  onChange={(e) => setForm({ ...form, icon: e.target.value })}
-                  placeholder="أيقونة (إيموجي)"
-                />
+                <Label>الأيقونة</Label>
+                <div className="flex flex-wrap gap-1" role="group" aria-label="اختيار الأيقونة">
+                  {Object.entries(CATEGORY_ICONS).map(([name, Icon]) => <Button key={name} title={name} aria-label={name} size="icon" variant={form.icon === name ? "default" : "outline"} onClick={() => setForm({ ...form, icon: name })}><Icon className="h-5 w-5" /></Button>)}
+                </div>
+                <Input aria-label="أيقونة مخصصة" value={form.icon} onChange={(e) => setForm({ ...form, icon: e.target.value })} placeholder="أيقونة مخصصة (اختياري)" />
+              </div>
+              <div className="space-y-2">
+                <Label>اللون</Label>
+                <div className="flex flex-wrap gap-2" role="group" aria-label="اختيار اللون">
+                  {CATEGORY_TONES.map((tone) => <Button key={tone} title={tone} aria-label={tone} aria-pressed={form.color === tone} size="icon" variant="outline" className={form.color === tone ? "ring-2 ring-primary" : ""} onClick={() => setForm({ ...form, color: tone })}><span className={`category-tone-${tone} h-7 w-7 rounded-full`} /></Button>)}
+                </div>
               </div>
               <div className="space-y-2">
                 <Label>الفئة الأم</Label>
@@ -411,6 +427,8 @@ const ManageCategories = () => {
 
             <TabsContent value="media" className="space-y-3">
               <ImageUploadField
+                onBusyChange={setImageBusy}
+                disabled={saving}
                 label="صورة الفئة"
                 value={form.image_url}
                 onChange={(image_url) => setForm({ ...form, image_url })}
@@ -418,6 +436,8 @@ const ManageCategories = () => {
                 folder="platform/categories"
               />
               <ImageUploadField
+                onBusyChange={setBannerBusy}
+                disabled={saving}
                 label="صورة بانر الفئة"
                 value={form.banner_url}
                 onChange={(banner_url) => setForm({ ...form, banner_url })}
@@ -473,7 +493,7 @@ const ManageCategories = () => {
           </Tabs>
           <DialogFooter>
             <Button variant="outline" onClick={() => setOpen(false)}>إلغاء</Button>
-            <Button onClick={save} disabled={saving}>
+            <Button onClick={save} disabled={saving || imageBusy || bannerBusy}>
               {saving && <Loader2 className="me-2 h-4 w-4 animate-spin" />}
               حفظ
             </Button>

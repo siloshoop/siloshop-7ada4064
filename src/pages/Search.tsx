@@ -232,7 +232,7 @@ const SearchPage = () => {
   useEffect(() => {
     const fetchFilterData = async () => {
       const [categoriesRes, subcategoriesRes, vendorsRes, brandsRes] = await Promise.all([
-        supabase.from("categories").select("id, name_ar").order("name_ar"),
+        supabase.from("categories").select("id, name_ar").eq("is_active", true).order("name_ar"),
         supabase.from("subcategories").select("id, name_ar, category_id").eq("is_active", true).order("name_ar"),
         supabase.rpc("search_public_stores", { _term: null, _limit: 200 }),
         supabase.from("brands").select("id, name_ar").eq("is_active", true).order("name_ar"),

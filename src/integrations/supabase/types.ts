@@ -338,6 +338,7 @@ export type Database = {
       categories: {
         Row: {
           banner_url: string | null
+          color: string | null
           created_at: string | null
           description: string | null
           icon: string | null
@@ -356,6 +357,7 @@ export type Database = {
         }
         Insert: {
           banner_url?: string | null
+          color?: string | null
           created_at?: string | null
           description?: string | null
           icon?: string | null
@@ -374,6 +376,7 @@ export type Database = {
         }
         Update: {
           banner_url?: string | null
+          color?: string | null
           created_at?: string | null
           description?: string | null
           icon?: string | null
@@ -5201,6 +5204,10 @@ export type Database = {
       }
       reject_seller_application: {
         Args: { _app_id: string; _reason: string }
+        Returns: undefined
+      }
+      reorder_category: {
+        Args: { p_category_id: string; p_direction: string }
         Returns: undefined
       }
       restore_order_stock: {

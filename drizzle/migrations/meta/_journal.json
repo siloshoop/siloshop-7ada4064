@@ -281,6 +281,13 @@
       "when": 1792562346385,
       "tag": "0039_moderator_product_flag_boundary",
       "breakpoints": true
+    },
+    {
+      "idx": 40,
+      "version": "7",
+      "when": 1792649963308,
+      "tag": "0040_owner_category_management",
+      "breakpoints": true
     }
   ]
 }

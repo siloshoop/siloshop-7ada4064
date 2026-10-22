@@ -4,7 +4,8 @@
 - [x] Inspect and reuse current roles, approval functions, policies and chat entry points
 - [x] Enable moderator seller approvals and constrain product moderation without granting role management or super-admin tools
 - [x] Secure current/legacy conversation creation, multi-seller order contact actions and message writes against unauthorized participants
-- [ ] Run isolated permission/flow tests and confirm automatic build; live mutations require disposable authorized test accounts
+- [x] Run 218 automated tests including 23 isolated PostgreSQL permission/chat tests; automatic typecheck/build OK. Signed-in non-staff browser access denied on both review pages; existing messaging inbox renders without page errors.
+- [ ] Verify live moderator approvals and two-account message send/read-back (blocked: no authorized disposable moderator/buyer/seller test accounts; existing production applications and messages untouched).
 
 ## Seller My Store settings
 - [x] Inspect existing store fields, navigation, auth, RLS and storage: reused approved seller_applications; all 12 approved sellers have the protected vendor role, no duplicate approved profiles

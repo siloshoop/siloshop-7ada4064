@@ -7,6 +7,8 @@ import useFeatureFlags from "@/hooks/useFeatureFlags";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Loader2 } from "lucide-react";
+import AccessDenied from "@/pages/AccessDenied";
+import { Button } from "@/components/ui/button";
 import { ADMIN_MODULES, AdminModule, canAccessAdminModule } from "./adminModules";
 
 interface AdminLayoutProps {
@@ -43,7 +45,7 @@ const NavItem = ({ module, active }: { module: AdminModule; active: boolean }) =
 );
 
 const AdminLayout = ({ title, description, actions, children }: AdminLayoutProps) => {
-  const { role, loading } = useStaffRole();
+  const { role, loading, error, retry } = useStaffRole();
   const { modules } = useAdminModules();
   const { pathname } = useLocation();
 
@@ -54,7 +56,8 @@ const AdminLayout = ({ title, description, actions, children }: AdminLayoutProps
       </div>
     );
   }
-  if (!canAccessAdminModule(pathname, role)) return null;
+  if (error) return <div dir="rtl" className="flex min-h-[60vh] flex-col items-center justify-center gap-4"><p role="alert">تعذّر التحقق من صلاحيات الإدارة</p><Button onClick={() => void retry()}>إعادة المحاولة</Button></div>;
+  if (!canAccessAdminModule(pathname, role)) return <AccessDenied />;
 
   return (
     <div className="min-h-screen flex flex-col bg-background" dir="rtl">

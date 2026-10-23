@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import AccessDenied from "@/pages/AccessDenied";
+import { Button } from "@/components/ui/button";
 
 type Role = "vendor" | "customer" | "admin" | "super_admin" | "moderator";
 
@@ -24,13 +25,19 @@ const RequireRole = ({ role, children }: RequireRoleProps) => {
   const [checking, setChecking] = useState(true);
   const [allowed, setAllowed] = useState(false);
   const [denied, setDenied] = useState(false);
+  const [error, setError] = useState(false);
+  const [attempt, setAttempt] = useState(0);
   const navigate = useNavigate();
   const roles = Array.isArray(role) ? role : [role];
+  const roleKey = roles.join(",");
 
   useEffect(() => {
     if (loading) return;
+    let active = true;
+    setChecking(true); setAllowed(false); setDenied(false); setError(false);
     if (!user) {
       navigate("/auth");
+      setChecking(false);
       return;
     }
     (async () => {
@@ -39,45 +46,54 @@ const RequireRole = ({ role, children }: RequireRoleProps) => {
         const requestedAdminRoles = roles.filter((r) => ADMIN_ROLES.includes(r));
         if (requestedAdminRoles.length > 0) {
           for (const r of requestedAdminRoles) {
-            const { data } = await supabase.rpc("has_role", {
+            const { data, error: lookupError } = await supabase.rpc("has_role", {
               _user_id: user.id,
               _role: r as "admin" | "super_admin" | "moderator",
             });
+            if (lookupError) throw lookupError;
             if (data) { ok = true; break; }
           }
           // an admin/super_admin always satisfies a moderator-level route
           if (!ok && roles.includes("moderator")) {
-            const { data } = await supabase.rpc("has_any_admin_role", { _user_id: user.id });
+            const { data, error: lookupError } = await supabase.rpc("has_any_admin_role", { _user_id: user.id });
+            if (lookupError) throw lookupError;
             if (data) ok = true;
           }
           if (!ok && roles.includes("admin")) {
-            const { data } = await supabase.rpc("has_role", { _user_id: user.id, _role: "super_admin" });
+            const { data, error: lookupError } = await supabase.rpc("has_role", { _user_id: user.id, _role: "super_admin" });
+            if (lookupError) throw lookupError;
             if (data) ok = true;
           }
         }
         if (!ok && (roles.includes("vendor") || roles.includes("customer"))) {
-          const { data: profile } = await supabase
+          const { data: profile, error: profileError } = await supabase
             .from("profiles")
             .select("role")
             .eq("id", user.id)
             .single();
+          if (profileError) throw profileError;
           if (profile && roles.includes(profile.role as Role)) ok = true;
         }
+        if (!active) return;
         if (!ok) {
           setDenied(true);
           return;
         }
         setAllowed(true);
+      } catch {
+        if (active) setError(true);
       } finally {
-        setChecking(false);
+        if (active) setChecking(false);
       }
     })();
+    return () => { active = false; };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user, loading]);
+  }, [user, loading, roleKey, attempt]);
 
   if (loading || checking) return <Fallback />;
+  if (error) return <div dir="rtl" className="flex min-h-[60vh] flex-col items-center justify-center gap-4"><p role="alert">تعذّر التحقق من الصلاحيات</p><Button onClick={() => setAttempt((n) => n + 1)}>إعادة المحاولة</Button></div>;
   if (denied) return <AccessDenied requiredRole={roles[0]} />;
-  if (!allowed) return null;
+  if (!allowed) return <AccessDenied requiredRole={roles[0]} />;
   return <>{children}</>;
 };
 

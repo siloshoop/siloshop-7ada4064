@@ -1,5 +1,10 @@
 # Production readiness audit
 
+## Super Admin blank-page audit
+- [ ] Reproduce authenticated dashboard failures and inspect existing RBAC/query/render paths
+- [ ] Fix identified causes and provide nonblank loading/error/empty states without weakening permissions
+- [ ] Verify all admin routes plus buyer/seller regression checks, automated tests and automatic production build
+
 ## Platform owner category management
 - [x] Reuse category management with Arabic name, icon, semantic color, optional image, atomic ordering and activation
 - [x] Enforce super_admin-only category and category-image writes while preserving public reads and existing products

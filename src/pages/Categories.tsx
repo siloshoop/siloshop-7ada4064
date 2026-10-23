@@ -25,7 +25,7 @@ const Categories = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    (async () => {
+    const load = async () => {
       const [{ data: c }, { data: s }] = await Promise.all([
         supabase.from("categories").select("id,name_ar,image_url,sort_order").eq("is_active", true).is("parent_id", null).order("sort_order"),
         supabase.from("subcategories").select("id,category_id,parent_subcategory_id,name_ar,image_url,sort_order").eq("is_active", true).order("sort_order"),
@@ -33,7 +33,10 @@ const Categories = () => {
       setCats((c as Cat[]) || []);
       setSubs((s as Sub[]) || []);
       setLoading(false);
-    })();
+    };
+    void load();
+    window.addEventListener("activation-changed", load);
+    return () => window.removeEventListener("activation-changed", load);
   }, []);
 
   const activeCat = params.get("c") || cats[0]?.id;
@@ -41,7 +44,8 @@ const Categories = () => {
     () => subs.filter((s) => s.category_id === activeCat && !s.parent_subcategory_id),
     [subs, activeCat],
   );
-  const activeGroup = params.get("g") && groups.some((g) => g.id === params.get("g")) ? params.get("g")! : groups[0]?.id;
+  const requestedGroup = params.get("g");
+  const activeGroup = requestedGroup && groups.some((g) => g.id === requestedGroup) ? requestedGroup : groups[0]?.id;
   const leaves = subs.filter((s) => s.parent_subcategory_id === activeGroup);
 
   const pick = (c: string, g?: string) => {
@@ -84,7 +88,7 @@ const Categories = () => {
               {groups.map((g) => (
                 <button
                   key={g.id}
-                  onClick={() => pick(activeCat!, g.id)}
+                  onClick={() => { if (activeCat) pick(activeCat, g.id); }}
                   className={cn(
                     "block w-full rounded-md border-s-4 px-2 py-3 text-start text-xs font-semibold leading-snug sm:text-sm",
                     g.id === activeGroup ? "border-primary bg-primary/10 text-primary" : "border-transparent bg-muted text-foreground hover:bg-muted/70",

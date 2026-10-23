@@ -163,6 +163,10 @@ const PublicActivationSync = ({ children }: { children: ReactNode }) => {
       .channel(ACTIVATION_CHANNEL)
       .on("broadcast", { event: "changed" }, refresh);
     ACTIVATION_TABLES.forEach((table) => {
+      if (table === "categories") {
+        channel.on("postgres_changes", { event: "*", schema: "public", table }, refresh);
+        return;
+      }
       channel.on("postgres_changes", { event: "UPDATE", schema: "public", table }, (payload) => {
         const oldRow = payload.old as { is_active?: boolean };
         const newRow = payload.new as { is_active?: boolean };

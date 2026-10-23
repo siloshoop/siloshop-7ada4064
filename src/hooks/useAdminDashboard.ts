@@ -63,6 +63,7 @@ export const useAdminDashboard = (days = 30) => {
   const load = useCallback(
     async (silent = false) => {
       if (silent) setRefreshing(true);
+      try {
       const { data: res, error: rpcError } = await supabase.rpc("admin_dashboard_overview", {
         _days: days,
       });
@@ -73,8 +74,11 @@ export const useAdminDashboard = (days = 30) => {
         setError(null);
         setData(res as unknown as AdminDashboardData);
       }
-      setLoading(false);
-      setRefreshing(false);
+      } catch (cause) {
+        if (mounted.current) setError(cause instanceof Error ? cause.message : "تعذر تحميل المؤشرات");
+      } finally {
+        if (mounted.current) { setLoading(false); setRefreshing(false); }
+      }
     },
     [days],
   );

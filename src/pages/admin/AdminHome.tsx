@@ -96,7 +96,7 @@ const AdminHome = () => {
 
   const [split, setSplit] = useState<RevenueSplit | null>(null);
   useEffect(() => {
-    supabase.rpc("revenue_totals_by_currency", { _scope: "admin", _days: days }).then(({ data }) => setSplit((data as unknown as RevenueSplit) ?? null));
+    void Promise.resolve(supabase.rpc("revenue_totals_by_currency", { _scope: "admin", _days: days })).then(({ data, error }) => setSplit(error ? null : (data as unknown as RevenueSplit) ?? null)).catch(() => setSplit(null));
   }, [days, data]);
 
   const kpis = useMemo<Kpi[]>(() => {

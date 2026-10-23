@@ -14,6 +14,7 @@ import { ACTIVATION_CHANNEL } from "@/lib/activationSync";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import PageScrollReset from "@/components/PageScrollReset";
+import RouteErrorBoundary from "@/components/RouteErrorBoundary";
 
 // Lazy-loaded routes. Each becomes its own async chunk.
 const Auth = lazy(() => import("./pages/Auth"));
@@ -202,6 +203,7 @@ const App = () => (
           <BrowserRouter>
           <PageScrollReset />
           <PublicActivationSync>
+          <RouteErrorBoundary>
           <Suspense fallback={<RouteFallback />}>
           <Routes>
             <Route path="/" element={<Index />} />
@@ -324,6 +326,7 @@ const App = () => (
             <Route path="*" element={<NotFound />} />
           </Routes>
           </Suspense>
+          </RouteErrorBoundary>
           </PublicActivationSync>
           </BrowserRouter>
           </FlyToCartProvider>

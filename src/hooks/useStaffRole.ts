@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
+import { resolveStaffRole } from "@/lib/staffRole";
 
 export const useStaffRole = () => {
   const { user, loading } = useAuth();
@@ -9,11 +10,10 @@ export const useStaffRole = () => {
     enabled: !!user && !loading,
     queryFn: async () => {
       if (!user) return null;
-      const { data, error } = await supabase.rpc("actor_admin_role", { _user_id: user.id });
-      if (error) throw error;
-      return data === "admin" || data === "super_admin" || data === "moderator" ? data : null;
+      return resolveStaffRole((role) => supabase.rpc("has_role", { _user_id: user.id, _role: role }));
     },
     staleTime: 0,
+    retry: 1,
   });
-  return { role: query.data ?? null, loading: loading || (!!user && query.isPending) };
+  return { role: query.data ?? null, loading: loading || (!!user && query.isPending), error: query.error, retry: query.refetch };
 };

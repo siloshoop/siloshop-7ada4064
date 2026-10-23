@@ -128,6 +128,7 @@ const AdminOrders = () => {
 
   const load = useCallback(async () => {
     setLoading(true);
+    try {
     const { data, error } = await supabase.rpc("admin_list_orders", {
       _search: debounced || null,
       _status: status === "all" ? null : status,
@@ -145,7 +146,10 @@ const AdminOrders = () => {
       setRows(list);
       setTotal(list[0]?.total_count ?? 0);
     }
-    setLoading(false);
+    } catch (cause) {
+      toast({ title: "تعذر تحميل الطلبات", description: friendlyOrderError(cause), variant: "destructive" });
+      setRows([]); setTotal(0);
+    } finally { setLoading(false); }
   }, [debounced, status, payStatus, from, to, page, toast]);
 
   useEffect(() => { void load(); }, [load]);

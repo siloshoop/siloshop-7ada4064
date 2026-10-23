@@ -1,9 +1,10 @@
 # Production readiness audit
 
 ## Platform owner category management
-- [ ] Reuse category management with Arabic name, icon, color, optional image, ordering and activation
-- [ ] Enforce super_admin-only writes while preserving public category reads and existing products
-- [ ] Verify category availability, permission tests and automatic build
+- [x] Reuse category management with Arabic name, icon, semantic color, optional image, atomic ordering and activation
+- [x] Enforce super_admin-only category and category-image writes while preserving public reads and existing products
+- [x] Verify 227 tests including isolated permission/save-read-back cases; automatic TypeScript/build OK. Real signed-in non-owner is denied; 17 saved categories render in the drawer and public browsing works without page errors.
+- [ ] Verify real super_admin create/edit/reorder/deactivate and image upload end-to-end (blocked: available authorized session is not super_admin; existing production categories untouched).
 
 ## Existing moderator permissions and secure buyer–seller chat
 - [x] Inspect and reuse current roles, approval functions, policies and chat entry points

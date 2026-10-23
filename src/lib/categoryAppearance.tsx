@@ -34,5 +34,5 @@ export const CATEGORY_ICONS: Record<string, Icon> = { Footprints, Dress, Laptop,
 export const categoryAppearance = (category: { name_ar: string; icon?: string | null; color?: string | null }) => {
   const saved = CATEGORY_DEFAULTS.find((item) => item.name === category.name_ar);
   const tone = CATEGORY_TONES.includes(category.color as CategoryTone) ? category.color as CategoryTone : saved?.tone ?? "violet";
-  return { tone, Icon: CATEGORY_ICONS[category.icon ?? ""] ?? saved?.icon ?? Handbag, emoji: category.icon && !CATEGORY_ICONS[category.icon] && /\p{Extended_Pictographic}/u.test(category.icon) ? category.icon : null };
+  return { tone, Icon: (!category.color ? saved?.icon : undefined) ?? CATEGORY_ICONS[category.icon ?? ""] ?? saved?.icon ?? Handbag, emoji: category.icon && !CATEGORY_ICONS[category.icon] && /\p{Extended_Pictographic}/u.test(category.icon) ? category.icon : null };
 };

@@ -6,7 +6,7 @@ const mocks = vi.hoisted(() => ({ saved: [] as Record<string, unknown>[], rpc: v
 vi.mock("@/integrations/supabase/client", () => ({ supabase: { rpc: mocks.rpc, from: (table: string) => {
   const chain: any = { select: () => chain, order: () => chain, eq: () => chain, limit: () => chain,
     insert: async (payload: Record<string, unknown>) => { mocks.saved.push({ ...payload, id: 'saved-category' }); return {error:null}; },
-    then: (resolve: any) => resolve({data:table === 'categories' ? mocks.saved : [],error:null}) };
+    then: (resolve: any) => resolve({data:table === 'categories' ? [...mocks.saved] : [],error:null}) };
   return chain;
 } } }));
 vi.mock("@/hooks/use-toast", () => ({useToast:()=>({toast:mocks.toast})}));

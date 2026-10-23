@@ -18,6 +18,7 @@ import ManageCategories from "@/pages/admin/ManageCategories";
 beforeEach(() => {cleanup();vi.clearAllMocks();mocks.saved=[];});
 it("saves a new Arabic-only category with selected icon and palette and reads it back", async () => {
   render(<QueryClientProvider client={new QueryClient()}><MemoryRouter><ManageCategories /></MemoryRouter></QueryClientProvider>);
+  await waitFor(() => expect(document.querySelector('.animate-spin')).toBeNull());
   fireEvent.click(await screen.findByRole('button',{name:'إضافة فئة جديدة'}));
   fireEvent.change(screen.getByLabelText('الاسم بالعربية'),{target:{value:'فئة الاختبار'}});
   fireEvent.click(screen.getByRole('button',{name:'Laptop'}));
@@ -26,5 +27,5 @@ it("saves a new Arabic-only category with selected icon and palette and reads it
   await waitFor(()=>expect(mocks.saved).toHaveLength(1));
   expect(mocks.saved[0]).toMatchObject({name:'فئة الاختبار',name_ar:'فئة الاختبار',icon:'Laptop',color:'sky',is_active:true,image_url:null});
   await waitFor(()=>expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
-  expect(screen.getAllByText('فئة الاختبار').length).toBeGreaterThan(0);
+  expect((await screen.findAllByText('فئة الاختبار')).length).toBeGreaterThan(0);
 });

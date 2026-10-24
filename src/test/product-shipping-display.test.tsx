@@ -8,6 +8,7 @@ import {
   shippingCardLabel,
   shippingChargeAmount,
   shippingDetailLabel,
+  shippingSummaryLabel,
 } from "@/lib/shippingDisplay";
 
 const mocks = vi.hoisted(() => ({ from: vi.fn() }));
@@ -47,15 +48,27 @@ const renderCard = (props: { shippingCost?: number; shippingMode?: string | null
 };
 
 describe("shipping basis resolution", () => {
+  it("does not label company shipping as free in cart or checkout zero totals", () => {
+    const products = [{ shipping_mode: "variable", shipping_cost: 0 }];
+    expect(shippingSummaryLabel(products, 0, "USD")).toBe("حسب شركة الشحن");
+    expect(shippingSummaryLabel([{ shipping_mode: "free", shipping_cost: 0 }], 0, "USD")).toBe("شحن مجاني");
+    expect(shippingSummaryLabel([{ shipping_mode: null, shipping_cost: 0 }], 0, "USD")).toBe("طريقة الشحن غير محددة");
+  });
   it("keeps the seller's explicit choice", () => {
     expect(resolveShippingMode("free", 0)).toBe("free");
     expect(resolveShippingMode("fixed", 5000)).toBe("fixed");
     expect(resolveShippingMode("variable", 0)).toBe("variable");
   });
   it("derives the basis for rows saved before the choice existed", () => {
-    expect(resolveShippingMode(null, 0)).toBe("free");
+    expect(resolveShippingMode(null, 0)).toBeNull();
     expect(resolveShippingMode(null, 5000)).toBe("fixed");
-    expect(resolveShippingMode(undefined, undefined)).toBe("free");
+    expect(resolveShippingMode(undefined, undefined)).toBeNull();
+  });
+  it("requires an explicit free choice, never inferring it from zero or missing prices", () => {
+    expect(isFreeShipping(null, 0)).toBe(false);
+    expect(isFreeShipping(undefined, undefined)).toBe(false);
+    expect(isFreeShipping("free", 0)).toBe(true);
+    expect(isFreeShipping("free", 5000)).toBe(false);
   });
   it("never treats a shipping price as free shipping", () => {
     expect(isFreeShipping("fixed", 5000)).toBe(false);

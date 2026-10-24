@@ -28,7 +28,7 @@ import {
   totalsByCurrency,
   type ProductCurrency,
 } from "@/lib/currency";
-import { shippingDetailLabel } from "@/lib/shippingDisplay";
+import { shippingDetailLabel, shippingSummaryLabel } from "@/lib/shippingDisplay";
 import {
   SYRIAN_MOBILE_MAX_DIGITS,
   SYRIAN_MOBILE_PATTERN,
@@ -1003,9 +1003,9 @@ const Checkout = () => {
                       <div className="flex justify-between">
                         <span>الشحن</span>
                         <span>
-                          {t.shipping > 0
-                            ? formatPrice(t.shipping, t.currency, { maximumFractionDigits: 2 })
-                            : "مجاني"}
+                          {usePlatformRules
+                            ? platformRulesSource.free ? "شحن مجاني" : formatPrice(t.shipping, t.currency, { maximumFractionDigits: 2 })
+                            : shippingSummaryLabel(cartItems.filter((i) => normalizeCurrency(i.product.currency) === t.currency).map((i) => i.product), t.shipping, t.currency)}
                         </span>
                       </div>
                       <div className="border-t pt-2 flex justify-between font-bold text-lg">
@@ -1115,9 +1115,9 @@ const Checkout = () => {
 
                       <p className="text-xs text-muted-foreground border-t pt-2">
                         الشحن:{" "}
-                        {currencyTotals.some((t) => t.shipping > 0)
-                          ? currencyTotals.filter((t) => t.shipping > 0).map((t) => formatPrice(t.shipping, t.currency)).join(" + ")
-                          : "شحن مجاني"}
+                        {platformRulesSource.free
+                          ? "شحن مجاني"
+                          : currencyTotals.map((t) => formatPrice(t.shipping, t.currency)).join(" + ")}
                       </p>
                     </div>
                   )}

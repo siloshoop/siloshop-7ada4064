@@ -384,7 +384,7 @@ const SearchPage = () => {
       // Free shipping
       if (filters.freeShipping) {
         // Free means free: a fixed price or a shipping-company price is not free shipping.
-        query = query.eq("shipping_cost", 0).or("shipping_mode.is.null,shipping_mode.neq.variable");
+        query = query.eq("shipping_cost", 0).eq("shipping_mode", "free");
       }
 
       // Country of origin (local seller vs. imported platform products)

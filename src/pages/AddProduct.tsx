@@ -13,7 +13,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { CURRENCY_OPTIONS, currencySymbol } from "@/lib/currency";
-import { SHIPPING_MODE_OPTIONS, type ShippingMode } from "@/lib/shippingDisplay";
+import { SHIPPING_MODE_OPTIONS, isShippingMode, type ShippingMode } from "@/lib/shippingDisplay";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, Upload, ChevronLeft, X } from "lucide-react";
@@ -60,7 +60,7 @@ const AddProduct = () => {
     min_order_quantity: "1",
     max_order_quantity: "",
     shipping_cost: "0",
-    shipping_mode: "free" as ShippingMode,
+    shipping_mode: "" as ShippingMode | "",
     ships_within_days: "",
     video_url: "",
     category_id: "",
@@ -191,6 +191,11 @@ const AddProduct = () => {
   const handleSubmit = async (e: React.FormEvent, asDraft = false) => {
     e.preventDefault();
     if (!user) return;
+
+    if (!isShippingMode(formData.shipping_mode)) {
+      toast({ title: "طريقة الشحن مطلوبة", description: "يرجى اختيار طريقة الشحن", variant: "destructive" });
+      return;
+    }
 
     setLoading(true);
     try {

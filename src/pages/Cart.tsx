@@ -15,7 +15,7 @@ import {
   normalizeCurrency,
   totalsByCurrency,
 } from "@/lib/currency";
-import { shippingDetailLabel } from "@/lib/shippingDisplay";
+import { shippingDetailLabel, shippingSummaryLabel, isFreeShipping } from "@/lib/shippingDisplay";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import CartRecommendations from "@/components/CartRecommendations";
@@ -932,10 +932,8 @@ const Cart = () => {
                           <Truck className="h-3.5 w-3.5" />
                           تكلفة التوصيل
                         </span>
-                        <span className={t.shipping === 0 ? "text-green-600 font-medium" : ""}>
-                          {t.shipping === 0
-                            ? "مجاني"
-                            : formatPrice(t.shipping, t.currency, { maximumFractionDigits: 2 })}
+                        <span className={cartItems.filter((i) => normalizeCurrency(i.product.currency) === t.currency).every((i) => isFreeShipping(i.product.shipping_mode, i.product.shipping_cost)) ? "text-success font-medium" : ""}>
+                          {shippingSummaryLabel(cartItems.filter((i) => normalizeCurrency(i.product.currency) === t.currency).map((i) => i.product), t.shipping, t.currency)}
                         </span>
                       </div>
 

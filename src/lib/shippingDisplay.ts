@@ -74,3 +74,22 @@ export const shippingChargeAmount = (
   shippingMode?: string | null,
   shippingCost?: number | null,
 ): number => (resolveShippingMode(shippingMode, shippingCost) === "fixed" ? Number(shippingCost ?? 0) : 0);
+
+/** A zero checkout subtotal does not mean the shipping company waived its fee. */
+export const shippingSummaryLabel = (
+  products: { shipping_mode?: string | null; shipping_cost?: number | null }[],
+  amount: number,
+  currency?: string | null,
+): string => {
+  const labels: string[] = [];
+  if (amount > 0) labels.push(formatPrice(amount, currency));
+  if (products.some((p) => resolveShippingMode(p.shipping_mode, p.shipping_cost) === "variable")) {
+    labels.push("حسب شركة الشحن");
+  }
+  if (products.some((p) => resolveShippingMode(p.shipping_mode, p.shipping_cost) === null)) {
+    labels.push("طريقة الشحن غير محددة");
+  }
+  if (labels.length) return labels.join(" + ");
+  if (products.length > 0 && products.every((p) => isFreeShipping(p.shipping_mode, p.shipping_cost))) return "شحن مجاني";
+  return products.length ? formatPrice(amount, currency) : "طريقة الشحن غير محددة";
+};

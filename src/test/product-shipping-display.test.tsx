@@ -53,9 +53,15 @@ describe("shipping basis resolution", () => {
     expect(resolveShippingMode("variable", 0)).toBe("variable");
   });
   it("derives the basis for rows saved before the choice existed", () => {
-    expect(resolveShippingMode(null, 0)).toBe("free");
+    expect(resolveShippingMode(null, 0)).toBeNull();
     expect(resolveShippingMode(null, 5000)).toBe("fixed");
-    expect(resolveShippingMode(undefined, undefined)).toBe("free");
+    expect(resolveShippingMode(undefined, undefined)).toBeNull();
+  });
+  it("requires an explicit free choice, never inferring it from zero or missing prices", () => {
+    expect(isFreeShipping(null, 0)).toBe(false);
+    expect(isFreeShipping(undefined, undefined)).toBe(false);
+    expect(isFreeShipping("free", 0)).toBe(true);
+    expect(isFreeShipping("free", 5000)).toBe(false);
   });
   it("never treats a shipping price as free shipping", () => {
     expect(isFreeShipping("fixed", 5000)).toBe(false);

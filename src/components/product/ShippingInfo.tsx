@@ -1,5 +1,5 @@
 import { formatPrice } from "@/lib/currency";
-import { isFreeShipping, resolveShippingMode } from "@/lib/shippingDisplay";
+import { isFreeShipping, resolveShippingMode, shippingDetailLabel } from "@/lib/shippingDisplay";
 import { Truck, RotateCcw, Banknote, MapPin, Clock } from "lucide-react";
 
 interface Props {
@@ -23,7 +23,9 @@ const ShippingInfo = ({ shippingCost, shippingMode, shipsWithinDays, isPlatform,
         ? "شحن مجاني"
         : shippingByCompany
         ? "حسب شركة الشحن — يُحدد عند التجهيز"
-        : `${formatPrice(shippingCost, currency)} — يحددها البائع لكل منتج`,
+         : resolveShippingMode(shippingMode, shippingCost) === null
+         ? shippingDetailLabel(shippingMode, shippingCost, currency)
+         : `${formatPrice(shippingCost, currency)} — يحددها البائع لكل منتج`,
     },
     {
       icon: Clock,

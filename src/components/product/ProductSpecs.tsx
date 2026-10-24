@@ -1,4 +1,5 @@
-import { formatPrice, isKnownCurrency, normalizeCurrency } from "@/lib/currency";
+import { isKnownCurrency, normalizeCurrency } from "@/lib/currency";
+import { shippingDetailLabel } from "@/lib/shippingDisplay";
 interface Props {
   product: Record<string, any>;
   vendorName?: string | null;
@@ -39,9 +40,7 @@ const ProductSpecs = ({ product, vendorName, categoryName, brandName }: Props) =
   );
   push(
     "تكلفة الشحن",
-    product.shipping_cost && Number(product.shipping_cost) > 0
-      ? formatPrice(product.shipping_cost, product.currency)
-      : "شحن مجاني",
+    shippingDetailLabel(product.shipping_mode, product.shipping_cost, product.currency),
   );
   push(
     "مدة الشحن",

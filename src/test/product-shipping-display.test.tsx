@@ -8,6 +8,7 @@ import {
   shippingCardLabel,
   shippingChargeAmount,
   shippingDetailLabel,
+  shippingSummaryLabel,
 } from "@/lib/shippingDisplay";
 
 const mocks = vi.hoisted(() => ({ from: vi.fn() }));
@@ -47,6 +48,12 @@ const renderCard = (props: { shippingCost?: number; shippingMode?: string | null
 };
 
 describe("shipping basis resolution", () => {
+  it("does not label company shipping as free in cart or checkout zero totals", () => {
+    const products = [{ shipping_mode: "variable", shipping_cost: 0 }];
+    expect(shippingSummaryLabel(products, 0, "USD")).toBe("حسب شركة الشحن");
+    expect(shippingSummaryLabel([{ shipping_mode: "free", shipping_cost: 0 }], 0, "USD")).toBe("شحن مجاني");
+    expect(shippingSummaryLabel([{ shipping_mode: null, shipping_cost: 0 }], 0, "USD")).toBe("طريقة الشحن غير محددة");
+  });
   it("keeps the seller's explicit choice", () => {
     expect(resolveShippingMode("free", 0)).toBe("free");
     expect(resolveShippingMode("fixed", 5000)).toBe("fixed");

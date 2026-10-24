@@ -16,14 +16,13 @@ vi.mock("@/components/seller/ProductColorsSizesEditor", () => ({ default: () => 
 vi.mock("@/lib/productVariantsSync", () => ({ syncColorSizeVariants: async () => {}, COLOR_ATTR: "color", SIZE_ATTR: "size" }));
 vi.mock("@/integrations/supabase/client", () => ({ supabase: {
   from: (table: string) => {
-    let updating = false;
     const chain: any = {
       select: () => chain,
       eq: (...args: any[]) => { mocks.eq(...args); return chain; },
       order: async () => ({ data: [] }),
       single: async () => ({ data: { ...mocks.saved, images: [...mocks.saved.images] }, error: null }),
       maybeSingle: async () => ({ data: { moderation_status: "approved" }, error: null }),
-      update: (values: any) => { updating = true; mocks.update(values); Object.assign(mocks.saved, values); return chain; },
+      update: (values: any) => { mocks.update(values); Object.assign(mocks.saved, values); return chain; },
       then: (resolve: any) => resolve({ data: table === "products" ? mocks.saved : [], error: null }),
     };
     return chain;
@@ -35,9 +34,10 @@ import { resolveShippingMode, isFreeShipping } from "@/lib/shippingDisplay";
 
 beforeEach(() => {
   vi.clearAllMocks();
+  vi.stubGlobal("ResizeObserver", class { observe() {} unobserve() {} disconnect() {} });
   mocks.saved = { id: "shipping-fixture", vendor_id: mocks.user.id, name: "منتج اختبار الشحن", price: 20, currency: "USD", stock_quantity: 5, shipping_mode: "free", shipping_cost: 0, images: ["/placeholder.svg"], is_active: true };
 });
-afterEach(cleanup);
+afterEach(() => { cleanup(); vi.unstubAllGlobals(); });
 const edit = () => render(<MemoryRouter initialEntries={["/edit/shipping-fixture"]}><Routes><Route path="/edit/:id" element={<EditProduct />} /></Routes></MemoryRouter>);
 
 describe("seller shipping choice persistence", () => {

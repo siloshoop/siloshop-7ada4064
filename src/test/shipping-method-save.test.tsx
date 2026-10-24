@@ -44,7 +44,7 @@ describe("seller shipping choice persistence", () => {
   it("saves the company-selected mode, reloads it, and exposes the same saved mode to buyers", async () => {
     edit();
     await screen.findByDisplayValue("منتج اختبار الشحن");
-    fireEvent.click(screen.getByRole("button", { name: "الشحن", exact: true }));
+    fireEvent.click(screen.getByRole("button", { name: /^الشحن$/ }));
     fireEvent.click(screen.getByRole("radio", { name: /حسب شركة الشحن/ }));
     fireEvent.click(screen.getByRole("button", { name: "حفظ التغييرات" }));
     await waitFor(() => expect(mocks.update).toHaveBeenCalledWith(expect.objectContaining({ shipping_mode: "variable", shipping_cost: 0 })));
@@ -52,7 +52,7 @@ describe("seller shipping choice persistence", () => {
     cleanup();
     edit();
     await screen.findByDisplayValue("منتج اختبار الشحن");
-    fireEvent.click(screen.getByRole("button", { name: "الشحن", exact: true }));
+    fireEvent.click(screen.getByRole("button", { name: /^الشحن$/ }));
     expect(screen.getByRole("radio", { name: /حسب شركة الشحن/ })).toBeChecked();
     expect(resolveShippingMode(mocks.saved.shipping_mode, mocks.saved.shipping_cost)).toBe("variable");
     expect(isFreeShipping(mocks.saved.shipping_mode, mocks.saved.shipping_cost)).toBe(false);

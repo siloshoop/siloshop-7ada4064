@@ -42,6 +42,7 @@ interface CartItem {
     id: string;
     name: string;
     price: number;
+    currency?: string | null;
     image_url: string;
     stock_quantity: number;
     category_id: string;

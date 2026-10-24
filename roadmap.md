@@ -1,9 +1,10 @@
 # Production readiness audit
 
 ## Super Admin blank-page audit
-- [ ] Reproduce authenticated dashboard failures and inspect existing RBAC/query/render paths
-- [ ] Fix identified causes and provide nonblank loading/error/empty states without weakening permissions
-- [ ] Verify all admin routes plus buyer/seller regression checks, automated tests and automatic production build
+- [x] Reproduced blank admin pages with real super_admin session: actor_admin_role RPC returned 403 because it is not executable by authenticated clients; AdminLayout then returned null.
+- [x] Replaced internal audit-role lookup with existing callable has_role RBAC; added explicit permission error/denial states, route crash recovery and loading cleanup. No database structure, grants or RLS changes.
+- [x] Checked all 34 static admin routes using real super_admin session: no render errors or failed data requests after fix; verified saved order detail, category dialog without saving, dashboard aliases, buyer-facing pages and seller entry. 232 tests and automatic TypeScript/build passed.
+- [ ] Verify every privileged write and separate seller/buyer account workflows (blocked: no authorized disposable orders/accounts for destructive actions; production records intentionally unchanged).
 
 ## Platform owner category management
 - [x] Reuse category management with Arabic name, icon, semantic color, optional image, atomic ordering and activation

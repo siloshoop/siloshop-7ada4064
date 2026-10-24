@@ -1,5 +1,9 @@
 # Production readiness audit
 
+## Shipping method accuracy
+- [ ] Inspect saved seller choices and every buyer display; remove zero-cost free-shipping inference without modifying existing records.
+- [ ] Verify save/read-back and buyer rendering with isolated tests and live read-only product checks.
+
 ## Super Admin blank-page audit
 - [x] Reproduced blank admin pages with real super_admin session: actor_admin_role RPC returned 403 because it is not executable by authenticated clients; AdminLayout then returned null.
 - [x] Replaced internal audit-role lookup with existing callable has_role RBAC; added explicit permission error/denial states, route crash recovery and loading cleanup. No database structure, grants or RLS changes.

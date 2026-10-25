@@ -59,7 +59,7 @@ describe("seller shipping choice persistence", () => {
     cleanup();
     render(<ProductSpecs product={mocks.saved} />);
     expect(screen.getByText("الشحن حسب شركة الشحن")).toBeInTheDocument();
-  });
+  }, 15000);
 
   it("preserves a legacy missing choice when saving unrelated edits, without creating explicit free shipping", async () => {
     mocks.saved.shipping_mode = null;

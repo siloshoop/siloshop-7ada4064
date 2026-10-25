@@ -1555,6 +1555,7 @@ export type Database = {
           is_read: boolean
           message: string
           related_id: string | null
+          staff_event_key: string | null
           title: string
           type: string
           user_id: string
@@ -1565,6 +1566,7 @@ export type Database = {
           is_read?: boolean
           message: string
           related_id?: string | null
+          staff_event_key?: string | null
           title: string
           type?: string
           user_id: string
@@ -1575,6 +1577,7 @@ export type Database = {
           is_read?: boolean
           message?: string
           related_id?: string | null
+          staff_event_key?: string | null
           title?: string
           type?: string
           user_id?: string
@@ -3717,7 +3720,9 @@ export type Database = {
           return_policy: string | null
           reviewed_at: string | null
           reviewed_by: string | null
+          shipping_all_provinces: boolean
           shipping_policy: string | null
+          shipping_provinces: string[]
           status: Database["public"]["Enums"]["seller_status"]
           store_description: string | null
           store_name: string | null
@@ -3744,7 +3749,9 @@ export type Database = {
           return_policy?: string | null
           reviewed_at?: string | null
           reviewed_by?: string | null
+          shipping_all_provinces?: boolean
           shipping_policy?: string | null
+          shipping_provinces?: string[]
           status?: Database["public"]["Enums"]["seller_status"]
           store_description?: string | null
           store_name?: string | null
@@ -3771,7 +3778,9 @@ export type Database = {
           return_policy?: string | null
           reviewed_at?: string | null
           reviewed_by?: string | null
+          shipping_all_provinces?: boolean
           shipping_policy?: string | null
+          shipping_provinces?: string[]
           status?: Database["public"]["Enums"]["seller_status"]
           store_description?: string | null
           store_name?: string | null
@@ -4773,6 +4782,10 @@ export type Database = {
         Returns: undefined
       }
       archive_product: { Args: { _product_id: string }; Returns: string }
+      assert_order_shipping_regions: {
+        Args: { _address: string; _items: Json; _pickup_id: string }
+        Returns: undefined
+      }
       bootstrap_first_super_admin: { Args: { _email: string }; Returns: Json }
       build_cart_lines: { Args: { _items: Json }; Returns: Json }
       can_access_conversation_file: {
@@ -4980,6 +4993,14 @@ export type Database = {
           total_orders: number
         }[]
       }
+      get_vendor_shipping_regions: {
+        Args: { _vendor_ids: string[] }
+        Returns: {
+          shipping_all_provinces: boolean
+          shipping_provinces: string[]
+          vendor_id: string
+        }[]
+      }
       has_any_admin_role: { Args: { _user_id: string }; Returns: boolean }
       has_any_role: {
         Args: { _roles: string[]; _user_id: string }
@@ -5131,6 +5152,10 @@ export type Database = {
       }
       next_order_number: { Args: never; Returns: string }
       normalize_order_status: { Args: { _status: string }; Returns: string }
+      notify_staff_event: {
+        Args: { _event: string; _id: string; _message: string; _title: string }
+        Returns: undefined
+      }
       order_item_tracking_can_transition: {
         Args: { _from: string; _to: string }
         Returns: boolean
@@ -5366,6 +5391,10 @@ export type Database = {
         Args: { _amount: number; _details?: string; _method: string }
         Returns: string
       }
+      seller_update_shipping_regions: {
+        Args: { _all_provinces: boolean; _provinces: string[] }
+        Returns: undefined
+      }
       seller_update_store_profile: {
         Args: {
           _address?: string
@@ -5381,6 +5410,10 @@ export type Database = {
           _store_name?: string
           _working_hours?: string
         }
+        Returns: undefined
+      }
+      seller_update_store_settings: {
+        Args: { _all_provinces: boolean; _profile: Json; _provinces: string[] }
         Returns: undefined
       }
       seller_wallet_summary: { Args: never; Returns: Json }
@@ -5527,6 +5560,10 @@ export type Database = {
           _user_agent?: string
         }
         Returns: undefined
+      }
+      valid_shipping_provinces: {
+        Args: { _provinces: string[] }
+        Returns: boolean
       }
       validate_chat_target: {
         Args: {

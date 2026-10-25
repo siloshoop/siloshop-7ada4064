@@ -29,6 +29,8 @@ import {
   type ProductCurrency,
 } from "@/lib/currency";
 import { shippingDetailLabel, shippingSummaryLabel } from "@/lib/shippingDisplay";
+import { useShippingRegions } from "@/hooks/useShippingRegions";
+import { loadShippingRegions, shipsToProvince, shippingRegionsLabel } from "@/lib/shippingRegions";
 import {
   SYRIAN_MOBILE_MAX_DIGITS,
   SYRIAN_MOBILE_PATTERN,
@@ -123,6 +125,8 @@ interface PlatformPaymentSettings {
 const Checkout = () => {
   const { user, loading: authLoading } = useAuth();
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
+  const sellerIds = [...new Set(cartItems.filter((i) => i.product.product_type !== "platform").map((i) => i.product.vendor_id))];
+  const shippingRegions = useShippingRegions(sellerIds);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [couponCode, setCouponCode] = useState("");
@@ -548,6 +552,10 @@ const Checkout = () => {
 
     setSubmitting(true);
     try {
+      const freshRegions = await loadShippingRegions(sellerIds);
+      if (sellerIds.some((id) => !freshRegions.some((r) => r.vendor_id === id && shipsToProvince(r, formData.governorate)))) {
+        throw new Error(`البائع لا يشحن إلى محافظة ${formData.governorate}`);
+      }
       // Create order server-side via SECURITY DEFINER RPC.
       // Total, prices, shipping, and coupon redemption are computed from
       // the database — the client cannot tamper with total_amount.

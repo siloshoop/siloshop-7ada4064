@@ -1,5 +1,11 @@
 # Production readiness audit
 
+## Shipping provinces and staff alerts
+- [ ] Add seller-owned all/specific province settings and consistent buyer reads.
+- [ ] Enforce province eligibility server-side for every order and show checkout feedback.
+- [ ] Send deduplicated store-request, customer-signup and new-product alerts to owner/moderators.
+- [ ] Run isolated server/UI tests and live read-only checks; do not deploy.
+
 ## Shipping method accuracy
 - [x] Confirmed the pictured product already stores variable/0 correctly; specs ignored its mode, and cart/checkout summaries and search inferred free from zero. Centralized mode-aware display, explicit new-product choice, and preserved legacy missing choices without changing saved records or financial logic.
 - [x] Verified isolated seller select/save/reload and buyer specs, live saved product specs/shipping at 393/1280px without runtime errors, all 236 tests and automatic build OK.

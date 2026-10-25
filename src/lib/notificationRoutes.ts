@@ -10,6 +10,9 @@ export const notificationTarget = (
   type: string,
   relatedId?: string | null,
 ): string | null => {
+  if (type === "staff_store_request") return "/admin/seller-applications";
+  if (type === "staff_product_added") return "/admin/products";
+  if (type === "staff_customer_registered") return "/notifications";
   if (type === "seller_approved" || type === "seller_reactivated") return "/dashboard";
   if (type === "seller_rejected" || type === "seller_suspended") return "/seller/application";
   if (type === "account_activated" || type === "account_suspended" || type === "account_banned") {

@@ -14,11 +14,16 @@ import { resolveStoreAssetUrl } from "@/lib/storeAssets";
 import ImageUploadField from "@/components/ImageUploadField";
 import { Link } from "react-router-dom";
 import { EMPTY_STORE, storeSettingsSchema, storeSettingsArgs, type StoreSettings } from "@/lib/storeSettings";
+import ShippingProvinceFields from "@/components/seller/ShippingProvinceFields";
+import { validProvince, type ShippingRegions } from "@/lib/shippingRegions";
+import { useQueryClient } from "@tanstack/react-query";
 
 const SellerStore = () => {
   const { user } = useAuth();
   const { toast } = useToast();
   const [form, setForm] = useState<StoreSettings>(EMPTY_STORE);
+  const [regions, setRegions] = useState<ShippingRegions>({ shipping_all_provinces: true, shipping_provinces: [] });
+  const queryClient = useQueryClient();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
@@ -52,13 +57,14 @@ const SellerStore = () => {
     setLoadError(null);
     try {
       const { data, error } = await supabase.from("seller_applications")
-        .select("store_name,store_description,contact_email,contact_phone,address,city,logo_url,cover_image_url,working_hours,return_policy,shipping_policy,business_info")
+        .select("store_name,store_description,contact_email,contact_phone,address,city,logo_url,cover_image_url,working_hours,return_policy,shipping_policy,business_info,shipping_all_provinces,shipping_provinces")
         .eq("user_id", user.id).eq("status", "approved")
         .order("created_at", { ascending: false }).order("id", { ascending: false }).limit(1).maybeSingle();
       if (version !== readVersion.current) return;
       if (error) throw error;
       if (!data) throw new Error("لا يوجد متجر معتمد لهذا الحساب");
       setForm(Object.fromEntries(Object.keys(EMPTY_STORE).map((key) => [key, data[key as keyof typeof data] ?? ""])) as StoreSettings);
+      setRegions({ shipping_all_provinces: data.shipping_all_provinces ?? true, shipping_provinces: data.shipping_provinces ?? [] });
     } catch (error) {
       if (version === readVersion.current) setLoadError(error instanceof Error ? error.message : "تعذّر تحميل بيانات المتجر");
     } finally { if (version === readVersion.current) setLoading(false); }
@@ -77,6 +83,11 @@ const SellerStore = () => {
   const save = async () => {
     if (saving || logoBusy || coverBusy || loading || loadError || !user) return;
     const parsed = storeSettingsSchema.safeParse(form);
+    if ((!regions.shipping_all_provinces && !regions.shipping_provinces.length) || regions.shipping_provinces.some((p) => !validProvince(p))) {
+      setErrors(["اختر محافظة سورية واحدة على الأقل"]);
+      toast({ title: "تحقق من محافظات الشحن", description: "اختر محافظة سورية واحدة على الأقل", variant: "destructive" });
+      return;
+    }
     if (!parsed.success) {
       setErrors(parsed.error.issues.map((issue) => issue.message));
       toast({ title: "تحقق من بيانات المتجر", description: parsed.error.issues[0]?.message, variant: "destructive" });
@@ -85,9 +96,14 @@ const SellerStore = () => {
     setErrors([]);
     setSaving(true);
     try {
-      const { error } = await supabase.rpc("seller_update_store_profile", storeSettingsArgs(parsed.data));
+      const { error } = await supabase.rpc("seller_update_store_settings", {
+        _profile: storeSettingsArgs(parsed.data),
+        _all_provinces: regions.shipping_all_provinces,
+        _provinces: regions.shipping_all_provinces ? [] : regions.shipping_provinces,
+      });
       if (error) throw error;
       toast({ title: "تم حفظ بيانات المتجر" });
+      await queryClient.invalidateQueries({ queryKey: ["vendor-shipping-regions"] });
       await load();
     } catch (error) {
       toast({ title: "تعذّر حفظ بيانات المتجر", description: error instanceof Error ? error.message : "حاول مجددًا", variant: "destructive" });
@@ -204,6 +220,7 @@ const SellerStore = () => {
         <Card className="lg:col-span-2">
           <CardHeader className="pb-3"><CardTitle className="text-base">السياسات</CardTitle></CardHeader>
           <CardContent className="grid gap-3 lg:grid-cols-2">
+            <div className="lg:col-span-2"><ShippingProvinceFields value={regions} onChange={(value) => { setRegions(value); setErrors([]); }} /></div>
             <div className="space-y-1.5">
               <Label htmlFor="shipping_policy">سياسة الشحن</Label>
               <Textarea maxLength={5000} id="shipping_policy" rows={5} value={form.shipping_policy ?? ""} onChange={set("shipping_policy")} />

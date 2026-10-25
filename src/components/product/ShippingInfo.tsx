@@ -1,6 +1,7 @@
 import { formatPrice } from "@/lib/currency";
 import { isFreeShipping, resolveShippingMode, shippingDetailLabel } from "@/lib/shippingDisplay";
 import { Truck, RotateCcw, Banknote, MapPin, Clock } from "lucide-react";
+import { shippingRegionsLabel, type ShippingRegions } from "@/lib/shippingRegions";
 
 interface Props {
   shippingCost?: number | null;
@@ -8,10 +9,11 @@ interface Props {
   shipsWithinDays?: number | null;
   isPlatform?: boolean;
   currency?: string | null;
+  regions?: ShippingRegions | null;
 }
 
 /** Shipping details + return policy summary for the product page. */
-const ShippingInfo = ({ shippingCost, shippingMode, shipsWithinDays, isPlatform, currency }: Props) => {
+const ShippingInfo = ({ shippingCost, shippingMode, shipsWithinDays, isPlatform, currency, regions }: Props) => {
   const freeShipping = isFreeShipping(shippingMode, shippingCost);
   const shippingByCompany = resolveShippingMode(shippingMode, shippingCost) === "variable";
 
@@ -36,7 +38,7 @@ const ShippingInfo = ({ shippingCost, shippingMode, shipsWithinDays, isPlatform,
         ? "التوصيل المتوقع 7-14 يوم عمل"
         : "يتم التحضير والشحن عادة خلال 1-3 أيام عمل",
     },
-    { icon: MapPin, title: "مناطق التوصيل", value: "توصيل إلى جميع المحافظات السورية" },
+    { icon: MapPin, title: "مناطق التوصيل", value: isPlatform ? "جميع المحافظات السورية" : shippingRegionsLabel(regions) },
     {
       icon: Banknote,
       title: "طريقة الدفع",

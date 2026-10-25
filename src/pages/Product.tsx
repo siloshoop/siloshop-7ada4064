@@ -6,6 +6,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { formatPrice, currencySymbol } from "@/lib/currency";
 import { shippingDetailLabel } from "@/lib/shippingDisplay";
+import { useShippingRegions } from "@/hooks/useShippingRegions";
 import Navbar from "@/components/Navbar";
 import ProductOriginBadge from "@/components/product/ProductOriginBadge";
 import SellerInfoCard from "@/components/product/SellerInfoCard";
@@ -95,6 +96,7 @@ const Product = () => {
   const { id } = useParams();
   const { user } = useAuth();
   const [product, setProduct] = useState<Product | null>(null);
+  const shippingRegions = useShippingRegions([product?.vendor_id]);
   const [dealPct, setDealPct] = useState(0);
   useEffect(() => {
     if (!product?.id) return;
@@ -788,6 +790,7 @@ const Product = () => {
               <ShippingInfo
                 shippingCost={product.shipping_cost}
                 shippingMode={product.shipping_mode}
+                regions={shippingRegions.data?.find((r) => r.vendor_id === product.vendor_id)}
                 currency={product.currency}
                 shipsWithinDays={product.ships_within_days}
                 isPlatform={product.product_type === "platform"}

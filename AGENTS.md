@@ -1,4 +1,6 @@
 # Project architecture rules
+- Store province coverage on the existing approved seller application, save profile/coverage atomically, expose only coverage through a public RPC, and enforce every seller's coverage inside create_order before any write; defaults preserve existing all-province delivery.
+- Create owner/moderator event alerts at trusted database/auth lifecycle boundaries with per-recipient event keys; do not duplicate signup alerts from verification clients or grant moderators user-management access.
 - Resolve product shipping presentation through shippingDisplay, including specification tables and filters; zero cost never substitutes for a saved explicit free choice, and legacy unknown choices remain unchanged on edit.
 - Enrich legacy report RPC payloads with read-only, RLS-protected saved currency snapshots and paginate financial reads; never infer currencies from amounts or modify financial storage for presentation.
 - Keep mobile Navbar in two compact rows; the bottom Categories control opens the Navbar-owned drawer through the siloshop:open-categories event to preserve one shared menu and all secondary controls, and inset side sheets using both browser and native safe-area values; this preserves access without occupying the scrolling viewport or system bars.

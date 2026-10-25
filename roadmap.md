@@ -1,8 +1,9 @@
 # Production readiness audit
 
 ## Shipping method accuracy
-- [ ] Inspect saved seller choices and every buyer display; remove zero-cost free-shipping inference without modifying existing records.
-- [ ] Verify save/read-back and buyer rendering with isolated tests and live read-only product checks.
+- [x] Confirmed the pictured product already stores variable/0 correctly; specs ignored its mode, and cart/checkout summaries and search inferred free from zero. Centralized mode-aware display, explicit new-product choice, and preserved legacy missing choices without changing saved records or financial logic.
+- [x] Verified isolated seller select/save/reload and buyer specs, live saved product specs/shipping at 393/1280px without runtime errors, all 236 tests and automatic build OK.
+- [ ] Live seller mutation and authenticated buyer cart/checkout end-to-end (blocked: no authorized disposable seller/buyer data supplied; production products unchanged). No publication or Android changes.
 
 ## Super Admin blank-page audit
 - [x] Reproduced blank admin pages with real super_admin session: actor_admin_role RPC returned 403 because it is not executable by authenticated clients; AdminLayout then returned null.

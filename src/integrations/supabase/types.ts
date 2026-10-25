@@ -5412,6 +5412,10 @@ export type Database = {
         }
         Returns: undefined
       }
+      seller_update_store_settings: {
+        Args: { _all_provinces: boolean; _profile: Json; _provinces: string[] }
+        Returns: undefined
+      }
       seller_wallet_summary: { Args: never; Returns: Json }
       send_chat_message: {
         Args: {

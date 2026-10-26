@@ -28,7 +28,7 @@ describe("seller store settings", () => {
     render(<QueryClientProvider client={new QueryClient()}><MemoryRouter><SellerStore /></MemoryRouter></QueryClientProvider>);
     await screen.findByDisplayValue("متجر محفوظ");
     fireEvent.click(screen.getByRole("radio", { name: "محافظات محددة" }));
-    fireEvent.click(screen.getByRole("checkbox", { name: "دمشق", exact: true } as any));
+    fireEvent.click(screen.getByRole("checkbox", { name: /^دمشق$/ }));
     fireEvent.click(screen.getByRole("checkbox", { name: "حلب" }));
     fireEvent.click(screen.getByRole("button", { name: "حفظ" }));
     await waitFor(() => expect(mocks.rpc).toHaveBeenCalledWith("seller_update_store_settings", expect.objectContaining({ _all_provinces: false, _provinces: ["دمشق", "حلب"] })));

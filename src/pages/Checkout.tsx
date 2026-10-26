@@ -642,6 +642,11 @@ const Checkout = () => {
       navigate("/orders");
     } catch (error) {
       const message = String(error?.message || "");
+      if (message.includes("محافظة") || message.includes("محافظات")) {
+        toast({ title: "الشحن غير متاح", description: message, variant: "destructive" });
+        void shippingRegions.refetch();
+        return;
+      }
       if (message.includes("PLATFORM_MARKETPLACE_DISABLED") || message.includes("SHAM_CASH_DISABLED")) {
         toast({
           title: "غير متاح حالياً",
@@ -882,6 +887,13 @@ const Checkout = () => {
 
                   <div className="space-y-2">
                     <Label htmlFor="address">المحافظة *</Label>
+                    {sellerIds.length > 0 && <div className="space-y-1 text-sm">
+                      {shippingRegions.isPending ? <p className="text-muted-foreground">جاري التحقق من محافظات الشحن...</p> : shippingRegions.isError ? <p role="alert" className="text-destructive">تعذّر تحميل محافظات الشحن</p> : sellerIds.map((id) => {
+                        const regions = shippingRegions.data?.find((r) => r.vendor_id === id);
+                        const allowed = regions && (!formData.governorate || shipsToProvince(regions, formData.governorate));
+                        return <p key={id} className={allowed ? "text-muted-foreground" : "text-destructive"}>{shippingRegionsLabel(regions)}{regions && formData.governorate && !allowed ? ` — البائع لا يشحن إلى ${formData.governorate}` : ""}</p>;
+                      })}
+                    </div>}
                     <Select
                       value={formData.governorate}
                       onValueChange={(v) => setFormData({ ...formData, governorate: v })}

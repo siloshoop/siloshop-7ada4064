@@ -891,7 +891,7 @@ const Checkout = () => {
                       {shippingRegions.isPending ? <p className="text-muted-foreground">جاري التحقق من محافظات الشحن...</p> : shippingRegions.isError ? <p role="alert" className="text-destructive">تعذّر تحميل محافظات الشحن</p> : sellerIds.map((id) => {
                         const regions = shippingRegions.data?.find((r) => r.vendor_id === id);
                         const allowed = regions && (!formData.governorate || shipsToProvince(regions, formData.governorate));
-                        return <p key={id} className={allowed ? "text-muted-foreground" : "text-destructive"}>{shippingRegionsLabel(regions)}{regions && formData.governorate && !allowed ? ` — البائع لا يشحن إلى ${formData.governnorate ?? formData.governorate}` : ""}</p>;
+                        return <p key={id} className={allowed ? "text-muted-foreground" : "text-destructive"}>{shippingRegionsLabel(regions)}{regions && formData.governorate && !allowed ? ` — البائع لا يشحن إلى ${formData.governorate}` : ""}</p>;
                       })}
                     </div>}
                     <Select

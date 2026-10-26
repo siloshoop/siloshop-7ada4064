@@ -1,5 +1,10 @@
 # Production readiness audit
 
+## Website and mobile loading performance
+- [ ] Measure cold public home/search listing appearance and network costs on mobile/desktop before and after.
+- [ ] Diagnose database health/slow queries, product queries, images and rendering; fix verified bottlenecks without design/business/data changes.
+- [ ] Run regression tests and navigation checks; report measured results and physical Android/production verification limits.
+
 ## Shipping provinces and staff alerts
 - [x] Add seller-owned all/specific province settings, atomic profile/coverage save and shared buyer reads; preserve all-province delivery for all 15 existing applications.
 - [x] Enforce every seller's province eligibility inside create_order before writes, recheck fresh settings on checkout submission, show coverage/error feedback and refresh buyer coverage on focus/interval.

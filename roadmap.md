@@ -1,10 +1,11 @@
 # Production readiness audit
 
 ## Shipping provinces and staff alerts
-- [ ] Add seller-owned all/specific province settings and consistent buyer reads.
-- [ ] Enforce province eligibility server-side for every order and show checkout feedback.
-- [ ] Send deduplicated store-request, customer-signup and new-product alerts to owner/moderators.
-- [ ] Run isolated server/UI tests and live read-only checks; do not deploy.
+- [x] Add seller-owned all/specific province settings, atomic profile/coverage save and shared buyer reads; preserve all-province delivery for all 15 existing applications.
+- [x] Enforce every seller's province eligibility inside create_order before writes, recheck fresh settings on checkout submission, show coverage/error feedback and refresh buyer coverage on focus/interval.
+- [x] Send per-recipient deduplicated store-request, verified-customer-signup and new-product in-app alerts to active super_admin/moderator users; remove verification-client duplicate source and keep restricted navigation.
+- [x] All 246 tests pass, including isolated PostgreSQL guards/recipient/dedup/rollback and actual seller UI choice/save/read-back fixtures; automatic build OK. Read-only live seller settings/public product/notifications render without runtime errors; API grants and applied triggers confirmed.
+- [ ] Live seller coverage mutation, real buyer checkout and newly generated staff notification delivery end-to-end (blocked: no authorized disposable production records/events; authenticated checkout account has an empty cart). Not published; physical Android and email/push delivery for new event types not tested.
 
 ## Shipping method accuracy
 - [x] Confirmed the pictured product already stores variable/0 correctly; specs ignored its mode, and cart/checkout summaries and search inferred free from zero. Centralized mode-aware display, explicit new-product choice, and preserved legacy missing choices without changing saved records or financial logic.

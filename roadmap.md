@@ -1,9 +1,10 @@
 # Production readiness audit
 
 ## Website and mobile loading performance
-- [ ] Measure cold public home/search listing appearance and network costs on mobile/desktop before and after.
-- [ ] Diagnose database health/slow queries, product queries, images and rendering; fix verified bottlenecks without design/business/data changes.
-- [ ] Run regression tests and navigation checks; report measured results and physical Android/production verification limits.
+- [x] Measure public home/search three fresh browser contexts per viewport before/after: search never displayed cards within 15s before; final median 1.79s mobile / 1.91s desktop; API requests 77→16 / 70→18. Homepage timing has no consistent improvement.
+- [x] Fix same-page history-key boundary remount loop, guard redundant URL writes, cancel outdated searches, cache filter/brand options only, render 24-card batches in search/category/subcategory, parallelize metadata/deals and recommendation inputs, and prioritize main gallery image. Preserve original uploads and uncached stock reads. Database health low-load, relevant indexes present; no database writes or compute upgrade.
+- [x] All 248 tests pass; automatic build OK. Public live search→load more (24→35)→typed search→product→back and saved subcategory checked at 393/1280px with no page errors/overflow; detail navigation 0.91–0.95s. Performance report records limitations and remaining scaling reads.
+- [ ] Production and physical Android performance verification (blocked: publication not requested; no physical device/emulator). Authenticated buyer/seller/admin performance not benchmarked in this pass.
 
 ## Shipping provinces and staff alerts
 - [x] Add seller-owned all/specific province settings, atomic profile/coverage save and shared buyer reads; preserve all-province delivery for all 15 existing applications.

@@ -14,9 +14,14 @@ vi.mock("@/components/FavoriteButton", () => ({ FavoriteButton: () => null }));
 afterEach(() => { cleanup(); mocks.metadata = {}; });
 
 const renderCard = (stockQuantity?: number) => {
-  mocks.from.mockImplementation(() => ({ select: () => ({
+  mocks.from.mockImplementation((table: string) => ({ select: () => ({
+    ...(table === "daily_deals" ? { in: () => {
+      const chain = { eq: () => chain, lte: () => chain, gt: async () => ({ data: [] }) };
+      return chain;
+    } } : {
     in: async (_col: string, ids: string[]) => ({
       data: ids.map((id) => ({ id, stock_quantity: mocks.stock, ...mocks.metadata })),
+    }),
     }),
   }) }));
   return render(<MemoryRouter><Routes>

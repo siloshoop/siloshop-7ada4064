@@ -43,6 +43,19 @@ describe("product metadata request coalescing", () => {
     expect(await retry).toMatchObject({ stock_quantity: 2 });
   });
 
+  it("starts independent deal reads before the product response resolves", async () => {
+    vi.useFakeTimers();
+    let finish: (value: { data: unknown[] }) => void = () => {};
+    mocks.query.mockImplementationOnce(() => new Promise((resolve) => { finish = resolve; }));
+    const dealRead = vi.spyOn(mocks, "deals", "get");
+    const request = loadProductCardMeta("parallel");
+    await vi.advanceTimersByTimeAsync(16);
+    expect(dealRead).toHaveBeenCalled();
+    finish({ data: [{ id: "parallel", stock_quantity: 4 }] });
+    expect(await request).toMatchObject({ stock_quantity: 4 });
+    dealRead.mockRestore();
+  });
+
   it("attaches the active sale percentage from a sale price", async () => {
     vi.useFakeTimers();
     mocks.deals = [{ product_id: "s", discount_percentage: 10, sale_price: 75, sale_quantity: null, sold_quantity: 0 }];

@@ -28,19 +28,19 @@ const flush = async () => {
   try {
     for (let i = 0; i < ids.length; i += 100) {
     const chunk = ids.slice(i, i + 100);
-    const { data } = await supabase
+    const nowIso = new Date().toISOString();
+    const [productResult, dealResult] = await Promise.all([supabase
       .from("products")
       .select("id, price, currency, stock_quantity, vendor_id, is_featured, is_trending, reviews(rating)")
-      .in("id", chunk);
-    (data ?? []).forEach((row: any) => found.set(row.id, row));
-    const nowIso = new Date().toISOString();
-    const { data: deals } = await supabase
+      .in("id", chunk), supabase
       .from("daily_deals")
       .select("product_id, discount_percentage, sale_price, sale_quantity, sold_quantity")
       .in("product_id", chunk)
       .eq("is_active", true)
       .lte("start_date", nowIso)
-      .gt("end_date", nowIso);
+      .gt("end_date", nowIso)]);
+    (productResult.data ?? []).forEach((row: any) => found.set(row.id, row));
+    const deals = dealResult.data;
     for (const d of (deals ?? []) as any[]) {
       const row = found.get(d.product_id);
       if (!row || !dealHasStock(d)) continue;

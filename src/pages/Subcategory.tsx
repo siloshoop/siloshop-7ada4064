@@ -41,6 +41,7 @@ const Subcategory = () => {
   const [categoryName, setCategoryName] = useState("");
   const [subcategoryName, setSubcategoryName] = useState("");
   const [loading, setLoading] = useState(true);
+  const [visibleCount, setVisibleCount] = useState(24);
   const [showCategoryFallbackNotice, setShowCategoryFallbackNotice] = useState(false);
   
   // Filters
@@ -63,26 +64,23 @@ const Subcategory = () => {
   }, [products, searchQuery, priceRange, sortBy, minVendorRating, inStockOnly, hasDiscountOnly, vendorRatings]);
 
   const fetchData = async () => {
+    if (!categoryId || !subcategoryId) return;
     setLoading(true);
     setShowCategoryFallbackNotice(false);
     
     // Fetch category info
-    const { data: categoryData } = await supabase
+    void supabase
       .from("categories")
       .select("name_ar")
       .eq("id", categoryId)
-      .maybeSingle();
-
-    if (categoryData) {
-      setCategoryName(categoryData.name_ar);
-    }
+      .maybeSingle().then(({ data }) => { if (data) setCategoryName(data.name_ar); });
 
     // Try to fetch subcategory from DB
-    const { data: subcategoryData } = await supabase
+    void supabase
       .from("subcategories")
       .select("name_ar")
       .eq("id", subcategoryId)
-      .maybeSingle();
+      .maybeSingle().then(({ data: subcategoryData }) => {
 
     if (subcategoryData) {
       setSubcategoryName(subcategoryData.name_ar);
@@ -166,8 +164,9 @@ const Subcategory = () => {
         "swimming": "سباحة",
         "cycling": "دراجات",
       };
-      setSubcategoryName(defaultNames[subcategoryId!] || subcategoryId!);
+      setSubcategoryName(defaultNames[subcategoryId] || subcategoryId);
     }
+    });
 
     // Fetch products - try with subcategory_id first, fall back to category
     let productsQuery = supabase
@@ -189,15 +188,15 @@ const Subcategory = () => {
       .eq("is_active", true);
 
     // Check if subcategoryId is a UUID (from DB) or a string key (default)
-    const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(subcategoryId!);
+    const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(subcategoryId);
     
     if (isUUID) {
       // Include products filed under child (level-3) subcategories of this group
       const { data: childSubs } = await supabase
         .from("subcategories")
         .select("id")
-        .eq("parent_subcategory_id", subcategoryId!);
-      const ids = [subcategoryId!, ...((childSubs || []).map((c: any) => c.id))];
+        .eq("parent_subcategory_id", subcategoryId);
+      const ids = [subcategoryId, ...((childSubs || []).map((c: any) => c.id))];
       productsQuery = productsQuery.in("subcategory_id", ids);
     } else {
       // For default subcategories, filter by category
@@ -245,6 +244,8 @@ const Subcategory = () => {
         setMaxPrice(max);
         setPriceRange([0, max]);
       }
+      // Ratings enrich filters after cards appear; do not hold the skeleton.
+      setLoading(false);
       
       // Fetch vendor ratings
       const vendorIds = [...new Set(resolvedProducts.map(p => p.vendor_id))];
@@ -260,7 +261,7 @@ const Subcategory = () => {
             if (!ratingsMap.has(r.vendor_id)) {
               ratingsMap.set(r.vendor_id, []);
             }
-            ratingsMap.get(r.vendor_id)!.push(r.rating);
+            ratingsMap.get(r.vendor_id)?.push(r.rating);
           });
           
           const avgRatings = new Map<string, number>();
@@ -279,6 +280,7 @@ const Subcategory = () => {
   };
 
   const applyFilters = () => {
+    setVisibleCount(24);
     let result = [...products];
 
     // Search filter
@@ -590,7 +592,7 @@ const Subcategory = () => {
           </div>
         ) : (
           <div className="product-grid-narrow">
-            {filteredProducts.map((product) => {
+            {filteredProducts.slice(0, visibleCount).map((product) => {
               const avgRating = product.reviews?.length > 0
                 ? product.reviews.reduce((sum, r) => sum + r.rating, 0) / product.reviews.length
                 : 4;
@@ -603,6 +605,7 @@ const Subcategory = () => {
                 <ProductCard
                   key={product.id}
                   id={product.id}
+                  vendorId={product.vendor_id}
                   stockQuantity={product.stock_quantity}
                   name={product.name}
                   price={product.price}
@@ -619,6 +622,9 @@ const Subcategory = () => {
             })}
           </div>
         )}
+        {visibleCount < filteredProducts.length && <div className="flex justify-center py-6">
+          <Button variant="outline" onClick={() => setVisibleCount((count) => count + 24)}>عرض المزيد</Button>
+        </div>}
       </main>
       <Footer />
     </div>

@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useRef, Fragment } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { Link, useSearchParams } from "react-router-dom";
 import { buildFuzzyPatterns, matchesSearchTerm } from "@/lib/search";
 import { Store } from "lucide-react";
@@ -174,7 +175,10 @@ interface StoreHit {
 }
 
 const SearchPage = () => {
+  const queryClient = useQueryClient();
   const [searchParams, setSearchParams] = useSearchParams();
+  const searchVersion = useRef(0);
+  const [visibleCount, setVisibleCount] = useState(24);
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [subcategories, setSubcategories] = useState<Subcategory[]>([]);
@@ -216,6 +220,7 @@ const SearchPage = () => {
   // Mirror filter state into the URL so it survives navigation and can be shared
   useEffect(() => {
     const encoded = encodeFilters(filters);
+    if ((searchParams.get(FILTER_PARAM) || null) === encoded) return;
     setSearchParams(
       (prev) => {
         const next = new URLSearchParams(prev);
@@ -225,18 +230,23 @@ const SearchPage = () => {
       },
       { replace: true },
     );
-  }, [filters, setSearchParams]);
+  }, [filters, searchParams, setSearchParams]);
 
 
   // Fetch categories, subcategories, and vendors on mount
   useEffect(() => {
     const fetchFilterData = async () => {
-      const [categoriesRes, subcategoriesRes, vendorsRes, brandsRes] = await Promise.all([
+      const [categoriesRes, subcategoriesRes, vendorsRes, brandsRes, variantsRes] = await queryClient.fetchQuery({
+        queryKey: ["search-filter-options"],
+        staleTime: 5 * 60_000,
+        queryFn: () => Promise.all([
         supabase.from("categories").select("id, name_ar").eq("is_active", true).order("name_ar"),
         supabase.from("subcategories").select("id, name_ar, category_id").eq("is_active", true).order("name_ar"),
         supabase.rpc("search_public_stores", { _term: null, _limit: 200 }),
         supabase.from("brands").select("id, name_ar").eq("is_active", true).order("name_ar"),
-      ]);
+        supabase.from("products").select("colors, sizes").eq("is_active", true).limit(1000),
+      ]),
+      });
 
       if (categoriesRes.data) setCategories(categoriesRes.data);
       if (subcategoriesRes.data) setSubcategories(subcategoriesRes.data);
@@ -245,11 +255,7 @@ const SearchPage = () => {
       if (brandsRes.data) setBrands(brandsRes.data);
 
       // Collect the color/size vocabulary actually used by live products.
-      const { data: variantRows } = await supabase
-        .from("products")
-        .select("colors, sizes")
-        .eq("is_active", true)
-        .limit(1000);
+      const variantRows = variantsRes.data;
       const colorSet = new Set<string>();
       const sizeSet = new Set<string>();
       (variantRows ?? []).forEach((row: any) => {
@@ -261,7 +267,7 @@ const SearchPage = () => {
     };
 
     fetchFilterData();
-  }, []);
+  }, [queryClient]);
 
   useEffect(() => {
     setFilters((prev) => (
@@ -287,8 +293,11 @@ const SearchPage = () => {
 
   // Search products when filters change
   useEffect(() => {
-    searchProducts();
-  }, [filters, salesCounts]);
+    setVisibleCount(24);
+    const controller = new AbortController();
+    void searchProducts(controller.signal);
+    return () => { controller.abort(); searchVersion.current += 1; };
+  }, [filters]);
 
   // Fetch sales counts once for best-selling sort
   useEffect(() => {
@@ -305,10 +314,16 @@ const SearchPage = () => {
       });
       setSalesCounts(map);
     };
-    fetchSales();
-  }, []);
+    if (filters.sortBy === "best_selling") void fetchSales();
+  }, [filters.sortBy]);
 
-  const searchProducts = async () => {
+  useEffect(() => {
+    if (filters.sortBy !== "best_selling") return;
+    setProducts((rows) => [...rows].sort((a, b) => (salesCounts.get(b.id) || 0) - (salesCounts.get(a.id) || 0)));
+  }, [salesCounts, filters.sortBy]);
+
+  const searchProducts = async (signal: AbortSignal) => {
+    const version = ++searchVersion.current;
     setLoading(true);
     try {
       let query = supabase
@@ -324,9 +339,11 @@ const SearchPage = () => {
       if (term) {
         const patterns = buildFuzzyPatterns(term);
         const [matchingBrands, matchingStores] = await Promise.all([
-          supabase.from("brands").select("id, name_ar, name").eq("is_active", true),
+          queryClient.fetchQuery({ queryKey: ["search-brand-matching"], staleTime: 5 * 60_000,
+            queryFn: async () => await supabase.from("brands").select("id, name_ar, name").eq("is_active", true) }),
           supabase.rpc("search_public_stores", { _term: term, _limit: 12 }),
         ]);
+        if (signal.aborted || version !== searchVersion.current) return;
         const brandIds = (matchingBrands.data ?? [])
           .filter((b: any) => matchesSearchTerm(b.name_ar, term) || matchesSearchTerm(b.name, term))
           .map((b: any) => b.id);
@@ -432,7 +449,9 @@ const SearchPage = () => {
       }
 
       // Cap the result window so search stays fast on large catalogs.
-      const { data, error } = await query.limit(120);
+      const { data, error } = await query.limit(120).abortSignal(signal);
+
+      if (signal.aborted || version !== searchVersion.current) return;
 
       if (error) throw error;
 
@@ -475,9 +494,9 @@ const SearchPage = () => {
 
       setProducts(filteredProducts);
     } catch (error) {
-      console.error("Search error:", error);
+      if (!signal.aborted) console.error("Search error:", error);
     } finally {
-      setLoading(false);
+      if (!signal.aborted && version === searchVersion.current) setLoading(false);
     }
   };
 
@@ -1141,7 +1160,7 @@ const SearchPage = () => {
             ) : (
               <>
                 <div className={`product-grid-narrow items-stretch transition-opacity ${loading ? "opacity-60" : ""}`}>
-                  {products.map((product, index) => {
+                  {products.slice(0, visibleCount).map((product, index) => {
                     const avgRating = getAverageRating(product.reviews);
                     const discount = product.original_price
                       ? Math.round(((product.original_price - product.price) / product.original_price) * 100)
@@ -1150,6 +1169,7 @@ const SearchPage = () => {
                       <Fragment key={product.id}>
                         <ProductCard
                           id={product.id}
+                          vendorId={product.vendor_id}
                           name={product.name}
                           price={product.price}
                           currency={(product as any).currency}
@@ -1168,6 +1188,11 @@ const SearchPage = () => {
                     );
                   })}
                 </div>
+                {visibleCount < products.length && (
+                  <div className="flex justify-center py-6">
+                    <Button variant="outline" onClick={() => setVisibleCount((count) => count + 24)}>عرض المزيد</Button>
+                  </div>
+                )}
               </>
             )}
           </div>

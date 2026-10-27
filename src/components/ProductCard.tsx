@@ -33,6 +33,7 @@ interface ProductCardProps {
   stockQuantity?: number | null;
   /** Store (seller) display name */
   storeName?: string | null;
+  vendorId?: string | null;
   /** "seller" (local) or "platform" (imported) */
   productType?: string | null;
   /** Preparation/shipping window in days */
@@ -55,6 +56,7 @@ const ProductCard = memo(({
   shippingMode,
   stockQuantity,
   storeName,
+  vendorId,
   productType,
   shipsWithinDays,
   soldCount,
@@ -80,12 +82,13 @@ const ProductCard = memo(({
   // Active sale from the saved deal: show the sale price with the list price crossed out.
   const saleApplies = !(typeof originalPrice === "number" && originalPrice > price)
     && (details?.deal_pct ?? 0) > 0 && Number(details?.price) > 0;
-  if (saleApplies) {
-    originalPrice = Number(details!.price);
-    price = applyDeal(originalPrice, details!.deal_pct);
+  if (saleApplies && details) {
+    originalPrice = Number(details.price);
+    price = applyDeal(originalPrice, details.deal_pct);
   }
-  const vendorNames = useVendorNames([details?.vendor_id]);
-  const sellerName = storeName || (details?.vendor_id ? vendorNames[details.vendor_id] : undefined);
+  const sellerId = details?.vendor_id ?? vendorId;
+  const vendorNames = useVendorNames(storeName ? [] : [sellerId]);
+  const sellerName = storeName || (sellerId ? vendorNames[sellerId] : undefined);
   const reviewCount = details?.reviews?.length ?? reviews;
   const averageRating = details?.reviews
     ? (reviewCount > 0 ? details.reviews.reduce((sum, review) => sum + review.rating, 0) / reviewCount : 0)

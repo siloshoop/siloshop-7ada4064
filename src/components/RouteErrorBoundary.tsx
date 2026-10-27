@@ -22,5 +22,7 @@ class PageBoundary extends Component<{ children: ReactNode }, { failed: boolean 
 }
 export default function RouteErrorBoundary({ children }: { children: ReactNode }) {
   const location = useLocation();
-  return <PageBoundary key={location.key}>{children}</PageBoundary>;
+  // Reset errors on another page, not on same-page filter/history updates.
+  // Remounting Routes on every replace() restarts all page reads and can loop.
+  return <PageBoundary key={location.pathname}>{children}</PageBoundary>;
 }

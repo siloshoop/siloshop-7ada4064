@@ -33,3 +33,5 @@
 
 - Category appearance uses shared semantic palette/icon keys with legacy name-based fallbacks; owner category ordering uses a locked atomic RPC so equal sort values can be reordered safely.
 - Staff UI resolves roles through existing callable has_role checks, never the internal actor_admin_role audit helper; route boundaries and explicit authorization errors prevent blank pages without changing server permissions.
+- Reset route error boundaries by pathname, never history-entry keys; same-page URL filter updates must preserve mounted pages and pending data reads.
+- Keep search option caches separate from product availability, cancel superseded searches, and render result batches without changing the existing filtered result window; stock continues to refresh uncached.

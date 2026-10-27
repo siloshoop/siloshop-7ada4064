@@ -8,6 +8,7 @@ import ProductCard from "@/components/ProductCard";
 import { SearchFilters } from "@/components/SearchFilters";
 import { Loader2 } from "lucide-react";
 import NativeAdBanner from "@/components/NativeAdBanner";
+import { Button } from "@/components/ui/button";
 interface Product {
   id: string;
   name: string;
@@ -33,6 +34,7 @@ const Category = () => {
   const [salesMap, setSalesMap] = useState<Map<string, number>>(new Map());
   const [categoryName, setCategoryName] = useState("");
   const [loading, setLoading] = useState(true);
+  const [visibleCount, setVisibleCount] = useState(24);
   const [filters, setFilters] = useState({
     minPrice: 0,
     maxPrice: 1000000,
@@ -55,16 +57,14 @@ const Category = () => {
   }, [products, filters, vendorRatings, salesMap]);
 
   const fetchCategoryProducts = async () => {
-    // Fetch category info
-    const { data: categoryData } = await supabase
+    setLoading(true);
+    setVisibleCount(24);
+    // The heading lookup must not delay the product query.
+    void supabase
       .from("categories")
       .select("name_ar")
       .eq("id", categoryId)
-      .maybeSingle();
-
-    if (categoryData) {
-      setCategoryName(categoryData.name_ar);
-    }
+      .maybeSingle().then(({ data }) => { if (data) setCategoryName(data.name_ar); });
 
     // Fetch products
     const { data: productsData } = await supabase
@@ -90,13 +90,18 @@ const Category = () => {
 
     if (productsData) {
       setProducts(productsData as any);
+      setLoading(false);
       
       // Fetch vendor ratings
       const vendorIds = [...new Set(productsData.map(p => p.vendor_id))];
-      const { data: ratingsData } = await supabase
+      const ratingsRequest = vendorIds.length ? supabase
         .from("vendor_ratings")
         .select("vendor_id, rating")
-        .in("vendor_id", vendorIds);
+        .in("vendor_id", vendorIds) : Promise.resolve({ data: [] });
+      const productIds = productsData.map(p => p.id);
+      const salesRequest = productIds.length ? supabase.from("order_items")
+        .select("product_id, quantity").in("product_id", productIds) : Promise.resolve({ data: [] });
+      const [{ data: ratingsData }, { data: salesData }] = await Promise.all([ratingsRequest, salesRequest]);
       
       if (ratingsData) {
         const ratingsMap = new Map<string, number[]>();
@@ -104,7 +109,7 @@ const Category = () => {
           if (!ratingsMap.has(r.vendor_id)) {
             ratingsMap.set(r.vendor_id, []);
           }
-          ratingsMap.get(r.vendor_id)!.push(r.rating);
+          ratingsMap.get(r.vendor_id)?.push(r.rating);
         });
         
         const avgRatings = new Map<string, number>();
@@ -115,12 +120,7 @@ const Category = () => {
       }
 
       // Fetch sales counts for "best selling" sort
-      const productIds = productsData.map(p => p.id);
       if (productIds.length > 0) {
-        const { data: salesData } = await supabase
-          .from("order_items")
-          .select("product_id, quantity")
-          .in("product_id", productIds);
         if (salesData) {
           const sMap = new Map<string, number>();
           salesData.forEach((s: any) => {
@@ -134,6 +134,7 @@ const Category = () => {
   };
 
   const applyFilters = () => {
+    setVisibleCount(24);
     let result = [...products];
 
     // Price filter
@@ -235,7 +236,7 @@ const Category = () => {
         ) : (
           <>
             <div className="product-grid">
-              {filteredProducts.map((product, index) => {
+              {filteredProducts.slice(0, visibleCount).map((product, index) => {
                 const avgRating = product.reviews?.length > 0
                   ? product.reviews.reduce((sum, r) => sum + r.rating, 0) / product.reviews.length
                   : 4;
@@ -246,6 +247,7 @@ const Category = () => {
                   <Fragment key={product.id}>
                     <ProductCard
                       id={product.id}
+                      vendorId={product.vendor_id}
                       name={product.name}
                       price={product.price}
                       currency={(product as any).currency}
@@ -262,6 +264,9 @@ const Category = () => {
                 );
               })}
             </div>
+            {visibleCount < filteredProducts.length && <div className="flex justify-center py-6">
+              <Button variant="outline" onClick={() => setVisibleCount((count) => count + 24)}>عرض المزيد</Button>
+            </div>}
           </>
         )}
       </main>

@@ -27,38 +27,32 @@ const ProductRecommendations = () => {
     const fetchRecommendations = async () => {
       try {
         let categoryIds: string[] = [];
+        let viewedProductIds: { product_id: string }[] = [];
         
         if (userId) {
           // Get categories from user's recently viewed products
-          const { data: recentViewed } = await supabase
+          const [recentResult, favoritesResult, ordersResult, viewedIdsResult] = await Promise.all([supabase
             .from("recently_viewed")
             .select("products(category_id)")
             .eq("user_id", userId)
             .order("viewed_at", { ascending: false })
-            .limit(10);
-
+            .limit(10), supabase.from("favorites").select("products(category_id)").eq("user_id", userId).limit(10),
+            supabase.from("orders").select("order_items(products(category_id))").eq("customer_id", userId).limit(5),
+            supabase.from("recently_viewed").select("product_id").eq("user_id", userId)]);
+          const recentViewed = recentResult.data;
+          const favorites = favoritesResult.data;
+          const orders = ordersResult.data;
+          viewedProductIds = viewedIdsResult.data ?? [];
           const viewedCategories = (recentViewed || [])
             .map(item => (item.products as any)?.category_id)
             .filter(Boolean);
 
           // Get categories from user's favorites
-          const { data: favorites } = await supabase
-            .from("favorites")
-            .select("products(category_id)")
-            .eq("user_id", userId)
-            .limit(10);
-
           const favoriteCategories = (favorites || [])
             .map(item => (item.products as any)?.category_id)
             .filter(Boolean);
 
           // Get categories from user's orders
-          const { data: orders } = await supabase
-            .from("orders")
-            .select("order_items(products(category_id))")
-            .eq("customer_id", userId)
-            .limit(5);
-
           const orderCategories = (orders || [])
             .flatMap(order => (order.order_items || []))
             .map(item => (item.products as any)?.category_id)
@@ -75,11 +69,6 @@ const ProductRecommendations = () => {
 
         if (categoryIds.length > 0) {
           // Get products from preferred categories, excluding already viewed
-          const { data: viewedProductIds } = userId ? await supabase
-            .from("recently_viewed")
-            .select("product_id")
-            .eq("user_id", userId) : { data: [] };
-
           const excludeIds = (viewedProductIds || []).map(v => v.product_id);
 
           query = query.in("category_id", categoryIds);

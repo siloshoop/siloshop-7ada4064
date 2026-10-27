@@ -1,9 +1,9 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { loadProductCardMeta } from "@/lib/productCardMeta";
 
-const mocks = vi.hoisted(() => ({ query: vi.fn(), deals: [] as unknown[] }));
+const mocks = vi.hoisted(() => ({ query: vi.fn(), dealRead: vi.fn(), deals: [] as unknown[] }));
 vi.mock("@/integrations/supabase/client", () => {
-  const dealChain: any = { eq: () => dealChain, lte: () => dealChain, gt: () => Promise.resolve({ data: mocks.deals }) };
+  const dealChain: any = { eq: () => dealChain, lte: () => dealChain, gt: () => { mocks.dealRead(); return Promise.resolve({ data: mocks.deals }); } };
   return {
     supabase: {
       from: (table: string) => ({
@@ -12,7 +12,7 @@ vi.mock("@/integrations/supabase/client", () => {
     },
   };
 });
-afterEach(() => { vi.useRealTimers(); mocks.query.mockReset(); mocks.deals = []; });
+afterEach(() => { vi.useRealTimers(); mocks.query.mockReset(); mocks.dealRead.mockReset(); mocks.deals = []; });
 
 describe("product metadata request coalescing", () => {
   it("shares pending requests but refreshes again after completion", async () => {
@@ -41,6 +41,17 @@ describe("product metadata request coalescing", () => {
     const retry = loadProductCardMeta("two");
     await vi.advanceTimersByTimeAsync(16);
     expect(await retry).toMatchObject({ stock_quantity: 2 });
+  });
+
+  it("starts independent deal reads before the product response resolves", async () => {
+    vi.useFakeTimers();
+    let finish: (value: { data: unknown[] }) => void = () => {};
+    mocks.query.mockImplementationOnce(() => new Promise((resolve) => { finish = resolve; }));
+    const request = loadProductCardMeta("parallel");
+    await vi.advanceTimersByTimeAsync(16);
+    expect(mocks.dealRead).toHaveBeenCalledTimes(1);
+    finish({ data: [{ id: "parallel", stock_quantity: 4 }] });
+    expect(await request).toMatchObject({ stock_quantity: 4 });
   });
 
   it("attaches the active sale percentage from a sale price", async () => {

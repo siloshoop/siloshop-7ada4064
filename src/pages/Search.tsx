@@ -340,7 +340,7 @@ const SearchPage = () => {
         const patterns = buildFuzzyPatterns(term);
         const [matchingBrands, matchingStores] = await Promise.all([
           queryClient.fetchQuery({ queryKey: ["search-brand-matching"], staleTime: 5 * 60_000,
-            queryFn: () => supabase.from("brands").select("id, name_ar, name").eq("is_active", true).then((result) => result) }),
+            queryFn: async () => await supabase.from("brands").select("id, name_ar, name").eq("is_active", true) }),
           supabase.rpc("search_public_stores", { _term: term, _limit: 12 }),
         ]);
         if (signal.aborted || version !== searchVersion.current) return;

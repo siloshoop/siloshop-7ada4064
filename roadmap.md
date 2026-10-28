@@ -1,5 +1,10 @@
 # Production readiness audit
 
+## Seller store and account deletion
+- [ ] Diagnose current deletion failure and database/storage dependencies.
+- [ ] Implement separate confirmed store/account deletion, eligible cleanup, safe retention and feedback.
+- [ ] Test isolated deletion, permissions, retries and buyer visibility; verify live read-only UI. Real destructive tests require disposable authorized records; physical Android unavailable.
+
 ## Website and mobile loading performance
 - [x] Measure public home/search three fresh browser contexts per viewport before/after: search never displayed cards within 15s before; final median 1.79s mobile / 1.91s desktop; API requests 77→16 / 70→18. Homepage timing has no consistent improvement.
 - [x] Fix same-page history-key boundary remount loop, guard redundant URL writes, cancel outdated searches, cache filter/brand options only, render 24-card batches in search/category/subcategory, parallelize metadata/deals and recommendation inputs, and prioritize main gallery image. Preserve original uploads and uncached stock reads. Database health low-load, relevant indexes present; no database writes or compute upgrade.

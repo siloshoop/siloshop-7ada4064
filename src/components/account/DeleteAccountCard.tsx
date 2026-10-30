@@ -18,12 +18,16 @@ import {
 import { Trash2, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { requestSellerDeletion } from "@/lib/sellerDeletion";
+import { useQueryClient } from "@tanstack/react-query";
+import { clearSignUpDraft } from "@/lib/authDrafts";
 
 const CONFIRM_WORD = "حذف";
 
 const DeleteAccountCard = ({ email }: { email: string }) => {
   const { toast } = useToast();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const [password, setPassword] = useState("");
   const [confirmText, setConfirmText] = useState("");
   const [deleting, setDeleting] = useState(false);
@@ -32,25 +36,13 @@ const DeleteAccountCard = ({ email }: { email: string }) => {
     if (deleting) return;
     setDeleting(true);
     try {
-      // Re-authenticate before a destructive action
-      const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
-      if (signInError) {
-        toast({ title: "كلمة المرور غير صحيحة", description: "تأكد من كتابتها ثم أعد المحاولة", variant: "destructive" });
-        return;
-      }
-
-      const { data, error } = await supabase.functions.invoke("delete-own-account", { body: {} });
-      const errorCode = (data as { error?: string } | null)?.error;
-
-      if (error || errorCode) {
-        const description = errorCode === "open_orders"
-          ? "لديك طلبات قيد التنفيذ، يمكنك حذف الحساب بعد اكتمالها أو إلغائها"
-          : "تعذّر حذف الحساب، حاول مرة أخرى أو تواصل معنا";
-        toast({ title: "لم يتم الحذف", description, variant: "destructive" });
-        return;
-      }
-
-      await supabase.auth.signOut();
+      if (!email || confirmText.trim() !== CONFIRM_WORD || !password) return;
+      await requestSellerDeletion("account", password, confirmText.trim());
+      await queryClient.cancelQueries();
+      queryClient.clear();
+      clearSignUpDraft();
+      localStorage.removeItem("siloshop_last_email");
+      await supabase.auth.signOut({ scope: "local" });
       toast({ title: "تم حذف الحساب", description: "تم حذف حسابك وبياناتك بشكل نهائي" });
       navigate("/", { replace: true });
     } catch (err) {
@@ -61,6 +53,7 @@ const DeleteAccountCard = ({ email }: { email: string }) => {
       });
     } finally {
       setDeleting(false);
+      setPassword("");
     }
   };
 
@@ -71,7 +64,7 @@ const DeleteAccountCard = ({ email }: { email: string }) => {
         <h2 className="font-semibold text-destructive">حذف الحساب نهائياً</h2>
       </div>
       <p className="text-sm text-muted-foreground">
-        سيتم حذف حسابك وبياناتك الشخصية بشكل نهائي ولا يمكن التراجع عن هذه الخطوة.
+        سيتم حذف حسابك ومتاجرك ومنتجاتك وصورها وبياناتك الشخصية المؤهلة نهائيًا. السجلات المرتبطة بطلبات أو مستحقات تحتاج مراجعة سياسة الاحتفاظ القانونية قبل الحذف.
       </p>
 
       <AlertDialog>

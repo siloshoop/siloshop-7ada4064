@@ -3791,6 +3791,30 @@ export type Database = {
         }
         Relationships: []
       }
+      seller_deletion_jobs: {
+        Row: {
+          assets: Json
+          created_at: string
+          scope: string
+          stage: string
+          user_id: string
+        }
+        Insert: {
+          assets?: Json
+          created_at?: string
+          scope: string
+          stage?: string
+          user_id: string
+        }
+        Update: {
+          assets?: Json
+          created_at?: string
+          scope?: string
+          stage?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       seller_violations: {
         Row: {
           created_at: string
@@ -4855,6 +4879,10 @@ export type Database = {
         Args: { _price: number; _product_id: string; _qty: number }
         Returns: number
       }
+      finish_seller_deletion: {
+        Args: { _scope: string; _uid: string }
+        Returns: undefined
+      }
       forward_chat_message: {
         Args: { p_message_id: string; p_target_conversation_id: string }
         Returns: string
@@ -5169,6 +5197,7 @@ export type Database = {
         Args: { _from: string; _role: string; _to: string }
         Returns: boolean
       }
+      own_deletion_pending: { Args: never; Returns: boolean }
       pin_chat_message: {
         Args: { p_message_id: string; p_pin?: boolean }
         Returns: undefined
@@ -5179,6 +5208,10 @@ export type Database = {
           hits: number
           term: string
         }[]
+      }
+      prepare_seller_deletion: {
+        Args: { _scope: string; _uid: string }
+        Returns: Json
       }
       product_analytics: { Args: { _product_id: string }; Returns: Json }
       product_can_manage: { Args: { _product_id: string }; Returns: boolean }

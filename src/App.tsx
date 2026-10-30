@@ -175,12 +175,20 @@ const PublicActivationSync = ({ children }: { children: ReactNode }) => {
       });
     });
     channel.subscribe();
+    channel.on;
 
     const stockChannel = supabase.channel("stock-availability-sync")
       .on("postgres_changes", { event: "UPDATE", schema: "public", table: "products" }, () => {
         window.dispatchEvent(new Event("stock-updated"));
         window.dispatchEvent(new Event("cart-updated"));
         window.dispatchEvent(new Event("favorites-updated"));
+      })
+      .on("postgres_changes", { event: "DELETE", schema: "public", table: "products" }, (payload) => {
+        window.dispatchEvent(new CustomEvent("product-deleted", { detail: { id: payload.old.id } }));
+        window.dispatchEvent(new Event("stock-updated"));
+        window.dispatchEvent(new Event("cart-updated"));
+        window.dispatchEvent(new Event("favorites-updated"));
+        refresh();
       }).subscribe();
 
     return () => {

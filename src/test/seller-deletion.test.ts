@@ -18,6 +18,7 @@ beforeAll(async()=>{
  CREATE TABLE order_items(id uuid,order_id uuid,product_id uuid REFERENCES products,vendor_id uuid REFERENCES profiles);
  CREATE TABLE returns(id uuid,vendor_id uuid,customer_id uuid,status text); CREATE TABLE payout_requests(vendor_id uuid,status text);
  CREATE FUNCTION normalize_order_status(text) RETURNS text LANGUAGE sql AS $$SELECT $1$$;
+ CREATE FUNCTION auth.uid() RETURNS uuid LANGUAGE sql AS $$SELECT NULL::uuid$$;
  CREATE TABLE conversations(id uuid PRIMARY KEY,vendor_id uuid,customer_id uuid);
  CREATE TABLE chat_audit_log(conversation_id uuid,actor_id uuid);
  CREATE TABLE vendor_followers(vendor_id uuid,user_id uuid); CREATE TABLE vendor_ratings(vendor_id uuid,user_id uuid);
@@ -34,7 +35,7 @@ beforeAll(async()=>{
  CREATE TABLE product_questions(user_id uuid); CREATE TABLE reviews(user_id uuid);
  CREATE TABLE activity_logs(user_id uuid); CREATE TABLE newsletter_subscriptions(email text);
  GRANT USAGE ON SCHEMA public TO authenticated,service_role;`);
- await db.exec(readFileSync('/tmp/seller-deletion.sql','utf8'));
+ await db.exec(readFileSync('drizzle/migrations/0044_seller_permanent_deletion.sql','utf8'));
 },30000);
 afterAll(async()=>{await db?.close()});
 const seed=async()=>{

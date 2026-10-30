@@ -15,6 +15,7 @@ import ImageUploadField from "@/components/ImageUploadField";
 import { Link } from "react-router-dom";
 import { EMPTY_STORE, storeSettingsSchema, storeSettingsArgs, type StoreSettings } from "@/lib/storeSettings";
 import ShippingProvinceFields from "@/components/seller/ShippingProvinceFields";
+import DeleteStoreCard from "@/components/seller/DeleteStoreCard";
 import { validProvince, type ShippingRegions } from "@/lib/shippingRegions";
 import { useQueryClient } from "@tanstack/react-query";
 
@@ -229,6 +230,7 @@ const SellerStore = () => {
         </Card>
       </fieldset>
       {errors.length > 0 && <ul role="alert" className="mt-3 space-y-1 text-sm text-destructive">{errors.map((message, i) => <li key={i}>{message}</li>)}</ul>}
+      <DeleteStoreCard />
     </SellerLayout>
   );
 };

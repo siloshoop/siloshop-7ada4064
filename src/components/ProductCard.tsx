@@ -66,6 +66,7 @@ const ProductCard = memo(({
   const { toast } = useToast();
   const { addProduct } = useCompareProducts();
   const [imageLoaded, setImageLoaded] = useState(false);
+  const [deleted, setDeleted] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
   const [liveStock, setLiveStock] = useState(stockQuantity);
   const [details, setDetails] = useState<{
@@ -96,6 +97,7 @@ const ProductCard = memo(({
   useEffect(() => { setLiveStock(stockQuantity); }, [stockQuantity]);
   useEffect(() => {
     if (!id) return;
+    setDeleted(false);
     setDetails(null);
     let active = true;
     const refresh = async () => {
@@ -109,10 +111,15 @@ const ProductCard = memo(({
     void refresh();
     window.addEventListener("stock-updated", refresh);
     window.addEventListener("focus", refresh);
+    const onDeleted = (event: Event) => {
+      if ((event as CustomEvent<{ id?: string }>).detail?.id === id) setDeleted(true);
+    };
+    window.addEventListener("product-deleted", onDeleted);
     return () => {
       active = false;
       window.removeEventListener("stock-updated", refresh);
       window.removeEventListener("focus", refresh);
+      window.removeEventListener("product-deleted", onDeleted);
     };
   }, [id, stockQuantity]);
 

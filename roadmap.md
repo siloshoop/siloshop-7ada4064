@@ -1,9 +1,11 @@
 # Production readiness audit
 
 ## Seller store and account deletion
-- [ ] Diagnose current deletion failure and database/storage dependencies.
-- [ ] Implement separate confirmed store/account deletion, eligible cleanup, safe retention and feedback.
-- [ ] Test isolated deletion, permissions, retries and buyer visibility; verify live read-only UI. Real destructive tests require disposable authorized records; physical Android unavailable.
+- [x] Diagnosed direct Auth deletion without media/dependency cleanup, restrictive order_items references and admin demotion mislabeled as deletion. Historical failing request logs unavailable; exact screenshot request cause unverified.
+- [x] Added separate confirmed store/account server entry points, reauthentication, service-only cleanup, durable media inventory, retry stages and meaningful errors; eligible stores without financial history are physically deleted, not deactivated.
+- [x] 33 focused isolated tests pass; authenticated own-account confirmation/cancel checked at 393/1280px without submitting deletion; live invalid-token calls to both endpoints return 401; automatic build OK.
+- [ ] Complete deletion for accounts/stores with financial history (blocked: legal retention policy not supplied; protective retention_review_required stops before mutation rather than deleting buyer receipts or inventing durations).
+- [ ] Live destructive end-to-end and physical Android verification (blocked: user explicitly permits isolated tests only; no physical Android device). No publish or Android release.
 
 ## Website and mobile loading performance
 - [x] Measure public home/search three fresh browser contexts per viewport before/after: search never displayed cards within 15s before; final median 1.79s mobile / 1.91s desktop; API requests 77→16 / 70→18. Homepage timing has no consistent improvement.

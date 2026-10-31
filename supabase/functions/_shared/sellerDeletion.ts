@@ -1,5 +1,5 @@
-import { createClient } from "npm:@supabase/supabase-js@2";
-import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
+import { createClient } from "npm:@supabase/supabase-js@2.118.0";
+import { corsHeaders } from "npm:@supabase/supabase-js@2.118.0/dist/cors.mjs";
 import { z } from "npm:zod@3";
 import { runDeletion, type DeletionJob, type DeletionScope } from "./deletionWorkflow.ts";
 

@@ -11,7 +11,7 @@ vi.mock("@/integrations/supabase/client", () => ({
 vi.mock("@/hooks/useToast", () => ({ useToast: () => ({ toast: vi.fn() }) }));
 vi.mock("@/hooks/useCompareProducts", () => ({ useCompareProducts: () => ({ addProduct: vi.fn() }) }));
 vi.mock("@/components/FavoriteButton", () => ({ FavoriteButton: () => null }));
-afterEach(() => { cleanup(); mocks.metadata = {}; });
+afterEach(() => { cleanup(); mocks.metadata = {}; mocks.from.mockClear(); });
 
 const renderCard = (stockQuantity?: number) => {
   mocks.from.mockImplementation((table: string) => ({ select: () => ({
@@ -31,13 +31,22 @@ const renderCard = (stockQuantity?: number) => {
 };
 
 describe("product listings", () => {
+  it("removes only the product confirmed deleted by the shared event", async () => {
+    mocks.stock = 8;
+    renderCard(8);
+    await waitFor(() => expect(screen.getByRole("link")).toBeInTheDocument());
+    fireEvent(window, new CustomEvent("product-deleted", { detail: { id: "another-product" } }));
+    expect(screen.getByRole("link")).toBeInTheDocument();
+    fireEvent(window, new CustomEvent("product-deleted", { detail: { id: "product-id" } }));
+    expect(screen.queryByRole("link")).not.toBeInTheDocument();
+  });
   it.each([0, 5])("has no cart button and opens details when stock is %s", async (stock) => {
     mocks.stock = stock;
     renderCard(stock);
     expect(screen.queryByRole("button", { name: /السلة|للسلة/ })).not.toBeInTheDocument();
     fireEvent.click(screen.getByRole("link"));
     expect(screen.getByText("صفحة المنتج")).toBeInTheDocument();
-    expect(mocks.from.mock.calls.every(([table]) => table === "products")).toBe(true);
+    expect(mocks.from.mock.calls.every(([table]) => table === "products" || table === "daily_deals")).toBe(true);
   });
   it("shows saved sold-out stock even if a listing supplies stale positive stock", async () => {
     mocks.stock = 0;

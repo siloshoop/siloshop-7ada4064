@@ -1,4 +1,5 @@
 # Project architecture rules
+- Seller deletion uses server-verified reauthentication, service-only transactional cleanup and a durable exact Storage inventory; delete Auth last, preserve unreviewed financial receipts, and resume failed stages rather than declaring partial cleanup successful.
 - Store province coverage on the existing approved seller application, save profile/coverage atomically, expose only coverage through a public RPC, and enforce every seller's coverage inside create_order before any write; defaults preserve existing all-province delivery.
 - Create owner/moderator event alerts at trusted database/auth lifecycle boundaries with per-recipient event keys; do not duplicate signup alerts from verification clients or grant moderators user-management access.
 - Resolve product shipping presentation through shippingDisplay, including specification tables and filters; zero cost never substitutes for a saved explicit free choice, and legacy unknown choices remain unchanged on edit.

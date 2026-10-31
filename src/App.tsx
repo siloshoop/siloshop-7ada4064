@@ -175,7 +175,6 @@ const PublicActivationSync = ({ children }: { children: ReactNode }) => {
       });
     });
     channel.subscribe();
-    channel.on;
 
     const stockChannel = supabase.channel("stock-availability-sync")
       .on("postgres_changes", { event: "UPDATE", schema: "public", table: "products" }, () => {

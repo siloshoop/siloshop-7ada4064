@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useStaffRole } from "@/hooks/useStaffRole";
+import { requestSellerDeletion } from "@/lib/sellerDeletion";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
@@ -70,6 +71,8 @@ const SellerManagement = () => {
   const [deleting, setDeleting] = useState<AppRow | null>(null);
   const [reason, setReason] = useState("");
   const [busy, setBusy] = useState(false);
+  const [deletePassword, setDeletePassword] = useState("");
+  const [deleteConfirm, setDeleteConfirm] = useState("");
   const [docUrls, setDocUrls] = useState<{ id?: string; biz?: string }>({});
 
   const load = async () => {
@@ -158,12 +161,15 @@ const SellerManagement = () => {
     runAction(() => supabase.rpc("reactivate_seller", { _user_id: r.user_id }), "تمت إعادة التفعيل");
 
   const remove = async () => {
-    if (!deleting) return;
-    const ok = await runAction(
-      () => supabase.rpc("delete_seller_account", { _user_id: deleting.user_id }),
-      "تم حذف حساب البائع"
-    );
-    if (ok) { setDeleting(null); setSelected(null); }
+    if (!deleting || busy || !deletePassword || deleteConfirm.trim() !== "حذف") return;
+    setBusy(true);
+    try {
+      await requestSellerDeletion("store", deletePassword, deleteConfirm.trim(), deleting.user_id);
+      toast({ title: "تم حذف متجر البائع ومنتجاته المؤهلة" });
+      setDeleting(null); setSelected(null); await load();
+    } catch (error) {
+      toast({ title: "لم يكتمل الحذف", description: error instanceof Error ? error.message : "أعد المحاولة", variant: "destructive" });
+    } finally { setBusy(false); setDeletePassword(""); }
   };
 
   return (
@@ -352,17 +358,19 @@ const SellerManagement = () => {
       </Dialog>
 
       {/* Delete */}
-      <AlertDialog open={!!deleting} onOpenChange={(o) => !o && setDeleting(null)}>
+      <AlertDialog open={!!deleting} onOpenChange={(o) => { if (!o && !busy) { setDeleting(null); setDeletePassword(""); setDeleteConfirm(""); } }}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>حذف حساب البائع؟</AlertDialogTitle>
+            <AlertDialogTitle>حذف متجر البائع نهائيًا؟</AlertDialogTitle>
             <AlertDialogDescription>
-              سيتم حذف طلب البائع وإزالة صلاحيات البيع من الحساب. لا يمكن التراجع.
+              سيُحذف المتجر ومنتجاته وصوره المؤهلة، ويبقى حساب البائع كمشتري. السجلات المالية تحتاج مراجعة الاحتفاظ القانوني. أدخل كلمة مرور حسابك واكتب «حذف».
             </AlertDialogDescription>
           </AlertDialogHeader>
+          <Input type="password" aria-label="كلمة مرور حساب الإدارة" autoComplete="current-password" value={deletePassword} onChange={(e) => setDeletePassword(e.target.value)} disabled={busy} />
+          <Input aria-label="تأكيد حذف متجر البائع" placeholder="اكتب «حذف»" value={deleteConfirm} onChange={(e) => setDeleteConfirm(e.target.value)} disabled={busy} />
           <AlertDialogFooter>
-            <AlertDialogCancel>إلغاء</AlertDialogCancel>
-            <AlertDialogAction onClick={remove} className="bg-destructive text-destructive-foreground">حذف</AlertDialogAction>
+            <AlertDialogCancel disabled={busy}>إلغاء</AlertDialogCancel>
+            <AlertDialogAction disabled={busy || !deletePassword || deleteConfirm.trim() !== "حذف"} onClick={(e) => { e.preventDefault(); void remove(); }} className="bg-destructive text-destructive-foreground">حذف</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

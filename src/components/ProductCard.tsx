@@ -188,6 +188,7 @@ const ProductCard = memo(({
   // Free / fixed price / set by the shipping company — never free when a price exists.
   const shippingLine = shippingCardLabel(shippingMode, shippingCost, shownCurrency);
 
+  if (deleted) return null;
   return (
     <a
       href={productId ? `/product/${productId}` : undefined}

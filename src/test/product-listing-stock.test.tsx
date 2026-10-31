@@ -31,6 +31,15 @@ const renderCard = (stockQuantity?: number) => {
 };
 
 describe("product listings", () => {
+  it("removes only the product confirmed deleted by the shared event", async () => {
+    mocks.stock = 8;
+    renderCard(8);
+    await waitFor(() => expect(screen.getByRole("link")).toBeInTheDocument());
+    fireEvent(window, new CustomEvent("product-deleted", { detail: { id: "another-product" } }));
+    expect(screen.getByRole("link")).toBeInTheDocument();
+    fireEvent(window, new CustomEvent("product-deleted", { detail: { id: "product-id" } }));
+    expect(screen.queryByRole("link")).not.toBeInTheDocument();
+  });
   it.each([0, 5])("has no cart button and opens details when stock is %s", async (stock) => {
     mocks.stock = stock;
     renderCard(stock);

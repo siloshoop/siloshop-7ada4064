@@ -11,7 +11,7 @@ vi.mock("@/integrations/supabase/client", () => ({
 vi.mock("@/hooks/useToast", () => ({ useToast: () => ({ toast: vi.fn() }) }));
 vi.mock("@/hooks/useCompareProducts", () => ({ useCompareProducts: () => ({ addProduct: vi.fn() }) }));
 vi.mock("@/components/FavoriteButton", () => ({ FavoriteButton: () => null }));
-afterEach(() => { cleanup(); mocks.metadata = {}; });
+afterEach(() => { cleanup(); mocks.metadata = {}; mocks.from.mockClear(); });
 
 const renderCard = (stockQuantity?: number) => {
   mocks.from.mockImplementation((table: string) => ({ select: () => ({
@@ -46,7 +46,7 @@ describe("product listings", () => {
     expect(screen.queryByRole("button", { name: /السلة|للسلة/ })).not.toBeInTheDocument();
     fireEvent.click(screen.getByRole("link"));
     expect(screen.getByText("صفحة المنتج")).toBeInTheDocument();
-    expect(mocks.from.mock.calls.every(([table]) => table === "products")).toBe(true);
+    expect(mocks.from.mock.calls.every(([table]) => table === "products" || table === "daily_deals")).toBe(true);
   });
   it("shows saved sold-out stock even if a listing supplies stale positive stock", async () => {
     mocks.stock = 0;

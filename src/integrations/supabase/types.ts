@@ -5619,6 +5619,10 @@ export type Database = {
           vendor_id: string
         }[]
       }
+      validate_seller_deletion: {
+        Args: { _scope: string; _uid: string }
+        Returns: undefined
+      }
       vendor_submit_product_for_review: {
         Args: { _product_id: string }
         Returns: undefined

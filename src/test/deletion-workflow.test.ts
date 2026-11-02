@@ -19,6 +19,19 @@ it("store deletion never deletes buyer login", async () => {
   const s = steps(); await runDeletion("store", s);
   expect(s.deleteAuth).not.toHaveBeenCalled(); expect(s.finishDatabase).toHaveBeenCalledTimes(1);
 });
+it("successful Auth deletion does not require deleted credentials when marker cleanup fails", async () => {
+  const s = steps("database_done");
+  s.complete = vi.fn(async () => { throw new Error("completion_failed"); });
+  await expect(runDeletion("account", s)).resolves.toBeUndefined();
+  expect(s.deleteAuth).toHaveBeenCalledTimes(1);
+  expect(s.complete).toHaveBeenCalledTimes(1);
+});
+it("store marker cleanup failure remains retryable with the preserved buyer login", async () => {
+  const s = steps("database_done");
+  s.complete = vi.fn(async () => { throw new Error("completion_failed"); });
+  await expect(runDeletion("store", s)).rejects.toThrow("completion_failed");
+  expect(s.deleteAuth).not.toHaveBeenCalled();
+});
 it("media failure stops database and login deletion", async () => {
   const s = steps(); s.removeAssets = vi.fn(async () => { throw new Error("storage_cleanup_failed"); });
   await expect(runDeletion("account", s)).rejects.toThrow("storage_cleanup_failed");

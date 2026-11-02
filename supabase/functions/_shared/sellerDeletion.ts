@@ -61,10 +61,14 @@ export async function handleSellerDeletion(req: Request, scope: DeletionScope) {
         if (error) throw new Error("auth_delete_failed");
       },
       complete: async () => {
-        // No PII inventory survives successful deletion. Store jobs are cleared
-        // so the remaining buyer account can apply for a new store later.
+        // The database stage already erased the media inventory. Store jobs
+        // must clear so the remaining buyer can apply again. If account marker
+        // cleanup fails after Auth deletion, log a maintenance code only.
         const { error } = await admin.from("seller_deletion_jobs").delete().eq("user_id", uid);
-        if (error) throw new Error("completion_failed");
+        if (error) {
+          console.error("seller deletion marker cleanup failed", { scope });
+          throw new Error("completion_failed");
+        }
       },
     });
     return reply({ success: true, scope });

@@ -28,6 +28,13 @@ export async function runDeletion(scope: DeletionScope, steps: DeletionSteps) {
     }
     await steps.finishDatabase();
   }
-  if (scope === "account") await steps.deleteAuth();
+  if (scope === "account") {
+    await steps.deleteAuth();
+    // The identity no longer exists: never ask its owner to reauthenticate
+    // after successful Auth deletion. A failed marker cleanup is maintenance,
+    // not a failed deletion of the account itself.
+    await steps.complete().catch(() => undefined);
+    return;
+  }
   await steps.complete();
 }

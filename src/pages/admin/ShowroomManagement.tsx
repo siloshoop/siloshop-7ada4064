@@ -150,7 +150,8 @@ const ShowroomManagement = () => {
 
   const toggleField = async (item: ShowroomItem, field: "is_active" | "is_pinned") => {
     const value = !item[field];
-    const { error } = await supabase.from("showroom_items").update({ [field]: value }).eq("id", item.id);
+    const update = field === "is_active" ? { is_active: value } : { is_pinned: value };
+    const { error } = await supabase.from("showroom_items").update(update).eq("id", item.id);
     if (error) {
       toast({ title: "تعذّر التحديث", description: error.message, variant: "destructive" });
       return;

@@ -3,6 +3,7 @@ export type DeletionAsset = { bucket: string; path: string };
 export type DeletionJob = { stage: string; assets: DeletionAsset[] };
 export interface DeletionSteps {
   prepare: () => Promise<DeletionJob>;
+  validateDatabase: () => Promise<void>;
   removeAssets: (bucket: string, paths: string[]) => Promise<void>;
   finishDatabase: () => Promise<void>;
   deleteAuth: () => Promise<void>;
@@ -15,6 +16,7 @@ export async function runDeletion(scope: DeletionScope, steps: DeletionSteps) {
   const job = await steps.prepare();
   if (job.stage === "complete") return;
   if (job.stage === "prepared") {
+    await steps.validateDatabase();
     const buckets = new Map<string, string[]>();
     for (const asset of job.assets) {
       const paths = buckets.get(asset.bucket) ?? [];

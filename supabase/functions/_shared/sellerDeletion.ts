@@ -48,6 +48,10 @@ export async function handleSellerDeletion(req: Request, scope: DeletionScope) {
         if (error) throw new Error(error.message);
         return data as DeletionJob;
       },
+      validateDatabase: async () => {
+        const { error } = await admin.rpc("validate_seller_deletion", { _uid: uid, _scope: scope });
+        if (error) throw new Error(error.message);
+      },
       removeAssets: async (bucket, paths) => {
         const { error } = await admin.storage.from(bucket).remove(paths);
         if (error) throw new Error("storage_cleanup_failed");

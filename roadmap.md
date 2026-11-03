@@ -3,7 +3,7 @@
 ## Seller store and account deletion
 - [x] Diagnosed direct Auth deletion without media/dependency cleanup, restrictive order_items references and admin demotion mislabeled as deletion. Historical failing request logs unavailable; exact screenshot request cause unverified.
 - [x] Added separate confirmed store/account server entry points, reauthentication, service-only cleanup, durable media inventory, retry stages and meaningful errors; eligible stores without financial history are physically deleted, not deactivated.
-- [x] 33 focused isolated tests pass; authenticated own-account confirmation/cancel checked at 393/1280px without submitting deletion; live invalid-token calls to both endpoints return 401; automatic build OK.
+- [x] 40 focused isolated tests plus 4 Deno auth/CORS tests pass; tests use corrected real attribute/attachment fields and cover rollback-only preflight, shared comparisons and retained coupon history. Authenticated own-account confirmation/cancel checked at 393/1280px without submitting deletion; automatic build OK. Both functions deployed; website/Android not published. Full-production-schema isolated fixture and destructive live flow remain unverified.
 - [ ] Complete deletion for accounts/stores with financial history (blocked: legal retention policy not supplied; protective retention_review_required stops before mutation rather than deleting buyer receipts or inventing durations).
 - [ ] Live destructive end-to-end and physical Android verification (blocked: user explicitly permits isolated tests only; no physical Android device). No publish or Android release.
 

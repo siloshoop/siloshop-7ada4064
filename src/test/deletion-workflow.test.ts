@@ -3,7 +3,7 @@ import { it, expect, vi } from "vitest";
 import { runDeletion, type DeletionSteps } from "../../supabase/functions/_shared/deletionWorkflow";
 const steps = (stage = "prepared", count = 1): DeletionSteps => ({
   prepare: vi.fn(async () => ({ stage, assets: Array.from({ length: count }, (_, i) => ({ bucket: "product-images", path: `isolated/${i}.jpg` })) })),
-  removeAssets: vi.fn(async () => {}), finishDatabase: vi.fn(async () => {}),
+  validateDatabase: vi.fn(async () => {}), removeAssets: vi.fn(async () => {}), finishDatabase: vi.fn(async () => {}),
   deleteAuth: vi.fn(async () => {}), complete: vi.fn(async () => {}),
 });
 it("account deletion finishes media and database before permanently deleting Auth", async () => {
@@ -36,6 +36,11 @@ it("media failure stops database and login deletion", async () => {
   const s = steps(); s.removeAssets = vi.fn(async () => { throw new Error("storage_cleanup_failed"); });
   await expect(runDeletion("account", s)).rejects.toThrow("storage_cleanup_failed");
   expect(s.finishDatabase).not.toHaveBeenCalled(); expect(s.deleteAuth).not.toHaveBeenCalled(); expect(s.complete).not.toHaveBeenCalled();
+});
+it("dependency preflight failure preserves every file and login", async () => {
+  const s = steps(); s.validateDatabase = vi.fn(async () => { throw new Error("invalid_dependency"); });
+  await expect(runDeletion("account", s)).rejects.toThrow("invalid_dependency");
+  expect(s.removeAssets).not.toHaveBeenCalled(); expect(s.deleteAuth).not.toHaveBeenCalled();
 });
 it("database failure never deletes login or reports completion", async () => {
   const s = steps(); s.finishDatabase = vi.fn(async () => { throw new Error("database_cleanup_failed"); });

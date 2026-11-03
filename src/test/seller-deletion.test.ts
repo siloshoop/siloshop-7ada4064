@@ -41,7 +41,7 @@ beforeAll(async()=>{
 },30000);
 afterAll(async()=>{await db?.close()});
 const seed=async()=>{
- await db.exec(`DELETE FROM seller_deletion_jobs; DELETE FROM order_items; DELETE FROM orders; DELETE FROM payout_requests; DELETE FROM returns; DELETE FROM products; DELETE FROM user_roles; DELETE FROM profiles; DELETE FROM auth.users; DELETE FROM storage.objects;
+ await db.exec(`DELETE FROM seller_deletion_jobs; DELETE FROM coupon_redemptions; DELETE FROM order_items; DELETE FROM orders; DELETE FROM payout_requests; DELETE FROM returns; DELETE FROM products; DELETE FROM user_roles; DELETE FROM profiles; DELETE FROM auth.users; DELETE FROM storage.objects;
  INSERT INTO auth.users VALUES('${uid}','isolated@example.test'),('${other}','other@example.test'); INSERT INTO profiles(id,role) VALUES('${uid}','vendor'),('${other}','vendor'); INSERT INTO user_roles VALUES('${uid}','vendor'); INSERT INTO seller_applications VALUES(gen_random_uuid(),'${uid}'); INSERT INTO products VALUES('${pid}','${uid}');`);
 };
 it('reproduces original seller reference failure and blocks retained receipts before deletion',async()=>{
@@ -89,4 +89,28 @@ it('prepared jobs block new products and orders while allowing unrelated seller 
  await expect(db.exec(`INSERT INTO products VALUES(gen_random_uuid(),'${uid}')`)).rejects.toThrow('deletion_in_progress');
  await expect(db.exec(`INSERT INTO orders VALUES(gen_random_uuid(),'${other}','${uid}','pending')`)).rejects.toThrow('deletion_in_progress');
  await expect(db.exec(`INSERT INTO products VALUES(gen_random_uuid(),'${other}')`)).resolves.toBeDefined();
+});
+it('rollback-only preflight leaves products, media and the prepared stage unchanged',async()=>{
+ await seed(); await db.exec(`INSERT INTO storage.objects VALUES('product-images','${uid}/preview.jpg','${uid}','${uid}')`);
+ await db.query(`SELECT prepare_seller_deletion($1,'store')`,[uid]);
+ await db.query(`SELECT validate_seller_deletion($1,'store')`,[uid]);
+ expect((await db.query(`SELECT id FROM products WHERE id='${pid}'`)).rows).toHaveLength(1);
+ expect((await db.query(`SELECT name FROM storage.objects`)).rows).toHaveLength(1);
+ expect((await db.query(`SELECT stage FROM seller_deletion_jobs WHERE user_id='${uid}'`)).rows).toEqual([{stage:'prepared'}]);
+});
+it('shared attribute values survive and only deleted IDs are removed from saved comparisons',async()=>{
+ await seed(); await db.exec(`INSERT INTO product_attribute_values VALUES('${other}'); INSERT INTO saved_comparisons VALUES(ARRAY['${pid}'::uuid,'${other}'::uuid])`);
+ await db.query(`SELECT prepare_seller_deletion($1,'store')`,[uid]); await db.query(`SELECT finish_seller_deletion($1,'store')`,[uid]);
+ expect((await db.query(`SELECT attribute_id FROM product_attribute_values WHERE attribute_id='${other}'`)).rows).toHaveLength(1);
+ expect((await db.query(`SELECT product_ids FROM saved_comparisons WHERE '${other}'::uuid=ANY(product_ids)`)).rows).toEqual([{product_ids:[other]}]);
+});
+it('retained coupon history stops deletion before any inventory is prepared',async()=>{
+ await seed(); await db.exec(`INSERT INTO coupon_redemptions VALUES(gen_random_uuid(),'${uid}','${other}')`);
+ await expect(db.query(`SELECT prepare_seller_deletion($1,'store')`,[uid])).rejects.toThrow('retention_review_required');
+ expect((await db.query(`SELECT * FROM seller_deletion_jobs`)).rows).toHaveLength(0);
+});
+it('inventories conversation-prefixed buyer attachments for removed seller conversations',async()=>{
+ await seed(); await db.exec(`INSERT INTO conversations(id,vendor_id,customer_id) VALUES('${pid}','${uid}','${other}'); INSERT INTO message_attachments VALUES('${other}','${pid}','${pid}/buyer.pdf'); INSERT INTO storage.objects VALUES('chat-files','${pid}/buyer.pdf','${other}','${other}')`);
+ const result=await db.query<{prepare_seller_deletion:{assets:unknown[]}}>(`SELECT prepare_seller_deletion($1,'store')`,[uid]);
+ expect(result.rows[0]?.prepare_seller_deletion.assets).toEqual([{bucket:'chat-files',path:pid+'/buyer.pdf'}]);
 });

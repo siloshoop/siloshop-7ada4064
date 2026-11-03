@@ -1,5 +1,11 @@
 # Production readiness audit
 
+## Central admin management and supervisor permissions
+- [ ] Fix customer/seller visibility with protected complete account/store reads and explicit error states.
+- [ ] Complete advertisement controls including placement, scheduling and owner access.
+- [ ] Add owner-controlled supervisor permissions enforced on the server and admin navigation.
+- [ ] Test permission boundaries and authenticated read/navigation flows without changing production records.
+
 ## Seller store and account deletion
 - [x] Diagnosed direct Auth deletion without media/dependency cleanup, restrictive order_items references and admin demotion mislabeled as deletion. Historical failing request logs unavailable; exact screenshot request cause unverified.
 - [x] Added separate confirmed store/account server entry points, reauthentication, service-only cleanup, durable media inventory, retry stages and meaningful errors; eligible stores without financial history are physically deleted, not deactivated.

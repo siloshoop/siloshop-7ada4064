@@ -323,6 +323,13 @@
       "when": 1793598462823,
       "tag": "0045_seller_deletion_safe_cleanup_preflight",
       "breakpoints": true
+    },
+    {
+      "idx": 46,
+      "version": "7",
+      "when": 1793771545666,
+      "tag": "0046_central_admin_scoped_permissions",
+      "breakpoints": true
     }
   ]
 }

@@ -4069,6 +4069,27 @@ export type Database = {
         }
         Relationships: []
       }
+      staff_permissions: {
+        Row: {
+          granted_by: string
+          permission: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          granted_by: string
+          permission: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          granted_by?: string
+          permission?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       stock_movements: {
         Row: {
           created_at: string
@@ -4400,6 +4421,19 @@ export type Database = {
       add_order_note: {
         Args: { _is_internal?: boolean; _note: string; _order_id: string }
         Returns: string
+      }
+      admin_account_detail: {
+        Args: { _limit?: number; _offset?: number; _user_id: string }
+        Returns: Json
+      }
+      admin_account_directory: {
+        Args: {
+          _kind: string
+          _limit?: number
+          _offset?: number
+          _search?: string
+        }
+        Returns: Json
       }
       admin_activate_user: { Args: { _user_id: string }; Returns: undefined }
       admin_assign_return_staff: {
@@ -4816,6 +4850,7 @@ export type Database = {
         Args: { _path: string }
         Returns: boolean
       }
+      can_manage_staff_account: { Args: { _user_id: string }; Returns: boolean }
       cancel_order: {
         Args: { _order_id: string; _reason: string }
         Returns: undefined
@@ -4887,6 +4922,7 @@ export type Database = {
         Args: { p_message_id: string; p_target_conversation_id: string }
         Returns: string
       }
+      get_my_staff_permissions: { Args: never; Returns: string[] }
       get_or_create_conversation: {
         Args: { p_product_id?: string; p_vendor_id: string }
         Returns: string
@@ -5041,6 +5077,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      has_staff_permission: { Args: { _permission: string }; Returns: boolean }
       is_conversation_member: {
         Args: { _conversation_id: string; _user_id: string }
         Returns: boolean
@@ -5487,6 +5524,10 @@ export type Database = {
           _tracking_number?: string
           _user_agent?: string
         }
+        Returns: undefined
+      }
+      set_staff_permissions: {
+        Args: { _permissions: string[]; _user_id: string }
         Returns: undefined
       }
       settle_sham_cash_payment: {

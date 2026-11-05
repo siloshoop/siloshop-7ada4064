@@ -29,7 +29,7 @@
 
 - Render product bulk actions in normal document flow after the last selected visible row; this keeps actions aligned without covering adjacent content.
 - Validate coupon dates through couponDates (local to UTC).
-- Reuse moderator approval RPCs and restrict moderator tools to seller/product reviews; validate product/order seller ownership in the shared chat RPC to prevent legacy bypasses.
+- Keep moderator seller/product review defaults; owner-delegated customer, seller and ad scopes use server-checked staff_permissions and protected paginated account RPCs, never profile roles or UI-only authorization. Keep ad destination lookups separate from owner-only showroom lookups.
 - Store settings update only the owner's approved seller_applications row; public contact RPC exposes business phone/address, never identity documents or admin fields.
 
 - Category appearance uses shared semantic palette/icon keys with legacy name-based fallbacks; owner category ordering uses a locked atomic RPC so equal sort values can be reordered safely.

@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { ArrowLeft, Megaphone } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
+import { isInternalAdPath } from "@/lib/adSchedule";
 
 export type NativeAdPlacement = "home" | "category" | "search" | "product";
 
@@ -65,7 +66,7 @@ const NativeAdBanner = ({ placement, className = "" }: NativeAdBannerProps) => {
 
   if (!ad) return null;
 
-  const target = ad.cta_url && ad.cta_url.startsWith("/") ? ad.cta_url : null;
+  const target = ad.cta_url && isInternalAdPath(ad.cta_url) ? ad.cta_url : null;
 
   return (
     <aside aria-label={`إعلان من ${ad.sponsor_name}`} className={`container px-4 ${className}`}>

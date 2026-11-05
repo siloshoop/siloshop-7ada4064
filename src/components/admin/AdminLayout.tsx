@@ -10,6 +10,7 @@ import { Loader2 } from "lucide-react";
 import AccessDenied from "@/pages/AccessDenied";
 import { Button } from "@/components/ui/button";
 import { ADMIN_MODULES, AdminModule, canAccessAdminModule } from "./adminModules";
+import { useStaffPermissions } from "@/hooks/useStaffPermissions";
 
 interface AdminLayoutProps {
   title: string;
@@ -21,8 +22,9 @@ interface AdminLayoutProps {
 export const useAdminModules = () => {
   const { isEnabled, loading } = useFeatureFlags();
   const { role } = useStaffRole();
+  const { permissions } = useStaffPermissions();
   const visible = ADMIN_MODULES.filter(
-    (m) => canAccessAdminModule(m.href, role) && (!m.featureFlag || isEnabled(m.featureFlag)),
+    (m) => canAccessAdminModule(m.href, role, permissions) && (!m.featureFlag || isEnabled(m.featureFlag)),
   );
   return { modules: visible, loading };
 };
@@ -46,10 +48,11 @@ const NavItem = ({ module, active }: { module: AdminModule; active: boolean }) =
 
 const AdminLayout = ({ title, description, actions, children }: AdminLayoutProps) => {
   const { role, loading, error, retry } = useStaffRole();
+  const { permissions, loading: permissionsLoading } = useStaffPermissions();
   const { modules } = useAdminModules();
   const { pathname } = useLocation();
 
-  if (loading) {
+  if (loading || permissionsLoading) {
     return (
       <div className="flex min-h-screen items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -57,7 +60,7 @@ const AdminLayout = ({ title, description, actions, children }: AdminLayoutProps
     );
   }
   if (error) return <div dir="rtl" className="flex min-h-[60vh] flex-col items-center justify-center gap-4"><p role="alert">تعذّر التحقق من صلاحيات الإدارة</p><Button onClick={() => void retry()}>إعادة المحاولة</Button></div>;
-  if (!canAccessAdminModule(pathname, role)) return <AccessDenied />;
+  if (!canAccessAdminModule(pathname, role, permissions)) return <AccessDenied />;
 
   return (
     <div className="min-h-screen flex flex-col bg-background" dir="rtl">

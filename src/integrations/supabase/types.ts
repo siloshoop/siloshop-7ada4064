@@ -4728,6 +4728,30 @@ export type Database = {
         Args: { _note?: string; _violation_id: string }
         Returns: undefined
       }
+      admin_search_ad_products: {
+        Args: { _limit?: number; _search?: string; _vendor_id?: string }
+        Returns: {
+          discount_price: number
+          image_url: string
+          name: string
+          price: number
+          product_id: string
+          rating: number
+          sku: string
+          vendor_id: string
+          vendor_name: string
+        }[]
+      }
+      admin_search_ad_vendors: {
+        Args: { _limit?: number; _search?: string }
+        Returns: {
+          logo_url: string
+          name: string
+          product_count: number
+          rating: number
+          vendor_id: string
+        }[]
+      }
       admin_search_showroom_products: {
         Args: { _limit?: number; _search?: string; _vendor_id?: string }
         Returns: {

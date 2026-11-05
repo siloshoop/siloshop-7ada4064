@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -13,15 +13,8 @@ import {
 } from "@/components/ui/dialog";
 import { Loader2, Search, ShieldOff, ShieldCheck, Ban, Store } from "lucide-react";
 
-interface ProfileRow {
-  id: string;
-  full_name: string | null;
-  role: "customer" | "vendor";
-  account_status: string;
-  status_reason: string | null;
-  is_banned: boolean;
-  created_at: string | null;
-}
+import { loadAdminAccounts, type AdminAccount as ProfileRow } from "@/lib/adminAccounts";
+import { useStaffPermissions } from "@/hooks/useStaffPermissions";
 
 const STATUS_LABEL: Record<string, string> = {
   active: "نشط",
@@ -39,31 +32,24 @@ const AdminUsers = ({ mode }: { mode: Mode }) => {
   const [action, setAction] = useState<{ type: "ban" | "suspend"; user: ProfileRow } | null>(null);
   const [reason, setReason] = useState("");
   const [working, setWorking] = useState(false);
+  const [failure, setFailure] = useState("");
+  const [offset, setOffset] = useState(0);
+  const [total, setTotal] = useState(0);
+  const { can } = useStaffPermissions();
+  const canManage = can(mode === "buyers" ? "customers.manage" : "sellers.manage");
 
   const load = useCallback(async () => {
     setLoading(true);
-    const { data, error } = await supabase
-      .from("profiles")
-      .select("id, full_name, role, account_status, status_reason, is_banned, created_at")
-      .eq("role", mode === "buyers" ? "customer" : "vendor")
-      .order("created_at", { ascending: false })
-      .limit(300);
-    if (error) {
-      toast({ title: "خطأ", description: error.message, variant: "destructive" });
-    }
-    setRows((data ?? []) as ProfileRow[]);
-    setLoading(false);
-  }, [mode, toast]);
+    setFailure("");
+    try {
+      const result = await loadAdminAccounts(mode, search.trim(), offset);
+      setRows(result.rows); setTotal(result.total);
+    } catch { setFailure("تعذّر تحميل الحسابات؛ تحقق من صلاحياتك وأعد المحاولة."); setRows([]); }
+    finally { setLoading(false); }
+  }, [mode, search, offset]);
 
-  useEffect(() => {
-    void load();
-  }, [load]);
-
-  const filtered = useMemo(() => {
-    const q = search.trim().toLowerCase();
-    if (!q) return rows;
-    return rows.filter((r) => (r.full_name ?? "").toLowerCase().includes(q) || r.id.includes(q));
-  }, [rows, search]);
+  useEffect(() => { const timer = setTimeout(() => void load(), 250); return () => clearTimeout(timer); }, [load]);
+  const filtered = rows;
 
   const runAction = async () => {
     if (!action) return;
@@ -113,16 +99,16 @@ const AdminUsers = ({ mode }: { mode: Mode }) => {
             <Search className="absolute end-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
               value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder="بحث بالاسم أو المعرّف..."
+              onChange={(e) => { setSearch(e.target.value); setOffset(0); }}
+              placeholder="بحث بالاسم أو الهاتف أو البريد أو المتجر..."
               className="pe-9"
             />
           </div>
-          <Badge variant="secondary">{filtered.length} حساب</Badge>
+          <Badge variant="secondary">{total} حساب</Badge>
         </CardContent>
       </Card>
 
-      {loading ? (
+      {failure ? <div role="alert" className="space-y-3 py-8"><p>{failure}</p><Button onClick={() => void load()}>إعادة المحاولة</Button></div> : loading ? (
         <div className="flex justify-center py-16">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
         </div>
@@ -139,7 +125,9 @@ const AdminUsers = ({ mode }: { mode: Mode }) => {
               <CardContent className="flex flex-wrap items-center gap-3 p-4">
                 <div className="min-w-0 flex-1">
                   <p className="truncate font-semibold">{row.full_name || "بدون اسم"}</p>
-                  <p className="truncate text-xs text-muted-foreground">{row.id}</p>
+                  <p className="break-all text-xs text-muted-foreground" dir="ltr">{row.email || "—"}</p>
+                  <p className="text-sm" dir="ltr">{row.phone || row.contact_phone || "—"}</p>
+                  {mode === "sellers" && <p className="text-sm">{row.store_name || "—"} · {row.products_count} منتج · {row.orders_count} طلب</p>}
                   {row.status_reason && (
                     <p className="mt-1 text-xs text-destructive">السبب: {row.status_reason}</p>
                   )}
@@ -165,7 +153,7 @@ const AdminUsers = ({ mode }: { mode: Mode }) => {
                     </Link>
                   </Button>
                 )}
-                {row.account_status === "active" && !row.is_banned ? (
+                {canManage && (row.account_status === "active" && !row.is_banned ? (
                   <>
                     <Button
                       variant="outline"
@@ -186,13 +174,18 @@ const AdminUsers = ({ mode }: { mode: Mode }) => {
                   <Button variant="default" size="sm" onClick={() => activate(row)}>
                     <ShieldCheck className="me-1 h-4 w-4" /> تنشيط
                   </Button>
-                )}
+                ))}
               </CardContent>
             </Card>
           ))}
         </div>
       )}
 
+      <div className="my-4 flex items-center justify-center gap-3">
+        <Button variant="outline" disabled={offset === 0 || loading} onClick={() => setOffset((n) => Math.max(0,n-50))}>السابق</Button>
+        <span>{Math.floor(offset/50)+1} / {Math.max(1,Math.ceil(total/50))}</span>
+        <Button variant="outline" disabled={offset+50 >= total || loading} onClick={() => setOffset((n) => n+50)}>التالي</Button>
+      </div>
       <Dialog open={!!action} onOpenChange={(o) => !o && setAction(null)}>
         <DialogContent dir="rtl">
           <DialogHeader>

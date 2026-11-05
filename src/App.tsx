@@ -240,8 +240,8 @@ const App = () => (
             <Route path="/dashboard/analytics" element={<RequireRole role="admin"><AdminAnalytics /></RequireRole>} />
             {/* Unified admin console */}
             <Route path="/admin" element={<RequireRole role="admin"><AdminHome /></RequireRole>} />
-            <Route path="/admin/buyers" element={<RequireRole role="admin"><AdminUsers mode="buyers" /></RequireRole>} />
-            <Route path="/admin/sellers" element={<RequireRole role="admin"><AdminUsers mode="sellers" /></RequireRole>} />
+            <Route path="/admin/buyers" element={<RequireRole role="moderator"><AdminUsers mode="buyers" /></RequireRole>} />
+            <Route path="/admin/sellers" element={<RequireRole role="moderator"><AdminUsers mode="sellers" /></RequireRole>} />
             <Route path="/admin/seller-applications" element={<RequireRole role="moderator"><SellerManagement /></RequireRole>} />
             <Route path="/admin/products" element={<RequireRole role="moderator"><ProductModeration /></RequireRole>} />
             <Route path="/admin/orders" element={<RequireRole role="admin"><AdminOrders /></RequireRole>} />
@@ -249,7 +249,7 @@ const App = () => (
             <Route path="/admin/brands" element={<RequireRole role="admin"><ManageBrands /></RequireRole>} />
             <Route path="/admin/attributes" element={<RequireRole role="admin"><AdminAttributes /></RequireRole>} />
             <Route path="/admin/homepage" element={<RequireRole role={["admin","super_admin"]}><ShowroomManagement /></RequireRole>} />
-            <Route path="/admin/banners" element={<RequireRole role="admin"><ManageBanners /></RequireRole>} />
+            <Route path="/admin/banners" element={<RequireRole role="moderator"><ManageBanners /></RequireRole>} />
             <Route path="/admin/partners" element={<RequireRole role="admin"><ManagePartners /></RequireRole>} />
             <Route path="/admin/reports" element={<RequireRole role="admin"><Reports /></RequireRole>} />
             <Route path="/admin/violations" element={<RequireRole role="admin"><AdminSellerViolations /></RequireRole>} />
@@ -261,8 +261,8 @@ const App = () => (
             <Route path="/admin/features" element={<RequireRole role="super_admin"><FeatureFlagsPage /></RequireRole>} />
             <Route path="/admin/platform-products" element={<RequireRole role="super_admin"><PlatformProducts /></RequireRole>} />
             <Route path="/admin/sham-cash" element={<RequireRole role="super_admin"><ShamCashSettings /></RequireRole>} />
-            <Route path="/admin/users/:id" element={<RequireRole role="admin"><AdminUserDetail /></RequireRole>} />
-            <Route path="/admin/stores" element={<RequireRole role="admin"><AdminStores /></RequireRole>} />
+            <Route path="/admin/users/:id" element={<RequireRole role="moderator"><AdminUserDetail /></RequireRole>} />
+            <Route path="/admin/stores" element={<RequireRole role="moderator"><AdminStores /></RequireRole>} />
             <Route path="/admin/payments" element={<RequireRole role="admin"><AdminPayments /></RequireRole>} />
             <Route path="/admin/announcements" element={<RequireRole role="admin"><ManageAnnouncements /></RequireRole>} />
             <Route path="/admin/audit" element={<RequireRole role="admin"><AdminAuditLog /></RequireRole>} />

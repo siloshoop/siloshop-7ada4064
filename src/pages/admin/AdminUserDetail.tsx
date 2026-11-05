@@ -1,5 +1,6 @@
 import { formatKnownPrice as money } from "@/lib/currency";
-import { withDisplayCurrency } from "@/lib/displayCurrency";
+import { useStaffPermissions } from "@/hooks/useStaffPermissions";
+import { useStaffRole } from "@/hooks/useStaffRole";
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -18,6 +19,8 @@ interface Profile {
   id: string;
   full_name: string | null;
   phone: string | null;
+  email: string | null;
+  roles: string[];
   role: string;
   account_status: string;
   status_reason: string | null;
@@ -58,32 +61,30 @@ const AdminUserDetail = () => {
   const [action, setAction] = useState<"ban" | "suspend" | null>(null);
   const [reason, setReason] = useState("");
   const [working, setWorking] = useState(false);
+  const [failure, setFailure] = useState("");
+  const [offset, setOffset] = useState(0);
+  const [detail, setDetail] = useState<{
+    profile: Profile; store: Record<string, unknown> | null; addresses: Record<string, unknown>[];
+    products: {id: string; name: string; price: number; currency: string; stock_quantity: number; is_active: boolean}[];
+    products_total: number; orders_total: number; orders: OrderRow[]; activity: ActivityRow[];
+  } | null>(null);
+  const { can } = useStaffPermissions();
+  const { role: staffRole } = useStaffRole();
 
   const load = async () => {
     setLoading(true);
-    const [{ data: p }, { data: r }, { data: o }, { data: a }] = await Promise.all([
-      supabase
-        .from("profiles")
-        .select("id, full_name, phone, role, account_status, status_reason, is_banned, created_at")
-        .eq("id", id)
-        .maybeSingle(),
-      supabase.from("user_roles").select("role").eq("user_id", id),
-      supabase.rpc("admin_user_order_history", { _user_id: id, _limit: 20 }),
-      supabase
-        .from("activity_logs")
-        .select("id, action_type, created_at")
-        .eq("user_id", id)
-        .order("created_at", { ascending: false })
-        .limit(20),
-    ]);
-    setProfile((p as Profile) ?? null);
-    setRoles(((r as { role: string }[]) ?? []).map((x) => x.role));
-    setOrders(await withDisplayCurrency((o as OrderRow[]) ?? [], "orders"));
-    setActivity((a as ActivityRow[]) ?? []);
-    setLoading(false);
+    setFailure("");
+    try {
+      const { data, error } = await supabase.rpc("admin_account_detail", { _user_id: id, _offset: offset, _limit: 20 });
+      if (error) throw error;
+      const result = data as unknown as typeof detail;
+      setDetail(result); setProfile(result?.profile ?? null); setRoles(result?.profile.roles ?? []);
+      setOrders(result?.orders ?? []); setActivity(result?.activity ?? []);
+    } catch { setFailure("تعذّر تحميل معلومات الحساب؛ تحقق من صلاحياتك وأعد المحاولة."); }
+    finally { setLoading(false); }
   };
 
-  useEffect(() => { void load(); /* eslint-disable-next-line react-hooks/exhaustive-deps */ }, [id]);
+  useEffect(() => { void load(); }, [id, offset]);
 
   const runAction = async () => {
     if (!action || !profile) return;
@@ -142,6 +143,8 @@ const AdminUserDetail = () => {
     );
   }
 
+  if (failure) return <AdminLayout title="ملف المستخدم"><div role="alert" className="space-y-3"><p>{failure}</p><Button onClick={() => void load()}>إعادة المحاولة</Button></div></AdminLayout>;
+
   if (!profile) {
     return (
       <AdminLayout title="ملف المستخدم">
@@ -154,6 +157,7 @@ const AdminUserDetail = () => {
     );
   }
 
+  const canManage = can(detail?.store || profile.role === "vendor" ? "sellers.manage" : "customers.manage");
   const isActive = profile.account_status === "active" && !profile.is_banned;
 
   return (
@@ -161,7 +165,7 @@ const AdminUserDetail = () => {
       title={profile.full_name || "مستخدم بدون اسم"}
       description="ملف موحّد يجمع الحالة والصلاحيات والطلبات وسجل النشاط."
       actions={
-        <div className="flex flex-wrap gap-2">
+        canManage && <div className="flex flex-wrap gap-2">
           {isActive ? (
             <>
               <Button variant="outline" size="sm" onClick={() => { setAction("suspend"); setReason(""); }}>
@@ -176,7 +180,7 @@ const AdminUserDetail = () => {
               <ShieldCheck className="me-1 h-4 w-4" /> تنشيط
             </Button>
           )}
-          <Button variant="outline" size="sm" onClick={forceLogout} disabled={working}>
+          <Button variant="outline" size="sm" onClick={forceLogout} disabled={working} hidden={staffRole !== "admin" && staffRole !== "super_admin"}>
             <LogOut className="me-1 h-4 w-4" /> إخراج من الأجهزة
           </Button>
         </div>
@@ -187,6 +191,7 @@ const AdminUserDetail = () => {
           <CardHeader><CardTitle className="text-base">الحساب</CardTitle></CardHeader>
           <CardContent className="space-y-2 text-sm">
             <p className="text-xs text-muted-foreground" dir="ltr">{profile.id}</p>
+            <p className="break-all">البريد: {profile.email || "—"}</p>
             <p>الهاتف: {profile.phone || "—"}</p>
             <p>النوع: {profile.role === "vendor" ? "بائع" : "مشتري"}</p>
             <div className="flex items-center gap-1">
@@ -223,14 +228,14 @@ const AdminUserDetail = () => {
               <p className="text-sm text-muted-foreground">لا توجد طلبات</p>
             ) : (
               orders.map((o) => (
-                <div key={`${o.id}-${o.role}`} className="flex items-center gap-2 text-sm">
+                <Link to={`/orders/${o.id}`} key={`${o.id}-${o.role}`} className="flex items-center gap-2 text-sm">
                   <ShoppingBag className="h-4 w-4 shrink-0 text-muted-foreground" />
                   <span className="min-w-0 flex-1 truncate">
                     {o.id.slice(0, 8)} · {new Date(o.created_at).toLocaleDateString("ar-SY")}
                   </span>
                   <Badge variant="outline">{o.status}</Badge>
                   <span className="whitespace-nowrap text-xs">{money(o.total_amount, o.currency)}</span>
-                </div>
+                </Link>
               ))
             )}
           </CardContent>
@@ -255,6 +260,20 @@ const AdminUserDetail = () => {
         </Card>
       </div>
 
+      {detail?.store && <section className="mt-6 space-y-3">
+        <h2 className="text-lg font-semibold">المتجر</h2>
+        <dl className="grid gap-3 text-sm sm:grid-cols-2">
+          {Object.entries({store_name:"اسم المتجر",owner_name:"المالك",contact_email:"بريد المتجر",contact_phone:"هاتف المتجر",governorate:"المحافظة",city:"المدينة",address:"العنوان",status:"حالة المتجر",store_description:"الوصف",working_hours:"ساعات العمل",shipping_policy:"سياسة الشحن",return_policy:"سياسة الإرجاع",business_info:"معلومات النشاط",rejection_reason:"سبب الرفض أو التعليق",submitted_at:"تقديم الطلب",reviewed_at:"مراجعة الطلب"}).map(([key,label]) => <div key={key}><dt className="text-muted-foreground">{label}</dt><dd className="break-words">{String(detail.store?.[key] ?? "—")}</dd></div>)}
+        </dl>
+        <p className="text-sm">محافظات الشحن: {detail.store.shipping_all_provinces ? "جميع المحافظات" : (Array.isArray(detail.store.shipping_provinces) ? detail.store.shipping_provinces.join("، ") : "—")}</p>
+        <h2 className="pt-3 text-lg font-semibold">المنتجات ({detail.products_total})</h2>
+        {detail.products.length===0 ? <p className="text-muted-foreground">لا توجد منتجات</p> : detail.products.map((p) => <div key={p.id} className="flex flex-wrap items-center gap-3 border-b py-3 text-sm"><Link to={`/product/${p.id}`} className="flex-1 font-medium">{p.name}</Link><span>{money(p.price,p.currency)}</span><span>المخزون: {p.stock_quantity}</span><Badge variant={p.is_active ? "default" : "secondary"}>{p.is_active ? "نشط" : "غير نشط"}</Badge></div>)}
+      </section>}
+      {!!detail?.addresses.length && <section className="mt-6 space-y-3"><h2 className="text-lg font-semibold">عناوين التوصيل</h2>{detail.addresses.map((a,i)=><p key={i} className="border-b py-2 text-sm">{Object.entries(a).filter(([k])=>!["id","user_id","created_at","updated_at"].includes(k)).map(([,v])=>String(v??"")).join(" · ")}</p>)}</section>}
+      <div className="my-4 flex items-center justify-center gap-3">
+        <Button variant="outline" disabled={offset===0} onClick={()=>setOffset((n)=>Math.max(0,n-20))}>السابق</Button><span>{Math.floor(offset/20)+1}</span>
+        <Button variant="outline" disabled={offset+20>=Math.max(detail?.products_total ?? 0,detail?.orders_total ?? 0)} onClick={()=>setOffset((n)=>n+20)}>التالي</Button>
+      </div>
       <Dialog open={!!action} onOpenChange={(o) => !o && setAction(null)}>
         <DialogContent dir="rtl">
           <DialogHeader>

@@ -71,8 +71,16 @@ export const ADMIN_MODULES: AdminModule[] = [
 /** Modules that stay hidden until their feature flag is activated. */
 export const FUTURE_MODULES = ADMIN_MODULES.filter((m) => !!m.featureFlag);
 
-export const canAccessAdminModule = (href: string, role: string | null) => {
+export const canAccessAdminModule = (href: string, role: string | null, permissions: readonly string[] = []) => {
   if (href === "/admin/categories") return role === "super_admin";
+  if (href === "/admin/roles") return role === "super_admin";
   if (role === "super_admin" || role === "admin") return true;
+  if (role === "moderator") {
+    const permitted = (area: string) => permissions.includes(`${area}.view`) || permissions.includes(`${area}.manage`);
+    if (href === "/admin/buyers") return permitted("customers");
+    if (["/admin/sellers", "/admin/stores"].includes(href)) return permitted("sellers");
+    if (href.startsWith("/admin/users/")) return permitted("customers") || permitted("sellers");
+    if (href === "/admin/banners") return permitted("ads");
+  }
   return role === "moderator" && ["/admin/seller-applications", "/admin/products"].includes(href);
 };

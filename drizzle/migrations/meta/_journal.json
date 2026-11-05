@@ -330,6 +330,13 @@
       "when": 1793771545666,
       "tag": "0046_central_admin_scoped_permissions",
       "breakpoints": true
+    },
+    {
+      "idx": 47,
+      "version": "7",
+      "when": 1793858335739,
+      "tag": "0047_delegated_ad_destination_lookups",
+      "breakpoints": true
     }
   ]
 }

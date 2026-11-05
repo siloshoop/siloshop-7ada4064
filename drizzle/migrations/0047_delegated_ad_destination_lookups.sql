@@ -1,0 +1,6 @@
+DO $$ DECLARE old_name text; new_name text; d text; BEGIN FOREACH old_name IN ARRAY ARRAY['admin_search_showroom_products','admin_search_showroom_vendors'] LOOP new_name:=replace(old_name,'showroom','ad'); SELECT pg_get_functiondef(oid) INTO d FROM pg_proc WHERE pronamespace='public'::regnamespace AND proname=old_name; IF strpos(d,'IF NOT public.has_role(auth.uid(), ''super_admin'')')=0 THEN RAISE EXCEPTION 'unexpected_picker_guard'; END IF; d:=replace(d,'FUNCTION public.'||old_name,'FUNCTION public.'||new_name); d:=replace(d,'IF NOT public.has_role(auth.uid(), ''super_admin'')','IF NOT public.has_staff_permission(''ads.manage'')'); EXECUTE d; END LOOP; END $$;
+REVOKE ALL ON FUNCTION public.admin_search_ad_products(text,uuid,integer) FROM PUBLIC,anon;
+REVOKE ALL ON FUNCTION public.admin_search_ad_vendors(text,integer) FROM PUBLIC,anon;
+GRANT EXECUTE ON FUNCTION public.admin_search_ad_products(text,uuid,integer),public.admin_search_ad_vendors(text,integer) TO authenticated,service_role;
+-- Preserve customer membership for pending store applicants; authorization of their detail remains seller-scoped.
+DO $$ DECLARE d text; BEGIN SELECT pg_get_functiondef(oid) INTO d FROM pg_proc WHERE pronamespace='public'::regnamespace AND proname='admin_account_directory'; d:=replace(d, 'p.role=''customer'' AND sa.id IS NULL', 'p.role=''customer'''); EXECUTE d; END $$;

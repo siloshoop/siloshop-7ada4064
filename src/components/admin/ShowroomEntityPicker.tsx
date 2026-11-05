@@ -41,11 +41,13 @@ const useDebounced = (value: string, delay = 350) => {
 
 /** Real Supabase-backed searchable selector for vendors/stores (Super Admin only RPC). */
 export const VendorPicker = ({
+  purpose = "showroom",
   selectedId,
   selectedLabel,
   onSelect,
   onClear,
 }: {
+  purpose?: "showroom" | "ad";
   selectedId: string;
   selectedLabel?: string;
   onSelect: (vendor: PickedVendor) => void;
@@ -63,14 +65,14 @@ export const VendorPicker = ({
     setLoading(true);
     setError(null);
     supabase
-      .rpc("admin_search_showroom_vendors", { _search: debounced, _limit: 20 })
+      .rpc(purpose === "ad" ? "admin_search_ad_vendors" : "admin_search_showroom_vendors", { _search: debounced, _limit: 20 })
       .then(({ data, error: err }) => {
         if (id !== reqId.current) return;
         if (err) setError(err.message);
         setResults((data as PickedVendor[]) || []);
         setLoading(false);
       });
-  }, [debounced]);
+  }, [debounced, purpose]);
 
   return (
     <div className="space-y-2">
@@ -134,12 +136,14 @@ export const VendorPicker = ({
 
 /** Real Supabase-backed searchable selector for products (Super Admin only RPC). */
 export const ProductPicker = ({
+  purpose = "showroom",
   selectedId,
   selectedLabel,
   vendorFilter,
   onSelect,
   onClear,
 }: {
+  purpose?: "showroom" | "ad";
   selectedId: string;
   selectedLabel?: string;
   vendorFilter?: string | null;
@@ -158,7 +162,7 @@ export const ProductPicker = ({
     setLoading(true);
     setError(null);
     supabase
-      .rpc("admin_search_showroom_products", {
+      .rpc(purpose === "ad" ? "admin_search_ad_products" : "admin_search_showroom_products", {
         _search: debounced,
         _vendor_id: vendorFilter || null,
         _limit: 20,
@@ -171,7 +175,7 @@ export const ProductPicker = ({
         setResults(enriched);
         setLoading(false);
       });
-  }, [debounced, vendorFilter]);
+  }, [debounced, vendorFilter, purpose]);
 
   return (
     <div className="space-y-2">

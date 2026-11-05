@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import AdminLayout from "@/components/admin/AdminLayout";
@@ -13,15 +13,8 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, Search, Store, ShieldOff, ShieldCheck } from "lucide-react";
 
-interface StoreRow {
-  id: string;
-  user_id: string;
-  store_name: string | null;
-  city: string | null;
-  logo_url: string | null;
-  status: string;
-  rejection_reason: string | null;
-}
+import { loadAdminAccounts, type AdminAccount as StoreRow } from "@/lib/adminAccounts";
+import { useStaffPermissions } from "@/hooks/useStaffPermissions";
 
 const STATUS_LABEL: Record<string, string> = {
   approved: "نشط",
@@ -33,7 +26,10 @@ const STATUS_LABEL: Record<string, string> = {
 const AdminStores = () => {
   const { toast } = useToast();
   const [rows, setRows] = useState<StoreRow[]>([]);
-  const [counts, setCounts] = useState<Record<string, number>>({});
+  const [failure, setFailure] = useState("");
+  const [offset, setOffset] = useState(0);
+  const [total, setTotal] = useState(0);
+  const { can } = useStaffPermissions();
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [suspendTarget, setSuspendTarget] = useState<StoreRow | null>(null);
@@ -42,37 +38,13 @@ const AdminStores = () => {
 
   const load = async () => {
     setLoading(true);
-    const { data } = await supabase
-      .from("seller_applications")
-      .select("id, user_id, store_name, city, logo_url, status, rejection_reason")
-      .in("status", ["approved", "suspended"])
-      .order("store_name", { ascending: true });
-    const list = (data as StoreRow[]) ?? [];
-    setRows(list);
-
-    const { data: products } = await supabase
-      .from("products")
-      .select("vendor_id")
-      .eq("is_active", true)
-      .limit(5000);
-    const tally: Record<string, number> = {};
-    for (const p of products ?? []) tally[p.vendor_id] = (tally[p.vendor_id] ?? 0) + 1;
-    setCounts(tally);
-    setLoading(false);
+    setFailure("");
+    try { const result = await loadAdminAccounts("stores", search.trim(), offset); setRows(result.rows); setTotal(result.total); }
+    catch { setFailure("تعذّر تحميل المتاجر؛ أعد المحاولة."); setRows([]); }
+    finally { setLoading(false); }
   };
-
-  useEffect(() => { void load(); }, []);
-
-  const filtered = useMemo(() => {
-    const q = search.trim().toLowerCase();
-    if (!q) return rows;
-    return rows.filter(
-      (r) =>
-        (r.store_name ?? "").toLowerCase().includes(q) ||
-        (r.city ?? "").toLowerCase().includes(q) ||
-        r.user_id.toLowerCase().includes(q),
-    );
-  }, [rows, search]);
+  useEffect(() => { const timer=setTimeout(() => void load(),250); return () => clearTimeout(timer); }, [search,offset]);
+  const filtered = rows;
 
   const suspend = async () => {
     if (!suspendTarget) return;
@@ -82,7 +54,7 @@ const AdminStores = () => {
     }
     setWorking(true);
     const { error } = await supabase.rpc("suspend_seller", {
-      _user_id: suspendTarget.user_id,
+      _user_id: suspendTarget.id,
       _reason: reason.trim(),
     });
     setWorking(false);
@@ -97,7 +69,7 @@ const AdminStores = () => {
   };
 
   const reactivate = async (row: StoreRow) => {
-    const { error } = await supabase.rpc("reactivate_seller", { _user_id: row.user_id });
+    const { error } = await supabase.rpc("reactivate_seller", { _user_id: row.id });
     if (error) {
       toast({ title: "تعذر إعادة التنشيط", description: error.message, variant: "destructive" });
       return;
@@ -117,16 +89,16 @@ const AdminStores = () => {
             <Search className="absolute end-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
               value={search}
-              onChange={(e) => setSearch(e.target.value)}
+              onChange={(e) => { setSearch(e.target.value); setOffset(0); }}
               placeholder="بحث باسم المتجر أو المدينة..."
               className="pe-9"
             />
           </div>
-          <Badge variant="secondary">{filtered.length} متجر</Badge>
+          <Badge variant="secondary">{total} متجر</Badge>
         </CardContent>
       </Card>
 
-      {loading ? (
+      {failure ? <div role="alert" className="space-y-3 py-8"><p>{failure}</p><Button onClick={() => void load()}>إعادة المحاولة</Button></div> : loading ? (
         <div className="flex justify-center py-16">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
         </div>
@@ -152,22 +124,25 @@ const AdminStores = () => {
                 <div className="min-w-0 flex-1">
                   <p className="truncate font-semibold">{r.store_name || "متجر بدون اسم"}</p>
                   <p className="truncate text-xs text-muted-foreground">
-                    {r.city || "—"} · {counts[r.user_id] ?? 0} منتج
+                    {r.city || "—"} · {r.products_count} منتج · {r.orders_count} طلب
                   </p>
-                  {r.status === "suspended" && r.rejection_reason && (
+                  <p className="text-sm">{r.owner_name || r.full_name || "—"} · {r.governorate || "—"}</p>
+                  <p dir="ltr" className="break-all text-xs">{r.contact_email || r.email || "—"} · {r.contact_phone || r.phone || "—"}</p>
+                  <p className="text-xs text-muted-foreground">{r.address || "—"}</p>
+                  {r.store_status === "suspended" && r.rejection_reason && (
                     <p className="truncate text-xs text-destructive">السبب: {r.rejection_reason}</p>
                   )}
                 </div>
-                <Badge variant={r.status === "approved" ? "default" : "secondary"}>
-                  {STATUS_LABEL[r.status] ?? r.status}
+                <Badge variant={r.store_status === "approved" ? "default" : "secondary"}>
+                  {STATUS_LABEL[r.store_status ?? ""] ?? r.store_status}
                 </Badge>
                 <Button asChild variant="outline" size="sm">
-                  <Link to={`/store/${r.user_id}`}>عرض المتجر</Link>
+                  <Link to={`/store/${r.id}`}>عرض المتجر</Link>
                 </Button>
                 <Button asChild variant="outline" size="sm">
-                  <Link to={`/admin/users/${r.user_id}`}>الحساب</Link>
+                  <Link to={`/admin/users/${r.id}`}>الحساب</Link>
                 </Button>
-                {r.status === "approved" ? (
+                {can("sellers.manage") && (r.store_status === "approved" ? (
                   <Button
                     variant="destructive"
                     size="sm"
@@ -175,17 +150,22 @@ const AdminStores = () => {
                   >
                     <ShieldOff className="me-1 h-4 w-4" /> تعليق
                   </Button>
-                ) : (
+                ) : r.store_status === "suspended" ? (
                   <Button size="sm" onClick={() => void reactivate(r)}>
                     <ShieldCheck className="me-1 h-4 w-4" /> تنشيط
                   </Button>
-                )}
+                ) : <Button asChild variant="outline" size="sm"><Link to="/admin/seller-applications">مراجعة الطلب</Link></Button>)}
               </CardContent>
             </Card>
           ))}
         </div>
       )}
 
+      <div className="my-4 flex items-center justify-center gap-3">
+        <Button variant="outline" disabled={offset===0 || loading} onClick={() => setOffset((n)=>Math.max(0,n-50))}>السابق</Button>
+        <span>{Math.floor(offset/50)+1} / {Math.max(1,Math.ceil(total/50))}</span>
+        <Button variant="outline" disabled={offset+50>=total || loading} onClick={() => setOffset((n)=>n+50)}>التالي</Button>
+      </div>
       <Dialog open={!!suspendTarget} onOpenChange={(o) => !o && setSuspendTarget(null)}>
         <DialogContent dir="rtl">
           <DialogHeader><DialogTitle>تعليق المتجر</DialogTitle></DialogHeader>

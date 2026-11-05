@@ -15,6 +15,8 @@ import { Loader2, Plus, Pencil, Trash2 } from "lucide-react";
 import ImageUploadField from "@/components/ImageUploadField";
 import { broadcastActivationChange } from "@/lib/activationSync";
 import { VendorPicker, ProductPicker } from "@/components/admin/ShowroomEntityPicker";
+import { adDates, adState, isInternalAdPath, localAdDate } from "@/lib/adSchedule";
+import { useStaffPermissions } from "@/hooks/useStaffPermissions";
 
 const UUID_RE = "[0-9a-fA-F-]{36}";
 const parseTarget = (url: string): { type: "store" | "product" | "custom"; id: string } => {
@@ -80,14 +82,19 @@ const ManageBanners = () => {
   const target = parseTarget(form.cta_url.trim());
   const [saving, setSaving] = useState(false);
   const [togglingId, setTogglingId] = useState<string | null>(null);
+  const [failure, setFailure] = useState("");
+  const [deleteTarget, setDeleteTarget] = useState<BannerRow | null>(null);
+  const { can } = useStaffPermissions();
+  const canManage = can("ads.manage");
 
   const load = useCallback(async () => {
     setLoading(true);
+    setFailure("");
     const { data, error } = await supabase
       .from("native_ads")
       .select("id, title, description, image_url, cta_text, cta_url, sponsor_name, placement, priority, is_active, start_date, end_date")
       .order("priority", { ascending: false });
-    if (error) toast({ title: "خطأ", description: error.message, variant: "destructive" });
+    if (error) setFailure("تعذّر تحميل الإعلانات؛ أعد المحاولة.");
     setRows((data ?? []) as BannerRow[]);
     setLoading(false);
   }, [toast]);
@@ -102,7 +109,7 @@ const ManageBanners = () => {
       return;
     }
     const url = form.cta_url.trim();
-    if (url && !url.startsWith("/")) {
+    if (!isInternalAdPath(url)) {
       toast({
         title: "رابط داخلي فقط",
         description: "يجب أن يبدأ الرابط بـ / مثل /category/... أو /product/...",
@@ -110,6 +117,9 @@ const ManageBanners = () => {
       });
       return;
     }
+    let dates;
+    try { dates = adDates(form.start_date, form.end_date); }
+    catch (error) { toast({ title: error instanceof Error ? error.message : "تاريخ غير صالح", variant: "destructive" }); return; }
     setSaving(true);
     const payload = {
       title: form.title.trim(),
@@ -121,8 +131,7 @@ const ManageBanners = () => {
       placement: form.placement,
       priority: Number(form.priority) || 0,
       is_active: form.is_active,
-      start_date: form.start_date ? new Date(form.start_date).toISOString() : null,
-      end_date: form.end_date ? new Date(form.end_date).toISOString() : null,
+      ...dates,
     };
     const { error } = editing
       ? await supabase.from("native_ads").update(payload).eq("id", editing.id)
@@ -139,6 +148,7 @@ const ManageBanners = () => {
       placement: payload.placement,
     });
     setOpen(false);
+    void broadcastActivationChange("native_ads", editing?.id ?? "new");
     void load();
   };
 
@@ -149,6 +159,8 @@ const ManageBanners = () => {
       return;
     }
     setRows((prev) => prev.filter((r) => r.id !== row.id));
+    setDeleteTarget(null);
+    void broadcastActivationChange("native_ads", row.id);
     toast({ title: "تم حذف البانر" });
     void logAdminAction("banner_deleted", { banner_id: row.id, title: row.title });
   };
@@ -184,12 +196,12 @@ const ManageBanners = () => {
       title="البانرات والإعلانات"
       description="إعلانات ترويجية داخلية فقط — يجب أن تكون الروابط مسارات داخلية في المنصة."
       actions={
-        <Button onClick={() => { setEditing(null); setForm(emptyForm); setOpen(true); }}>
+        canManage && <Button onClick={() => { setEditing(null); setForm(emptyForm); setOpen(true); }}>
           <Plus className="me-1 h-4 w-4" /> بانر جديد
         </Button>
       }
     >
-      {loading ? (
+      {failure ? <div role="alert" className="space-y-3 py-8"><p>{failure}</p><Button onClick={() => void load()}>إعادة المحاولة</Button></div> : loading ? (
         <div className="flex justify-center py-16">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
         </div>
@@ -222,11 +234,13 @@ const ManageBanners = () => {
                   {PLACEMENTS.find((p) => p.value === b.placement)?.label ?? b.placement}
                 </Badge>
                 <Badge variant="secondary">أولوية {b.priority}</Badge>
-                <Switch checked={b.is_active} onCheckedChange={() => toggleActive(b)} disabled={togglingId === b.id} aria-label="تفعيل" />
+                <Badge variant="outline">{adState(b)}</Badge>
+                <Switch checked={b.is_active} onCheckedChange={() => toggleActive(b)} disabled={!canManage || togglingId === b.id} aria-label="تفعيل" />
                 <Button
                   variant="ghost"
                   size="icon"
                   aria-label="تعديل"
+                  disabled={!canManage}
                   onClick={() => {
                     setEditing(b);
                     setForm({
@@ -239,15 +253,15 @@ const ManageBanners = () => {
                       placement: b.placement,
                       priority: b.priority,
                       is_active: b.is_active,
-                      start_date: b.start_date ? b.start_date.slice(0, 16) : "",
-                      end_date: b.end_date ? b.end_date.slice(0, 16) : "",
+                      start_date: localAdDate(b.start_date),
+                      end_date: localAdDate(b.end_date),
                     });
                     setOpen(true);
                   }}
                 >
                   <Pencil className="h-4 w-4" />
                 </Button>
-                <Button variant="ghost" size="icon" aria-label="حذف" onClick={() => remove(b)}>
+                <Button variant="ghost" size="icon" aria-label="حذف" disabled={!canManage} onClick={() => setDeleteTarget(b)}>
                   <Trash2 className="h-4 w-4 text-destructive" />
                 </Button>
               </CardContent>
@@ -256,6 +270,11 @@ const ManageBanners = () => {
         </div>
       )}
 
+      <Dialog open={!!deleteTarget} onOpenChange={(value) => !value && setDeleteTarget(null)}>
+        <DialogContent dir="rtl"><DialogHeader><DialogTitle>حذف الإعلان «{deleteTarget?.title}»؟</DialogTitle></DialogHeader>
+          <DialogFooter><Button variant="outline" onClick={() => setDeleteTarget(null)}>إلغاء</Button><Button variant="destructive" onClick={() => deleteTarget && void remove(deleteTarget)}>تأكيد الحذف</Button></DialogFooter>
+        </DialogContent>
+      </Dialog>
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent dir="rtl" className="max-h-[85vh] overflow-y-auto">
           <DialogHeader>
@@ -290,6 +309,7 @@ const ManageBanners = () => {
             </Select>
             {targetType === "store" && (
               <VendorPicker
+                purpose="ad"
                 selectedId={target.type === "store" ? target.id : ""}
                 selectedLabel={targetLabel || undefined}
                 onSelect={(v) => { setTargetLabel(v.name); setForm({ ...form, cta_url: `/store/${v.vendor_id}` }); }}
@@ -298,6 +318,7 @@ const ManageBanners = () => {
             )}
             {targetType === "product" && (
               <ProductPicker
+                purpose="ad"
                 selectedId={target.type === "product" ? target.id : ""}
                 selectedLabel={targetLabel || undefined}
                 onSelect={(p) => { setTargetLabel(p.name); setForm({ ...form, cta_url: `/product/${p.product_id}` }); }}

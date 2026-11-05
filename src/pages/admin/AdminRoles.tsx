@@ -13,6 +13,9 @@ import {
 import {
   Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle,
 } from "@/components/ui/dialog";
+import { STAFF_PERMISSIONS } from "@/lib/adminPermissions";
+import { Checkbox } from "@/components/ui/checkbox";
+import { useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, Search, ShieldCheck, UserCog } from "lucide-react";
 
@@ -41,13 +44,25 @@ const AdminRoles = () => {
   const [role, setRole] = useState<AppRole>("moderator");
   const [reason, setReason] = useState("");
   const [working, setWorking] = useState(false);
+  const [permissionTarget, setPermissionTarget] = useState<string | null>(null);
+  const [selectedPermissions, setSelectedPermissions] = useState<string[]>([]);
+  const [permissionMap, setPermissionMap] = useState<Record<string,string[]>>({});
+  const [failure, setFailure] = useState("");
+  const queryClient = useQueryClient();
 
   const load = async () => {
     setLoading(true);
-    const { data } = await supabase
+    setFailure("");
+    const { data, error } = await supabase
       .from("user_roles")
       .select("user_id, role")
       .in("role", MANAGED_ROLES);
+    if (error) { setFailure("تعذّر تحميل الأدوار"); setLoading(false); return; }
+    const { data: saved, error: permissionsError } = await supabase.from("staff_permissions").select("user_id,permission");
+    if (permissionsError) setFailure("تعذّر تحميل صلاحيات المشرفين");
+    const map: Record<string,string[]> = {};
+    for (const row of saved ?? []) map[row.user_id] = [...(map[row.user_id] ?? []),row.permission];
+    setPermissionMap(map);
     const rows = (data as RoleRow[]) ?? [];
     setRoles(rows);
     const ids = [...new Set(rows.map((r) => r.user_id))];
@@ -124,7 +139,7 @@ const AdminRoles = () => {
         </CardContent>
       </Card>
 
-      {loading ? (
+      {failure ? <div role="alert"><p>{failure}</p><Button onClick={()=>void load()}>إعادة المحاولة</Button></div> : loading ? (
         <div className="flex justify-center py-16">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
         </div>
@@ -150,6 +165,7 @@ const AdminRoles = () => {
                 <Button asChild variant="outline" size="sm">
                   <Link to={`/admin/users/${id}`}>الملف</Link>
                 </Button>
+                {list.includes("moderator") && !list.includes("admin") && !list.includes("super_admin") && <Button variant="outline" size="sm" onClick={()=>{setPermissionTarget(id);setSelectedPermissions(permissionMap[id] ?? []);}}>تخصيص الصلاحيات</Button>}
                 {list.map((r) => (
                   <Button
                     key={`revoke-${r}`}
@@ -167,6 +183,17 @@ const AdminRoles = () => {
         </div>
       )}
 
+      <Dialog open={!!permissionTarget} onOpenChange={(open)=>!open && setPermissionTarget(null)}>
+        <DialogContent dir="rtl"><DialogHeader><DialogTitle>صلاحيات المشرف</DialogTitle></DialogHeader>
+          <div className="space-y-3">{STAFF_PERMISSIONS.map(({key,label})=><label key={key} className="flex items-center gap-3"><Checkbox checked={selectedPermissions.includes(key)} onCheckedChange={(checked)=>setSelectedPermissions((values)=>checked ? [...values,key] : values.filter((v)=>v!==key))}/><span>{label}</span></label>)}</div>
+          <DialogFooter><Button variant="outline" onClick={()=>setPermissionTarget(null)}>إلغاء</Button><Button disabled={working} onClick={async()=>{
+            if (!permissionTarget) return; setWorking(true);
+            const {error}=await supabase.rpc("set_staff_permissions",{_user_id:permissionTarget,_permissions:selectedPermissions}); setWorking(false);
+            if(error){toast({title:"تعذّر حفظ الصلاحيات",description:error.message,variant:"destructive"});return;}
+            toast({title:"تم حفظ صلاحيات المشرف"});setPermissionTarget(null);void queryClient.invalidateQueries({queryKey:["staff-permissions"]});void load();
+          }}>حفظ</Button></DialogFooter>
+        </DialogContent>
+      </Dialog>
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent dir="rtl">
           <DialogHeader>

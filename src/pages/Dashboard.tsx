@@ -1,4 +1,4 @@
-import { formatPrice, formatSplitTotals, sumByCurrency, type RevenueSplit } from "@/lib/currency";
+import { formatPrice, formatSplitTotals, type RevenueSplit } from "@/lib/currency";
 import { useCallback, useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
@@ -42,10 +42,9 @@ const Dashboard = () => {
     productsSold: 0,
     estimatedRevenue: 0,
   });
-  const [customerStats, setCustomerStats] = useState({ orders: 0, totalSpent: 0, reviewed: 0, favorites: 0 });
+  const [customerStats, setCustomerStats] = useState({ orders: 0, reviewed: 0, favorites: 0 });
   const [loading, setLoading] = useState(true);
   const [vendorSplit, setVendorSplit] = useState<RevenueSplit | null>(null);
-  const [customerSplit, setCustomerSplit] = useState<RevenueSplit | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [filterStatus, setFilterStatus] = useState("all");
   const [sortBy, setSortBy] = useState("date-desc");
@@ -63,20 +62,15 @@ const Dashboard = () => {
 
   const fetchCustomerStats = useCallback(async (uid: string) => {
     const [ordersRes, favRes, reviewsRes] = await Promise.all([
-      supabase.from("orders").select("total_amount, status, currency").eq("customer_id", uid).is("parent_order_id", null),
+      supabase.from("orders").select("status").eq("customer_id", uid).is("parent_order_id", null),
       supabase.from("favorites").select("id", { count: "exact", head: true }).eq("user_id", uid),
       supabase.from("reviews").select("id", { count: "exact", head: true }).eq("user_id", uid),
     ]);
     const orders = ordersRes.data || [];
-    // Successful orders = not cancelled; Revenue = delivered only
+    // Successful orders = not cancelled.
     const successfulOrders = orders.filter((o: any) => o.status !== "cancelled");
-    const deliveredRevenue = orders
-      .filter((o: any) => o.status === "delivered")
-      .reduce((s: number, o: any) => s + Number(o.total_amount || 0), 0);
-    setCustomerSplit(sumByCurrency(orders.filter((o: any) => o.status === "delivered").map((o: any) => ({ amount: Number(o.total_amount || 0), currency: o.currency }))));
     setCustomerStats({
       orders: successfulOrders.length,
-      totalSpent: deliveredRevenue,
       reviewed: reviewsRes.count || 0,
       favorites: favRes.count || 0,
     });
@@ -828,7 +822,7 @@ const Dashboard = () => {
           </>
         ) : (
           <>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-6">
               <Link to="/orders" aria-label="عدد الطلبات" className="block min-w-0 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
               <Card className="h-full">
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -836,15 +830,6 @@ const Dashboard = () => {
                   <ShoppingBag className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent><div className="text-2xl font-bold">{customerStats.orders}</div></CardContent>
-              </Card>
-              </Link>
-              <Link to="/orders" aria-label="المبلغ الإجمالي" className="block min-w-0 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
-              <Card className="h-full">
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">المبلغ الإجمالي</CardTitle>
-                  <DollarSign className="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent><div className="text-2xl font-bold">{formatSplitTotals(customerSplit)}</div></CardContent>
               </Card>
               </Link>
               <Link to="/orders" aria-label="منتجات مقيّمة" className="block min-w-0 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">

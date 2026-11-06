@@ -1,5 +1,9 @@
 # Production readiness audit
 
+## Login back navigation
+- [ ] Replace automatic signed-out redirects rather than pushing protected pages into history; preserve explicit login actions and authorization.
+- [ ] Verify browser back on mobile/desktop, role-gated routes and native fallback; no publication or physical Android test.
+
 ## Central admin management and supervisor permissions
 - [x] Replaced sparse/error-suppressing customer/store reads with protected paginated account/contact/store/product/order reads; preserve saved financial currencies and explicit error states.
 - [x] Advertisement create/edit/delete/activation, placement and duration controls validated; local date editing preserves instants, confirmation on delete, delegated image/destination lookups do not grant showroom access.

@@ -1,10 +1,11 @@
 # Production readiness audit
 
 ## Central admin management and supervisor permissions
-- [ ] Fix customer/seller visibility with protected complete account/store reads and explicit error states.
-- [ ] Complete advertisement controls including placement, scheduling and owner access.
-- [ ] Add owner-controlled supervisor permissions enforced on the server and admin navigation.
-- [ ] Test permission boundaries and authenticated read/navigation flows without changing production records.
+- [x] Replaced sparse/error-suppressing customer/store reads with protected paginated account/contact/store/product/order reads; preserve saved financial currencies and explicit error states.
+- [x] Advertisement create/edit/delete/activation, placement and duration controls validated; local date editing preserves instants, confirmation on delete, delegated image/destination lookups do not grant showroom access.
+- [x] Owner-only supervisor permission editor; server-enforced customer/seller/ad view/manage scopes, immediate revocation, staff-target protections and scoped navigation. Existing review defaults unchanged.
+- [x] All 290 tests pass (17 new permission/ad tests); automatic build OK. Real owner navigated buyers (23), sellers (16), stores (15), ads and roles, buyer detail and seller detail with 3 products; ad form opened/cancelled, no runtime errors. No production records mutated.
+- [ ] Live supervisor permission changes, customer/store status changes, ad save/image upload/delete end-to-end (blocked: no authorized disposable production records; verified with isolated tests instead). Physical Android and published UI untested; not published.
 
 ## Seller store and account deletion
 - [x] Diagnosed direct Auth deletion without media/dependency cleanup, restrictive order_items references and admin demotion mislabeled as deletion. Historical failing request logs unavailable; exact screenshot request cause unverified.

@@ -24,8 +24,7 @@ describe("server-scoped admin permissions", () => {
       GRANT SELECT,INSERT,UPDATE,DELETE ON native_ads TO authenticated;`);
     const migration=readFileSync("drizzle/migrations/0046_central_admin_scoped_permissions.sql","utf8");
     await db.exec(migration.slice(0,migration.indexOf("CREATE FUNCTION public.admin_account_directory")));
-    const policies=migration.slice(migration.indexOf("CREATE POLICY staff_read_native_ads"),migration.indexOf("--",migration.indexOf("CREATE POLICY staff_read_native_ads"))>0 ? migration.indexOf("--",migration.indexOf("CREATE POLICY staff_read_native_ads")):migration.indexOf("CREATE POLICY delegated_ad_image_insert"));
-    await db.exec(policies.split("CREATE POLICY delegated_ad_image_insert")[0]);
+    await db.exec(migration.slice(migration.indexOf("CREATE POLICY staff_read_native_ads"),migration.indexOf("CREATE POLICY delegated_ad_image_insert")));
     await db.exec(migration.slice(migration.indexOf("CREATE FUNCTION public.validate_admin_ad")));
     await db.exec(`INSERT INTO profiles(id,role) VALUES('${id(1)}','customer'),('${id(2)}','customer'),('${id(3)}','customer'),('${id(4)}','vendor'); INSERT INTO user_roles VALUES('${id(1)}','super_admin'),('${id(2)}','moderator'),('${id(3)}','customer'); INSERT INTO seller_applications VALUES('${id(4)}')`);
   },30000);
@@ -50,6 +49,21 @@ describe("server-scoped admin permissions", () => {
     await expect(db.query(`INSERT INTO native_ads(title,placement) VALUES('denied','home')`)).rejects.toThrow('row-level security');
   });
   it("ad view-only supervisors cannot create ads",async()=>{await actor(1);await db.query(`SELECT set_staff_permissions($1,ARRAY['ads.view'])`,[id(2)]);await actor(2);await expect(db.query(`INSERT INTO native_ads(title,placement) VALUES('denied','home')`)).rejects.toThrow('row-level security');});
+  it("ad managers can create edit schedule deactivate reactivate and delete",async()=>{
+    await actor(1);await db.query(`SELECT set_staff_permissions($1,ARRAY['ads.manage'])`,[id(2)]);await actor(2);
+    await db.query(`INSERT INTO native_ads(id,title,placement) VALUES($1,'original','home')`,[id(8)]);
+    await db.query(`UPDATE native_ads SET title='edited',placement='search',start_date='2026-11-05',end_date='2026-11-07',is_active=false WHERE id=$1`,[id(8)]);
+    expect((await db.query(`SELECT title,placement,is_active FROM native_ads WHERE id=$1`,[id(8)])).rows).toEqual([{title:'edited',placement:'search',is_active:false}]);
+    await db.query(`UPDATE native_ads SET is_active=true WHERE id=$1`,[id(8)]);
+    expect((await db.query<{is_active:boolean}>(`SELECT is_active FROM native_ads WHERE id=$1`,[id(8)])).rows[0]?.is_active).toBe(true);
+    await db.query(`DELETE FROM native_ads WHERE id=$1`,[id(8)]);expect((await db.query(`SELECT id FROM native_ads`)).rows).toEqual([]);
+  });
+  it("view-only ad readers cannot edit or delete",async()=>{
+    await actor(1);await db.query(`INSERT INTO native_ads(id,title,placement) VALUES($1,'original','home')`,[id(8)]);await db.query(`SELECT set_staff_permissions($1,ARRAY['ads.view'])`,[id(2)]);await actor(2);
+    expect((await db.query(`UPDATE native_ads SET title='unauthorized' WHERE id=$1 RETURNING id`,[id(8)])).rows).toEqual([]);
+    expect((await db.query(`DELETE FROM native_ads WHERE id=$1 RETURNING id`,[id(8)])).rows).toEqual([]);
+    expect((await db.query<{title:string}>(`SELECT title FROM native_ads`)).rows[0]?.title).toBe('original');
+  });
   it("suspended supervisors lose delegated access",async()=>{await actor(1);await db.query(`SELECT set_staff_permissions($1,ARRAY['sellers.manage'])`,[id(2)]);await db.exec(`RESET ROLE;UPDATE profiles SET account_status='suspended' WHERE id='${id(2)}'`);await actor(2);expect((await db.query<{ok:boolean}>(`SELECT has_staff_permission('sellers.view') ok`)).rows[0]?.ok).toBe(false);});
   it("delegates cannot manage staff accounts",async()=>{await actor(1);await db.query(`SELECT set_staff_permissions($1,ARRAY['customers.manage','sellers.manage'])`,[id(2)]);await actor(2);expect((await db.query<{ok:boolean}>(`SELECT can_manage_staff_account($1) ok`,[id(1)])).rows[0]?.ok).toBe(false);expect((await db.query<{ok:boolean}>(`SELECT can_manage_staff_account($1) ok`,[id(4)])).rows[0]?.ok).toBe(true);});
   it("ad dates and placements are enforced on writes",async()=>{await actor(1);await expect(db.query(`INSERT INTO native_ads(placement) VALUES('unknown')`)).rejects.toThrow('invalid_ad_placement');await expect(db.query(`INSERT INTO native_ads(placement,start_date,end_date) VALUES('home','2026-11-05','2026-11-04')`)).rejects.toThrow('invalid_ad_dates');});

@@ -28,7 +28,7 @@ const Messages = () => {
   const active = useMemo(() => items.find((c) => c.id === activeId) ?? null, [items, activeId]);
 
   useEffect(() => {
-    if (!authLoading && !user) navigate("/auth");
+    if (!authLoading && !user) navigate("/auth", { replace: true });
   }, [authLoading, user, navigate]);
 
   const select = (id: string) => {

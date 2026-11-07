@@ -36,3 +36,4 @@
 - Staff UI resolves roles through existing callable has_role checks, never the internal actor_admin_role audit helper; route boundaries and explicit authorization errors prevent blank pages without changing server permissions.
 - Reset route error boundaries by pathname, never history-entry keys; same-page URL filter updates must preserve mounted pages and pending data reads.
 - Keep search option caches separate from product availability, cancel superseded searches, and render result batches without changing the existing filtered result window; stock continues to refresh uncached.
+- Automatic signed-out redirects replace protected history entries, while explicit login actions push; this prevents browser/native Back from looping into login. Native auth fallback replaces with home when no prior entry exists.

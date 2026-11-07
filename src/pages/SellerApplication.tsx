@@ -64,7 +64,7 @@ const SellerApplication = () => {
   const [coverPath, setCoverPath] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!authLoading && !user) navigate("/auth");
+    if (!authLoading && !user) navigate("/auth", { replace: true });
   }, [authLoading, user, navigate]);
 
   const signedUrl = async (path: string | null) => {

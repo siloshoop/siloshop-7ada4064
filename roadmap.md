@@ -1,8 +1,9 @@
 # Production readiness audit
 
 ## Login back navigation
-- [ ] Replace automatic signed-out redirects rather than pushing protected pages into history; preserve explicit login actions and authorization.
-- [ ] Verify browser back on mobile/desktop, role-gated routes and native fallback; no publication or physical Android test.
+- [x] Reproduced login Back returning to a protected dashboard then redirecting to login; automatic signed-out redirects now replace denied history entries across page/role guards. Explicit login actions and authorization remain unchanged; native no-history auth fallback replaces rather than pushes home.
+- [x] Browser Back verified on 393×660 and 1280×1800 across dashboard/orders/favorites/settings/profile/notifications/admin/seller-add-product plus explicit Navbar login; every flow returns to search, no runtime errors. Five role-guard regression tests and automatic build pass.
+- [ ] Physical Android hardware Back verification (blocked: no device/emulator); native fallback is source-reviewed, not exercised on a device. No publication or Android release.
 
 ## Central admin management and supervisor permissions
 - [x] Replaced sparse/error-suppressing customer/store reads with protected paginated account/contact/store/product/order reads; preserve saved financial currencies and explicit error states.

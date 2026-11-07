@@ -43,7 +43,7 @@ const FollowedBrands = () => {
         description: "يرجى تسجيل الدخول لعرض الماركات المتابَعة",
         variant: "destructive",
       });
-      navigate("/auth");
+      navigate("/auth", { replace: true });
       return;
     }
 

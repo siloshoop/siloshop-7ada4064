@@ -28,7 +28,7 @@ const Profile = () => {
   useEffect(() => {
     if (authLoading) return;
     if (!user) {
-      navigate("/auth");
+      navigate("/auth", { replace: true });
       return;
     }
     (async () => {

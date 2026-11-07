@@ -14,7 +14,7 @@ export const useAdminCheck = () => {
   useEffect(() => {
     if (!authLoading && !user) {
       setAdminLoading(false);
-      navigate("/auth");
+      navigate("/auth", { replace: true });
       return;
     }
 

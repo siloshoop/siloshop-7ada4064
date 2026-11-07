@@ -36,7 +36,7 @@ const RequireRole = ({ role, children }: RequireRoleProps) => {
     let active = true;
     setChecking(true); setAllowed(false); setDenied(false); setError(false);
     if (!user) {
-      navigate("/auth");
+      navigate("/auth", { replace: true });
       setChecking(false);
       return;
     }

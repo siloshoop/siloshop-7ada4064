@@ -59,7 +59,7 @@ export const initNativeApp = async () => {
       if (canGoBack && window.location.pathname !== "/") {
         window.history.back();
       } else if (/^\/(auth|forgot-password|verify-email|reset-password)/.test(window.location.pathname)) {
-        window.location.assign("/");
+        window.location.replace("/");
       } else {
         void App.exitApp();
       }

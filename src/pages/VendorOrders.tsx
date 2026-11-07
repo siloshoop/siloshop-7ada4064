@@ -52,7 +52,7 @@ const VendorOrders = () => {
   const [kpis, setKpis] = useState<Kpis>({ pending: 0, preparing: 0, shipped: 0, delivered: 0, cancelled: 0, revenue: "0" });
 
   useEffect(() => {
-    if (!authLoading && !user) navigate("/auth");
+    if (!authLoading && !user) navigate("/auth", { replace: true });
   }, [user, authLoading, navigate]);
 
   const load = useCallback(async () => {

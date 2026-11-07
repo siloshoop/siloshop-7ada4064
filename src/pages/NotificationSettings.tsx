@@ -44,7 +44,7 @@ const NotificationSettings = () => {
     const checkAuth = async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
-        navigate("/auth");
+        navigate("/auth", { replace: true });
         return;
       }
       setUserId(user.id);

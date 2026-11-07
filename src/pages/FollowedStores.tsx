@@ -33,7 +33,7 @@ const FollowedStores = () => {
     const load = async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
-        navigate("/auth");
+        navigate("/auth", { replace: true });
         return;
       }
       try {

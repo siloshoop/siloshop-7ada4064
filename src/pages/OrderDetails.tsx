@@ -74,7 +74,7 @@ const OrderDetails = () => {
   const [submittingNote, setSubmittingNote] = useState(false);
 
   useEffect(() => {
-    if (!authLoading && !user) navigate("/auth");
+    if (!authLoading && !user) navigate("/auth", { replace: true });
   }, [user, authLoading, navigate]);
 
   const loadNotes = useCallback(async () => {

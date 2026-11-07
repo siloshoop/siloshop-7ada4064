@@ -30,7 +30,7 @@ const Settings = () => {
   const [sellerStatus, setSellerStatus] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!loading && !user) navigate("/auth");
+    if (!loading && !user) navigate("/auth", { replace: true });
   }, [user, loading, navigate]);
 
   useEffect(() => {

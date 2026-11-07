@@ -66,7 +66,7 @@ const Addresses = () => {
   });
 
   useEffect(() => {
-    if (!authLoading && !user) navigate("/auth");
+    if (!authLoading && !user) navigate("/auth", { replace: true });
   }, [user, authLoading, navigate]);
 
   const fetchAddresses = async () => {

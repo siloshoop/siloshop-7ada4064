@@ -90,7 +90,7 @@ const EditProduct = () => {
 
   useEffect(() => {
     if (!authLoading && !user) {
-      navigate("/auth");
+      navigate("/auth", { replace: true });
     }
   }, [user, authLoading, navigate]);
 

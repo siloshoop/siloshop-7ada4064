@@ -78,7 +78,7 @@ const AdminAnalytics = () => {
   }, [days]);
 
   useEffect(() => {
-    if (!authLoading && !user) navigate("/auth");
+    if (!authLoading && !user) navigate("/auth", { replace: true });
   }, [user, authLoading, navigate]);
 
   useEffect(() => {

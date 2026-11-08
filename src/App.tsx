@@ -304,6 +304,7 @@ const App = () => (
             <Route path="/orders/:id" element={<OrderDetails />} />
             <Route path="/account/addresses" element={<Addresses />} />
             <Route path="/product/:id" element={<Product />} />
+            <Route path="/product/:id/preview" element={<RequireRole role={["vendor", "moderator"]}><Product preview /></RequireRole>} />
             <Route path="/compare" element={<Compare />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/faq" element={<FAQ />} />

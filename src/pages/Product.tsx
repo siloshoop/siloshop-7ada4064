@@ -22,7 +22,7 @@ import { ProductReviews } from "@/components/ProductReviews";
 import { VendorRating } from "@/components/VendorRating";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ShoppingCart, Loader2, Minus, Plus, Star, ArrowLeftRight, Zap, Truck, ShieldCheck, RotateCcw, Store } from "lucide-react";
+import { ShoppingCart, Loader2, Minus, Plus, Star, ArrowLeftRight, Zap, Truck, ShieldCheck, RotateCcw, Store, Eye } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
@@ -90,9 +90,20 @@ interface Product {
   seo_description?: string | null;
   seo_keywords?: string | null;
   purchase_enabled?: boolean | null;
+  is_active?: boolean | null;
+  moderation_status?: string | null;
 }
 
-const Product = () => {
+interface ProductPageProps {
+  /**
+   * Staff/seller preview of the latest saved product. Reads go through the same
+   * RLS-protected queries (unauthorized viewers get "not found"), but nothing is
+   * written: no view counters, no recently-viewed history, no cart or compare.
+   */
+  preview?: boolean;
+}
+
+const Product = ({ preview = false }: ProductPageProps) => {
   const { id } = useParams();
   const { user } = useAuth();
   const [product, setProduct] = useState<Product | null>(null);
@@ -119,6 +130,10 @@ const Product = () => {
   // Uses the same saved compare list as product cards (account or guest storage).
   const addToCompare = async () => {
     if (!id) return;
+    if (preview) {
+      toast({ title: "وضع المعاينة", description: "هذه معاينة فقط؛ لا يمكن الشراء أو الإضافة من صفحة المعاينة." });
+      return;
+    }
     const result = await addCompareProduct(id);
     if (result.message === "exists") {
       toast({ title: "تنبيه", description: "المنتج موجود بالفعل في قائمة المقارنة" });
@@ -182,8 +197,8 @@ const Product = () => {
             .eq("is_active", true);
           setVariants(variantData || []);
 
-          // Track product view once per product
-          if (viewTrackedRef.current !== data.id) {
+          // Track product view once per product (never for previews)
+          if (!preview && viewTrackedRef.current !== data.id) {
             viewTrackedRef.current = data.id;
             void supabase
               .rpc("track_product_metric", { _product_id: data.id, _metric: "view" })
@@ -205,8 +220,8 @@ const Product = () => {
 
     if (id) {
       fetchProduct();
-      // Track product view for recently viewed feature
-      trackProductView(id);
+      // Track product view for recently viewed feature (never for previews)
+      if (!preview) trackProductView(id);
     }
     if (!id) return;
     const refreshStock = async () => {
@@ -229,10 +244,25 @@ const Product = () => {
     // Only re-fetch when the product changes. `toast` / `trackProductView` are
     // intentionally omitted — including them re-ran this effect on every render.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [id]);
+  }, [id, preview]);
+
+  // Previews must never be indexed by search engines.
+  useEffect(() => {
+    if (!preview) return;
+    const meta = document.createElement("meta");
+    meta.name = "robots";
+    meta.content = "noindex, nofollow";
+    document.head.appendChild(meta);
+    return () => { meta.remove(); };
+  }, [preview]);
+
+  const previewBlocked = () => {
+    toast({ title: "وضع المعاينة", description: "هذه معاينة فقط؛ لا يمكن الشراء أو الإضافة من صفحة المعاينة." });
+  };
 
   const addToCart = async () => {
     if (!id || !product) return false;
+    if (preview) { previewBlocked(); return false; }
     if (variants.length > 0 && !selectedVariant) {
       toast({
         title: "اختر الخيارات أولاً",
@@ -325,6 +355,9 @@ const Product = () => {
         <div className="flex-1 flex items-center justify-center">
           <div className="text-center">
             <h2 className="text-2xl font-bold mb-4">المنتج غير موجود</h2>
+            {preview && (
+              <p className="mb-4 text-sm text-muted-foreground">لا تملك صلاحية معاينة هذا المنتج أو أنه حُذف.</p>
+            )}
             <Button onClick={() => navigate("/")}>العودة للرئيسية</Button>
           </div>
         </div>
@@ -378,7 +411,7 @@ const Product = () => {
     if (added) navigate("/cart");
   };
 
-  const canonicalUrl = typeof window !== "undefined" ? toPublicUrl(window.location.pathname) : undefined;
+  const canonicalUrl = typeof window !== "undefined" ? toPublicUrl(preview ? `/product/${product.id}` : window.location.pathname) : undefined;
   const seoTitleRaw = product.seo_title || `${product.name} | Silo Shop`;
   const seoTitle = seoTitleRaw.length > 60 ? seoTitleRaw.slice(0, 57) + "..." : seoTitleRaw;
   const seoDescRaw = product.seo_description || product.short_description || product.description || "";
@@ -421,6 +454,23 @@ const Product = () => {
       />
       <Navbar />
       <main className="container max-w-6xl min-w-0 flex-1 px-3 py-4 sm:px-4 sm:py-6 md:py-8">
+        {preview && (
+          <div
+            role="status"
+            data-testid="product-preview-banner"
+            className="mb-4 flex flex-wrap items-center gap-2 rounded-2xl border border-highlight/50 bg-highlight/15 px-3 py-2.5 text-sm sm:mb-6"
+          >
+            <Eye className="h-4 w-4 shrink-0 text-primary" />
+            <span className="font-semibold">وضع المعاينة</span>
+            <span className="text-muted-foreground">هكذا سيظهر المنتج للعملاء. المعاينة لا تنشر المنتج ولا تغيّر حالته.</span>
+            <Badge variant={product.is_active && product.moderation_status === "approved" ? "default" : "secondary"} className="rounded-full">
+              {product.is_active && product.moderation_status === "approved" ? "منشور" : "غير منشور"}
+            </Badge>
+            <Button size="sm" variant="outline" className="ms-auto rounded-full" onClick={() => navigate(-1)}>
+              رجوع
+            </Button>
+          </div>
+        )}
         <NativeAdBanner placement="product" className="mb-5 !px-0 sm:mb-8" />
         <div className="grid min-w-0 gap-5 animate-fade-in sm:gap-6 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,1fr)] lg:gap-10">
           {/* Image Gallery */}

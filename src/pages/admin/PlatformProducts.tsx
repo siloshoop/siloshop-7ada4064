@@ -1,5 +1,6 @@
 import { formatPrice } from "@/lib/currency";
 import { useEffect, useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -10,7 +11,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Plus, Upload, Edit2, Trash2, Package, Settings2, Search } from "lucide-react";
+import { Loader2, Plus, Upload, Edit2, Trash2, Package, Settings2, Search, Eye } from "lucide-react";
 import PlatformProductForm, { PlatformProduct } from "@/components/admin/PlatformProductForm";
 import PlatformProductImport from "@/components/admin/PlatformProductImport";
 import CategoriesBrandsManager from "@/components/admin/CategoriesBrandsManager";
@@ -21,6 +22,7 @@ import ShamCashMerchantConfig from "@/components/admin/ShamCashMerchantConfig";
 
 const PlatformProducts = () => {
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [products, setProducts] = useState<any[]>([]);
   const [categories, setCategories] = useState<any[]>([]);
   const [brands, setBrands] = useState<any[]>([]);
@@ -300,6 +302,15 @@ const PlatformProducts = () => {
                     </td>
                     <td className="p-2">
                       <div className="flex gap-1">
+                        <Button
+                          size="icon"
+                          variant="ghost"
+                          onClick={() => navigate(`/product/${p.id}/preview`)}
+                          aria-label={`معاينة ${p.name}`}
+                          title="معاينة"
+                        >
+                          <Eye className="h-4 w-4" />
+                        </Button>
                         <Button size="icon" variant="ghost" onClick={() => openEdit(p)}>
                           <Edit2 className="h-4 w-4" />
                         </Button>

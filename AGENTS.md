@@ -40,3 +40,4 @@
 - Automatic signed-out redirects replace protected history entries, while explicit login actions push; this prevents browser/native Back from looping into login. Native auth fallback replaces with home when no prior entry exists.
 - Homepage carousel ads are native_ads rows with placement home_carousel, guarded by restrictive owner-only RLS (live rows public), with singleton home_carousel_settings and owner-only stats/visitor RPCs over ad_analytics slots (account set by trigger, guests random id); delegated ad scopes never reach it.
 - Storage removal requires the remover to be able to read the object; give owner-managed folders an owner-scoped SELECT policy alongside DELETE, or removals silently do nothing.
+- Product previews reuse the customer Product page via /product/:id/preview (preview prop): reads stay RLS-scoped so only owners/staff see unpublished products, and preview mode never writes view counts, recently viewed, cart or compare data.

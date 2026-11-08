@@ -5018,6 +5018,10 @@ export type Database = {
           shipping_fee: number
         }[]
       }
+      get_popular_variant_option: {
+        Args: { p_attribute: string; p_product_id: string }
+        Returns: string
+      }
       get_product_reviews: {
         Args: { _product_id: string }
         Returns: {

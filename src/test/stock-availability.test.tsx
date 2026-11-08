@@ -1,5 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+vi.mock("@/integrations/supabase/client", () => ({ supabase: { rpc: vi.fn().mockResolvedValue({ data: null, error: null }) } }));
 import ProductVariantPicker from "@/components/product/ProductVariantPicker";
 import { availableProductStock, optionInStock } from "@/lib/stockAvailability";
 import type { Database } from "@/integrations/supabase/types";

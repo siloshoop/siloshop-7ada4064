@@ -491,7 +491,15 @@ const AdminOrders = () => {
                       )}
                       <div className="min-w-0 flex-1">
                         <p className="truncate text-sm">{it.product_name || "منتج"}</p>
-                        <p className="text-xs text-muted-foreground">البائع: {it.vendor_name || "—"}</p>
+                        <p className="truncate text-xs text-muted-foreground">
+                          البائع: <span dir="auto" className="text-foreground">{it.vendor_name || it.vendor_store_name || "—"}</span>
+                          {it.vendor_store_name && it.vendor_store_name !== it.vendor_name && (
+                            <span dir="auto"> · متجر {it.vendor_store_name}</span>
+                          )}
+                        </p>
+                        {it.vendor_email && (
+                          <p dir="ltr" className="truncate text-end text-xs text-muted-foreground">{it.vendor_email}</p>
+                        )}
                       </div>
                       <div className="whitespace-nowrap text-xs">{it.quantity} × {money(it.price, it.currency ?? order.currency)}</div>
                     </div>

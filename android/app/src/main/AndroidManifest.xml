@@ -30,6 +30,10 @@
                 <data android:host="www.siloshop.net" />
                 <data android:host="siloshop.net" />
                 <data android:pathPrefix="/product/" />
+                <data android:pathPrefix="/store/" />
+                <data android:pathPrefix="/category/" />
+                <data android:path="/compare" />
+                <data android:path="/shared-favorites" />
             </intent-filter>
         </activity>
 

@@ -24,6 +24,13 @@ describe("Android App Links", () => {
     expect(filter).toContain('android:pathPrefix="/product/"');
   });
 
+  it("every link the site shares (product, store, category, comparison, shared favorites) opens in the app", () => {
+    const manifest = readFileSync("android/app/src/main/AndroidManifest.xml", "utf8");
+    const filter = manifest.match(/<intent-filter android:autoVerify="true">([\s\S]*?)<\/intent-filter>/)?.[1] ?? "";
+    for (const prefix of ["/product/", "/store/", "/category/"]) expect(filter).toContain(`android:pathPrefix="${prefix}"`);
+    for (const path of ["/compare", "/shared-favorites"]) expect(filter).toContain(`android:path="${path}"`);
+  });
+
   it("the app passes the phone's system text size to the pages instead of blocking it", () => {
     const activity = readFileSync("android/app/src/main/java/com/siloshop/app/MainActivity.java", "utf8");
     const plugin = readFileSync("android/app/src/main/java/com/siloshop/app/FontScalePlugin.java", "utf8");

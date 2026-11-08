@@ -285,3 +285,8 @@
 - [x] Audited all 36 admin pages at 360px in app mode as the owner: fixed squeezed rows (buyers, sellers, stores, users, categories, banners, payments, stock alerts, announcements, activity log, home lists), split multi-currency totals onto separate lines, fixed wrapped report tabs, chart number labels, subcategory/seller-request headers, orders table side-scroll, broken store logos.
 - [x] Follow the phone's text size instead of blocking it: the app enlarges text together with fields, buttons and pictures (up to 130%); crowded rows stack only when text is enlarged. Re-checked buyer, seller and admin pages at 130%; normal size pixel-identical.
 - [ ] Verify on a real Android phone with large system text (blocked: no device; Android build not compiled here).
+
+## Shared links open in the app
+- [x] App opens shared product, store, category, comparison and shared-favorites links (versionCode 16). Stray DNS record confirmed gone; www.siloshop.net verification accepted by Google.
+- [ ] siloshop.net still redirects (blocked: owner must Unset as primary for www.siloshop.net in Domains settings before releasing versionCode 16).
+- [ ] Reinstall/update the app on the phone so Android re-checks links (blocked: needs new build uploaded by owner).

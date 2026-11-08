@@ -87,7 +87,7 @@ export default function AnimatedProductCarousel() {
           ))}
         </div>
         {n > 1 && (
-          <div className="absolute bottom-1 left-2 flex items-center gap-1.5">
+          <div className="absolute left-2 top-1/2 flex -translate-y-1/2 items-center gap-1">
             <button type="button" aria-label="السابق" onClick={() => goTo(index - 1)} className={ctrl}><ChevronRight className="h-4 w-4" /></button>
             <div className="flex items-center gap-1">
               {items.map((slide, i) => (

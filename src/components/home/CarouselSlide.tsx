@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 import { formatPrice } from "@/lib/currency";
 import type { CarouselSlideData } from "@/lib/homeCarousel";
 
-const slideClass = "group relative block h-48 w-full shrink-0 overflow-hidden bg-muted sm:h-60 md:h-72";
+const slideClass = "group relative block h-[72px] w-full shrink-0 overflow-hidden bg-muted";
 
 /** One homepage carousel slide; shared by the homepage and the admin preview so both look identical. */
 export default function CarouselSlide({ slide, active = true, onOpen, preview = false }: {
@@ -16,14 +16,15 @@ export default function CarouselSlide({ slide, active = true, onOpen, preview = 
         className="absolute inset-0 h-full w-full scale-110 object-cover opacity-70 blur-2xl" />
       {/* The full picture, never cropped */}
       <img src={src} alt={slide.title} loading="lazy" decoding="async"
-        className="absolute inset-0 h-full w-full object-contain drop-shadow-xl transition-transform duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-[1.03]" />
-      <div className="absolute inset-x-0 bottom-0 h-3/5 bg-gradient-to-t from-scrim/85 via-scrim/40 to-transparent" />
-      <span className="absolute right-3 top-3 rounded-full bg-primary px-2.5 py-0.5 text-[10px] font-bold text-primary-foreground shadow-md">إعلان</span>
-      <div className="absolute inset-x-0 bottom-0 px-4 pb-10 text-right text-scrim-foreground sm:pb-11">
-        <p className="line-clamp-1 text-base font-bold drop-shadow sm:text-lg">{slide.title}</p>
-        {slide.description && <p className="hidden line-clamp-1 text-xs text-scrim-foreground/80 sm:block">{slide.description}</p>}
+        className="absolute inset-0 h-full w-full object-contain drop-shadow-lg transition-transform duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-[1.03]" />
+      <div className="absolute inset-y-0 right-0 w-3/5 bg-gradient-to-l from-scrim/85 via-scrim/40 to-transparent" />
+      <div className="absolute inset-y-0 right-0 flex max-w-[55%] flex-col items-start justify-center gap-0.5 px-3 text-right text-scrim-foreground">
+        <div className="flex min-w-0 max-w-full items-center gap-1.5">
+          <span className="shrink-0 rounded-full bg-primary px-2 py-px text-[9px] font-bold text-primary-foreground shadow">إعلان</span>
+          <p className="line-clamp-1 text-sm font-bold drop-shadow">{slide.title}</p>
+        </div>
         {slide.price != null && (
-          <span className="mt-1 inline-block rounded-md bg-accent px-2 py-0.5 text-sm font-bold text-accent-foreground shadow">
+          <span className="inline-block rounded-md bg-accent px-1.5 py-px text-xs font-bold text-accent-foreground shadow">
             {formatPrice(slide.price, slide.currency)}
           </span>
         )}

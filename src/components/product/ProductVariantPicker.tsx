@@ -98,7 +98,7 @@ const ProductVariantPicker = ({ variants, onSelect }: ProductVariantPickerProps)
             <span className="font-bold">{key.replace(/^ال(?=لون)/, "")}:</span>{" "}
             <span className="text-muted-foreground">{selected[key] || "اختر"}</span>
           </p>
-          <div className="flex flex-wrap gap-2.5 pt-2">
+          <div className="flex flex-wrap gap-3.5 pt-3.5 sm:gap-4">
             {attributeOptions[key].map((value) => {
               const isSelected = selected[key] === value;
               const available = isOptionAvailable(key, value);
@@ -115,34 +115,36 @@ const ProductVariantPicker = ({ variants, onSelect }: ProductVariantPickerProps)
                   aria-label={!available ? `${value} — ${OUT_OF_STOCK_LABEL}` : value}
                   aria-describedby={popular ? `popular-${key}` : undefined}
                   onClick={() => select(key, value)}
-                  className={`relative flex h-14 w-14 shrink-0 items-center justify-center rounded-lg border bg-background p-1 transition-colors sm:h-16 sm:w-16 ${
+                  className={`relative flex h-10 w-10 shrink-0 items-center justify-center rounded-full border-2 bg-background p-[3px] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background sm:h-11 sm:w-11 ${
                     isSelected && available
-                      ? "border-selected ring-1 ring-selected"
-                      : "border-border hover:border-selected/60"
-                  } ${!available ? "cursor-not-allowed border-dashed opacity-50" : ""}`}
+                      ? "border-selected"
+                      : available
+                        ? "border-transparent hover:border-selected/50"
+                        : "cursor-not-allowed border-dashed border-border opacity-50"
+                  }`}
                 >
                   {swatch ? (
                     <span
                       aria-hidden="true"
                       data-swatch={swatch}
-                      className="block h-full w-full rounded-md ring-1 ring-inset ring-border"
+                      className="block h-full w-full rounded-full ring-1 ring-inset ring-border"
                       style={{ backgroundColor: swatch }}
                     />
                   ) : image ? (
-                    <img src={image} alt={value} loading="lazy" decoding="async" draggable={false} className="h-full w-full rounded-md object-contain" />
+                    <img src={image} alt={value} loading="lazy" decoding="async" draggable={false} className="h-full w-full rounded-full object-cover" />
                   ) : (
-                    <span className="line-clamp-2 break-words text-center text-[11px] font-medium leading-tight text-foreground">{value}</span>
+                    <span aria-hidden="true" className="flex h-full w-full items-center justify-center rounded-full bg-muted text-xs font-bold text-muted-foreground">{Array.from(value.replace(/^ال/, ""))[0]}</span>
                   )}
                   {popular && (
                     <span
                       id={`popular-${key}`}
-                      className="pointer-events-none absolute -top-2 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full bg-selected px-1.5 py-px text-[9px] font-bold leading-tight text-selected-foreground shadow-sm sm:text-[10px]"
+                      className="pointer-events-none absolute -top-3.5 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full bg-selected px-1.5 py-px text-[9px] font-bold leading-tight text-selected-foreground shadow-sm sm:text-[10px]"
                     >
                       شائع
                     </span>
                   )}
                   {!available && (
-                    <span className="absolute bottom-0.5 left-0.5 rounded-sm bg-background/80 p-px">
+                    <span className="absolute -bottom-1 -left-1 rounded-full bg-background p-0.5 shadow-sm">
                       <LockKeyhole className="h-3 w-3 text-muted-foreground" aria-hidden="true" />
                     </span>
                   )}

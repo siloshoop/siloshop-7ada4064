@@ -28,13 +28,25 @@ describe("color swatches", () => {
     expect(colorSwatch("نمر مرقط")).toBeNull();
   });
 
-  it("shows a color square instead of the name or picture inside the tile", () => {
+  it("shows a solid color instead of the name or picture inside the tile", () => {
     rpc.mockResolvedValue({ data: null, error: null });
     render(<ProductVariantPicker variants={[variant("a", { اللون: "أخضر" }), variant("b", { اللون: "أسود" })]} onSelect={vi.fn()} />);
     const tile = screen.getByRole("button", { name: "أخضر" });
     expect(tile.querySelector("[data-swatch]")).not.toBeNull();
     expect(tile.querySelector("img")).toBeNull();
     expect(tile.textContent).toBe("");
+  });
+
+  it("draws colors as circles with an orange outer ring only on the chosen one", () => {
+    rpc.mockResolvedValue({ data: null, error: null });
+    render(<ProductVariantPicker variants={[variant("a", { اللون: "أخضر" }), variant("b", { اللون: "أسود" })]} onSelect={vi.fn()} />);
+    const green = screen.getByRole("button", { name: "أخضر" });
+    expect(green).toHaveClass("rounded-full");
+    expect(green.querySelector("[data-swatch]")).toHaveClass("rounded-full");
+    expect(green).not.toHaveClass("border-selected");
+    fireEvent.click(green);
+    expect(green).toHaveClass("border-selected");
+    expect(screen.getByRole("button", { name: "أسود" })).not.toHaveClass("border-selected");
   });
 });
 

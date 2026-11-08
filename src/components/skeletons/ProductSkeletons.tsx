@@ -1,7 +1,7 @@
 import { Skeleton } from "@/components/ui/skeleton";
 
 export const ProductCardSkeleton = () => (
-  <div className="overflow-hidden rounded-xl border bg-card">
+  <div className="overflow-hidden rounded-2xl border border-border/60 bg-card">
     <Skeleton className="aspect-square w-full rounded-none" />
     <div className="space-y-2 p-3">
       <Skeleton className="h-3 w-1/3" />

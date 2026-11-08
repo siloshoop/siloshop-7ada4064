@@ -14,9 +14,9 @@ interface SectionHeaderProps {
 }
 
 const toneMap = {
-  primary: { chip: "bg-primary/10 text-primary", bar: "from-primary to-accent" },
-  accent: { chip: "bg-accent/10 text-accent", bar: "from-accent to-primary" },
-  success: { chip: "bg-success/10 text-success", bar: "from-success to-primary" },
+  primary: { chip: "bg-primary/10 text-primary", bar: "bg-gradient-brand" },
+  accent: { chip: "bg-accent/10 text-accent", bar: "bg-gradient-brand" },
+  success: { chip: "bg-success/10 text-success", bar: "bg-gradient-to-l from-success to-primary" },
 } as const;
 
 const SectionHeader = ({
@@ -47,7 +47,7 @@ const SectionHeader = ({
         )}
         <h2 className="text-xl font-extrabold tracking-tight md:text-2xl">{title}</h2>
         {subtitle && <p className="text-sm text-muted-foreground">{subtitle}</p>}
-        <div className={cn("h-1 w-14 rounded-full bg-gradient-to-r", t.bar)} />
+        <div className={cn("h-1 w-14 rounded-full", t.bar)} />
       </div>
 
       {href && (

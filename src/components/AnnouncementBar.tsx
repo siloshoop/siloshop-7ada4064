@@ -33,7 +33,7 @@ const AnnouncementBar = () => {
   const CurrentIcon = iconMap[announcements[currentIndex]?.icon] || Tag;
 
   return (
-    <div className="relative bg-gradient-to-r from-primary via-primary/90 to-primary overflow-hidden">
+    <div className="relative bg-gradient-primary overflow-hidden">
       {/* Animated background pattern */}
       <div className="absolute inset-0 opacity-10">
         <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_25%,rgba(255,255,255,0.1)_50%,transparent_75%)] bg-[length:20px_20px] animate-[slide_20s_linear_infinite]" />

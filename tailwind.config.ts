@@ -21,6 +21,7 @@ export default {
         "gradient-primary": "var(--gradient-primary)",
         "gradient-hero": "var(--gradient-hero)",
         "gradient-ad": "var(--gradient-ad)",
+        "gradient-brand": "var(--gradient-brand)",
       },
       boxShadow: {
         ad: "var(--shadow-ad)",

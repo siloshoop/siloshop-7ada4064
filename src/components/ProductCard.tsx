@@ -192,7 +192,7 @@ const ProductCard = memo(({
   return (
     <a
       href={productId ? `/product/${productId}` : undefined}
-      className="group relative flex h-full min-w-0 cursor-pointer flex-col overflow-hidden rounded-lg border border-border bg-card shadow-card transition-all duration-300 motion-reduce:transition-none hover:border-primary/40 hover:shadow-elegant"
+      className="group relative flex h-full min-w-0 cursor-pointer flex-col overflow-hidden rounded-2xl border border-border/60 bg-card shadow-card transition-all duration-300 motion-reduce:transition-none hover:border-primary/40 hover:shadow-elegant"
       data-product-card
       onClick={(e) => {
         // Let the browser handle ctrl/cmd/middle-click so the product can be
@@ -208,7 +208,7 @@ const ProductCard = memo(({
       <div className="relative aspect-[4/5] overflow-hidden bg-muted/30">
         {discountPercent > 0 && (
           <div className="absolute end-2 top-2 z-10 max-w-[calc(100%-3.5rem)]">
-            <Badge className="bg-sale text-sale-foreground font-bold text-[11px] px-2 py-1 rounded-md border-0">
+            <Badge className="bg-sale text-sale-foreground font-bold text-[11px] px-2 py-1 rounded-full shadow-md border-0">
               خصم {discountPercent}%
             </Badge>
           </div>
@@ -216,14 +216,14 @@ const ProductCard = memo(({
 
         {isOutOfStock && (
           <div className="absolute bottom-2 end-2 z-10 max-w-[calc(100%-1rem)]">
-            <Badge className="bg-destructive text-destructive-foreground font-bold text-[11px] px-2 py-0.5 rounded-md shadow-lg border-0 animate-pop-in">
+            <Badge className="bg-destructive text-destructive-foreground font-bold text-[11px] px-2 py-0.5 rounded-full shadow-lg border-0 animate-pop-in">
               {OUT_OF_STOCK_LABEL}
             </Badge>
           </div>
         )}
         {!isOutOfStock && isLowStock && (
           <div className="absolute bottom-2 start-2 z-10">
-            <Badge className="bg-warning text-warning-foreground font-semibold text-[10px] px-1.5 py-0.5 rounded-md shadow-md border-0 animate-pulse">
+            <Badge className="bg-highlight text-highlight-foreground font-bold text-[10px] px-2 py-0.5 rounded-full shadow-md border-0 animate-pulse">
               متبقي {liveStock}
             </Badge>
           </div>

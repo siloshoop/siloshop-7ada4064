@@ -78,7 +78,7 @@ export default function AnimatedProductCarousel() {
     <section ref={sectionRef} aria-label="منتجات مميزة" aria-roledescription="carousel" className="container px-4 pb-2 pt-4 sm:pb-3 sm:pt-6" dir="rtl"
       onPointerEnter={() => (hovering.current = true)} onPointerLeave={() => (hovering.current = false)}
       onFocusCapture={() => (hovering.current = true)} onBlurCapture={() => (hovering.current = false)}>
-      <div className="relative isolate overflow-hidden rounded-2xl shadow-ad ring-1 ring-border/60 sm:rounded-3xl">
+      <div className="relative isolate overflow-hidden rounded-2xl shadow-ad ring-1 ring-border/60">
         <div className="flex transition-transform duration-700 ease-[cubic-bezier(0.22,1,0.36,1)]"
           style={{ transform: `translateX(${index * 100}%)` }} aria-live={userPaused ? "polite" : "off"}>
           {items.map((slide, i) => (

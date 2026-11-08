@@ -257,3 +257,8 @@
 ## Homepage ad carousel management (owner only)
 - [x] "إدارة الإعلانات" page: add/edit/delete, draft/publish, image upload/replace, title/description/price/destination, order, dates, autoplay and slide duration, live preview, per-ad impressions/clicks. Owner-only database rules; 13 isolated tests; owner CRUD/schedule/reorder/settings checked in the preview with test ads removed afterwards.
 - [ ] Live impression/click recording on a published ad and physical Android check (not run: would show a test ad to real visitors; no device).
+
+## Final security audit (Nov 8)
+- [x] Deletion retention, buyer financial isolation, owner finance pages, role regressions checked on desktop/phone; 315 tests pass.
+- [ ] Limit platform-wide revenue/report/payout data to Super Admin on the server (blocked: needs a database change; user forbade migrations in this audit).
+- [ ] Physical Android verification (blocked: no device; Android needs a new build for screen changes).

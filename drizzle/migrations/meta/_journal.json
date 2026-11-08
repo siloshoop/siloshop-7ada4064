@@ -407,6 +407,13 @@
       "when": 1794155977571,
       "tag": "0057_admin_order_detail_people",
       "breakpoints": true
+    },
+    {
+      "idx": 58,
+      "version": "7",
+      "when": 1794156271517,
+      "tag": "0058_admin_set_account_type",
+      "breakpoints": true
     }
   ]
 }

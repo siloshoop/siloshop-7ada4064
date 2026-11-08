@@ -178,23 +178,36 @@ const ManageUsers = () => {
 
   const updateProfileRole = async (userId: string, newRole: "customer" | "vendor") => {
     try {
-      const { error } = await supabase
-        .from("profiles")
-        .update({ role: newRole })
-        .eq("id", userId);
-
-      if (error) throw error;
-
-      toast({
-        title: "تم بنجاح",
-        description: `تم تحديث نوع الحساب إلى ${newRole === "vendor" ? "بائع" : "عميل"}`,
+      // A direct profiles update is silently filtered by RLS for other users'
+      // rows, so the change goes through the server-checked RPC, which also keeps
+      // the seller permission row in step and returns the saved value.
+      const { data: saved, error } = await supabase.rpc("admin_set_account_type", {
+        _user_id: userId,
+        _type: newRole,
       });
 
-      fetchUsers();
-    } catch (error) {
+      if (error) throw error;
+      if (saved !== newRole) throw new Error("لم يتم حفظ نوع الحساب، حاول مرة أخرى");
+
+      setUsers((prev) => prev.map((u) => (u.id === userId ? { ...u, role: saved } : u)));
       toast({
-        title: "خطأ",
-        description: error.message,
+        title: "تم بنجاح",
+        description: `تم تحديث نوع الحساب إلى ${saved === "vendor" ? "بائع" : "عميل"}`,
+      });
+
+      await fetchUsers();
+    } catch (error) {
+      const message = String((error as { message?: string })?.message ?? "");
+      const description = message.includes("not_authorized")
+        ? "تغيير نوع الحساب متاح لمالك المنصة فقط"
+        : message.includes("cannot_target_self")
+          ? "لا يمكنك تغيير نوع حسابك بنفسك"
+          : message.includes("user_not_found")
+            ? "لم يتم العثور على هذا الحساب"
+            : message || "تعذر تحديث نوع الحساب";
+      toast({
+        title: "تعذر تحديث نوع الحساب",
+        description,
         variant: "destructive",
       });
     }

@@ -4832,6 +4832,14 @@ export type Database = {
         Args: { p_query: string }
         Returns: string[]
       }
+      admin_set_account_type: {
+        Args: {
+          _reason?: string
+          _type: Database["public"]["Enums"]["user_role"]
+          _user_id: string
+        }
+        Returns: Database["public"]["Enums"]["user_role"]
+      }
       admin_set_coupon_active: {
         Args: { _coupon_id: string; _is_active: boolean; _reason?: string }
         Returns: undefined

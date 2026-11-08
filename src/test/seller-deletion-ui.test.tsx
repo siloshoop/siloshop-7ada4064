@@ -36,6 +36,6 @@ it("account success signs out only after confirmed successful deletion", async (
 });
 it("non-2xx response preserves meaningful retention error instead of generic failure", async () => {
   mocks.invoke.mockResolvedValue({ data: null, error: { context: new Response(JSON.stringify({ error: "retention_review_required" }), { status: 409 }) } });
-  await expect(requestSellerDeletion("account", "isolated-password", "حذف")).rejects.toThrow("سياسة الاحتفاظ القانونية");
+  await expect(requestSellerDeletion("account", "isolated-password", "حذف")).rejects.toThrow("لم يُحذف شيء");
   expect(mocks.signOut).not.toHaveBeenCalled();
 });

@@ -36,7 +36,7 @@ export default function DeleteStoreCard() {
   };
   return <Card className="mt-6 space-y-3 border-destructive/40 p-4 sm:p-6">
     <h2 className="flex items-center gap-2 font-semibold text-destructive"><Trash2 className="h-5 w-5" />حذف المتجر نهائيًا</h2>
-    <p className="text-sm text-muted-foreground">سيُحذف المتجر ومنتجاته وصوره وإعداداته نهائيًا، مع بقاء حسابك كمشتري. السجلات المرتبطة بطلبات أو مستحقات تحتاج مراجعة الاحتفاظ القانوني قبل الحذف.</p>
+    <p className="text-sm text-muted-foreground">سيُحذف المتجر ومنتجاته وصوره وإعداداته نهائيًا، مع بقاء حسابك كمشتري. تبقى سجلات الطلبات المنتهية للمشترين، ويجب إكمال الطلبات الجارية أولًا.</p>
     <AlertDialog open={open} onOpenChange={(value) => { if (!busy) { setOpen(value); setPassword(""); setConfirmation(""); } }}>
       <AlertDialogTrigger asChild><Button variant="destructive"><Trash2 className="me-2 h-4 w-4" />حذف المتجر</Button></AlertDialogTrigger>
       <AlertDialogContent className="max-h-[85dvh] max-w-[92vw] overflow-y-auto sm:max-w-lg">

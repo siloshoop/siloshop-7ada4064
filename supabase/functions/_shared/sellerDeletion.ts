@@ -61,7 +61,12 @@ export async function handleSellerDeletion(req: Request, scope: DeletionScope) {
         if (error) throw new Error(error.message);
       },
       deleteAuth: async () => {
-        const { error } = await admin.auth.admin.deleteUser(uid, false);
+        // A remaining anonymous profile means finished sales are retained. A hard
+        // Auth delete would cascade through the profile into those orders, so the
+        // login is soft-deleted instead (email/phone obfuscated, sign-in impossible).
+        const { data: placeholder, error: lookupError } = await admin.from("profiles").select("id").eq("id", uid).maybeSingle();
+        if (lookupError) throw new Error("auth_delete_failed");
+        const { error } = await admin.auth.admin.deleteUser(uid, Boolean(placeholder));
         if (error) throw new Error("auth_delete_failed");
       },
       complete: async () => {

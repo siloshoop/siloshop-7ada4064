@@ -363,7 +363,7 @@ const SellerManagement = () => {
           <AlertDialogHeader>
             <AlertDialogTitle>حذف متجر البائع نهائيًا؟</AlertDialogTitle>
             <AlertDialogDescription>
-              سيُحذف المتجر ومنتجاته وصوره المؤهلة، ويبقى حساب البائع كمشتري. السجلات المالية تحتاج مراجعة الاحتفاظ القانوني. أدخل كلمة مرور حسابك واكتب «حذف».
+              سيُحذف المتجر ومنتجاته وصوره المؤهلة، ويبقى حساب البائع كمشتري. تبقى سجلات الطلبات المنتهية للمشترين. أدخل كلمة مرور حسابك واكتب «حذف».
             </AlertDialogDescription>
           </AlertDialogHeader>
           <Input type="password" aria-label="كلمة مرور حساب الإدارة" autoComplete="current-password" value={deletePassword} onChange={(e) => setDeletePassword(e.target.value)} disabled={busy} />

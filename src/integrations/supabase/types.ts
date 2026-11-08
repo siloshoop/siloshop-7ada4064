@@ -1232,6 +1232,30 @@ export type Database = {
         }
         Relationships: []
       }
+      home_carousel_settings: {
+        Row: {
+          autoplay: boolean
+          id: number
+          slide_duration_ms: number
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          autoplay?: boolean
+          id?: number
+          slide_duration_ms?: number
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          autoplay?: boolean
+          id?: number
+          slide_duration_ms?: number
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
       message_attachments: {
         Row: {
           conversation_id: string
@@ -1440,12 +1464,14 @@ export type Database = {
           created_by: string | null
           cta_text: string
           cta_url: string | null
+          currency: string | null
           description: string | null
           end_date: string | null
           id: string
           image_url: string | null
           is_active: boolean
           placement: string
+          price: number | null
           priority: number
           sponsor_name: string
           start_date: string | null
@@ -1457,12 +1483,14 @@ export type Database = {
           created_by?: string | null
           cta_text?: string
           cta_url?: string | null
+          currency?: string | null
           description?: string | null
           end_date?: string | null
           id?: string
           image_url?: string | null
           is_active?: boolean
           placement?: string
+          price?: number | null
           priority?: number
           sponsor_name?: string
           start_date?: string | null
@@ -1474,12 +1502,14 @@ export type Database = {
           created_by?: string | null
           cta_text?: string
           cta_url?: string | null
+          currency?: string | null
           description?: string | null
           end_date?: string | null
           id?: string
           image_url?: string | null
           is_active?: boolean
           placement?: string
+          price?: number | null
           priority?: number
           sponsor_name?: string
           start_date?: string | null
@@ -4486,6 +4516,15 @@ export type Database = {
       admin_hide_review: {
         Args: { _reason: string; _review_id: string }
         Returns: undefined
+      }
+      admin_home_carousel_ad_stats: {
+        Args: never
+        Returns: {
+          ad_id: string
+          clicks: number
+          impressions: number
+          last_event_at: string
+        }[]
       }
       admin_inventory_overview: {
         Args: { _limit?: number; _threshold?: number }

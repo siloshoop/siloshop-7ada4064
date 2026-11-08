@@ -93,6 +93,7 @@ const ManageBanners = () => {
     const { data, error } = await supabase
       .from("native_ads")
       .select("id, title, description, image_url, cta_text, cta_url, sponsor_name, placement, priority, is_active, start_date, end_date")
+      .neq("placement", "home_carousel") // homepage carousel ads are owner-only, managed in إدارة الإعلانات
       .order("priority", { ascending: false });
     if (error) setFailure("تعذّر تحميل الإعلانات؛ أعد المحاولة.");
     setRows((data ?? []) as BannerRow[]);

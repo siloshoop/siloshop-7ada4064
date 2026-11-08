@@ -344,6 +344,20 @@
       "when": 1794136177650,
       "tag": "0048_retain_finished_sales_on_deletion",
       "breakpoints": true
+    },
+    {
+      "idx": 49,
+      "version": "7",
+      "when": 1794136503110,
+      "tag": "0049_owner_home_carousel_ads",
+      "breakpoints": true
+    },
+    {
+      "idx": 50,
+      "version": "7",
+      "when": 1794136718504,
+      "tag": "0050_carousel_price_requires_currency",
+      "breakpoints": true
     }
   ]
 }

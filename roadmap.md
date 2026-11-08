@@ -253,3 +253,7 @@
 ## Footer bottom-bar clearance
 - [x] Reserve the fixed bottom bar plus a margin inside the footer on phones so its last item is never flush against the bar; desktop and tablet padding unchanged
 - [x] Verify home, categories, product and contact at 393x660 (2x and 2.75x density, signed out and signed in, with a 24px bottom safe area): copyright and "حذف الحساب" fully above the bar, ~79px clearance, no overlap or horizontal overflow; 189 automated tests and automatic build OK; physical Android not tested
+
+## Homepage ad carousel management (owner only)
+- [x] "إدارة الإعلانات" page: add/edit/delete, draft/publish, image upload/replace, title/description/price/destination, order, dates, autoplay and slide duration, live preview, per-ad impressions/clicks. Owner-only database rules; 13 isolated tests; owner CRUD/schedule/reorder/settings checked in the preview with test ads removed afterwards.
+- [ ] Live impression/click recording on a published ad and physical Android check (not run: would show a test ad to real visitors; no device).

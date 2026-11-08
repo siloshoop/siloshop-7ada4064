@@ -1,0 +1,2 @@
+-- A price with no currency slipped past native_ads_price_currency (NULL comparisons pass CHECKs); enforce the pairing explicitly.
+ALTER TABLE public.native_ads ADD CONSTRAINT native_ads_price_currency_required CHECK ((price IS NULL AND currency IS NULL) OR (price IS NOT NULL AND coalesce(currency, '') IN ('USD','SYP')));

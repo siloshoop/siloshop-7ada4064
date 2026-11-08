@@ -20,8 +20,10 @@ export default {
       backgroundImage: {
         "gradient-primary": "var(--gradient-primary)",
         "gradient-hero": "var(--gradient-hero)",
+        "gradient-ad": "var(--gradient-ad)",
       },
       boxShadow: {
+        ad: "var(--shadow-ad)",
         elegant: "var(--shadow-elegant)",
         card: "var(--shadow-card)",
       },
@@ -69,6 +71,10 @@ export default {
         success: {
           DEFAULT: "hsl(var(--success))",
           foreground: "hsl(var(--success-foreground))",
+        },
+        highlight: {
+          DEFAULT: "hsl(var(--highlight))",
+          foreground: "hsl(var(--highlight-foreground))",
         },
         warning: {
           DEFAULT: "hsl(var(--warning))",

@@ -2,7 +2,9 @@ import { Link } from "react-router-dom";
 import { formatPrice } from "@/lib/currency";
 import type { CarouselSlideData } from "@/lib/homeCarousel";
 
-const slideClass = "group relative block h-[72px] w-full shrink-0 overflow-hidden bg-muted";
+// Reserve side room for the slider arrows and bottom room for the slide dots.
+const slideClass =
+  "group relative flex h-32 w-full shrink-0 items-center justify-center gap-3 overflow-hidden bg-gradient-ad px-10 pb-6 pt-3 text-primary-foreground sm:h-40 sm:gap-10 sm:px-14 sm:pb-7 sm:pt-4";
 
 /** One homepage carousel slide; shared by the homepage and the admin preview so both look identical. */
 export default function CarouselSlide({ slide, active = true, onOpen, preview = false }: {
@@ -11,23 +13,25 @@ export default function CarouselSlide({ slide, active = true, onOpen, preview = 
   const src = slide.imageUrl || "/placeholder.svg";
   const body = (
     <>
-      {/* Blurred fill so any picture shape covers the whole banner */}
-      <img src={src} alt="" aria-hidden loading="lazy" decoding="async"
-        className="absolute inset-0 h-full w-full scale-110 object-cover opacity-70 blur-2xl" />
-      {/* The full picture, never cropped */}
-      <img src={src} alt={slide.title} loading="lazy" decoding="async"
-        className="absolute inset-0 h-full w-full object-contain drop-shadow-lg transition-transform duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-[1.03]" />
-      <div className="absolute inset-y-0 right-0 w-3/5 bg-gradient-to-l from-scrim/85 via-scrim/40 to-transparent" />
-      <div className="absolute inset-y-0 right-0 flex max-w-[55%] flex-col items-start justify-center gap-0.5 px-3 text-right text-scrim-foreground">
-        <div className="flex min-w-0 max-w-full items-center gap-1.5">
-          <span className="shrink-0 rounded-full bg-primary px-2 py-px text-[9px] font-bold text-primary-foreground shadow">إعلان</span>
-          <p className="line-clamp-1 text-sm font-bold drop-shadow">{slide.title}</p>
-        </div>
+      {/* Soft decorative glows */}
+      <span aria-hidden className="pointer-events-none absolute -right-8 -top-10 h-28 w-28 rounded-full bg-primary-foreground/15 blur-xl" />
+      <span aria-hidden className="pointer-events-none absolute -bottom-12 left-1/4 h-32 w-32 rounded-full bg-highlight/40 blur-2xl" />
+
+      <div className="relative z-10 flex min-w-0 flex-1 flex-col sm:max-w-lg items-start gap-1 text-right sm:gap-1.5">
+        <span className="rounded-full bg-primary-foreground/20 px-2 py-0.5 text-[10px] font-bold ring-1 ring-primary-foreground/40 backdrop-blur-sm sm:text-xs">
+          إعلان
+        </span>
+        <p className="line-clamp-2 max-w-full text-sm font-extrabold leading-snug drop-shadow-sm sm:text-xl">{slide.title}</p>
         {slide.price != null && (
-          <span className="inline-block rounded-md bg-accent px-1.5 py-px text-xs font-bold text-accent-foreground shadow">
+          <span className="rounded-full bg-highlight px-2.5 py-0.5 text-xs font-extrabold text-highlight-foreground shadow-md sm:text-sm">
             {formatPrice(slide.price, slide.currency)}
           </span>
         )}
+      </div>
+
+      <div className="relative z-10 aspect-square h-full shrink-0 overflow-hidden rounded-xl bg-card p-1 shadow-lg ring-2 ring-primary-foreground/50">
+        <img src={src} alt={slide.title} loading="lazy" decoding="async"
+          className="h-full w-full rounded-lg object-contain transition-transform duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-105" />
       </div>
     </>
   );

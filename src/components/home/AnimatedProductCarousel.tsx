@@ -72,13 +72,13 @@ export default function AnimatedProductCarousel() {
   if (!items.length) return null;
   const n = items.length;
   const goTo = (i: number) => { setIndex(((i % n) + n) % n); setTick((t) => t + 1); };
-  const ctrl = "flex h-7 w-7 items-center justify-center rounded-full border bg-background/95 text-foreground shadow-sm hover:bg-primary hover:text-primary-foreground";
+  const ctrl = "flex h-7 w-7 items-center justify-center rounded-full bg-background/90 text-foreground shadow-md backdrop-blur-sm transition-colors hover:bg-background hover:text-primary sm:h-9 sm:w-9";
 
   return (
-    <section ref={sectionRef} aria-label="منتجات مميزة" aria-roledescription="carousel" className="container px-4 py-3" dir="rtl"
+    <section ref={sectionRef} aria-label="منتجات مميزة" aria-roledescription="carousel" className="container px-4 pb-2 pt-4 sm:pb-3 sm:pt-6" dir="rtl"
       onPointerEnter={() => (hovering.current = true)} onPointerLeave={() => (hovering.current = false)}
       onFocusCapture={() => (hovering.current = true)} onBlurCapture={() => (hovering.current = false)}>
-      <div className="relative overflow-hidden rounded-2xl border bg-card shadow-lg">
+      <div className="relative isolate overflow-hidden rounded-2xl shadow-ad ring-1 ring-border/60 sm:rounded-3xl">
         <div className="flex transition-transform duration-700 ease-[cubic-bezier(0.22,1,0.36,1)]"
           style={{ transform: `translateX(${index * 100}%)` }} aria-live={userPaused ? "polite" : "off"}>
           {items.map((slide, i) => (
@@ -87,22 +87,26 @@ export default function AnimatedProductCarousel() {
           ))}
         </div>
         {n > 1 && (
-          <div className="absolute left-2 top-1/2 flex -translate-y-1/2 items-center gap-1">
-            <button type="button" aria-label="السابق" onClick={() => goTo(index - 1)} className={ctrl}><ChevronRight className="h-4 w-4" /></button>
-            <div className="flex items-center gap-1">
+          <>
+            <button type="button" aria-label="السابق" onClick={() => goTo(index - 1)}
+              className={cn(ctrl, "absolute right-1.5 top-1/2 z-20 -translate-y-1/2 sm:right-3")}><ChevronRight className="h-4 w-4 sm:h-5 sm:w-5" /></button>
+            <button type="button" aria-label="التالي" onClick={() => goTo(index + 1)}
+              className={cn(ctrl, "absolute left-1.5 top-1/2 z-20 -translate-y-1/2 sm:left-3")}><ChevronLeft className="h-4 w-4 sm:h-5 sm:w-5" /></button>
+            <div className="absolute bottom-1 left-1/2 z-20 flex -translate-x-1/2 items-center gap-0.5 sm:bottom-1.5">
               {items.map((slide, i) => (
                 <button key={slide.key} type="button" aria-label={`الشريحة ${i + 1} من ${n}`} aria-current={i === index}
-                  onClick={() => goTo(i)} className="flex h-6 items-center px-0.5">
-                  <span className={cn("h-1.5 rounded-full transition-all", i === index ? "w-5 bg-primary" : "w-1.5 bg-scrim-foreground/70")} />
+                  onClick={() => goTo(i)} className="flex h-5 items-center px-0.5">
+                  <span className={cn("h-1.5 rounded-full shadow-sm transition-all duration-500",
+                    i === index ? "w-5 bg-highlight" : "w-1.5 bg-primary-foreground/60 hover:bg-primary-foreground")} />
                 </button>
               ))}
+              <button type="button" aria-label={userPaused ? "تشغيل" : "إيقاف مؤقت"} aria-pressed={userPaused}
+                onClick={() => setUserPaused((v) => !v)}
+                className="mr-1 flex h-5 w-5 items-center justify-center rounded-full bg-primary-foreground/20 text-primary-foreground ring-1 ring-primary-foreground/40 backdrop-blur-sm hover:bg-primary-foreground/30">
+                {userPaused ? <Play className="h-2.5 w-2.5" /> : <Pause className="h-2.5 w-2.5" />}
+              </button>
             </div>
-            <button type="button" aria-label="التالي" onClick={() => goTo(index + 1)} className={ctrl}><ChevronLeft className="h-4 w-4" /></button>
-            <button type="button" aria-label={userPaused ? "تشغيل" : "إيقاف مؤقت"} aria-pressed={userPaused}
-              onClick={() => setUserPaused((v) => !v)} className={ctrl}>
-              {userPaused ? <Play className="h-3.5 w-3.5" /> : <Pause className="h-3.5 w-3.5" />}
-            </button>
-          </div>
+          </>
         )}
       </div>
     </section>

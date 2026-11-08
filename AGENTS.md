@@ -41,4 +41,3 @@
 - Homepage carousel ads are native_ads (placement home_carousel) under restrictive owner-only RLS (live rows public), singleton home_carousel_settings, owner-only stats/visitor RPCs over ad_analytics (account set by trigger, guests random id); delegated ad scopes never reach it.
 - Storage removal needs read access: give owner-managed folders an owner-scoped SELECT policy with DELETE, or removal no-ops.
 - Product previews reuse the Product page (/product/:id/preview, preview prop) with RLS-scoped reads and no view/recently-viewed/cart/compare writes.
-- In the Android app, WebView textZoom stays 100% and FontScalePlugin's system fontScale (clamped, src/lib/appFontScale.ts) scales the root font size; fixed text sizes use rem and enlarged-only layout tweaks use the `scaled:` variant, so text, fields and images grow together without changing the normal-size design.

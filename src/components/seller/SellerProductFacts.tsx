@@ -30,10 +30,10 @@ const SellerProductFacts = ({
   return (
     <div className="mt-1.5 space-y-1.5">
       {dims && (
-        <p className="flex items-center gap-1 text-xs text-foreground">
-          <Ruler className="h-3.5 w-3.5 shrink-0 text-muted-foreground" aria-hidden="true" />
-          <span className="text-muted-foreground">{dims.label}:</span>
-          <span dir="auto" className="font-semibold">{dims.value}</span>
+        <p className="text-xs leading-5 text-foreground">
+          <Ruler className="me-1 inline h-3.5 w-3.5 align-[-2px] text-muted-foreground" aria-hidden="true" />
+          <span className="text-muted-foreground">{dims.label}:</span>{" "}
+          <span dir="auto" className="whitespace-nowrap font-semibold">{dims.value}</span>
         </p>
       )}
       {items.length > 0 && (

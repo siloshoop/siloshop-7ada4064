@@ -38,3 +38,4 @@
 - Keep search option caches separate from product availability, cancel superseded searches, and render result batches without changing the existing filtered result window; stock continues to refresh uncached.
 - Automatic signed-out redirects replace protected history entries, while explicit login actions push; this prevents browser/native Back from looping into login. Native auth fallback replaces with home when no prior entry exists.
 - Homepage carousel ads are native_ads rows with placement home_carousel, guarded by restrictive owner-only RLS (live rows public), with singleton home_carousel_settings and owner-only stats RPC over ad_analytics slots; delegated ad scopes never reach it.
+- Storage removal requires the remover to be able to read the object; give owner-managed folders an owner-scoped SELECT policy alongside DELETE, or removals silently do nothing.

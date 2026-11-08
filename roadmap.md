@@ -262,3 +262,8 @@
 - [x] Deletion retention, buyer financial isolation, owner finance pages, role regressions checked on desktop/phone; 315 tests pass.
 - [ ] Limit platform-wide revenue/report/payout data to Super Admin on the server (blocked: needs a database change; user forbade migrations in this audit).
 - [ ] Physical Android verification (blocked: no device; Android needs a new build for screen changes).
+
+## Ad Management final checks (Nov 8)
+- [x] Unused test ad pictures removed after reference scan; owner can now remove ad pictures (storage read rule).
+- [x] Phone-size owner flow, controlled view/click tracking, owner-only permissions, best-seller fallback verified.
+- [ ] Physical Android check (blocked: no device; screen changes need a new Android build).

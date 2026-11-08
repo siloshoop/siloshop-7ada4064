@@ -58,6 +58,19 @@ describe("homepage carousel ads (database rules)", () => {
     expect((await db.query(`SELECT 1 FROM native_ads WHERE id=$1`, [adId])).rows).toHaveLength(0);
   });
 
+  it("only the owner can see (and so remove) uploaded ad pictures in storage", async () => {
+    await db.exec(`RESET ROLE; CREATE SCHEMA IF NOT EXISTS storage; GRANT USAGE ON SCHEMA storage TO authenticated;
+      CREATE TABLE IF NOT EXISTS storage.objects(bucket_id text, name text);
+      CREATE OR REPLACE FUNCTION storage.foldername(name text) RETURNS text[] LANGUAGE sql AS $$ SELECT (string_to_array(name,'/'))[1:array_length(string_to_array(name,'/'),1)-1] $$;
+      ALTER TABLE storage.objects ENABLE ROW LEVEL SECURITY; GRANT SELECT ON storage.objects TO authenticated; DELETE FROM storage.objects;
+      INSERT INTO storage.objects VALUES('product-images','platform/banners/ad.png'),('product-images','platform/categories/c.png'),('store-assets','platform/banners/x.png');`);
+    if (!(await db.query(`SELECT 1 FROM pg_policies WHERE policyname='owner_read_platform_banner_images'`)).rows.length)
+      await db.exec(readFileSync("drizzle/migrations/0051_owner_read_platform_banner_images.sql", "utf8"));
+    const visible = async (n: number) => { await as(n); return (await db.query<{ name: string }>(`SELECT name FROM storage.objects`)).rows.map((r) => r.name); };
+    expect(await visible(OWNER)).toEqual(["platform/banners/ad.png"]);
+    for (const other of [ADMIN, MODERATOR, CUSTOMER]) expect(await visible(other)).toEqual([]);
+  });
+
   it("admins and permitted supervisors cannot create carousel ads", async () => {
     for (const actor of [ADMIN, MODERATOR, CUSTOMER]) {
       await as(actor);

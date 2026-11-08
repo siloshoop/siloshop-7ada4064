@@ -1,5 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
-import { PRODUCTION_ORIGIN } from "@/lib/shareUrl";
+import { getAuthRedirectOrigin } from "@/lib/shareUrl";
 import type { User, Session } from "@supabase/supabase-js";
 
 interface AuthResponse {
@@ -14,7 +14,7 @@ export const signUp = async (
   fullName: string,
   phone?: string
 ): Promise<AuthResponse> => {
-  const redirectUrl = `${PRODUCTION_ORIGIN}/`;
+  const redirectUrl = `${getAuthRedirectOrigin()}/`;
   
   const { data, error } = await supabase.auth.signUp({
     email,

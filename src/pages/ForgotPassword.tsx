@@ -8,7 +8,7 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { ArrowRight, Loader2, Mail, ShoppingBag } from "lucide-react";
 import { checkEmail } from "@/lib/authGuard";
-import { PRODUCTION_ORIGIN } from "@/lib/shareUrl";
+import { getAuthRedirectOrigin } from "@/lib/shareUrl";
 
 const ForgotPassword = () => {
   const [email, setEmail] = useState("");
@@ -43,7 +43,7 @@ const ForgotPassword = () => {
       }
 
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${PRODUCTION_ORIGIN}/reset-password`,
+        redirectTo: `${getAuthRedirectOrigin()}/reset-password`,
       });
       if (error) throw error;
       setSent(true);

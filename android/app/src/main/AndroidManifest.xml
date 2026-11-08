@@ -19,15 +19,16 @@
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-            <!-- Android App Links: open shared www.siloshop.net product links in the app; the website is the fallback when not installed.
-                 Only www is listed: siloshop.net redirects to www, Android never verifies a redirecting host, and on Android 11 and older
-                 one failed host cancels verification for every host. Verified by /.well-known/assetlinks.json (Play app signing key). -->
+            <!-- Android App Links: open shared siloshop.net / www.siloshop.net product links in the app; the website is the fallback when not installed.
+                 Both hosts must serve /.well-known/assetlinks.json directly (HTTP 200, no redirect): Android never verifies a redirecting host,
+                 and on Android 11 and older one failed host cancels verification for every host. Verified with the Play app signing key. -->
             <intent-filter android:autoVerify="true">
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
                 <data android:scheme="https" />
                 <data android:host="www.siloshop.net" />
+                <data android:host="siloshop.net" />
                 <data android:pathPrefix="/product/" />
             </intent-filter>
         </activity>

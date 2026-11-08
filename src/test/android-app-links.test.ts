@@ -15,12 +15,12 @@ describe("Android App Links", () => {
     expect(links[0].target.sha256_cert_fingerprints).toEqual([PLAY_SIGNING_SHA256]);
   });
 
-  it("the app auto-verifies only www.siloshop.net product links", () => {
+  it("the app auto-verifies product links on both www.siloshop.net and siloshop.net", () => {
     const manifest = readFileSync("android/app/src/main/AndroidManifest.xml", "utf8");
     const filter = manifest.match(/<intent-filter android:autoVerify="true">([\s\S]*?)<\/intent-filter>/)?.[1] ?? "";
     expect(filter).toContain('android:scheme="https"');
     expect(filter).toContain('android:host="www.siloshop.net"');
-    expect(filter).not.toContain('android:host="siloshop.net"');
+    expect(filter).toContain('android:host="siloshop.net"');
     expect(filter).toContain('android:pathPrefix="/product/"');
   });
 

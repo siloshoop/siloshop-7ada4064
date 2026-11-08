@@ -275,3 +275,7 @@
 - [x] Length/width (cm) fields saved on platform + seller add/edit, shown on product page
 - [x] Seller-defined product features (title/value list) saved and shown in a «ميزات المنتج» section; verified with one hidden test product (then deleted), 348 tests pass
 - [ ] Physical Android check (blocked: no device; needs next app update). Seller-account save not run live (owner session only).
+
+## Both domains and App Links
+- [x] Add siloshop.net back to Android verified product links (versionCode 15); website address shown at the bottom of every page.
+- [ ] siloshop.net verification (blocked: owner must turn off "primary" for www.siloshop.net in Domains settings and delete the stray 208.91.197.27 DNS record at Network Solutions; then build/upload Android versionCode 15).

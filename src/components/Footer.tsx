@@ -1,4 +1,4 @@
-import { Facebook, Instagram, MessageCircle, Send, Twitter, Youtube, Store } from "lucide-react";
+import { Facebook, Instagram, MessageCircle, Send, Twitter, Youtube, Store, Globe } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
@@ -218,6 +218,16 @@ const Footer = () => {
           <p className="text-base">
             © 2024 siloshop. جميع الحقوق محفوظة.
           </p>
+          <a
+            href="https://www.siloshop.net"
+            target="_blank"
+            rel="noopener noreferrer"
+            dir="ltr"
+            className="mt-2 inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:underline"
+          >
+            <Globe className="h-4 w-4" aria-hidden="true" />
+            www.siloshop.net
+          </a>
         </div>
       </div>
     </footer>;

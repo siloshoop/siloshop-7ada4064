@@ -23,9 +23,9 @@ const toneClasses: Record<NonNullable<Kpi["tone"]>, string> = {
 
 const KpiCard = memo(({ kpi }: { kpi: Kpi }) => {
   const body = (
-    <Card className="h-full transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-0.5 hover:shadow-[var(--shadow-card)]">
+    <Card className="h-full transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-elegant">
       <CardContent className="flex items-start gap-3 p-4">
-        <span className={cn("rounded-lg p-2", toneClasses[kpi.tone ?? "default"])}>
+        <span className={cn("rounded-xl p-2", toneClasses[kpi.tone ?? "default"])}>
           <kpi.icon className="h-4 w-4" />
         </span>
         <div className="min-w-0">
@@ -38,7 +38,7 @@ const KpiCard = memo(({ kpi }: { kpi: Kpi }) => {
   );
 
   return kpi.href ? (
-    <Link to={kpi.href} className="block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-lg">
+    <Link to={kpi.href} className="block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-2xl">
       {body}
     </Link>
   ) : (

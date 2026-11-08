@@ -172,7 +172,7 @@ const AdminHome = () => {
       {loading ? (
         <div className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-4">
           {Array.from({ length: 12 }).map((_, index) => (
-            <Skeleton key={index} className="h-[92px] rounded-lg" />
+            <Skeleton key={index} className="h-[92px] rounded-2xl" />
           ))}
         </div>
       ) : (
@@ -313,9 +313,9 @@ const AdminHome = () => {
           .filter((module) => module.href !== "/admin")
           .map((module) => (
             <Link key={module.href} to={module.href} className="group">
-              <Card className="h-full transition-transform group-hover:-translate-y-0.5 group-hover:shadow-lg">
+              <Card className="h-full transition-transform group-hover:-translate-y-0.5 group-hover:border-primary/40 group-hover:shadow-elegant">
                 <CardContent className="flex items-start gap-3 p-4">
-                  <span className="rounded-lg bg-primary/10 p-2 text-primary">
+                  <span className="rounded-xl bg-primary/10 p-2 text-primary">
                     <module.icon className="h-5 w-5" />
                   </span>
                   <div className="min-w-0">

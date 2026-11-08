@@ -823,7 +823,7 @@ const Dashboard = () => {
         ) : (
           <>
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-6">
-              <Link to="/orders" aria-label="عدد الطلبات" className="block min-w-0 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+              <Link to="/orders" aria-label="عدد الطلبات" className="block min-w-0 rounded-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
               <Card className="h-full">
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-sm font-medium">عدد الطلبات</CardTitle>
@@ -832,7 +832,7 @@ const Dashboard = () => {
                 <CardContent><div className="text-2xl font-bold">{customerStats.orders}</div></CardContent>
               </Card>
               </Link>
-              <Link to="/orders" aria-label="منتجات مقيّمة" className="block min-w-0 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+              <Link to="/orders" aria-label="منتجات مقيّمة" className="block min-w-0 rounded-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
               <Card className="h-full">
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-sm font-medium">منتجات مقيّمة</CardTitle>
@@ -848,7 +848,7 @@ const Dashboard = () => {
                 </CardContent>
               </Card>
               </Link>
-              <Link to="/favorites" aria-label="المفضلة" className="block min-w-0 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+              <Link to="/favorites" aria-label="المفضلة" className="block min-w-0 rounded-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
               <Card className="h-full">
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-sm font-medium">المفضلة</CardTitle>

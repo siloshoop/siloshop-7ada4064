@@ -33,10 +33,10 @@ const NavList = ({ onNavigate }: { onNavigate?: () => void }) => {
                       onClick={onNavigate}
                       aria-current={active ? "page" : undefined}
                       className={cn(
-                        "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
+                        "flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium transition-colors",
                         active
-                          ? "bg-primary text-primary-foreground"
-                          : "text-foreground hover:bg-muted"
+                          ? "bg-gradient-primary font-semibold text-primary-foreground shadow-elegant"
+                          : "text-foreground hover:bg-primary/10 hover:text-primary"
                       )}
                     >
                       <Icon className="h-4 w-4 shrink-0" />
@@ -66,8 +66,8 @@ const SellerLayout = ({ title, description, actions, children }: SellerLayoutPro
     <div className="container mx-auto min-w-0 px-3 py-4 sm:px-4 sm:py-6">
       <div className="flex min-w-0 gap-4 sm:gap-6">
         <aside className="hidden w-64 shrink-0 lg:block">
-          <div className="sticky top-24 rounded-xl border bg-card p-4 shadow-sm">
-            <div className="mb-4 flex items-center gap-2 rounded-lg bg-primary/10 px-3 py-2">
+          <div className="sticky top-24 rounded-2xl border border-border/60 bg-card p-4 shadow-card">
+            <div className="mb-4 flex items-center gap-2 rounded-xl bg-primary/10 px-3 py-2">
               <BadgeCheck className="h-4 w-4 text-primary" />
               <span className="text-sm font-bold text-primary">بائع موثّق</span>
             </div>
@@ -92,8 +92,9 @@ const SellerLayout = ({ title, description, actions, children }: SellerLayoutPro
               </SheetContent>
             </Sheet>
             <div className="min-w-0 flex-1">
-              <h1 className="text-xl font-bold leading-tight sm:text-2xl">{title}</h1>
+              <h1 className="text-xl font-extrabold leading-tight tracking-tight sm:text-2xl">{title}</h1>
               {description && <p className="text-sm text-muted-foreground">{description}</p>}
+              <div aria-hidden className="mt-1.5 h-1 w-12 rounded-full bg-gradient-brand" />
             </div>
             {actions}
           </header>

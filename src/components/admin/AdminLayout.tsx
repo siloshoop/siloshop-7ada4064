@@ -32,10 +32,10 @@ export const useAdminModules = () => {
 const NavItem = ({ module, active }: { module: AdminModule; active: boolean }) => (
   <Link
     to={module.href}
-    className={`flex items-center gap-2 rounded-md px-3 py-2 text-sm transition-colors ${
+    className={`flex items-center gap-2 rounded-xl px-3 py-2 text-sm transition-colors ${
       active
-        ? "bg-primary text-primary-foreground"
-        : "text-foreground hover:bg-muted"
+        ? "bg-gradient-primary font-semibold text-primary-foreground shadow-elegant"
+        : "text-foreground hover:bg-primary/10 hover:text-primary"
     }`}
   >
     <module.icon className="h-4 w-4 shrink-0" />
@@ -76,10 +76,11 @@ const AdminLayout = ({ title, description, actions, children }: AdminLayoutProps
         <main className="min-w-0 flex-1">
           <div className="mb-6 flex flex-wrap items-start justify-between gap-3">
             <div>
-              <h1 className="text-2xl font-bold md:text-3xl">{title}</h1>
+              <h1 className="text-2xl font-extrabold tracking-tight md:text-3xl">{title}</h1>
               {description && (
                 <p className="mt-1 text-sm text-muted-foreground">{description}</p>
               )}
+              <div aria-hidden className="mt-2 h-1 w-14 rounded-full bg-gradient-brand" />
             </div>
             {actions}
           </div>

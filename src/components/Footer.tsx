@@ -167,9 +167,11 @@ const Footer = () => {
                 </Link>
               </li>
               <li>
-                <Button asChild variant="outline" className="h-auto gap-1.5 rounded-full border-border bg-card px-5 py-2.5 text-sm font-semibold transition-colors hover:border-primary/40 hover:text-primary">
+                <Button asChild className="h-auto gap-2 rounded-full border-0 bg-gradient-brand py-1.5 pe-5 ps-1.5 text-sm font-bold text-primary-foreground shadow-md shadow-primary/25 transition-all duration-300 hover:-translate-y-0.5 hover:opacity-95 hover:shadow-lg hover:shadow-accent/30 motion-reduce:transition-none motion-reduce:hover:translate-y-0">
                   <Link to="/seller/application">
-                    <Store className="h-4 w-4" />
+                    <span className="flex h-7 w-7 items-center justify-center rounded-full bg-background/20 ring-1 ring-primary-foreground/30">
+                      <Store className="h-4 w-4" />
+                    </span>
                     افتح متجرك
                   </Link>
                 </Button>

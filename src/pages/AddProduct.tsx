@@ -21,6 +21,8 @@ import { productNumbersSchema, firstIssue, friendlyDbError } from "@/lib/product
 import { useImageCropper } from "@/components/ImageCropDialog";
 import { IMAGE_FORMAT_HINT, IMAGE_SIZE_GUIDES, UploadError, describeUploadError, validateImageFile } from "@/lib/uploadErrors";
 import ProductColorsSizesEditor, { type ColorsSizesValue } from "@/components/seller/ProductColorsSizesEditor";
+import ProductFeaturesEditor from "@/components/product/ProductFeaturesEditor";
+import { normalizeFeatureRows, parseDimension, toFeatureRows, type FeatureRow } from "@/lib/productFeatures";
 import { syncColorSizeVariants } from "@/lib/productVariantsSync";
 
 const SHIPPING_CLASSES = [
@@ -79,6 +81,7 @@ const AddProduct = () => {
     seo_keywords: "",
   });
 
+  const [featureRows, setFeatureRows] = useState<FeatureRow[]>([]);
   const [csz, setCsz] = useState<ColorsSizesValue>({ colors: [], sizes: [], variants: [] });
 
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
@@ -221,6 +224,21 @@ const AddProduct = () => {
       }
       const values = parsed.data;
 
+      const lengthCm = parseDimension(formData.length_cm, "الطول");
+      const widthCm = parseDimension(formData.width_cm, "العرض");
+      const dimError = !lengthCm.ok ? lengthCm.error : !widthCm.ok ? widthCm.error : null;
+      if (dimError) {
+        toast({ title: "بيانات غير صالحة", description: dimError, variant: "destructive" });
+        setLoading(false);
+        return;
+      }
+      const features = normalizeFeatureRows(featureRows);
+      if (!features.ok) {
+        toast({ title: "ميزات المنتج", description: features.error, variant: "destructive" });
+        setLoading(false);
+        return;
+      }
+
       if (formData.short_description && formData.short_description.length > 300) {
         toast({ title: "بيانات غير صالحة", description: "الوصف المختصر يجب ألا يتجاوز 300 حرف", variant: "destructive" });
         setLoading(false);
@@ -282,6 +300,9 @@ const AddProduct = () => {
         image_url: mainImageUrl,
         images: imageUrls.length > 0 ? imageUrls : null,
         shipping_weight: formData.shipping_weight ? Number(formData.shipping_weight) : null,
+        length_cm: lengthCm.value,
+        width_cm: widthCm.value,
+        features: features.features,
         shipping_class: formData.shipping_class || null,
         warranty: formData.warranty.trim() || null,
         country_of_origin: formData.country_of_origin.trim() || null,
@@ -414,6 +435,37 @@ const AddProduct = () => {
                       <p className="text-xs text-muted-foreground">
                         يظهر الفيديو داخل معرض صور المنتج (يوتيوب، فيميو، أو ملف mp4).
                       </p>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="length_cm">الطول (سم)</Label>
+                        <Input
+                          id="length_cm"
+                          type="number"
+                          inputMode="decimal"
+                          step="0.1"
+                          min={0}
+                          dir="ltr"
+                          value={formData.length_cm}
+                          onChange={(e) => setFormData({ ...formData, length_cm: e.target.value })}
+                          placeholder="مثال: 220"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="width_cm">العرض (سم)</Label>
+                        <Input
+                          id="width_cm"
+                          type="number"
+                          inputMode="decimal"
+                          step="0.1"
+                          min={0}
+                          dir="ltr"
+                          value={formData.width_cm}
+                          onChange={(e) => setFormData({ ...formData, width_cm: e.target.value })}
+                          placeholder="مثال: 160"
+                        />
+                      </div>
                     </div>
 
                     {/* Category Selection - Amazon Style */}
@@ -736,6 +788,13 @@ const AddProduct = () => {
                   <AccordionTrigger>الألوان والمقاسات (اختياري)</AccordionTrigger>
                   <AccordionContent className="space-y-4">
                     <ProductColorsSizesEditor value={csz} onChange={setCsz} />
+                  </AccordionContent>
+                </AccordionItem>
+
+                <AccordionItem value="features">
+                  <AccordionTrigger>ميزات المنتج (اختياري)</AccordionTrigger>
+                  <AccordionContent className="space-y-4">
+                    <ProductFeaturesEditor value={featureRows} onChange={setFeatureRows} />
                   </AccordionContent>
                 </AccordionItem>
 

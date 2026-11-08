@@ -135,6 +135,7 @@ const PlatformProducts = () => {
       sku: p.sku,
       brand_id: p.brand_id,
       category_id: p.category_id,
+      subcategory_id: p.subcategory_id ?? null,
       description: p.description,
       price: Number(p.price),
       discount_price: p.discount_price != null ? Number(p.discount_price) : null,
@@ -152,6 +153,9 @@ const PlatformProducts = () => {
       platform_cod_enabled: p.platform_cod_enabled ?? true,
       platform_sham_cash_enabled: p.platform_sham_cash_enabled ?? false,
       platform_electronic_payment_enabled: p.platform_electronic_payment_enabled ?? false,
+      length_cm: p.length_cm != null ? Number(p.length_cm) : null,
+      width_cm: p.width_cm != null ? Number(p.width_cm) : null,
+      features: Array.isArray(p.features) ? p.features : [],
     });
     setFormOpen(true);
   };

@@ -268,3 +268,9 @@
 - [x] Unused test ad pictures removed after reference scan; owner can now remove ad pictures (storage read rule).
 - [x] Phone-size owner flow, controlled view/click tracking, owner-only permissions, best-seller fallback verified.
 - [ ] Physical Android check (blocked: no device; screen changes need a new Android build).
+
+## Add-product form improvements
+- [ ] Subcategory picker in the platform add/edit product window (seller pages already have it)
+- [ ] Add-product window closes only via Close/Cancel; unsaved entries kept when reopened
+- [ ] Length/width (cm) fields saved on platform + seller add/edit, shown on product page
+- [ ] Seller-defined product features (title/value list) saved and shown in a «ميزات المنتج» section

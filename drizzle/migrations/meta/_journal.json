@@ -393,6 +393,13 @@
       "when": 1794151485126,
       "tag": "0055_admin_staff_email_search",
       "breakpoints": true
+    },
+    {
+      "idx": 56,
+      "version": "7",
+      "when": 1794154237874,
+      "tag": "0056_product_features_and_dimensions",
+      "breakpoints": true
     }
   ]
 }

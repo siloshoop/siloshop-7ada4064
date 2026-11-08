@@ -1,5 +1,5 @@
 import { currencySymbol, isKnownCurrency } from "@/lib/currency";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
@@ -13,6 +13,16 @@ import { useToast } from "@/hooks/use-toast";
 import { Loader2, X } from "lucide-react";
 import { productNumbersSchema, firstIssue, friendlyDbError } from "@/lib/productValidation";
 import PlatformImageUploader from "./PlatformImageUploader";
+import ProductFeaturesEditor from "@/components/product/ProductFeaturesEditor";
+import { flattenSubcategoryTree } from "@/lib/categoryTree";
+import {
+  normalizeFeatureRows,
+  parseDimension,
+  toFeatureRows,
+  type FeatureRow,
+  type ProductFeature,
+} from "@/lib/productFeatures";
+import { clearDraft, loadDraft, saveDraft } from "@/lib/formDraft";
 
 export interface PlatformProduct {
   id?: string;
@@ -20,6 +30,7 @@ export interface PlatformProduct {
   sku: string | null;
   brand_id: string | null;
   category_id: string | null;
+  subcategory_id: string | null;
   description: string | null;
   price: number;
   discount_price: number | null;
@@ -37,6 +48,9 @@ export interface PlatformProduct {
   platform_cod_enabled: boolean;
   platform_sham_cash_enabled: boolean;
   platform_electronic_payment_enabled: boolean;
+  length_cm: number | null;
+  width_cm: number | null;
+  features: ProductFeature[];
 }
 
 const empty: PlatformProduct = {
@@ -44,6 +58,7 @@ const empty: PlatformProduct = {
   sku: "",
   brand_id: null,
   category_id: null,
+  subcategory_id: null,
   description: "",
   price: 0,
   discount_price: null,
@@ -61,7 +76,36 @@ const empty: PlatformProduct = {
   platform_cod_enabled: true,
   platform_sham_cash_enabled: false,
   platform_electronic_payment_enabled: false,
+  length_cm: null,
+  width_cm: null,
+  features: [],
 };
+
+interface DraftState {
+  form: PlatformProduct;
+  dims: { length: string; width: string };
+  featureRows: FeatureRow[];
+}
+
+const initialState = (product: PlatformProduct | null): DraftState => {
+  const form = product ? { ...empty, ...product } : empty;
+  return {
+    form,
+    dims: {
+      length: form.length_cm != null ? String(form.length_cm) : "",
+      width: form.width_cm != null ? String(form.width_cm) : "",
+    },
+    featureRows: toFeatureRows(form.features),
+  };
+};
+
+interface SubcategoryOption {
+  id: string;
+  name_ar: string;
+  category_id: string;
+  parent_subcategory_id: string | null;
+  sort_order: number | null;
+}
 
 interface Props {
   open: boolean;
@@ -131,11 +175,70 @@ const PlatformProductForm = ({ open, onOpenChange, product, onSaved, categories,
   const { user } = useAuth();
   const { toast } = useToast();
   const [form, setForm] = useState<PlatformProduct>(empty);
+  const [dims, setDims] = useState({ length: "", width: "" });
+  const [featureRows, setFeatureRows] = useState<FeatureRow[]>([]);
   const [saving, setSaving] = useState(false);
+  const [subcategories, setSubcategories] = useState<SubcategoryOption[]>([]);
+  const [restored, setRestored] = useState(false);
+  // Key whose state is loaded; drafts are only written once the matching state is on screen.
+  const [readyKey, setReadyKey] = useState<string | null>(null);
+  const baselineRef = useRef("");
+
+  const draftKey = `platform-product:${user?.id ?? "anon"}:${product?.id ?? "new"}`;
+
+  // Opening restores an unsaved draft for this product (or a new one) before saved values.
+  useEffect(() => {
+    if (!open) {
+      setReadyKey(null);
+      return;
+    }
+    const base = initialState(product);
+    baselineRef.current = JSON.stringify(base);
+    const draft = loadDraft<DraftState>(draftKey);
+    const next = draft && draft.form ? draft : base;
+    setForm(next.form);
+    setDims(next.dims ?? base.dims);
+    setFeatureRows(Array.isArray(next.featureRows) ? next.featureRows : base.featureRows);
+    setRestored(!!draft);
+    setReadyKey(draftKey);
+  }, [product, open, draftKey]);
+
+  // Keep every unsaved change so closing or reopening the window never loses entries.
+  useEffect(() => {
+    if (!open || readyKey !== draftKey) return;
+    const snapshot = JSON.stringify({ form, dims, featureRows });
+    if (snapshot === baselineRef.current) clearDraft(draftKey);
+    else saveDraft(draftKey, { form, dims, featureRows });
+  }, [form, dims, featureRows, open, readyKey, draftKey]);
 
   useEffect(() => {
-    setForm(product ? { ...empty, ...product } : empty);
-  }, [product, open]);
+    if (!open) return;
+    let cancelled = false;
+    supabase
+      .from("subcategories")
+      .select("id, name_ar, category_id, parent_subcategory_id, sort_order")
+      .eq("is_active", true)
+      .order("sort_order")
+      .then(({ data }) => {
+        if (!cancelled) setSubcategories((data as SubcategoryOption[] | null) ?? []);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [open]);
+
+  const categorySubs = form.category_id
+    ? flattenSubcategoryTree(subcategories.filter((s) => s.category_id === form.category_id))
+    : [];
+
+  const discardDraft = () => {
+    clearDraft(draftKey);
+    const base = initialState(product);
+    setForm(base.form);
+    setDims(base.dims);
+    setFeatureRows(base.featureRows);
+    setRestored(false);
+  };
 
   const set = <K extends keyof PlatformProduct>(k: K, v: PlatformProduct[K]) =>
     setForm((f) => ({ ...f, [k]: v }));
@@ -171,12 +274,31 @@ const PlatformProductForm = ({ open, onOpenChange, product, onSaved, categories,
       toast({ title: "يرجى إدخال قيمة الشحن للمنتج", variant: "destructive" });
       return;
     }
+    const length = parseDimension(dims.length, "الطول");
+    if (!length.ok) {
+      toast({ title: "بيانات غير صالحة", description: length.error, variant: "destructive" });
+      return;
+    }
+    const width = parseDimension(dims.width, "العرض");
+    if (!width.ok) {
+      toast({ title: "بيانات غير صالحة", description: width.error, variant: "destructive" });
+      return;
+    }
+    const features = normalizeFeatureRows(featureRows);
+    if (!features.ok) {
+      toast({ title: "ميزات المنتج", description: features.error, variant: "destructive" });
+      return;
+    }
     setSaving(true);
     const payload: any = {
       name: values.name,
       sku: values.sku ?? null,
       brand_id: form.brand_id,
       category_id: form.category_id,
+      subcategory_id: form.category_id ? form.subcategory_id : null,
+      length_cm: length.value,
+      width_cm: width.value,
+      features: features.features,
       description: form.description?.trim() || null,
       price: values.price,
       discount_price: values.discount_price ?? null,
@@ -208,6 +330,7 @@ const PlatformProductForm = ({ open, onOpenChange, product, onSaved, categories,
       toast({ title: "خطأ", description: friendlyDbError(error), variant: "destructive" });
       return;
     }
+    clearDraft(draftKey);
     toast({ title: "تم الحفظ", description: "تم حفظ المنتج بنجاح" });
     onSaved();
     onOpenChange(false);
@@ -215,10 +338,24 @@ const PlatformProductForm = ({ open, onOpenChange, product, onSaved, categories,
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+      <DialogContent
+        className="max-w-3xl max-h-[90vh] overflow-y-auto"
+        // Only the Close (X) and Cancel buttons close this window.
+        onInteractOutside={(e) => e.preventDefault()}
+        onEscapeKeyDown={(e) => e.preventDefault()}
+      >
         <DialogHeader>
           <DialogTitle>{form.id ? "تعديل منتج المنصة" : "إضافة منتج جديد"}</DialogTitle>
         </DialogHeader>
+
+        {restored && (
+          <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-border/60 bg-muted/40 px-3 py-2 text-sm">
+            <span>تمت استعادة البيانات التي أدخلتها ولم تُحفظ بعد.</span>
+            <Button type="button" variant="ghost" size="sm" onClick={discardDraft}>
+              تجاهلها والبدء من جديد
+            </Button>
+          </div>
+        )}
 
         <div className="space-y-4 py-2">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -234,7 +371,18 @@ const PlatformProductForm = ({ open, onOpenChange, product, onSaved, categories,
               <Label>الفئة</Label>
               <Select
                 value={form.category_id || "__none__"}
-                onValueChange={(v) => set("category_id", v === "__none__" ? null : v)}
+                onValueChange={(v) => {
+                  const next = v === "__none__" ? null : v;
+                  setForm((f) => ({
+                    ...f,
+                    category_id: next,
+                    // A subcategory only stays when it still belongs to the chosen category.
+                    subcategory_id:
+                      next && f.subcategory_id && subcategories.some((s) => s.id === f.subcategory_id && s.category_id === next)
+                        ? f.subcategory_id
+                        : null,
+                  }));
+                }}
               >
                 <SelectTrigger><SelectValue placeholder="اختر" /></SelectTrigger>
                 <SelectContent>
@@ -244,6 +392,31 @@ const PlatformProductForm = ({ open, onOpenChange, product, onSaved, categories,
                   ))}
                 </SelectContent>
               </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>الفئة الفرعية</Label>
+              <Select
+                value={form.subcategory_id || "__none__"}
+                onValueChange={(v) => set("subcategory_id", v === "__none__" ? null : v)}
+                disabled={!form.category_id}
+              >
+                <SelectTrigger aria-label="الفئة الفرعية">
+                  <SelectValue placeholder={form.category_id ? "بدون فئة فرعية" : "اختر الفئة أولاً"} />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="__none__">
+                    {form.category_id ? "بدون فئة فرعية" : "اختر الفئة أولاً"}
+                  </SelectItem>
+                  {categorySubs.map((s) => (
+                    <SelectItem key={s.id} value={s.id} className={s.depth ? "ps-10 text-sm" : "font-semibold"}>
+                      {s.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {form.category_id && categorySubs.length === 0 && (
+                <p className="text-xs text-muted-foreground">لا توجد فئات فرعية لهذه الفئة.</p>
+              )}
             </div>
             <div className="space-y-2">
               <Label>العلامة التجارية</Label>
@@ -332,6 +505,42 @@ const PlatformProductForm = ({ open, onOpenChange, product, onSaved, categories,
               <Switch checked={form.is_active} onCheckedChange={(c) => set("is_active", c)} />
               <Label>مفعّل</Label>
             </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="platform-length">الطول (سم)</Label>
+              <Input
+                id="platform-length"
+                type="number"
+                inputMode="decimal"
+                step="0.1"
+                min={0}
+                dir="ltr"
+                placeholder="مثال: 220"
+                value={dims.length}
+                onChange={(e) => setDims((d) => ({ ...d, length: e.target.value }))}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="platform-width">العرض (سم)</Label>
+              <Input
+                id="platform-width"
+                type="number"
+                inputMode="decimal"
+                step="0.1"
+                min={0}
+                dir="ltr"
+                placeholder="مثال: 160"
+                value={dims.width}
+                onChange={(e) => setDims((d) => ({ ...d, width: e.target.value }))}
+              />
+            </div>
+          </div>
+
+          <div className="space-y-2 rounded-lg border p-3">
+            <p className="text-sm font-semibold">ميزات المنتج</p>
+            <ProductFeaturesEditor value={featureRows} onChange={setFeatureRows} />
           </div>
 
           {/* Per-product platform shipping & payment (Super Admin only, enforced server-side) */}

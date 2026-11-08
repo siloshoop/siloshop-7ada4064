@@ -13,6 +13,8 @@ import SellerInfoCard from "@/components/product/SellerInfoCard";
 import ReportDialog from "@/components/ReportDialog";
 import ShippingInfo from "@/components/product/ShippingInfo";
 import ProductSpecs from "@/components/product/ProductSpecs";
+import ProductFeatures from "@/components/product/ProductFeatures";
+import { formatDimensions } from "@/lib/productFeatures";
 import ProductQuestions from "@/components/product/ProductQuestions";
 import FrequentlyBoughtTogether from "@/components/product/FrequentlyBoughtTogether";
 import ProductRecommendations from "@/components/ProductRecommendations";
@@ -79,6 +81,7 @@ interface Product {
   length_cm?: number | null;
   width_cm?: number | null;
   height_cm?: number | null;
+  features?: unknown;
   shipping_weight?: number | null;
   shipping_class?: string | null;
   warranty?: string | null;
@@ -389,6 +392,8 @@ const Product = ({ preview = false }: ProductPageProps) => {
     : product.image_url
     ? [product.image_url]
     : [];
+
+  const dimensions = formatDimensions(product.length_cm, product.width_cm, product.height_cm);
 
   // Calculate average rating
   const averageRating = product.reviews && product.reviews.length > 0
@@ -755,6 +760,8 @@ const Product = ({ preview = false }: ProductPageProps) => {
           </div>
         </div>
 
+        <ProductFeatures features={product.features} dimensions={dimensions} />
+
         {/* Tabbed sections */}
         <section className="mt-10">
           <Tabs defaultValue="description" className="w-full">
@@ -813,7 +820,7 @@ const Product = ({ preview = false }: ProductPageProps) => {
                     {product.barcode && <span>الباركود: {product.barcode}</span>}
                   </div>
                 )}
-                {(product.warranty || product.gtin || product.shipping_weight || product.length_cm || product.width_cm || product.height_cm) && (
+                {(product.warranty || product.gtin || product.shipping_weight || dimensions) && (
                   <div className="rounded-xl border divide-y text-sm">
                     {product.warranty && (
                       <div className="flex justify-between px-3 py-2"><span className="text-muted-foreground">الضمان</span><span>{product.warranty}</span></div>
@@ -821,8 +828,8 @@ const Product = ({ preview = false }: ProductPageProps) => {
                     {product.shipping_weight && (
                       <div className="flex justify-between px-3 py-2"><span className="text-muted-foreground">الوزن</span><span>{product.shipping_weight} كغ</span></div>
                     )}
-                    {(product.length_cm || product.width_cm || product.height_cm) && (
-                      <div className="flex justify-between px-3 py-2"><span className="text-muted-foreground">الأبعاد (طول×عرض×ارتفاع)</span><span>{[product.length_cm, product.width_cm, product.height_cm].filter(Boolean).join(" × ")} سم</span></div>
+                    {dimensions && (
+                      <div className="flex justify-between gap-3 px-3 py-2"><span className="text-muted-foreground">{dimensions.label}</span><span dir="ltr">{dimensions.value}</span></div>
                     )}
                     {product.gtin && (
                       <div className="flex justify-between px-3 py-2"><span className="text-muted-foreground">GTIN</span><span>{product.gtin}</span></div>

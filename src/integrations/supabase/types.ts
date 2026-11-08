@@ -2692,6 +2692,7 @@ export type Database = {
           description: string | null
           discount_price: number | null
           external_id: string | null
+          features: Json
           gtin: string | null
           height_cm: number | null
           id: string
@@ -2761,6 +2762,7 @@ export type Database = {
           description?: string | null
           discount_price?: number | null
           external_id?: string | null
+          features?: Json
           gtin?: string | null
           height_cm?: number | null
           id?: string
@@ -2830,6 +2832,7 @@ export type Database = {
           description?: string | null
           discount_price?: number | null
           external_id?: string | null
+          features?: Json
           gtin?: string | null
           height_cm?: number | null
           id?: string
@@ -5333,6 +5336,7 @@ export type Database = {
       }
       product_analytics: { Args: { _product_id: string }; Returns: Json }
       product_can_manage: { Args: { _product_id: string }; Returns: boolean }
+      product_features_valid: { Args: { p: Json }; Returns: boolean }
       product_sold_counts: {
         Args: { _product_ids: string[] }
         Returns: {

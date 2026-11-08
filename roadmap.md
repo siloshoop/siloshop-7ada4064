@@ -260,7 +260,8 @@
 
 ## Final security audit (Nov 8)
 - [x] Deletion retention, buyer financial isolation, owner finance pages, role regressions checked on desktop/phone; 315 tests pass.
-- [ ] Limit platform-wide revenue/report/payout data to Super Admin on the server (SQL + rollback prepared; waiting for the user's SQL review before applying).
+- [x] Limit platform-wide revenue/report/payout data to Super Admin on the server: approved SQL applied verbatim (15 functions, 7 rules), finance pages owner-only; 3 supervisors, buyer and seller refused/own-only, owner full access verified with real sessions; 3 isolated tests; 319 tests pass. Rollback script kept in Files.
+- [x] Archived the 19 "[TEST DATA]" products in the owner's store (approved); order/payment/history fingerprints unchanged; best-sellers now show real products.
 - [ ] Physical Android verification (blocked: no device; Android needs a new build for screen changes).
 
 ## Ad Management final checks (Nov 8)

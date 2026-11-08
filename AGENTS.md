@@ -29,6 +29,7 @@
 
 - Render product bulk actions in normal document flow after the last selected visible row; this keeps actions aligned without covering adjacent content.
 - Validate coupon dates through couponDates (local to UTC).
+- Platform-wide finance RPCs/RLS (revenue, reports, payouts, payments, coupon usage, other sellers' performance) check has_role(super_admin) only, never has_any_admin_role, and finance routes use RequireRole super_admin; supervisors otherwise keep operational access.
 - Keep moderator seller/product review defaults; owner-delegated customer, seller and ad scopes use server-checked staff_permissions and protected paginated account RPCs, never profile roles or UI-only authorization. Keep ad destination lookups separate from owner-only showroom lookups.
 - Store settings update only the owner's approved seller_applications row; public contact RPC exposes business phone/address, never identity documents or admin fields.
 

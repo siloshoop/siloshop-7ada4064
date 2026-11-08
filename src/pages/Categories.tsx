@@ -70,7 +70,7 @@ const Categories = () => {
                 onClick={() => pick(c.id)}
                 className={cn(
                   "shrink-0 rounded-full border px-4 py-1.5 text-sm font-medium transition-colors",
-                  c.id === activeCat ? "border-primary bg-primary text-primary-foreground" : "border-border bg-card hover:border-primary/50",
+                  c.id === activeCat ? "border-transparent bg-gradient-primary text-primary-foreground shadow-elegant" : "border-border/60 bg-card hover:border-primary/50 hover:text-primary",
                 )}
               >
                 {c.name_ar}
@@ -90,8 +90,10 @@ const Categories = () => {
                   key={g.id}
                   onClick={() => { if (activeCat) pick(activeCat, g.id); }}
                   className={cn(
-                    "block w-full rounded-md border-s-4 px-2 py-3 text-start text-xs font-semibold leading-snug sm:text-sm",
-                    g.id === activeGroup ? "border-primary bg-primary/10 text-primary" : "border-transparent bg-muted text-foreground hover:bg-muted/70",
+                    "relative block w-full overflow-hidden rounded-xl px-2.5 py-3 text-start text-xs font-semibold leading-snug transition-colors sm:text-sm",
+                    g.id === activeGroup
+                      ? "bg-primary/10 text-primary shadow-card before:absolute before:inset-y-0 before:start-0 before:w-1 before:bg-gradient-primary"
+                      : "bg-muted text-foreground hover:bg-primary/5 hover:text-primary",
                   )}
                 >
                   {g.name_ar}
@@ -113,7 +115,7 @@ const Categories = () => {
               <div className="grid grid-cols-3 gap-x-2 gap-y-4 sm:grid-cols-4 lg:grid-cols-6">
                 {leaves.map((l) => (
                   <Link key={l.id} to={`/subcategory/${activeCat}/${l.id}`} className="group flex flex-col items-center text-center">
-                    <div className="flex aspect-square w-full items-center justify-center overflow-hidden rounded-xl border bg-card transition-shadow group-hover:shadow-md">
+                    <div className="gradient-edge-hover relative flex aspect-square w-full items-center justify-center overflow-hidden rounded-2xl border border-border/60 bg-card shadow-card transition-shadow duration-300 group-hover:shadow-elegant motion-reduce:transition-none">
                       {l.image_url ? (
                         <img src={l.image_url} alt={l.name_ar} loading="lazy" className="h-full w-full object-contain p-2" />
                       ) : (

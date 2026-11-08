@@ -16,6 +16,7 @@ import { usePullToRefresh } from "@/hooks/usePullToRefresh";
 import SectionErrorBoundary from "@/components/SectionErrorBoundary";
 import LazySection from "@/components/LazySection";
 import AnimatedProductCarousel from "@/components/home/AnimatedProductCarousel";
+import HomeCategories from "@/components/home/HomeCategories";
 
 // Below-fold sections are lazy loaded to improve initial performance
 const TurkeyMarketplace = lazy(() => import("@/components/home/TurkeyMarketplace"));
@@ -190,6 +191,10 @@ const Index = () => {
 
         <SectionErrorBoundary>
           <AnimatedProductCarousel />
+        </SectionErrorBoundary>
+
+        <SectionErrorBoundary>
+          <HomeCategories />
         </SectionErrorBoundary>
 
         {/* Local Marketplace (Phase 1) */}

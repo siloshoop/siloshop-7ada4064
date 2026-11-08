@@ -595,9 +595,11 @@ All colors MUST be HSL.
     pointer-events: none;
     transition: opacity 300ms ease;
   }
-  .gradient-edge-hover:focus-visible::after { opacity: 1; }
+  .gradient-edge-hover:focus-visible::after,
+  .group:focus-visible > .gradient-edge-hover::after { opacity: 1; }
   @media (hover: hover) {
-    .gradient-edge-hover:hover::after { opacity: 1; }
+    .gradient-edge-hover:hover::after,
+    .group:hover > .gradient-edge-hover::after { opacity: 1; }
   }
   @media (prefers-reduced-motion: reduce) {
     .gradient-edge-hover::after { transition: none; }

@@ -29,7 +29,7 @@ const LocalMarketplaceBanner = () => (
             <div className="flex flex-wrap gap-2.5 pt-1">
               <Link
                 to="/categories"
-                className="group inline-flex items-center gap-1.5 rounded-full bg-primary px-5 py-2.5 text-sm font-bold text-primary-foreground shadow-[var(--shadow-elegant)] transition-transform hover:scale-[1.02] motion-reduce:transition-none"
+                className="group inline-flex items-center gap-1.5 rounded-full bg-gradient-primary px-5 py-2.5 text-sm font-bold text-primary-foreground shadow-[var(--shadow-elegant)] transition-transform hover:scale-[1.02] motion-reduce:transition-none"
               >
                 تسوّق الآن
                 <ArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-0.5 motion-reduce:transition-none" />
@@ -41,9 +41,10 @@ const LocalMarketplaceBanner = () => (
             {PERKS.map(({ icon: Icon, title, body }) => (
               <div
                 key={title}
-                className="rounded-2xl border border-border/60 bg-background/70 p-2.5 backdrop-blur-sm transition-transform duration-300 hover:-translate-y-0.5 motion-reduce:transition-none md:p-4"
+                className="gradient-edge-hover relative overflow-hidden rounded-2xl border border-border/60 bg-background/70 p-2.5 pt-3 shadow-card backdrop-blur-sm transition-transform duration-300 hover:-translate-y-0.5 motion-reduce:transition-none md:p-4 md:pt-5"
               >
-                <span className="mb-1.5 inline-flex h-7 w-7 items-center justify-center rounded-lg bg-primary/10 text-primary md:mb-2 md:h-9 md:w-9 md:rounded-xl">
+                <span aria-hidden className="absolute inset-x-0 top-0 h-1 bg-gradient-ad" />
+                <span className="mb-1.5 inline-flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-primary text-primary-foreground shadow-sm md:mb-2 md:h-9 md:w-9 md:rounded-xl">
                   <Icon className="h-3.5 w-3.5 md:h-4 md:w-4" />
                 </span>
                 <p className="text-[11px] font-bold leading-snug md:text-sm">{title}</p>

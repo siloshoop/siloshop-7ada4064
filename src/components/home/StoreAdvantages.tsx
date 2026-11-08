@@ -31,10 +31,11 @@ const StoreAdvantages = () => {
           {advantages.map(({ icon: Icon, title, description }) => (
             <div
               key={title}
-              className="flex min-w-0 flex-col items-center gap-1 sm:gap-2 rounded-xl sm:rounded-2xl border border-border/60 bg-card p-1.5 sm:p-3 md:p-4 text-center shadow-[var(--shadow-card)]"
+              className="gradient-edge-hover relative flex min-w-0 flex-col items-center gap-1 overflow-hidden rounded-2xl border border-border/60 bg-card p-1.5 pt-2.5 text-center shadow-card transition-shadow duration-300 hover:shadow-elegant sm:gap-2 sm:p-3 sm:pt-4 md:p-4 md:pt-5"
             >
-              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/10 sm:h-10 sm:w-10 md:h-11 md:w-11">
-                <Icon className="h-4 w-4 text-primary sm:h-5 sm:w-5" />
+              <span aria-hidden className="absolute inset-x-0 top-0 h-1 bg-gradient-ad" />
+              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gradient-primary shadow-sm sm:h-10 sm:w-10 md:h-11 md:w-11">
+                <Icon className="h-4 w-4 text-primary-foreground sm:h-5 sm:w-5" />
               </div>
               <h3 className="w-full break-words text-[10px] font-bold leading-tight sm:text-sm">{title}</h3>
               <p className="w-full break-words text-[9px] leading-tight text-muted-foreground sm:text-[11px] md:text-xs">{description}</p>

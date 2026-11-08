@@ -30,7 +30,6 @@ const HomeCategories = () => {
                       to={`/categories?c=${category.id}`}
                       className="gradient-edge-hover group relative flex h-full flex-col items-center gap-1 overflow-hidden rounded-xl border border-border/60 bg-card px-0.5 pb-1.5 pt-2.5 text-center shadow-card transition-all duration-300 hover:-translate-y-0.5 hover:shadow-elegant motion-reduce:transition-none motion-reduce:hover:translate-y-0 sm:gap-1.5 sm:rounded-2xl sm:px-1 sm:pb-2 sm:pt-3"
                     >
-                      <span aria-hidden className="absolute inset-x-0 top-0 h-[3px] bg-gradient-ad" />
                       <span aria-hidden className="rounded-full bg-gradient-ad p-[1.5px] shadow-sm">
                         <span className={`category-tone-${tone} relative flex h-8 w-8 items-center justify-center overflow-hidden rounded-full sm:h-10 sm:w-10`}>
                           {emoji ? <span className="text-base sm:text-lg">{emoji}</span> : <Icon className="h-4 w-4 sm:h-5 sm:w-5" />}

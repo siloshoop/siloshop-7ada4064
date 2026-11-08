@@ -17,10 +17,10 @@ const HomeCategories = () => {
     <section className="py-5" aria-label="تسوّق حسب الفئة">
       <div className="container px-4">
         <SectionHeader icon={LayoutGrid} eyebrow="الفئات" title="تسوّق حسب الفئة" href="/categories" />
-        <ul className="grid grid-cols-4 gap-2 sm:grid-cols-6 sm:gap-3">
+        <ul className="grid grid-cols-5 gap-1.5 min-[380px]:grid-cols-6 sm:grid-cols-8 sm:gap-2 lg:grid-cols-12">
           {isLoading
-            ? Array.from({ length: 8 }, (_, i) => (
-                <li key={i} aria-hidden className="h-[104px] animate-pulse rounded-2xl border border-border/60 bg-muted sm:h-[124px]" />
+            ? Array.from({ length: 12 }, (_, i) => (
+                <li key={i} aria-hidden className="h-[80px] animate-pulse rounded-xl border border-border/60 bg-muted sm:h-[92px] sm:rounded-2xl" />
               ))
             : shown.map((category) => {
                 const { Icon, tone, emoji } = categoryAppearance(category);
@@ -28,12 +28,12 @@ const HomeCategories = () => {
                   <li key={category.id} className="min-w-0">
                     <Link
                       to={`/categories?c=${category.id}`}
-                      className="gradient-edge-hover group relative flex h-full flex-col items-center gap-2 overflow-hidden rounded-2xl border border-border/60 bg-card px-1.5 pb-2.5 pt-3.5 text-center shadow-card transition-all duration-300 hover:-translate-y-0.5 hover:shadow-elegant motion-reduce:transition-none motion-reduce:hover:translate-y-0 sm:pt-4"
+                      className="gradient-edge-hover group relative flex h-full flex-col items-center gap-1 overflow-hidden rounded-xl border border-border/60 bg-card px-0.5 pb-1.5 pt-2.5 text-center shadow-card transition-all duration-300 hover:-translate-y-0.5 hover:shadow-elegant motion-reduce:transition-none motion-reduce:hover:translate-y-0 sm:gap-1.5 sm:rounded-2xl sm:px-1 sm:pb-2 sm:pt-3"
                     >
-                      <span aria-hidden className="absolute inset-x-0 top-0 h-1 bg-gradient-ad" />
-                      <span aria-hidden className="rounded-full bg-gradient-ad p-[2px] shadow-sm">
-                        <span className={`category-tone-${tone} relative flex h-11 w-11 items-center justify-center overflow-hidden rounded-full sm:h-14 sm:w-14`}>
-                          {emoji ? <span className="text-xl">{emoji}</span> : <Icon className="h-5 w-5 sm:h-6 sm:w-6" />}
+                      <span aria-hidden className="absolute inset-x-0 top-0 h-[3px] bg-gradient-ad" />
+                      <span aria-hidden className="rounded-full bg-gradient-ad p-[1.5px] shadow-sm">
+                        <span className={`category-tone-${tone} relative flex h-8 w-8 items-center justify-center overflow-hidden rounded-full sm:h-10 sm:w-10`}>
+                          {emoji ? <span className="text-base sm:text-lg">{emoji}</span> : <Icon className="h-4 w-4 sm:h-5 sm:w-5" />}
                           {category.image_url && (
                             <img
                               src={category.image_url}
@@ -45,7 +45,7 @@ const HomeCategories = () => {
                           )}
                         </span>
                       </span>
-                      <span className="line-clamp-2 w-full break-words text-[11px] font-semibold leading-tight transition-colors group-hover:text-primary sm:text-sm">
+                      <span className="line-clamp-2 w-full break-words text-[9.5px] font-semibold leading-tight transition-colors group-hover:text-primary sm:text-xs">
                         {category.name_ar}
                       </span>
                     </Link>

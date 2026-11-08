@@ -62,6 +62,10 @@ export default {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
+        scrim: {
+          DEFAULT: "hsl(var(--scrim))",
+          foreground: "hsl(var(--scrim-foreground))",
+        },
         success: {
           DEFAULT: "hsl(var(--success))",
           foreground: "hsl(var(--success-foreground))",

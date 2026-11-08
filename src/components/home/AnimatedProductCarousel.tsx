@@ -78,7 +78,7 @@ export default function AnimatedProductCarousel() {
     <section ref={sectionRef} aria-label="منتجات مميزة" aria-roledescription="carousel" className="container px-4 py-3" dir="rtl"
       onPointerEnter={() => (hovering.current = true)} onPointerLeave={() => (hovering.current = false)}
       onFocusCapture={() => (hovering.current = true)} onBlurCapture={() => (hovering.current = false)}>
-      <div className="relative overflow-hidden rounded-xl border bg-card">
+      <div className="relative overflow-hidden rounded-2xl border bg-card shadow-lg">
         <div className="flex transition-transform duration-700 ease-[cubic-bezier(0.22,1,0.36,1)]"
           style={{ transform: `translateX(${index * 100}%)` }} aria-live={userPaused ? "polite" : "off"}>
           {items.map((slide, i) => (
@@ -93,7 +93,7 @@ export default function AnimatedProductCarousel() {
               {items.map((slide, i) => (
                 <button key={slide.key} type="button" aria-label={`الشريحة ${i + 1} من ${n}`} aria-current={i === index}
                   onClick={() => goTo(i)} className="flex h-6 items-center px-0.5">
-                  <span className={cn("h-1.5 rounded-full transition-all", i === index ? "w-4 bg-primary" : "w-1.5 bg-border")} />
+                  <span className={cn("h-1.5 rounded-full transition-all", i === index ? "w-5 bg-primary" : "w-1.5 bg-scrim-foreground/70")} />
                 </button>
               ))}
             </div>

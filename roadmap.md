@@ -279,3 +279,7 @@
 ## Both domains and App Links
 - [x] Add siloshop.net back to Android verified product links (versionCode 15); website address shown at the bottom of every page.
 - [ ] siloshop.net verification (blocked: owner must turn off "primary" for www.siloshop.net in Domains settings and delete the stray 208.91.197.27 DNS record at Network Solutions; then build/upload Android versionCode 15).
+
+## App layout overlap
+- [x] Audited 27 buyer/seller pages at 360px in app mode: no overlap at normal text size except footer logo (fixed). Large phone text size reproduces clipping; app now caps system text scaling at 100%.
+- [ ] Verify on a real Android phone with large system text (blocked: no device; Android build not compiled here). Admin pages not audited (signed-in test account is a seller).

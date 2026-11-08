@@ -24,6 +24,12 @@ describe("Android App Links", () => {
     expect(filter).toContain('android:pathPrefix="/product/"');
   });
 
+  it("the app caps the phone's system text size at 100% so layouts do not overlap", () => {
+    const activity = readFileSync("android/app/src/main/java/com/siloshop/app/MainActivity.java", "utf8");
+    expect(activity).toContain("MAX_TEXT_ZOOM = 100");
+    expect(activity).toContain("settings.setTextZoom(MAX_TEXT_ZOOM)");
+  });
+
   it("the package id is unchanged", () => {
     expect(readFileSync("android/app/build.gradle", "utf8")).toContain('applicationId "com.siloshop.app"');
   });

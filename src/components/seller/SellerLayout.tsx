@@ -19,7 +19,7 @@ const NavList = ({ onNavigate }: { onNavigate?: () => void }) => {
         if (!items.length) return null;
         return (
           <div key={g}>
-            <p className="mb-2 px-3 text-[11px] font-bold uppercase tracking-wide text-muted-foreground">
+            <p className="mb-2 px-3 text-[0.6875rem] font-bold uppercase tracking-wide text-muted-foreground">
               {SELLER_GROUP_LABELS[g]}
             </p>
             <ul className="space-y-1">
@@ -91,7 +91,7 @@ const SellerLayout = ({ title, description, actions, children }: SellerLayoutPro
                 </div>
               </SheetContent>
             </Sheet>
-            <div className="min-w-0 flex-1">
+            <div className="min-w-0 flex-1 scaled:min-w-[9rem]">
               <h1 className="text-xl font-extrabold leading-tight tracking-tight sm:text-2xl">{title}</h1>
               {description && <p className="text-sm text-muted-foreground">{description}</p>}
               <div aria-hidden className="mt-1.5 h-1 w-12 rounded-full bg-gradient-brand" />

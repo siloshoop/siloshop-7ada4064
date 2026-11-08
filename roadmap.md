@@ -281,6 +281,7 @@
 - [ ] siloshop.net verification (blocked: owner must turn off "primary" for www.siloshop.net in Domains settings and delete the stray 208.91.197.27 DNS record at Network Solutions; then build/upload Android versionCode 15).
 
 ## App layout overlap
-- [x] Audited 27 buyer/seller pages at 360px in app mode: no overlap at normal text size except footer logo (fixed). Large phone text size reproduces clipping; app now caps system text scaling at 100%.
+- [x] Audited 27 buyer/seller pages at 360px in app mode: no overlap at normal text size except footer logo (fixed). Large phone text size reproduces clipping.
 - [x] Audited all 36 admin pages at 360px in app mode as the owner: fixed squeezed rows (buyers, sellers, stores, users, categories, banners, payments, stock alerts, announcements, activity log, home lists), split multi-currency totals onto separate lines, fixed wrapped report tabs, chart number labels, subcategory/seller-request headers, orders table side-scroll, broken store logos.
+- [x] Follow the phone's text size instead of blocking it: the app enlarges text together with fields, buttons and pictures (up to 130%); crowded rows stack only when text is enlarged. Re-checked buyer, seller and admin pages at 130%; normal size pixel-identical.
 - [ ] Verify on a real Android phone with large system text (blocked: no device; Android build not compiled here).

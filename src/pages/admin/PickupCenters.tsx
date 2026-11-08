@@ -289,7 +289,7 @@ const PickupCenters = () => {
                       )}
                     </div>
                     <div className="flex items-center gap-2">
-                      <Badge variant={c.is_active ? "default" : "secondary"} className="text-[10px]">
+                      <Badge variant={c.is_active ? "default" : "secondary"} className="text-[0.625rem]">
                         {c.is_active ? "مفعّل" : "معطّل"}
                       </Badge>
                       <Switch

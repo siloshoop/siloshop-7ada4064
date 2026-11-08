@@ -25,7 +25,7 @@ const ProductOriginBadge = ({ productType, shipsWithinDays, compact, className }
     return (
       <Badge
         variant="secondary"
-        className={`gap-1 px-1.5 py-0 text-[10px] font-medium ${className ?? ""}`}
+        className={`gap-1 px-1.5 py-0 text-[0.625rem] font-medium ${className ?? ""}`}
       >
         {isPlatform ? (
           <>

@@ -6,27 +6,29 @@ import com.getcapacitor.BridgeActivity;
 
 public class MainActivity extends BridgeActivity {
     /**
-     * Android WebView scales every font by the phone's system text size while fixed-size
-     * fields, icons and images stay the same, so large system text made words, fields and
-     * pictures overlap. Cap the scale at the size the pages are designed and tested for.
+     * Android WebView would otherwise enlarge only the words by the phone's system text size
+     * while fields, icons and images keep their size, which made them overlap. The WebView
+     * text zoom stays at 100% and FontScalePlugin passes the system size to the pages instead,
+     * which enlarge text together with the boxes around it.
      */
-    private static final int MAX_TEXT_ZOOM = 100;
+    private static final int WEBVIEW_TEXT_ZOOM = 100;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
+        registerPlugin(FontScalePlugin.class);
         super.onCreate(savedInstanceState);
-        capTextZoom();
+        keepWebViewTextZoom();
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        capTextZoom();
+        keepWebViewTextZoom();
     }
 
-    private void capTextZoom() {
+    private void keepWebViewTextZoom() {
         if (bridge == null || bridge.getWebView() == null) return;
         WebSettings settings = bridge.getWebView().getSettings();
-        if (settings.getTextZoom() > MAX_TEXT_ZOOM) settings.setTextZoom(MAX_TEXT_ZOOM);
+        if (settings.getTextZoom() != WEBVIEW_TEXT_ZOOM) settings.setTextZoom(WEBVIEW_TEXT_ZOOM);
     }
 }

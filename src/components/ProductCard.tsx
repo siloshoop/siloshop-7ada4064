@@ -208,7 +208,7 @@ const ProductCard = memo(({
       <div className="relative aspect-[4/5] overflow-hidden bg-muted/30">
         {discountPercent > 0 && (
           <div className="absolute end-2 top-2 z-10 max-w-[calc(100%-3.5rem)]">
-            <Badge className="bg-sale text-sale-foreground font-bold text-[11px] px-2 py-1 rounded-full shadow-md border-0">
+            <Badge className="bg-sale text-sale-foreground font-bold text-[0.6875rem] px-2 py-1 rounded-full shadow-md border-0">
               خصم {discountPercent}%
             </Badge>
           </div>
@@ -216,14 +216,14 @@ const ProductCard = memo(({
 
         {isOutOfStock && (
           <div className="absolute bottom-2 end-2 z-10 max-w-[calc(100%-1rem)]">
-            <Badge className="bg-destructive text-destructive-foreground font-bold text-[11px] px-2 py-0.5 rounded-full shadow-lg border-0 animate-pop-in">
+            <Badge className="bg-destructive text-destructive-foreground font-bold text-[0.6875rem] px-2 py-0.5 rounded-full shadow-lg border-0 animate-pop-in">
               {OUT_OF_STOCK_LABEL}
             </Badge>
           </div>
         )}
         {!isOutOfStock && isLowStock && (
           <div className="absolute bottom-2 start-2 z-10">
-            <Badge className="bg-highlight text-highlight-foreground font-bold text-[10px] px-2 py-0.5 rounded-full shadow-md border-0 animate-pulse">
+            <Badge className="bg-highlight text-highlight-foreground font-bold text-[0.625rem] px-2 py-0.5 rounded-full shadow-md border-0 animate-pulse">
               متبقي {liveStock}
             </Badge>
           </div>
@@ -300,7 +300,7 @@ const ProductCard = memo(({
       </div>
 
       {(details?.is_trending || details?.is_featured) && (
-        <div className="flex min-w-0 items-center gap-1.5 bg-primary/10 px-2 py-1 text-[10px] font-semibold text-primary">
+        <div className="flex min-w-0 items-center gap-1.5 bg-primary/10 px-2 py-1 text-[0.625rem] font-semibold text-primary">
           {details.is_trending ? <TrendingUp className="h-3.5 w-3.5 shrink-0" /> : <Award className="h-3.5 w-3.5 shrink-0" />}
           <span className="truncate">{details.is_trending ? "رائج الآن" : "منتج مميز"}</span>
         </div>
@@ -313,7 +313,7 @@ const ProductCard = memo(({
 
         {/* Store name */}
         {sellerName && (
-          <p className="flex items-center gap-1 text-[11px] text-muted-foreground truncate">
+          <p className="flex items-center gap-1 text-[0.6875rem] text-muted-foreground truncate">
             <Store className="h-3 w-3 shrink-0" />
             <span className="truncate">{sellerName}</span>
           </p>
@@ -332,11 +332,11 @@ const ProductCard = memo(({
               </span>
             ))}
           </div>
-          <span className="min-w-0 text-[11px] text-muted-foreground">
+          <span className="min-w-0 text-[0.6875rem] text-muted-foreground">
             {averageRating > 0 ? averageRating.toFixed(1) : "—"} ({reviewCount})
           </span>
           {typeof soldCount === "number" && soldCount > 0 && (
-            <span className="min-w-0 truncate text-[10px] text-muted-foreground">
+            <span className="min-w-0 truncate text-[0.625rem] text-muted-foreground">
               · تم بيع {soldCount.toLocaleString()}
             </span>
           )}
@@ -348,14 +348,14 @@ const ProductCard = memo(({
             {formatPrice(price, shownCurrency)}
           </span>
           {originalPrice && originalPrice > price && (
-            <span className="text-[10px] text-muted-foreground line-through">
+            <span className="text-[0.625rem] text-muted-foreground line-through">
               {formatPrice(originalPrice, shownCurrency)}
             </span>
           )}
         </div>
 
         {shippingLine && (
-          <div className="flex min-w-0 items-center gap-1 text-[10px]">
+          <div className="flex min-w-0 items-center gap-1 text-[0.625rem]">
             <span
               className={
                 isFreeShipping(shippingMode, shippingCost)
@@ -368,7 +368,7 @@ const ProductCard = memo(({
           </div>
         )}
 
-        <p className="hidden text-[10px] text-muted-foreground sm:block">
+        <p className="hidden text-[0.625rem] text-muted-foreground sm:block">
           {shipsWithinDays && shipsWithinDays > 0
             ? `التوصيل خلال ${shipsWithinDays} أيام`
             : productType === "platform"

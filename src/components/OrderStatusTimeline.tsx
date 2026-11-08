@@ -71,7 +71,7 @@ const OrderStatusTimeline = ({ status, latestNote, className }: Props) => {
               </div>
               <span
                 className={cn(
-                  "mt-2 text-[10px] sm:text-xs text-center leading-tight",
+                  "mt-2 text-[0.625rem] sm:text-xs text-center leading-tight",
                   active ? cn(c.text, "font-semibold") : "text-muted-foreground"
                 )}
               >

@@ -258,7 +258,7 @@ const ActivityLogs = () => {
               filteredLogs.map((log) => (
                 <Card key={log.id} className="hover:shadow-md transition-shadow">
                   <CardContent className="p-4">
-                    <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-4 scaled:flex-wrap scaled:gap-3">
                       <Avatar className="h-10 w-10">
                         <AvatarImage src={log.profiles?.avatar_url || undefined} />
                         <AvatarFallback>
@@ -266,7 +266,7 @@ const ActivityLogs = () => {
                         </AvatarFallback>
                       </Avatar>
 
-                      <div className="flex-1 min-w-0">
+                      <div className="flex-1 min-w-0 scaled:min-w-[10rem]">
                         <div className="flex items-center gap-2 flex-wrap">
                           <span className="font-medium">
                             {log.profiles?.full_name || "مستخدم غير معروف"}
@@ -283,7 +283,7 @@ const ActivityLogs = () => {
                         )}
                       </div>
 
-                      <div className="shrink-0 whitespace-nowrap text-left text-sm text-muted-foreground">
+                      <div className="shrink-0 whitespace-nowrap text-left text-sm text-muted-foreground scaled:basis-full">
                         {format(new Date(log.created_at), "dd MMM yyyy", { locale: ar })}
                         <br />
                         <span className="text-xs">

@@ -41,7 +41,7 @@ const NavItem = ({ module, active }: { module: AdminModule; active: boolean }) =
     <module.icon className="h-4 w-4 shrink-0" />
     <span className="truncate">{module.label}</span>
     {module.comingSoon && (
-      <Badge variant="secondary" className="ms-auto text-[10px]">قريبًا</Badge>
+      <Badge variant="secondary" className="ms-auto text-[0.625rem]">قريبًا</Badge>
     )}
   </Link>
 );

@@ -24,10 +24,15 @@ describe("Android App Links", () => {
     expect(filter).toContain('android:pathPrefix="/product/"');
   });
 
-  it("the app caps the phone's system text size at 100% so layouts do not overlap", () => {
+  it("the app passes the phone's system text size to the pages instead of blocking it", () => {
     const activity = readFileSync("android/app/src/main/java/com/siloshop/app/MainActivity.java", "utf8");
-    expect(activity).toContain("MAX_TEXT_ZOOM = 100");
-    expect(activity).toContain("settings.setTextZoom(MAX_TEXT_ZOOM)");
+    const plugin = readFileSync("android/app/src/main/java/com/siloshop/app/FontScalePlugin.java", "utf8");
+    // WebView keeps its own words-only zoom at 100% so the pages can scale text and boxes together.
+    expect(activity).toContain("WEBVIEW_TEXT_ZOOM = 100");
+    expect(activity).toContain("registerPlugin(FontScalePlugin.class)");
+    expect(activity.indexOf("registerPlugin(FontScalePlugin.class)")).toBeLessThan(activity.indexOf("super.onCreate"));
+    expect(plugin).toContain('@CapacitorPlugin(name = "SiloShopFontScale")');
+    expect(plugin).toContain("getConfiguration().fontScale");
   });
 
   it("the package id is unchanged", () => {

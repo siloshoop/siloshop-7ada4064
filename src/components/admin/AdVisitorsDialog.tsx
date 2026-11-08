@@ -100,10 +100,10 @@ const AdVisitorsDialog = ({ ad, onClose }: Props) => {
             <div className="rounded-xl border border-border/60 bg-card p-3 shadow-card">
               <p className="flex items-center gap-1 text-xs text-muted-foreground"><Users className="h-3.5 w-3.5" />زوار فريدون</p>
               <p className="mt-1 text-xl font-extrabold" data-testid="visitors-unique">{num(s.unique_visitors)}</p>
-              <p className="text-[11px] text-muted-foreground">{num(s.signed_in_visitors)} مسجّل · {num(s.guest_visitors)} ضيف</p>
+              <p className="text-[0.6875rem] text-muted-foreground">{num(s.signed_in_visitors)} مسجّل · {num(s.guest_visitors)} ضيف</p>
             </div>
             {s.untracked_views > 0 && (
-              <p className="col-span-2 text-[11px] text-muted-foreground">
+              <p className="col-span-2 text-[0.6875rem] text-muted-foreground">
                 {num(s.untracked_views)} مشاهدة سُجّلت قبل تفعيل سجل الزوار، فهي محسوبة في الإجمالي دون تفاصيل الزائر.
               </p>
             )}

@@ -160,7 +160,7 @@ const VendorOrders = () => {
             </Card>
           ))}
           <Card>
-            <CardContent className="flex items-center gap-3 p-4">
+            <CardContent className="flex items-center gap-3 p-4 scaled:flex-wrap scaled:gap-2 scaled:p-3">
               <div className="rounded-lg bg-primary/10 p-2">
                 <Wallet className="h-4 w-4 text-primary" />
               </div>

@@ -138,7 +138,7 @@ const ProductVariantPicker = ({ variants, onSelect }: ProductVariantPickerProps)
                   {popular && (
                     <span
                       id={`popular-${key}`}
-                      className="pointer-events-none absolute -top-3.5 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full bg-selected px-1.5 py-px text-[9px] font-bold leading-tight text-selected-foreground shadow-sm sm:text-[10px]"
+                      className="pointer-events-none absolute -top-3.5 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full bg-selected px-1.5 py-px text-[0.5625rem] font-bold leading-tight text-selected-foreground shadow-sm sm:text-[0.625rem]"
                     >
                       شائع
                     </span>

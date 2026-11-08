@@ -117,7 +117,7 @@ const SellerHome = () => {
       title="لوحة البائع"
       description="مركز إدارة متجرك — بيانات مباشرة من قاعدة البيانات"
       actions={
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 scaled:flex-wrap">
           <Tabs value={String(days)} onValueChange={(v) => setDays(Number(v))}>
             <TabsList>
               <TabsTrigger value="7">٧ أيام</TabsTrigger>
@@ -260,7 +260,7 @@ const SellerHome = () => {
                   <Link key={m.id} to="/messages" className="flex items-center gap-2 rounded-lg border p-2 text-sm hover:bg-muted">
                     <MessageSquare className="h-3.5 w-3.5 text-primary" />
                     <span className="min-w-0 flex-1 truncate text-xs">{m.content || "مرفق"}</span>
-                    {!m.is_read && <Badge variant="destructive" className="text-[10px]">جديد</Badge>}
+                    {!m.is_read && <Badge variant="destructive" className="text-[0.625rem]">جديد</Badge>}
                   </Link>
                 ))}
                 {(data?.latest_reviews ?? []).length === 0 && (data?.latest_messages ?? []).length === 0 && (

@@ -93,7 +93,7 @@ const Messages = () => {
                       <div className="flex items-baseline justify-between gap-2">
                         <span className="truncate font-semibold">{c.peer_name || "مستخدم"}</span>
                         {c.last_message_at && (
-                          <span className="shrink-0 text-[11px] text-muted-foreground">
+                          <span className="shrink-0 text-[0.6875rem] text-muted-foreground">
                             {formatDistanceToNow(new Date(c.last_message_at), { addSuffix: true, locale: ar })}
                           </span>
                         )}
@@ -102,7 +102,7 @@ const Messages = () => {
                         {c.last_message_preview || "ابدأ المحادثة"}
                       </p>
                       {c.order_number && (
-                        <span className="mt-1 inline-flex items-center gap-1 text-[11px] text-muted-foreground">
+                        <span className="mt-1 inline-flex items-center gap-1 text-[0.6875rem] text-muted-foreground">
                           <Package className="h-3 w-3" />
                           {c.order_number}
                         </span>

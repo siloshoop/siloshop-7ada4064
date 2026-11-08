@@ -227,7 +227,7 @@ const ManageBanners = () => {
                   <p className="truncate text-xs text-muted-foreground">
                     {b.sponsor_name} · {b.cta_url || "بدون رابط"}
                   </p>
-                  <p className="mt-1 text-[11px] text-muted-foreground">
+                  <p className="mt-1 text-[0.6875rem] text-muted-foreground">
                     {b.start_date ? `يبدأ ${new Date(b.start_date).toLocaleString("ar-SY")}` : "يبدأ فوراً"}
                     {b.end_date ? ` · ينتهي ${new Date(b.end_date).toLocaleString("ar-SY")}` : " · بلا تاريخ انتهاء"}
                   </p>

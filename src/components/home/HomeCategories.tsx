@@ -44,7 +44,7 @@ const HomeCategories = () => {
                           )}
                         </span>
                       </span>
-                      <span className="line-clamp-2 w-full text-[10px] font-semibold min-[380px]:text-[10.5px] leading-[1.15] tracking-tight text-foreground transition-colors group-hover:text-primary sm:text-xs sm:leading-tight">
+                      <span className="line-clamp-2 w-full text-[0.625rem] font-semibold min-[380px]:text-[0.65625rem] leading-[1.15] tracking-tight text-foreground transition-colors group-hover:text-primary sm:text-xs sm:leading-tight">
                         {category.name_ar}
                       </span>
                     </Link>

@@ -35,7 +35,7 @@ const KpiCard = memo(({ kpi }: { kpi: Kpi }) => {
           <p className={cn("mt-0.5 font-extrabold leading-tight", wide ? "text-lg sm:text-xl" : "text-xl")}>
             <StackedAmount value={kpi.value} />
           </p>
-          {kpi.hint && <p className="mt-0.5 break-words text-[11px] leading-snug text-muted-foreground">{kpi.hint}</p>}
+          {kpi.hint && <p className="mt-0.5 break-words text-[0.6875rem] leading-snug text-muted-foreground">{kpi.hint}</p>}
         </div>
       </CardContent>
     </Card>

@@ -335,7 +335,7 @@ export const NotificationsDropdown = () => {
                       {!notification.is_read && (
                         <div className="h-2 w-2 bg-primary rounded-full" />
                       )}
-                      <Badge variant="secondary" className="text-[10px] px-1.5 py-0">
+                      <Badge variant="secondary" className="text-[0.625rem] px-1.5 py-0">
                         {getTypeLabel(notification.type)}
                       </Badge>
                     </div>

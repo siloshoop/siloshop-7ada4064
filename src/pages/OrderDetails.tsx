@@ -424,7 +424,7 @@ const OrderDetails = () => {
                   <div key={n.id} className="rounded-lg bg-muted/30 p-3 text-sm space-y-1">
                     <div className="flex items-center gap-2">
                       <span className="font-semibold">{n.author_name || ROLE_LABELS[n.author_role] || n.author_role}</span>
-                      <Badge variant="outline" className="text-[10px]">{ROLE_LABELS[n.author_role] || n.author_role}</Badge>
+                      <Badge variant="outline" className="text-[0.625rem]">{ROLE_LABELS[n.author_role] || n.author_role}</Badge>
                       <span className="text-xs text-muted-foreground mr-auto">
                         {format(new Date(n.created_at), "dd MMMM yyyy - HH:mm", { locale: ar })}
                       </span>

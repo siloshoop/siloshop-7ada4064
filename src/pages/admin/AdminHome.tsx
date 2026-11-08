@@ -233,11 +233,11 @@ const AdminHome = () => {
                     >
                       <div className="w-full min-w-0 sm:w-auto sm:flex-1">
                         <p className="truncate font-semibold">{order.customer_name}</p>
-                        <p className="break-words text-[11px] text-muted-foreground">
+                        <p className="break-words text-[0.6875rem] text-muted-foreground">
                           #{order.id.slice(0, 8)} — {new Date(order.created_at).toLocaleString("ar-SY")}
                         </p>
                       </div>
-                      <Badge variant="secondary" className="shrink-0 text-[10px]">
+                      <Badge variant="secondary" className="shrink-0 text-[0.625rem]">
                         {STATUS_LABELS[order.status] ?? order.status}
                       </Badge>
                       <span className="ms-auto shrink-0 font-bold text-primary sm:ms-0">{formatKnownPrice(order.total_amount, latestCurrencies[order.id])}</span>
@@ -271,7 +271,7 @@ const AdminHome = () => {
                       )}
                       <span className="min-w-0 flex-1">
                         <span className="block truncate font-medium">{product.name}</span>
-                        <span className="block text-[11px] text-muted-foreground">{fmt(product.units)} قطعة</span>
+                        <span className="block text-[0.6875rem] text-muted-foreground">{fmt(product.units)} قطعة</span>
                       </span>
                       <span className="max-w-[45%] shrink-0 text-end text-xs font-bold text-primary sm:text-sm">
                         <StackedAmount value={moneyRows ? reportMoney(moneyRows, (r) => r.product_id === product.id && ["delivered", "completed"].includes(r.status)) : "—"} />
@@ -300,7 +300,7 @@ const AdminHome = () => {
                       <Store className="h-4 w-4 shrink-0 text-primary" />
                       <span className="min-w-0 flex-1">
                         <span className="block truncate font-medium">{seller.name}</span>
-                        <span className="block text-[11px] text-muted-foreground">{fmt(seller.orders)} طلب</span>
+                        <span className="block text-[0.6875rem] text-muted-foreground">{fmt(seller.orders)} طلب</span>
                       </span>
                       <span className="max-w-[45%] shrink-0 text-end text-xs font-bold text-primary sm:text-sm">
                         <StackedAmount value={moneyRows ? reportMoney(moneyRows, (r) => r.vendor_id === seller.id && ["delivered", "completed"].includes(r.status)) : "—"} />
@@ -330,7 +330,7 @@ const AdminHome = () => {
                   <div className="min-w-0">
                     <p className="flex items-center gap-2 font-semibold">
                       {module.label}
-                      {module.comingSoon && <Badge variant="secondary" className="text-[10px]">قريبًا</Badge>}
+                      {module.comingSoon && <Badge variant="secondary" className="text-[0.625rem]">قريبًا</Badge>}
                     </p>
                     <p className="mt-1 text-sm text-muted-foreground">{module.description}</p>
                   </div>

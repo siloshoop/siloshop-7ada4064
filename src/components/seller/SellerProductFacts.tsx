@@ -41,7 +41,7 @@ const SellerProductFacts = ({
           {visible.map((f, i) => (
             <li
               key={`${f.title}-${i}`}
-              className="max-w-full truncate rounded-full bg-muted/60 px-2 py-0.5 text-[11px] sm:max-w-[16rem]"
+              className="max-w-full truncate rounded-full bg-muted/60 px-2 py-0.5 text-[0.6875rem] sm:max-w-[16rem]"
               title={`${f.title}: ${f.value}`}
             >
               <span dir="auto" className="text-muted-foreground">{f.title}:</span>{" "}
@@ -53,7 +53,7 @@ const SellerProductFacts = ({
               <button
                 type="button"
                 onClick={() => setExpanded((v) => !v)}
-                className="rounded-full px-2 py-0.5 text-[11px] font-semibold text-primary hover:underline"
+                className="rounded-full px-2 py-0.5 text-[0.6875rem] font-semibold text-primary hover:underline"
                 aria-expanded={expanded}
               >
                 {expanded ? "عرض أقل" : `+${hidden} ميزات أخرى`}

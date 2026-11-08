@@ -104,13 +104,13 @@ const ChatMessageItem = ({
         )}
       >
         {message.is_pinned && (
-          <div className="mb-1 flex items-center gap-1 text-[11px] opacity-80">
+          <div className="mb-1 flex items-center gap-1 text-[0.6875rem] opacity-80">
             <Pin className="h-3 w-3" /> مثبّتة
           </div>
         )}
 
         {message.forwarded_from_id && (
-          <div className="mb-1 flex items-center gap-1 text-[11px] opacity-80">
+          <div className="mb-1 flex items-center gap-1 text-[0.6875rem] opacity-80">
             <Forward className="h-3 w-3" /> رسالة محوّلة
           </div>
         )}
@@ -163,7 +163,7 @@ const ChatMessageItem = ({
           </>
         )}
 
-        <div className="mt-1 flex items-center justify-end gap-1 text-[11px] opacity-70">
+        <div className="mt-1 flex items-center justify-end gap-1 text-[0.6875rem] opacity-70">
           {message.edited_at && <span>معدّلة</span>}
           <span>
             {formatDistanceToNow(new Date(message.created_at), { addSuffix: true, locale: ar })}

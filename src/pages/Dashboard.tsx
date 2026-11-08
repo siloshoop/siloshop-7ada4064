@@ -849,7 +849,7 @@ const Dashboard = () => {
                     value={customerStats.orders > 0 ? Math.min(100, (customerStats.reviewed / customerStats.orders) * 100) : 0}
                     className="mt-2 h-1.5"
                   />
-                  <p className="text-[10px] text-muted-foreground mt-1">نسبة التقييم من طلباتك</p>
+                  <p className="text-[0.625rem] text-muted-foreground mt-1">نسبة التقييم من طلباتك</p>
                 </CardContent>
               </Card>
               </Link>

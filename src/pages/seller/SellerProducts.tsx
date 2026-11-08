@@ -434,7 +434,7 @@ const SellerProducts = () => {
                   decoding="async"
                   className="h-16 w-16 rounded-lg object-cover"
                 />
-                <div className="min-w-0 flex-1">
+                <div className="min-w-0 flex-1 scaled:min-w-[9rem]">
                   <p className="truncate font-semibold">{p.name}</p>
                   <p className="text-sm text-muted-foreground">
                     {formatPrice(p.price, (p as any).currency)} · المخزون: {p.stock_quantity ?? 0}

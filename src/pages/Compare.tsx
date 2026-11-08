@@ -611,7 +611,7 @@ const Compare = () => {
             {/* Save Comparison Button */}
             <Dialog open={saveDialogOpen} onOpenChange={setSaveDialogOpen}>
               <DialogTrigger asChild>
-                <Button variant="outline" className="h-8 w-full px-2 text-[11px] sm:h-9 sm:w-auto sm:px-3 sm:text-sm">
+                <Button variant="outline" className="h-8 w-full px-2 text-[0.6875rem] sm:h-9 sm:w-auto sm:px-3 sm:text-sm">
                   <Bookmark className="h-4 w-4 ml-2" />
                   حفظ المقارنة
                 </Button>
@@ -642,7 +642,7 @@ const Compare = () => {
             {/* Load Saved Comparisons Button */}
             <Dialog open={savedDialogOpen} onOpenChange={setSavedDialogOpen}>
               <DialogTrigger asChild>
-                <Button variant="outline" className="h-8 w-full px-2 text-[11px] sm:h-9 sm:w-auto sm:px-3 sm:text-sm">
+                <Button variant="outline" className="h-8 w-full px-2 text-[0.6875rem] sm:h-9 sm:w-auto sm:px-3 sm:text-sm">
                   <FolderOpen className="h-4 w-4 ml-2" />
                   المقارنات المحفوظة
                   {savedComparisons.length > 0 && (
@@ -698,7 +698,7 @@ const Compare = () => {
             {/* Export Dropdown */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="outline" disabled={exporting} className="h-8 w-full px-2 text-[11px] sm:h-9 sm:w-auto sm:px-3 sm:text-sm">
+                <Button variant="outline" disabled={exporting} className="h-8 w-full px-2 text-[0.6875rem] sm:h-9 sm:w-auto sm:px-3 sm:text-sm">
                   {exporting ? (
                     <Loader2 className="h-4 w-4 ml-2 animate-spin" />
                   ) : (
@@ -721,7 +721,7 @@ const Compare = () => {
 
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="outline" className="h-8 w-full px-2 text-[11px] sm:h-9 sm:w-auto sm:px-3 sm:text-sm">
+                <Button variant="outline" className="h-8 w-full px-2 text-[0.6875rem] sm:h-9 sm:w-auto sm:px-3 sm:text-sm">
                   <Share2 className="h-4 w-4 ml-2" />
                   مشاركة المقارنة
                 </Button>
@@ -753,7 +753,7 @@ const Compare = () => {
             </DropdownMenu>
             <AlertDialog>
               <AlertDialogTrigger asChild>
-                <Button variant="destructive" className="h-8 w-full px-2 text-[11px] sm:h-9 sm:w-auto sm:px-3 sm:text-sm">
+                <Button variant="destructive" className="h-8 w-full px-2 text-[0.6875rem] sm:h-9 sm:w-auto sm:px-3 sm:text-sm">
                   <Trash2 className="h-4 w-4 ml-2" />
                   مسح الكل
                 </Button>
@@ -831,7 +831,7 @@ const Compare = () => {
                     
                     <div className="flex min-w-0 gap-1.5 sm:gap-2">
                       <Button 
-                        className="h-8 min-w-0 flex-1 px-2 text-[11px] sm:text-xs"
+                        className="h-8 min-w-0 flex-1 px-2 text-[0.6875rem] sm:text-xs"
                         size="sm"
                         onClick={() => addToCart(product.id)}
                         disabled={addingToCart === product.id || (product.stock_quantity || 0) === 0}
@@ -858,7 +858,7 @@ const Compare = () => {
                 {comparisonRows.map((row, index) => (
                   <div key={row.label}>
                     <div 
-                      className={`comparison-grid grid items-center gap-2 px-2 py-1 text-[11px] sm:gap-3 sm:px-3 sm:py-1.5 sm:text-sm ${index % 2 === 0 ? "bg-muted/30" : ""}`}
+                      className={`comparison-grid grid items-center gap-2 px-2 py-1 text-[0.6875rem] sm:gap-3 sm:px-3 sm:py-1.5 sm:text-sm ${index % 2 === 0 ? "bg-muted/30" : ""}`}
                     >
                       <div className="sticky end-0 z-10 flex min-w-0 items-center gap-1.5 bg-card py-1 font-medium text-muted-foreground sm:gap-2">
                         {row.icon}
@@ -877,14 +877,14 @@ const Compare = () => {
                 {/* Description Row */}
                 <Separator />
                 <div 
-                  className="comparison-grid grid gap-2 px-2 py-1 text-[11px] sm:gap-3 sm:px-3 sm:py-1.5 sm:text-sm"
+                  className="comparison-grid grid gap-2 px-2 py-1 text-[0.6875rem] sm:gap-3 sm:px-3 sm:py-1.5 sm:text-sm"
                 >
                   <div className="sticky end-0 z-10 flex min-w-0 items-start gap-1.5 bg-card pt-1 font-medium text-muted-foreground sm:gap-2">
                     <Minus className="h-4 w-4" />
                     <span>الوصف</span>
                   </div>
                   {products.map((product) => (
-                    <p key={product.id} className="text-[11px] text-muted-foreground line-clamp-3 sm:text-sm">
+                    <p key={product.id} className="text-[0.6875rem] text-muted-foreground line-clamp-3 sm:text-sm">
                       {product.description || "لا يوجد وصف"}
                     </p>
                   ))}

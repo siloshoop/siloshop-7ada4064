@@ -193,7 +193,7 @@ const AdminNotifications = () => {
                 <div key={n.id} className="rounded-md border p-3">
                   <div className="flex items-center justify-between gap-2">
                     <p className="truncate font-medium">{n.title}</p>
-                    <Badge variant="secondary" className="shrink-0 text-[10px]">
+                    <Badge variant="secondary" className="shrink-0 text-[0.625rem]">
                       {formatDistanceToNow(new Date(n.created_at), { addSuffix: true, locale: ar })}
                     </Badge>
                   </div>

@@ -181,7 +181,7 @@ const EnhancedDailyDeals = () => {
                     <span className="min-w-[1.75rem] rounded bg-destructive px-1 py-0.5 text-center text-sm text-primary-foreground">
                       {String(Math.min(value, 99)).padStart(2, "0")}
                     </span>
-                    <span className="mt-0.5 text-[9px] font-medium text-muted-foreground">{label}</span>
+                    <span className="mt-0.5 text-[0.5625rem] font-medium text-muted-foreground">{label}</span>
                   </div>
                 </div>
               ))}

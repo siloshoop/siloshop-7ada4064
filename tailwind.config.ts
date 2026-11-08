@@ -1,5 +1,6 @@
 import type { Config } from "tailwindcss";
 import tailwindcssAnimate from "tailwindcss-animate";
+import plugin from "tailwindcss/plugin";
 
 export default {
   darkMode: ["class"],
@@ -162,5 +163,9 @@ export default {
       },
     },
   },
-  plugins: [tailwindcssAnimate],
+  plugins: [
+    tailwindcssAnimate,
+    // `scaled:` applies only in the Android app when the phone's system text size is enlarged.
+    plugin(({ addVariant }) => addVariant("scaled", "html[data-app-font-scaled] &")),
+  ],
 } satisfies Config;

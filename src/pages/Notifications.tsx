@@ -319,8 +319,8 @@ const Notifications = () => {
                   ))}
                 </SelectContent>
               </Select>
-              <Tabs value={readFilter} onValueChange={setReadFilter}>
-                <TabsList>
+              <Tabs value={readFilter} onValueChange={setReadFilter} className="scaled:w-full">
+                <TabsList className="scaled:h-auto scaled:w-full scaled:flex-wrap">
                   <TabsTrigger value="all">الكل</TabsTrigger>
                   <TabsTrigger value="unread">
                     غير مقروء
@@ -360,12 +360,12 @@ const Notifications = () => {
                   onClick={() => handleNotificationClick(notification)}
                 >
                   <CardContent className="p-4">
-                    <div className="flex items-start gap-4">
+                    <div className="flex items-start gap-4 scaled:gap-2">
                       <div className={`p-2 rounded-full ${config.color}`}>
                         {config.icon}
                       </div>
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-1">
+                      <div className="min-w-0 flex-1">
+                        <div className="mb-1 flex flex-wrap items-center gap-2">
                           <h3 className="font-semibold">{notification.title}</h3>
                           {!notification.is_read && (
                             <div className="h-2 w-2 bg-primary rounded-full" />

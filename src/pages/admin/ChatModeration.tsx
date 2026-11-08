@@ -494,7 +494,7 @@ const ChatModeration = () => {
                           <p className="font-semibold text-xs mb-0.5">
                             {m.sender_name || "مستخدم"}
                             {m.report_count > 0 && (
-                              <Badge variant="destructive" className="mr-2 text-[10px]">
+                              <Badge variant="destructive" className="mr-2 text-[0.625rem]">
                                 {m.report_count} بلاغ
                               </Badge>
                             )}
@@ -518,7 +518,7 @@ const ChatModeration = () => {
                             </a>
                           )}
                           <p className="whitespace-pre-wrap break-words">{m.content}</p>
-                          <p className="text-[10px] text-muted-foreground mt-1">
+                          <p className="text-[0.625rem] text-muted-foreground mt-1">
                             {new Date(m.created_at).toLocaleString("ar")}
                           </p>
                         </div>

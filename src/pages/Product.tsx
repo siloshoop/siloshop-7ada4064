@@ -491,7 +491,7 @@ const Product = ({ preview = false }: ProductPageProps) => {
                 productName={product.name}
                 videoUrl={product.video_url}
               />
-              <div className="absolute top-12 right-3 z-10 flex flex-col gap-1.5">
+              <div className="absolute top-12 right-3 z-10 flex flex-col gap-1.5 scaled:flex-row">
                 <FavoriteButton productId={id!} variant="ghost" size="icon" className="h-9 w-9 rounded-full bg-background/95 shadow-sm" />
                 <ShareProductButton productId={id!} productName={product.name} size="icon" showLabel={false}
                   className="h-9 w-9 rounded-full bg-background/95 shadow-sm hover:bg-primary hover:text-primary-foreground" />
@@ -523,7 +523,7 @@ const Product = ({ preview = false }: ProductPageProps) => {
               {product.tags && product.tags.length > 0 && (
                 <div className="flex flex-wrap gap-1.5 pt-0.5">
                   {product.tags.map((tag) => (
-                    <Badge key={tag} variant="secondary" className="rounded-full text-[11px] font-normal">
+                    <Badge key={tag} variant="secondary" className="rounded-full text-[0.6875rem] font-normal">
                       {tag}
                     </Badge>
                   ))}
@@ -724,7 +724,7 @@ const Product = ({ preview = false }: ProductPageProps) => {
             <div className="grid min-w-0 grid-cols-2 gap-2 pt-2">
               <div className="flex min-w-0 flex-col items-center gap-1 rounded-xl border bg-muted/30 p-2.5 text-center sm:p-3">
                 <Truck className="h-4 w-4 text-primary" />
-                <span className="break-words text-[11px] leading-tight text-muted-foreground">
+                <span className="break-words text-[0.6875rem] leading-tight text-muted-foreground">
                   {(product as any).ships_within_days
                     ? `يشحن خلال ${(product as any).ships_within_days} أيام`
                     : "شحن لجميع المحافظات"}
@@ -732,7 +732,7 @@ const Product = ({ preview = false }: ProductPageProps) => {
               </div>
               <div className="flex min-w-0 flex-col items-center gap-1 rounded-xl border bg-muted/30 p-2.5 text-center sm:p-3">
                 <ShieldCheck className="h-4 w-4 text-primary" />
-                <span className="break-words text-[11px] leading-tight text-muted-foreground">
+                <span className="break-words text-[0.6875rem] leading-tight text-muted-foreground">
                   دفع آمن عند الاستلام
                 </span>
               </div>
@@ -768,31 +768,31 @@ const Product = ({ preview = false }: ProductPageProps) => {
             <TabsList className="w-full justify-start overflow-x-auto scrollbar-hide bg-transparent border-b rounded-none h-auto p-0 gap-1">
               <TabsTrigger
                 value="description"
-                className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none px-4 py-2.5"
+                className="shrink-0 rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none px-4 py-2.5"
               >
                 الوصف
               </TabsTrigger>
               <TabsTrigger
                 value="specs"
-                className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none px-4 py-2.5"
+                className="shrink-0 rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none px-4 py-2.5"
               >
                 المواصفات
               </TabsTrigger>
               <TabsTrigger
                 value="reviews"
-                className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none px-4 py-2.5"
+                className="shrink-0 rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none px-4 py-2.5"
               >
                 التقييمات ({product.reviews?.length || 0})
               </TabsTrigger>
               <TabsTrigger
                 value="shipping"
-                className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none px-4 py-2.5"
+                className="shrink-0 rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none px-4 py-2.5"
               >
                 الشحن
               </TabsTrigger>
               <TabsTrigger
                 value="qa"
-                className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none px-4 py-2.5"
+                className="shrink-0 rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none px-4 py-2.5"
               >
                 أسئلة وأجوبة
               </TabsTrigger>
@@ -903,7 +903,7 @@ const Product = ({ preview = false }: ProductPageProps) => {
         className="mobile-fixed-bottom safe-area-x fixed inset-x-0 bottom-0 z-40 border-t bg-background/95 shadow-lg backdrop-blur supports-[backdrop-filter]:bg-background/80 md:hidden"
       >
         {previewOnly && (
-          <div className="mobile-product-notice flex items-center justify-center border-b border-amber-500/40 bg-amber-500/10 px-3 py-1.5 text-center text-[11px] leading-snug text-amber-700 dark:text-amber-400">
+          <div className="mobile-product-notice flex items-center justify-center border-b border-amber-500/40 bg-amber-500/10 px-3 py-1.5 text-center text-[0.6875rem] leading-snug text-amber-700 dark:text-amber-400">
             هذا المنتج معروض للمعاينة فقط وغير متاح للشراء حالياً.
           </div>
         )}
@@ -921,10 +921,10 @@ const Product = ({ preview = false }: ProductPageProps) => {
             disabled={addingToCart || !canStartPurchase}
           >
             <Zap className="h-4 w-4" />
-            <span className="text-[11px] leading-none">اشترِ الآن</span>
+            <span className="text-[0.6875rem] leading-none">اشترِ الآن</span>
           </Button>
           <Button
-            className="h-12 flex-[1.4] text-sm font-bold"
+            className="h-12 flex-[1.4] text-sm font-bold scaled:whitespace-normal scaled:px-2 scaled:leading-tight"
             onClick={addToCart}
             disabled={addingToCart || !canStartPurchase}
           >

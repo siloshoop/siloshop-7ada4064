@@ -35,7 +35,7 @@ const SellerInfoCard = ({
         <div className="min-w-0 flex-1 space-y-1">
           <div className="flex flex-wrap items-center gap-2">
             <h3 className="truncate font-semibold">{displayName}</h3>
-            <Badge variant="secondary" className="gap-1 text-[10px]">
+            <Badge variant="secondary" className="gap-1 text-[0.625rem]">
               <ShieldCheck className="h-3 w-3" />
               {isPlatform ? "متجر المنصة" : "بائع معتمد"}
             </Badge>

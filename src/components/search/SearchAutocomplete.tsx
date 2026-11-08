@@ -142,7 +142,7 @@ const SearchAutocomplete = ({
           {/* Live product results */}
           {showResults && (
             <section className="mb-1">
-              <p className="px-2 py-1.5 text-[11px] font-semibold text-muted-foreground">نتائج مباشرة</p>
+              <p className="px-2 py-1.5 text-[0.6875rem] font-semibold text-muted-foreground">نتائج مباشرة</p>
               {products.length === 0 && !loading ? (
                 <p className="px-2 py-3 text-sm text-muted-foreground">لا توجد منتجات مطابقة</p>
               ) : (
@@ -173,7 +173,7 @@ const SearchAutocomplete = ({
           {/* Smart suggestions (completions) */}
           {hasQuery && smartSuggestions.length > 0 && (
             <section className="mb-1 border-t pt-1">
-              <p className="px-2 py-1.5 text-[11px] font-semibold text-muted-foreground">اقتراحات ذكية</p>
+              <p className="px-2 py-1.5 text-[0.6875rem] font-semibold text-muted-foreground">اقتراحات ذكية</p>
               <div className="flex flex-wrap gap-1.5 px-2 pb-2">
                 {smartSuggestions.map((s) => (
                   <button
@@ -193,7 +193,7 @@ const SearchAutocomplete = ({
           {/* Category matches */}
           {categories.length > 0 && (
             <section className="mb-1 border-t pt-1">
-              <p className="px-2 py-1.5 text-[11px] font-semibold text-muted-foreground">في الفئات</p>
+              <p className="px-2 py-1.5 text-[0.6875rem] font-semibold text-muted-foreground">في الفئات</p>
               {categories.map((c) => (
                 <button
                   key={c.id}
@@ -211,7 +211,7 @@ const SearchAutocomplete = ({
           {/* Brand matches */}
           {brands.length > 0 && (
             <section className="mb-1 border-t pt-1">
-              <p className="px-2 py-1.5 text-[11px] font-semibold text-muted-foreground">
+              <p className="px-2 py-1.5 text-[0.6875rem] font-semibold text-muted-foreground">
                 في العلامات التجارية
               </p>
               {brands.map((b) => (
@@ -232,11 +232,11 @@ const SearchAutocomplete = ({
           {!hasQuery && recent.length > 0 && (
             <section className="mb-1">
               <div className="flex items-center justify-between px-2 py-1.5">
-                <p className="text-[11px] font-semibold text-muted-foreground">آخر عمليات البحث</p>
+                <p className="text-[0.6875rem] font-semibold text-muted-foreground">آخر عمليات البحث</p>
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="h-6 px-2 text-[11px]"
+                  className="h-6 px-2 text-[0.6875rem]"
                   onClick={() => {
                     void clearRecentSearches();
                     setRecent([]);
@@ -272,7 +272,7 @@ const SearchAutocomplete = ({
           {/* Popular searches */}
           {!hasQuery && popularTerms.length > 0 && (
             <section className="border-t pt-1">
-              <p className="px-2 py-1.5 text-[11px] font-semibold text-muted-foreground">الأكثر بحثاً</p>
+              <p className="px-2 py-1.5 text-[0.6875rem] font-semibold text-muted-foreground">الأكثر بحثاً</p>
               <div className="flex flex-wrap gap-1.5 px-2 pb-2">
                 {popularTerms.map(({ term, hits }) => (
                   <button

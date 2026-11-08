@@ -18,7 +18,7 @@ export default function CarouselSlide({ slide, active = true, onOpen, preview = 
       <span aria-hidden className="pointer-events-none absolute -bottom-12 left-1/4 h-32 w-32 rounded-full bg-highlight/40 blur-2xl" />
 
       <div className="relative z-10 flex min-w-0 flex-1 flex-col items-start gap-1 pb-4 text-right sm:max-w-lg sm:gap-1.5 sm:pb-5">
-        <span className="rounded-full bg-primary-foreground/20 px-2 py-0.5 text-[10px] font-bold ring-1 ring-primary-foreground/40 backdrop-blur-sm sm:text-xs">
+        <span className="rounded-full bg-primary-foreground/20 px-2 py-0.5 text-[0.625rem] font-bold ring-1 ring-primary-foreground/40 backdrop-blur-sm sm:text-xs">
           إعلان
         </span>
         <p className="line-clamp-2 max-w-full text-sm font-extrabold leading-snug drop-shadow-sm sm:text-xl">{slide.title}</p>
@@ -29,7 +29,7 @@ export default function CarouselSlide({ slide, active = true, onOpen, preview = 
         )}
       </div>
 
-      <div className="relative z-10 aspect-square h-full shrink-0 overflow-hidden rounded-xl bg-card p-0.5 shadow-lg ring-2 ring-primary-foreground/50">
+      <div className="relative z-10 aspect-square h-full shrink-0 scaled:max-w-[45%] overflow-hidden rounded-xl bg-card p-0.5 shadow-lg ring-2 ring-primary-foreground/50">
         <img src={src} alt={slide.title} loading="lazy" decoding="async"
           className="h-full w-full rounded-lg object-contain transition-transform duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-105" />
       </div>

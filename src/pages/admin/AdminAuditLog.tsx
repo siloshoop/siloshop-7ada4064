@@ -140,7 +140,7 @@ const AdminAuditLog = () => {
                 </p>
                 {r.reason && <p className="text-xs text-primary">السبب: {r.reason}</p>}
                 {(r.old_value || r.new_value) && (
-                  <pre className="max-h-40 overflow-auto rounded-md bg-muted p-2 text-[11px] leading-relaxed" dir="ltr">
+                  <pre className="max-h-40 overflow-auto rounded-md bg-muted p-2 text-[0.6875rem] leading-relaxed" dir="ltr">
 {JSON.stringify({ before: r.old_value ?? null, after: r.new_value ?? null }, null, 2)}
                   </pre>
                 )}

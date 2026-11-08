@@ -74,7 +74,7 @@ const MarketPriceBar = ({ productId, price, categoryId, currency }: Props) => {
           style={{ left: `calc(${ratio}% - 6px)` }}
         />
       </div>
-      <div className="flex justify-between text-[10px] text-muted-foreground">
+      <div className="flex justify-between text-[0.625rem] text-muted-foreground">
         <span>أرخص</span>
         <span>المتوسط</span>
         <span>أغلى</span>

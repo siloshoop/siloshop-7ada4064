@@ -47,8 +47,8 @@ const LocalMarketplaceBanner = () => (
                 <span className="mb-1.5 inline-flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-primary text-primary-foreground shadow-sm md:mb-2 md:h-9 md:w-9 md:rounded-xl">
                   <Icon className="h-3.5 w-3.5 md:h-4 md:w-4" />
                 </span>
-                <p className="text-[11px] font-bold leading-snug md:text-sm">{title}</p>
-                <p className="mt-0.5 text-[10px] leading-relaxed text-muted-foreground md:mt-1 md:text-xs">{body}</p>
+                <p className="text-[0.6875rem] font-bold leading-snug md:text-sm">{title}</p>
+                <p className="mt-0.5 text-[0.625rem] leading-relaxed text-muted-foreground md:mt-1 md:text-xs">{body}</p>
               </div>
             ))}
           </div>

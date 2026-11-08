@@ -258,7 +258,7 @@ const AdManagement = () => {
                         <p className="truncate text-xs text-muted-foreground">
                           {ad.price != null ? formatPrice(ad.price, ad.currency) : "بدون سعر"} · {ad.cta_url || "بدون رابط"}
                         </p>
-                        <p className="mt-1 text-[11px] text-muted-foreground">
+                        <p className="mt-1 text-[0.6875rem] text-muted-foreground">
                           {ad.start_date ? `يبدأ ${new Date(ad.start_date).toLocaleString("ar-SY")}` : "يبدأ فورًا"}
                           {ad.end_date ? ` · ينتهي ${new Date(ad.end_date).toLocaleString("ar-SY")}` : " · بلا تاريخ انتهاء"}
                         </p>

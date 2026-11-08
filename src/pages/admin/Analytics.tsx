@@ -55,11 +55,11 @@ const StatCard = ({
   title, value, hint, icon: Icon, tone = "primary",
 }: { title: string; value: string | number; hint?: string; icon: any; tone?: string }) => (
   <Card className={`border-r-4 border-r-${tone} ${isWideAmount(value) ? "col-span-2 md:col-span-1" : ""}`}>
-    <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-2">
+    <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-2 scaled:px-4 scaled:pt-4">
       <CardTitle className="min-w-0 text-sm font-medium">{title}</CardTitle>
       <Icon className="h-4 w-4 shrink-0 text-muted-foreground" />
     </CardHeader>
-    <CardContent>
+    <CardContent className="scaled:px-4 scaled:pb-4">
       <div className={isWideAmount(value) ? "text-xl font-bold sm:text-2xl" : "text-2xl font-bold"}><StackedAmount value={value} /></div>
       {hint && <p className="mt-1 break-words text-xs text-muted-foreground">{hint}</p>}
     </CardContent>

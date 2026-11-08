@@ -378,8 +378,8 @@ const AdminOrders = () => {
                           <td className="px-3 py-2">
                             <div className="flex flex-col">
                               <span className="whitespace-nowrap font-mono text-xs font-semibold">{orderLabel(r)}</span>
-                              {r.invoice_number && <span className="whitespace-nowrap text-[10px] text-muted-foreground">فاتورة: {r.invoice_number}</span>}
-                              {r.is_frozen && <Badge variant="destructive" className="mt-1 w-fit gap-1 text-[10px]"><Snowflake className="h-3 w-3" /> مجمّد</Badge>}
+                              {r.invoice_number && <span className="whitespace-nowrap text-[0.625rem] text-muted-foreground">فاتورة: {r.invoice_number}</span>}
+                              {r.is_frozen && <Badge variant="destructive" className="mt-1 w-fit gap-1 text-[0.625rem]"><Snowflake className="h-3 w-3" /> مجمّد</Badge>}
                             </div>
                           </td>
                           <td className="px-3 py-2">
@@ -548,7 +548,7 @@ const AdminOrders = () => {
                         <div className="mb-1 flex items-center justify-between gap-2">
                           <span className="font-semibold">{n.author_name || n.author_role || "—"}</span>
                           <div className="flex items-center gap-1">
-                            {n.is_internal && <Badge variant="secondary" className="gap-1 text-[10px]"><Lock className="h-3 w-3" /> داخلية</Badge>}
+                            {n.is_internal && <Badge variant="secondary" className="gap-1 text-[0.625rem]"><Lock className="h-3 w-3" /> داخلية</Badge>}
                             <span className="text-muted-foreground">{new Date(n.created_at).toLocaleString("ar-SY")}</span>
                           </div>
                         </div>

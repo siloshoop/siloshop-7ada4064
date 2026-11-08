@@ -16,7 +16,7 @@ const CategoryDrawerList = ({ onNavigate }: { onNavigate: () => void }) => {
                 {emoji ? <span>{emoji}</span> : <Icon className="h-5 w-5" aria-hidden />}
                 {category.image_url && <img src={category.image_url} alt="" className="absolute h-11 w-11 rounded-full object-cover" onError={(event) => { event.currentTarget.hidden = true; }} />}
               </span>
-              <span className="min-w-0 flex-1 text-[15px] font-medium leading-snug">{category.name_ar}</span>
+              <span className="min-w-0 flex-1 text-[0.9375rem] font-medium leading-snug">{category.name_ar}</span>
               <ChevronLeft className="h-4 w-4 shrink-0 text-muted-foreground" aria-hidden />
             </Link>
           </li>

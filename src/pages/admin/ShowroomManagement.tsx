@@ -258,7 +258,7 @@ const ShowroomManagement = () => {
                         {item.is_pinned && <Pin className="h-3.5 w-3.5 text-primary" />}
                       </div>
                       <p className="line-clamp-1 text-xs text-muted-foreground">{item.subtitle}</p>
-                      <p className="mt-0.5 text-[11px] text-muted-foreground">
+                      <p className="mt-0.5 text-[0.6875rem] text-muted-foreground">
                         ترتيب #{item.display_order + 1}
                         {item.start_date && ` · من ${new Date(item.start_date).toLocaleDateString("ar-SY")}`}
                         {item.end_date && ` · إلى ${new Date(item.end_date).toLocaleDateString("ar-SY")}`}

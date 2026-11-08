@@ -70,12 +70,12 @@ const MobileBottomNav = () => {
                   isActive(item.path) && "scale-110"
                 )} />
                 {typeof item.badge === "number" && item.badge > 0 && (
-                  <span className="absolute -top-1.5 -right-2 flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-1 text-[9px] font-semibold leading-none text-primary-foreground">
+                  <span className="absolute -top-1.5 -right-2 flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-1 text-[0.5625rem] font-semibold leading-none text-primary-foreground">
                     {item.badge > 99 ? "99+" : item.badge}
                   </span>
                 )}
               </span>
-               <span className="max-w-full truncate text-[9px] font-medium min-[360px]:text-[10px]">{item.label}</span>
+               <span className="max-w-full truncate text-[0.5625rem] font-medium min-[360px]:text-[0.625rem]">{item.label}</span>
             </Button>
           ))}
         </div>

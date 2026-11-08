@@ -83,12 +83,12 @@ const OrderTimelineLog = ({ orderId, className, realtime = true }: Props) => {
                   (من: {statusLabel(e.from_status)})
                 </span>
               )}
-              <Badge variant="outline" className="text-[10px]">
+              <Badge variant="outline" className="text-[0.625rem]">
                 {ACTOR_ROLE_LABELS[e.changed_by_role] || e.changed_by_role}
                 {e.actor_name ? ` · ${e.actor_name}` : ""}
               </Badge>
               {e.is_override && (
-                <Badge variant="destructive" className="text-[10px] gap-1">
+                <Badge variant="destructive" className="text-[0.625rem] gap-1">
                   <ShieldAlert className="h-3 w-3" /> تجاوز إداري
                 </Badge>
               )}
@@ -101,7 +101,7 @@ const OrderTimelineLog = ({ orderId, className, realtime = true }: Props) => {
             </p>
             {e.notes && <p className="mt-1 text-sm">{e.notes}</p>}
             {(e.ip_address || e.user_agent) && (
-              <div className="mt-1 flex flex-wrap gap-3 text-[11px] text-muted-foreground">
+              <div className="mt-1 flex flex-wrap gap-3 text-[0.6875rem] text-muted-foreground">
                 {e.ip_address && (
                   <span className="inline-flex items-center gap-1">
                     <Globe className="h-3 w-3" /> {e.ip_address}

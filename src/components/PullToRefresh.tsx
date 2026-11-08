@@ -41,7 +41,7 @@ const PullToRefreshIndicator = ({
                 isReady && "rotate-180"
               )}
             />
-            <span className="text-[10px] text-primary font-medium mt-0.5">
+            <span className="text-[0.625rem] text-primary font-medium mt-0.5">
               {isReady ? "أفلت" : "اسحب"}
             </span>
           </>

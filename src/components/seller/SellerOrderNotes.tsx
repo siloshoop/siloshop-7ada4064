@@ -65,11 +65,11 @@ const SellerOrderNotes = ({ orderId }: { orderId: string }) => {
             <li key={n.id} className="rounded-lg border bg-muted/40 p-2.5 text-sm">
               <div className="flex flex-wrap items-center gap-2 mb-1">
                 <span className="font-medium text-xs">{n.author_name || ROLE_LABELS[n.author_role || ""] || "مستخدم"}</span>
-                <Badge variant="outline" className="text-[10px]">{ROLE_LABELS[n.author_role || ""] || n.author_role}</Badge>
+                <Badge variant="outline" className="text-[0.625rem]">{ROLE_LABELS[n.author_role || ""] || n.author_role}</Badge>
                 {n.is_internal && (
-                  <Badge variant="secondary" className="text-[10px] gap-1"><Lock className="h-3 w-3" /> ملاحظة داخلية</Badge>
+                  <Badge variant="secondary" className="text-[0.625rem] gap-1"><Lock className="h-3 w-3" /> ملاحظة داخلية</Badge>
                 )}
-                <span className="text-[11px] text-muted-foreground ms-auto">
+                <span className="text-[0.6875rem] text-muted-foreground ms-auto">
                   {new Date(n.created_at).toLocaleString("ar-SY")}
                 </span>
               </div>

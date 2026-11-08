@@ -78,7 +78,7 @@ const NativeAdBanner = ({ placement, className = "" }: NativeAdBannerProps) => {
         className={`${target ? "cursor-pointer " : ""}overflow-hidden rounded-2xl border border-border/60 bg-card shadow-[var(--shadow-card)]`}>
         <div className="flex min-w-0 items-stretch">
           <div className="flex min-w-0 flex-1 flex-col justify-center gap-1.5 p-3 text-right sm:gap-2 sm:p-4 md:p-5">
-            <span className="inline-flex w-fit items-center gap-1 rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-semibold text-primary sm:text-xs">
+            <span className="inline-flex w-fit items-center gap-1 rounded-full bg-primary/10 px-2 py-0.5 text-[0.625rem] font-semibold text-primary sm:text-xs">
               <Megaphone className="h-3 w-3" /> إعلان · {ad.sponsor_name}
             </span>
             <h2 className="line-clamp-2 text-sm font-bold leading-snug sm:text-lg">{ad.title}</h2>

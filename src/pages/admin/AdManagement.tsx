@@ -251,7 +251,7 @@ const AdManagement = () => {
                         <Button variant="ghost" size="icon" className="h-7 w-7" aria-label="تأخير في الترتيب" disabled={i === rows.length - 1 || busyId === ad.id} onClick={() => void move(ad, 1)}><ArrowDown className="h-4 w-4" /></Button>
                       </div>
                       <img src={ad.image_url || "/placeholder.svg"} alt={ad.title} loading="lazy" className="h-16 w-16 rounded-lg bg-muted object-cover" />
-                      <div className="min-w-0 flex-1">
+                      <div className="min-w-0 flex-1 basis-40">
                         <p className="truncate font-semibold">{ad.title}</p>
                         <p className="truncate text-xs text-muted-foreground">
                           {ad.price != null ? formatPrice(ad.price, ad.currency) : "بدون سعر"} · {ad.cta_url || "بدون رابط"}

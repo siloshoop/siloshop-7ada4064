@@ -192,7 +192,7 @@ const ProductCard = memo(({
   return (
     <a
       href={productId ? `/product/${productId}` : undefined}
-      className="group relative flex h-full min-w-0 cursor-pointer flex-col overflow-hidden rounded-2xl border border-border/60 bg-card shadow-card transition-all duration-300 motion-reduce:transition-none hover:border-primary/40 hover:shadow-elegant"
+      className="group relative flex h-full min-w-0 cursor-pointer flex-col overflow-hidden rounded-2xl border border-border/60 bg-card shadow-card transition-all duration-300 motion-reduce:transition-none gradient-edge-hover hover:shadow-elegant"
       data-product-card
       onClick={(e) => {
         // Let the browser handle ctrl/cmd/middle-click so the product can be

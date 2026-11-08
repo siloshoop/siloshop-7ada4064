@@ -579,6 +579,30 @@ All colors MUST be HSL.
   .product-grid-narrow { @apply grid grid-cols-2 gap-2 sm:grid-cols-3 sm:gap-3 lg:grid-cols-4 xl:grid-cols-5 items-stretch; }
   .product-grid > *, .product-grid-narrow > * { min-width: 0; }
 
+  /* Thin purple → pink edge that fades in on hover / keyboard focus. */
+  .gradient-edge-hover::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 20;
+    padding: 1.5px;
+    border-radius: inherit;
+    background: var(--gradient-primary);
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 300ms ease;
+  }
+  .gradient-edge-hover:focus-visible::after { opacity: 1; }
+  @media (hover: hover) {
+    .gradient-edge-hover:hover::after { opacity: 1; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .gradient-edge-hover::after { transition: none; }
+  }
+
   /* SiloShop wordmark painted with the logo gradient (theme-aware via --gradient-logo). */
   .brand-logo-text {
     background-image: var(--gradient-logo);

@@ -270,7 +270,8 @@
 - [ ] Physical Android check (blocked: no device; screen changes need a new Android build).
 
 ## Add-product form improvements
-- [ ] Subcategory picker in the platform add/edit product window (seller pages already have it)
-- [ ] Add-product window closes only via Close/Cancel; unsaved entries kept when reopened
-- [ ] Length/width (cm) fields saved on platform + seller add/edit, shown on product page
-- [ ] Seller-defined product features (title/value list) saved and shown in a «ميزات المنتج» section
+- [x] Subcategory picker in the platform add/edit product window (seller pages already have it)
+- [x] Add-product window closes only via Close/Cancel; unsaved entries kept when reopened
+- [x] Length/width (cm) fields saved on platform + seller add/edit, shown on product page
+- [x] Seller-defined product features (title/value list) saved and shown in a «ميزات المنتج» section; verified with one hidden test product (then deleted), 348 tests pass
+- [ ] Physical Android check (blocked: no device; needs next app update). Seller-account save not run live (owner session only).

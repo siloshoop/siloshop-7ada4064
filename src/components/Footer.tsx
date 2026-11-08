@@ -223,10 +223,16 @@ const Footer = () => {
             target="_blank"
             rel="noopener noreferrer"
             dir="ltr"
-            className="mt-2 inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:underline"
+            className="group mt-4 inline-flex rounded-full bg-gradient-brand p-[1.5px] shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-primary/25 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:ring-offset-2 motion-reduce:transition-none motion-reduce:hover:translate-y-0"
           >
-            <Globe className="h-4 w-4" aria-hidden="true" />
-            www.siloshop.net
+            <span className="inline-flex items-center gap-2 rounded-full bg-background py-1.5 pe-4 ps-1.5">
+              <span className="flex h-7 w-7 items-center justify-center rounded-full bg-gradient-brand text-primary-foreground shadow-sm">
+                <Globe className="h-4 w-4" aria-hidden="true" />
+              </span>
+              <span className="bg-gradient-brand bg-clip-text text-sm font-bold tracking-wide text-transparent">
+                www.siloshop.net
+              </span>
+            </span>
           </a>
         </div>
       </div>

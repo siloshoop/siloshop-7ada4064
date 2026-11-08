@@ -51,11 +51,9 @@
     <meta name="twitter:description" content="وجهتك للتسوق أونلاين في سوريا." />
     <meta name="twitter:image" content="/og-image.png" />
     
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="preconnect" href="https://cflrdbkvpzzilazdufmh.supabase.co" crossorigin>
+    <link rel="preconnect" href="https://cflrdbkvpzzilazdufmh.supabase.co">
     <link rel="dns-prefetch" href="https://cflrdbkvpzzilazdufmh.supabase.co">
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   </head>
 
   <body>
@@ -99,7 +97,10 @@
       }
     </style>
     <div id="app-splash" aria-hidden="true">
-      <img src="/splash-logo.png" alt="" fetchpriority="high" width="512" height="478" />
+      <picture>
+        <source srcset="/splash-logo.webp" type="image/webp" />
+        <img src="/splash-logo.png" alt="" fetchpriority="high" width="512" height="478" />
+      </picture>
       <div class="splash-bar"><span></span></div>
     </div>
 

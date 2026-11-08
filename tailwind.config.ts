@@ -16,7 +16,7 @@ export default {
     },
     extend: {
       fontFamily: {
-        sans: ["Cairo", "sans-serif"],
+        sans: ["Cairo Variable", "Cairo", "sans-serif"],
       },
       backgroundImage: {
         "gradient-primary": "var(--gradient-primary)",

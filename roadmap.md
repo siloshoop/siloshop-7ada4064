@@ -297,3 +297,8 @@
 - [ ] Compare the SHA-256 with Play Console → App integrity → App signing (blocked: needs owner's Play Console access).
 - [ ] Build and upload versionCode 16 (blocked: owner's build/upload).
 - [ ] Connect Google Search Console to read real indexing data (blocked: owner's Google account).
+
+## Performance audit (Nov 8)
+- [x] Measure real-visitor speed, backend health, slow queries, bundle size, images
+- [x] Fix root causes found (no design/business-logic changes)
+- [x] Re-measure before/after and report (lab only; real Android/Syrian networks not testable here)

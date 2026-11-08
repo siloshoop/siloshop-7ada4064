@@ -16,6 +16,7 @@ interface Item { id: string; name: string; price: number; currency: string | nul
  */
 export default function AnimatedProductCarousel() {
   const [items, setItems] = useState<CarouselSlideData[]>([]);
+  const [loaded, setLoaded] = useState(false);
   const [settings, setSettings] = useState<CarouselSettings>(DEFAULT_CAROUSEL_SETTINGS);
   const [index, setIndex] = useState(0);
   const [userPaused, setUserPaused] = useState(false);
@@ -34,7 +35,7 @@ export default function AnimatedProductCarousel() {
       if (!alive) return;
       setSettings(loadedSettings);
       setUserPaused(!loadedSettings.autoplay);
-      if (ads.length) { setItems(ads.map(adToSlide)); setIndex(0); return; }
+      if (ads.length) { setItems(ads.map(adToSlide)); setIndex(0); setLoaded(true); return; }
       const { data } = await supabase.from("products").select("id,name,price,currency,image_url")
         .eq("is_active", true).order("sold_count", { ascending: false }).limit(6);
       if (!alive) return;
@@ -43,6 +44,7 @@ export default function AnimatedProductCarousel() {
         price: p.price, currency: p.currency, href: `/product/${p.id}`,
       })));
       setIndex(0);
+      setLoaded(true);
     };
     void load();
     const refresh = () => void load();
@@ -69,7 +71,15 @@ export default function AnimatedProductCarousel() {
     return () => window.clearInterval(t);
   }, [items.length, userPaused, tick, settings.slide_duration_ms]);
 
-  if (!items.length) return null;
+  // Hold the banner's exact height while the first ads load so the page below doesn't jump.
+  if (!items.length) {
+    if (loaded) return null;
+    return (
+      <section aria-hidden className="container px-4 pb-2 pt-4 sm:pb-3 sm:pt-6">
+        <div className="h-36 animate-pulse rounded-2xl bg-muted ring-1 ring-border/60 sm:h-44" />
+      </section>
+    );
+  }
   const n = items.length;
   const goTo = (i: number) => { setIndex(((i % n) + n) % n); setTick((t) => t + 1); };
   const ctrl = "flex h-7 w-7 items-center justify-center rounded-full bg-background/90 text-foreground shadow-md backdrop-blur-sm transition-colors hover:bg-background hover:text-primary sm:h-9 sm:w-9";

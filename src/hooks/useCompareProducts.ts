@@ -24,6 +24,45 @@ const writeGuest = (ids: string[]) => {
   }
 };
 
+// Every product card uses this hook, so a listing of 20 cards used to send 20
+// identical reads (and 20 more after each change). Hooks that load at the same
+// moment now share one in-flight read; finished results are never reused, so the
+// next mount or change still reads the saved list fresh.
+const inflightLoads = new Map<string, Promise<string[]>>();
+
+export const loadAccountCompareList = (uid: string): Promise<string[]> => {
+  const existing = inflightLoads.get(uid);
+  if (existing) return existing;
+  const request = (async () => {
+    // Merge any list the visitor built before signing in.
+    const pending = readGuest();
+    if (pending.length) {
+      await supabase
+        .from("compare_items")
+        .upsert(
+          pending.map((product_id) => ({ user_id: uid, product_id })),
+          { onConflict: "user_id,product_id", ignoreDuplicates: true },
+        );
+      writeGuest([]);
+    }
+    const { data } = await supabase
+      .from("compare_items")
+      .select("product_id")
+      .order("created_at", { ascending: true });
+    return data?.map((row) => row.product_id) ?? [];
+  })().finally(() => {
+    inflightLoads.delete(uid);
+  });
+  inflightLoads.set(uid, request);
+  return request;
+};
+
+/** A change was saved: drop reads that started before it, then tell every list. */
+const announceCompareChange = () => {
+  inflightLoads.clear();
+  window.dispatchEvent(new CustomEvent(UPDATED_EVENT));
+};
+
 /**
  * Product comparison list.
  *
@@ -43,22 +82,8 @@ export const useCompareProducts = () => {
       setLoading(false);
       return;
     }
-    // Merge any list the visitor built before signing in.
-    const pending = readGuest();
-    if (pending.length) {
-      await supabase
-        .from("compare_items")
-        .upsert(
-          pending.map((product_id) => ({ user_id: uid, product_id })),
-          { onConflict: "user_id,product_id", ignoreDuplicates: true },
-        );
-      writeGuest([]);
-    }
-    const { data } = await supabase
-      .from("compare_items")
-      .select("product_id")
-      .order("created_at", { ascending: true });
-    setCompareProducts(data?.map((row) => row.product_id) ?? []);
+    const ids = await loadAccountCompareList(uid);
+    setCompareProducts(ids);
     setLoading(false);
   }, []);
 
@@ -86,7 +111,7 @@ export const useCompareProducts = () => {
         const next = [...compareProducts, productId];
         writeGuest(next);
         setCompareProducts(next);
-        window.dispatchEvent(new CustomEvent(UPDATED_EVENT));
+        announceCompareChange();
         return { success: true, message: "added" };
       }
 
@@ -102,7 +127,7 @@ export const useCompareProducts = () => {
       }
 
       setCompareProducts((prev) => [...prev, productId]);
-      window.dispatchEvent(new CustomEvent(UPDATED_EVENT));
+      announceCompareChange();
       return { success: true, message: "added" };
     },
     [compareProducts, userId],
@@ -118,7 +143,7 @@ export const useCompareProducts = () => {
       if (userId) {
         await supabase.from("compare_items").delete().eq("user_id", userId).eq("product_id", productId);
       }
-      window.dispatchEvent(new CustomEvent(UPDATED_EVENT));
+      announceCompareChange();
     },
     [userId],
   );
@@ -130,7 +155,7 @@ export const useCompareProducts = () => {
     } else {
       await supabase.from("compare_items").delete().eq("user_id", userId);
     }
-    window.dispatchEvent(new CustomEvent(UPDATED_EVENT));
+    announceCompareChange();
   }, [userId]);
 
   const isInCompare = useCallback(

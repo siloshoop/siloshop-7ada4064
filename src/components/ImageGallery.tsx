@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { ChevronLeft, ChevronRight, X, ZoomIn, Maximize2, Play } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { resizedImageUrl, responsiveImage, retryWithOriginalImage } from "@/lib/imageUrl";
 
 interface ImageGalleryProps {
   images: string[];
@@ -136,7 +137,8 @@ export const ImageGallery = ({ images, productName, videoUrl }: ImageGalleryProp
           ) : (
           <img
             key={fadeKey}
-            src={images[currentIndex]}
+            {...responsiveImage(images[currentIndex], [480, 720, 960, 1280], "(min-width: 1024px) 960px, 100vw", 80)}
+            onError={retryWithOriginalImage}
             alt={`${productName} - ${currentIndex + 1}`}
             loading="eager"
             fetchPriority="high"
@@ -220,7 +222,9 @@ export const ImageGallery = ({ images, productName, videoUrl }: ImageGalleryProp
                 }`}
               >
                 <img
-                  src={images[0]}
+                  src={resizedImageUrl(images[0], 160)}
+                  data-original-src={images[0]}
+                  onError={retryWithOriginalImage}
                   alt={`${productName} فيديو`}
                   loading="lazy"
                   className="h-full w-full object-cover"
@@ -243,7 +247,9 @@ export const ImageGallery = ({ images, productName, videoUrl }: ImageGalleryProp
                 }`}
               >
                 <img
-                  src={image}
+                  src={resizedImageUrl(image, 160)}
+                  data-original-src={image}
+                  onError={retryWithOriginalImage}
                   alt={`${productName} صورة ${index + 1}`}
                   loading="lazy"
                   decoding="async"
@@ -425,7 +431,7 @@ const Lightbox = ({
                 }`}
                 aria-label={`صورة ${i + 1}`}
               >
-                <img src={image} alt={`صورة ${i + 1}`} loading="lazy" className="w-full h-full object-cover" />
+                <img src={resizedImageUrl(image, 160)} data-original-src={image} onError={retryWithOriginalImage} alt={`صورة ${i + 1}`} loading="lazy" className="w-full h-full object-cover" />
               </button>
             ))}
           </div>

@@ -41,3 +41,6 @@
 - Homepage carousel ads are native_ads (placement home_carousel) under restrictive owner-only RLS (live rows public), singleton home_carousel_settings, owner-only stats/visitor RPCs over ad_analytics (account set by trigger, guests random id); delegated ad scopes never reach it.
 - Storage removal needs read access: give owner-managed folders an owner-scoped SELECT policy with DELETE, or removal no-ops.
 - Product previews reuse the Product page (/product/:id/preview, preview prop) with RLS-scoped reads and no view/recently-viewed/cart/compare writes.
+- Show public Storage photos through src/lib/imageUrl.ts (resized render copies with srcset and original-file fallback); full-screen zoom keeps the original so detail is never lost.
+- Bundle the Cairo font via @fontsource-variable (no Google Fonts link) so first paint never waits on a third-party host and the Android app needs no font download.
+- useCompareProducts shares only in-flight account reads and drops them on every saved change; completed lists are never reused.

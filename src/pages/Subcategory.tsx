@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useLayoutEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import Navbar from "@/components/Navbar";
@@ -59,7 +59,9 @@ const Subcategory = () => {
     }
   }, [categoryId, subcategoryId]);
 
-  useEffect(() => {
+  // Before paint, so a freshly loaded list never flashes "no products" (and the
+  // footer) for one frame before the real cards push it down.
+  useLayoutEffect(() => {
     applyFilters();
   }, [products, searchQuery, priceRange, sortBy, minVendorRating, inStockOnly, hasDiscountOnly, vendorRatings]);
 

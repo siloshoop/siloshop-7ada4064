@@ -1,4 +1,5 @@
-import React, { memo, useCallback, useMemo, useRef, useState } from "react";
+import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { responsiveImage, resizedImageUrl, retryWithOriginalImage } from "@/lib/imageUrl";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, BadgeCheck, ChevronLeft, ChevronRight, Sparkles, Star, Store } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -29,10 +30,10 @@ const ShowroomStand = memo(({ item, offset, isCenter, priority, onSelect }: Stan
   return (
     <article style={style} onClick={() => isCenter ? target && navigate(target) : onSelect()} className={cn("absolute left-1/2 top-1/2 w-[76%] cursor-pointer select-none overflow-hidden rounded-2xl border border-border/60 bg-card/80 sm:w-[58%] lg:w-[42%]", "transition-[transform,opacity] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none", isCenter ? "shadow-[var(--shadow-elegant)] ring-1 ring-primary/20" : "shadow-[var(--shadow-card)]")}>
       <div className="relative aspect-[16/10] overflow-hidden bg-muted">
-        {item.cover_image_url ? <img src={item.cover_image_url} alt={item.title} loading={priority ? "eager" : "lazy"} decoding="async" width={800} height={500} className="h-full w-full object-cover transition-transform duration-700 hover:scale-105 motion-reduce:transition-none" /> : <div className="h-full w-full bg-gradient-to-br from-primary/20 to-accent/20" />}
+        {item.cover_image_url ? <img {...responsiveImage(item.cover_image_url, [480, 720, 960], "(min-width: 768px) 600px, 90vw")} onError={retryWithOriginalImage} alt={item.title} loading={priority ? "eager" : "lazy"} decoding="async" width={800} height={500} className="h-full w-full object-cover transition-transform duration-700 hover:scale-105 motion-reduce:transition-none" /> : <div className="h-full w-full bg-gradient-to-br from-primary/20 to-accent/20" />}
         <div className="absolute inset-0 bg-gradient-to-t from-background/85 via-background/10 to-transparent" />
         {item.badge_label && <span className="absolute start-3 top-3 rounded-full bg-accent px-3 py-1 text-xs font-bold text-accent-foreground shadow-md">{item.badge_label}</span>}
-        {item.logo_url && <img src={item.logo_url} alt="" loading="lazy" decoding="async" width={56} height={56} className="absolute -bottom-6 end-4 h-14 w-14 rounded-2xl border-2 border-background bg-card object-cover shadow-lg" />}
+        {item.logo_url && <img src={resizedImageUrl(item.logo_url, 112)} data-original-src={item.logo_url} onError={retryWithOriginalImage} alt="" loading="lazy" decoding="async" width={56} height={56} className="absolute -bottom-6 end-4 h-14 w-14 rounded-2xl border-2 border-background bg-card object-cover shadow-lg" />}
       </div>
       <div className="space-y-3 p-4 md:p-5">
         <div className="flex items-center gap-2"><span className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-2.5 py-1 text-[0.6875rem] font-semibold text-primary">{item.item_type === "store" ? <Store className="h-3 w-3" /> : <Sparkles className="h-3 w-3" />}{item.item_type === "store" ? "متجر مميز" : "منتج مميز"}</span>{item.is_verified && <span className="inline-flex items-center gap-1 text-[0.6875rem] font-semibold text-success"><BadgeCheck className="h-3.5 w-3.5" /> موثّق</span>}{item.rating != null && <span className="ms-auto inline-flex items-center gap-1 text-xs font-bold"><Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />{Number(item.rating).toFixed(1)}</span>}</div>
@@ -46,6 +47,10 @@ const ShowroomStand = memo(({ item, offset, isCenter, priority, onSelect }: Stan
 });
 ShowroomStand.displayName = "ShowroomStand";
 
+const SHOWROOM_SEEN_KEY = "siloshop:showroom-had-items";
+const showroomHadItems = () => { try { return localStorage.getItem(SHOWROOM_SEEN_KEY) === "1"; } catch { return false; } };
+const rememberShowroom = (hasItems: boolean) => { try { localStorage.setItem(SHOWROOM_SEEN_KEY, hasItems ? "1" : "0"); } catch { /* storage unavailable */ } };
+
 interface PremiumShowroomProps { showEmptyState?: boolean; }
 const PremiumShowroom = ({ showEmptyState = false }: PremiumShowroomProps) => {
   const { items, loading } = useShowroom();
@@ -56,8 +61,13 @@ const PremiumShowroom = ({ showEmptyState = false }: PremiumShowroomProps) => {
   const stageRef = useRef<HTMLDivElement>(null);
   const count = items.length;
   const go = useCallback((direction: number) => setIndex((current) => Math.min(Math.max(current + direction, 0), Math.max(count - 1, 0))), [count]);
+  useEffect(() => { if (!loading) rememberShowroom(count > 0); }, [loading, count]);
   const dragOffset = useMemo(() => -(drag / (stageRef.current?.offsetWidth ?? 1)) * 1.6, [drag]);
 
+  // Most visits find no published stands; reserving a tall placeholder for them made
+  // the whole homepage jump up once loading finished. Reserve it only when the last
+  // visit actually showed stands.
+  if (loading && !showroomHadItems()) return null;
   if (loading) return <section aria-label="تحميل المعرض المميز" className="bg-gradient-to-br from-secondary via-background to-accent/5"><div className="container px-4 py-10 md:py-14"><div className="mx-auto h-[300px] w-full max-w-3xl animate-pulse rounded-2xl bg-muted md:h-[420px]" /></div></section>;
   if (count === 0) return showEmptyState ? <section className="container px-4 py-10 text-center"><h2 className="text-lg font-bold">لا توجد عناصر منشورة في المعرض</h2></section> : null;
 

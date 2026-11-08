@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { formatPrice } from "@/lib/currency";
 import type { CarouselSlideData } from "@/lib/homeCarousel";
+import { responsiveImage, retryWithOriginalImage } from "@/lib/imageUrl";
 
 // Reserve side room for the slider arrows; the picture uses almost the full height and the dots sit under the text.
 const slideClass =
@@ -30,7 +31,8 @@ export default function CarouselSlide({ slide, active = true, onOpen, preview = 
       </div>
 
       <div className="relative z-10 aspect-square h-full shrink-0 scaled:max-w-[45%] overflow-hidden rounded-xl bg-card p-0.5 shadow-lg ring-2 ring-primary-foreground/50">
-        <img src={src} alt={slide.title} loading="lazy" decoding="async"
+        <img {...responsiveImage(src, [160, 240, 360, 480], "(min-width: 640px) 176px, 144px")} alt={slide.title} loading="lazy" decoding="async"
+          onError={retryWithOriginalImage}
           className="h-full w-full rounded-lg object-contain transition-transform duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-105" />
       </div>
     </>

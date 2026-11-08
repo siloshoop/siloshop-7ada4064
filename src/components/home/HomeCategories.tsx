@@ -3,6 +3,7 @@ import { LayoutGrid } from "lucide-react";
 import { useCategories } from "@/hooks/useCategories";
 import { categoryAppearance } from "@/lib/categoryAppearance";
 import SectionHeader from "@/components/home/SectionHeader";
+import { resizedImageUrl, retryWithOriginalImage } from "@/lib/imageUrl";
 
 const MAX_CATEGORIES = 12;
 
@@ -35,11 +36,12 @@ const HomeCategories = () => {
                           {emoji ? <span className="text-base sm:text-lg">{emoji}</span> : <Icon className="h-4 w-4 sm:h-5 sm:w-5" />}
                           {category.image_url && (
                             <img
-                              src={category.image_url}
+                              src={resizedImageUrl(category.image_url, 120)}
+                              data-original-src={category.image_url}
                               alt=""
                               loading="lazy"
                               className="absolute inset-0 h-full w-full object-cover"
-                              onError={(event) => { event.currentTarget.hidden = true; }}
+                              onError={(event) => { if (!retryWithOriginalImage(event)) event.currentTarget.hidden = true; }}
                             />
                           )}
                         </span>

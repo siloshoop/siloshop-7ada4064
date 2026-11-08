@@ -15,6 +15,7 @@ import { OUT_OF_STOCK_LABEL } from "@/lib/stockAvailability";
 import { loadProductCardMeta } from "@/lib/productCardMeta";
 import { shippingCardLabel, isFreeShipping } from "@/lib/shippingDisplay";
 import { useVendorNames } from "@/hooks/useVendorNames";
+import { responsiveImage, retryWithOriginalImage } from "@/lib/imageUrl";
 
 interface ProductCardProps {
   id?: string;
@@ -266,12 +267,15 @@ const ProductCard = memo(({
         </div>
 
         <img
-          src={image || "/placeholder.svg"}
+          {...(image
+            ? responsiveImage(image, [240, 360, 480, 720], "(min-width: 1280px) 260px, (min-width: 768px) 30vw, 50vw")
+            : { src: "/placeholder.svg" })}
           alt={name}
           loading="lazy"
           decoding="async"
           onLoad={() => setImageLoaded(true)}
           onError={(event) => {
+            if (retryWithOriginalImage(event)) return;
             event.currentTarget.src = "/placeholder.svg";
             setImageLoaded(true);
           }}

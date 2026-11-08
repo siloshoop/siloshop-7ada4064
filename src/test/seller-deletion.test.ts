@@ -43,6 +43,7 @@ beforeAll(async()=>{
  CREATE TABLE recently_viewed(product_id uuid REFERENCES products ON DELETE CASCADE,user_id uuid); CREATE TABLE wishlist_items(product_id uuid REFERENCES products ON DELETE CASCADE);
  CREATE TABLE daily_deals(product_id uuid REFERENCES products ON DELETE CASCADE); CREATE TABLE quantity_discounts(product_id uuid REFERENCES products ON DELETE CASCADE);
  CREATE TABLE activity_logs(user_id uuid); CREATE TABLE newsletter_subscriptions(email text);
+ CREATE TABLE payments(order_id uuid REFERENCES orders ON DELETE CASCADE,amount numeric,currency text); CREATE TABLE order_status_history(order_id uuid REFERENCES orders ON DELETE CASCADE,status text);
  GRANT USAGE ON SCHEMA public TO authenticated,service_role;`);
  await db.exec(readFileSync('drizzle/migrations/0044_seller_permanent_deletion.sql','utf8'));
  await db.exec(readFileSync('drizzle/migrations/0045_seller_deletion_safe_cleanup_preflight.sql','utf8'));
@@ -50,11 +51,12 @@ beforeAll(async()=>{
 },30000);
 afterAll(async()=>{await db?.close()});
 const seed=async()=>{
- await db.exec(`DELETE FROM seller_deletion_jobs; DELETE FROM coupon_redemptions; DELETE FROM coupons; DELETE FROM order_items; DELETE FROM orders; DELETE FROM payout_requests; DELETE FROM returns; DELETE FROM products; DELETE FROM user_roles; DELETE FROM profiles; DELETE FROM auth.users; DELETE FROM storage.objects;
+ await db.exec(`DELETE FROM seller_deletion_jobs; DELETE FROM payments; DELETE FROM order_status_history; DELETE FROM coupon_redemptions; DELETE FROM coupons; DELETE FROM order_items; DELETE FROM orders; DELETE FROM payout_requests; DELETE FROM returns; DELETE FROM products; DELETE FROM user_roles; DELETE FROM profiles; DELETE FROM auth.users; DELETE FROM storage.objects;
  INSERT INTO auth.users VALUES('${uid}','isolated@example.test'),('${other}','other@example.test'); INSERT INTO profiles(id,role) VALUES('${uid}','vendor'),('${other}','vendor'); INSERT INTO user_roles VALUES('${uid}','vendor'); INSERT INTO seller_applications VALUES(gen_random_uuid(),'${uid}'); INSERT INTO products VALUES('${pid}','${uid}');`);
 };
 const soldOrder=`INSERT INTO products(id,vendor_id,image_url,description) VALUES('${unsold}','${uid}','u.jpg','x'); UPDATE products SET image_url='${uid}/a.jpg',images='{${uid}/a.jpg}',description='وصف' WHERE id='${pid}';
- INSERT INTO orders(id,customer_id,vendor_id,status,phone,shipping_address,notes) VALUES('${oid}','${other}','${uid}','delivered','0991234567','دمشق - المزة','اتصل قبل التوصيل');
+ INSERT INTO orders(id,customer_id,vendor_id,status,phone,shipping_address,notes,total_amount) VALUES('${oid}','${other}','${uid}','delivered','0991234567','دمشق - المزة','اتصل قبل التوصيل',50);
+ INSERT INTO payments VALUES('${oid}',50,'SYP'); INSERT INTO order_status_history VALUES('${oid}','pending'),('${oid}','delivered');
  INSERT INTO order_items VALUES(gen_random_uuid(),'${oid}','${pid}','${uid}','مكنسة',25); INSERT INTO favorites VALUES('${pid}','${other}'); INSERT INTO cart_items VALUES('${pid}','${other}')`;
 it('seller with finished sales deletes the account; sales stay as anonymous records',async()=>{
  await seed(); await db.exec(soldOrder+`; INSERT INTO payout_requests VALUES('${uid}','paid','bank details')`);
@@ -153,3 +155,28 @@ it('inventories conversation-prefixed buyer attachments for removed seller conve
  const result=await db.query<{prepare_seller_deletion:{assets:unknown[]}}>(`SELECT prepare_seller_deletion($1,'store')`,[uid]);
  expect(result.rows[0]?.prepare_seller_deletion.assets).toEqual([{bucket:'chat-files',path:pid+'/buyer.pdf'}]);
 });
+
+const financialHistory=async()=>({
+ order:(await db.query(`SELECT id,status,total_amount FROM orders`)).rows,
+ items:(await db.query(`SELECT order_id,product_id,product_name,price FROM order_items`)).rows,
+ payments:(await db.query(`SELECT order_id,amount,currency FROM payments`)).rows,
+ history:(await db.query(`SELECT status FROM order_status_history ORDER BY status`)).rows,
+});
+const expectedHistory={
+ order:[{id:oid,status:'delivered',total_amount:'50'}],
+ items:[{order_id:oid,product_id:pid,product_name:'مكنسة',price:'25'}],
+ payments:[{order_id:oid,amount:'50',currency:'SYP'}],
+ history:[{status:'delivered'},{status:'pending'}],
+};
+for(const [label,who,scope] of [['seller account','seller','account'],['seller store','seller','store'],['buyer account','buyer','account']] as const){
+ it(`${label} deletion keeps order totals, item price snapshots, payments and status history unchanged`,async()=>{
+  await seed(); await db.exec(soldOrder);
+  const target=who==='seller'?uid:other;
+  await db.query('SELECT prepare_seller_deletion($1,$2)',[target,scope]);
+  await db.query('SELECT finish_seller_deletion($1,$2)',[target,scope]);
+  expect(await financialHistory()).toEqual(expectedHistory);
+  // the login row is never removed by the database step; retained history keeps the person's anonymous placeholder
+  expect((await db.query(`SELECT id FROM auth.users WHERE id=$1`,[target])).rows).toHaveLength(1);
+  if(scope==='account') expect((await db.query(`SELECT full_name FROM profiles WHERE id=$1`,[target])).rows).toEqual([{full_name:'حساب محذوف'}]);
+ });
+}

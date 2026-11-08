@@ -49,6 +49,8 @@ const Dashboard = () => {
   const [filterStatus, setFilterStatus] = useState("all");
   const [sortBy, setSortBy] = useState("date-desc");
   const [isAdmin, setIsAdmin] = useState(false);
+  // Owner-only pages (platform finance, orders, showroom, platform products) are hidden from regular admins.
+  const [isSuperAdmin, setIsSuperAdmin] = useState(false);
   const [isModerator, setIsModerator] = useState(false);
   const [sellerApp, setSellerApp] = useState<{ status: string; rejection_reason: string | null } | null>(null);
   const navigate = useNavigate();
@@ -121,6 +123,7 @@ const Dashboard = () => {
           .in("role", ["admin", "super_admin", "moderator"]);
 
         setIsAdmin((adminRoles ?? []).some((r) => r.role === "admin" || r.role === "super_admin"));
+        setIsSuperAdmin((adminRoles ?? []).some((r) => r.role === "super_admin"));
         setIsModerator((adminRoles ?? []).some((r) => r.role === "moderator"));
 
         // Detect pending/rejected/suspended seller application
@@ -400,7 +403,7 @@ const Dashboard = () => {
           </Card>
         )}
 
-        {isAdmin && (
+        {isSuperAdmin && (
           <Card className="mb-6 border-primary/30">
             <CardContent className="flex min-w-0 flex-col items-start gap-4 pt-6 sm:flex-row sm:items-center sm:justify-between">
               <div className="min-w-0">
@@ -412,7 +415,7 @@ const Dashboard = () => {
           </Card>
         )}
 
-        {isAdmin && (
+        {isSuperAdmin && (
           <Card className="mb-6 border-primary/30">
             <CardContent className="flex min-w-0 flex-col items-start gap-4 pt-6 sm:flex-row sm:items-center sm:justify-between">
               <div className="min-w-0">
@@ -424,7 +427,7 @@ const Dashboard = () => {
           </Card>
         )}
 
-        {isAdmin && (
+        {isSuperAdmin && (
           <Card className="mb-6 border-primary/30">
             <CardContent className="flex min-w-0 flex-col items-start gap-4 pt-6 sm:flex-row sm:items-center sm:justify-between">
               <div className="min-w-0">
@@ -436,7 +439,7 @@ const Dashboard = () => {
           </Card>
         )}
 
-        {isAdmin && (
+        {isSuperAdmin && (
           <Card className="mb-6 border-primary/30">
             <CardContent className="flex min-w-0 flex-col items-start gap-4 pt-6 sm:flex-row sm:items-center sm:justify-between">
               <div className="min-w-0">
@@ -664,6 +667,7 @@ const Dashboard = () => {
                           <Megaphone className="ml-2 h-4 w-4" />
                           الإعلانات
                         </Button>
+                        {isSuperAdmin && (
                         <Button 
                           variant="outline"
                           onClick={() => navigate("/dashboard/showroom")}
@@ -671,6 +675,7 @@ const Dashboard = () => {
                           <Sparkles className="ml-2 h-4 w-4" />
                           المعرض المميز
                         </Button>
+                        )}
                         <Button 
                           variant="outline"
                           onClick={() => navigate("/dashboard/users")}

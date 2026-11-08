@@ -72,10 +72,15 @@ export const ADMIN_MODULES: AdminModule[] = [
 /** Modules that stay hidden until their feature flag is activated. */
 export const FUTURE_MODULES = ADMIN_MODULES.filter((m) => !!m.featureFlag);
 
+/** Must mirror the RequireRole role="super_admin" routes in App.tsx so menus never link to Access Denied. */
+export const OWNER_ONLY_ADMIN_HREFS: readonly string[] = [
+  "/admin", "/admin/orders", "/admin/payments", "/admin/reports", "/admin/statistics",
+  "/admin/revenue", "/admin/coupons", "/admin/categories", "/admin/roles", "/admin/ads",
+  "/admin/features", "/admin/platform-products", "/admin/sham-cash",
+];
+
 export const canAccessAdminModule = (href: string, role: string | null, permissions: readonly string[] = []) => {
-  if (href === "/admin/categories") return role === "super_admin";
-  if (href === "/admin/roles") return role === "super_admin";
-  if (href === "/admin/ads") return role === "super_admin";
+  if (OWNER_ONLY_ADMIN_HREFS.includes(href)) return role === "super_admin";
   if (role === "super_admin" || role === "admin") return true;
   if (role === "moderator") {
     const permitted = (area: string) => permissions.includes(`${area}.view`) || permissions.includes(`${area}.manage`);

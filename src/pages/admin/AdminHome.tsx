@@ -1,3 +1,4 @@
+import StackedAmount from "@/components/admin/StackedAmount";
 import { reportMoney, loadReportMoney, type ReportMoneyRow } from "@/lib/reportCurrency";
 import { formatKnownPrice } from "@/lib/currency";
 import { withDisplayCurrency } from "@/lib/displayCurrency";
@@ -228,18 +229,18 @@ const AdminHome = () => {
                     <Link
                       key={order.id}
                       to={`/admin/orders?order=${order.id}`}
-                      className="flex items-center gap-3 rounded-lg border border-border/60 p-2.5 text-sm transition-colors hover:bg-muted/60"
+                      className="flex flex-wrap items-center gap-x-3 gap-y-1.5 rounded-lg border border-border/60 p-2.5 text-sm transition-colors hover:bg-muted/60"
                     >
-                      <div className="min-w-0 flex-1">
+                      <div className="w-full min-w-0 sm:w-auto sm:flex-1">
                         <p className="truncate font-semibold">{order.customer_name}</p>
-                        <p className="text-[11px] text-muted-foreground">
+                        <p className="break-words text-[11px] text-muted-foreground">
                           #{order.id.slice(0, 8)} — {new Date(order.created_at).toLocaleString("ar-SY")}
                         </p>
                       </div>
                       <Badge variant="secondary" className="shrink-0 text-[10px]">
                         {STATUS_LABELS[order.status] ?? order.status}
                       </Badge>
-                      <span className="shrink-0 font-bold text-primary">{formatKnownPrice(order.total_amount, latestCurrencies[order.id])}</span>
+                      <span className="ms-auto shrink-0 font-bold text-primary sm:ms-0">{formatKnownPrice(order.total_amount, latestCurrencies[order.id])}</span>
                     </Link>
                   ))
                 )}
@@ -262,15 +263,19 @@ const AdminHome = () => {
                       to={`/product/${product.id}`}
                       className="flex items-center gap-3 rounded-lg p-2 text-sm transition-colors hover:bg-muted/60"
                     >
-                      <span className="w-5 text-center text-xs font-bold text-muted-foreground">{index + 1}</span>
+                      <span className="w-5 shrink-0 text-center text-xs font-bold text-muted-foreground">{index + 1}</span>
                       {product.image_url ? (
-                        <img src={product.image_url} alt="" loading="lazy" width={40} height={40} className="h-10 w-10 rounded-md object-cover" />
+                        <img src={product.image_url} alt="" loading="lazy" width={40} height={40} className="h-10 w-10 shrink-0 rounded-md object-cover" />
                       ) : (
-                        <span className="h-10 w-10 rounded-md bg-muted" />
+                        <span className="h-10 w-10 shrink-0 rounded-md bg-muted" />
                       )}
-                      <span className="min-w-0 flex-1 truncate font-medium">{product.name}</span>
-                      <span className="shrink-0 text-[11px] text-muted-foreground">{fmt(product.units)} قطعة</span>
-                      <span className="shrink-0 font-bold text-primary">{moneyRows ? reportMoney(moneyRows, (r) => r.product_id === product.id && ["delivered", "completed"].includes(r.status)) : "—"}</span>
+                      <span className="min-w-0 flex-1">
+                        <span className="block truncate font-medium">{product.name}</span>
+                        <span className="block text-[11px] text-muted-foreground">{fmt(product.units)} قطعة</span>
+                      </span>
+                      <span className="max-w-[45%] shrink-0 text-end text-xs font-bold text-primary sm:text-sm">
+                        <StackedAmount value={moneyRows ? reportMoney(moneyRows, (r) => r.product_id === product.id && ["delivered", "completed"].includes(r.status)) : "—"} />
+                      </span>
                     </Link>
                   ))
                 )}
@@ -291,11 +296,15 @@ const AdminHome = () => {
                       to={`/admin/users/${seller.id}`}
                       className="flex items-center gap-3 rounded-lg p-2 text-sm transition-colors hover:bg-muted/60"
                     >
-                      <span className="w-5 text-center text-xs font-bold text-muted-foreground">{index + 1}</span>
-                      <Store className="h-4 w-4 text-primary" />
-                      <span className="min-w-0 flex-1 truncate font-medium">{seller.name}</span>
-                      <span className="shrink-0 text-[11px] text-muted-foreground">{fmt(seller.orders)} طلب</span>
-                      <span className="shrink-0 font-bold text-primary">{moneyRows ? reportMoney(moneyRows, (r) => r.vendor_id === seller.id && ["delivered", "completed"].includes(r.status)) : "—"}</span>
+                      <span className="w-5 shrink-0 text-center text-xs font-bold text-muted-foreground">{index + 1}</span>
+                      <Store className="h-4 w-4 shrink-0 text-primary" />
+                      <span className="min-w-0 flex-1">
+                        <span className="block truncate font-medium">{seller.name}</span>
+                        <span className="block text-[11px] text-muted-foreground">{fmt(seller.orders)} طلب</span>
+                      </span>
+                      <span className="max-w-[45%] shrink-0 text-end text-xs font-bold text-primary sm:text-sm">
+                        <StackedAmount value={moneyRows ? reportMoney(moneyRows, (r) => r.vendor_id === seller.id && ["delivered", "completed"].includes(r.status)) : "—"} />
+                      </span>
                     </Link>
                   ))
                 )}

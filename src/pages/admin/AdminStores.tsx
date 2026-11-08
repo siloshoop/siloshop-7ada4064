@@ -111,15 +111,16 @@ const AdminStores = () => {
           {filtered.map((r) => (
             <Card key={r.id}>
               <CardContent className="flex flex-wrap items-center gap-3 p-4">
+                <div className="flex w-full min-w-0 items-start gap-3 sm:w-auto sm:flex-1">
                 {r.logo_url ? (
                   <img
                     src={r.logo_url}
                     alt={r.store_name ?? "شعار المتجر"}
                     loading="lazy"
-                    className="h-10 w-10 rounded-md object-cover"
+                    className="h-10 w-10 shrink-0 rounded-md object-cover"
                   />
                 ) : (
-                  <Store className="h-5 w-5 text-muted-foreground" />
+                  <Store className="mt-0.5 h-5 w-5 shrink-0 text-muted-foreground" />
                 )}
                 <div className="min-w-0 flex-1">
                   <p className="truncate font-semibold">{r.store_name || "متجر بدون اسم"}</p>
@@ -132,6 +133,7 @@ const AdminStores = () => {
                   {r.store_status === "suspended" && r.rejection_reason && (
                     <p className="truncate text-xs text-destructive">السبب: {r.rejection_reason}</p>
                   )}
+                </div>
                 </div>
                 <Badge variant={r.store_status === "approved" ? "default" : "secondary"}>
                   {STATUS_LABEL[r.store_status ?? ""] ?? r.store_status}

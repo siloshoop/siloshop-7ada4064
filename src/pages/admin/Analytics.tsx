@@ -1,4 +1,5 @@
 import RevenueCurrencyChart from "@/components/RevenueCurrencyChart";
+import StackedAmount, { isWideAmount } from "@/components/admin/StackedAmount";
 import { formatSplitTotals, type RevenueSplit } from "@/lib/currency";
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -53,14 +54,14 @@ const COLORS = ["hsl(var(--primary))", "hsl(var(--accent))", "#10b981", "#f59e0b
 const StatCard = ({
   title, value, hint, icon: Icon, tone = "primary",
 }: { title: string; value: string | number; hint?: string; icon: any; tone?: string }) => (
-  <Card className={`border-r-4 border-r-${tone}`}>
-    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-      <CardTitle className="text-sm font-medium">{title}</CardTitle>
-      <Icon className="h-4 w-4 text-muted-foreground" />
+  <Card className={`border-r-4 border-r-${tone} ${isWideAmount(value) ? "col-span-2 md:col-span-1" : ""}`}>
+    <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-2">
+      <CardTitle className="min-w-0 text-sm font-medium">{title}</CardTitle>
+      <Icon className="h-4 w-4 shrink-0 text-muted-foreground" />
     </CardHeader>
     <CardContent>
-      <div className="text-2xl font-bold">{value}</div>
-      {hint && <p className="text-xs text-muted-foreground mt-1">{hint}</p>}
+      <div className={isWideAmount(value) ? "text-xl font-bold sm:text-2xl" : "text-2xl font-bold"}><StackedAmount value={value} /></div>
+      {hint && <p className="mt-1 break-words text-xs text-muted-foreground">{hint}</p>}
     </CardContent>
   </Card>
 );
@@ -171,7 +172,7 @@ const AdminAnalytics = () => {
         ) : data ? (
           <>
             {/* Primary KPIs */}
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4 mb-6">
+            <div className="grid grid-flow-row-dense grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4 mb-6">
               <StatCard title="إجمالي المستخدمين" value={data.users.total}
                 hint={`${data.users.customers} مشتري • ${data.users.vendors} بائع`} icon={Users} />
               <StatCard title="المستخدمون النشطون" value={data.users.active_period}

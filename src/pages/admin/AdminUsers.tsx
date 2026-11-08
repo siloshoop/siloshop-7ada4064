@@ -123,7 +123,7 @@ const AdminUsers = ({ mode }: { mode: Mode }) => {
           {filtered.map((row) => (
             <Card key={row.id}>
               <CardContent className="flex flex-wrap items-center gap-3 p-4">
-                <div className="min-w-0 flex-1">
+                <div className="w-full min-w-0 sm:w-auto sm:flex-1">
                   <p className="truncate font-semibold">{row.full_name || "بدون اسم"}</p>
                   <p className="break-all text-xs text-muted-foreground" dir="ltr">{row.email || "—"}</p>
                   <p className="text-sm" dir="ltr">{row.phone || row.contact_phone || "—"}</p>

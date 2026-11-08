@@ -643,3 +643,7 @@ All colors MUST be HSL.
 .category-tone-peach { background-color: hsl(var(--pastel-peach)); color: hsl(var(--pastel-peach-fg)); }
 .category-tone-lemon { background-color: hsl(var(--pastel-lemon)); color: hsl(var(--pastel-lemon-fg)); }
 .category-tone-teal { background-color: hsl(var(--pastel-teal)); color: hsl(var(--pastel-teal-fg)); }
+
+/* Number labels on chart value axes: in RTL pages the browser flips their text anchor,
+   which draws them over the axis line. Keep only these numeric labels left-to-right. */
+.recharts-yAxis .recharts-cartesian-axis-tick text { direction: ltr; unicode-bidi: plaintext; }

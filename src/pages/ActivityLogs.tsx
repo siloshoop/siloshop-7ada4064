@@ -271,19 +271,19 @@ const ActivityLogs = () => {
                           <span className="font-medium">
                             {log.profiles?.full_name || "مستخدم غير معروف"}
                           </span>
-                          <Badge variant={getActionBadgeVariant(log.action_type) as any} className="flex items-center gap-1">
+                          <Badge variant={getActionBadgeVariant(log.action_type) as any} className="flex max-w-full items-center gap-1 break-all">
                             {getActionIcon(log.action_type)}
                             {getActionLabel(log.action_type)}
                           </Badge>
                         </div>
                         {Object.keys(log.action_details).length > 0 && (
-                          <p className="text-sm text-muted-foreground mt-1">
+                          <p dir="ltr" className="mt-1 break-all text-start text-sm text-muted-foreground">
                             {JSON.stringify(log.action_details)}
                           </p>
                         )}
                       </div>
 
-                      <div className="text-sm text-muted-foreground text-left">
+                      <div className="shrink-0 whitespace-nowrap text-left text-sm text-muted-foreground">
                         {format(new Date(log.created_at), "dd MMM yyyy", { locale: ar })}
                         <br />
                         <span className="text-xs">

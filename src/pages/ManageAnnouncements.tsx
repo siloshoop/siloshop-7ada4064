@@ -333,17 +333,17 @@ const ManageAnnouncements = () => {
                   key={announcement.id} 
                   className={`transition-all ${!announcement.is_active ? 'opacity-60' : ''}`}
                 >
-                  <CardContent className="p-6">
-                    <div className="flex items-start gap-4">
-                      <div className="flex items-center gap-2 text-muted-foreground">
+                  <CardContent className="p-4 sm:p-6">
+                    <div className="flex flex-wrap items-start gap-4">
+                      <div className="flex shrink-0 items-center gap-2 text-muted-foreground">
                         <GripVertical className="h-5 w-5" />
                         <span className="text-sm font-medium">#{announcement.sort_order}</span>
                       </div>
                       
-                      <div className="flex-1">
-                        <div className="flex items-center gap-3 mb-2">
-                          <p className="text-lg font-medium">{announcement.text}</p>
-                          <span className={`text-xs px-2 py-1 rounded-full ${
+                      <div className="min-w-0 flex-1">
+                        <div className="mb-2 flex flex-wrap items-center gap-2 sm:gap-3">
+                          <p className="min-w-0 break-words text-lg font-medium">{announcement.text}</p>
+                          <span className={`shrink-0 whitespace-nowrap text-xs px-2 py-1 rounded-full ${
                             announcement.is_active 
                               ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400' 
                               : 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-400'
@@ -352,7 +352,7 @@ const ManageAnnouncements = () => {
                           </span>
                         </div>
                         
-                        <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">
+                        <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-muted-foreground">
                           <span className="flex items-center gap-1">
                             <span className="font-medium">الأيقونة:</span>
                             {iconOptions.find(i => i.value === announcement.icon)?.label || announcement.icon}
@@ -368,7 +368,7 @@ const ManageAnnouncements = () => {
                         </div>
                       </div>
 
-                      <div className="flex items-center gap-2">
+                      <div className="flex w-full items-center justify-end gap-2 sm:w-auto">
                         <div className="flex items-center gap-2 pl-4 border-l">
                           <Label htmlFor={`toggle-${announcement.id}`} className="text-sm">
                             {announcement.is_active ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}

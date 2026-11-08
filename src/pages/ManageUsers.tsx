@@ -388,9 +388,9 @@ const ManageUsers = () => {
             ) : (
               filteredUsers.map((userProfile) => (
                 <Card key={userProfile.id}>
-                  <CardContent className="p-6">
-                    <div className="flex items-start gap-4">
-                      <Avatar className="h-14 w-14">
+                  <CardContent className="p-4 sm:p-6">
+                    <div className="flex flex-wrap items-start gap-4">
+                      <Avatar className="h-14 w-14 shrink-0">
                         <AvatarImage src={userProfile.avatar_url || undefined} />
                         <AvatarFallback className="text-lg">
                           {userProfile.full_name?.[0]?.toUpperCase() || "؟"}
@@ -399,7 +399,7 @@ const ManageUsers = () => {
 
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-2 flex-wrap">
-                          <h3 className="font-semibold text-lg">
+                          <h3 className="break-words text-lg font-semibold">
                             {userProfile.full_name || "بدون اسم"}
                           </h3>
                           {userProfile.id === user?.id && (
@@ -470,7 +470,7 @@ const ManageUsers = () => {
                         </div>
                       </div>
 
-                      <div className="flex items-center gap-2 flex-wrap justify-end">
+                      <div className="flex w-full flex-wrap items-center justify-start gap-2 sm:w-auto sm:justify-end">
                         {/* Toggle Profile Role */}
                         <Select
                           value={userProfile.role}

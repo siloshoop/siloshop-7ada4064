@@ -37,7 +37,7 @@
 - Staff UI resolves roles through existing callable has_role checks, never the internal actor_admin_role audit helper; route boundaries and explicit authorization errors prevent blank pages without changing server permissions.
 - Reset route error boundaries by pathname, never history-entry keys; same-page URL filter updates must preserve mounted pages and pending data reads.
 - Keep search option caches separate from product availability, cancel superseded searches, and render result batches without changing the existing filtered result window; stock continues to refresh uncached.
-- Automatic signed-out redirects replace protected history entries, while explicit login actions push; this prevents browser/native Back from looping into login. Native auth fallback replaces with home when no prior entry exists.
+- Automatic signed-out redirects replace protected history entries; explicit login actions push, so Back never loops into login. Native auth fallback replaces with home when no prior entry exists.
 - Homepage carousel ads are native_ads (placement home_carousel) under restrictive owner-only RLS (live rows public), singleton home_carousel_settings, owner-only stats/visitor RPCs over ad_analytics (account set by trigger, guests random id); delegated ad scopes never reach it.
 - Storage removal needs read access: give owner-managed folders an owner-scoped SELECT policy with DELETE, or removals silently no-op.
 - Product previews reuse the Product page (/product/:id/preview, preview prop) with RLS-scoped reads and no view/recently-viewed/cart/compare writes.

@@ -2,9 +2,9 @@ import { Link } from "react-router-dom";
 import { formatPrice } from "@/lib/currency";
 import type { CarouselSlideData } from "@/lib/homeCarousel";
 
-// Reserve side room for the slider arrows and bottom room for the slide dots.
+// Reserve side room for the slider arrows; the picture uses almost the full height and the dots sit under the text.
 const slideClass =
-  "group relative flex h-32 w-full shrink-0 items-center justify-center gap-3 overflow-hidden bg-gradient-ad px-10 pb-6 pt-3 text-primary-foreground sm:h-40 sm:gap-10 sm:px-14 sm:pb-7 sm:pt-4";
+  "group relative flex h-36 w-full shrink-0 items-center justify-center gap-3 overflow-hidden bg-gradient-ad px-10 py-2 text-primary-foreground sm:h-44 sm:gap-10 sm:px-14 sm:py-2.5";
 
 /** One homepage carousel slide; shared by the homepage and the admin preview so both look identical. */
 export default function CarouselSlide({ slide, active = true, onOpen, preview = false }: {
@@ -17,7 +17,7 @@ export default function CarouselSlide({ slide, active = true, onOpen, preview = 
       <span aria-hidden className="pointer-events-none absolute -right-8 -top-10 h-28 w-28 rounded-full bg-primary-foreground/15 blur-xl" />
       <span aria-hidden className="pointer-events-none absolute -bottom-12 left-1/4 h-32 w-32 rounded-full bg-highlight/40 blur-2xl" />
 
-      <div className="relative z-10 flex min-w-0 flex-1 flex-col sm:max-w-lg items-start gap-1 text-right sm:gap-1.5">
+      <div className="relative z-10 flex min-w-0 flex-1 flex-col items-start gap-1 pb-4 text-right sm:max-w-lg sm:gap-1.5 sm:pb-5">
         <span className="rounded-full bg-primary-foreground/20 px-2 py-0.5 text-[10px] font-bold ring-1 ring-primary-foreground/40 backdrop-blur-sm sm:text-xs">
           إعلان
         </span>
@@ -29,7 +29,7 @@ export default function CarouselSlide({ slide, active = true, onOpen, preview = 
         )}
       </div>
 
-      <div className="relative z-10 aspect-square h-full shrink-0 overflow-hidden rounded-xl bg-card p-1 shadow-lg ring-2 ring-primary-foreground/50">
+      <div className="relative z-10 aspect-square h-full shrink-0 overflow-hidden rounded-xl bg-card p-0.5 shadow-lg ring-2 ring-primary-foreground/50">
         <img src={src} alt={slide.title} loading="lazy" decoding="async"
           className="h-full w-full rounded-lg object-contain transition-transform duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-105" />
       </div>

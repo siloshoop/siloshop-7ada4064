@@ -92,7 +92,7 @@ export default function AnimatedProductCarousel() {
               className={cn(ctrl, "absolute right-1.5 top-1/2 z-20 -translate-y-1/2 sm:right-3")}><ChevronRight className="h-4 w-4 sm:h-5 sm:w-5" /></button>
             <button type="button" aria-label="التالي" onClick={() => goTo(index + 1)}
               className={cn(ctrl, "absolute left-1.5 top-1/2 z-20 -translate-y-1/2 sm:left-3")}><ChevronLeft className="h-4 w-4 sm:h-5 sm:w-5" /></button>
-            <div className="absolute bottom-1 left-1/2 z-20 flex -translate-x-1/2 items-center gap-0.5 sm:bottom-1.5">
+            <div className="absolute bottom-1.5 right-9 z-20 flex items-center gap-0.5 sm:bottom-2.5 sm:right-1/2 sm:translate-x-1/2">
               {items.map((slide, i) => (
                 <button key={slide.key} type="button" aria-label={`الشريحة ${i + 1} من ${n}`} aria-current={i === index}
                   onClick={() => goTo(i)} className="flex h-5 items-center px-0.5">

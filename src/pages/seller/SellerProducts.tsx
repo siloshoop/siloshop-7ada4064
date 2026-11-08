@@ -35,6 +35,7 @@ import {
 import { moderationBadgeClass, moderationLabel } from "@/lib/productModeration";
 import { buildProductsCsv, parseProductsCsv, PRODUCT_CSV_COLUMNS, type ProductCsvColumn } from "@/lib/productCsv";
 import ProductAnalyticsDialog from "@/components/seller/ProductAnalyticsDialog";
+import SellerProductFacts from "@/components/seller/SellerProductFacts";
 
 interface Row {
   id: string;
@@ -49,6 +50,10 @@ interface Row {
   sku: string | null;
   barcode: string | null;
   brand_id: string | null;
+  features?: unknown;
+  length_cm?: number | null;
+  width_cm?: number | null;
+  height_cm?: number | null;
 }
 
 interface Brand {
@@ -130,7 +135,7 @@ const SellerProducts = () => {
     const [productsRes, brandsRes] = await Promise.all([
       supabase
         .from("products")
-        .select("id,name,price,currency,stock_quantity,image_url,moderation_status,moderation_reason,is_active,created_at,sku,barcode,brand_id")
+        .select("id,name,price,currency,stock_quantity,image_url,moderation_status,moderation_reason,is_active,created_at,sku,barcode,brand_id,features,length_cm,width_cm,height_cm")
         .eq("vendor_id", user.id)
         .order("created_at", { ascending: false }),
       supabase.from("brands").select("id,name").eq("is_active", true).order("name"),
@@ -442,6 +447,7 @@ const SellerProducts = () => {
                       {p.barcode && <span>باركود: {p.barcode}</span>}
                     </p>
                   )}
+                  <SellerProductFacts features={p.features} length={p.length_cm} width={p.width_cm} height={p.height_cm} />
                   {p.moderation_status === "rejected" && p.moderation_reason && (
                     <p className="mt-1 text-xs text-destructive">سبب الرفض: {p.moderation_reason}</p>
                   )}

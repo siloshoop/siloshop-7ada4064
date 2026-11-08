@@ -104,16 +104,17 @@ const AdminInventory = () => {
           {rows.map((r) => (
             <Card key={r.id} className={r.stock_quantity <= 0 ? "border-destructive/40" : undefined}>
               <CardContent className="flex flex-wrap items-center gap-4 p-4">
+                <div className="flex w-full min-w-0 items-center gap-4 sm:w-auto sm:flex-1">
                 {r.image_url ? (
-                  <img src={r.image_url} alt={r.name} loading="lazy" className="h-14 w-14 rounded-md object-cover" />
+                  <img src={r.image_url} alt={r.name} loading="lazy" className="h-14 w-14 shrink-0 rounded-md object-cover" />
                 ) : (
-                  <span className="flex h-14 w-14 items-center justify-center rounded-md bg-muted text-muted-foreground">
+                  <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-md bg-muted text-muted-foreground">
                     <PackageX className="h-5 w-5" />
                   </span>
                 )}
                 <div className="min-w-0 flex-1">
                   <div className="flex flex-wrap items-center gap-2">
-                    <span className="truncate font-medium">{r.name}</span>
+                    <span className="min-w-0 max-w-full truncate font-medium">{r.name}</span>
                     {r.stock_quantity <= 0 ? (
                       <Badge variant="destructive">نفدت الكمية</Badge>
                     ) : (
@@ -126,6 +127,7 @@ const AdminInventory = () => {
                   <p className="text-xs text-muted-foreground">
                     {r.vendor_name ?? "بائع"} — {formatKnownPrice(r.price, r.currency)} — آخر تحديث {new Date(r.updated_at).toLocaleDateString("ar")}
                   </p>
+                </div>
                 </div>
                 <Button asChild size="sm" variant="outline">
                   <Link to={`/product/${r.id}`}>عرض المنتج</Link>

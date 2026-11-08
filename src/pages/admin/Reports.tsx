@@ -1,3 +1,4 @@
+import StackedAmount, { isWideAmount } from "@/components/admin/StackedAmount";
 import { formatPrice } from "@/lib/currency";
 import { loadReportMoney, reportMoney, reportAverage, type ReportMoneyRow } from "@/lib/reportCurrency";
 import { useCallback, useEffect, useState } from "react";
@@ -106,9 +107,9 @@ const rangeToDates = (range: OrdersReportRange, customFrom: string, customTo: st
 };
 
 const RangeStatCard = ({ title, value }: { title: string; value: string | number }) => (
-  <Card>
+  <Card className={isWideAmount(value) ? "col-span-2 md:col-span-1" : undefined}>
     <CardHeader className="pb-2"><CardTitle className="text-sm font-medium text-muted-foreground">{title}</CardTitle></CardHeader>
-    <CardContent><div className="text-xl font-bold">{value}</div></CardContent>
+    <CardContent><div className="text-xl font-bold"><StackedAmount value={value} /></div></CardContent>
   </Card>
 );
 
@@ -175,7 +176,7 @@ const OrdersReportSection = () => {
   return (
     <div className="space-y-4">
       <Tabs value={range} onValueChange={(v) => setRange(v as OrdersReportRange)}>
-        <TabsList className="flex-wrap">
+        <TabsList className="h-auto flex-wrap">
           <TabsTrigger value="today">اليوم</TabsTrigger>
           <TabsTrigger value="7d">7 أيام</TabsTrigger>
           <TabsTrigger value="30d">30 يوم</TabsTrigger>
@@ -197,7 +198,7 @@ const OrdersReportSection = () => {
         <Card><CardContent className="py-16 text-center text-muted-foreground">لا توجد بيانات لهذه الفترة.</CardContent></Card>
       ) : (
         <>
-          <div className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-6">
+          <div className="grid grid-flow-row-dense grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-6">
             <RangeStatCard title="عدد الطلبات" value={totals?.orders_count ?? (totals as any)?.orders ?? 0} />
             <RangeStatCard title="الإيرادات" value={reportMoney(moneyRows, (r) => !["cancelled", "returned", "refunded"].includes(r.status))} />
             <RangeStatCard title="متوسط قيمة الطلب" value={reportAverage(orderAmounts)} />

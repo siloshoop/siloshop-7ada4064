@@ -8,7 +8,7 @@ export const isWideAmount = (value: string | number): boolean => String(value).l
 const StackedAmount = ({ value }: { value: string | number }) => (
   <>
     {amountParts(value).map((part, index) => (
-      <span key={index} className="block whitespace-nowrap">
+      <span key={index} className="block break-words">
         {part}
       </span>
     ))}

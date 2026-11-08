@@ -215,11 +215,12 @@ const ManageBanners = () => {
           {rows.map((b) => (
             <Card key={b.id}>
               <CardContent className="flex flex-wrap items-center gap-4 p-4">
+                <div className="flex w-full min-w-0 items-start gap-4 sm:w-auto sm:flex-1">
                 <img
                   src={b.image_url || "/placeholder.svg"}
                   alt={b.title}
                   loading="lazy"
-                  className="h-16 w-24 rounded object-cover"
+                  className="h-16 w-24 shrink-0 rounded object-cover"
                 />
                 <div className="min-w-0 flex-1">
                   <p className="truncate font-semibold">{b.title}</p>
@@ -230,6 +231,7 @@ const ManageBanners = () => {
                     {b.start_date ? `يبدأ ${new Date(b.start_date).toLocaleString("ar-SY")}` : "يبدأ فوراً"}
                     {b.end_date ? ` · ينتهي ${new Date(b.end_date).toLocaleString("ar-SY")}` : " · بلا تاريخ انتهاء"}
                   </p>
+                </div>
                 </div>
                 <Badge variant="outline">
                   {PLACEMENTS.find((p) => p.value === b.placement)?.label ?? b.placement}

@@ -313,10 +313,12 @@ const ManageCategories = () => {
           {orderedRows.map(({ row: c, depth }) => (
             <Card key={c.id} style={{ marginInlineStart: depth * 24 }}>
               <CardContent className="flex flex-wrap items-center gap-3 p-4">
+                <div className="flex w-full min-w-0 items-center gap-3 sm:w-auto sm:flex-1">
                 <span className={`category-tone-${categoryAppearance(c).tone} flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full`}>{(() => { const { Icon, emoji } = categoryAppearance(c); return c.image_url ? <img src={c.image_url} alt="" className="h-full w-full object-cover" /> : emoji || <Icon className="h-5 w-5" />; })()}</span>
                 <div className="min-w-0 flex-1">
                   <p className="truncate font-semibold">{c.name_ar}</p>
                   <p className="truncate text-xs text-muted-foreground">{c.name}</p>
+                </div>
                 </div>
                 <Badge variant="secondary">{counts[c.id] ?? 0} منتج</Badge>
                 <Badge variant="outline">{childCounts[c.id] ?? 0} فرعي</Badge>

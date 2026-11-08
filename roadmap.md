@@ -282,4 +282,5 @@
 
 ## App layout overlap
 - [x] Audited 27 buyer/seller pages at 360px in app mode: no overlap at normal text size except footer logo (fixed). Large phone text size reproduces clipping; app now caps system text scaling at 100%.
-- [ ] Verify on a real Android phone with large system text (blocked: no device; Android build not compiled here). Admin pages not audited (signed-in test account is a seller).
+- [x] Audited all 36 admin pages at 360px in app mode as the owner: fixed squeezed rows (buyers, sellers, stores, users, categories, banners, payments, stock alerts, announcements, activity log, home lists), split multi-currency totals onto separate lines, fixed wrapped report tabs, chart number labels, subcategory/seller-request headers, orders table side-scroll, broken store logos.
+- [ ] Verify on a real Android phone with large system text (blocked: no device; Android build not compiled here).

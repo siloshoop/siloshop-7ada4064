@@ -360,7 +360,7 @@ const AdminOrders = () => {
                 <p className="py-12 text-center text-sm text-muted-foreground">لا توجد طلبات مطابقة.</p>
               ) : (
                 <div className="overflow-x-auto">
-                  <table className="w-full text-sm">
+                  <table className="w-full min-w-[760px] text-sm">
                     <thead className="bg-muted/40 text-muted-foreground">
                       <tr>
                         <th className="px-3 py-2 text-right">الطلب</th>
@@ -377,8 +377,8 @@ const AdminOrders = () => {
                         <tr key={r.id} className="border-t">
                           <td className="px-3 py-2">
                             <div className="flex flex-col">
-                              <span className="font-mono text-xs font-semibold">{orderLabel(r)}</span>
-                              {r.invoice_number && <span className="text-[10px] text-muted-foreground">فاتورة: {r.invoice_number}</span>}
+                              <span className="whitespace-nowrap font-mono text-xs font-semibold">{orderLabel(r)}</span>
+                              {r.invoice_number && <span className="whitespace-nowrap text-[10px] text-muted-foreground">فاتورة: {r.invoice_number}</span>}
                               {r.is_frozen && <Badge variant="destructive" className="mt-1 w-fit gap-1 text-[10px]"><Snowflake className="h-3 w-3" /> مجمّد</Badge>}
                             </div>
                           </td>

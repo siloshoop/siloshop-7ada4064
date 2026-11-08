@@ -325,8 +325,8 @@ const ManageSubcategories = () => {
 
         <Card>
           <CardHeader>
-            <div className="flex items-center justify-between">
-              <div>
+            <div className="flex flex-col items-stretch gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <div className="min-w-0">
                 <CardTitle className="flex items-center gap-2">
                   <Layers className="h-5 w-5" />
                   إدارة التصنيفات الفرعية

@@ -137,7 +137,8 @@ const AdminPayments = () => {
           {filtered.map((r) => (
             <Card key={r.id}>
               <CardContent className="flex flex-wrap items-center gap-3 p-4">
-                <Receipt className="h-5 w-5 shrink-0 text-muted-foreground" />
+                <div className="flex w-full min-w-0 items-start gap-3 sm:w-auto sm:flex-1">
+                <Receipt className="mt-0.5 h-5 w-5 shrink-0 text-muted-foreground" />
                 <div className="min-w-0 flex-1">
                   <p className="truncate font-semibold">{money(Number(r.amount), r.currency)}</p>
                   <p className="truncate text-xs text-muted-foreground">
@@ -149,6 +150,7 @@ const AdminPayments = () => {
                   {r.failure_reason && (
                     <p className="truncate text-xs text-destructive">سبب الفشل: {r.failure_reason}</p>
                   )}
+                </div>
                 </div>
                 <Badge variant="outline">{METHOD_LABEL[r.payment_method] ?? r.payment_method}</Badge>
                 <Badge variant={statusVariant(r.payment_status)}>

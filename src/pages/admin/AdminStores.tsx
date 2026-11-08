@@ -16,6 +16,21 @@ import { Loader2, Search, Store, ShieldOff, ShieldCheck } from "lucide-react";
 import { loadAdminAccounts, type AdminAccount as StoreRow } from "@/lib/adminAccounts";
 import { useStaffPermissions } from "@/hooks/useStaffPermissions";
 
+/** Store logo with the store icon as a fallback when the picture is missing or fails to load. */
+const StoreLogo = ({ url, name }: { url?: string | null; name?: string | null }) => {
+  const [failed, setFailed] = useState(false);
+  if (!url || failed) return <Store className="mt-0.5 h-5 w-5 shrink-0 text-muted-foreground" />;
+  return (
+    <img
+      src={url}
+      alt={name ?? "شعار المتجر"}
+      loading="lazy"
+      onError={() => setFailed(true)}
+      className="h-10 w-10 shrink-0 rounded-md object-cover"
+    />
+  );
+};
+
 const STATUS_LABEL: Record<string, string> = {
   approved: "نشط",
   suspended: "معلّق",
@@ -112,16 +127,7 @@ const AdminStores = () => {
             <Card key={r.id}>
               <CardContent className="flex flex-wrap items-center gap-3 p-4">
                 <div className="flex w-full min-w-0 items-start gap-3 sm:w-auto sm:flex-1">
-                {r.logo_url ? (
-                  <img
-                    src={r.logo_url}
-                    alt={r.store_name ?? "شعار المتجر"}
-                    loading="lazy"
-                    className="h-10 w-10 shrink-0 rounded-md object-cover"
-                  />
-                ) : (
-                  <Store className="mt-0.5 h-5 w-5 shrink-0 text-muted-foreground" />
-                )}
+                <StoreLogo url={r.logo_url} name={r.store_name} />
                 <div className="min-w-0 flex-1">
                   <p className="truncate font-semibold">{r.store_name || "متجر بدون اسم"}</p>
                   <p className="truncate text-xs text-muted-foreground">

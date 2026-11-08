@@ -6,6 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Link } from "react-router-dom";
 import BrandLogo from "@/components/BrandLogo";
 import googlePlayBadge from "@/assets/google-play-badge.png";
+import { isNativeApp } from "@/lib/native";
 
 const PLAY_STORE_URL = "https://play.google.com/store/apps/details?id=com.siloshop.app";
 
@@ -218,6 +219,8 @@ const Footer = () => {
           <p className="text-base">
             © 2024 siloshop. جميع الحقوق محفوظة.
           </p>
+          {/* Website address is shown only inside the Android app, not on the website itself. */}
+          {isNativeApp() && (
           <a
             href="https://www.siloshop.net"
             target="_blank"
@@ -234,6 +237,7 @@ const Footer = () => {
               </span>
             </span>
           </a>
+          )}
         </div>
       </div>
     </footer>;

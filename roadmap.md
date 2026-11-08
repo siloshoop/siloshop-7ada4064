@@ -278,7 +278,7 @@
 
 ## Both domains and App Links
 - [x] Add siloshop.net back to Android verified product links (versionCode 15); website address shown at the bottom of every page.
-- [ ] siloshop.net verification (blocked: owner must turn off "primary" for www.siloshop.net in Domains settings and delete the stray 208.91.197.27 DNS record at Network Solutions; then build/upload Android versionCode 15).
+- [x] Superseded: owner chose www.siloshop.net only; stray DNS record confirmed removed.
 
 ## App layout overlap
 - [x] Audited 27 buyer/seller pages at 360px in app mode: no overlap at normal text size except footer logo (fixed). Large phone text size reproduces clipping.
@@ -288,5 +288,12 @@
 
 ## Shared links open in the app
 - [x] App opens shared product, store, category, comparison and shared-favorites links (versionCode 16). Stray DNS record confirmed gone; www.siloshop.net verification accepted by Google.
-- [ ] siloshop.net still redirects (blocked: owner must Unset as primary for www.siloshop.net in Domains settings before releasing versionCode 16).
+- [x] Owner chose www.siloshop.net only (primary kept): app links now claim www only, so the siloshop.net redirect no longer blocks verification.
 - [ ] Reinstall/update the app on the phone so Android re-checks links (blocked: needs new build uploaded by owner).
+
+## Domain, DNS and Google audit (Nov 8)
+- [x] DNS clean (only Lovable A + verification TXT), SSL valid on both, Google confirms www links the app, Googlebot gets 200, robots/sitemap OK.
+- [x] Each page now gives Google its own www address (previously every page pointed at the homepage); missing pages marked noindex.
+- [ ] Compare the SHA-256 with Play Console → App integrity → App signing (blocked: needs owner's Play Console access).
+- [ ] Build and upload versionCode 16 (blocked: owner's build/upload).
+- [ ] Connect Google Search Console to read real indexing data (blocked: owner's Google account).

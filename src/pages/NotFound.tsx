@@ -8,6 +8,15 @@ const NotFound = () => {
     console.error("404 Error: User attempted to access non-existent route:", location.pathname);
   }, [location.pathname]);
 
+  // The host answers every path with HTTP 200, so tell search engines not to index missing pages.
+  useEffect(() => {
+    const meta = document.createElement("meta");
+    meta.setAttribute("name", "robots");
+    meta.setAttribute("content", "noindex");
+    document.head.appendChild(meta);
+    return () => meta.remove();
+  }, []);
+
   return (
     <div className="flex min-h-screen items-center justify-center bg-muted">
       <div className="text-center">

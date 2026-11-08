@@ -379,6 +379,13 @@
       "when": 1794150080015,
       "tag": "0053_popular_variant_option",
       "breakpoints": true
+    },
+    {
+      "idx": 54,
+      "version": "7",
+      "when": 1794150910200,
+      "tag": "0054_home_carousel_ad_visitors",
+      "breakpoints": true
     }
   ]
 }

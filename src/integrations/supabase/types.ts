@@ -4526,6 +4526,16 @@ export type Database = {
           last_event_at: string
         }[]
       }
+      admin_home_carousel_ad_visitors: {
+        Args: {
+          p_ad_id: string
+          p_from?: string
+          p_limit?: number
+          p_offset?: number
+          p_to?: string
+        }
+        Returns: Json
+      }
       admin_inventory_overview: {
         Args: { _limit?: number; _threshold?: number }
         Returns: {

@@ -75,14 +75,45 @@ export async function fetchCarouselSettings(): Promise<CarouselSettings> {
 
 export const carouselSlot = (adId: string) => `home-carousel-${adId}`;
 
+const VISITOR_KEY = "siloshop:ad-visitor";
+const randomId = () =>
+  typeof crypto !== "undefined" && typeof crypto.randomUUID === "function"
+    ? crypto.randomUUID()
+    : `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 12)}`;
+
+/**
+ * Random first-party id for this browser, used only to count unique ad visitors.
+ * Not derived from the device (no fingerprinting); signed-in accounts are attached by the server.
+ */
+export function adVisitorId(storage: Pick<Storage, "getItem" | "setItem"> | null = typeof localStorage === "undefined" ? null : localStorage): string | null {
+  if (!storage) return null;
+  try {
+    const saved = storage.getItem(VISITOR_KEY);
+    if (saved && saved.length <= 100) return saved;
+    const fresh = randomId();
+    storage.setItem(VISITOR_KEY, fresh);
+    return fresh;
+  } catch {
+    return null;
+  }
+}
+
 /** Impressions count once per ad per browser session; every click counts. */
-export function trackCarouselEvent(adId: string, event: "impression" | "click", storage: Pick<Storage, "getItem" | "setItem"> | null = typeof sessionStorage === "undefined" ? null : sessionStorage) {
+export function trackCarouselEvent(
+  adId: string,
+  event: "impression" | "click",
+  storage: Pick<Storage, "getItem" | "setItem"> | null = typeof sessionStorage === "undefined" ? null : sessionStorage,
+  visitorStorage: Pick<Storage, "getItem" | "setItem"> | null = typeof localStorage === "undefined" ? null : localStorage,
+) {
   const slot = carouselSlot(adId);
   if (event === "impression" && storage) {
     const key = `siloshop:seen:${slot}`;
     try { if (storage.getItem(key)) return false; storage.setItem(key, "1"); } catch { /* storage blocked: still record */ }
   }
-  void supabase.from("ad_analytics").insert({ ad_slot: slot, event_type: event, page_url: typeof location === "undefined" ? null : location.pathname.slice(0, 500) })
+  void supabase.from("ad_analytics").insert({
+    ad_slot: slot, event_type: event, session_id: adVisitorId(visitorStorage),
+    page_url: typeof location === "undefined" ? null : location.pathname.slice(0, 500),
+  })
     .then(({ error }) => { if (error) console.warn("Ad tracking failed:", error.message); });
   return true;
 }

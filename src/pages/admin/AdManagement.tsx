@@ -17,6 +17,7 @@ import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "
 import ImageUploadField from "@/components/ImageUploadField";
 import { ProductPicker, VendorPicker } from "@/components/admin/ShowroomEntityPicker";
 import CarouselSlide from "@/components/home/CarouselSlide";
+import AdVisitorsDialog from "@/components/admin/AdVisitorsDialog";
 import { adDates, adState, localAdDate } from "@/lib/adSchedule";
 import { CURRENCY_OPTIONS, formatPrice, isKnownCurrency } from "@/lib/currency";
 import {
@@ -59,6 +60,7 @@ const AdManagement = () => {
   const [imageBusy, setImageBusy] = useState(false);
   const [busyId, setBusyId] = useState<string | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<CarouselAdRow | null>(null);
+  const [visitorsAd, setVisitorsAd] = useState<{ id: string; title: string } | null>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -263,7 +265,15 @@ const AdManagement = () => {
                       </div>
                       <Badge variant="secondary">الترتيب {ad.priority}</Badge>
                       <Badge variant="outline">{adState(ad)}</Badge>
-                      <span className="flex items-center gap-1 text-xs text-muted-foreground" title="المشاهدات"><Eye className="h-3.5 w-3.5" />{s.impressions.toLocaleString("ar-SY")}</span>
+                      <button
+                        type="button"
+                        onClick={() => setVisitorsAd({ id: ad.id, title: ad.title })}
+                        title="عرض زوار الإعلان"
+                        aria-label={`المشاهدات ${s.impressions.toLocaleString("ar-SY")} — عرض زوار ${ad.title}`}
+                        className="flex items-center gap-1 rounded-full px-2 py-1 text-xs text-muted-foreground underline-offset-2 transition-colors hover:bg-primary/10 hover:text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                      >
+                        <Eye className="h-3.5 w-3.5" />{s.impressions.toLocaleString("ar-SY")}
+                      </button>
                       <span className="flex items-center gap-1 text-xs text-muted-foreground" title="النقرات"><MousePointerClick className="h-3.5 w-3.5" />{s.clicks.toLocaleString("ar-SY")} ({clickThroughRate(s.impressions, s.clicks)})</span>
                       <Switch checked={ad.is_active} disabled={busyId === ad.id} onCheckedChange={() => void toggleActive(ad)} aria-label={`تفعيل ${ad.title}`} />
                       <Button variant="ghost" size="icon" aria-label={`تعديل ${ad.title}`} onClick={() => openEdit(ad)}><Pencil className="h-4 w-4" /></Button>
@@ -276,6 +286,8 @@ const AdManagement = () => {
           )}
         </div>
       )}
+
+      <AdVisitorsDialog ad={visitorsAd} onClose={() => setVisitorsAd(null)} />
 
       <Dialog open={!!deleteTarget} onOpenChange={(value) => !value && setDeleteTarget(null)}>
         <DialogContent dir="rtl">

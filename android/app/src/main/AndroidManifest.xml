@@ -19,15 +19,17 @@
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-            <!-- Android App Links: open shared www.siloshop.net links in the app; the website is the fallback when not installed.
-                 Only the primary host is claimed: siloshop.net redirects to www, Android never verifies a redirecting host,
-                 and on Android 11 and older one failed host cancels verification for every host. Verified with the Play app signing key. -->
+            <!-- Android App Links: open shared www.siloshop.net and siloshop.net links in the app; the website is the fallback when not installed.
+                 Both hosts serve /.well-known/assetlinks.json directly (no Lovable Primary domain, so neither redirects).
+                 Never set a Primary domain again while both are claimed: Android never verifies a redirecting host, and on
+                 Android 11 and older one failed host cancels verification for every host. Verified with the Play app signing key. -->
             <intent-filter android:autoVerify="true">
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
                 <data android:scheme="https" />
                 <data android:host="www.siloshop.net" />
+                <data android:host="siloshop.net" />
                 <data android:pathPrefix="/product/" />
                 <data android:pathPrefix="/store/" />
                 <data android:pathPrefix="/category/" />

@@ -73,6 +73,11 @@ All colors MUST be HSL.
     --info: 217 91% 50%;
     --info-foreground: 0 0% 100%;
 
+    /* Product page: chosen color / chosen picture frame (orange) */
+    --selected: 25 95% 53%;
+    --selected-foreground: 0 0% 100%;
+    --selected-soft: 30 100% 95%;
+
     /* Gradients */
     --gradient-primary: linear-gradient(135deg, hsl(263 70% 50%) 0%, hsl(300 65% 50%) 55%, hsl(340 82% 52%) 100%);
     /* Shared brand accent (purple → pink → yellow) for underlines, tags and highlights. */
@@ -185,6 +190,10 @@ All colors MUST be HSL.
 
     --info: 217 91% 60%;
     --info-foreground: 0 0% 100%;
+
+    --selected: 25 95% 55%;
+    --selected-foreground: 0 0% 100%;
+    --selected-soft: 25 60% 18%;
 
     --sidebar-background: 222 47% 11%;
     --sidebar-foreground: 210 40% 98%;

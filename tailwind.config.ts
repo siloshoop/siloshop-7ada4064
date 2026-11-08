@@ -89,6 +89,11 @@ export default {
           DEFAULT: "hsl(var(--info))",
           foreground: "hsl(var(--info-foreground))",
         },
+        selected: {
+          DEFAULT: "hsl(var(--selected))",
+          foreground: "hsl(var(--selected-foreground))",
+          soft: "hsl(var(--selected-soft))",
+        },
 
         sidebar: {
           DEFAULT: "hsl(var(--sidebar-background))",

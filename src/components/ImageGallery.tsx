@@ -105,7 +105,7 @@ export const ImageGallery = ({ images, productName, videoUrl }: ImageGalleryProp
 
   return (
     <>
-      <div className="flex min-w-0 flex-col-reverse gap-2.5 md:flex-row-reverse md:gap-4">
+      <div className="flex min-w-0 flex-col gap-2.5 sm:gap-3">
         {/* Main Image */}
         <div
           className="group relative aspect-square min-w-0 flex-1 touch-pan-y select-none overflow-hidden rounded-xl bg-muted sm:rounded-2xl"
@@ -205,18 +205,18 @@ export const ImageGallery = ({ images, productName, videoUrl }: ImageGalleryProp
           )}
         </div>
 
-        {/* Thumbnails: vertical on desktop, horizontal on mobile */}
+        {/* Thumbnails: one compact horizontal row under the main image */}
         {(total > 1 || !!videoUrl) && (
-          <div className="flex gap-2 overflow-x-auto scrollbar-hide md:max-h-[min(520px,60dvh)] md:w-20 md:flex-col md:overflow-y-auto">
+          <div className="flex gap-2.5 overflow-x-auto scrollbar-hide p-px">
             {!!videoUrl && (
               <button
                 onClick={() => setShowVideo(true)}
                 aria-label="تشغيل فيديو المنتج"
                 aria-current={showVideo}
-                className={`relative shrink-0 w-16 h-16 md:w-full md:h-20 rounded-lg overflow-hidden border transition-all ${
+                className={`relative h-[60px] w-12 shrink-0 overflow-hidden rounded-lg border bg-background transition-colors sm:h-[72px] sm:w-[58px] ${
                   showVideo
-                    ? "border-primary ring-2 ring-primary/40"
-                    : "border-border/60 opacity-80 hover:opacity-100"
+                    ? "border-selected ring-1 ring-selected"
+                    : "border-border hover:border-selected/60"
                 }`}
               >
                 <img
@@ -236,10 +236,10 @@ export const ImageGallery = ({ images, productName, videoUrl }: ImageGalleryProp
                 onClick={() => goToImage(index)}
                 aria-label={`عرض الصورة ${index + 1}`}
                 aria-current={index === currentIndex}
-                className={`shrink-0 w-16 h-16 md:w-full md:h-20 rounded-lg overflow-hidden border transition-all ${
-                  index === currentIndex
-                    ? "border-primary ring-2 ring-primary/40"
-                    : "border-border/60 opacity-70 hover:opacity-100"
+                className={`h-[60px] w-12 shrink-0 overflow-hidden rounded-lg border bg-background p-0.5 transition-colors sm:h-[72px] sm:w-[58px] ${
+                  index === currentIndex && !showVideo
+                    ? "border-selected ring-1 ring-selected"
+                    : "border-border hover:border-selected/60"
                 }`}
               >
                 <img
@@ -247,7 +247,8 @@ export const ImageGallery = ({ images, productName, videoUrl }: ImageGalleryProp
                   alt={`${productName} صورة ${index + 1}`}
                   loading="lazy"
                   decoding="async"
-                  className="w-full h-full object-cover"
+                  draggable={false}
+                  className="h-full w-full object-contain"
                 />
               </button>
             ))}

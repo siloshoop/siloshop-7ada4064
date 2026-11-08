@@ -11,6 +11,9 @@ interface ProductVariantPickerProps {
   onSelect: (variant: ProductVariant | null) => void;
 }
 
+/** Attribute keys shown as picture thumbnails (Arabic «اللون» or English color). */
+const isColorKey = (key: string) => /لون|colou?r/i.test(key);
+
 const ProductVariantPicker = ({ variants, onSelect }: ProductVariantPickerProps) => {
   // Collect attribute keys (Arabic names) in stable order
   const attributeKeys = useMemo(() => {
@@ -60,11 +63,57 @@ const ProductVariantPicker = ({ variants, onSelect }: ProductVariantPickerProps)
     return optionInStock(variants, selected, key, value);
   };
 
+  // Saved picture for each color value (first active variant of that color with an image).
+  const optionImage = (key: string, value: string) =>
+    variants.find((v) => ((v.attributes || {}) as Record<string, string>)[key] === value && v.image_url)?.image_url ?? null;
+
+  const select = (key: string, value: string) =>
+    setSelected((prev) => ({ ...prev, [key]: prev[key] === value ? "" : value }));
+
   if (attributeKeys.length === 0) return null;
 
   return (
     <div className="space-y-4">
-      {attributeKeys.map((key) => (
+      {attributeKeys.map((key) => isColorKey(key) ? (
+        <div key={key} className="space-y-2.5">
+          <p className="text-sm text-foreground">
+            <span className="font-bold">{key.replace(/^ال(?=لون)/, "")}:</span>{" "}
+            <span className="text-muted-foreground">{selected[key] || "اختر"}</span>
+          </p>
+          <div className="flex flex-wrap gap-2.5">
+            {attributeOptions[key].map((value) => {
+              const isSelected = selected[key] === value;
+              const available = isOptionAvailable(key, value);
+              const image = optionImage(key, value);
+              return (
+                <button
+                  key={value}
+                  type="button"
+                  aria-pressed={isSelected && available}
+                  disabled={!available}
+                  title={!available ? OUT_OF_STOCK_LABEL : value}
+                  aria-label={!available ? `${value} — ${OUT_OF_STOCK_LABEL}` : value}
+                  onClick={() => select(key, value)}
+                  className={`relative flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-lg border bg-background p-1 transition-colors sm:h-16 sm:w-16 ${
+                    isSelected && available
+                      ? "border-selected ring-1 ring-selected"
+                      : "border-border hover:border-selected/60"
+                  } ${!available ? "cursor-not-allowed border-dashed opacity-50" : ""}`}
+                >
+                  {image ? (
+                    <img src={image} alt={value} loading="lazy" decoding="async" draggable={false} className="h-full w-full object-contain" />
+                  ) : (
+                    <span className="line-clamp-2 break-words text-center text-[11px] font-medium leading-tight text-foreground">{value}</span>
+                  )}
+                  {!available && (
+                    <LockKeyhole className="absolute bottom-0.5 left-0.5 h-3 w-3 text-muted-foreground" aria-hidden="true" />
+                  )}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      ) : (
         <div key={key} className="space-y-2">
           <span className="text-sm font-medium text-muted-foreground">{key}</span>
           <div className="flex flex-wrap gap-2">

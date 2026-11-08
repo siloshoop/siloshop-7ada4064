@@ -4825,6 +4825,10 @@ export type Database = {
           vendor_id: string
         }[]
       }
+      admin_search_staff_by_email: {
+        Args: { p_query: string }
+        Returns: string[]
+      }
       admin_set_coupon_active: {
         Args: { _coupon_id: string; _is_active: boolean; _reason?: string }
         Returns: undefined

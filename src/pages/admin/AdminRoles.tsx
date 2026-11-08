@@ -48,6 +48,7 @@ const AdminRoles = () => {
   const [selectedPermissions, setSelectedPermissions] = useState<string[]>([]);
   const [permissionMap, setPermissionMap] = useState<Record<string,string[]>>({});
   const [failure, setFailure] = useState("");
+  const [emailMatches, setEmailMatches] = useState<Set<string>>(new Set());
   const queryClient = useQueryClient();
 
   const load = async () => {
@@ -80,15 +81,29 @@ const AdminRoles = () => {
 
   useEffect(() => { void load(); }, []);
 
+  // Email search: checked on the server (Super Admin only); returns matching account ids, never emails.
+  useEffect(() => {
+    const q = search.trim();
+    setEmailMatches(new Set());
+    if (q.length < 3) return;
+    let cancelled = false;
+    const timer = setTimeout(() => {
+      void supabase.rpc("admin_search_staff_by_email", { p_query: q }).then(({ data, error }) => {
+        if (!cancelled && !error) setEmailMatches(new Set((data ?? []) as string[]));
+      });
+    }, 300);
+    return () => { cancelled = true; clearTimeout(timer); };
+  }, [search]);
+
   const grouped = useMemo(() => {
     const q = search.trim().toLowerCase();
     const map = new Map<string, AppRole[]>();
     for (const r of roles) map.set(r.user_id, [...(map.get(r.user_id) ?? []), r.role]);
     return [...map.entries()].filter(([id]) => {
       if (!q) return true;
-      return id.toLowerCase().includes(q) || (names[id] ?? "").toLowerCase().includes(q);
+      return id.toLowerCase().includes(q) || (names[id] ?? "").toLowerCase().includes(q) || emailMatches.has(id);
     });
-  }, [roles, search, names]);
+  }, [roles, search, names, emailMatches]);
 
   const apply = async (userId: string, r: AppRole, grant: boolean, why: string) => {
     setWorking(true);
@@ -131,7 +146,7 @@ const AdminRoles = () => {
             <Input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="بحث بالاسم أو المعرّف..."
+              placeholder="بحث بالاسم أو المعرّف أو البريد الإلكتروني..."
               className="pe-9"
             />
           </div>

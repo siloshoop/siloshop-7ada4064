@@ -414,6 +414,13 @@
       "when": 1794156271517,
       "tag": "0058_admin_set_account_type",
       "breakpoints": true
+    },
+    {
+      "idx": 59,
+      "version": "7",
+      "when": 1794210923987,
+      "tag": "0059_product_size_or_age_options",
+      "breakpoints": true
     }
   ]
 }

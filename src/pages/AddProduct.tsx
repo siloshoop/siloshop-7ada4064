@@ -20,7 +20,8 @@ import { Loader2, Upload, ChevronLeft, X } from "lucide-react";
 import { productNumbersSchema, firstIssue, friendlyDbError } from "@/lib/productValidation";
 import { useImageCropper } from "@/components/ImageCropDialog";
 import { IMAGE_FORMAT_HINT, IMAGE_SIZE_GUIDES, UploadError, describeUploadError, validateImageFile } from "@/lib/uploadErrors";
-import ProductColorsSizesEditor, { type ColorsSizesValue } from "@/components/seller/ProductColorsSizesEditor";
+import ProductColorsSizesEditor, { type ColorsSizesValue, emptyColorsSizes } from "@/components/seller/ProductColorsSizesEditor";
+import { productOptionColumns } from "@/lib/productOptions";
 import ProductFeaturesEditor from "@/components/product/ProductFeaturesEditor";
 import { normalizeFeatureRows, parseDimension, toFeatureRows, type FeatureRow } from "@/lib/productFeatures";
 import { syncColorSizeVariants } from "@/lib/productVariantsSync";
@@ -82,7 +83,7 @@ const AddProduct = () => {
   });
 
   const [featureRows, setFeatureRows] = useState<FeatureRow[]>([]);
-  const [csz, setCsz] = useState<ColorsSizesValue>({ colors: [], sizes: [], variants: [] });
+  const [csz, setCsz] = useState<ColorsSizesValue>(emptyColorsSizes);
 
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [imagePreviews, setImagePreviews] = useState<string[]>([]);
@@ -306,8 +307,7 @@ const AddProduct = () => {
         shipping_class: formData.shipping_class || null,
         warranty: formData.warranty.trim() || null,
         country_of_origin: formData.country_of_origin.trim() || null,
-        colors: csz.colors,
-        sizes: csz.sizes,
+        ...productOptionColumns(csz),
         slug: finalSlug || null,
         seo_title: formData.seo_title.trim() || null,
         seo_description: formData.seo_description.trim() || null,
@@ -320,7 +320,7 @@ const AddProduct = () => {
 
       if (inserted?.id && csz.variants.length > 0) {
         try {
-          await syncColorSizeVariants(inserted.id, csz.variants);
+          await syncColorSizeVariants(inserted.id, csz.variants, csz.mode);
         } catch (vErr) {
           toast({
             title: "تم حفظ المنتج",
@@ -785,7 +785,7 @@ const AddProduct = () => {
                 </AccordionItem>
 
                 <AccordionItem value="specs">
-                  <AccordionTrigger>الألوان والمقاسات (اختياري)</AccordionTrigger>
+                  <AccordionTrigger>الألوان والمقاس أو العمر (اختياري)</AccordionTrigger>
                   <AccordionContent className="space-y-4">
                     <ProductColorsSizesEditor value={csz} onChange={setCsz} />
                   </AccordionContent>

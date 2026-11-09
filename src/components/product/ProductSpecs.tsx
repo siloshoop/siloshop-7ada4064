@@ -32,6 +32,7 @@ const ProductSpecs = ({ product, vendorName, categoryName, brandName }: Props) =
   push("البائع", product.product_type === "platform" ? "سيلو شوب" : vendorName);
   push("نوع المنتج", product.product_type === "platform" ? "منتج مستورد (تركيا)" : "منتج بائع محلي");
   push("المقاسات المتوفرة", product.sizes);
+  push("العمر المناسب", product.age_ranges);
   push("الألوان المتوفرة", product.colors);
   push("الوزن", product.weight ? `${product.weight} كغ` : null);
   push(

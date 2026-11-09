@@ -36,6 +36,8 @@ import SimilarProducts from "@/components/SimilarProducts";
 import MarketPriceBar from "@/components/MarketPriceBar";
 import SeoHead from "@/components/SeoHead";
 import ProductVariantPicker from "@/components/product/ProductVariantPicker";
+import ProductSizeChart from "@/components/product/ProductSizeChart";
+import { SIZE_ATTR, choicePrompt } from "@/lib/productOptions";
 import type { Database } from "@/integrations/supabase/types";
 import { notifySync, useSyncListener } from "@/lib/uiSync";
 import NativeAdBanner from "@/components/NativeAdBanner";
@@ -371,6 +373,9 @@ const Product = ({ preview = false }: ProductPageProps) => {
 
   // Prepare images array for gallery
   const hasVariants = variants.length > 0;
+  const variantKeys = Array.from(
+    new Set(variants.flatMap((v) => Object.keys((v.attributes || {}) as Record<string, string>)))
+  );
   const basePrice = selectedVariant?.discount_price ?? selectedVariant?.price ?? product.price;
   // Active «عروض اليوم» deal is charged for real at checkout (effective_unit_price).
   const effectivePrice = applyDeal(Number(basePrice), dealPct);
@@ -625,8 +630,21 @@ const Product = ({ preview = false }: ProductPageProps) => {
               <div className="min-w-0 rounded-xl border bg-muted/20 p-3 sm:p-4">
                 <ProductVariantPicker variants={variants} onSelect={setSelectedVariant} />
                 {!selectedVariant && (
-                  <p className="text-xs text-muted-foreground pt-2">يرجى اختيار اللون والمقاس لعرض السعر والكمية المتوفرة</p>
+                  <p className="text-xs text-muted-foreground pt-2">{choicePrompt(variantKeys)}</p>
                 )}
+                {(product as any).size_chart && (
+                  <div className="pt-4">
+                    <ProductSizeChart
+                      chart={(product as any).size_chart}
+                      selectedSize={((selectedVariant?.attributes || {}) as Record<string, string>)[SIZE_ATTR] ?? null}
+                    />
+                  </div>
+                )}
+              </div>
+            )}
+            {!hasVariants && (product as any).size_chart && (
+              <div className="min-w-0 rounded-xl border bg-muted/20 p-3 sm:p-4">
+                <ProductSizeChart chart={(product as any).size_chart} />
               </div>
             )}
 

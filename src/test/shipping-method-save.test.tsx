@@ -12,7 +12,7 @@ vi.mock("@/components/Navbar", () => ({ default: () => null }));
 vi.mock("@/components/Footer", () => ({ default: () => null }));
 vi.mock("@/components/ImageCropDialog", () => ({ useImageCropper: () => ({ crop: vi.fn(), dialog: null }) }));
 vi.mock("@/components/seller/ProductVariantsManager", () => ({ default: () => null }));
-vi.mock("@/components/seller/ProductColorsSizesEditor", () => ({ default: () => null, buildVariantRows: () => [] }));
+vi.mock("@/components/seller/ProductColorsSizesEditor", () => ({ default: () => null, buildVariantRows: () => [], activeOptions: () => [], emptyColorsSizes: () => ({ colors: [], mode: "none", sizes: [], ages: [], sizeChart: null, variants: [] }) }));
 vi.mock("@/lib/productVariantsSync", () => ({ syncColorSizeVariants: async () => {}, COLOR_ATTR: "color", SIZE_ATTR: "size" }));
 vi.mock("@/integrations/supabase/client", () => ({ supabase: {
   from: (table: string) => {

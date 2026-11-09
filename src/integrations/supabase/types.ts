@@ -2681,6 +2681,7 @@ export type Database = {
       }
       products: {
         Row: {
+          age_ranges: string[]
           barcode: string | null
           brand_id: string | null
           category_id: string | null
@@ -2733,6 +2734,7 @@ export type Database = {
           shipping_weight: number | null
           ships_within_days: number | null
           short_description: string | null
+          size_chart: Json | null
           sizes: string[]
           sku: string | null
           slug: string | null
@@ -2751,6 +2753,7 @@ export type Database = {
           width_cm: number | null
         }
         Insert: {
+          age_ranges?: string[]
           barcode?: string | null
           brand_id?: string | null
           category_id?: string | null
@@ -2803,6 +2806,7 @@ export type Database = {
           shipping_weight?: number | null
           ships_within_days?: number | null
           short_description?: string | null
+          size_chart?: Json | null
           sizes?: string[]
           sku?: string | null
           slug?: string | null
@@ -2821,6 +2825,7 @@ export type Database = {
           width_cm?: number | null
         }
         Update: {
+          age_ranges?: string[]
           barcode?: string | null
           brand_id?: string | null
           category_id?: string | null
@@ -2873,6 +2878,7 @@ export type Database = {
           shipping_weight?: number | null
           ships_within_days?: number | null
           short_description?: string | null
+          size_chart?: Json | null
           sizes?: string[]
           sku?: string | null
           slug?: string | null

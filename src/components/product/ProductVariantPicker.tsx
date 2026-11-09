@@ -155,7 +155,10 @@ const ProductVariantPicker = ({ variants, onSelect }: ProductVariantPickerProps)
         </div>
       ) : (
         <div key={key} className="space-y-2">
-          <span className="text-sm font-medium text-muted-foreground">{key}</span>
+          <p className="text-sm text-foreground">
+            <span className="font-bold">{key}:</span>{" "}
+            <span className={selected[key] ? "font-semibold text-selected" : "text-muted-foreground"}>{selected[key] || "اختر"}</span>
+          </p>
           <div className="flex flex-wrap gap-2">
             {attributeOptions[key].map((value) => {
               const isSelected = selected[key] === value;

@@ -21,7 +21,8 @@ import { productNumbersSchema, firstIssue, friendlyDbError } from "@/lib/product
 import { useImageCropper } from "@/components/ImageCropDialog";
 import { IMAGE_FORMAT_HINT, IMAGE_SIZE_GUIDES, UploadError, describeUploadError, validateImageFile } from "@/lib/uploadErrors";
 import ProductVariantsManager from "@/components/seller/ProductVariantsManager";
-import ProductColorsSizesEditor, { type ColorsSizesValue, buildVariantRows } from "@/components/seller/ProductColorsSizesEditor";
+import ProductColorsSizesEditor, { type ColorsSizesValue, buildVariantRows, emptyColorsSizes, activeOptions } from "@/components/seller/ProductColorsSizesEditor";
+import { AGE_ATTR, inferOptionMode, parseSizeChart, productOptionColumns } from "@/lib/productOptions";
 import ProductFeaturesEditor from "@/components/product/ProductFeaturesEditor";
 import { normalizeFeatureRows, parseDimension, toFeatureRows, type FeatureRow } from "@/lib/productFeatures";
 import { syncColorSizeVariants, COLOR_ATTR, SIZE_ATTR } from "@/lib/productVariantsSync";
@@ -85,7 +86,7 @@ const EditProduct = () => {
   });
 
   const [featureRows, setFeatureRows] = useState<FeatureRow[]>([]);
-  const [csz, setCsz] = useState<ColorsSizesValue>({ colors: [], sizes: [], variants: [] });
+  const [csz, setCsz] = useState<ColorsSizesValue>(emptyColorsSizes);
 
   const [existingImages, setExistingImages] = useState<string[]>([]);
   const [newFiles, setNewFiles] = useState<File[]>([]);
@@ -164,12 +165,21 @@ const EditProduct = () => {
             const existingRows = (vRows ?? [])
               .map((v: any) => ({
                 color: (v.attributes || {})[COLOR_ATTR] || "",
-                size: (v.attributes || {})[SIZE_ATTR] || "",
+                size: (v.attributes || {})[SIZE_ATTR] || (v.attributes || {})[AGE_ATTR] || "",
                 stock_quantity: String(v.stock_quantity ?? 0),
                 price: v.price != null ? String(v.price) : "",
               }))
               .filter((r) => r.color || r.size);
-            setCsz({ colors, sizes, variants: buildVariantRows(colors, sizes, existingRows) });
+            const ages: string[] = Array.isArray(p.age_ranges) ? p.age_ranges : [];
+            const mode = inferOptionMode(sizes, ages);
+            const loaded = {
+              colors,
+              mode,
+              sizes: mode === "size" ? sizes : [],
+              ages: mode === "age" ? ages : [],
+              sizeChart: mode === "size" ? parseSizeChart(p.size_chart) : null,
+            };
+            setCsz({ ...loaded, variants: buildVariantRows(colors, activeOptions(loaded), existingRows) });
 
             // Set existing images
             const images = product.images || [];
@@ -398,8 +408,7 @@ const EditProduct = () => {
           shipping_class: formData.shipping_class || null,
           warranty: formData.warranty.trim() || null,
             country_of_origin: formData.country_of_origin.trim() || null,
-          colors: csz.colors,
-          sizes: csz.sizes,
+          ...productOptionColumns(csz),
           slug: finalSlug || null,
           seo_title: formData.seo_title.trim() || null,
           seo_description: formData.seo_description.trim() || null,
@@ -413,7 +422,7 @@ const EditProduct = () => {
 
       if (id) {
         try {
-          await syncColorSizeVariants(id, csz.variants);
+          await syncColorSizeVariants(id, csz.variants, csz.mode);
         } catch {
           toast({
             title: "تم تحديث المنتج",
@@ -931,7 +940,7 @@ const EditProduct = () => {
                 </AccordionItem>
 
                 <AccordionItem value="specs">
-                  <AccordionTrigger>الألوان والمقاسات (اختياري)</AccordionTrigger>
+                  <AccordionTrigger>الألوان والمقاس أو العمر (اختياري)</AccordionTrigger>
                   <AccordionContent className="space-y-4">
                     <ProductColorsSizesEditor value={csz} onChange={setCsz} />
                   </AccordionContent>

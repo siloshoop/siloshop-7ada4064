@@ -4647,6 +4647,7 @@ export type Database = {
           payment_method: string
           payment_status: string
           phone: string
+          sellers: Json
           shipping_address: string
           status: string
           total_amount: number

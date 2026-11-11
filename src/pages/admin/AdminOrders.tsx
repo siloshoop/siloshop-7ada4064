@@ -51,7 +51,14 @@ type OrderRow = {
   items_count: number;
   vendors_count: number;
   total_count: number;
+  sellers?: OrderSeller[] | null;
 };
+
+type OrderSeller = { id: string; name: string | null; store_name: string | null; email: string | null };
+
+const sellerName = (s: OrderSeller) => s.store_name || s.name || "—";
+const sellersCsv = (list?: OrderSeller[] | null) =>
+  (list || []).map((s) => [sellerName(s), s.email].filter(Boolean).join(" - ")).join(" | ");
 
 type OrderNote = {
   id: string;
@@ -249,6 +256,7 @@ const AdminOrders = () => {
     { key: "phone", label: "الهاتف" },
     { key: "items_count", label: "عدد المنتجات" },
     { key: "vendors_count", label: "عدد البائعين" },
+    { key: "sellers", label: "البائع والبريد" },
     { key: "courier_name", label: "شركة الشحن" },
   ];
 
@@ -279,7 +287,7 @@ const AdminOrders = () => {
       const headers = CSV_COLUMNS.map((c) => c.label);
       const csv = [
         headers.map(csvCell).join(","),
-        ...all.map((r) => CSV_COLUMNS.map(({ key }) => csvCell((r as any)[key])).join(",")),
+        ...all.map((r) => CSV_COLUMNS.map(({ key }) => csvCell(key === "sellers" ? sellersCsv(r.sellers) : (r as any)[key])).join(",")),
       ].join("\n");
       if (!all.length) throw new Error("لا توجد طلبات مطابقة للتصدير");
       const r = await exportFile("\uFEFF" + csv, `orders-${new Date().toISOString().slice(0, 10)}.csv`);
@@ -326,7 +334,7 @@ const AdminOrders = () => {
                 <Input
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
-                  placeholder="بحث برقم الطلب، الهاتف، الاسم، البريد..."
+                  placeholder="بحث برقم الطلب، الهاتف، الاسم، البريد، البائع..."
                   className="pr-9"
                 />
               </div>
@@ -360,11 +368,12 @@ const AdminOrders = () => {
                 <p className="py-12 text-center text-sm text-muted-foreground">لا توجد طلبات مطابقة.</p>
               ) : (
                 <div className="overflow-x-auto">
-                  <table className="w-full min-w-[760px] text-sm">
+                  <table className="w-full min-w-[920px] text-sm">
                     <thead className="bg-muted/40 text-muted-foreground">
                       <tr>
                         <th className="px-3 py-2 text-right">الطلب</th>
                         <th className="px-3 py-2 text-right">العميل</th>
+                        <th className="px-3 py-2 text-right">البائع</th>
                         <th className="px-3 py-2 text-right">الحالة</th>
                         <th className="px-3 py-2 text-right">الدفع</th>
                         <th className="px-3 py-2 text-right">المبلغ</th>
@@ -387,6 +396,23 @@ const AdminOrders = () => {
                               <span>{r.customer_name || "—"}</span>
                               <span className="text-xs text-muted-foreground">{r.customer_email || r.phone || ""}</span>
                             </div>
+                          </td>
+                          <td className="px-3 py-2">
+                            {r.sellers && r.sellers.length > 0 ? (
+                              <div className="flex flex-col gap-1.5">
+                                {r.sellers.map((s) => (
+                                  <div key={s.id} className="flex flex-col">
+                                    <span dir="auto">{sellerName(s)}</span>
+                                    {s.store_name && s.name && s.store_name !== s.name && (
+                                      <span dir="auto" className="text-[0.625rem] text-muted-foreground">{s.name}</span>
+                                    )}
+                                    {s.email && <span className="text-xs text-muted-foreground">{s.email}</span>}
+                                  </div>
+                                ))}
+                              </div>
+                            ) : (
+                              <span className="text-muted-foreground">—</span>
+                            )}
                           </td>
                           <td className="px-3 py-2"><OrderStatusBadge status={r.status} /></td>
                           <td className="px-3 py-2">

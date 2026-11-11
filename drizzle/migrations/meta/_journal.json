@@ -421,6 +421,13 @@
       "when": 1794210923987,
       "tag": "0059_product_size_or_age_options",
       "breakpoints": true
+    },
+    {
+      "idx": 60,
+      "version": "7",
+      "when": 1794376722436,
+      "tag": "0060_admin_order_list_sellers",
+      "breakpoints": true
     }
   ]
 }

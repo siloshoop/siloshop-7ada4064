@@ -18,7 +18,7 @@ const HomeCategories = () => {
     <section className="py-5" aria-label="تسوّق حسب الفئة">
       <div className="container px-4">
         <SectionHeader icon={LayoutGrid} eyebrow="الفئات" title="تسوّق حسب الفئة" href="/categories" />
-        <ul className="grid grid-cols-5 gap-1.5 min-[380px]:grid-cols-6 sm:grid-cols-8 sm:gap-2 lg:grid-cols-12">
+        <ul className="grid grid-cols-4 gap-1.5 sm:grid-cols-8 sm:gap-2 lg:grid-cols-12">
           {isLoading
             ? Array.from({ length: 12 }, (_, i) => (
                 <li key={i} aria-hidden className="h-[80px] animate-pulse rounded-xl border border-border/60 bg-muted sm:h-[92px] sm:rounded-2xl" />

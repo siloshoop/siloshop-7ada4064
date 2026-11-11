@@ -1,18 +1,16 @@
 import { useEffect, useRef, useState } from "react";
 import { ChevronLeft, ChevronRight, Pause, Play } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
 import CarouselSlide from "@/components/home/CarouselSlide";
 import {
-  DEFAULT_CAROUSEL_SETTINGS, adToSlide, fetchCarouselSettings, fetchLiveCarouselAds, trackCarouselEvent,
+  DEFAULT_CAROUSEL_SETTINGS, adToSlide, fetchCarouselSettings, fetchLiveCarouselAds, msUntilNextAdExpiry, trackCarouselEvent,
   type CarouselSettings, type CarouselSlideData,
 } from "@/lib/homeCarousel";
 
-interface Item { id: string; name: string; price: number; currency: string | null; image_url: string | null }
-
 /**
- * Compact auto-sliding homepage carousel. Shows the owner-managed live ads; when none are
- * scheduled it keeps the previous strip of 6 best-selling active products.
+ * Compact auto-sliding homepage carousel. Shows only the owner-managed live ads: nothing is
+ * filled in automatically, the section is hidden when no ad is live, and each ad leaves the
+ * screen the moment its end date passes (even if the page stays open).
  */
 export default function AnimatedProductCarousel() {
   const [items, setItems] = useState<CarouselSlideData[]>([]);
@@ -27,6 +25,7 @@ export default function AnimatedProductCarousel() {
 
   useEffect(() => {
     let alive = true;
+    let expiryTimer: number | undefined;
     const load = async () => {
       const [ads, loadedSettings] = await Promise.all([
         fetchLiveCarouselAds().catch(() => []),
@@ -35,21 +34,25 @@ export default function AnimatedProductCarousel() {
       if (!alive) return;
       setSettings(loadedSettings);
       setUserPaused(!loadedSettings.autoplay);
-      if (ads.length) { setItems(ads.map(adToSlide)); setIndex(0); setLoaded(true); return; }
-      const { data } = await supabase.from("products").select("id,name,price,currency,image_url")
-        .eq("is_active", true).order("sold_count", { ascending: false }).limit(6);
-      if (!alive) return;
-      setItems(((data ?? []) as Item[]).map((p) => ({
-        key: p.id, adId: null, title: p.name, description: null, imageUrl: p.image_url,
-        price: p.price, currency: p.currency, href: `/product/${p.id}`,
-      })));
+      setItems(ads.map(adToSlide));
       setIndex(0);
       setLoaded(true);
+      window.clearTimeout(expiryTimer);
+      const wait = msUntilNextAdExpiry(ads);
+      // Re-read when the next ad ends so it disappears on time.
+      if (wait !== null) expiryTimer = window.setTimeout(() => void load(), wait + 500);
     };
     void load();
     const refresh = () => void load();
+    const onVisible = () => { if (document.visibilityState === "visible") void load(); };
     window.addEventListener("activation-changed", refresh);
-    return () => { alive = false; window.removeEventListener("activation-changed", refresh); };
+    document.addEventListener("visibilitychange", onVisible);
+    return () => {
+      alive = false;
+      window.clearTimeout(expiryTimer);
+      window.removeEventListener("activation-changed", refresh);
+      document.removeEventListener("visibilitychange", onVisible);
+    };
   }, []);
 
   useEffect(() => {

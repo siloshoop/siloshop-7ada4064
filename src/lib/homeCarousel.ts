@@ -11,7 +11,7 @@ export const MAX_SLIDE_SECONDS = 20;
 export interface CarouselSettings { autoplay: boolean; slide_duration_ms: number }
 export const DEFAULT_CAROUSEL_SETTINGS: CarouselSettings = { autoplay: true, slide_duration_ms: 4500 };
 
-/** One slide as rendered on the homepage (ads and the best-seller fallback share it). */
+/** One slide as rendered on the homepage; only owner-created ads become slides. */
 export interface CarouselSlideData {
   key: string;
   adId: string | null;
@@ -51,6 +51,24 @@ export const isLiveCarouselAd = (ad: Pick<CarouselAdRow, "is_active" | "start_da
 /** Display order: lower number first, then newest. */
 export const sortCarouselAds = <T extends { priority: number; start_date?: string | null; id: string }>(ads: T[]) =>
   [...ads].sort((a, b) => a.priority - b.priority || a.id.localeCompare(b.id));
+
+/** Longest delay browsers accept for setTimeout (~24.8 days). */
+const MAX_TIMER_MS = 2_147_483_647;
+
+/**
+ * Milliseconds until the first of these ads reaches its end date (it must disappear then),
+ * or null when none of them ends. Never negative.
+ */
+export function msUntilNextAdExpiry(ads: Array<{ end_date: string | null }>, now = Date.now()): number | null {
+  let next: number | null = null;
+  for (const ad of ads) {
+    if (!ad.end_date) continue;
+    const end = Date.parse(ad.end_date);
+    if (!Number.isFinite(end)) continue;
+    if (next === null || end < next) next = end;
+  }
+  return next === null ? null : Math.min(MAX_TIMER_MS, Math.max(0, next - now));
+}
 
 export async function fetchLiveCarouselAds(): Promise<CarouselAdRow[]> {
   const now = new Date().toISOString();

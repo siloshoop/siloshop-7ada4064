@@ -4,6 +4,7 @@ import { ArrowLeft, Megaphone } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { isInternalAdPath } from "@/lib/adSchedule";
+import { msUntilNextAdExpiry } from "@/lib/homeCarousel";
 
 export type NativeAdPlacement = "home" | "category" | "search" | "product";
 
@@ -15,6 +16,7 @@ interface NativeAd {
   cta_text: string;
   cta_url: string | null;
   sponsor_name: string;
+  end_date: string | null;
 }
 
 interface NativeAdBannerProps {
@@ -31,7 +33,7 @@ const NativeAdBanner = ({ placement, className = "" }: NativeAdBannerProps) => {
     const now = new Date().toISOString();
     const { data, error } = await supabase
       .from("native_ads")
-      .select("id,title,description,image_url,cta_text,cta_url,sponsor_name")
+      .select("id,title,description,image_url,cta_text,cta_url,sponsor_name,end_date")
       .eq("placement", placement)
       .eq("is_active", true)
       .or(`start_date.is.null,start_date.lte.${now}`)
@@ -49,6 +51,14 @@ const NativeAdBanner = ({ placement, className = "" }: NativeAdBannerProps) => {
     setAd(data);
     setImageFailed(false);
   }, [placement]);
+
+  // Hide the ad the moment its end date passes, even if the page stays open.
+  useEffect(() => {
+    const wait = ad ? msUntilNextAdExpiry([ad]) : null;
+    if (wait === null) return;
+    const t = window.setTimeout(() => { setAd(null); void loadAd(); }, wait + 500);
+    return () => window.clearTimeout(t);
+  }, [ad, loadAd]);
 
   useEffect(() => {
     void loadAd();

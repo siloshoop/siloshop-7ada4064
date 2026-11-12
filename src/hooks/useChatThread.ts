@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import { CHAT_PHONE_BLOCKED_TEXT, chatTextHasPhone } from "@/lib/chatPhone";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { useStaffRole } from "@/hooks/useStaffRole";
 import { useToast } from "@/hooks/use-toast";
 import { uploadChatFiles, type ChatAttachment } from "@/lib/chatFiles";
 
@@ -72,6 +74,7 @@ const ERROR_TEXT: Record<string, string> = {
   product_not_available: "المنتج غير متاح للمراسلة؛ استخدم المحادثة من طلبك إن كنت قد اشتريته",
   product_vendor_mismatch: "هذا المنتج لا يتبع البائع المحدد",
   vendor_required: "يجب اختيار بائع من الطلب",
+  phone_not_allowed: CHAT_PHONE_BLOCKED_TEXT,
 };
 
 export const chatErrorText = (message?: string) => {
@@ -83,6 +86,8 @@ export const chatErrorText = (message?: string) => {
 /** Full realtime chat thread: messages, pagination, typing, presence, actions. */
 export const useChatThread = (conversationId: string | null) => {
   const { user } = useAuth();
+  // Platform staff may share numbers; buyers and sellers never can (enforced by the database).
+  const isStaff = !!useStaffRole().role;
   const { toast } = useToast();
   const [header, setHeader] = useState<ChatHeader | null>(null);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -277,6 +282,10 @@ export const useChatThread = (conversationId: string | null) => {
   const send = useCallback(
     async (text: string, files: File[], replyToId: string | null) => {
       if (!conversationId) return false;
+      if (chatTextHasPhone(text) && !isStaff) {
+        toast({ title: "تعذر الإرسال", description: CHAT_PHONE_BLOCKED_TEXT, variant: "destructive" });
+        return false;
+      }
       setSending(true);
       try {
         let attachments: unknown[] = [];
@@ -316,11 +325,15 @@ export const useChatThread = (conversationId: string | null) => {
         setSending(false);
       }
     },
-    [conversationId, fetchPage, toast],
+    [conversationId, fetchPage, toast, isStaff],
   );
 
   const editMessage = useCallback(
     async (id: string, content: string) => {
+      if (chatTextHasPhone(content) && !isStaff) {
+        toast({ title: "تعذر التعديل", description: CHAT_PHONE_BLOCKED_TEXT, variant: "destructive" });
+        return false;
+      }
       const { error } = await supabase.rpc("edit_chat_message", { p_message_id: id, p_content: content });
       if (error) {
         toast({ title: "تعذر التعديل", description: chatErrorText(error.message), variant: "destructive" });
@@ -328,7 +341,7 @@ export const useChatThread = (conversationId: string | null) => {
       }
       return true;
     },
-    [toast],
+    [toast, isStaff],
   );
 
   const deleteMessage = useCallback(

@@ -395,7 +395,6 @@ const Store = () => {
                   </p>
                   <dl className="grid gap-2 sm:grid-cols-2">
                     <div className="min-w-0 rounded-lg border p-3 sm:col-span-2"><dt className="text-muted-foreground">محافظات الشحن</dt><dd className="mt-1 break-words font-medium">{shippingRegionsLabel(shippingRegions.data?.find((r) => r.vendor_id === vendorId))}</dd></div>
-                    {contact?.contact_phone && <div className="flex min-w-0 flex-wrap justify-between gap-2 rounded-lg border p-3"><dt className="flex items-center gap-1 text-muted-foreground"><Phone className="h-3.5 w-3.5" />الهاتف</dt><dd dir="ltr" className="font-medium"><a href={`tel:${contact.contact_phone.replace(/[^+0-9]/g, "")}`}>{contact.contact_phone}</a></dd></div>}
                     {contact?.address && <div className="min-w-0 rounded-lg border p-3 sm:col-span-2"><dt className="text-muted-foreground">العنوان</dt><dd className="mt-1 whitespace-pre-wrap break-words font-medium">{contact.address}</dd></div>}
                     {profile.owner_name && (
                       <div className="flex justify-between rounded-lg border p-3">

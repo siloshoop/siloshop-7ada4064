@@ -4950,6 +4950,7 @@ export type Database = {
         Args: { _order_id: string; _reason: string }
         Returns: undefined
       }
+      chat_text_has_phone: { Args: { _t: string }; Returns: boolean }
       chat_unread_total: { Args: never; Returns: number }
       check_contact_rate_limit: {
         Args: { p_email_hash: string }

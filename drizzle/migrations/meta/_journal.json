@@ -428,6 +428,13 @@
       "when": 1794376722436,
       "tag": "0060_admin_order_list_sellers",
       "breakpoints": true
+    },
+    {
+      "idx": 61,
+      "version": "7",
+      "when": 1794468870956,
+      "tag": "0061_hide_phones_block_chat_phones",
+      "breakpoints": true
     }
   ]
 }

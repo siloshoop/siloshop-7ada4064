@@ -195,6 +195,7 @@ const SellerStore = () => {
               <div className="space-y-1.5">
                 <Label htmlFor="contact_phone">الهاتف</Label>
                 <Input id="contact_phone" type="tel" maxLength={30} dir="ltr" value={form.contact_phone ?? ""} onChange={set("contact_phone")} />
+                <p className="text-xs text-muted-foreground">يظهر للإدارة فقط، ولا يظهر للمشترين أو البائعين الآخرين.</p>
               </div>
             </div>
             <div className="grid gap-3 sm:grid-cols-2">

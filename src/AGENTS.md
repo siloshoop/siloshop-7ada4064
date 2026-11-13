@@ -6,3 +6,4 @@
 - Bundle the Cairo font via @fontsource-variable (no Google Fonts link) so first paint never waits on a third-party host and the Android app needs no font download.
 - useCompareProducts shares only in-flight account reads and drops them on every saved change; completed lists are never reused.
 - A product's second option is size or age, never both: src/lib/productOptions.ts decides the saved columns and variant attribute (المقاس/العمر), and database checks reject mixed products/variants, so buyers always choose through the one existing variant picker and order labels.
+- Buyer–seller chat rejects phone numbers in the database (public.chat_text_has_phone via a messages trigger; staff exempt); src/lib/chatPhone.ts mirrors the same rules only for instant feedback, so both must change together.

@@ -28,7 +28,8 @@ const keyOf = (a: Record<string, any>) => {
 export const syncColorSizeVariants = async (
   productId: string,
   rows: VariantRow[],
-  mode: ProductOptionMode = "size"
+  mode: ProductOptionMode = "size",
+  colorImages: Record<string, string> = {}
 ) => {
   const { data: existing, error } = await supabase
     .from("product_variants")
@@ -61,6 +62,8 @@ export const syncColorSizeVariants = async (
       attributes,
       stock_quantity: Math.max(0, parseInt(row.stock_quantity, 10) || 0),
       price: row.price.trim() ? Math.max(0, Number(row.price)) : null,
+      // Each color's own picture travels with every size/age of that color into cart and orders.
+      image_url: (row.color && colorImages[row.color]) || null,
       sort_order: i,
       is_active: true,
     };

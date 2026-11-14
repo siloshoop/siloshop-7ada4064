@@ -45,6 +45,8 @@ import { friendlyDbError } from "@/lib/productValidation";
 import { fetchActiveDeals, applyDeal } from "@/lib/dealPricing";
 import { useCompareProducts } from "@/hooks/useCompareProducts";
 import { OUT_OF_STOCK_LABEL, availableProductStock, variantInStock } from "@/lib/stockAvailability";
+import ProductColorAlternatives from "@/components/product/ProductColorAlternatives";
+import { galleryImages } from "@/lib/productGallery";
 
 type ProductVariant = Database["public"]["Tables"]["product_variants"]["Row"];
 interface Product {
@@ -130,6 +132,8 @@ const Product = ({ preview = false }: ProductPageProps) => {
   const [vendorStats, setVendorStats] = useState<{ avg: number; count: number }>({ avg: 0, count: 0 });
   const [variants, setVariants] = useState<ProductVariant[]>([]);
   const [selectedVariant, setSelectedVariant] = useState<ProductVariant | null>(null);
+  // Picture of the color the buyer picked, shown first even before a size/age is chosen.
+  const [colorImage, setColorImage] = useState<string | null>(null);
   const viewTrackedRef = useState(() => ({ current: "" }))[0];
 
   // Uses the same saved compare list as product cards (account or guest storage).
@@ -390,13 +394,8 @@ const Product = ({ preview = false }: ProductPageProps) => {
     ? Math.round(((effectiveOriginalPrice - effectivePrice) / effectiveOriginalPrice) * 100)
     : 0;
 
-  const productImages = selectedVariant?.image_url
-    ? [selectedVariant.image_url, ...(product.images || [])]
-    : product.images && product.images.length > 0
-    ? product.images
-    : product.image_url
-    ? [product.image_url]
-    : [];
+  const leadImage = selectedVariant?.image_url || colorImage;
+  const productImages = galleryImages(leadImage, product.images, product.image_url);
 
   const dimensions = formatDimensions(product.length_cm, product.width_cm, product.height_cm);
 
@@ -492,6 +491,7 @@ const Product = ({ preview = false }: ProductPageProps) => {
             )}
             <div className="relative lg:sticky lg:top-24">
               <ImageGallery
+                key={`${product.id}:${leadImage ?? ""}`}
                 images={productImages}
                 productName={product.name}
                 videoUrl={product.video_url}
@@ -625,10 +625,17 @@ const Product = ({ preview = false }: ProductPageProps) => {
               )}
             </div>
 
+            {/* Linked color products */}
+            {(product as any).color_group_id && (
+              <div className="min-w-0 rounded-xl border bg-muted/20 p-3 sm:p-4">
+                <ProductColorAlternatives productId={product.id} groupId={(product as any).color_group_id} />
+              </div>
+            )}
+
             {/* Variant picker */}
             {hasVariants && (
               <div className="min-w-0 rounded-xl border bg-muted/20 p-3 sm:p-4">
-                <ProductVariantPicker variants={variants} onSelect={setSelectedVariant} />
+                <ProductVariantPicker key={product.id} variants={variants} onSelect={setSelectedVariant} onColorImage={setColorImage} />
                 {!selectedVariant && (
                   <p className="text-xs text-muted-foreground pt-2">{choicePrompt(variantKeys)}</p>
                 )}

@@ -10,12 +10,14 @@ type ProductVariant = Database["public"]["Tables"]["product_variants"]["Row"];
 interface ProductVariantPickerProps {
   variants: ProductVariant[];
   onSelect: (variant: ProductVariant | null) => void;
+  /** Saved picture of the chosen color (null when none is chosen or it has no picture). */
+  onColorImage?: (image: string | null) => void;
 }
 
 /** Attribute keys shown as picture thumbnails (Arabic «اللون» or English color). */
 const isColorKey = (key: string) => /لون|colou?r/i.test(key);
 
-const ProductVariantPicker = ({ variants, onSelect }: ProductVariantPickerProps) => {
+const ProductVariantPicker = ({ variants, onSelect, onColorImage }: ProductVariantPickerProps) => {
   // Collect attribute keys (Arabic names) in stable order
   const attributeKeys = useMemo(() => {
     const keys: string[] = [];
@@ -85,6 +87,12 @@ const ProductVariantPicker = ({ variants, onSelect }: ProductVariantPickerProps)
   const optionImage = (key: string, value: string) =>
     variants.find((v) => ((v.attributes || {}) as Record<string, string>)[key] === value && v.image_url)?.image_url ?? null;
 
+  const chosenColor = colorKey ? selected[colorKey] || "" : "";
+  useEffect(() => {
+    onColorImage?.(colorKey && chosenColor ? optionImage(colorKey, chosenColor) : null);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [chosenColor, colorKey, variants]);
+
   const select = (key: string, value: string) =>
     setSelected((prev) => ({ ...prev, [key]: prev[key] === value ? "" : value }));
 
@@ -102,8 +110,9 @@ const ProductVariantPicker = ({ variants, onSelect }: ProductVariantPickerProps)
             {attributeOptions[key].map((value) => {
               const isSelected = selected[key] === value;
               const available = isOptionAvailable(key, value);
-              const swatch = colorSwatch(value);
-              const image = swatch ? null : optionImage(key, value);
+              // A color's own uploaded picture wins over the generic color dot.
+              const image = optionImage(key, value);
+              const swatch = image ? null : colorSwatch(value);
               const popular = popularColor === value;
               return (
                 <button

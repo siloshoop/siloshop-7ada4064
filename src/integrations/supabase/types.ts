@@ -2686,6 +2686,7 @@ export type Database = {
           brand_id: string | null
           category_id: string | null
           clicks_count: number
+          color_group_id: string | null
           colors: string[]
           country_of_origin: string | null
           created_at: string | null
@@ -2758,6 +2759,7 @@ export type Database = {
           brand_id?: string | null
           category_id?: string | null
           clicks_count?: number
+          color_group_id?: string | null
           colors?: string[]
           country_of_origin?: string | null
           created_at?: string | null
@@ -2830,6 +2832,7 @@ export type Database = {
           brand_id?: string | null
           category_id?: string | null
           clicks_count?: number
+          color_group_id?: string | null
           colors?: string[]
           country_of_origin?: string | null
           created_at?: string | null
@@ -5626,6 +5629,10 @@ export type Database = {
           _user_agent?: string
         }
         Returns: undefined
+      }
+      set_product_color_links: {
+        Args: { _linked_ids: string[]; _product_id: string }
+        Returns: string
       }
       set_staff_permissions: {
         Args: { _permissions: string[]; _user_id: string }

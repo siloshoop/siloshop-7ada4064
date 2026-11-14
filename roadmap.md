@@ -302,3 +302,10 @@
 - [x] Measure real-visitor speed, backend health, slow queries, bundle size, images
 - [x] Fix root causes found (no design/business-logic changes)
 - [x] Re-measure before/after and report (lab only; real Android/Syrian networks not testable here)
+
+## Color images, linked colors and platform product form parity
+- [ ] Per-color images in the shared colors/sizes editor (seller + platform)
+- [ ] Link products as color alternatives (Trendyol-style thumbnails on product page)
+- [ ] Orders show exact color, size and color image (seller, buyer, admin)
+- [ ] Platform product add/edit reuses the seller Add/Edit pages (platform shipping/payment kept, super_admin only)
+- [ ] Tests, build, end-to-end check

@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Plus, X, RefreshCw, LockKeyhole } from "lucide-react";
+import ColorImagesEditor from "@/components/seller/ColorImagesEditor";
 import {
   AGE_PRESETS,
   MAX_MEASUREMENT_COLUMNS,
@@ -29,6 +30,8 @@ export interface ColorsSizesValue {
   ages: string[];
   /** Optional per-size measurements in cm (size mode only). */
   sizeChart: SizeChart | null;
+  /** Optional picture per color (public URL), saved on that color's variants. */
+  colorImages: Record<string, string>;
   variants: VariantRow[];
 }
 
@@ -38,6 +41,7 @@ export const emptyColorsSizes = (): ColorsSizesValue => ({
   sizes: [],
   ages: [],
   sizeChart: null,
+  colorImages: {},
   variants: [],
 });
 
@@ -228,7 +232,10 @@ const ProductColorsSizesEditor = ({ value, onChange }: Props) => {
                 <button
                   type="button"
                   aria-label="حذف اللون"
-                  onClick={() => set({ colors: value.colors.filter((x) => x !== c) })}
+                  onClick={() => {
+                    const { [c]: _removed, ...colorImages } = value.colorImages ?? {};
+                    set({ colors: value.colors.filter((x) => x !== c), colorImages });
+                  }}
                 >
                   <X className="h-3 w-3" />
                 </button>
@@ -237,6 +244,12 @@ const ProductColorsSizesEditor = ({ value, onChange }: Props) => {
           </div>
         )}
       </div>
+
+      <ColorImagesEditor
+        colors={value.colors}
+        value={value.colorImages ?? {}}
+        onChange={(colorImages) => onChange({ ...value, colorImages })}
+      />
 
       {/* Size OR age */}
       <div className="space-y-2">

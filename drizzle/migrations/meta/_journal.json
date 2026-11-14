@@ -435,6 +435,13 @@
       "when": 1794468870956,
       "tag": "0061_hide_phones_block_chat_phones",
       "breakpoints": true
+    },
+    {
+      "idx": 62,
+      "version": "7",
+      "when": 1794635009965,
+      "tag": "0062_product_color_links_and_admin_order_variants",
+      "breakpoints": true
     }
   ]
 }

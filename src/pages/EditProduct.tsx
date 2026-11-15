@@ -26,6 +26,10 @@ import { AGE_ATTR, inferOptionMode, parseSizeChart, productOptionColumns } from 
 import ProductFeaturesEditor from "@/components/product/ProductFeaturesEditor";
 import { normalizeFeatureRows, parseDimension, toFeatureRows, type FeatureRow } from "@/lib/productFeatures";
 import { syncColorSizeVariants, COLOR_ATTR, SIZE_ATTR } from "@/lib/productVariantsSync";
+import PlatformProductSettingsFields from "@/components/admin/PlatformProductSettingsFields";
+import { emptyPlatformSettings, platformProductColumns, platformSettingsFromProduct, validatePlatformSettings, type PlatformSettings } from "@/lib/platformProductSettings";
+import ColorLinksEditor from "@/components/seller/ColorLinksEditor";
+import { loadColorLinkIds, saveColorLinks } from "@/lib/productColorLinks";
 
 const SHIPPING_CLASSES = [
   { value: "عادي", label: "عادي" },
@@ -41,7 +45,12 @@ const slugify = (input: string) =>
     .replace(/[^a-z0-9\u0600-\u06FF]+/g, "-")
     .replace(/^-+|-+$/g, "");
 
-const EditProduct = () => {
+interface EditProductProps {
+  /** Owner-managed platform product: same form, plus platform shipping/payment settings. */
+  platform?: boolean;
+}
+
+const EditProduct = ({ platform = false }: EditProductProps) => {
   const { id } = useParams();
   const { user, loading: authLoading } = useAuth();
   const [categories, setCategories] = useState<any[]>([]);
@@ -87,6 +96,9 @@ const EditProduct = () => {
 
   const [featureRows, setFeatureRows] = useState<FeatureRow[]>([]);
   const [csz, setCsz] = useState<ColorsSizesValue>(emptyColorsSizes);
+  const [platformSettings, setPlatformSettings] = useState<PlatformSettings>(emptyPlatformSettings);
+  const [colorLinks, setColorLinks] = useState<string[]>([]);
+  const backPath = platform ? "/admin/platform-products" : "/dashboard";
 
   const [existingImages, setExistingImages] = useState<string[]>([]);
   const [newFiles, setNewFiles] = useState<File[]>([]);
@@ -111,12 +123,12 @@ const EditProduct = () => {
 
         // Fetch product
         if (id && user) {
-          const { data: product, error } = await supabase
-            .from("products")
-            .select("*")
-            .eq("id", id)
-            .eq("vendor_id", user.id)
-            .single();
+          const base = supabase.from("products").select("*").eq("id", id);
+          // Sellers open only their own products; the owner opens platform products.
+          const { data: product, error } = await (platform
+            ? base.eq("product_type", "platform")
+            : base.eq("vendor_id", user.id)
+          ).single();
 
           if (error) throw error;
 
@@ -154,12 +166,14 @@ const EditProduct = () => {
             });
 
             setFeatureRows(toFeatureRows(p.features));
+            if (platform) setPlatformSettings(platformSettingsFromProduct(p));
+            loadColorLinkIds(id).then(setColorLinks, () => setColorLinks([]));
 
             const colors: string[] = Array.isArray(p.colors) ? p.colors : [];
             const sizes: string[] = Array.isArray(p.sizes) ? p.sizes : [];
             const { data: vRows } = await supabase
               .from("product_variants")
-              .select("attributes, stock_quantity, price")
+              .select("attributes, stock_quantity, price, image_url")
               .eq("product_id", id)
               .order("sort_order");
             const existingRows = (vRows ?? [])
@@ -170,6 +184,11 @@ const EditProduct = () => {
                 price: v.price != null ? String(v.price) : "",
               }))
               .filter((r) => r.color || r.size);
+            const colorImages: Record<string, string> = {};
+            for (const v of (vRows ?? []) as any[]) {
+              const c = (v.attributes || {})[COLOR_ATTR];
+              if (c && v.image_url && !colorImages[c]) colorImages[c] = v.image_url;
+            }
             const ages: string[] = Array.isArray(p.age_ranges) ? p.age_ranges : [];
             const mode = inferOptionMode(sizes, ages);
             const loaded = {
@@ -178,6 +197,7 @@ const EditProduct = () => {
               sizes: mode === "size" ? sizes : [],
               ages: mode === "age" ? ages : [],
               sizeChart: mode === "size" ? parseSizeChart(p.size_chart) : null,
+              colorImages,
             };
             setCsz({ ...loaded, variants: buildVariantRows(colors, activeOptions(loaded), existingRows) });
 
@@ -195,14 +215,14 @@ const EditProduct = () => {
           description: error.message,
           variant: "destructive",
         });
-        navigate("/dashboard");
+        navigate(backPath);
       } finally {
         setFetching(false);
       }
     };
 
     fetchData();
-  }, [id, user, navigate, toast]);
+  }, [id, user, navigate, toast, platform]);
 
   // Filter subcategories when category changes
   useEffect(() => {
@@ -301,6 +321,13 @@ const EditProduct = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user || !id) return;
+    if (platform) {
+      const platformError = validatePlatformSettings(platformSettings);
+      if (platformError) {
+        toast({ title: "إعدادات منتج المنصة", description: platformError, variant: "destructive" });
+        return;
+      }
+    }
 
     setLoading(true);
     try {
@@ -414,15 +441,16 @@ const EditProduct = () => {
           seo_description: formData.seo_description.trim() || null,
           seo_keywords: formData.seo_keywords.trim() || null,
           updated_at: new Date().toISOString(),
+          ...(platform ? platformProductColumns(platformSettings) : {}),
         } as any)
         .eq("id", id)
-        .eq("vendor_id", user.id);
+        .eq(platform ? "product_type" : "vendor_id", platform ? "platform" : user.id);
 
       if (error) throw error;
 
       if (id) {
         try {
-          await syncColorSizeVariants(id, csz.variants, csz.mode);
+          await syncColorSizeVariants(id, csz.variants, csz.mode, csz.colorImages);
         } catch {
           toast({
             title: "تم تحديث المنتج",
@@ -434,8 +462,11 @@ const EditProduct = () => {
 
 
 
+      const linkError = await saveColorLinks(id, colorLinks);
+      if (linkError) toast({ title: "تم تحديث المنتج", description: linkError, variant: "destructive" });
+
       let reviewAgain = false;
-      if (id) {
+      if (id && !platform) {
         const { data: after } = await supabase
           .from("products")
           .select("moderation_status")
@@ -451,7 +482,7 @@ const EditProduct = () => {
           : "تم تحديث المنتج بنجاح",
       });
 
-      navigate("/dashboard");
+      navigate(backPath);
     } catch (error) {
       toast({
         title: "خطأ",
@@ -491,7 +522,7 @@ const EditProduct = () => {
           : "لا يمكن حذف هذا المنتج نهائياً لأنه مرتبط بطلبات عملاء موجودة. تمت أرشفته بدلاً من ذلك.",
     });
 
-    navigate("/dashboard");
+    navigate(backPath);
   };
 
   if (authLoading || fetching) {
@@ -512,7 +543,7 @@ const EditProduct = () => {
       <main className="container min-w-0 flex-1 px-3 py-6 sm:px-4 sm:py-8">
         <Card className="mx-auto min-w-0 max-w-3xl">
           <CardHeader className="p-4 sm:p-6">
-            <CardTitle className="text-2xl leading-tight sm:text-3xl">تعديل المنتج</CardTitle>
+            <CardTitle className="text-2xl leading-tight sm:text-3xl">{platform ? "تعديل منتج المنصة" : "تعديل المنتج"}</CardTitle>
             <CardDescription>تحديث معلومات وصور المنتج</CardDescription>
           </CardHeader>
           <CardContent className="min-w-0 p-4 pt-0 sm:p-6 sm:pt-0">
@@ -835,6 +866,10 @@ const EditProduct = () => {
                 <AccordionItem value="shipping">
                   <AccordionTrigger>الشحن</AccordionTrigger>
                   <AccordionContent className="space-y-4">
+                    {platform ? (
+                      <PlatformProductSettingsFields value={platformSettings} onChange={setPlatformSettings} currency={formData.currency} />
+                    ) : (
+                    <>
                     <div className="space-y-2">
                       <Label>طريقة الشحن</Label>
                       <RadioGroup
@@ -878,6 +913,9 @@ const EditProduct = () => {
                           placeholder="مثال: 5000"
                         />
                       </div>
+                    )}
+
+                    </>
                     )}
 
                     <div className="space-y-2">
@@ -943,6 +981,7 @@ const EditProduct = () => {
                   <AccordionTrigger>الألوان والمقاس أو العمر (اختياري)</AccordionTrigger>
                   <AccordionContent className="space-y-4">
                     <ProductColorsSizesEditor value={csz} onChange={setCsz} />
+                    <ColorLinksEditor productId={id} platform={platform} value={colorLinks} onChange={setColorLinks} />
                   </AccordionContent>
                 </AccordionItem>
 
@@ -1024,7 +1063,7 @@ const EditProduct = () => {
                 <Button
                   type="button"
                   variant="outline"
-                  onClick={() => navigate("/dashboard")}
+                  onClick={() => navigate(backPath)}
                   className="min-w-0 whitespace-normal"
                   disabled={loading}
                 >

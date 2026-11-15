@@ -110,9 +110,8 @@ const ProductVariantPicker = ({ variants, onSelect, onColorImage }: ProductVaria
             {attributeOptions[key].map((value) => {
               const isSelected = selected[key] === value;
               const available = isOptionAvailable(key, value);
-              // A color's own uploaded picture wins over the generic color dot.
-              const image = optionImage(key, value);
-              const swatch = image ? null : colorSwatch(value);
+              const swatch = colorSwatch(value);
+              const image = swatch ? null : optionImage(key, value);
               const popular = popularColor === value;
               return (
                 <button

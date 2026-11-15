@@ -77,3 +77,17 @@ describe("size buttons", () => {
     expect(screen.getByRole("button", { name: "L" })).not.toHaveClass("border-selected");
   });
 });
+
+describe("color pictures", () => {
+  it("reports the chosen color's own picture so the gallery can show it first", () => {
+    rpc.mockResolvedValue({ data: null, error: null });
+    const onColorImage = vi.fn();
+    const pink = { ...variant("a", { اللون: "وردي", المقاس: "M" }), image_url: "https://example.com/pink.jpg" };
+    const blue = { ...variant("b", { اللون: "أزرق", المقاس: "M" }), image_url: "https://example.com/blue.jpg" };
+    render(<ProductVariantPicker variants={[pink, blue]} onSelect={vi.fn()} onColorImage={onColorImage} />);
+    fireEvent.click(screen.getByRole("button", { name: "أزرق" }));
+    expect(onColorImage).toHaveBeenLastCalledWith("https://example.com/blue.jpg");
+    fireEvent.click(screen.getByRole("button", { name: "أزرق" }));
+    expect(onColorImage).toHaveBeenLastCalledWith(null);
+  });
+});

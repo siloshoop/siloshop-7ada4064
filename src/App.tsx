@@ -264,6 +264,8 @@ const App = () => (
             <Route path="/admin/activity" element={<RequireRole role="admin"><ActivityLogs /></RequireRole>} />
             <Route path="/admin/features" element={<RequireRole role="super_admin"><FeatureFlagsPage /></RequireRole>} />
             <Route path="/admin/platform-products" element={<RequireRole role="super_admin"><PlatformProducts /></RequireRole>} />
+            <Route path="/admin/platform-products/new" element={<RequireRole role="super_admin"><AddProduct platform /></RequireRole>} />
+            <Route path="/admin/platform-products/:id/edit" element={<RequireRole role="super_admin"><EditProduct platform /></RequireRole>} />
             <Route path="/admin/sham-cash" element={<RequireRole role="super_admin"><ShamCashSettings /></RequireRole>} />
             <Route path="/admin/users/:id" element={<RequireRole role="moderator"><AdminUserDetail /></RequireRole>} />
             <Route path="/admin/stores" element={<RequireRole role="moderator"><AdminStores /></RequireRole>} />

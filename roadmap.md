@@ -304,8 +304,9 @@
 - [x] Re-measure before/after and report (lab only; real Android/Syrian networks not testable here)
 
 ## Color images, linked colors and platform product form parity
-- [ ] Per-color images in the shared colors/sizes editor (seller + platform)
-- [ ] Link products as color alternatives (Trendyol-style thumbnails on product page)
-- [ ] Orders show exact color, size and color image (seller, buyer, admin)
-- [ ] Platform product add/edit reuses the seller Add/Edit pages (platform shipping/payment kept, super_admin only)
-- [ ] Tests, build, end-to-end check
+- [x] Per-color images in the shared colors/sizes editor (seller + platform); picking a color shows its picture first in the gallery
+- [x] Link products as color alternatives (Trendyol-style thumbnails with orange frame, navigate to each color's page); same owner/type enforced in the database
+- [x] Orders keep the exact color/size label and color picture (checked with a rolled-back buyer order, picture unchanged after seller edit); admin order details and seller email now show it
+- [x] Platform product add/edit reuses the seller Add/Edit pages with owner-only platform shipping/payment settings; old platform window removed
+- [x] 406 tests, typecheck and build pass; owner saved and reopened a draft platform product with two colors, a color picture and a size (test product removed afterwards)
+- [ ] Real buyer checkout on a platform product (blocked: platform products are switched off for buyers until the platform marketplace is turned on); Android app needs a new build

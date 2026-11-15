@@ -240,7 +240,7 @@ const SellerOrderDetailSheet = ({ order, open, onOpenChange, onChanged }: Props)
                     <OrderProductImage image={it.product_image} orderItemId={it.id} alt={it.product_name || ""} className="h-12 w-12 shrink-0 rounded object-cover" />
                     <div className="min-w-0 flex-1">
                       <p className="truncate text-sm font-medium">{it.product_name || "منتج"}</p>
-                      {it.variant_label && <p className="text-xs text-muted-foreground">{it.variant_label}</p>}
+                      {it.variant_label && <p className="break-words text-xs font-medium text-foreground">{it.variant_label}</p>}
                       <p className="text-xs text-muted-foreground">الكمية: {it.quantity} × {formatPrice(it.price, (it as any).currency ?? orderCurrency)}</p>
                     </div>
                     <p className="text-sm font-semibold">

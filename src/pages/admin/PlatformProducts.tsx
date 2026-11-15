@@ -12,7 +12,6 @@ import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, Plus, Upload, Edit2, Trash2, Package, Settings2, Search, Eye } from "lucide-react";
-import PlatformProductForm, { PlatformProduct } from "@/components/admin/PlatformProductForm";
 import PlatformProductImport from "@/components/admin/PlatformProductImport";
 import CategoriesBrandsManager from "@/components/admin/CategoriesBrandsManager";
 import PlatformShamCashSettings from "@/components/admin/PlatformShamCashSettings";
@@ -34,8 +33,6 @@ const PlatformProducts = () => {
   const [filterStatus, setFilterStatus] = useState<string>("__all__");
 
   const [selected, setSelected] = useState<Set<string>>(new Set());
-  const [formOpen, setFormOpen] = useState(false);
-  const [editing, setEditing] = useState<PlatformProduct | null>(null);
   const [importOpen, setImportOpen] = useState(false);
   const [cbOpen, setCbOpen] = useState(false);
 
@@ -128,39 +125,10 @@ const PlatformProducts = () => {
     load();
   };
 
-  const openEdit = (p: any) => {
-    setEditing({
-      id: p.id,
-      name: p.name,
-      sku: p.sku,
-      brand_id: p.brand_id,
-      category_id: p.category_id,
-      subcategory_id: p.subcategory_id ?? null,
-      description: p.description,
-      price: Number(p.price),
-      discount_price: p.discount_price != null ? Number(p.discount_price) : null,
-      currency: p.currency || "",
-      stock_quantity: p.stock_quantity ?? 0,
-      sizes: p.sizes || [],
-      colors: p.colors || [],
-      weight: p.weight != null ? Number(p.weight) : null,
-      shipping_duration_text: p.shipping_duration_text ?? "",
-      image_url: p.image_url,
-      images: p.images || [],
-      is_active: !!p.is_active,
-      platform_free_shipping: p.platform_free_shipping ?? true,
-      platform_shipping_fee: Number(p.platform_shipping_fee ?? 0),
-      platform_cod_enabled: p.platform_cod_enabled ?? true,
-      platform_sham_cash_enabled: p.platform_sham_cash_enabled ?? false,
-      platform_electronic_payment_enabled: p.platform_electronic_payment_enabled ?? false,
-      length_cm: p.length_cm != null ? Number(p.length_cm) : null,
-      width_cm: p.width_cm != null ? Number(p.width_cm) : null,
-      features: Array.isArray(p.features) ? p.features : [],
-    });
-    setFormOpen(true);
-  };
+  // Platform products use the same full product form as sellers (owner-only routes).
+  const openEdit = (p: { id: string }) => navigate(`/admin/platform-products/${p.id}/edit`);
 
-  const openNew = () => { setEditing(null); setFormOpen(true); };
+  const openNew = () => navigate("/admin/platform-products/new");
 
   const catMap = useMemo(() => new Map(categories.map((c) => [c.id, c.name_ar])), [categories]);
   const brandMap = useMemo(() => new Map(brands.map((b) => [b.id, b.name_ar])), [brands]);
@@ -330,14 +298,6 @@ const PlatformProducts = () => {
           </div>
         )}
 
-        <PlatformProductForm
-          open={formOpen}
-          onOpenChange={setFormOpen}
-          product={editing}
-          onSaved={load}
-          categories={categories}
-          brands={brands}
-        />
         <PlatformProductImport
           open={importOpen}
           onOpenChange={setImportOpen}

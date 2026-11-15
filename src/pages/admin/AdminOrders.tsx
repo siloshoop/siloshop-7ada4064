@@ -517,6 +517,7 @@ const AdminOrders = () => {
                       )}
                       <div className="min-w-0 flex-1">
                         <p className="truncate text-sm">{it.product_name || "منتج"}</p>
+                        {it.variant_label && <p className="break-words text-xs font-medium text-foreground">{it.variant_label}</p>}
                         <p className="truncate text-xs text-muted-foreground">
                           البائع: <span dir="auto" className="text-foreground">{it.vendor_name || it.vendor_store_name || "—"}</span>
                           {it.vendor_store_name && it.vendor_store_name !== it.vendor_name && (

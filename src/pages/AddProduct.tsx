@@ -25,6 +25,10 @@ import { productOptionColumns } from "@/lib/productOptions";
 import ProductFeaturesEditor from "@/components/product/ProductFeaturesEditor";
 import { normalizeFeatureRows, parseDimension, toFeatureRows, type FeatureRow } from "@/lib/productFeatures";
 import { syncColorSizeVariants } from "@/lib/productVariantsSync";
+import PlatformProductSettingsFields from "@/components/admin/PlatformProductSettingsFields";
+import { emptyPlatformSettings, platformProductColumns, validatePlatformSettings, type PlatformSettings } from "@/lib/platformProductSettings";
+import ColorLinksEditor from "@/components/seller/ColorLinksEditor";
+import { saveColorLinks } from "@/lib/productColorLinks";
 
 const SHIPPING_CLASSES = [
   { value: "عادي", label: "عادي" },
@@ -40,7 +44,12 @@ const slugify = (input: string) =>
     .replace(/[^a-z0-9\u0600-\u06FF]+/g, "-")
     .replace(/^-+|-+$/g, "");
 
-const AddProduct = () => {
+interface AddProductProps {
+  /** Owner-managed platform product: same form, plus platform shipping/payment settings. */
+  platform?: boolean;
+}
+
+const AddProduct = ({ platform = false }: AddProductProps) => {
   const { user, loading: authLoading } = useAuth();
   const [categories, setCategories] = useState<any[]>([]);
   const [subcategories, setSubcategories] = useState<any[]>([]);
@@ -84,6 +93,9 @@ const AddProduct = () => {
 
   const [featureRows, setFeatureRows] = useState<FeatureRow[]>([]);
   const [csz, setCsz] = useState<ColorsSizesValue>(emptyColorsSizes);
+  const [platformSettings, setPlatformSettings] = useState<PlatformSettings>(emptyPlatformSettings);
+  const [colorLinks, setColorLinks] = useState<string[]>([]);
+  const backPath = platform ? "/admin/platform-products" : "/dashboard";
 
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [imagePreviews, setImagePreviews] = useState<string[]>([]);
@@ -196,7 +208,13 @@ const AddProduct = () => {
     e.preventDefault();
     if (!user) return;
 
-    if (!isShippingMode(formData.shipping_mode)) {
+    if (platform) {
+      const platformError = validatePlatformSettings(platformSettings);
+      if (platformError) {
+        toast({ title: "إعدادات منتج المنصة", description: platformError, variant: "destructive" });
+        return;
+      }
+    } else if (!isShippingMode(formData.shipping_mode)) {
       toast({ title: "طريقة الشحن مطلوبة", description: "يرجى اختيار طريقة الشحن", variant: "destructive" });
       return;
     }
@@ -313,14 +331,16 @@ const AddProduct = () => {
         seo_description: formData.seo_description.trim() || null,
         seo_keywords: formData.seo_keywords.trim() || null,
         is_active: !asDraft,
-        moderation_status: asDraft ? "draft" : "pending",
+        moderation_status: asDraft ? "draft" : platform ? "approved" : "pending",
+        // Platform products keep their owner-managed shipping/payment settings.
+        ...(platform ? { ...platformProductColumns(platformSettings), source: "manual" } : {}),
       } as any).select("id").single();
 
       if (error) throw error;
 
       if (inserted?.id && csz.variants.length > 0) {
         try {
-          await syncColorSizeVariants(inserted.id, csz.variants, csz.mode);
+          await syncColorSizeVariants(inserted.id, csz.variants, csz.mode, csz.colorImages);
         } catch (vErr) {
           toast({
             title: "تم حفظ المنتج",
@@ -330,14 +350,21 @@ const AddProduct = () => {
         }
       }
 
+      if (inserted?.id && colorLinks.length > 0) {
+        const linkError = await saveColorLinks(inserted.id, colorLinks);
+        if (linkError) toast({ title: "تم حفظ المنتج", description: linkError, variant: "destructive" });
+      }
+
       toast({
         title: "تم بنجاح",
-        description: asDraft
+        description: platform
+          ? asDraft ? "تم حفظ منتج المنصة كمسودة." : "تم حفظ منتج المنصة"
+          : asDraft
           ? "تم حفظ المنتج كمسودة. يمكنك إرساله للمراجعة لاحقاً."
           : "تم إرسال المنتج للمراجعة",
       });
 
-      navigate("/dashboard");
+      navigate(backPath);
     } catch (error) {
       toast({
         title: "خطأ",
@@ -367,8 +394,8 @@ const AddProduct = () => {
       <main className="container min-w-0 flex-1 px-3 py-6 sm:px-4 sm:py-8">
         <Card className="mx-auto min-w-0 max-w-3xl">
           <CardHeader className="p-4 sm:p-6">
-            <CardTitle className="text-2xl leading-tight sm:text-3xl">إضافة منتج جديد</CardTitle>
-            <CardDescription>أضف منتجاً جديداً إلى متجرك</CardDescription>
+            <CardTitle className="text-2xl leading-tight sm:text-3xl">{platform ? "إضافة منتج منصة" : "إضافة منتج جديد"}</CardTitle>
+            <CardDescription>{platform ? "أضف منتجاً تديره المنصة مباشرةً" : "أضف منتجاً جديداً إلى متجرك"}</CardDescription>
           </CardHeader>
           <CardContent className="min-w-0 p-4 pt-0 sm:p-6 sm:pt-0">
             <form onSubmit={handleSubmit} className="space-y-6">
@@ -677,6 +704,10 @@ const AddProduct = () => {
                 <AccordionItem value="shipping">
                   <AccordionTrigger>الشحن</AccordionTrigger>
                   <AccordionContent className="space-y-4">
+                    {platform ? (
+                      <PlatformProductSettingsFields value={platformSettings} onChange={setPlatformSettings} currency={formData.currency} />
+                    ) : (
+                    <>
                     <div className="space-y-2">
                       <Label>طريقة الشحن</Label>
                       <RadioGroup
@@ -720,6 +751,9 @@ const AddProduct = () => {
                           placeholder="مثال: 5000"
                         />
                       </div>
+                    )}
+
+                    </>
                     )}
 
                     <div className="space-y-2">
@@ -788,6 +822,7 @@ const AddProduct = () => {
                   <AccordionTrigger>الألوان والمقاس أو العمر (اختياري)</AccordionTrigger>
                   <AccordionContent className="space-y-4">
                     <ProductColorsSizesEditor value={csz} onChange={setCsz} />
+                    <ColorLinksEditor platform={platform} value={colorLinks} onChange={setColorLinks} />
                   </AccordionContent>
                 </AccordionItem>
 
@@ -863,7 +898,7 @@ const AddProduct = () => {
                   ) : (
                     <>
                       <Upload className="ml-2 h-5 w-5" />
-                      إرسال للمراجعة
+                      {platform ? "حفظ ونشر" : "إرسال للمراجعة"}
                     </>
                   )}
                 </Button>
@@ -880,7 +915,7 @@ const AddProduct = () => {
                 <Button
                   type="button"
                   variant="outline"
-                  onClick={() => navigate("/dashboard")}
+                  onClick={() => navigate(backPath)}
                   className="min-w-0 whitespace-normal sm:flex-none"
                   disabled={loading}
                 >

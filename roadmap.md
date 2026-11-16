@@ -308,5 +308,5 @@
 - [x] Link products as color alternatives (Trendyol-style thumbnails with orange frame, navigate to each color's page); same owner/type enforced in the database
 - [x] Orders keep the exact color/size label and color picture (checked with a rolled-back buyer order, picture unchanged after seller edit); admin order details and seller email now show it
 - [x] Platform product add/edit reuses the seller Add/Edit pages with owner-only platform shipping/payment settings; old platform window removed
-- [x] 406 tests, typecheck and build pass; owner saved and reopened a draft platform product with two colors, a color picture and a size (test product removed afterwards)
+- [x] 405 tests, typecheck and build pass; owner saved and reopened a draft platform product with two colors, a color picture and a size (test product removed afterwards)
 - [ ] Real buyer checkout on a platform product (blocked: platform products are switched off for buyers until the platform marketplace is turned on); Android app needs a new build

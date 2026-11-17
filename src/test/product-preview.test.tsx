@@ -38,6 +38,10 @@ vi.mock("@/hooks/useAuth", () => ({ useAuth: () => ({ user: { id: "owner" } }) }
 vi.mock("@/hooks/useRecentlyViewed", () => ({ useRecentlyViewed: () => ({ trackProductView }) }));
 vi.mock("@/hooks/useCompareProducts", () => ({ useCompareProducts: () => ({ addProduct: addCompareProduct }) }));
 vi.mock("@/hooks/useShippingRegions", () => ({ useShippingRegions: () => ({ data: [] }) }));
+vi.mock("@/lib/productPaymentMethods", async (orig) => ({
+  ...(await orig<typeof import("@/lib/productPaymentMethods")>()),
+  usePlatformPaymentOptions: () => ({ data: null, isError: false }),
+}));
 vi.mock("@/hooks/use-toast", () => ({ useToast: () => ({ toast }) }));
 vi.mock("@/lib/dealPricing", () => ({ fetchActiveDeals: async () => ({}), applyDeal: (p: number) => p }));
 vi.mock("@/components/Navbar", () => ({ default: () => null }));

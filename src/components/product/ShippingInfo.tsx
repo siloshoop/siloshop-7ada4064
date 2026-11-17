@@ -2,6 +2,7 @@ import { formatPrice } from "@/lib/currency";
 import { isFreeShipping, resolveShippingMode, shippingDetailLabel } from "@/lib/shippingDisplay";
 import { Truck, RotateCcw, Banknote, MapPin, Clock } from "lucide-react";
 import { shippingRegionsLabel, type ShippingRegions } from "@/lib/shippingRegions";
+import { PAYMENT_METHOD_LABELS, type PaymentMethod } from "@/lib/productPaymentMethods";
 
 interface Props {
   shippingCost?: number | null;
@@ -10,10 +11,12 @@ interface Props {
   isPlatform?: boolean;
   currency?: string | null;
   regions?: ShippingRegions | null;
+  /** Methods buyers can actually use for this product (null while loading). */
+  paymentMethods?: PaymentMethod[] | null;
 }
 
 /** Shipping details + return policy summary for the product page. */
-const ShippingInfo = ({ shippingCost, shippingMode, shipsWithinDays, isPlatform, currency, regions }: Props) => {
+const ShippingInfo = ({ shippingCost, shippingMode, shipsWithinDays, isPlatform, currency, regions, paymentMethods }: Props) => {
   const freeShipping = isFreeShipping(shippingMode, shippingCost);
   const shippingByCompany = resolveShippingMode(shippingMode, shippingCost) === "variable";
 
@@ -42,9 +45,11 @@ const ShippingInfo = ({ shippingCost, shippingMode, shipsWithinDays, isPlatform,
     {
       icon: Banknote,
       title: "طريقة الدفع",
-      value: isPlatform
-        ? "الدفع عبر شام كاش لمنتجات المنصة"
-        : "الدفع نقداً عند الاستلام (COD) فقط",
+      value: !paymentMethods
+        ? "تظهر طرق الدفع المتاحة عند إتمام الطلب"
+        : paymentMethods.length === 0
+        ? "لا توجد طريقة دفع متاحة لهذا المنتج حالياً"
+        : paymentMethods.map((m) => PAYMENT_METHOD_LABELS[m]).join(" أو "),
     },
   ];
 

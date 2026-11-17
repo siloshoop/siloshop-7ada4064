@@ -12,6 +12,7 @@ import ProductOriginBadge from "@/components/product/ProductOriginBadge";
 import SellerInfoCard from "@/components/product/SellerInfoCard";
 import ReportDialog from "@/components/ReportDialog";
 import ShippingInfo from "@/components/product/ShippingInfo";
+import { paymentMethodsLabel, productPaymentMethods, usePlatformPaymentOptions } from "@/lib/productPaymentMethods";
 import ProductSpecs from "@/components/product/ProductSpecs";
 import ProductFeatures from "@/components/product/ProductFeatures";
 import { formatDimensions } from "@/lib/productFeatures";
@@ -115,6 +116,11 @@ const Product = ({ preview = false }: ProductPageProps) => {
   const { user } = useAuth();
   const [product, setProduct] = useState<Product | null>(null);
   const shippingRegions = useShippingRegions([product?.vendor_id]);
+  const platformPayment = usePlatformPaymentOptions();
+  const paymentMethods = product
+    ? productPaymentMethods(product as any, platformPayment.isError ? null : platformPayment.data)
+    : null;
+  const paymentLabel = paymentMethodsLabel(paymentMethods);
   const [dealPct, setDealPct] = useState(0);
   useEffect(() => {
     if (!product?.id) return;
@@ -758,7 +764,7 @@ const Product = ({ preview = false }: ProductPageProps) => {
               <div className="flex min-w-0 flex-col items-center gap-1 rounded-xl border bg-muted/30 p-2.5 text-center sm:p-3">
                 <ShieldCheck className="h-4 w-4 text-primary" />
                 <span className="break-words text-[0.6875rem] leading-tight text-muted-foreground">
-                  دفع آمن عند الاستلام
+                  {paymentLabel ?? "دفع آمن"}
                 </span>
               </div>
             </div>
@@ -876,6 +882,7 @@ const Product = ({ preview = false }: ProductPageProps) => {
                 currency={product.currency}
                 shipsWithinDays={product.ships_within_days}
                 isPlatform={product.product_type === "platform"}
+                paymentMethods={paymentMethods}
               />
             </TabsContent>
 

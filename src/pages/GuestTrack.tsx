@@ -1,4 +1,5 @@
 import { formatKnownPrice } from "@/lib/currency";
+import { orderPaymentMethodLabel } from "@/lib/productPaymentMethods";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import Navbar from "@/components/Navbar";
@@ -264,7 +265,7 @@ const GuestTrack = () => {
                   {result.payment_method && (
                     <div className="flex items-center gap-2">
                       <CreditCard className="h-4 w-4 text-muted-foreground" />
-                      <span className="font-medium">{result.payment_method}</span>
+                      <span className="font-medium">{orderPaymentMethodLabel(result.payment_method)}</span>
                       {result.payment_status && (
                         <span className="text-xs text-muted-foreground">({result.payment_status})</span>
                       )}

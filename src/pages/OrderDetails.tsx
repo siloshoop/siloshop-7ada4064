@@ -1,4 +1,5 @@
 import { useEffect, useState, useCallback, useRef } from "react";
+import { orderPaymentMethodLabel } from "@/lib/productPaymentMethods";
 import { mergeSavedProductTracking } from "@/lib/liveProductTracking";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
@@ -235,8 +236,7 @@ const OrderDetails = () => {
   const deliveredAt = shipping?.delivered_at || order.delivered_at || null;
   const shippingNotes = shipping?.shipping_notes || order.shipping_notes || null;
   const shippingDuration = (order as any).shipping_duration_text as string | null;
-  const paymentMethodLabel =
-    order.payment_method === "sham_cash" ? "شام كاش" : "الدفع عند الاستلام";
+  const paymentMethodLabel = orderPaymentMethodLabel(order.payment_method);
   const hasShippingInfo = !!(shippingDuration || shippingCompany || estimatedDelivery || shippedAt || deliveredAt || shippingNotes);
 
   return (
@@ -291,7 +291,7 @@ const OrderDetails = () => {
 
             {order.phone && <p className="flex items-center gap-2" dir="ltr"><Phone className="h-4 w-4 text-muted-foreground" />{order.phone}</p>}
             {order.notes && <p className="text-muted-foreground bg-muted/50 p-2 rounded">{order.notes}</p>}
-            <p className="flex items-center gap-2"><Receipt className="h-4 w-4 text-muted-foreground" />طريقة الدفع: <span className="font-semibold">الدفع عند الاستلام</span></p>
+            <p className="flex items-center gap-2"><Receipt className="h-4 w-4 text-muted-foreground" />طريقة الدفع: <span className="font-semibold">{paymentMethodLabel}</span></p>
             {order.confirmed_at && (
               <p className="flex items-center gap-2">
                 <Calendar className="h-4 w-4 text-muted-foreground" />

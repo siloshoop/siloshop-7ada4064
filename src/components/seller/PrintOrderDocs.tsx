@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button";
+import { orderPaymentMethodLabel } from "@/lib/productPaymentMethods";
 import { useToast } from "@/hooks/use-toast";
 import { exportSuccessMessage, printOrExportHtml } from "@/lib/exportFile";
 import { Printer, Tag } from "lucide-react";
@@ -27,6 +28,8 @@ export interface PrintOrderData {
   discount?: number | null;
   couponCode?: string | null;
   payable?: number | null;
+  /** Payment method saved on the order. */
+  paymentMethod?: string | null;
 }
 
 /* --- Minimal Code 39 barcode as inline SVG (no external deps) --- */
@@ -131,7 +134,7 @@ const buildHtml = (order: PrintOrderData, mode: "invoice" | "label") => {
     <div class="total">إجمالي منتجاتك: ${esc(total)}</div>
     ${order.discount && order.discount > 0 ? `<div class="total">الخصم${order.couponCode ? ` (كوبون ${esc(order.couponCode)})` : ""}: -${esc(money(order.discount, currency))}</div>` : ""}
     ${order.payable != null ? `<div class="total">المبلغ المطلوب تحصيله: ${esc(money(order.payable, currency))}</div>` : ""}
-    <div class="note">الدفع عند الاستلام. هذه الفاتورة خاصة بمنتجات هذا المتجر فقط داخل الطلب.</div>
+    <div class="note">طريقة الدفع: ${esc(orderPaymentMethodLabel(order.paymentMethod ?? "cod"))}. هذه الفاتورة خاصة بمنتجات هذا المتجر فقط داخل الطلب.</div>
   `;
 
   const label = `
@@ -143,7 +146,7 @@ const buildHtml = (order: PrintOrderData, mode: "invoice" | "label") => {
       <div style="margin-top:8px"><strong>المستلم:</strong> ${esc(order.customer_name || "غير متوفر")}</div>
       <div><strong>المدينة:</strong> ${esc(order.city || "غير محددة")}</div>
       <div><strong>عدد القطع:</strong> ${order.items.reduce((s, i) => s + i.quantity, 0)}</div>
-      <div><strong>طريقة الدفع:</strong> الدفع عند الاستلام</div>
+      <div><strong>طريقة الدفع:</strong> ${esc(orderPaymentMethodLabel(order.paymentMethod ?? "cod"))}</div>
       <div class="note">العنوان الكامل ورقم الهاتف يتم تسليمهما لمندوب التوصيل عبر المنصة حمايةً لخصوصية العميل.</div>
     </div>
   `;

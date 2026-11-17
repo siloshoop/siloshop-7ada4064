@@ -114,6 +114,7 @@ const SellerOrderDetailSheet = ({ order, open, onOpenChange, onChanged }: Props)
       discount: saved ? Number(saved.discount_amount || 0) : null,
       couponCode: saved?.coupon_code ?? null,
       payable: saved?.total_amount != null ? Number(saved.total_amount) : null,
+      paymentMethod: localOrder.payment_method ?? null,
     };
   }, [localOrder, items, orderCurrency, saved]);
 

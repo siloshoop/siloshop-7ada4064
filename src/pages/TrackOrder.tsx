@@ -1,4 +1,5 @@
 import { formatPrice } from "@/lib/currency";
+import { orderPaymentMethodLabel } from "@/lib/productPaymentMethods";
 import { mergeSavedProductTracking } from "@/lib/liveProductTracking";
 import { useFeatureFlags } from "@/hooks/useFeatureFlags";
 import { useEffect, useRef, useState } from "react";
@@ -561,7 +562,7 @@ const TrackOrder = () => {
                     <div className="flex items-center gap-3 text-sm">
                       <CreditCard className="h-4 w-4 text-muted-foreground" />
                       <span className="text-muted-foreground">طريقة الدفع:</span>
-                      <span className="font-medium">{order.payment_method === "cod" ? "الدفع عند الاستلام" : order.payment_method === "sham_cash" ? "شام كاش" : "طريقة دفع أخرى"}</span>
+                      <span className="font-medium">{orderPaymentMethodLabel(order.payment_method)}</span>
                     </div>
                   )}
 

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import { unionPaymentMethods } from "@/lib/productPaymentMethods";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import SeoHead from "@/components/SeoHead";
@@ -25,6 +26,9 @@ interface ProductRow {
   shipping_duration_text: string | null;
   platform_free_shipping: boolean | null;
   platform_shipping_fee: number | null;
+  platform_cod_enabled: boolean | null;
+  platform_sham_cash_enabled: boolean | null;
+  platform_electronic_payment_enabled: boolean | null;
   reviews: { rating: number }[] | null;
 }
 
@@ -37,7 +41,7 @@ interface PlatformOptions {
 }
 
 const SELECT =
-  "id, name, price, currency, original_price, discount_price, image_url, stock_quantity, product_type, ships_within_days, shipping_duration_text, platform_free_shipping, platform_shipping_fee, reviews(rating)";
+  "id, name, price, currency, original_price, discount_price, image_url, stock_quantity, product_type, ships_within_days, shipping_duration_text, platform_free_shipping, platform_shipping_fee, platform_cod_enabled, platform_sham_cash_enabled, platform_electronic_payment_enabled, reviews(rating)";
 
 /** Dedicated marketplace section for Turkish (platform) products. */
 const TurkishProducts = () => {
@@ -84,6 +88,13 @@ const TurkishProducts = () => {
   }, []);
 
   const enabled = !flagsLoading && isEnabled("platform_marketplace");
+  // Methods buyers can really use here: each product's own choices (empty
+  // choices fall back to the section settings), as checkout applies them.
+  const sectionOptions = options ? { ...options, apply_to_all_products: false } : null;
+  const methods =
+    (products.length > 0
+      ? unionPaymentMethods(products, sectionOptions)
+      : unionPaymentMethods([{ product_type: "platform" }], sectionOptions)) ?? [];
 
   return (
     <div className="min-h-screen bg-background">
@@ -120,25 +131,22 @@ const TurkishProducts = () => {
               <Package className="h-4 w-4 text-primary" /> طرق الدفع المتاحة
             </p>
             <div className="flex flex-wrap gap-2">
-              {options?.cod_enabled && (
+              {methods.includes("cod") && (
                 <Badge variant="secondary" className="gap-1">
                   <Banknote className="h-3.5 w-3.5" /> الدفع عند الاستلام
                 </Badge>
               )}
-              {options?.sham_cash_enabled && (
+              {methods.includes("sham_cash") && (
                 <Badge variant="secondary" className="gap-1">
                   <Wallet className="h-3.5 w-3.5" /> شام كاش
                 </Badge>
               )}
-              {options?.electronic_payment_enabled && (
+              {methods.includes("electronic") && (
                 <Badge variant="secondary" className="gap-1">
                   <CreditCard className="h-3.5 w-3.5" /> الدفع الإلكتروني
                 </Badge>
               )}
-              {options &&
-                !options.cod_enabled &&
-                !options.sham_cash_enabled &&
-                !options.electronic_payment_enabled && (
+              {!loading && methods.length === 0 && (
                   <p className="text-sm text-muted-foreground">
                     لا توجد طريقة دفع مفعّلة حالياً لهذا القسم.
                   </p>

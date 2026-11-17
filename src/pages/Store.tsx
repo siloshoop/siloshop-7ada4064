@@ -28,6 +28,7 @@ import { resolveStoreAssetUrl } from "@/lib/storeAssets";
 import { format } from "date-fns";
 import { ar } from "date-fns/locale";
 import { useShippingRegions } from "@/hooks/useShippingRegions";
+import { paymentMethodsLabel, unionPaymentMethods, usePlatformPaymentOptions, PAYMENT_METHOD_LABELS } from "@/lib/productPaymentMethods";
 import { shippingRegionsLabel } from "@/lib/shippingRegions";
 
 interface StoreProfile {
@@ -59,6 +60,9 @@ interface StoreProduct {
   shipping_mode: string | null;
   product_type: string | null;
   ships_within_days: number | null;
+  platform_cod_enabled?: boolean | null;
+  platform_sham_cash_enabled?: boolean | null;
+  platform_electronic_payment_enabled?: boolean | null;
   reviews: { rating: number }[];
 }
 
@@ -76,6 +80,16 @@ const Store = () => {
   const [profile, setProfile] = useState<StoreProfile | null>(null);
   const [followers, setFollowers] = useState(0);
   const [products, setProducts] = useState<StoreProduct[]>([]);
+  const platformPayment = usePlatformPaymentOptions();
+  // A store's methods are those its listed products accept at checkout.
+  const storeMethods = unionPaymentMethods(
+    products.length > 0 ? products : [{ product_type: "seller" }],
+    platformPayment.isError ? null : platformPayment.data,
+  );
+  const storePaymentLabel =
+    storeMethods && storeMethods.length > 0
+      ? storeMethods.map((m) => PAYMENT_METHOD_LABELS[m]).join(" أو ")
+      : paymentMethodsLabel(storeMethods) ?? "…";
   const [reviews, setReviews] = useState<StoreReview[]>([]);
   const [loading, setLoading] = useState(true);
   const [logoUrl, setLogoUrl] = useState<string | null>(null);
@@ -94,7 +108,7 @@ const Store = () => {
         supabase
           .from("products")
           .select(
-            "id, name, price, currency, original_price, image_url, stock_quantity, shipping_cost, shipping_mode, product_type, ships_within_days, reviews(rating)",
+            "id, name, price, currency, original_price, image_url, stock_quantity, shipping_cost, shipping_mode, product_type, ships_within_days, platform_cod_enabled, platform_sham_cash_enabled, platform_electronic_payment_enabled, reviews(rating)",
           )
           .eq("vendor_id", vendorId)
           .eq("is_active", true)
@@ -410,7 +424,7 @@ const Store = () => {
                     )}
                     <div className="flex justify-between rounded-lg border p-3">
                       <dt className="text-muted-foreground">طريقة الدفع</dt>
-                      <dd className="font-medium">الدفع عند الاستلام</dd>
+                      <dd className="font-medium">{storePaymentLabel}</dd>
                     </div>
                   </dl>
                 </CardContent>

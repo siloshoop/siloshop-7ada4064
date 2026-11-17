@@ -1,4 +1,5 @@
 import { formatKnownPrice as money } from "@/lib/currency";
+import { orderPaymentMethodLabel } from "@/lib/productPaymentMethods";
 import { withDisplayCurrency } from "@/lib/displayCurrency";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { csvCell, exportFile, exportSuccessMessage } from "@/lib/exportFile";
@@ -422,7 +423,7 @@ const AdminOrders = () => {
                               )}
                               {r.payment_method && (
                                 <span className="whitespace-nowrap text-xs text-muted-foreground">
-                                  {r.payment_method === "cod" ? "الدفع عند الاستلام" : r.payment_method}
+                                  {orderPaymentMethodLabel(r.payment_method)}
                                 </span>
                               )}
                             </div>

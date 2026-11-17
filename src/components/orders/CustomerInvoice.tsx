@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { orderPaymentMethodLabel } from "@/lib/productPaymentMethods";
 import { exportSuccessMessage, printOrExportHtml } from "@/lib/exportFile";
 import { Button } from "@/components/ui/button";
 import { Download, Loader2 } from "lucide-react";
@@ -140,7 +141,7 @@ const CustomerInvoice = ({ orderId }: Props) => {
         </div>`,
           )
           .join("")}
-        ${order.payment_method === "cod" ? `<div class="note"><strong>طريقة الدفع:</strong> الدفع عند الاستلام</div>` : ""}
+        ${order.payment_method ? `<div class="note"><strong>طريقة الدفع:</strong> ${esc(orderPaymentMethodLabel(order.payment_method))}</div>` : ""}
         <div class="note">شكرًا لتسوقكم من سيلو شوب — هذه الفاتورة صادرة إلكترونيًا ولا تحتاج إلى توقيع أو ختم.</div>
         <script>window.onload = function(){ window.focus(); window.print(); };</script>
       </body></html>`;

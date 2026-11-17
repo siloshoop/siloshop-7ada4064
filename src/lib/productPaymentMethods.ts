@@ -85,3 +85,25 @@ export const usePlatformPaymentOptions = () =>
     staleTime: 60_000,
     refetchOnWindowFocus: true,
   });
+
+/** Label for the payment method saved on an order (never inferred). */
+export const orderPaymentMethodLabel = (method: string | null | undefined): string =>
+  method && method in PAYMENT_METHOD_LABELS
+    ? PAYMENT_METHOD_LABELS[method as PaymentMethod]
+    : method === "cash"
+    ? PAYMENT_METHOD_LABELS.cod
+    : method || "غير محددة";
+
+/** Every method buyers can use for at least one of these products (store/section summaries). */
+export const unionPaymentMethods = (
+  products: ProductPaymentFields[],
+  options: PlatformPaymentOptions | null | undefined,
+): PaymentMethod[] | null => {
+  const all = new Set<PaymentMethod>();
+  for (const p of products) {
+    const m = productPaymentMethods(p, options);
+    if (!m) return null;
+    m.forEach((x) => all.add(x));
+  }
+  return (["cod", "sham_cash", "electronic"] as PaymentMethod[]).filter((m) => all.has(m));
+};

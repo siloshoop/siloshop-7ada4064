@@ -39,18 +39,40 @@ const SWATCHES: Record<string, string> = {
   نيلي: "#3730a3", indigo: "#3730a3",
   عسلي: "#c68e3d",
   فوشي: "#d946ef", fuchsia: "#d946ef",
-  كاكي: "#b5a26b", khaki: "#b5a26b",
-  جملي: "#c19a6b", camel: "#c19a6b",
+  كاكي: "#b5a26b", خاكي: "#b5a26b", هاكي: "#b5a26b", khaki: "#b5a26b",
+  جملي: "#c19a6b", كاميل: "#c19a6b", camel: "#c19a6b",
+  كريم: "#f5ecd7",
+  بورغندي: "#6d1a36", برغندي: "#6d1a36", بوردو: "#6d1a36",
+  انتراسيت: "#3b3f45", anthracite: "#3b3f45",
+  "نايت بلاك": "#111111", بلاك: "#111111",
+  "ازرق بحري": "#1e3a5f", بحري: "#1e3a5f",
+  "ازرق سماوي": "#38bdf8",
+  زرق: "#2563eb",
   نحاسي: "#b87333", copper: "#b87333",
 };
 
 const HEX = /^#(?:[0-9a-f]{3}|[0-9a-f]{6})$/i;
 
+// Shade words sellers add after a color, e.g. «رمادي فاتح» / «أزرق غامق».
+const LIGHT = new Set(["فاتح", "light"]);
+const DARK = new Set(["داكن", "غامق", "dark"]);
+
+const mix = (hex: string, target: number, amount: number) => {
+  const n = parseInt(hex.slice(1), 16);
+  const ch = [(n >> 16) & 255, (n >> 8) & 255, n & 255].map((c) => Math.round(c + (target - c) * amount));
+  return `#${ch.map((c) => c.toString(16).padStart(2, "0")).join("")}`;
+};
+
 /** Swatch color for a saved color name, or null when the name is not a known color. */
 export function colorSwatch(name: string): string | null {
   const raw = name.trim();
   if (HEX.test(raw)) return raw;
-  const words = normalize(raw).split(" ").map(stripArticle);
+  const words = normalize(raw).split(" ").filter(Boolean).map(stripArticle);
   const whole = words.join(" ");
-  return SWATCHES[whole] ?? SWATCHES[words[0]] ?? null;
+  if (SWATCHES[whole]) return SWATCHES[whole];
+  const shade = words.find((w) => LIGHT.has(w) || DARK.has(w));
+  const base = words.filter((w) => !LIGHT.has(w) && !DARK.has(w));
+  const color = SWATCHES[base.join(" ")] ?? SWATCHES[base[0]] ?? null;
+  if (!color || !shade || color.length !== 7) return color;
+  return LIGHT.has(shade) ? mix(color, 255, 0.45) : mix(color, 0, 0.4);
 }

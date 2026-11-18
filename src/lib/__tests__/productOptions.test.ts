@@ -44,8 +44,24 @@ describe("product size or age option", () => {
     expect(cleanSizeChart(chart, ["XL"])).toBeNull();
   });
 
-  it("buyer options are stored as size or age, never both", () => {
-    expect(variantAttributes({ color: "أزرق", size: "3–6 أشهر" }, "age")).toEqual({ "اللون": "أزرق", [AGE_ATTR]: "3–6 أشهر" });
+  it("size-and-age products save sizes, measurements and ages together", () => {
+    const cols = productOptionColumns({ mode: "both", colors: [], sizes: ["M"], ages: ["3–5 سنوات"], sizeChart: chart });
+    expect(cols.sizes).toEqual(["M"]);
+    expect(cols.age_ranges).toEqual(["3–5 سنوات"]);
+    expect(cols.size_chart?.rows).toEqual([{ size: "M", values: { "الطول": "70", "العرض": "52" } }]);
+  });
+
+  it("size-and-age variants carry both choices for the buyer", () => {
+    expect(variantAttributes({ color: "أحمر", size: "M", age: "3–5 سنوات" }, "both")).toEqual({
+      "اللون": "أحمر",
+      [SIZE_ATTR]: "M",
+      [AGE_ATTR]: "3–5 سنوات",
+    });
+    expect(variantAttributes({ color: "", size: "M", age: "3–5 سنوات" }, "size")).toEqual({ [SIZE_ATTR]: "M" });
+  });
+
+  it("buyer options follow the chosen mode", () => {
+    expect(variantAttributes({ color: "أزرق", size: "", age: "3–6 أشهر" }, "age")).toEqual({ "اللون": "أزرق", [AGE_ATTR]: "3–6 أشهر" });
     expect(variantAttributes({ color: "", size: "M" }, "size")).toEqual({ [SIZE_ATTR]: "M" });
     expect(variantAttributes({ color: "أزرق", size: "M" }, "none")).toEqual({ "اللون": "أزرق" });
   });
@@ -53,6 +69,7 @@ describe("product size or age option", () => {
   it("reopens saved products in the right mode", () => {
     expect(inferOptionMode(["M"], [])).toBe("size");
     expect(inferOptionMode([], ["0–3 أشهر"])).toBe("age");
+    expect(inferOptionMode(["M"], ["0–3 أشهر"])).toBe("both");
     expect(inferOptionMode(null, null)).toBe("none");
   });
 });

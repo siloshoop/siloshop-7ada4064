@@ -21,7 +21,7 @@ import { productNumbersSchema, firstIssue, friendlyDbError } from "@/lib/product
 import { useImageCropper } from "@/components/ImageCropDialog";
 import { IMAGE_FORMAT_HINT, IMAGE_SIZE_GUIDES, UploadError, describeUploadError, validateImageFile } from "@/lib/uploadErrors";
 import ProductVariantsManager from "@/components/seller/ProductVariantsManager";
-import ProductColorsSizesEditor, { type ColorsSizesValue, buildVariantRows, emptyColorsSizes, activeOptions } from "@/components/seller/ProductColorsSizesEditor";
+import ProductColorsSizesEditor, { type ColorsSizesValue, emptyColorsSizes, rowsFor } from "@/components/seller/ProductColorsSizesEditor";
 import { AGE_ATTR, inferOptionMode, parseSizeChart, productOptionColumns } from "@/lib/productOptions";
 import ProductFeaturesEditor from "@/components/product/ProductFeaturesEditor";
 import { normalizeFeatureRows, parseDimension, toFeatureRows, type FeatureRow } from "@/lib/productFeatures";
@@ -179,11 +179,12 @@ const EditProduct = ({ platform = false }: EditProductProps) => {
             const existingRows = (vRows ?? [])
               .map((v: any) => ({
                 color: (v.attributes || {})[COLOR_ATTR] || "",
-                size: (v.attributes || {})[SIZE_ATTR] || (v.attributes || {})[AGE_ATTR] || "",
+                size: (v.attributes || {})[SIZE_ATTR] || "",
+                age: (v.attributes || {})[AGE_ATTR] || "",
                 stock_quantity: String(v.stock_quantity ?? 0),
                 price: v.price != null ? String(v.price) : "",
               }))
-              .filter((r) => r.color || r.size);
+              .filter((r) => r.color || r.size || r.age);
             const colorImages: Record<string, string> = {};
             for (const v of (vRows ?? []) as any[]) {
               const c = (v.attributes || {})[COLOR_ATTR];
@@ -194,12 +195,12 @@ const EditProduct = ({ platform = false }: EditProductProps) => {
             const loaded = {
               colors,
               mode,
-              sizes: mode === "size" ? sizes : [],
-              ages: mode === "age" ? ages : [],
-              sizeChart: mode === "size" ? parseSizeChart(p.size_chart) : null,
+              sizes,
+              ages,
+              sizeChart: sizes.length > 0 ? parseSizeChart(p.size_chart) : null,
               colorImages,
             };
-            setCsz({ ...loaded, variants: buildVariantRows(colors, activeOptions(loaded), existingRows) });
+            setCsz({ ...loaded, variants: rowsFor(loaded, existingRows) });
 
             // Set existing images
             const images = product.images || [];

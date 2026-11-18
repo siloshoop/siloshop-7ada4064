@@ -10,25 +10,29 @@ import {
   AGE_PRESETS,
   MAX_MEASUREMENT_COLUMNS,
   emptySizeChart,
+  modeHasAge,
+  modeHasSize,
   type ProductOptionMode,
   type SizeChart,
 } from "@/lib/productOptions";
 
 export interface VariantRow {
   color: string;
-  /** Value of the chosen option: a size or an age, depending on the mode. */
+  /** Chosen size ("" when the product has no sizes). */
   size: string;
+  /** Chosen age ("" when the product has no ages). */
+  age?: string;
   stock_quantity: string;
   price: string;
 }
 
 export interface ColorsSizesValue {
   colors: string[];
-  /** Size or age — never both. */
+  /** None, size, age, or size and age together. */
   mode: ProductOptionMode;
   sizes: string[];
   ages: string[];
-  /** Optional per-size measurements in cm (size mode only). */
+  /** Optional per-size measurements in cm (only when sizes are offered). */
   sizeChart: SizeChart | null;
   /** Optional picture per color (public URL), saved on that color's variants. */
   colorImages: Record<string, string>;
@@ -52,9 +56,11 @@ const MODE_OPTIONS: { value: ProductOptionMode; label: string; hint: string }[] 
   { value: "none", label: "بدون", hint: "المنتج لا يحتاج مقاسًا أو عمرًا" },
   { value: "size", label: "المقاس فقط", hint: "مقاسات مع قياسات الطول والعرض وغيرها" },
   { value: "age", label: "العمر فقط", hint: "العمر المناسب، مثل 0–3 أشهر أو 3–5 سنوات" },
+  { value: "both", label: "المقاس والعمر", hint: "مقاسات وأعمار معًا، ويختار المشتري الاثنين" },
 ];
 
-export const variantKey = (color: string, size: string) => `${color}__${size}`;
+export const variantKey = (color: string, size: string, age = "") =>
+  age ? `${color}__${size}__${age}` : `${color}__${size}`;
 
 /** Arabic-Indic digits -> latin, and strip anything that is not a number. */
 export const toLatinDigits = (s: string) =>
@@ -68,28 +74,39 @@ const cleanDecimal = (s: string) => {
   return rest.length ? `${head}.${rest.join("").slice(0, 2)}` : head;
 };
 
-/** Builds the color x option grid, keeping quantities/prices already entered. */
+/** Builds the color × size × age grid, keeping quantities/prices already entered. */
 export const buildVariantRows = (
   colors: string[],
   sizes: string[],
-  existing: VariantRow[]
+  existing: VariantRow[],
+  ages: string[] = []
 ): VariantRow[] => {
+  if (colors.length === 0 && sizes.length === 0 && ages.length === 0) return [];
   const cs = colors.length > 0 ? colors : [""];
   const ss = sizes.length > 0 ? sizes : [""];
-  if (colors.length === 0 && sizes.length === 0) return [];
-  const map = new Map(existing.map((r) => [variantKey(r.color, r.size), r]));
+  const as = ages.length > 0 ? ages : [""];
+  const map = new Map(existing.map((r) => [variantKey(r.color, r.size, r.age ?? ""), r]));
   const rows: VariantRow[] = [];
   for (const c of cs) {
     for (const s of ss) {
-      rows.push(map.get(variantKey(c, s)) ?? { color: c, size: s, stock_quantity: "", price: "" });
+      for (const a of as) {
+        const found = map.get(variantKey(c, s, a));
+        rows.push(found ? { ...found, age: a } : { color: c, size: s, age: a, stock_quantity: "", price: "" });
+      }
     }
   }
   return rows;
 };
 
-/** Values of the active option (sizes or ages) used for the combination grid. */
-export const activeOptions = (v: Pick<ColorsSizesValue, "mode" | "sizes" | "ages">) =>
-  v.mode === "size" ? v.sizes : v.mode === "age" ? v.ages : [];
+/** Combination grid for the current colors and the sizes/ages the mode offers. */
+export const rowsFor = (
+  v: Pick<ColorsSizesValue, "mode" | "colors" | "sizes" | "ages">,
+  existing: VariantRow[]
+) =>
+  buildVariantRows(v.colors, modeHasSize(v.mode) ? v.sizes : [], existing, modeHasAge(v.mode) ? v.ages : []);
+
+const rowKey = (r: VariantRow) => variantKey(r.color, r.size, r.age ?? "");
+const rowLabel = (r: VariantRow) => [r.color, r.size, r.age].filter(Boolean).join(" / ");
 
 interface Props {
   value: ColorsSizesValue;
@@ -97,8 +114,8 @@ interface Props {
 }
 
 /**
- * Colors plus ONE optional second option — sizes (letter, numeric, custom, with
- * optional measurements) or suitable ages — with a per-combination quantity / price table.
+ * Colors plus optional sizes (letter, numeric, custom, with optional measurements)
+ * and/or suitable ages, with a per-combination quantity / price table.
  */
 const ProductColorsSizesEditor = ({ value, onChange }: Props) => {
   const [colorInput, setColorInput] = useState("");
@@ -114,19 +131,19 @@ const ProductColorsSizesEditor = ({ value, onChange }: Props) => {
 
   const set = (next: Partial<ColorsSizesValue>) => {
     const merged = { ...value, ...next };
-    const variants = next.variants ?? buildVariantRows(merged.colors, activeOptions(merged), value.variants);
+    const variants = next.variants ?? rowsFor(merged, value.variants);
     onChange({ ...merged, variants });
   };
 
   const changeMode = (mode: ProductOptionMode) => {
     if (mode === value.mode) return;
-    if (value.mode === "size") stash.current = { ...stash.current, sizes: value.sizes, sizeChart: value.sizeChart };
-    if (value.mode === "age") stash.current = { ...stash.current, ages: value.ages };
+    if (modeHasSize(value.mode)) stash.current = { ...stash.current, sizes: value.sizes, sizeChart: value.sizeChart };
+    if (modeHasAge(value.mode)) stash.current = { ...stash.current, ages: value.ages };
     set({
       mode,
-      sizes: mode === "size" ? stash.current.sizes : [],
-      sizeChart: mode === "size" ? stash.current.sizeChart : null,
-      ages: mode === "age" ? stash.current.ages : [],
+      sizes: modeHasSize(mode) ? stash.current.sizes : [],
+      sizeChart: modeHasSize(mode) ? stash.current.sizeChart : null,
+      ages: modeHasAge(mode) ? stash.current.ages : [],
     });
   };
 
@@ -182,7 +199,7 @@ const ProductColorsSizesEditor = ({ value, onChange }: Props) => {
     onChange({
       ...value,
       variants: value.variants.map((r) =>
-        variantKey(r.color, r.size) === key ? { ...r, [field]: v } : r
+        rowKey(r) === key ? { ...r, [field]: v } : r
       ),
     });
   };
@@ -257,7 +274,7 @@ const ProductColorsSizesEditor = ({ value, onChange }: Props) => {
         <RadioGroup
           value={value.mode}
           onValueChange={(v) => changeMode(v as ProductOptionMode)}
-          className="grid gap-2 sm:grid-cols-3"
+          className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4"
         >
           {MODE_OPTIONS.map((option) => (
             <Label
@@ -275,12 +292,12 @@ const ProductColorsSizesEditor = ({ value, onChange }: Props) => {
           ))}
         </RadioGroup>
         <p className="text-xs text-muted-foreground">
-          اختر المقاس أو العمر حسب نوع المنتج — لا يمكن الجمع بينهما في نفس المنتج.
+          اختر المقاس أو العمر أو الاثنين معًا حسب نوع المنتج.
         </p>
       </div>
 
       {/* Sizes */}
-      {value.mode === "size" && (
+      {modeHasSize(value.mode) && (
         <div className="space-y-4 rounded-lg border p-3">
           <div className="space-y-2">
             <Label htmlFor="csz-size">المقاسات</Label>
@@ -423,7 +440,7 @@ const ProductColorsSizesEditor = ({ value, onChange }: Props) => {
       )}
 
       {/* Ages */}
-      {value.mode === "age" && (
+      {modeHasAge(value.mode) && (
         <div className="space-y-2 rounded-lg border p-3">
           <Label htmlFor="csz-age">العمر المناسب</Label>
           <div className="flex flex-wrap gap-2">
@@ -499,7 +516,7 @@ const ProductColorsSizesEditor = ({ value, onChange }: Props) => {
               onClick={() =>
                 onChange({
                   ...value,
-                  variants: buildVariantRows(value.colors, activeOptions(value), value.variants),
+                  variants: rowsFor(value, value.variants),
                 })
               }
             >
@@ -508,11 +525,11 @@ const ProductColorsSizesEditor = ({ value, onChange }: Props) => {
           </div>
           <div className="space-y-2 rounded-lg border p-2">
             {value.variants.map((r) => {
-              const key = variantKey(r.color, r.size);
+              const key = rowKey(r);
               return (
                 <div key={key} className="grid grid-cols-1 gap-2 sm:grid-cols-4 sm:items-center">
                   <p className={`flex items-center gap-2 rounded-md border px-2 py-1 text-sm font-medium sm:col-span-2 ${Number(r.stock_quantity) > 0 ? "bg-primary text-primary-foreground" : "border-dashed text-muted-foreground opacity-60"}`}>
-                    {[r.color, r.size].filter(Boolean).join(" / ")}
+                    {rowLabel(r)}
                     {Number(r.stock_quantity) <= 0 && <><LockKeyhole className="h-3 w-3 shrink-0" />نفذت الكمية</>}
                   </p>
                   <Input
@@ -521,7 +538,7 @@ const ProductColorsSizesEditor = ({ value, onChange }: Props) => {
                     autoComplete="off"
                     dir="ltr"
                     className="text-left"
-                    aria-label={`الكمية ${[r.color, r.size].filter(Boolean).join(" / ")}`}
+                    aria-label={`الكمية ${rowLabel(r)}`}
                     placeholder="الكمية"
                     value={r.stock_quantity}
                     onChange={(e) => updateRow(key, "stock_quantity", cleanInt(e.target.value))}
@@ -532,7 +549,7 @@ const ProductColorsSizesEditor = ({ value, onChange }: Props) => {
                     autoComplete="off"
                     dir="ltr"
                     className="text-left"
-                    aria-label={`السعر ${[r.color, r.size].filter(Boolean).join(" / ")}`}
+                    aria-label={`السعر ${rowLabel(r)}`}
                     placeholder="السعر (اختياري)"
                     value={r.price}
                     onChange={(e) => updateRow(key, "price", cleanDecimal(e.target.value))}

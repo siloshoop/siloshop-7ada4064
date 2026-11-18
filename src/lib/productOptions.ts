@@ -1,10 +1,13 @@
 /**
- * Product "second option": a product offers either sizes (with optional
- * per-size measurements) or suitable ages — never both. Colors stay independent.
- * Buyers pick the chosen option through product_variants attributes.
+ * Product options beside colors: sizes (with optional per-size measurements),
+ * suitable ages, or both together. Buyers pick each one through
+ * product_variants attributes (color × size × age).
  */
 
-export type ProductOptionMode = "none" | "size" | "age";
+export type ProductOptionMode = "none" | "size" | "age" | "both";
+
+export const modeHasSize = (mode: ProductOptionMode) => mode === "size" || mode === "both";
+export const modeHasAge = (mode: ProductOptionMode) => mode === "age" || mode === "both";
 
 export const COLOR_ATTR = "اللون";
 export const SIZE_ATTR = "المقاس";
@@ -37,13 +40,13 @@ export interface SizeChart {
 
 export const emptySizeChart = (): SizeChart => ({ columns: [...DEFAULT_MEASUREMENTS], rows: [] });
 
-/** Attribute name used by the variants for the chosen mode. */
-export const optionAttr = (mode: ProductOptionMode) => (mode === "age" ? AGE_ATTR : SIZE_ATTR);
-
-/** Size/age decided from saved data; ages win only when no sizes exist (they can never coexist). */
+/** Size/age mode decided from saved data. */
 export const inferOptionMode = (sizes: unknown, ages: unknown): ProductOptionMode => {
-  if (Array.isArray(sizes) && sizes.length > 0) return "size";
-  if (Array.isArray(ages) && ages.length > 0) return "age";
+  const hasSizes = Array.isArray(sizes) && sizes.length > 0;
+  const hasAges = Array.isArray(ages) && ages.length > 0;
+  if (hasSizes && hasAges) return "both";
+  if (hasSizes) return "size";
+  if (hasAges) return "age";
   return "none";
 };
 
@@ -93,7 +96,7 @@ export const cleanSizeChart = (chart: SizeChart | null | undefined, sizes: strin
   return { columns, rows };
 };
 
-/** Product columns to save: exactly one of sizes / age_ranges can be filled. */
+/** Product columns to save: sizes and/or ages depending on the mode. */
 export const productOptionColumns = (value: {
   mode: ProductOptionMode;
   colors: string[];
@@ -102,16 +105,20 @@ export const productOptionColumns = (value: {
   sizeChart: SizeChart | null;
 }) => ({
   colors: value.colors,
-  sizes: value.mode === "size" ? value.sizes : [],
-  age_ranges: value.mode === "age" ? value.ages : [],
-  size_chart: value.mode === "size" ? cleanSizeChart(value.sizeChart, value.sizes) : null,
+  sizes: modeHasSize(value.mode) ? value.sizes : [],
+  age_ranges: modeHasAge(value.mode) ? value.ages : [],
+  size_chart: modeHasSize(value.mode) ? cleanSizeChart(value.sizeChart, value.sizes) : null,
 });
 
-/** Variant attributes for a color/option row under the chosen mode. */
-export const variantAttributes = (row: { color: string; size: string }, mode: ProductOptionMode) => {
+/** Variant attributes for a color/size/age row under the chosen mode. */
+export const variantAttributes = (
+  row: { color: string; size: string; age?: string },
+  mode: ProductOptionMode
+) => {
   const a: Record<string, string> = {};
   if (row.color) a[COLOR_ATTR] = row.color;
-  if (row.size && mode !== "none") a[optionAttr(mode)] = row.size;
+  if (row.size && modeHasSize(mode)) a[SIZE_ATTR] = row.size;
+  if (row.age && modeHasAge(mode)) a[AGE_ATTR] = row.age;
   return a;
 };
 

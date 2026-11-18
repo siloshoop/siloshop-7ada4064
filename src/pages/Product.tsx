@@ -34,7 +34,6 @@ import ChatButton from "@/components/ChatButton";
 import ShareProductButton from "@/components/product/ShareProductButton";
 import { useRecentlyViewed } from "@/hooks/useRecentlyViewed";
 import SimilarProducts from "@/components/SimilarProducts";
-import MarketPriceBar from "@/components/MarketPriceBar";
 import SeoHead from "@/components/SeoHead";
 import ProductVariantPicker from "@/components/product/ProductVariantPicker";
 import ProductSizeChart from "@/components/product/ProductSizeChart";
@@ -586,12 +585,6 @@ const Product = ({ preview = false }: ProductPageProps) => {
                   </span>
                 )}
               </div>
-              <MarketPriceBar
-                productId={product.id}
-                price={effectivePrice}
-                categoryId={product.category_id}
-                currency={product.currency}
-              />
             </div>
 
             {/* Availability + shipping */}

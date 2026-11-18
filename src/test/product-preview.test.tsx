@@ -54,7 +54,6 @@ vi.mock("@/components/ChatButton", () => ({ default: () => null }));
 vi.mock("@/components/product/ShareProductButton", () => ({ default: () => null }));
 vi.mock("@/components/ReportDialog", () => ({ default: () => null }));
 vi.mock("@/components/product/SellerInfoCard", () => ({ default: () => null }));
-vi.mock("@/components/MarketPriceBar", () => ({ default: () => null }));
 vi.mock("@/components/product/ShippingInfo", () => ({ default: () => null }));
 vi.mock("@/components/product/ProductSpecs", () => ({ default: () => null }));
 vi.mock("@/components/product/ProductOriginBadge", () => ({ default: () => null }));

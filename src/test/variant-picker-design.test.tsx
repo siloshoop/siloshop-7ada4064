@@ -24,8 +24,23 @@ describe("color swatches", () => {
     expect(colorSwatch("الابيض")).toBe("#ffffff");
     expect(colorSwatch("Black")).toBe("#111111");
     expect(colorSwatch("دهبي")).toBe(colorSwatch("ذهبي"));
-    expect(colorSwatch("أزرق فاتح")).toBe(colorSwatch("أزرق"));
     expect(colorSwatch("نمر مرقط")).toBeNull();
+  });
+
+  it("shows khaki as a color for every common spelling", () => {
+    expect(colorSwatch("هاكي")).toBe("#b5a26b");
+    expect(colorSwatch("خاكي")).toBe("#b5a26b");
+    expect(colorSwatch("كاكي")).toBe("#b5a26b");
+  });
+
+  it("gives light and dark shades their own swatch", () => {
+    const gray = colorSwatch("رمادي");
+    const light = colorSwatch("رمادي فاتح");
+    const dark = colorSwatch("رمادي داكن");
+    expect(light).not.toBeNull();
+    expect(dark).not.toBeNull();
+    expect(new Set([gray, light, dark]).size).toBe(3);
+    expect(colorSwatch("أخضر  غامق")).toBe(colorSwatch("اخضر داكن"));
   });
 
   it("shows a solid color instead of the name or picture inside the tile", () => {

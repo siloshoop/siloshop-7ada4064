@@ -12,16 +12,12 @@ export { COLOR_ATTR, SIZE_ATTR, AGE_ATTR };
 
 const MANAGED_KEYS = new Set([COLOR_ATTR, SIZE_ATTR, AGE_ATTR]);
 
-/** Identity of a managed variant: color plus whichever option (size or age) it carries. */
-const keyOf = (a: Record<string, any>) => {
-  const color = a?.[COLOR_ATTR] ?? "";
-  if (a?.[SIZE_ATTR]) return `${color}__${SIZE_ATTR}:${a[SIZE_ATTR]}`;
-  if (a?.[AGE_ATTR]) return `${color}__${AGE_ATTR}:${a[AGE_ATTR]}`;
-  return `${color}__`;
-};
+/** Identity of a managed variant: color plus the size and/or age it carries. */
+const keyOf = (a: Record<string, any>) =>
+  `${a?.[COLOR_ATTR] ?? ""}__${SIZE_ATTR}:${a?.[SIZE_ATTR] ?? ""}__${AGE_ATTR}:${a?.[AGE_ATTR] ?? ""}`;
 
 /**
- * Syncs the color × (size | age) grid into product_variants.
+ * Syncs the color × size × age grid into product_variants.
  * Only variants whose attributes are color/size/age are touched — variants created
  * through the advanced attributes manager stay untouched.
  */
@@ -48,7 +44,7 @@ export const syncColorSizeVariants = async (
     .filter((w) => Object.keys(w.attributes).length > 0);
   const seen = new Set(wanted.map((w) => keyOf(w.attributes)));
 
-  // Remove options no longer offered first, so a product never keeps sizes and ages side by side.
+  // Remove combinations no longer offered first, so stale options never stay buyable.
   const stale = managed.filter((v: any) => !seen.has(keyOf(v.attributes || {}))).map((v: any) => v.id);
   if (stale.length > 0) {
     const { error: dErr } = await supabase.from("product_variants").delete().in("id", stale);

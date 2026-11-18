@@ -53,7 +53,10 @@ export const sortCarouselAds = <T extends { priority: number; start_date?: strin
   [...ads].sort((a, b) => a.priority - b.priority || a.id.localeCompare(b.id));
 
 /** Longest delay browsers accept for setTimeout (~24.8 days). */
-const MAX_TIMER_MS = 2_147_483_647;
+// Largest setTimeout delay is 2_147_483_647 ms (~24.8 days); larger values fire
+// at once. Callers add a short margin, so cap well below it. A capped timer
+// simply re-checks the ads early and schedules again.
+const MAX_TIMER_MS = 2_000_000_000;
 
 /**
  * Milliseconds until the first of these ads reaches its end date (it must disappear then),

@@ -50,5 +50,9 @@ describe("homepage ads are owner-only and expire", () => {
     expect(msUntilNextAdExpiry([{ end_date: null }, { end_date: "2026-11-11T07:00:00Z" }, { end_date: "2026-11-11T06:30:00Z" }], now)).toBe(30 * 60_000);
     expect(msUntilNextAdExpiry([{ end_date: null }], now)).toBeNull();
     expect(msUntilNextAdExpiry([{ end_date: "2026-11-11T05:00:00Z" }], now)).toBe(0);
+    // An ad ending months away must not overflow the browser timer limit, even with the callers' margin.
+    const far = msUntilNextAdExpiry([{ end_date: "2027-06-01T00:00:00Z" }], now)!;
+    expect(far + 500).toBeLessThanOrEqual(2_147_483_647);
+    expect(far).toBeGreaterThan(20 * 24 * 3_600_000);
   });
 });

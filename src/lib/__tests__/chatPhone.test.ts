@@ -13,4 +13,16 @@ describe("chat phone blocking", () => {
       expect(chatTextHasPhone(t), t).toBe(false);
     }
   });
+
+  it("allows size lists and price ranges", () => {
+    for (const t of ["عندك مقاسات 38, 39, 40, 41, 42؟", "المقاسات 38 39 40 41 42", "السعر 25000-30000", "من 25000 إلى 30000", "السعر بين 1500000 - 2000000 ل.س", "الأعمار 0-3 / 3-6 / 6-9 أشهر", "٣٨، ٣٩، ٤٠، ٤١، ٤٢"]) {
+      expect(chatTextHasPhone(t), t).toBe(false);
+    }
+  });
+
+  it("still blocks numbers written in groups", () => {
+    for (const t of ["0944-123-456", "(011) 2345678", "963 944 123 456", "944 123 456", "0531 081 88 12"]) {
+      expect(chatTextHasPhone(t), t).toBe(true);
+    }
+  });
 });

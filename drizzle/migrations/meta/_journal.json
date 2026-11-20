@@ -456,6 +456,27 @@
       "when": 1795001316649,
       "tag": "0064_allow_size_and_age_together",
       "breakpoints": true
+    },
+    {
+      "idx": 65,
+      "version": "7",
+      "when": 1795154113750,
+      "tag": "0065_unique_store_names",
+      "breakpoints": true
+    },
+    {
+      "idx": 66,
+      "version": "7",
+      "when": 1795154339458,
+      "tag": "0066_mobile_push_devices",
+      "breakpoints": true
+    },
+    {
+      "idx": 67,
+      "version": "7",
+      "when": 1795154409614,
+      "tag": "0067_push_eligible_types_sync",
+      "breakpoints": true
     }
   ]
 }

@@ -2,7 +2,7 @@ import { Capacitor } from "@capacitor/core";
 import { getPublicOrigin } from "@/lib/shareUrl";
 
 export type ShareResult = "shared" | "copied" | "cancelled" | "failed";
-export type SharePlatform = "whatsapp" | "twitter" | "facebook" | "telegram";
+export type SharePlatform = "whatsapp" | "x" | "facebook" | "telegram";
 
 const LOCAL_URL = /^https?:\/\/(localhost|127\.|0\.0\.0\.0|10\.|192\.168\.|172\.(1[6-9]|2\d|3[01])\.|\[?::1\]?)/i;
 
@@ -81,8 +81,8 @@ export const buildSocialShareUrl = (platform: SharePlatform, url: string, text =
   switch (platform) {
     case "whatsapp":
       return `https://wa.me/?text=${text ? `${t}%20` : ""}${u}`;
-    case "twitter":
-      return `https://twitter.com/intent/tweet?text=${t}&url=${u}`;
+    case "x":
+      return `https://x.com/intent/post?text=${t}&url=${u}`;
     case "facebook":
       return `https://www.facebook.com/sharer/sharer.php?u=${u}`;
     case "telegram":

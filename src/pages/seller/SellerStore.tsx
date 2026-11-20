@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
+import { isStoreNameTakenError, storeSaveErrorMessage } from "@/lib/storeName";
 import SellerLayout from "@/components/seller/SellerLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -107,7 +108,9 @@ const SellerStore = () => {
       await queryClient.invalidateQueries({ queryKey: ["vendor-shipping-regions"] });
       await load();
     } catch (error) {
-      toast({ title: "تعذّر حفظ بيانات المتجر", description: error instanceof Error ? error.message : "حاول مجددًا", variant: "destructive" });
+      const message = storeSaveErrorMessage(error);
+      if (isStoreNameTakenError(error)) setErrors([message]);
+      toast({ title: "تعذّر حفظ بيانات المتجر", description: message, variant: "destructive" });
     } finally { setSaving(false); }
   };
 

@@ -1,6 +1,7 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import { STORE_NAME_TAKEN_MESSAGE, checkStoreNameAvailable, isStoreNameTakenError, storeSaveErrorMessage } from "@/lib/storeName";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import Navbar from "@/components/Navbar";
@@ -53,6 +54,9 @@ const SellerApplication = () => {
   const [submitSuccess, setSubmitSuccess] = useState(false);
 
   const [storeName, setStoreName] = useState("");
+  const [nameTaken, setNameTaken] = useState(false);
+  const latestStoreName = useRef("");
+  latestStoreName.current = storeName;
   const [ownerName, setOwnerName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
@@ -124,6 +128,12 @@ const SellerApplication = () => {
     if (city.trim().length < 2) { toast({ title: "المدينة مطلوبة", variant: "destructive" }); return; }
 
     setSaving(true);
+    if ((await checkStoreNameAvailable(storeName)) === false) {
+      setSaving(false);
+      setNameTaken(true);
+      toast({ title: "اسم المتجر غير متاح", description: STORE_NAME_TAKEN_MESSAGE, variant: "destructive" });
+      return;
+    }
     const { error } = await supabase.rpc("submit_seller_application", {
       _store_name: storeName,
       _owner_name: ownerName,
@@ -138,7 +148,8 @@ const SellerApplication = () => {
     });
     setSaving(false);
     if (error) {
-      toast({ title: "خطأ", description: error.message, variant: "destructive" });
+      if (isStoreNameTakenError(error)) setNameTaken(true);
+      toast({ title: "خطأ", description: storeSaveErrorMessage(error), variant: "destructive" });
       return;
     }
     setSubmitSuccess(true);
@@ -213,7 +224,23 @@ const SellerApplication = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label>اسم المتجر *</Label>
-                    <Input value={storeName} onChange={(e) => setStoreName(e.target.value)} disabled={!isEditable} maxLength={100} />
+                    <Input
+                      value={storeName}
+                      onChange={(e) => { setStoreName(e.target.value); setNameTaken(false); }}
+                      onBlur={async () => {
+                        if (!isEditable || storeName.trim().length < 2) return;
+                        const name = storeName;
+                        const free = await checkStoreNameAvailable(name);
+                        if (free === false && name === latestStoreName.current) setNameTaken(true);
+                      }}
+                      disabled={!isEditable}
+                      maxLength={100}
+                      aria-invalid={nameTaken}
+                      aria-describedby={nameTaken ? "store-name-taken" : undefined}
+                    />
+                    {nameTaken && (
+                      <p id="store-name-taken" role="alert" className="text-xs text-destructive">{STORE_NAME_TAKEN_MESSAGE}</p>
+                    )}
                   </div>
                   <div className="space-y-2">
                     <Label>اسم المالك *</Label>

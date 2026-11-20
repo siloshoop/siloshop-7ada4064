@@ -27,12 +27,18 @@ describe("share utility", () => {
 
   it("encodes Arabic text and public URL for every platform", () => {
     const url = "https://localhost/compare?products=a,b";
-    for (const p of ["whatsapp", "twitter", "facebook", "telegram"] as const) {
+    for (const p of ["whatsapp", "x", "facebook", "telegram"] as const) {
       const href = buildSocialShareUrl(p, url, "مقارنة بين 2 منتجات");
       expect(href).toContain(encodeURIComponent(`${PROD}/compare?products=a,b`));
       expect(decodeURIComponent(href)).not.toContain("localhost");
       if (p !== "facebook") expect(decodeURIComponent(href)).toContain("مقارنة");
     }
+  });
+
+  it("shares to X on x.com instead of twitter.com", () => {
+    const href = buildSocialShareUrl("x", "https://localhost/compare?products=a,b", "مقارنة");
+    expect(href.startsWith("https://x.com/intent/post?")).toBe(true);
+    expect(href).not.toContain("twitter.com");
   });
 
   it("falls back to clipboard and reports cancellation", async () => {

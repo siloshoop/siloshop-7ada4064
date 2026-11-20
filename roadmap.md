@@ -310,3 +310,9 @@
 - [x] Platform product add/edit reuses the seller Add/Edit pages with owner-only platform shipping/payment settings; old platform window removed
 - [x] 405 tests, typecheck and build pass; owner saved and reopened a draft platform product with two colors, a color picture and a size (test product removed afterwards)
 - [ ] Real buyer checkout on a platform product (blocked: platform products are switched off for buyers until the platform marketplace is turned on); Android app needs a new build
+
+## Digital category, unique store names, X, mobile push
+- [ ] Add «المنتجات الرقمية» category with its own icon.
+- [ ] Block new or renamed stores whose name is already used by another seller (server-enforced, instant form feedback); keep the two existing duplicates.
+- [ ] Rename Twitter to X (icon, label, share links) everywhere.
+- [ ] Phone push notifications for new orders, store requests, order updates and platform notifications on Android and the web.

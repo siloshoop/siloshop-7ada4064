@@ -1,10 +1,15 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import path from "path";
+import fs from "fs";
 import { componentTagger } from "lovable-tagger";
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
+  define: {
+    // Phone push needs Firebase in the Android build; registering without it crashes the app.
+    __NATIVE_PUSH_READY__: JSON.stringify(fs.existsSync(path.resolve(__dirname, "android/app/google-services.json"))),
+  },
   server: {
     host: "::",
     port: 8080,

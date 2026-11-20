@@ -1,5 +1,5 @@
 import { type ComponentType, type SVGProps } from "react";
-import { BookOpen, Car, Footprints, Gamepad2, Gem, Laptop, PawPrint, Shirt, Sofa, Trophy } from "lucide-react";
+import { BookOpen, Car, CloudDownload, Footprints, Gamepad2, Gem, Laptop, PawPrint, Shirt, Sofa, Trophy } from "lucide-react";
 
 type Icon = ComponentType<SVGProps<SVGSVGElement> & { className?: string }>;
 const svg = (d: React.ReactNode): Icon => (props) => (
@@ -26,11 +26,12 @@ export const CATEGORY_DEFAULTS: { name: string; icon: Icon; tone: CategoryTone }
   { name: "الأطفال", icon: Teddy, tone: "lemon" },
   { name: "مستلزمات الحيوانات الأليفة", icon: PawPrint, tone: "mint" },
   { name: "السيارات والدراجات", icon: Car, tone: "teal" },
+  { name: "المنتجات الرقمية", icon: CloudDownload, tone: "sky" },
 ];
 
 
 export const CATEGORY_TONES: CategoryTone[] = ["rose", "violet", "sky", "mint", "peach", "lemon", "teal"];
-export const CATEGORY_ICONS: Record<string, Icon> = { Footprints, Dress, Laptop, Shirt, Trophy, Lipstick, Sofa, Handbag, Gem, Gamepad2, BookOpen, Teddy, PawPrint, Car };
+export const CATEGORY_ICONS: Record<string, Icon> = { Footprints, Dress, Laptop, Shirt, Trophy, Lipstick, Sofa, Handbag, Gem, Gamepad2, BookOpen, Teddy, PawPrint, Car, CloudDownload };
 export const categoryAppearance = (category: { name_ar: string; icon?: string | null; color?: string | null }) => {
   const saved = CATEGORY_DEFAULTS.find((item) => item.name === category.name_ar);
   const tone = CATEGORY_TONES.includes(category.color as CategoryTone) ? category.color as CategoryTone : saved?.tone ?? "violet";

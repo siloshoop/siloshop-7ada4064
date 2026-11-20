@@ -1,4 +1,5 @@
-import { Facebook, Instagram, MessageCircle, Send, Twitter, Youtube, Store, Globe } from "lucide-react";
+import { Facebook, Instagram, MessageCircle, Send, Youtube, Store, Globe } from "lucide-react";
+import XLogo from "@/components/icons/XLogo";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
@@ -95,8 +96,8 @@ const Footer = () => {
                 </a>
               </Button>
               <Button size="icon" variant="ghost" className="hover-scale glow-on-hover" asChild>
-                <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" aria-label="تويتر">
-                  <Twitter className="h-5 w-5" />
+                <a href="https://x.com" target="_blank" rel="noopener noreferrer" aria-label="إكس (X)" title="X">
+                  <XLogo className="h-[1.125rem] w-[1.125rem]" />
                 </a>
               </Button>
               <Button size="icon" variant="ghost" className="hover-scale glow-on-hover" asChild>

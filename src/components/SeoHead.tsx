@@ -11,7 +11,7 @@ interface SeoHeadProps {
 }
 
 /**
- * Injects SEO-related tags (title, meta, canonical, Open Graph, Twitter, JSON-LD)
+ * Injects SEO-related tags (title, meta, canonical, Open Graph, X (twitter:* card tags), JSON-LD)
  * into the document head and cleans them up on unmount / update.
  */
 const SeoHead = ({

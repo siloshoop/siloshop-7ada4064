@@ -1584,6 +1584,7 @@ export type Database = {
           id: string
           is_read: boolean
           message: string
+          push_sent_at: string | null
           related_id: string | null
           staff_event_key: string | null
           title: string
@@ -1595,6 +1596,7 @@ export type Database = {
           id?: string
           is_read?: boolean
           message: string
+          push_sent_at?: string | null
           related_id?: string | null
           staff_event_key?: string | null
           title: string
@@ -1606,6 +1608,7 @@ export type Database = {
           id?: string
           is_read?: boolean
           message?: string
+          push_sent_at?: string | null
           related_id?: string | null
           staff_event_key?: string | null
           title?: string
@@ -2981,6 +2984,33 @@ export type Database = {
           status_changed_by?: string | null
           status_reason?: string | null
           updated_at?: string | null
+        }
+        Relationships: []
+      }
+      push_devices: {
+        Row: {
+          created_at: string
+          id: string
+          last_seen_at: string
+          platform: string
+          token: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          last_seen_at?: string
+          platform: string
+          token: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          last_seen_at?: string
+          platform?: string
+          token?: string
+          user_id?: string
         }
         Relationships: []
       }
@@ -5195,6 +5225,7 @@ export type Database = {
         Returns: boolean
       }
       is_public_store_image: { Args: { _path: string }; Returns: boolean }
+      is_store_name_available: { Args: { _name: string }; Returns: boolean }
       is_valid_order_status: { Args: { _status: string }; Returns: boolean }
       latest_public_reviews: {
         Args: { _limit?: number }
@@ -5320,6 +5351,8 @@ export type Database = {
       }
       next_order_number: { Args: never; Returns: string }
       normalize_order_status: { Args: { _status: string }; Returns: string }
+      normalize_store_name: { Args: { _name: string }; Returns: string }
+      notification_push_eligible: { Args: { _type: string }; Returns: boolean }
       notify_staff_event: {
         Args: { _event: string; _id: string; _message: string; _title: string }
         Returns: undefined
@@ -5400,6 +5433,10 @@ export type Database = {
           discount_value: number
           id: string
         }[]
+      }
+      register_push_device: {
+        Args: { _platform: string; _token: string }
+        Returns: undefined
       }
       reject_seller_application: {
         Args: { _app_id: string; _reason: string }
@@ -5658,6 +5695,10 @@ export type Database = {
         }
         Returns: string
       }
+      store_name_in_use: {
+        Args: { _exclude_user?: string; _name: string }
+        Returns: boolean
+      }
       submit_report: {
         Args: {
           _description?: string
@@ -5698,6 +5739,7 @@ export type Database = {
         Args: { _metric: string; _product_id: string }
         Returns: undefined
       }
+      unregister_push_device: { Args: { _token: string }; Returns: undefined }
       update_order_item_tracking: {
         Args: {
           _carrier?: string

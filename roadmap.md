@@ -316,4 +316,6 @@
 - [x] Block new or renamed stores whose name is already used by another seller (server-enforced, instant form feedback); keep the two existing duplicates. Rolled-back database test passed.
 - [x] Rename Twitter to X (icon, label, share links) everywhere. Footer links to x.com until the user supplies a SiloShop X account.
 - [x] Phone/web push built: device list, automatic sending on alerts, Android permission/channel, bell + settings toggle, sign-out unregister.
-- [ ] Push delivery live (blocked: user must connect Firebase with web push, and add google-services.json to the Android project then rebuild the app).
+- [ ] Push delivery live (blocked: user declined the Firebase connection card for now; needs Firebase with web push, plus google-services.json in the Android project and a rebuild).
+- [x] Security: returns list no longer leaks all returns for unknown list types.
+- [ ] Security: login «email not registered» check (waiting on user's choice); chat list finding is a false positive (own conversations only) pending user approval to dismiss.

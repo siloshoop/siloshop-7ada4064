@@ -4983,6 +4983,17 @@ export type Database = {
         Args: { _order_id: string; _reason: string }
         Returns: undefined
       }
+      chat_conversation_labels: {
+        Args: { _conversation_id: string }
+        Returns: {
+          order_number: string
+          peer_avatar: string
+          peer_id: string
+          peer_last_seen: string
+          peer_name: string
+          return_number: string
+        }[]
+      }
       chat_text_has_phone: { Args: { _t: string }; Returns: boolean }
       chat_unread_total: { Args: never; Returns: number }
       check_contact_rate_limit: {

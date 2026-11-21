@@ -318,4 +318,5 @@
 - [x] Phone/web push built: device list, automatic sending on alerts, Android permission/channel, bell + settings toggle, sign-out unregister.
 - [ ] Push delivery live (blocked: user declined the Firebase connection card for now; needs Firebase with web push, plus google-services.json in the Android project and a rebuild).
 - [x] Security: returns list no longer leaks all returns for unknown list types.
-- [ ] Security: login «email not registered» check (waiting on user's choice); chat list finding is a false positive (own conversations only) pending user approval to dismiss.
+- [x] Security: chat list now follows normal access rules (rolled-back check: 7 of 7 chats and names still shown).
+- [ ] Security: login «email not registered» check (blocked: waiting on the user's choice).

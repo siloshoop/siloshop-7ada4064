@@ -11,6 +11,7 @@ import { useToast } from "@/hooks/use-toast";
 import { signIn, signUp } from "@/lib/auth";
 import { readSignUpDraft, saveSignUpDraft, readSignUpSecret, saveSignUpSecret, getLastEmail, setLastEmail, setPendingVerifyEmail } from "@/lib/authDrafts";
 import { supabase } from "@/integrations/supabase/client";
+import { disablePush } from "@/lib/push";
 import { logActivity } from "@/hooks/useActivityLog";
 import { Eye, EyeOff, Loader2, ShoppingBag } from "lucide-react";
 import { z } from "zod";
@@ -223,6 +224,7 @@ const Auth = () => {
 
         if (profile?.is_banned) {
           // Sign out the banned user
+          await disablePush().catch(() => undefined);
           await supabase.auth.signOut();
           
           toast({

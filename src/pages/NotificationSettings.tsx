@@ -206,10 +206,10 @@ const NotificationSettings = () => {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Bell className="h-5 w-5" />
-                إشعارات المتصفح
+                إشعارات الهاتف والمتصفح
               </CardTitle>
               <CardDescription>
-                تلقي إشعارات فورية على متصفحك
+                تنبيهات فورية على هذا الجهاز للطلبات الجديدة وتحديثات الطلبات وطلبات المتاجر وإشعارات المنصة
               </CardDescription>
             </CardHeader>
             <CardContent>

@@ -15,6 +15,7 @@ import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import PageScrollReset from "@/components/PageScrollReset";
 import RouteCanonical from "@/components/RouteCanonical";
+import PushRegistrar from "@/components/PushRegistrar";
 import RouteErrorBoundary from "@/components/RouteErrorBoundary";
 
 // Lazy-loaded routes. Each becomes its own async chunk.
@@ -212,6 +213,7 @@ const App = () => (
           <BrowserRouter>
           <PageScrollReset />
           <RouteCanonical />
+          <PushRegistrar />
           <PublicActivationSync>
           <RouteErrorBoundary>
           <Suspense fallback={<RouteFallback />}>

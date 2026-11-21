@@ -312,7 +312,8 @@
 - [ ] Real buyer checkout on a platform product (blocked: platform products are switched off for buyers until the platform marketplace is turned on); Android app needs a new build
 
 ## Digital category, unique store names, X, mobile push
-- [ ] Add «المنتجات الرقمية» category with its own icon.
-- [ ] Block new or renamed stores whose name is already used by another seller (server-enforced, instant form feedback); keep the two existing duplicates.
-- [ ] Rename Twitter to X (icon, label, share links) everywhere.
-- [ ] Phone push notifications for new orders, store requests, order updates and platform notifications on Android and the web.
+- [x] Add «المنتجات الرقمية» category with its own icon.
+- [x] Block new or renamed stores whose name is already used by another seller (server-enforced, instant form feedback); keep the two existing duplicates. Rolled-back database test passed.
+- [x] Rename Twitter to X (icon, label, share links) everywhere. Footer links to x.com until the user supplies a SiloShop X account.
+- [x] Phone/web push built: device list, automatic sending on alerts, Android permission/channel, bell + settings toggle, sign-out unregister.
+- [ ] Push delivery live (blocked: user must connect Firebase with web push, and add google-services.json to the Android project then rebuild the app).

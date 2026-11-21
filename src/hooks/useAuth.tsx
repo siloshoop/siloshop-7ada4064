@@ -3,6 +3,7 @@ import type { User, Session } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { setLastEmail } from "@/lib/authDrafts";
+import { disablePush } from "@/lib/push";
 
 interface AuthState {
   user: User | null;
@@ -48,6 +49,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       // Remember the email on this device so the next sign-in only needs the password.
       const { data: { session: current } } = await supabase.auth.getSession();
       if (current?.user?.email) setLastEmail(current.user.email);
+      // Stop this device's phone/browser alerts for the account before the session ends.
+      await disablePush().catch(() => undefined);
       const { error } = await supabase.auth.signOut();
       if (error) throw error;
       

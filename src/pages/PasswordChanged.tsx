@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
+import { disablePush } from "@/lib/push";
 import { CheckCircle2, LogIn, Home } from "lucide-react";
 
 const PasswordChanged = () => {
@@ -10,7 +11,7 @@ const PasswordChanged = () => {
 
   useEffect(() => {
     // End the recovery session so the user signs in with the new password
-    supabase.auth.signOut().catch(() => undefined);
+    disablePush().catch(() => undefined).finally(() => supabase.auth.signOut().catch(() => undefined));
   }, []);
 
   return (

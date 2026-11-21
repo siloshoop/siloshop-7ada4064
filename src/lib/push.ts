@@ -104,6 +104,11 @@ const ensureNativeListeners = async () => {
   });
 };
 
+/** Registers tap/registration listeners at app start so a tap that launched the app still opens its page. */
+export const initPushListeners = async () => {
+  if (nativePushReady()) await ensureNativeListeners().catch(() => undefined);
+};
+
 const enableNative = async (prompt: boolean): Promise<PushResult> => {
   if (!nativePushReady()) return { status: "not-configured" };
   const { PushNotifications } = await import("@capacitor/push-notifications");

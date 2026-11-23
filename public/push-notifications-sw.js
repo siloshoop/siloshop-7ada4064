@@ -30,8 +30,11 @@ self.addEventListener("notificationclick", (event) => {
   event.waitUntil(clients.matchAll({ type: "window", includeUncontrolled: true }).then((clientList) => {
     const existing = clientList.find((client) => client.url === target && "focus" in client);
     if (existing) return existing.focus();
-    const any = clientList.find((client) => "navigate" in client && "focus" in client);
-    if (any) return any.navigate(target).then((c) => c && c.focus());
-    return clients.openWindow && clients.openWindow(target);
+    // App pages sit outside this worker's scope, so navigate() on them rejects.
+    // Only reuse a tab this worker controls; otherwise always open the target.
+    const open = () => clients.openWindow && clients.openWindow(target);
+    const controlled = clientList.find((client) => client.url.startsWith(self.registration.scope) && "navigate" in client);
+    if (!controlled) return open();
+    return controlled.navigate(target).then((c) => (c ? c.focus() : open())).catch(open);
   }));
 });

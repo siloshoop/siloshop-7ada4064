@@ -49,8 +49,8 @@ export const notificationTarget = (
 
 /**
  * In-app alert types that are also delivered as phone/browser notifications:
- * new orders, store requests, order updates and platform/account notices.
- * Mirrored by public.notification_push_eligible — change both together.
+ * orders, store requests, chat messages, platform/account notices and
+ * opt-out promotions. Mirrored by public.notification_push_eligible — change both together.
  */
 export const PUSH_NOTIFICATION_TYPES = [
   "new_order", "order", "order_status", "order_cancelled", "order_refunded", "return_status",
@@ -58,10 +58,36 @@ export const PUSH_NOTIFICATION_TYPES = [
   "product_approve", "product_reject", "product_suspend",
   "admin", "warning", "announcement",
   "account_suspended", "account_activated", "account_banned",
+  "message",
+  "promotion", "deal", "daily_deal", "price_drop", "price_change", "new_product",
 ] as const;
 
 /** Buyer order progress types; skipped as pushes when the buyer turned off «تحديثات الطلبات». */
 export const ORDER_UPDATE_TYPES = ["order", "order_status", "order_cancelled", "order_refunded", "return_status"];
+
+/** Optional marketing pushes; each needs «العروض والتخفيضات» plus its own switch when it has one. */
+export const PROMOTION_TYPES = ["promotion", "deal", "daily_deal", "price_drop", "price_change", "new_product"];
+
+export type NotificationPreferenceKey = "order_updates" | "promotions" | "price_drops" | "daily_deals" | "new_products";
+
+/** Preference switches that must all be on (missing = on) before this alert is pushed to a buyer. */
+export const pushPreferenceKeys = (type: string): NotificationPreferenceKey[] => {
+  if (ORDER_UPDATE_TYPES.includes(type)) return ["order_updates"];
+  if (type === "price_drop" || type === "price_change") return ["promotions", "price_drops"];
+  if (type === "deal" || type === "daily_deal") return ["promotions", "daily_deals"];
+  if (type === "new_product") return ["promotions", "new_products"];
+  if (type === "promotion") return ["promotions"];
+  return [];
+};
+
+/** Alerts sharing a key replace each other on the device, so one order or chat shows one alert. */
+export const pushGroupKey = (type: string, relatedId: string | null | undefined, notificationId: string) => {
+  if (!relatedId) return notificationId;
+  if (type === "message") return `chat-${relatedId}`;
+  if (type === "new_order") return `sale-${relatedId}`;
+  if (ORDER_UPDATE_TYPES.includes(type)) return `order-${relatedId}`;
+  return notificationId;
+};
 
 export const isPushNotificationType = (type: string | null | undefined) =>
   !!type && (PUSH_NOTIFICATION_TYPES as readonly string[]).includes(type);

@@ -7,7 +7,8 @@ import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
 import {
   isPushNotificationType,
   notificationTarget,
-  ORDER_UPDATE_TYPES,
+  pushGroupKey,
+  pushPreferenceKeys,
 } from "../_shared/notificationRoutes.ts";
 
 const GATEWAY_URL = "https://connector-gateway.lovable.dev/firebase_messaging";
@@ -62,13 +63,24 @@ Deno.serve(async (req) => {
   if (!n) return json({ skipped: "not_pending" });
   if (!isPushNotificationType(n.type)) return json({ skipped: "type" });
 
-  if (ORDER_UPDATE_TYPES.includes(n.type)) {
+  // A seller's per-item "order" alert is the same sale as their "new_order" alert:
+  // open the seller order screen, share one device slot, and skip buyer switches.
+  let type = n.type;
+  if (type === "order" && n.related_id) {
+    const { data: order } = await admin.from("orders").select("user_id").eq("id", n.related_id).maybeSingle();
+    if (order && order.user_id !== n.user_id) type = "new_order";
+  }
+
+  const prefKeys = pushPreferenceKeys(type);
+  if (prefKeys.length) {
     const { data: prefs } = await admin
       .from("notification_preferences")
-      .select("order_updates")
+      .select("order_updates, promotions, price_drops, daily_deals, new_products")
       .eq("user_id", n.user_id)
       .maybeSingle();
-    if (prefs && prefs.order_updates === false) return json({ skipped: "preference" });
+    if (prefs && prefKeys.some((k) => (prefs as Record<string, unknown>)[k] === false)) {
+      return json({ skipped: "preference" });
+    }
   }
 
   const { data: devices, error: devErr } = await admin
@@ -83,7 +95,8 @@ Deno.serve(async (req) => {
 
   const title = clip(n.title, 120) || "SiloShop";
   const body = clip(n.message, 400);
-  const path = notificationTarget(n.type, n.related_id) ?? "/notifications";
+  const path = notificationTarget(type, n.related_id) ?? "/notifications";
+  const group = pushGroupKey(type, n.related_id, n.id);
 
   const headers = {
     Authorization: `Bearer ${LOVABLE_API_KEY}`,
@@ -101,7 +114,7 @@ Deno.serve(async (req) => {
         ? {
             token: d.token,
             // Data-only: the site's own push worker shows it (RTL, icon, tap target).
-            data: { title, body, url: path, tag: n.id },
+            data: { title, body, url: path, tag: group },
             webpush: { headers: { Urgency: "high", TTL: "86400" } },
           }
         : {
@@ -110,9 +123,9 @@ Deno.serve(async (req) => {
             data: { url: path, notification_id: n.id },
             android: {
               priority: "HIGH",
-              notification: { channel_id: "siloshop_alerts", sound: "default", tag: n.id },
+              notification: { channel_id: "siloshop_alerts", sound: "default", tag: group },
             },
-            apns: { payload: { aps: { sound: "default" } } },
+            apns: { headers: { "apns-collapse-id": group.slice(0, 64) }, payload: { aps: { sound: "default", "thread-id": group } } },
           };
 
     const res = await fetch(`${GATEWAY_URL}/v1/projects/_/messages:send`, {

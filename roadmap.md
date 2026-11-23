@@ -319,4 +319,4 @@
 - [ ] Push delivery live (blocked: user declined the Firebase connection card for now; needs Firebase with web push, plus google-services.json in the Android project and a rebuild).
 - [x] Security: returns list no longer leaks all returns for unknown list types.
 - [x] Security: chat list now follows normal access rules (rolled-back check: 7 of 7 chats and names still shown).
-- [x] Security: login «email not registered» check (blocked: waiting on the user's choice).
+- [x] Security: login no longer reveals whether an email is registered (user chose the general message).

@@ -20,7 +20,6 @@ import { COUNTRY_CODES, DEFAULT_COUNTRY, findCountry } from "@/lib/countryCodes"
 import SyrianFlag from "@/components/SyrianFlag";
 import {
   CAPTCHA_AFTER,
-  checkEmail,
   clearAttempts,
   getAttemptState,
   makeChallenge,
@@ -191,25 +190,6 @@ const Auth = () => {
     setIsLoading(true);
 
     try {
-      // Tell the user clearly whether this email has an account before trying to sign in
-      const check = await checkEmail(signInEmail);
-      if (check.status === "not_registered") {
-        setSignInErrors({ email: "لا يوجد حساب مرتبط بهذا البريد الإلكتروني" });
-        toast({
-          title: "بريد غير مسجّل",
-          description: "لا يوجد حساب بهذا البريد. أنشئ حساباً جديداً أو تحقق من كتابة البريد.",
-          variant: "destructive",
-        });
-        setIsLoading(false);
-        return;
-      }
-      if (check.status === "registered" && check.confirmed === false) {
-        toast({ title: "الحساب غير مفعّل", description: "سنرسل رمز تحقق جديد إلى بريدك" });
-        navigate(`/verify-email?email=${encodeURIComponent(signInEmail)}`);
-        setIsLoading(false);
-        return;
-      }
-
       const { user: signedInUser, error } = await signIn(signInEmail, signInPassword);
 
       if (error) throw error;

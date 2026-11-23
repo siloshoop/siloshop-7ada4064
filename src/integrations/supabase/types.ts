@@ -5000,7 +5000,6 @@ export type Database = {
         Args: { p_email_hash: string }
         Returns: boolean
       }
-      check_email_registered: { Args: { p_email: string }; Returns: Json }
       cleanup_old_rate_limits: { Args: never; Returns: undefined }
       coupon_allocate: {
         Args: {

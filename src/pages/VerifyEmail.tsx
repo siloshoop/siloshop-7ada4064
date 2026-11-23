@@ -8,7 +8,6 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, MailCheck, CheckCircle2, AlertCircle, Send } from "lucide-react";
-import { checkEmail } from "@/lib/authGuard";
 import { getAuthRedirectOrigin } from "@/lib/shareUrl";
 
 const RESEND_COOLDOWN = 60;
@@ -72,30 +71,6 @@ const VerifyEmail = () => {
       return;
     }
     if (resendCooldown > 0) return;
-
-    // Verify the email belongs to an account (and is not already active) first
-    setSendState("checking");
-    setSendMessage("جاري التحقق من البريد الإلكتروني...");
-    const check = await checkEmail(email);
-    if (check.status === "not_registered") {
-      setSendState("error");
-      setSendMessage("لا يوجد حساب مرتبط بهذا البريد الإلكتروني، أنشئ حساباً جديداً");
-      if (!silent) toast({ title: "بريد غير مسجّل", description: check.messageAr, variant: "destructive" });
-      return;
-    }
-    if (check.status === "invalid" || check.status === "rate_limited") {
-      setSendState("error");
-      setSendMessage(check.messageAr);
-      if (!silent) toast({ title: "تعذّر الإرسال", description: check.messageAr, variant: "destructive" });
-      return;
-    }
-    if (check.status === "registered" && check.confirmed) {
-      setSendState("error");
-      setSendMessage("هذا الحساب مفعّل مسبقاً، يمكنك تسجيل الدخول مباشرة");
-      toast({ title: "الحساب مفعّل مسبقاً", description: "يمكنك تسجيل الدخول" });
-      navigate("/auth");
-      return;
-    }
 
     try {
       setSendState("sending");

@@ -7,7 +7,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { ArrowRight, Loader2, Mail, ShoppingBag } from "lucide-react";
-import { checkEmail } from "@/lib/authGuard";
 import { getAuthRedirectOrigin } from "@/lib/shareUrl";
 
 const ForgotPassword = () => {
@@ -26,28 +25,12 @@ const ForgotPassword = () => {
 
     setIsLoading(true);
     try {
-      const check = await checkEmail(email);
-      if (check.status === "not_registered") {
-        toast({
-          title: "بريد غير مسجّل",
-          description: "لا يوجد حساب مرتبط بهذا البريد الإلكتروني، تأكد من كتابته أو أنشئ حساباً جديداً",
-          variant: "destructive",
-        });
-        setIsLoading(false);
-        return;
-      }
-      if (check.status === "invalid" || check.status === "rate_limited") {
-        toast({ title: "تعذّر الإرسال", description: check.messageAr, variant: "destructive" });
-        setIsLoading(false);
-        return;
-      }
-
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
         redirectTo: `${getAuthRedirectOrigin()}/reset-password`,
       });
       if (error) throw error;
       setSent(true);
-      toast({ title: "تم الإرسال", description: "تحقق من بريدك الإلكتروني لإعادة تعيين كلمة المرور" });
+      toast({ title: "تم الإرسال", description: "إذا كان البريد مسجّلًا لدينا فسيصلك رابط إعادة تعيين كلمة المرور" });
     } catch (error) {
       const raw = (error as Error)?.message || "";
       const description = /rate limit|too many|over_email_send/i.test(raw)
@@ -73,7 +56,7 @@ const ForgotPassword = () => {
           </CardTitle>
           <CardDescription>
             {sent
-              ? "تم إرسال رابط إعادة تعيين كلمة المرور إلى بريدك الإلكتروني"
+              ? "إذا كان البريد مسجّلًا لدينا فقد أرسلنا إليه رابط إعادة تعيين كلمة المرور"
               : "أدخل بريدك الإلكتروني وسنرسل لك رابط إعادة التعيين"}
           </CardDescription>
         </CardHeader>

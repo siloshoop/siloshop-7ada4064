@@ -71,6 +71,7 @@ const NotificationTypeConfig: Record<string, { label: string; icon: React.ReactN
   price_drop: { label: "تخفيض سعر", icon: <Percent className="h-4 w-4" />, color: GREEN },
   daily_deal: { label: "عرض يومي", icon: <Tag className="h-4 w-4" />, color: ORANGE },
   deal: { label: "عرض", icon: <Tag className="h-4 w-4" />, color: ORANGE },
+  promotion: { label: "عروض وكوبونات", icon: <Tag className="h-4 w-4" />, color: ORANGE },
   deal_ended: { label: "انتهاء عرض", icon: <Tag className="h-4 w-4" />, color: GRAY },
   new_product: { label: "منتج جديد", icon: <Store className="h-4 w-4" />, color: PURPLE },
   push_new_product: { label: "منتج جديد", icon: <Store className="h-4 w-4" />, color: PURPLE },

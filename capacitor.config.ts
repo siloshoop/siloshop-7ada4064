@@ -31,6 +31,10 @@ const config: CapacitorConfig = {
     androidScheme: "https",
   },
   plugins: {
+    PushNotifications: {
+      // While the app is open the in-app alert (bell + pop-up) shows it; iOS only adds the badge.
+      presentationOptions: ["badge"],
+    },
     SystemBars: {
       // Capacitor 8 injects --safe-area-inset-* values for Android 15+
       // and consumes native insets on older WebViews when necessary.

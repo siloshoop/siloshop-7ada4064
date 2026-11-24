@@ -9,7 +9,10 @@ self.addEventListener("push", (event) => {
   const title = (fcm && fcm.title) || (payload.notification && payload.notification.title) || payload.title || "SiloShop";
   const body = (fcm && fcm.body) || (payload.notification && payload.notification.body) || payload.body || "لديك إشعار جديد";
   const url = (fcm && fcm.url) || (payload.data && payload.data.url) || "/notifications";
-  event.waitUntil(self.registration.showNotification(title, {
+  // While a SiloShop page is on screen, its in-app alert already shows this; skip the duplicate.
+  event.waitUntil(clients.matchAll({ type: "window", includeUncontrolled: true }).then((list) => {
+    if (list.some((c) => c.visibilityState === "visible" && new URL(c.url).origin === self.location.origin)) return;
+    return self.registration.showNotification(title, {
     body,
     icon: payload.icon || "/pwa-192x192.png",
     badge: payload.badge || "/pwa-192x192.png",
@@ -18,6 +21,8 @@ self.addEventListener("push", (event) => {
     data: { url },
     actions: [{ action: "open", title: "فتح" }, { action: "close", title: "إغلاق" }],
     dir: "rtl", lang: "ar",
+    renotify: !!(fcm && fcm.tag),
+    });
   }));
 });
 

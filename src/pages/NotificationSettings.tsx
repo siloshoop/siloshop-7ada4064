@@ -179,7 +179,7 @@ const NotificationSettings = () => {
       iconColor: "text-purple-500",
       bgColor: "bg-purple-500/10",
       title: "العروض الترويجية",
-      description: "إشعارات بالعروض والخصومات الخاصة",
+      description: "إشعارات بالعروض والكوبونات والخصومات الخاصة",
     },
     {
       key: "newsletter" as keyof NotificationPreferences,

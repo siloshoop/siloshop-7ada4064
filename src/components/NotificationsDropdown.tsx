@@ -202,6 +202,7 @@ export const NotificationsDropdown = () => {
       price_drop: "تخفيض سعر",
       daily_deal: "عرض يومي",
       deal: "عرض",
+      promotion: "عروض وكوبونات",
       deal_ended: "انتهاء عرض",
       new_product: "منتج جديد",
       push_new_product: "منتج جديد",

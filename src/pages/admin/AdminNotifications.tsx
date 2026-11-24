@@ -35,9 +35,18 @@ const AUDIENCES: { value: Audience; label: string }[] = [
   { value: "all", label: "جميع المستخدمين" },
 ];
 
+type Kind = "admin" | "promotion";
+
+// «إعلان مهم» reaches everyone; «عرض أو كوبون» respects each user's «العروض والتخفيضات» switch for phone alerts.
+const KINDS: { value: Kind; label: string }[] = [
+  { value: "admin", label: "إعلان مهم من SiloShop" },
+  { value: "promotion", label: "عرض أو كوبون أو تخفيض" },
+];
+
 const AdminNotifications = () => {
   const { toast } = useToast();
   const [audience, setAudience] = useState<Audience>("customers");
+  const [kind, setKind] = useState<Kind>("admin");
   const [title, setTitle] = useState("");
   const [message, setMessage] = useState("");
   const [recipients, setRecipients] = useState<RecipientRow[]>([]);
@@ -53,7 +62,7 @@ const AdminNotifications = () => {
       supabase
         .from("notifications")
         .select("id, title, message, created_at, type")
-        .eq("type", "admin")
+        .in("type", ["admin", "promotion"])
         .order("created_at", { ascending: false })
         .limit(20),
     ]);
@@ -94,7 +103,7 @@ const AdminNotifications = () => {
             _target_user_id: t.id,
             _title: title.trim(),
             _message: message.trim(),
-            _type: "admin",
+            _type: kind,
           }),
         ),
       );
@@ -115,6 +124,7 @@ const AdminNotifications = () => {
     });
     void logAdminAction("broadcast_notification_sent", {
       audience,
+      kind,
       recipients: targets.length,
       failed,
       title: title.trim(),
@@ -142,6 +152,14 @@ const AdminNotifications = () => {
               <SelectContent>
                 {AUDIENCES.map((a) => (
                   <SelectItem key={a.value} value={a.value}>{a.label}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Select value={kind} onValueChange={(v) => setKind(v as Kind)}>
+              <SelectTrigger aria-label="نوع الإشعار"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                {KINDS.map((k) => (
+                  <SelectItem key={k.value} value={k.value}>{k.label}</SelectItem>
                 ))}
               </SelectContent>
             </Select>

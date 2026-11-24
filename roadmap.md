@@ -320,3 +320,7 @@
 - [x] Security: returns list no longer leaks all returns for unknown list types.
 - [x] Security: chat list now follows normal access rules (rolled-back check: 7 of 7 chats and names still shown).
 - [x] Security: login no longer reveals whether an email is registered (user chose the general message).
+
+## Native push (Trendyol-style)
+- [x] Chat, offers/coupons (opt-out via «العروض الترويجية» + own switch), seller sale alerts open seller orders, one device alert per chat/order, no double alert while app/site is open, owner can send «عرض أو كوبون».
+- [ ] Live delivery tests (foreground/background/closed, Android device) — blocked: Firebase connection + android/app/google-services.json + app rebuild.

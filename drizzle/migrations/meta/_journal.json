@@ -512,6 +512,13 @@
       "when": 1795498028948,
       "tag": "0072_seller_item_alert_opens_seller_orders",
       "breakpoints": true
+    },
+    {
+      "idx": 73,
+      "version": "7",
+      "when": 1795586453967,
+      "tag": "0073_restrict_home_carousel_settings_read",
+      "breakpoints": true
     }
   ]
 }

@@ -1,5 +1,11 @@
 # Production readiness audit
 
+## Telegram and external social links
+- [x] Link the existing Telegram icon to https://t.me/siloshoop; preserve other account URLs and appearance.
+- [x] Use normal browser anchors and native HTTPS app/browser handoff for social links and sharing.
+- [x] All six social destinations opened by real clicks at 393×660 and 1280×1800; third-party responses intercepted (actual third-party pages not verified). No page errors/overflow; 17 focused tests and automatic build pass.
+- [ ] Physical Android app/browser fallback verification (blocked: no device; changes require a new Android build). Editor sandbox blocks remain outside app control; not published.
+
 ## Login back navigation
 - [x] Reproduced login Back returning to a protected dashboard then redirecting to login; automatic signed-out redirects now replace denied history entries across page/role guards. Explicit login actions and authorization remain unchanged; native no-history auth fallback replaces rather than pushes home.
 - [x] Browser Back verified on 393×660 and 1280×1800 across dashboard/orders/favorites/settings/profile/notifications/admin/seller-add-product plus explicit Navbar login; every flow returns to search, no runtime errors. Five role-guard regression tests and automatic build pass.

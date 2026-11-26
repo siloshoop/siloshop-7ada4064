@@ -8,6 +8,7 @@ import { Link } from "react-router-dom";
 import BrandLogo from "@/components/BrandLogo";
 import googlePlayBadge from "@/assets/google-play-badge.png";
 import { isNativeApp } from "@/lib/native";
+import { externalLinkTarget, TELEGRAM_URL } from "@/lib/externalLinks";
 
 const PLAY_STORE_URL = "https://play.google.com/store/apps/details?id=com.siloshop.app";
 const TIKTOK_URL = "https://www.tiktok.com/@silosho0p";
@@ -19,6 +20,7 @@ const TikTokIcon = ({ className }: { className?: string }) => (
 );
 
 const Footer = () => {
+  const socialTarget = externalLinkTarget();
   const [email, setEmail] = useState("");
   const {
     toast
@@ -76,10 +78,9 @@ const Footer = () => {
               <Button size="icon" variant="ghost" className="hover-scale glow-on-hover" asChild>
                 <a
                   href="https://www.facebook.com/profile.php?id=61591855201582"
-                  target="_blank"
+                  target={socialTarget}
                   rel="noopener noreferrer"
                   aria-label="فيسبوك"
-                  onClick={(e) => { e.preventDefault(); window.open("https://www.facebook.com/profile.php?id=61591855201582", "_blank", "noopener,noreferrer"); }}
                 >
                   <Facebook className="h-5 w-5" style={{ color: "#1877F2" }} />
                 </a>
@@ -87,26 +88,24 @@ const Footer = () => {
               <Button size="icon" variant="ghost" className="hover-scale glow-on-hover" asChild>
                 <a
                   href="https://www.instagram.com/siloshoop/"
-                  target="_blank"
+                  target={socialTarget}
                   rel="noopener noreferrer"
                   aria-label="انستغرام"
-                  onClick={(e) => { e.preventDefault(); window.open("https://www.instagram.com/siloshoop/", "_blank", "noopener,noreferrer"); }}
                 >
                   <Instagram className="h-5 w-5" stroke="url(#instagram-gradient)" />
                 </a>
               </Button>
               <Button size="icon" variant="ghost" className="hover-scale glow-on-hover" asChild>
-                <a href="https://x.com" target="_blank" rel="noopener noreferrer" aria-label="إكس (X)" title="X">
+                <a href="https://x.com" target={socialTarget} rel="noopener noreferrer" aria-label="إكس (X)" title="X">
                   <XLogo className="h-[1.125rem] w-[1.125rem]" />
                 </a>
               </Button>
               <Button size="icon" variant="ghost" className="hover-scale glow-on-hover" asChild>
                 <a
                   href="https://www.youtube.com/@siloshoop"
-                  target="_blank"
+                  target={socialTarget}
                   rel="noopener noreferrer"
                   aria-label="يوتيوب"
-                  onClick={(e) => { e.preventDefault(); window.open("https://www.youtube.com/@siloshoop", "_blank", "noopener,noreferrer"); }}
                 >
                   <Youtube className="h-5 w-5" style={{ color: "#FF0000" }} />
                 </a>
@@ -114,10 +113,9 @@ const Footer = () => {
               <Button size="icon" variant="ghost" className="hover-scale glow-on-hover" asChild>
                 <a
                   href={TIKTOK_URL}
-                  target="_blank"
+                  target={socialTarget}
                   rel="noopener noreferrer"
                   aria-label="تيك توك"
-                  onClick={(e) => { e.preventDefault(); window.open(TIKTOK_URL, "_blank", "noopener,noreferrer"); }}
                 >
                   <TikTokIcon className="h-5 w-5" />
                 </a>
@@ -128,9 +126,9 @@ const Footer = () => {
                 </span>
               </Button>
               <Button size="icon" variant="ghost" className="hover-scale glow-on-hover" asChild>
-                <span aria-label="تيليجرام">
+                <a href={TELEGRAM_URL} target={socialTarget} rel="noopener noreferrer" aria-label="تيليجرام" title="Telegram">
                   <Send className="h-5 w-5" style={{ color: "#0088cc" }} />
-                </span>
+                </a>
               </Button>
             </div>
             <div className="mt-5">

@@ -1,5 +1,6 @@
 import { Capacitor } from "@capacitor/core";
 import { getPublicOrigin } from "@/lib/shareUrl";
+import { externalLinkTarget } from "@/lib/externalLinks";
 
 export type ShareResult = "shared" | "copied" | "cancelled" | "failed";
 export type SharePlatform = "whatsapp" | "x" | "facebook" | "telegram";
@@ -93,6 +94,18 @@ export const buildSocialShareUrl = (platform: SharePlatform, url: string, text =
 /** Opens a social share URL; in the Android app this hands off to the external app/browser. */
 export const openSocialShare = (platform: SharePlatform, url: string, text = ""): boolean => {
   const href = buildSocialShareUrl(platform, url, text);
+  if (externalLinkTarget() === "_self") {
+    // Same-window external navigation goes through Capacitor's ACTION_VIEW handler,
+    // letting Android choose the social app or fall back to the browser.
+    const a = document.createElement("a");
+    a.href = href;
+    a.target = "_self";
+    a.rel = "noopener noreferrer";
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    return true;
+  }
   const w = window.open(href, "_blank");
   if (w) {
     try {

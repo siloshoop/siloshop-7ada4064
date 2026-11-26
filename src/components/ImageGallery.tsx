@@ -112,8 +112,8 @@ export const ImageGallery = ({ images, productName, videoUrl }: ImageGalleryProp
           className="group relative aspect-square min-w-0 flex-1 touch-pan-y select-none overflow-hidden rounded-xl bg-muted sm:rounded-2xl"
           onTouchStart={onTouchStart}
           onTouchEnd={onTouchEnd}
-          onMouseEnter={() => setIsZooming(true)}
-          onMouseLeave={() => setIsZooming(false)}
+          onPointerEnter={(e) => setIsZooming(e.pointerType === "mouse")}
+          onPointerLeave={() => setIsZooming(false)}
           onMouseMove={onMouseMove}
         >
           {showVideo && videoUrl ? (
@@ -144,7 +144,8 @@ export const ImageGallery = ({ images, productName, videoUrl }: ImageGalleryProp
             fetchPriority="high"
             decoding="async"
             draggable={false}
-            className="absolute inset-0 w-full h-full object-contain animate-fade-in transition-transform duration-300 ease-out will-change-transform"
+            onClick={() => setIsLightboxOpen(true)}
+            className="absolute inset-0 w-full h-full cursor-zoom-in object-contain animate-fade-in transition-transform duration-300 ease-out will-change-transform"
             style={
               isZooming
                 ? {

@@ -1,5 +1,12 @@
 # Production readiness audit
 
+## Phone social-link recheck and product Telegram sharing
+- [x] Open all footer social destinations in a 393×660 browser without replacing third-party responses; Facebook, Instagram, YouTube, TikTok and Telegram loaded. X independently returns HTTP 403 in this environment; working URL unchanged.
+- [x] Add Telegram beside existing product sharing, using the shared public URL and app/browser handoff; listing cards unchanged.
+- [x] Both visible product Telegram buttons open the saved product URL on phone/desktop without overflow or app errors; actual Telegram share page loaded on phone and desktop (one desktop request returned a blank title). 25 focused tests and automatic build pass.
+- [ ] Physical Android app/browser handoff verification (blocked: no device; requires next Android build). Editor-preview restrictions unchanged; no publication.
+- [ ] Enable inactive WhatsApp footer icon (blocked: user must supply the official contact/channel URL; question sent).
+
 ## Telegram and external social links
 - [x] Link the existing Telegram icon to https://t.me/siloshoop; preserve other account URLs and appearance.
 - [x] Use normal browser anchors and native HTTPS app/browser handoff for social links and sharing.

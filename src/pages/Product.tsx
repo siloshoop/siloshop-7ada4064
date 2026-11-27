@@ -503,7 +503,7 @@ const Product = ({ preview = false }: ProductPageProps) => {
               />
               <div className="absolute top-12 right-3 z-10 flex flex-col gap-1.5 scaled:flex-row">
                 <FavoriteButton productId={id!} variant="ghost" size="icon" className="h-9 w-9 rounded-full bg-background/95 shadow-sm" />
-                <ShareProductButton productId={id!} productName={product.name} size="icon" showLabel={false}
+                <ShareProductButton productId={product.id} productName={product.name} size="icon" showLabel={false} showTelegram
                   className="h-9 w-9 rounded-full bg-background/95 shadow-sm hover:bg-primary hover:text-primary-foreground" />
               </div>
             </div>
@@ -736,11 +736,11 @@ const Product = ({ preview = false }: ProductPageProps) => {
                   مقارنة
                 </Button>
                 <ChatButton vendorId={product.vendor_id} productId={id} />
-                <ShareProductButton productId={id!} productName={product.name} className="rounded-full" />
+                <ShareProductButton productId={product.id} productName={product.name} className="rounded-full" showTelegram />
               </div>
 
               <div className="flex justify-end md:hidden">
-                <ShareProductButton productId={id!} productName={product.name} className="rounded-full" />
+                <ShareProductButton productId={product.id} productName={product.name} className="rounded-full" showTelegram />
               </div>
             </div>
 

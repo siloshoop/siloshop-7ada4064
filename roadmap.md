@@ -1,5 +1,12 @@
 # Production readiness audit
 
+## Uploaded complete platform requirements
+- [ ] Governorate coverage and per-governorate free/paid shipping for seller and owner product forms, with server-calculated checkout costs.
+- [ ] Platform products use shared full product forms and exclusively Sham Cash without affecting sellers; activation waits for verified receiving-account configuration.
+- [ ] Verify multiple product images, unique store names, expanded linked categories, full colors and subcategory fields.
+- [ ] Prevent accidental product-form dismissal; verify saved dimensions and editable custom features on add/edit/detail.
+- [ ] Run focused rules tests and browser flows; physical Android testing requires a device and new build; do not publish or mutate customer records.
+
 ## Phone social-link recheck and product Telegram sharing
 - [x] Open all footer social destinations in a 393×660 browser without replacing third-party responses; Facebook, Instagram, YouTube, TikTok and Telegram loaded. X independently returns HTTP 403 in this environment; working URL unchanged.
 - [x] Add Telegram beside existing product sharing, using the shared public URL and app/browser handoff; listing cards unchanged.
